@@ -1,6 +1,15 @@
-# Shadcn-UI Template Usage Instructions
+# CS2 Betting Analytics Dashboard
 
-## technology stack
+CS2 betting analytics application with advanced risk management and data visualization.
+
+## Features
+
+- **9 Analytics Tabs**: Profit, Odds, Activity, Teams, Periods, Predictions, Recommendations, Risks, Insights
+- **Risk Management**: Sharpe ratio, Kelly criterion, risk alerts
+- **Data Visualization**: Interactive charts and tables
+- **Responsive Design**: Modern UI with shadcn-ui components
+
+## Technology Stack
 
 This project is built with:
 
@@ -21,28 +30,10 @@ All shadcn/ui components have been downloaded under `@/components/ui`.
 - `src/app.tsx` - Root component of the project
 - `src/main.tsx` - Project entry point
 - `src/index.css` - Existing CSS configuration
-- `src/pages/Index.tsx` - Home page logic
+- `src/pages/Analytics.tsx` - Main analytics dashboard
+- `src/components/RiskManagement.tsx` - Risk analysis component
 
-## Components
-
-- All shadcn/ui components are pre-downloaded and available at `@/components/ui`
-
-## Styling
-
-- Add global styles to `src/index.css` or create new CSS files as needed
-- Use Tailwind classes for styling components
-
-## Development
-
-- Import components from `@/components/ui` in your React components
-- Customize the UI by modifying the Tailwind configuration
-
-## Note
-
-- The `@/` path alias points to the `src/` directory
-- In your typescript code, don't re-export types that you're already importing
-
-# Commands
+## Commands
 
 **Install Dependencies**
 
@@ -54,6 +45,7 @@ pnpm i
 
 ```shell
 pnpm add some_new_dependency
+```
 
 **Start Preview**
 
@@ -66,3 +58,9 @@ pnpm run dev
 ```shell
 pnpm run build
 ```
+
+## Development
+
+- Import components from `@/components/ui` in your React components
+- Customize the UI by modifying the Tailwind configuration
+- The `@/` path alias points to the `src/` directory
