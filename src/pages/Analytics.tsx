@@ -22,7 +22,6 @@ import {
   Trophy,
   DollarSign,
   Percent,
-  Activity,
   Users,
   Filter,
   RefreshCw,
@@ -866,7 +865,7 @@ export default function Analytics() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Поточна серія</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${streaks.currentWinStreak > 0 ? 'text-green-600' : streaks.currentLossStreak > 0 ? 'text-red-600' : 'text-gray-600'}`}>
@@ -896,10 +895,9 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="profit" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="profit">Прибуток</TabsTrigger>
           <TabsTrigger value="odds">Коефіцієнти</TabsTrigger>
-          <TabsTrigger value="activity">Активність</TabsTrigger>
           <TabsTrigger value="teams">Команди</TabsTrigger>
           <TabsTrigger value="comparison">Періоди</TabsTrigger>
           <TabsTrigger value="prediction">Прогнози</TabsTrigger>
@@ -1049,10 +1047,6 @@ export default function Analytics() {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="activity">
-          <CalendarHeatmap data={heatmapData} />
         </TabsContent>
 
         <TabsContent value="teams">
