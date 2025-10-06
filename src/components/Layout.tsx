@@ -20,7 +20,7 @@ interface LayoutProps {
 const navigation = [
   { name: 'Аналітика', href: '/', icon: Target },
   { name: 'Матчі', href: '/matches', icon: Trophy },
-  { name: 'Команди', href: '/teams', icon: Users },
+  { name: 'Аналіз Команд', href: '/teams', icon: Users },
   { name: 'Мої ставки', href: '/my-bets', icon: Wallet },
   { name: 'Панель управління', href: '/dashboard', icon: BarChart3 },
 ];
