@@ -42,7 +42,8 @@ import {
   WifiOff,
   Database,
   Crown,
-  Map
+  Map,
+  Trash2
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
 import type { Bet, BettingStats, TeamStats, OddsRange, CalendarData, BalanceData, ScatterData } from '@/types/betting';
@@ -294,29 +295,13 @@ export default function Analytics() {
     } catch (error) {
       console.error('❌ Error loading analytics from C# backend:', error);
       
-      // Fallback to mock data for development
-      setBets([
-        {
-          id: '1',
-          date: new Date().toISOString(),
-          team1: 'NAVI',
-          team2: 'Astralis',
-          bet: 'NAVI',
-          odds: 1.8,
-          stake: 100,
-          result: 'Win',
-          profit: 80,
-          matchScore: '2-1',
-          tournament: 'IEM Katowice',
-          confidence: 85
-        }
-      ]);
-      
+      // Clear all data instead of showing mock data
+      setBets([]);
       setStats({
-        totalBets: 1,
-        winRate: 100,
-        totalProfit: 80,
-        averageROI: 80,
+        totalBets: 0,
+        winRate: 0,
+        totalProfit: 0,
+        averageROI: 0,
         profitByMonth: [],
         profitByStrategy: []
       });
@@ -324,6 +309,22 @@ export default function Analytics() {
       setLoading(false);
       updateConnectionStatus();
     }
+  };
+
+  // Clear all data function
+  const clearAllData = () => {
+    setBets([]);
+    setStats({
+      totalBets: 0,
+      winRate: 0,
+      totalProfit: 0,
+      averageROI: 0,
+      profitByMonth: [],
+      profitByStrategy: []
+    });
+    setDatabaseTeams([]);
+    setRecommendations([]);
+    console.log('🗑️ All analytics data cleared');
   };
 
   // Load teams from database
@@ -338,14 +339,8 @@ export default function Analytics() {
       setDatabaseTeams(teamsData as DatabaseTeam[]);
     } catch (error) {
       console.error('❌ Помилка завантаження команд:', error);
-      // Fallback teams data
-      setDatabaseTeams([
-        { id: 1, name: 'NAVI', position: 1, points: 1000, hltvId: 4608 },
-        { id: 2, name: 'Astralis', position: 2, points: 950, hltvId: 6665 },
-        { id: 3, name: 'FaZe', position: 3, points: 900, hltvId: 6667 },
-        { id: 4, name: 'G2', position: 4, points: 850, hltvId: 5995 },
-        { id: 5, name: 'Spirit', position: 5, points: 800, hltvId: 7020 }
-      ]);
+      // Clear teams data on error
+      setDatabaseTeams([]);
     } finally {
       setTeamsLoading(false);
     }
@@ -815,6 +810,10 @@ export default function Analytics() {
             <RefreshCw className="h-4 w-4" />
             Оновити
           </Button>
+          <Button variant="destructive" onClick={clearAllData} className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4" />
+            Очистити дані
+          </Button>
         </div>
       </div>
 
@@ -828,10 +827,20 @@ export default function Analytics() {
           <strong>Backend Status:</strong> {connectionStatus.environment} 
           {connectionStatus.connected ? 
             ' - З\'єднано з C# SQLite базою даних' : 
-            ' - Використовуються mock дані для розробки'
+            ' - Немає підключення до бази даних'
           }
         </AlertDescription>
       </Alert>
+
+      {/* No Data Warning */}
+      {bets.length === 0 && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <AlertTriangle className="h-4 w-4 text-blue-600" />
+          <AlertDescription>
+            <strong>Немає даних для аналізу.</strong> Підключіть C# backend або додайте ставки для перегляду аналітики.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -908,82 +917,96 @@ export default function Analytics() {
 
         <TabsContent value="profit">
           <div className="grid grid-cols-1 gap-6">
-            <BalanceChart data={balanceData} />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Прибуток по місяцях</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={monthlyProfit}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [`${value} ₴`, 'Прибуток']} />
-                      <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+            {bets.length > 0 ? (
+              <>
+                <BalanceChart data={balanceData} />
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Прибуток по місяцях</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={monthlyProfit}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip formatter={(value) => [`${value} ₴`, 'Прибуток']} />
+                          <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Коефіцієнти vs Прибуток</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <ScatterChart data={scatterData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="odds" name="Коефіцієнт" />
-                      <YAxis dataKey="profit" name="Прибуток" />
-                      <Tooltip formatter={(value, name) => [
-                        name === 'odds' ? value : `${value} ₴`,
-                        name === 'odds' ? 'Коефіцієнт' : 'Прибуток'
-                      ]} />
-                      <Scatter dataKey="profit" fill="#8b5cf6" />
-                    </ScatterChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Top teams by betting stats only */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Топ-10 команд за кількістю ставок</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {topTeamsData.map((team, index) => (
-                    <div key={team.team} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{team.team}</h3>
-                          <p className="text-sm text-gray-600">{team.bets} ставок</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-4">
-                          <Badge variant={Number(team.winRate) > 50 ? 'default' : 'secondary'}>
-                            {team.winRate}% WR
-                          </Badge>
-                          <span className={`font-medium ${team.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {team.profit >= 0 ? '+' : ''}{team.profit} ₴
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Коефіцієнти vs Прибуток</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <ScatterChart data={scatterData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="odds" name="Коефіцієнт" />
+                          <YAxis dataKey="profit" name="Прибуток" />
+                          <Tooltip formatter={(value, name) => [
+                            name === 'odds' ? value : `${value} ₴`,
+                            name === 'odds' ? 'Коефіцієнт' : 'Прибуток'
+                          ]} />
+                          <Scatter dataKey="profit" fill="#8b5cf6" />
+                        </ScatterChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Top teams by betting stats only */}
+                {topTeamsData.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Топ-10 команд за кількістю ставок</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {topTeamsData.map((team, index) => (
+                          <div key={team.team} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">{team.team}</h3>
+                                <p className="text-sm text-gray-600">{team.bets} ставок</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center gap-4">
+                                <Badge variant={Number(team.winRate) > 50 ? 'default' : 'secondary'}>
+                                  {team.winRate}% WR
+                                </Badge>
+                                <span className={`font-medium ${team.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {team.profit >= 0 ? '+' : ''}{team.profit} ₴
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Немає даних про прибуток</h3>
+                  <p className="text-gray-600">Додайте ставки для перегляду аналізу прибутку</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
@@ -994,29 +1017,36 @@ export default function Analytics() {
                 <CardTitle>Аналіз по коефіцієнтах</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {oddsData.map((range) => (
-                    <div key={range.range} className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-2">{range.range}</h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Ставок:</span>
-                          <span className="font-medium">{range.count}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Win Rate:</span>
-                          <span className="font-medium">{range.winRate}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Прибуток:</span>
-                          <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
-                          </span>
+                {bets.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {oddsData.map((range) => (
+                      <div key={range.range} className="p-4 border rounded-lg">
+                        <h3 className="font-semibold mb-2">{range.range}</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Ставок:</span>
+                            <span className="font-medium">{range.count}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Win Rate:</span>
+                            <span className="font-medium">{range.winRate}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Прибуток:</span>
+                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -1025,25 +1055,32 @@ export default function Analytics() {
                 <CardTitle>Розподіл типів ставок</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={betTypes}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {betTypes.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                {betTypes.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={betTypes}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {betTypes.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center py-12">
+                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Немає даних про типи ставок</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -1484,6 +1521,12 @@ export default function Analytics() {
                       <span className="text-sm">Підключено до C# SQLite бази даних</span>
                     </div>
                   )}
+                  {bets.length === 0 && (
+                    <div className="text-center py-8">
+                      <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">Немає даних для аналізу сильних сторін</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1494,13 +1537,13 @@ export default function Analytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {completedBets.length < 10 && (
+                  {completedBets.length < 10 && completedBets.length > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
                       <span className="text-sm">Мало даних для аналізу (менше 10 ставок)</span>
                     </div>
                   )}
-                  {stats.winRate < 50 && (
+                  {stats.winRate < 50 && stats.winRate > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
                       <span className="text-sm">Win rate нижче 50% ({stats.winRate}%)</span>
@@ -1527,7 +1570,13 @@ export default function Analytics() {
                   {!connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-yellow-500">!</span>
-                      <span className="text-sm">Використовуються mock дані - підключіть C# backend</span>
+                      <span className="text-sm">Немає підключення до C# backend</span>
+                    </div>
+                  )}
+                  {bets.length === 0 && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-500">ℹ</span>
+                      <span className="text-sm">Додайте ставки для початку аналізу</span>
                     </div>
                   )}
                 </div>
