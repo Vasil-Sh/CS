@@ -5,6 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import PreviewButton from '@/components/PreviewButton';
+import { useUISettings } from '@/hooks/useUISettings';
 import csharpDataService from '@/services/csharp-data-service';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
 import BalanceChart from '@/components/BalanceChart';
@@ -135,6 +137,8 @@ const popularMaps = [
 ];
 
 export default function Analytics() {
+  const { settings, getCardSizeClass } = useUISettings();
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [stats, setStats] = useState<BettingStats>({
     totalBets: 0,
     winRate: 0,
@@ -764,14 +768,31 @@ export default function Analytics() {
   const scatterData = oddsVsProfitData();
 
   return (
-    <div className="space-y-6">
+    <div 
+      className="space-y-6" 
+      style={isPreviewMode ? { 
+        fontSize: `${settings.fontSize}px`,
+        fontFamily: settings.fontFamily 
+      } : {}}
+    >
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">CS2 Betting Analytics</h1>
-          <p className="text-gray-600">Детальний аналіз вашої беттінг активності з інтеграцією C# backend</p>
+          <h1 
+            className="text-3xl font-bold text-gray-900"
+            style={isPreviewMode ? { color: settings.primaryColor } : {}}
+          >
+            CS2 Betting Analytics {isPreviewMode && '(Preview)'}
+          </h1>
+          <p 
+            className="text-gray-600"
+            style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+          >
+            Детальний аналіз вашої беттінг активності з інтеграцією C# backend
+          </p>
         </div>
         
         <div className="flex gap-2">
+          <PreviewButton onPreviewChange={setIsPreviewMode} />
           <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Експорт
@@ -814,59 +835,110 @@ export default function Analytics() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card 
+          className={isPreviewMode ? getCardSizeClass() : ''}
+          style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Загальний профіт</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign 
+              className="h-4 w-4 text-muted-foreground" 
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold flex items-center gap-1 ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold flex items-center gap-1 ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              style={isPreviewMode ? { 
+                color: stats.totalProfit >= 0 ? settings.accentColor : '#ef4444' 
+              } : {}}
+            >
               {stats.totalProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
               {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p 
+              className="text-xs text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            >
               З {completedBets.length} завершених ставок
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className={isPreviewMode ? getCardSizeClass() : ''}
+          style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Відсоток перемог</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <Target 
+              className="h-4 w-4 text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.winRate}%</div>
+            <div 
+              className="text-2xl font-bold"
+              style={isPreviewMode ? { color: settings.primaryColor } : {}}
+            >
+              {stats.winRate}%
+            </div>
             <Progress value={stats.winRate} className="mt-2" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className={isPreviewMode ? getCardSizeClass() : ''}
+          style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Поточна серія</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <Trophy 
+              className="h-4 w-4 text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${streaks.currentWinStreak > 0 ? 'text-green-600' : streaks.currentLossStreak > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`text-2xl font-bold ${streaks.currentWinStreak > 0 ? 'text-green-600' : streaks.currentLossStreak > 0 ? 'text-red-600' : 'text-gray-600'}`}
+              style={isPreviewMode ? { 
+                color: streaks.currentWinStreak > 0 ? settings.accentColor : 
+                       streaks.currentLossStreak > 0 ? '#ef4444' : settings.primaryColor
+              } : {}}
+            >
               {streaks.currentWinStreak > 0 ? `+${streaks.currentWinStreak}` : 
                streaks.currentLossStreak > 0 ? `-${streaks.currentLossStreak}` : '0'}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p 
+              className="text-xs text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            >
               Макс: +{streaks.maxWinStreak} / -{streaks.maxLossStreak}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className={isPreviewMode ? getCardSizeClass() : ''}
+          style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Середній ROI</CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
+            <Percent 
+              className="h-4 w-4 text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${stats.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              style={isPreviewMode ? { 
+                color: stats.averageROI >= 0 ? settings.accentColor : '#ef4444' 
+              } : {}}
+            >
               {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p 
+              className="text-xs text-muted-foreground"
+              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+            >
               На одну ставку
             </p>
           </CardContent>
@@ -891,9 +963,16 @@ export default function Analytics() {
                 <BalanceChart data={balanceData} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
+                  <Card
+                    className={isPreviewMode ? getCardSizeClass() : ''}
+                    style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                  >
                     <CardHeader>
-                      <CardTitle>Прибуток по місяцях</CardTitle>
+                      <CardTitle
+                        style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                      >
+                        Прибуток по місяцях
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -902,15 +981,27 @@ export default function Analytics() {
                           <XAxis dataKey="month" />
                           <YAxis />
                           <Tooltip formatter={(value) => [`${value} ₴`, 'Прибуток']} />
-                          <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} />
+                          <Line 
+                            type="monotone" 
+                            dataKey="profit" 
+                            stroke={isPreviewMode ? settings.accentColor : "#10b981"} 
+                            strokeWidth={2} 
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card
+                    className={isPreviewMode ? getCardSizeClass() : ''}
+                    style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                  >
                     <CardHeader>
-                      <CardTitle>Коефіцієнти vs Прибуток</CardTitle>
+                      <CardTitle
+                        style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                      >
+                        Коефіцієнти vs Прибуток
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -922,7 +1013,10 @@ export default function Analytics() {
                             name === 'odds' ? value : `${value} ₴`,
                             name === 'odds' ? 'Коефіцієнт' : 'Прибуток'
                           ]} />
-                          <Scatter dataKey="profit" fill="#8b5cf6" />
+                          <Scatter 
+                            dataKey="profit" 
+                            fill={isPreviewMode ? settings.primaryColor : "#8b5cf6"} 
+                          />
                         </ScatterChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -931,14 +1025,25 @@ export default function Analytics() {
 
                 {/* Top teams by betting stats only */}
                 {topTeamsData.length > 0 && (
-                  <Card>
+                  <Card
+                    className={isPreviewMode ? getCardSizeClass() : ''}
+                    style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                  >
                     <CardHeader>
-                      <CardTitle>Топ-10 команд за кількістю ставок</CardTitle>
+                      <CardTitle
+                        style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                      >
+                        Топ-10 команд за кількістю ставок
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {topTeamsData.map((team, index) => (
-                          <div key={team.team} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div 
+                            key={team.team} 
+                            className="flex items-center justify-between p-4 border rounded-lg"
+                            style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                          >
                             <div className="flex items-center gap-3">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                                 index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'
@@ -946,8 +1051,18 @@ export default function Analytics() {
                                 {index + 1}
                               </div>
                               <div>
-                                <h3 className="font-semibold">{team.team}</h3>
-                                <p className="text-sm text-gray-600">{team.bets} ставок</p>
+                                <h3 
+                                  className="font-semibold"
+                                  style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                                >
+                                  {team.team}
+                                </h3>
+                                <p 
+                                  className="text-sm text-gray-600"
+                                  style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                                >
+                                  {team.bets} ставок
+                                </p>
                               </div>
                             </div>
                             <div className="text-right">
@@ -955,7 +1070,12 @@ export default function Analytics() {
                                 <Badge variant={Number(team.winRate) > 50 ? 'default' : 'secondary'}>
                                   {team.winRate}% WR
                                 </Badge>
-                                <span className={`font-medium ${team.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <span 
+                                  className={`font-medium ${team.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                                  style={isPreviewMode ? { 
+                                    color: team.profit >= 0 ? settings.accentColor : '#ef4444' 
+                                  } : {}}
+                                >
                                   {team.profit >= 0 ? '+' : ''}{team.profit} ₴
                                 </span>
                               </div>
@@ -968,11 +1088,27 @@ export default function Analytics() {
                 )}
               </>
             ) : (
-              <Card>
+              <Card
+                className={isPreviewMode ? getCardSizeClass() : ''}
+                style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+              >
                 <CardContent className="py-12 text-center">
-                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Немає даних про прибуток</h3>
-                  <p className="text-gray-600">Додайте ставки для перегляду аналізу прибутку</p>
+                  <DollarSign 
+                    className="h-12 w-12 text-gray-400 mx-auto mb-4"
+                    style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                  />
+                  <h3 
+                    className="text-lg font-medium text-gray-900 mb-2"
+                    style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                  >
+                    Немає даних про прибуток
+                  </h3>
+                  <p 
+                    className="text-gray-600"
+                    style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                  >
+                    Додайте ставки для перегляду аналізу прибутку
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -981,28 +1117,63 @@ export default function Analytics() {
 
         <TabsContent value="odds">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card
+              className={isPreviewMode ? getCardSizeClass() : ''}
+              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+            >
               <CardHeader>
-                <CardTitle>Аналіз по коефіцієнтах</CardTitle>
+                <CardTitle
+                  style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                >
+                  Аналіз по коефіцієнтах
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {bets.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {oddsData.map((range) => (
-                      <div key={range.range} className="p-4 border rounded-lg">
-                        <h3 className="font-semibold mb-2">{range.range}</h3>
+                      <div 
+                        key={range.range} 
+                        className="p-4 border rounded-lg"
+                        style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                      >
+                        <h3 
+                          className="font-semibold mb-2"
+                          style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                        >
+                          {range.range}
+                        </h3>
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Ставок:</span>
+                            <span 
+                              className="text-sm text-gray-600"
+                              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                            >
+                              Ставок:
+                            </span>
                             <span className="font-medium">{range.count}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Win Rate:</span>
+                            <span 
+                              className="text-sm text-gray-600"
+                              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                            >
+                              Win Rate:
+                            </span>
                             <span className="font-medium">{range.winRate}%</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Прибуток:</span>
-                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span 
+                              className="text-sm text-gray-600"
+                              style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                            >
+                              Прибуток:
+                            </span>
+                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                              style={isPreviewMode ? { 
+                                color: range.profit >= 0 ? settings.accentColor : '#ef4444' 
+                              } : {}}
+                            >
                               {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
                             </span>
                           </div>
@@ -1012,16 +1183,31 @@ export default function Analytics() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
+                    <Target 
+                      className="h-12 w-12 text-gray-400 mx-auto mb-4"
+                      style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                    />
+                    <p 
+                      className="text-gray-600"
+                      style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                    >
+                      Немає даних для аналізу коефіцієнтів
+                    </p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={isPreviewMode ? getCardSizeClass() : ''}
+              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+            >
               <CardHeader>
-                <CardTitle>Розподіл типів ставок</CardTitle>
+                <CardTitle
+                  style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                >
+                  Розподіл типів ставок
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {betTypes.length > 0 ? (
@@ -1046,8 +1232,16 @@ export default function Analytics() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-12">
-                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Немає даних про типи ставок</p>
+                    <BarChart3 
+                      className="h-12 w-12 text-gray-400 mx-auto mb-4"
+                      style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                    />
+                    <p 
+                      className="text-gray-600"
+                      style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                    >
+                      Немає даних про типи ставок
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -1064,9 +1258,15 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="recommendations">
-          <Card>
+          <Card
+            className={isPreviewMode ? getCardSizeClass() : ''}
+            style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle 
+                className="flex items-center gap-2"
+                style={isPreviewMode ? { color: settings.primaryColor } : {}}
+              >
                 <Zap className="h-5 w-5" />
                 Генератор рекомендацій на основі нової системи тірів
               </CardTitle>
@@ -1075,9 +1275,15 @@ export default function Analytics() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Команда 1:</label>
+                    <label 
+                      className="text-sm font-medium"
+                      style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                    >
+                      Команда 1:
+                    </label>
                     <select 
                       className="w-full p-2 border rounded-md mt-1"
+                      style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
                       onChange={(e) => {
                         const team2 = (document.querySelector('select[data-team="2"]') as HTMLSelectElement)?.value;
                         if (e.target.value && team2 && e.target.value !== team2) {
@@ -1096,9 +1302,15 @@ export default function Analytics() {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-medium">Команда 2:</label>
+                    <label 
+                      className="text-sm font-medium"
+                      style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                    >
+                      Команда 2:
+                    </label>
                     <select 
                       className="w-full p-2 border rounded-md mt-1"
+                      style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
                       data-team="2"
                       onChange={(e) => {
                         const team1 = (document.querySelector('select:not([data-team])') as HTMLSelectElement)?.value;
@@ -1119,11 +1331,20 @@ export default function Analytics() {
                 </div>
 
                 {recommendations.map((rec, index) => (
-                  <div key={index} className={`p-6 border rounded-lg ${getRecommendationColor(rec.recommendation)}`}>
+                  <div 
+                    key={index} 
+                    className={`p-6 border rounded-lg ${getRecommendationColor(rec.recommendation)}`}
+                    style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                  >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         {getRecommendationIcon(rec.recommendation)}
-                        <h3 className="font-semibold text-lg">{rec.team} vs {rec.opponent}</h3>
+                        <h3 
+                          className="font-semibold text-lg"
+                          style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                        >
+                          {rec.team} vs {rec.opponent}
+                        </h3>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="font-medium">{getRecommendationText(rec.recommendation)}</Badge>
@@ -1136,34 +1357,64 @@ export default function Analytics() {
                       <div className="space-y-4">
                         <div className="flex items-center gap-2">
                           <Star className="h-4 w-4" />
-                          <span className="text-sm font-medium">Індекс стабільності: {rec.stabilityScore}/100</span>
+                          <span 
+                            className="text-sm font-medium"
+                            style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                          >
+                            Індекс стабільності: {rec.stabilityScore}/100
+                          </span>
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-2">Короткі причини:</p>
+                          <p 
+                            className="text-sm font-medium mb-2"
+                            style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                          >
+                            Короткі причини:
+                          </p>
                           <ul className="text-sm space-y-1">
                             {rec.reasons.map((reason, i) => (
                               <li key={i} className="flex items-start gap-2">
                                 <span className="text-xs mt-1">•</span>
-                                <span>{reason}</span>
+                                <span 
+                                  style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                                >
+                                  {reason}
+                                </span>
                               </li>
                             ))}
                           </ul>
                         </div>
 
-                        <div className="p-3 bg-white/50 rounded-lg">
+                        <div 
+                          className="p-3 bg-white/50 rounded-lg"
+                          style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                        >
                           <div className="flex items-center gap-2 mb-2">
                             <Target className="h-4 w-4" />
-                            <span className="text-sm font-medium">Рекомендація:</span>
+                            <span 
+                              className="text-sm font-medium"
+                              style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                            >
+                              Рекомендація:
+                            </span>
                           </div>
-                          <p className="text-sm">{rec.detailedAnalysis.recommendation}</p>
+                          <p 
+                            className="text-sm"
+                            style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                          >
+                            {rec.detailedAnalysis.recommendation}
+                          </p>
                         </div>
                       </div>
 
                       {/* Right column - Detailed analysis */}
                       <div className="space-y-4">
                         <div>
-                          <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <h4 
+                            className="font-medium mb-2 flex items-center gap-2"
+                            style={isPreviewMode ? { color: settings.primaryColor } : {}}
+                          >
                             <BarChart3 className="h-4 w-4" />
                             Детальний аналіз
                           </h4>
@@ -1171,27 +1422,52 @@ export default function Analytics() {
                           <div className="space-y-3 text-sm">
                             <div>
                               <span className="font-medium text-blue-600">Тіри:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.tierComparison}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.tierComparison}
+                              </p>
                             </div>
                             
                             <div>
                               <span className="font-medium text-purple-600">Рейтинг:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.rankComparison}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.rankComparison}
+                              </p>
                             </div>
                             
                             <div>
                               <span className="font-medium text-green-600">Win Rate:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.winRateAnalysis}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.winRateAnalysis}
+                              </p>
                             </div>
                             
                             <div>
                               <span className="font-medium text-orange-600">Форма:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.recentFormAnalysis}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.recentFormAnalysis}
+                              </p>
                             </div>
                             
                             <div>
                               <span className="font-medium text-red-600">H2H:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.headToHeadAnalysis}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.headToHeadAnalysis}
+                              </p>
                             </div>
                             
                             {rec.detailedAnalysis.mapAnalysis.length > 0 && (
@@ -1202,7 +1478,13 @@ export default function Analytics() {
                                 </span>
                                 <ul className="text-gray-700 ml-4">
                                   {rec.detailedAnalysis.mapAnalysis.map((analysis, i) => (
-                                    <li key={i} className="text-xs">• {analysis}</li>
+                                    <li 
+                                      key={i} 
+                                      className="text-xs"
+                                      style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                                    >
+                                      • {analysis}
+                                    </li>
                                   ))}
                                 </ul>
                               </div>
@@ -1210,7 +1492,12 @@ export default function Analytics() {
                             
                             <div>
                               <span className="font-medium text-teal-600">Стабільність:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.stabilityAnalysis}</p>
+                              <p 
+                                className="text-gray-700"
+                                style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                              >
+                                {rec.detailedAnalysis.stabilityAnalysis}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1218,7 +1505,10 @@ export default function Analytics() {
                         {/* Strengths and risks */}
                         <div className="grid grid-cols-2 gap-3">
                           {rec.detailedAnalysis.strengths.length > 0 && (
-                            <div className="p-3 bg-green-50 rounded-lg">
+                            <div 
+                              className="p-3 bg-green-50 rounded-lg"
+                              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                            >
                               <div className="flex items-center gap-2 mb-2">
                                 <TrendUp className="h-3 w-3 text-green-600" />
                                 <span className="text-xs font-medium text-green-800">Сильні сторони</span>
@@ -1232,7 +1522,10 @@ export default function Analytics() {
                           )}
                           
                           {rec.detailedAnalysis.riskFactors.length > 0 && (
-                            <div className="p-3 bg-red-50 rounded-lg">
+                            <div 
+                              className="p-3 bg-red-50 rounded-lg"
+                              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+                            >
                               <div className="flex items-center gap-2 mb-2">
                                 <TrendDown className="h-3 w-3 text-red-600" />
                                 <span className="text-xs font-medium text-red-800">Ризик-фактори</span>
@@ -1260,104 +1553,223 @@ export default function Analytics() {
 
         <TabsContent value="insights">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card
+              className={isPreviewMode ? getCardSizeClass() : ''}
+              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+            >
               <CardHeader>
-                <CardTitle className="text-green-700">Сильні сторони</CardTitle>
+                <CardTitle 
+                  className="text-green-700"
+                  style={isPreviewMode ? { color: settings.accentColor } : {}}
+                >
+                  Сильні сторони
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {stats.winRate > 50 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Позитивний win rate ({stats.winRate}%)</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Позитивний win rate ({stats.winRate}%)
+                      </span>
                     </div>
                   )}
                   {stats.totalProfit > 0 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Прибутковість: +{stats.totalProfit} ₴</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Прибутковість: +{stats.totalProfit} ₴
+                      </span>
                     </div>
                   )}
                   {streaks.maxWinStreak > 3 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Максимальна серія: {streaks.maxWinStreak} виграшів</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Максимальна серія: {streaks.maxWinStreak} виграшів
+                      </span>
                     </div>
                   )}
                   {stats.averageROI > 0 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Позитивний ROI: {stats.averageROI}%</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Позитивний ROI: {stats.averageROI}%
+                      </span>
                     </div>
                   )}
                   {completedBets.length > 20 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Достатньо даних для аналізу ({completedBets.length} ставок)</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Достатньо даних для аналізу ({completedBets.length} ставок)
+                      </span>
                     </div>
                   )}
                   {connectionStatus.connected && (
                     <div className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span className="text-sm">Підключено до C# SQLite бази даних ставок</span>
+                      <span 
+                        className="text-green-500"
+                        style={isPreviewMode ? { color: settings.accentColor } : {}}
+                      >
+                        ✓
+                      </span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Підключено до C# SQLite бази даних ставок
+                      </span>
                     </div>
                   )}
                   {bets.length === 0 && (
                     <div className="text-center py-8">
-                      <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">Немає даних для аналізу сильних сторін</p>
+                      <CheckCircle 
+                        className="h-12 w-12 text-gray-400 mx-auto mb-4"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      />
+                      <p 
+                        className="text-gray-600"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Немає даних для аналізу сильних сторін
+                      </p>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={isPreviewMode ? getCardSizeClass() : ''}
+              style={isPreviewMode ? { borderRadius: `${settings.borderRadius}px` } : {}}
+            >
               <CardHeader>
-                <CardTitle className="text-orange-700">Області для покращення</CardTitle>
+                <CardTitle 
+                  className="text-orange-700"
+                  style={isPreviewMode ? { color: '#f59e0b' } : {}}
+                >
+                  Області для покращення
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {completedBets.length < 10 && completedBets.length > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
-                      <span className="text-sm">Мало даних для аналізу (менше 10 ставок)</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Мало даних для аналізу (менше 10 ставок)
+                      </span>
                     </div>
                   )}
                   {stats.winRate < 50 && stats.winRate > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
-                      <span className="text-sm">Win rate нижче 50% ({stats.winRate}%)</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Win rate нижче 50% ({stats.winRate}%)
+                      </span>
                     </div>
                   )}
                   {streaks.maxLossStreak > 5 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
-                      <span className="text-sm">Довга серія програшів: {streaks.maxLossStreak}</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Довга серія програшів: {streaks.maxLossStreak}
+                      </span>
                     </div>
                   )}
                   {stats.totalProfit < 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-red-500">⚠</span>
-                      <span className="text-sm">Загальний збиток: {stats.totalProfit} ₴</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Загальний збиток: {stats.totalProfit} ₴
+                      </span>
                     </div>
                   )}
                   {stats.averageROI < 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-red-500">⚠</span>
-                      <span className="text-sm">Негативний ROI: {stats.averageROI}%</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Негативний ROI: {stats.averageROI}%
+                      </span>
                     </div>
                   )}
                   {!connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-yellow-500">!</span>
-                      <span className="text-sm">Немає підключення до C# backend ставок</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Немає підключення до C# backend ставок
+                      </span>
                     </div>
                   )}
                   {bets.length === 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-blue-500">ℹ</span>
-                      <span className="text-sm">Додайте ставки для початку аналізу</span>
+                      <span 
+                        className="text-sm"
+                        style={isPreviewMode ? { color: settings.secondaryColor } : {}}
+                      >
+                        Додайте ставки для початку аналізу
+                      </span>
                     </div>
                   )}
                 </div>
