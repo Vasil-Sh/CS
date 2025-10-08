@@ -69,14 +69,6 @@ interface TeamRecommendation {
   };
 }
 
-interface DatabaseTeam {
-  id: number;
-  name: string;
-  position: number;
-  points: number;
-  hltvId: number;
-}
-
 // Top 3 teams from HLTV ranking
 const topTeams = [
   {
@@ -156,8 +148,6 @@ export default function Analytics() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [recommendations, setRecommendations] = useState<TeamRecommendation[]>([]);
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
-  const [databaseTeams, setDatabaseTeams] = useState<DatabaseTeam[]>([]);
-  const [teamsLoading, setTeamsLoading] = useState(false);
 
   // Enhanced teams data with C# integration support
   const teams = {
@@ -322,28 +312,8 @@ export default function Analytics() {
       profitByMonth: [],
       profitByStrategy: []
     });
-    setDatabaseTeams([]);
     setRecommendations([]);
     console.log('🗑️ All analytics data cleared');
-  };
-
-  // Load teams from database
-  const loadTeamsFromDatabase = async () => {
-    try {
-      setTeamsLoading(true);
-      console.log('🔄 Завантаження команд з бази даних...');
-      
-      const teamsData = await csharpDataService.getTeamsData();
-      console.log('✅ Команди завантажено з C# backend:', teamsData);
-      
-      setDatabaseTeams(teamsData as DatabaseTeam[]);
-    } catch (error) {
-      console.error('❌ Помилка завантаження команд:', error);
-      // Clear teams data on error
-      setDatabaseTeams([]);
-    } finally {
-      setTeamsLoading(false);
-    }
   };
 
   // Generate recommendation with detailed analysis
@@ -817,17 +787,17 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Connection Status */}
+      {/* Betting Backend Connection Status */}
       <Alert className={connectionStatus.connected ? 'border-green-200 bg-green-50' : 'border-yellow-200 bg-yellow-50'}>
         <div className="flex items-center gap-2">
           {connectionStatus.connected ? <Wifi className="h-4 w-4 text-green-600" /> : <WifiOff className="h-4 w-4 text-yellow-600" />}
           <Database className="h-4 w-4" />
         </div>
         <AlertDescription>
-          <strong>Backend Status:</strong> {connectionStatus.environment} 
+          <strong>Betting Backend Status:</strong> {connectionStatus.environment} 
           {connectionStatus.connected ? 
-            ' - З\'єднано з C# SQLite базою даних' : 
-            ' - Немає підключення до бази даних'
+            ' - З\'єднано з C# SQLite базою даних ставок' : 
+            ' - Немає підключення до бази даних ставок'
           }
         </AlertDescription>
       </Alert>
@@ -904,10 +874,9 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="profit" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="profit">Прибуток</TabsTrigger>
           <TabsTrigger value="odds">Коефіцієнти</TabsTrigger>
-          <TabsTrigger value="teams">Команди</TabsTrigger>
           <TabsTrigger value="comparison">Періоди</TabsTrigger>
           <TabsTrigger value="prediction">Прогнози</TabsTrigger>
           <TabsTrigger value="recommendations">Рекомендації</TabsTrigger>
@@ -1081,194 +1050,6 @@ export default function Analytics() {
                     <p className="text-gray-600">Немає даних про типи ставок</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="teams">
-          <div className="space-y-6">
-            {/* Top 3 Teams Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-yellow-500" />
-                  Топ-3 команди світу (HLTV рейтинг)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {topTeams.map((team, index) => (
-                    <Card key={team.name} className={`relative overflow-hidden ${
-                      index === 0 ? 'border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100' :
-                      index === 1 ? 'border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100' :
-                      'border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100'
-                    }`}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold ${
-                              index === 0 ? 'bg-yellow-200 text-yellow-800' :
-                              index === 1 ? 'bg-gray-200 text-gray-800' :
-                              'bg-orange-200 text-orange-800'
-                            }`}>
-                              {team.logo}
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-lg">{team.name}</h3>
-                              <p className="text-sm text-gray-600">{team.country}</p>
-                            </div>
-                          </div>
-                          <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-                            index === 0 ? 'bg-yellow-500 text-white' :
-                            index === 1 ? 'bg-gray-500 text-white' :
-                            'bg-orange-500 text-white'
-                          }`}>
-                            #{team.rank}
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Очки:</span>
-                            <span className="font-semibold">{team.points}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Win Rate:</span>
-                            <span className="font-semibold text-green-600">{team.winRate}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Карти:</span>
-                            <span className="font-semibold">{team.mapWins}-{team.mapLosses}</span>
-                          </div>
-                          
-                          <div>
-                            <span className="text-sm text-gray-600 block mb-2">Остання форма:</span>
-                            <div className="flex gap-1">
-                              {team.recentForm.map((result, i) => (
-                                <div key={i} className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                  result === 'W' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                                }`}>
-                                  {result}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Database Teams Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Команди з бази даних
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={loadTeamsFromDatabase} 
-                    disabled={teamsLoading}
-                    className="flex items-center gap-2"
-                  >
-                    {teamsLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <RefreshCw className="h-4 w-4" />
-                    )}
-                    {teamsLoading ? 'Завантаження...' : 'Завантажити команди'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {databaseTeams.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {databaseTeams.map((team) => (
-                      <Card key={team.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-lg">{team.name}</h3>
-                            <Badge variant="outline">#{team.position}</Badge>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Позиція:</span>
-                              <span className="font-medium">{team.position}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Очки:</span>
-                              <span className="font-medium">{team.points}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">HLTV ID:</span>
-                              <span className="font-medium">{team.hltvId}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Команди не завантажені</p>
-                    <Button onClick={loadTeamsFromDatabase} disabled={teamsLoading}>
-                      {teamsLoading ? 'Завантаження...' : 'Завантажити команди з бази даних'}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Popular Maps Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5" />
-                  Популярні карти CS2
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {popularMaps.map((map, index) => (
-                    <Card key={map.name} className="hover:shadow-md transition-shadow">
-                      <CardContent className="pt-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl">
-                            {map.image}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-lg">{map.name}</h3>
-                            <p className="text-sm text-gray-600">Play Rate: {map.playRate}</p>
-                          </div>
-                        </div>
-                        
-                        <p className="text-sm text-gray-700 mb-4">{map.description}</p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Середня кількість раундів:</span>
-                            <span className="font-medium">{map.avgRounds}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">T-Side Win Rate:</span>
-                            <span className="font-medium">{map.tSideWinRate}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                              style={{ width: `${map.tSideWinRate}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -1518,7 +1299,7 @@ export default function Analytics() {
                   {connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span className="text-sm">Підключено до C# SQLite бази даних</span>
+                      <span className="text-sm">Підключено до C# SQLite бази даних ставок</span>
                     </div>
                   )}
                   {bets.length === 0 && (
@@ -1570,7 +1351,7 @@ export default function Analytics() {
                   {!connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-yellow-500">!</span>
-                      <span className="text-sm">Немає підключення до C# backend</span>
+                      <span className="text-sm">Немає підключення до C# backend ставок</span>
                     </div>
                   )}
                   {bets.length === 0 && (
