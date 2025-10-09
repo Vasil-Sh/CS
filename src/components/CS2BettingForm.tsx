@@ -493,7 +493,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </div>
                 </div>
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
                   {isSubmitting ? 'Додавання...' : 'Додати ставку'}
                 </Button>
               </form>
