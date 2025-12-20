@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, LogIn } from 'lucide-react';
+import { Loader2, LogIn, AlertTriangle } from 'lucide-react';
 
 interface User {
   username: string;
   password: string;
+  endDate: string;
 }
 
 export default function Login() {
@@ -17,19 +18,48 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     // Check if already logged in
     const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      navigate('/matches');
+    const endDate = localStorage.getItem('userEndDate');
+    
+    if (currentUser && endDate) {
+      // Check if subscription is still valid
+      if (isSubscriptionValid(endDate)) {
+        navigate('/matches');
+      } else {
+        // Subscription expired, logout user
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userEndDate');
+        setSubscriptionExpired(true);
+      }
     }
 
     // Fetch users from Google Sheets
     fetchUsers();
   }, [navigate]);
+
+  const isSubscriptionValid = (endDateStr: string): boolean => {
+    try {
+      // Parse date in format DD/MM/YYYY
+      const [day, month, year] = endDateStr.split('/').map(Number);
+      const endDate = new Date(year, month - 1, day);
+      const today = new Date();
+      
+      // Set time to start of day for accurate comparison
+      today.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      
+      return endDate >= today;
+    } catch (err) {
+      console.error('Error parsing date:', err);
+      return false;
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -41,23 +71,25 @@ export default function Login() {
       
       console.log('Raw CSV data:', text);
       
-      // Parse CSV - now we have 5 columns: Users Telegram, UserName, Password, StartDate, EndDate
+      // Parse CSV - 5 columns: Users Telegram, UserName, Password, StartDate, EndDate
       const rows = text.split('\n').slice(1); // Skip header
       const parsedUsers: User[] = rows
         .filter(row => row.trim())
         .map(row => {
           // Handle CSV parsing with quotes
           const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 3) return null;
+          if (!matches || matches.length < 5) return null;
           
           const username = matches[1].replace(/"/g, '').trim();
           const password = matches[2].replace(/"/g, '').trim();
+          const endDate = matches[4].replace(/"/g, '').trim();
           
-          console.log('Parsed user:', { username, password });
+          console.log('Parsed user:', { username, password, endDate });
           
           return {
             username,
             password,
+            endDate,
           };
         })
         .filter((user): user is User => user !== null);
@@ -73,6 +105,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSubscriptionExpired(false);
     setLoading(true);
 
     try {
@@ -87,8 +120,17 @@ export default function Login() {
       console.log('Found user:', user);
 
       if (user) {
-        // Save user session
+        // Check if subscription is valid
+        if (!isSubscriptionValid(user.endDate)) {
+          setSubscriptionExpired(true);
+          setError('Ваша підписка закінчилась. Будь ласка, продовжіть підписку.');
+          setLoading(false);
+          return;
+        }
+
+        // Save user session with end date
         localStorage.setItem('currentUser', user.username);
+        localStorage.setItem('userEndDate', user.endDate);
         
         // Redirect to matches page
         navigate('/matches');
@@ -120,6 +162,15 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {subscriptionExpired && (
+            <Alert className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                Ваша підписка закінчилась. Будь ласка, зверніться до адміністратора для продовження.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username" className="text-gray-700">
@@ -150,7 +201,7 @@ export default function Login() {
               />
             </div>
 
-            {error && (
+            {error && !subscriptionExpired && (
               <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>

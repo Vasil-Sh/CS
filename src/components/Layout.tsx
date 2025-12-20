@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
@@ -26,9 +26,41 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentUser = localStorage.getItem('currentUser');
+  const userEndDate = localStorage.getItem('userEndDate');
+
+  useEffect(() => {
+    // Check subscription validity on every route change
+    if (currentUser && userEndDate) {
+      if (!isSubscriptionValid(userEndDate)) {
+        // Subscription expired, logout and redirect
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userEndDate');
+        navigate('/login');
+      }
+    }
+  }, [location.pathname, currentUser, userEndDate, navigate]);
+
+  const isSubscriptionValid = (endDateStr: string): boolean => {
+    try {
+      // Parse date in format DD/MM/YYYY
+      const [day, month, year] = endDateStr.split('/').map(Number);
+      const endDate = new Date(year, month - 1, day);
+      const today = new Date();
+      
+      // Set time to start of day for accurate comparison
+      today.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      
+      return endDate >= today;
+    } catch (err) {
+      console.error('Error parsing date:', err);
+      return false;
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('userEndDate');
     navigate('/login');
   };
 
@@ -75,6 +107,11 @@ export default function Layout({ children }: LayoutProps) {
               <p className="text-sm font-medium text-gray-900 truncate">
                 @{currentUser}
               </p>
+              {userEndDate && (
+                <p className="text-xs text-gray-500">
+                  До: {userEndDate}
+                </p>
+              )}
             </div>
           </div>
 
@@ -124,6 +161,11 @@ export default function Layout({ children }: LayoutProps) {
                   <p className="text-sm font-medium text-gray-900 truncate">
                     @{currentUser}
                   </p>
+                  {userEndDate && (
+                    <p className="text-xs text-gray-500">
+                      До: {userEndDate}
+                    </p>
+                  )}
                 </div>
               </div>
 
