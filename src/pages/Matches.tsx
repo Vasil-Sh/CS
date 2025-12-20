@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { UserDataService } from '@/lib/userDataService';
 import { 
   Calendar, 
   Trophy, 
@@ -34,11 +33,10 @@ import { useToast } from '@/hooks/use-toast';
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
 
 interface RiskyTeam {
-  id: string;
   name: string;
-  comment: string;
-  riskLevel: 'high' | 'medium' | 'low';
-  dateAdded: string;
+  game: string;
+  status: string;
+  notes: string;
 }
 
 interface Match {
@@ -246,8 +244,6 @@ const getRiskBadge = (risk: number) => {
 };
 
 export default function Matches() {
-  const currentUser = localStorage.getItem('currentUser') || '';
-  
   const [matches, setMatches] = useState<Match[]>(mockMatches);
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('confidence');
@@ -259,9 +255,8 @@ export default function Matches() {
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>(() => 
-    UserDataService.getUserData(currentUser, 'risky_teams', [])
-  );
+  // Load risky teams from admin_risky_teams (global storage)
+  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   
   const [visibleComments, setVisibleComments] = useState<Set<string>>(new Set());
   const { toast } = useToast();
@@ -270,17 +265,12 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
-  // Save risky teams whenever they change
-  useEffect(() => {
-    if (currentUser) {
-      UserDataService.setUserData(currentUser, 'risky_teams', riskyTeams);
-    }
-  }, [riskyTeams, currentUser]);
-
   const loadRiskyTeams = () => {
     try {
-      const saved = UserDataService.getUserData(currentUser, 'risky_teams', []);
-      setRiskyTeams(saved);
+      const saved = localStorage.getItem('admin_risky_teams');
+      if (saved) {
+        setRiskyTeams(JSON.parse(saved));
+      }
     } catch (error) {
       console.error('Error loading risky teams:', error);
     }
@@ -298,7 +288,7 @@ export default function Matches() {
     });
   };
 
-  const getTeamRiskComment = (teamName: string): { comment: string; riskLevel: 'high' | 'medium' | 'low' } | null => {
+  const getTeamRiskInfo = (teamName: string): { notes: string; status: string } | null => {
     const team = riskyTeams.find(t => 
       t.name.toLowerCase() === teamName.toLowerCase() ||
       teamName.toLowerCase().includes(t.name.toLowerCase()) ||
@@ -307,27 +297,31 @@ export default function Matches() {
     
     if (team) {
       return {
-        comment: team.comment,
-        riskLevel: team.riskLevel
+        notes: team.notes,
+        status: team.status
       };
     }
     return null;
   };
 
   const getMatchRiskComments = (team1: string, team2: string): string => {
-    const team1Risk = getTeamRiskComment(team1);
-    const team2Risk = getTeamRiskComment(team2);
+    const team1Risk = getTeamRiskInfo(team1);
+    const team2Risk = getTeamRiskInfo(team2);
     
     const comments: string[] = [];
     
     if (team1Risk) {
-      const icon = team1Risk.riskLevel === 'high' ? '🔴' : team1Risk.riskLevel === 'medium' ? '🟡' : '🟢';
-      comments.push(`${icon} ${team1}: ${team1Risk.comment}`);
+      const icon = team1Risk.status === 'БАН' ? '🔴' : 
+                   team1Risk.status === 'Нестабільні' ? '🟠' : 
+                   team1Risk.status === 'Обережно' ? '🟡' : '🔵';
+      comments.push(`${icon} ${team1}: ${team1Risk.notes || team1Risk.status}`);
     }
     
     if (team2Risk) {
-      const icon = team2Risk.riskLevel === 'high' ? '🔴' : team2Risk.riskLevel === 'medium' ? '🟡' : '🟢';
-      comments.push(`${icon} ${team2}: ${team2Risk.comment}`);
+      const icon = team2Risk.status === 'БАН' ? '🔴' : 
+                   team2Risk.status === 'Нестабільні' ? '🟠' : 
+                   team2Risk.status === 'Обережно' ? '🟡' : '🔵';
+      comments.push(`${icon} ${team2}: ${team2Risk.notes || team2Risk.status}`);
     }
     
     return comments.length > 0 ? comments.join('\n') : '';
