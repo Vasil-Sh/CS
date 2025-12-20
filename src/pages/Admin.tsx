@@ -31,7 +31,8 @@ interface User {
   username: string;
   password: string;
   priceMonth: string;
-  vipGroup: string;
+  vipGroupStartDate: string;
+  vipGroupEndDate: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -93,21 +94,22 @@ export default function Admin() {
       const response = await fetch(url);
       const text = await response.text();
       
-      // Parse CSV - 7 columns: Telegram, UserName, Password, PriceMonth, VIPGrup, StartDate, EndDate
+      // Parse CSV - 9 columns: Telegram, UserName, Password, PriceMonth, VIPGrupStartDate, VIPGrupEdnDate, StartDate, EdnDate
       const rows = text.split('\n').slice(1); // Skip header
       const parsedUsers: User[] = rows
         .filter(row => row.trim())
         .map(row => {
           const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 7) return null;
+          if (!matches || matches.length < 8) return null;
           
           const telegram = matches[0].replace(/"/g, '').trim();
           const username = matches[1].replace(/"/g, '').trim();
           const password = matches[2].replace(/"/g, '').trim();
           const priceMonth = matches[3].replace(/"/g, '').trim();
-          const vipGroup = matches[4].replace(/"/g, '').trim();
-          const startDate = matches[5].replace(/"/g, '').trim();
-          const endDate = matches[6].replace(/"/g, '').trim();
+          const vipGroupStartDate = matches[4].replace(/"/g, '').trim();
+          const vipGroupEndDate = matches[5].replace(/"/g, '').trim();
+          const startDate = matches[6].replace(/"/g, '').trim();
+          const endDate = matches[7].replace(/"/g, '').trim();
           
           const daysLeft = getDaysUntilExpiry(endDate);
           
@@ -116,7 +118,8 @@ export default function Admin() {
             username,
             password,
             priceMonth,
-            vipGroup,
+            vipGroupStartDate,
+            vipGroupEndDate,
             startDate,
             endDate,
             isActive: isSubscriptionActive(endDate),
@@ -171,6 +174,45 @@ export default function Admin() {
       <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-3 py-1 rounded-full border-0">
         <CheckCircle className="mr-1 h-3 w-3" />
         Активна ({user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry && user.daysUntilExpiry < 5 ? 'і' : 'ів'})
+      </Badge>
+    );
+  };
+
+  const getVipGroupStatus = (startDate: string, endDate: string) => {
+    if (!startDate || !endDate) {
+      return (
+        <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-full border-0">
+          <MessageCircle className="mr-1 h-3 w-3" />
+          Немає доступу
+        </Badge>
+      );
+    }
+
+    const daysLeft = getDaysUntilExpiry(endDate);
+    const isActive = daysLeft >= 0;
+
+    if (!isActive) {
+      return (
+        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 px-2 py-1 rounded-full border-0">
+          <XCircle className="mr-1 h-3 w-3" />
+          Закінчився
+        </Badge>
+      );
+    }
+
+    if (daysLeft <= 3) {
+      return (
+        <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 px-2 py-1 rounded-full border-0">
+          <AlertTriangle className="mr-1 h-3 w-3" />
+          {daysLeft} дн{daysLeft === 1 ? 'ень' : daysLeft < 5 ? 'і' : 'ів'}
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-2 py-1 rounded-full border-0">
+        <CheckCircle className="mr-1 h-3 w-3" />
+        Активний ({daysLeft} дн{daysLeft === 1 ? 'ень' : daysLeft < 5 ? 'і' : 'ів'})
       </Badge>
     );
   };
@@ -357,10 +399,7 @@ export default function Admin() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-gray-700">
-                        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 px-2 py-1 rounded-full border-0">
-                          <MessageCircle className="mr-1 h-3 w-3" />
-                          {user.vipGroup}
-                        </Badge>
+                        {getVipGroupStatus(user.vipGroupStartDate, user.vipGroupEndDate)}
                       </TableCell>
                       <TableCell className="text-gray-700">{user.startDate}</TableCell>
                       <TableCell className="text-gray-700">{user.endDate}</TableCell>
