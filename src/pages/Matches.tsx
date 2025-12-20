@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { UserDataService } from '@/lib/userDataService';
 import { 
   Calendar, 
   Trophy, 
@@ -245,6 +246,8 @@ const getRiskBadge = (risk: number) => {
 };
 
 export default function Matches() {
+  const currentUser = localStorage.getItem('currentUser') || '';
+  
   const [matches, setMatches] = useState<Match[]>(mockMatches);
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('confidence');
@@ -255,7 +258,11 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
+  
+  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>(() => 
+    UserDataService.getUserData(currentUser, 'risky_teams', [])
+  );
+  
   const [visibleComments, setVisibleComments] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -263,12 +270,17 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
+  // Save risky teams whenever they change
+  useEffect(() => {
+    if (currentUser) {
+      UserDataService.setUserData(currentUser, 'risky_teams', riskyTeams);
+    }
+  }, [riskyTeams, currentUser]);
+
   const loadRiskyTeams = () => {
     try {
-      const saved = localStorage.getItem('riskyTeams');
-      if (saved) {
-        setRiskyTeams(JSON.parse(saved));
-      }
+      const saved = UserDataService.getUserData(currentUser, 'risky_teams', []);
+      setRiskyTeams(saved);
     } catch (error) {
       console.error('Error loading risky teams:', error);
     }

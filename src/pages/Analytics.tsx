@@ -11,6 +11,7 @@ import BalanceChart from '@/components/BalanceChart';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import PredictiveAnalytics from '@/components/PredictiveAnalytics';
+import { UserDataService } from '@/lib/userDataService';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -57,15 +58,23 @@ interface TeamRecommendation {
 }
 
 export default function Analytics() {
-  const [stats, setStats] = useState<BettingStats>({
-    totalBets: 0,
-    winRate: 0,
-    totalProfit: 0,
-    averageROI: 0,
-    profitByMonth: [],
-    profitByStrategy: []
-  });
-  const [bets, setBets] = useState<Bet[]>([]);
+  const currentUser = localStorage.getItem('currentUser') || '';
+  
+  const [stats, setStats] = useState<BettingStats>(() => 
+    UserDataService.getUserData(currentUser, 'analytics_stats', {
+      totalBets: 0,
+      winRate: 0,
+      totalProfit: 0,
+      averageROI: 0,
+      profitByMonth: [],
+      profitByStrategy: []
+    })
+  );
+  
+  const [bets, setBets] = useState<Bet[]>(() => 
+    UserDataService.getUserData(currentUser, 'analytics_bets', [])
+  );
+  
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
   const [recommendations, setRecommendations] = useState<TeamRecommendation[]>([]);
@@ -175,6 +184,14 @@ export default function Analytics() {
     updateConnectionStatus();
   }, []);
 
+  // Save data whenever it changes
+  useEffect(() => {
+    if (currentUser) {
+      UserDataService.setUserData(currentUser, 'analytics_stats', stats);
+      UserDataService.setUserData(currentUser, 'analytics_bets', bets);
+    }
+  }, [stats, bets, currentUser]);
+
   const updateConnectionStatus = () => {
     const status = csharpDataService.getConnectionStatus();
     setConnectionStatus(status);
@@ -184,29 +201,110 @@ export default function Analytics() {
     try {
       setLoading(true);
       
-      const [betsData, analyticsData] = await Promise.all([
-        csharpDataService.getBettingData(),
-        csharpDataService.getAnalyticsData()
-      ]);
+      // Try to load from MyBets user-specific data first
+      const myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
+      const myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
       
-      setBets(betsData);
-      setStats({
-        totalBets: analyticsData.totalBets,
-        winRate: analyticsData.winRate,
-        totalProfit: analyticsData.totalProfit,
-        averageROI: analyticsData.roi,
+      if (myBetsData.length > 0 || myBetsStats) {
+        // Use MyBets data if available
+        setBets(myBetsData);
+        
+        if (myBetsStats) {
+          setStats({
+            totalBets: myBetsStats.totalBets || 0,
+            winRate: myBetsStats.winRate || 0,
+            totalProfit: myBetsStats.totalProfit || 0,
+            averageROI: myBetsStats.averageROI || 0,
+            profitByMonth: myBetsStats.profitByMonth || [],
+            profitByStrategy: myBetsStats.profitByStrategy || []
+          });
+        }
+        
+        console.log('✅ Data loaded from MyBets user-specific storage:', { 
+          bets: myBetsData.length, 
+          totalProfit: myBetsStats?.totalProfit || 0
+        });
+      } else {
+        // Try C# backend as fallback
+        try {
+          const [betsData, analyticsData] = await Promise.all([
+            csharpDataService.getBettingData(),
+            csharpDataService.getAnalyticsData()
+          ]);
+          
+          if (betsData.length > 0) {
+            setBets(betsData as Bet[]);
+            setStats({
+              totalBets: analyticsData.totalBets,
+              winRate: analyticsData.winRate,
+              totalProfit: analyticsData.totalProfit,
+              averageROI: analyticsData.roi,
+              profitByMonth: [],
+              profitByStrategy: []
+            });
+            
+            console.log('✅ Data loaded from C# backend:', { 
+              bets: betsData.length, 
+              totalProfit: analyticsData.totalProfit 
+            });
+          } else {
+            // Use analytics-specific localStorage as last resort
+            const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
+            const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
+              totalBets: 0,
+              winRate: 0,
+              totalProfit: 0,
+              averageROI: 0,
+              profitByMonth: [],
+              profitByStrategy: []
+            });
+            
+            setBets(savedBets);
+            setStats(savedStats);
+          }
+        } catch (error) {
+          console.error('❌ Error loading from C# backend:', error);
+          
+          // Use analytics-specific localStorage
+          const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
+          const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
+            totalBets: 0,
+            winRate: 0,
+            totalProfit: 0,
+            averageROI: 0,
+            profitByMonth: [],
+            profitByStrategy: []
+          });
+          
+          setBets(savedBets);
+          setStats(savedStats);
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Error loading analytics:', error);
+      
+      // Load from user-specific localStorage
+      const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
+      const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
+        totalBets: 0,
+        winRate: 0,
+        totalProfit: 0,
+        averageROI: 0,
         profitByMonth: [],
         profitByStrategy: []
       });
       
-      console.log('✅ Data loaded from C# backend:', { 
-        bets: betsData.length, 
-        totalProfit: analyticsData.totalProfit 
-      });
-      
-    } catch (error) {
-      console.error('❌ Error loading analytics from C# backend:', error);
-      
+      setBets(savedBets);
+      setStats(savedStats);
+    } finally {
+      setLoading(false);
+      updateConnectionStatus();
+    }
+  };
+
+  const clearAllData = () => {
+    if (window.confirm('Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.')) {
       setBets([]);
       setStats({
         totalBets: 0,
@@ -216,24 +314,14 @@ export default function Analytics() {
         profitByMonth: [],
         profitByStrategy: []
       });
-    } finally {
-      setLoading(false);
-      updateConnectionStatus();
+      setRecommendations([]);
+      
+      // Clear user-specific data
+      UserDataService.clearUserData(currentUser, 'analytics_bets');
+      UserDataService.clearUserData(currentUser, 'analytics_stats');
+      
+      console.log('🗑️ All analytics data cleared for user:', currentUser);
     }
-  };
-
-  const clearAllData = () => {
-    setBets([]);
-    setStats({
-      totalBets: 0,
-      winRate: 0,
-      totalProfit: 0,
-      averageROI: 0,
-      profitByMonth: [],
-      profitByStrategy: []
-    });
-    setRecommendations([]);
-    console.log('🗑️ All analytics data cleared');
   };
 
   const generateRecommendation = (team1: string, team2: string): TeamRecommendation => {
@@ -659,7 +747,7 @@ export default function Analytics() {
           <strong>Backend Status:</strong> {connectionStatus.environment} 
           {connectionStatus.connected ? 
             ' - З\'єднано з C# SQLite базою даних' : 
-            ' - Немає підключення до бази даних'
+            ' - Використовується user-specific localStorage'
           }
         </AlertDescription>
       </Alert>
@@ -669,7 +757,7 @@ export default function Analytics() {
         <Alert className="border-blue-200 bg-blue-50">
           <AlertTriangle className="h-4 w-4 text-blue-600" />
           <AlertDescription>
-            <strong>Немає даних для аналізу.</strong> Підключіть C# backend або додайте ставки для перегляду аналітики.
+            <strong>Немає даних для аналізу.</strong> Додайте ставки на сторінці "Мої ставки" для перегляду аналітики.
           </AlertDescription>
         </Alert>
       )}

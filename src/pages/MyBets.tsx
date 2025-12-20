@@ -8,33 +8,78 @@ import BettingHistory from '@/components/BettingHistory';
 import GoogleSheetsConfig from '@/components/GoogleSheetsConfig';
 import StrategyOverview from '@/components/StrategyOverview';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
+import { UserDataService } from '@/lib/userDataService';
 import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, RefreshCw, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function MyBets() {
-  const [stats, setStats] = useState({
-    totalBets: 0,
-    winRate: 0,
-    totalProfit: 0,
-    averageROI: 0,
-    profitByMonth: [] as { month: string; profit: number }[],
-    profitByStrategy: [] as { strategy: string; profit: number }[]
-  });
+  const currentUser = localStorage.getItem('currentUser') || '';
+  
+  const [stats, setStats] = useState(() => 
+    UserDataService.getUserData(currentUser, 'mybets_stats', {
+      totalBets: 0,
+      winRate: 0,
+      totalProfit: 0,
+      averageROI: 0,
+      profitByMonth: [] as { month: string; profit: number }[],
+      profitByStrategy: [] as { strategy: string; profit: number }[]
+    })
+  );
+  
   const [loading, setLoading] = useState(true);
-  const [recentBets, setRecentBets] = useState([]);
+  
+  const [recentBets, setRecentBets] = useState(() => 
+    UserDataService.getUserData(currentUser, 'mybets_data', [])
+  );
 
   useEffect(() => {
     loadStats();
     loadRecentBets();
   }, []);
 
+  // Save data whenever it changes
+  useEffect(() => {
+    if (currentUser) {
+      UserDataService.setUserData(currentUser, 'mybets_stats', stats);
+      UserDataService.setUserData(currentUser, 'mybets_data', recentBets);
+    }
+  }, [stats, recentBets, currentUser]);
+
   const loadStats = async () => {
     try {
       setLoading(true);
+      
+      // Try to load from Google Sheets first
       const data = await realGoogleSheetsService.getBettingStatistics();
-      setStats(data);
+      
+      // If Google Sheets returns data, use it
+      if (data.totalBets > 0) {
+        setStats(data);
+      } else {
+        // Otherwise, use user-specific localStorage data
+        const savedStats = UserDataService.getUserData(currentUser, 'mybets_stats', {
+          totalBets: 0,
+          winRate: 0,
+          totalProfit: 0,
+          averageROI: 0,
+          profitByMonth: [],
+          profitByStrategy: []
+        });
+        setStats(savedStats);
+      }
     } catch (error) {
       console.error('Error loading stats:', error);
+      
+      // Load from user-specific localStorage
+      const savedStats = UserDataService.getUserData(currentUser, 'mybets_stats', {
+        totalBets: 0,
+        winRate: 0,
+        totalProfit: 0,
+        averageROI: 0,
+        profitByMonth: [],
+        profitByStrategy: []
+      });
+      setStats(savedStats);
     } finally {
       setLoading(false);
     }
@@ -42,10 +87,23 @@ export default function MyBets() {
 
   const loadRecentBets = async () => {
     try {
+      // Try to load from Google Sheets first
       const data = await realGoogleSheetsService.fetchUSDTData();
-      setRecentBets(data.slice(-20));
+      
+      // If Google Sheets returns data, use it
+      if (data.length > 0) {
+        setRecentBets(data.slice(-20));
+      } else {
+        // Otherwise, use user-specific localStorage data
+        const savedBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+        setRecentBets(savedBets);
+      }
     } catch (error) {
       console.error('Error loading recent bets:', error);
+      
+      // Load from user-specific localStorage
+      const savedBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+      setRecentBets(savedBets);
     }
   };
 
@@ -62,7 +120,12 @@ export default function MyBets() {
   const clearRecentBets = async () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі ставки, статистику та історію. Ця дія незворотна.')) {
       try {
+        // Clear Google Sheets data (if connected)
         await realGoogleSheetsService.clearAllData();
+        
+        // Clear user-specific data
+        UserDataService.clearUserData(currentUser, 'mybets_data');
+        UserDataService.clearUserData(currentUser, 'mybets_stats');
         
         setRecentBets([]);
         setStats({
@@ -93,7 +156,19 @@ export default function MyBets() {
       const profit = result === 'Win' ? (bet.odds - 1) * bet.amount : -bet.amount;
       const roi = (profit / bet.amount) * 100;
 
+      // Update in Google Sheets (if connected)
       await realGoogleSheetsService.updateBetResult(bet, result, profit, roi);
+      
+      // Update in user-specific localStorage
+      const updatedBets = recentBets.map((b: any) => {
+        if (b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds) {
+          return { ...b, result, profit, roi };
+        }
+        return b;
+      });
+      
+      setRecentBets(updatedBets);
+      UserDataService.setUserData(currentUser, 'mybets_data', updatedBets);
       
       toast.success(`Ставка позначена як ${result === 'Win' ? 'виграшна' : 'програшна'}`);
       
