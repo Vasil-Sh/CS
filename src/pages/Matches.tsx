@@ -747,63 +747,41 @@ export default function Matches() {
                         </td>
                         <td className="p-4">
                           {riskComments ? (
-                            <div className="space-y-3">
+                            <div className="flex flex-col gap-2">
                               <div 
-                                className={`relative rounded-2xl p-4 transition-all duration-300 ${
+                                className={`text-xs font-medium whitespace-pre-line max-w-xs transition-all duration-300 rounded-lg p-2 ${
                                   isCommentVisible 
-                                    ? 'bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 border-2 border-orange-200 shadow-lg' 
-                                    : 'bg-gray-100 border-2 border-gray-200'
+                                    ? 'bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 text-gray-900 border border-orange-200' 
+                                    : 'blur-sm select-none bg-gray-100 text-gray-400 border border-gray-200'
                                 }`}
                               >
-                                <div 
-                                  className={`text-sm font-medium leading-relaxed transition-all duration-300 ${
-                                    isCommentVisible 
-                                      ? 'text-gray-900' 
-                                      : 'blur-md select-none text-gray-400'
-                                  }`}
-                                >
-                                  {riskComments.split('\n').map((line, idx) => (
-                                    <div key={idx} className="flex items-start gap-2 mb-2 last:mb-0">
-                                      <span className="text-lg leading-none mt-0.5">{line.split(':')[0]}</span>
-                                      <span className="flex-1">{line.split(':').slice(1).join(':')}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                                
-                                {!isCommentVisible && (
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-md">
-                                      <p className="text-xs font-semibold text-gray-600">Натисніть "Показати"</p>
-                                    </div>
-                                  </div>
-                                )}
+                                {riskComments}
                               </div>
-                              
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleCommentVisibility(match.id)}
-                                className={`w-full h-9 px-4 text-sm flex items-center justify-center gap-2 rounded-xl font-semibold transition-all shadow-sm ${
+                                className={`h-7 px-3 text-xs flex items-center gap-1.5 self-start rounded-full font-semibold transition-all ${
                                   isCommentVisible
-                                    ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 hover:shadow-md'
-                                    : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-md'
+                                    ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600'
+                                    : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
                                 }`}
                               >
                                 {isCommentVisible ? (
                                   <>
-                                    <EyeOff className="h-4 w-4" />
+                                    <EyeOff className="h-3.5 w-3.5" />
                                     Приховати
                                   </>
                                 ) : (
                                   <>
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-3.5 w-3.5" />
                                     Показати
                                   </>
                                 )}
                               </Button>
                             </div>
                           ) : (
-                            <div className="text-xs text-gray-400 text-center py-2">—</div>
+                            <div className="text-xs text-gray-400">—</div>
                           )}
                         </td>
                         <td className="p-4 text-center">
