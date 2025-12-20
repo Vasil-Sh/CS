@@ -220,8 +220,16 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       return;
     }
 
-    if (!formData.team1 || !formData.team2 || !formData.betType || !formData.selection || !formData.odds) {
-      toast.error('Заповніть всі поля події перед додаванням');
+    // Перевірка обов'язкових полів з детальними підказками
+    const missingFields = [];
+    if (!formData.team1) missingFields.push('Команда 1');
+    if (!formData.team2) missingFields.push('Команда 2');
+    if (!formData.betType) missingFields.push('Тип ставки');
+    if (!formData.selection) missingFields.push('Вибір');
+    if (!formData.odds) missingFields.push('Коефіцієнт');
+
+    if (missingFields.length > 0) {
+      toast.error(`Заповніть наступні поля: ${missingFields.join(', ')}`);
       return;
     }
 
@@ -321,13 +329,13 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         const totalOdds = calculateTotalExpressOdds();
         finalOdds = totalOdds;
         
-        // Формуємо рядок з усіма подіями експресу
+        // Формуємо компактний рядок з усіма подіями експресу
         const eventsString = expressEvents.map((event, index) => 
-          `${index + 1}. ${event.match} - ${event.betType} (${event.selection}) @${event.odds}`
-        ).join('\n');
+          `${index + 1}. ${event.match} | ${event.betType}: ${event.selection} @${event.odds}`
+        ).join(' • ');
         
-        betTypeWithCategory = `Експрес (${expressEvents.length} подій)\n${eventsString}`;
-        matchName = `Експрес: ${expressEvents.length} подій`;
+        betTypeWithCategory = `Експрес ${expressEvents.length}x | ${eventsString}`;
+        matchName = `Експрес ${expressEvents.length}x`;
       } else {
         betTypeWithCategory = `${formData.betType} - ${formData.selection}`;
         finalOdds = parseFloat(formData.odds);
@@ -338,10 +346,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         date: formData.date,
         match: matchName,
         team1: formData.betCategory === 'Експрес' ? 'Експрес' : formData.team1,
-        team2: formData.betCategory === 'Експрес' ? `${expressEvents.length} подій` : formData.team2,
+        team2: formData.betCategory === 'Експрес' ? `${expressEvents.length}x` : formData.team2,
         tournament: formData.betCategory === 'Експрес' ? 'Експрес' : formData.tournament,
         format: formData.betCategory === 'Експрес' ? `${expressEvents.length}x` : formData.format,
-        matchUrl: formData.matchUrl,
+        matchUrl: formData.matchUrl || '',
         betType: betTypeWithCategory,
         odds: finalOdds,
         amount: stakeInUAH,
@@ -466,7 +474,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         </CardTitle>
                         <div className="flex items-center gap-2">
                           <Badge className="bg-purple-600 text-white border-0 rounded-full">
-                            Загальний коеф: {totalExpressOdds.toFixed(2)}
+                            Коеф: {totalExpressOdds.toFixed(2)}
                           </Badge>
                           <Button
                             type="button"
@@ -491,7 +499,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               <span className="font-medium text-gray-900 text-sm">{event.match}</span>
                             </div>
                             <div className="text-xs text-gray-600">
-                              {event.betType} - {event.selection}
+                              {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
                             </div>
                             <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
                               @{event.odds}
@@ -530,7 +538,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                 <div>
                   <Label htmlFor="matchUrl" className="text-gray-700 font-medium">
-                    {formData.betCategory === 'Експрес' ? 'HLTV URL матчу (для події)' : 'HLTV URL матчу'}
+                    {formData.betCategory === 'Експрес' ? 'HLTV URL матчу (необов\'язково)' : 'HLTV URL матчу (необов\'язково)'}
                   </Label>
                   <div className="flex gap-2">
                     <Input
@@ -576,10 +584,36 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     {formData.betCategory === 'Експрес' ? 'Деталі події' : 'Деталі ставки'}
                   </h3>
                   
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="team1" className="text-gray-700 font-medium">Команда 1 *</Label>
+                      <Input
+                        id="team1"
+                        value={formData.team1}
+                        onChange={(e) => setFormData({...formData, team1: e.target.value})}
+                        placeholder="NAVI"
+                        required={formData.betCategory === 'Експрес'}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="team2" className="text-gray-700 font-medium">Команда 2 *</Label>
+                      <Input
+                        id="team2"
+                        value={formData.team2}
+                        onChange={(e) => setFormData({...formData, team2: e.target.value})}
+                        placeholder="G2"
+                        required={formData.betCategory === 'Експрес'}
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="betType" className="text-gray-700 font-medium">Тип ставки</Label>
-                      <Select value={formData.betType} onValueChange={(value) => setFormData({...formData, betType: value})}>
+                      <Label htmlFor="betType" className="text-gray-700 font-medium">Тип ставки *</Label>
+                      <Select value={formData.betType} onValueChange={(value) => setFormData({...formData, betType: value})} required>
                         <SelectTrigger className="rounded-xl">
                           <SelectValue placeholder="Оберіть тип ставки" />
                         </SelectTrigger>
@@ -596,19 +630,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     </div>
                     
                     <div>
-                      <Label htmlFor="selection" className="text-gray-700 font-medium">Вибір</Label>
+                      <Label htmlFor="selection" className="text-gray-700 font-medium">Вибір *</Label>
                       <Input
                         id="selection"
                         value={formData.selection}
                         onChange={(e) => setFormData({...formData, selection: e.target.value})}
                         placeholder="NAVI, Over 2.5, +1.5..."
-                        required={formData.betCategory === 'Ординар'}
+                        required
                         className="rounded-xl"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="odds" className="text-gray-700 font-medium">Коефіцієнт</Label>
+                      <Label htmlFor="odds" className="text-gray-700 font-medium">Коефіцієнт *</Label>
                       <Input
                         id="odds"
                         type="number"
@@ -617,7 +651,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         value={formData.odds}
                         onChange={(e) => setFormData({...formData, odds: e.target.value})}
                         placeholder="1.65"
-                        required={formData.betCategory === 'Ординар'}
+                        required
                         className="rounded-xl"
                       />
                     </div>
@@ -855,30 +889,41 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-green-100">
-              <div className="flex items-center gap-3">
+            <div className="p-4 bg-white rounded-2xl border border-green-100 space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-blue-600" />
                   <span className="font-medium text-gray-900">{lastAddedBet.match}</span>
                 </div>
-                <Badge className="rounded-full bg-gray-100 text-gray-700 border-0">
-                  {lastAddedBet.betType.includes('Експрес') ? `Експрес ${lastAddedBet.format}` : lastAddedBet.betType}
+                <span className="text-sm text-gray-600">{lastAddedBet.date}</span>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="rounded-full bg-purple-100 text-purple-700 border-0">
+                  {lastAddedBet.format}
                 </Badge>
-                <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{lastAddedBet.format}</Badge>
                 {lastAddedBet.currency && (
-                  <Badge className="rounded-full bg-purple-100 text-purple-700 border-0">
+                  <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">
                     {lastAddedBet.currency}
                   </Badge>
                 )}
+                <Badge className="rounded-full bg-yellow-100 text-yellow-700 border-0">Очікується</Badge>
               </div>
               
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-gray-600 font-medium">{lastAddedBet.date}</span>
-                <span className="font-medium text-gray-900">
-                  {lastAddedBet.currency === 'USD' ? '$' : '₴'}{lastAddedBet.originalAmount}
-                </span>
-                <span className="text-gray-600">@{lastAddedBet.odds.toFixed(2)}</span>
-                <Badge className="rounded-full bg-yellow-100 text-yellow-700 border-0">Очікується</Badge>
+              {lastAddedBet.betType.includes('Експрес') && (
+                <div className="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                  <p className="text-xs text-purple-900 font-medium mb-1">Події експресу:</p>
+                  <p className="text-xs text-purple-700 leading-relaxed">{lastAddedBet.betType}</p>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="font-medium text-gray-900">
+                    {lastAddedBet.currency === 'USD' ? '$' : '₴'}{lastAddedBet.originalAmount}
+                  </span>
+                  <span className="text-gray-600">@{lastAddedBet.odds.toFixed(2)}</span>
+                </div>
                 <span className="text-green-600 font-semibold">
                   +{((lastAddedBet.odds - 1) * lastAddedBet.originalAmount).toFixed(2)} {lastAddedBet.currency === 'USD' ? '$' : '₴'}
                 </span>

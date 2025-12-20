@@ -271,56 +271,71 @@ export default function BettingHistory() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedBets.map((bet, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                      <td className="p-3 text-sm text-gray-900">{bet.date}</td>
-                      <td className="p-3">
-                        <div className="font-medium text-gray-900">{bet.match || `${bet.team1} vs ${bet.team2}`}</div>
-                        <Badge className="text-xs mt-1 rounded-full bg-gray-100 text-gray-700 border-0">{bet.format}</Badge>
-                      </td>
-                      <td className="p-3">
-                        <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{bet.betType}</Badge>
-                      </td>
-                      <td className="p-3 font-medium text-gray-900">₴{bet.amount}</td>
-                      <td className="p-3 font-medium text-gray-900">{bet.odds}</td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          {bet.result === 'Win' ? (
-                            <Trophy className="h-4 w-4 text-green-600" />
-                          ) : bet.result === 'Loss' ? (
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-blue-600" />
-                          )}
-                          <Badge 
-                            className={`rounded-full border-0 ${
-                              bet.result === 'Win' 
-                                ? 'bg-green-100 text-green-700' 
-                                : bet.result === 'Loss' 
-                                ? 'bg-red-100 text-red-700' 
-                                : 'bg-blue-100 text-blue-700'
-                            }`}
-                          >
-                            {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
+                  {sortedBets.map((bet, index) => {
+                    const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
+                    const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
+                    
+                    return (
+                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                        <td className="p-3 text-sm text-gray-900">{bet.date}</td>
+                        <td className="p-3">
+                          <div className="font-medium text-gray-900">{displayMatch}</div>
+                          <Badge className="text-xs mt-1 rounded-full bg-gray-100 text-gray-700 border-0">
+                            {bet.format}
                           </Badge>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        {bet.profit !== undefined && (
-                          <div className="flex items-center gap-1">
-                            {bet.profit >= 0 ? (
-                              <TrendingUp className="h-4 w-4 text-green-600" />
+                        </td>
+                        <td className="p-3">
+                          {isExpress ? (
+                            <Badge className="rounded-full bg-purple-100 text-purple-700 border-0">
+                              Експрес {bet.format}
+                            </Badge>
+                          ) : (
+                            <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">
+                              {bet.betType.split(' - ')[0]}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="p-3 font-medium text-gray-900">₴{bet.amount}</td>
+                        <td className="p-3 font-medium text-gray-900">{bet.odds.toFixed(2)}</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            {bet.result === 'Win' ? (
+                              <Trophy className="h-4 w-4 text-green-600" />
+                            ) : bet.result === 'Loss' ? (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
                             ) : (
-                              <TrendingDown className="h-4 w-4 text-red-600" />
+                              <Clock className="h-4 w-4 text-blue-600" />
                             )}
-                            <span className={`font-medium ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
-                            </span>
+                            <Badge 
+                              className={`rounded-full border-0 ${
+                                bet.result === 'Win' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : bet.result === 'Loss' 
+                                  ? 'bg-red-100 text-red-700' 
+                                  : 'bg-blue-100 text-blue-700'
+                              }`}
+                            >
+                              {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
+                            </Badge>
                           </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="p-3">
+                          {bet.profit !== undefined && (
+                            <div className="flex items-center gap-1">
+                              {bet.profit >= 0 ? (
+                                <TrendingUp className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4 text-red-600" />
+                              )}
+                              <span className={`font-medium ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
+                              </span>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
