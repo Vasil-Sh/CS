@@ -34,12 +34,46 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   // Перевірка чи це експрес
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
   
-  // Для експресу витягуємо інформацію
-  let expressEvents: string[] = [];
+  // Для експресу витягуємо інформацію та парсимо події
+  interface ParsedEvent {
+    number: string;
+    match: string;
+    betType: string;
+    selection: string;
+    odds: string;
+  }
+  
+  let parsedEvents: ParsedEvent[] = [];
+  
   if (isExpress && bet.betType.includes('|')) {
     // Формат: "Експрес 2x | 1. TEAM1 vs TEAM2 | Type: Selection @odds • 2. ..."
-    const parts = bet.betType.split('|').slice(1); // Пропускаємо "Експрес 2x"
-    expressEvents = parts.map(part => part.trim());
+    const fullString = bet.betType.split('|').slice(1).join('|').trim();
+    const eventStrings = fullString.split('•').map(e => e.trim());
+    
+    parsedEvents = eventStrings.map(eventStr => {
+      // Парсимо: "1. INNER CIRCLE vs FURIA | Match Winner: FURIA @1.22"
+      const parts = eventStr.split('|').map(p => p.trim());
+      
+      if (parts.length >= 2) {
+        const matchPart = parts[0]; // "1. INNER CIRCLE vs FURIA"
+        const betPart = parts[1]; // "Match Winner: FURIA @1.22"
+        
+        // Витягуємо номер та матч
+        const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
+        const number = numberMatch ? numberMatch[1] : '';
+        const match = numberMatch ? numberMatch[2] : matchPart;
+        
+        // Витягуємо тип ставки, вибір та коефіцієнт
+        const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
+        const betType = betMatch ? betMatch[1] : '';
+        const selection = betMatch ? betMatch[2] : '';
+        const odds = betMatch ? betMatch[3] : '';
+        
+        return { number, match, betType, selection, odds };
+      }
+      
+      return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
+    });
   }
 
   // Extract selection from betType for regular bets
@@ -90,29 +124,75 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           </div>
 
           {/* Express Events or Regular Selection */}
-          {isExpress && expressEvents.length > 0 ? (
-            <div className={`p-4 rounded-2xl backdrop-blur-sm border space-y-2 ${
+          {isExpress && parsedEvents.length > 0 ? (
+            <div className={`rounded-2xl backdrop-blur-sm border overflow-hidden ${
               isWin 
                 ? 'bg-green-50/80 border-green-200' 
                 : isLoss
                 ? 'bg-red-50/80 border-red-200'
                 : 'bg-purple-50/80 border-purple-200'
             }`}>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                {isWin && <CheckCircle2 className="h-5 w-5 text-green-600" />}
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className={`flex items-center justify-center gap-2 py-3 px-4 ${
+                isWin 
+                  ? 'bg-green-100/50' 
+                  : isLoss
+                  ? 'bg-red-100/50'
+                  : 'bg-purple-100/50'
+              }`}>
+                {isWin && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                   Експрес {bet.format}
                 </p>
               </div>
-              {expressEvents.map((event, index) => (
-                <div key={index} className="text-sm">
-                  <p className={`font-medium ${
-                    isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-purple-700'
+              
+              <div className="p-4 space-y-3">
+                {parsedEvents.map((event, index) => (
+                  <div key={index} className={`p-3 rounded-xl border ${
+                    isWin 
+                      ? 'bg-white/60 border-green-200' 
+                      : isLoss
+                      ? 'bg-white/60 border-red-200'
+                      : 'bg-white/60 border-purple-200'
                   }`}>
-                    {event}
-                  </p>
-                </div>
-              ))}
+                    <div className="flex items-start gap-2 mb-2">
+                      <Badge className={`rounded-full text-xs font-bold ${
+                        isWin 
+                          ? 'bg-green-600 text-white' 
+                          : isLoss
+                          ? 'bg-red-600 text-white'
+                          : 'bg-purple-600 text-white'
+                      } border-0`}>
+                        #{event.number}
+                      </Badge>
+                      <p className="text-sm font-semibold text-gray-900 leading-tight flex-1">
+                        {event.match}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1 ml-8">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                        {event.betType}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className={`text-sm font-bold ${
+                          isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-purple-700'
+                        }`}>
+                          {event.selection}
+                        </p>
+                        <Badge className={`text-xs font-semibold rounded-full ${
+                          isWin 
+                            ? 'bg-green-100 text-green-700' 
+                            : isLoss
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-purple-100 text-purple-700'
+                        } border-0`}>
+                          @{event.odds}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : selection && (
             <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
