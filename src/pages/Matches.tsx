@@ -24,7 +24,8 @@ import {
   Shield,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  MousePointerClick
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -635,21 +636,27 @@ export default function Matches() {
                     <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Матч</th>
                     <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Фаворит</th>
                     <th 
-                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors"
+                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors group"
                       onClick={() => toggleSort('confidence')}
                     >
                       <div className="flex items-center justify-center gap-1">
                         AI %
                         <ArrowUpDown className="h-3.5 w-3.5" />
+                        <div className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MousePointerClick className="h-3 w-3 text-blue-600" />
+                        </div>
                       </div>
                     </th>
                     <th 
-                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors"
+                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors group"
                       onClick={() => toggleSort('risk')}
                     >
                       <div className="flex items-center justify-center gap-1">
                         Ризик
                         <ArrowUpDown className="h-3.5 w-3.5" />
+                        <div className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MousePointerClick className="h-3 w-3 text-blue-600" />
+                        </div>
                       </div>
                     </th>
                     <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Коефіцієнти</th>
@@ -695,17 +702,18 @@ export default function Matches() {
                         </td>
                         <td className="p-4 text-center">
                           <Badge 
-                            className={`font-bold px-3.5 py-1.5 rounded-full border-0 text-sm ${
+                            className={`font-bold px-3.5 py-1.5 rounded-full border-0 text-sm cursor-pointer hover:scale-105 transition-transform ${
                               match.aiConfidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' :
                               match.aiConfidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 
                               'bg-gradient-to-r from-gray-400 to-gray-600 text-white'
                             }`}
+                            title="Клікніть для сортування"
                           >
                             {match.aiConfidence}%
                           </Badge>
                         </td>
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform" title="Клікніть для сортування">
                             <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-sm`} />
                             <span className="text-sm font-bold text-gray-900">{match.risk}%</span>
                           </div>
@@ -751,7 +759,7 @@ export default function Matches() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleCommentVisibility(match.id)}
-                                className="h-7 px-3 text-xs flex items-center gap-1.5 self-start rounded-full font-semibold hover:bg-blue-100"
+                                className="h-7 px-3 text-xs flex items-center gap-1.5 self-start rounded-full font-semibold hover:bg-blue-100 transition-all hover:scale-105"
                               >
                                 {isCommentVisible ? (
                                   <>
