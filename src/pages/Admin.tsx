@@ -10,7 +10,9 @@ import {
   Calendar,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
 import {
   Table,
@@ -29,6 +31,7 @@ interface User {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  daysUntilExpiry?: number;
 }
 
 const ADMIN_USERNAME = 'super_gus23_7482';
@@ -52,7 +55,7 @@ export default function Admin() {
     fetchUsers();
   }, [currentUser, navigate]);
 
-  const isSubscriptionActive = (endDateStr: string): boolean => {
+  const getDaysUntilExpiry = (endDateStr: string): number => {
     try {
       const [day, month, year] = endDateStr.split('/').map(Number);
       const endDate = new Date(year, month - 1, day);
@@ -61,10 +64,18 @@ export default function Admin() {
       today.setHours(0, 0, 0, 0);
       endDate.setHours(23, 59, 59, 999);
       
-      return endDate >= today;
+      const diffTime = endDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return diffDays;
     } catch (err) {
-      return false;
+      return -1;
     }
+  };
+
+  const isSubscriptionActive = (endDateStr: string): boolean => {
+    const daysLeft = getDaysUntilExpiry(endDateStr);
+    return daysLeft >= 0;
   };
 
   const fetchUsers = async () => {
@@ -92,6 +103,8 @@ export default function Admin() {
           const startDate = matches[3].replace(/"/g, '').trim();
           const endDate = matches[4].replace(/"/g, '').trim();
           
+          const daysLeft = getDaysUntilExpiry(endDate);
+          
           return {
             telegram,
             username,
@@ -99,6 +112,7 @@ export default function Admin() {
             startDate,
             endDate,
             isActive: isSubscriptionActive(endDate),
+            daysUntilExpiry: daysLeft,
           };
         })
         .filter((user): user is User => user !== null);
@@ -115,6 +129,43 @@ export default function Admin() {
 
   const activeUsers = users.filter(u => u.isActive).length;
   const inactiveUsers = users.filter(u => !u.isActive).length;
+  const expiringUsers = users.filter(u => u.isActive && u.daysUntilExpiry !== undefined && u.daysUntilExpiry <= 3 && u.daysUntilExpiry >= 0);
+
+  const getExpiryBadge = (user: User) => {
+    if (!user.isActive) {
+      return (
+        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 px-3 py-1 rounded-full border-0">
+          <XCircle className="mr-1 h-3 w-3" />
+          Закінчилась
+        </Badge>
+      );
+    }
+
+    if (user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0) {
+      return (
+        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:bg-gradient-to-r hover:from-orange-600 hover:to-red-600 px-3 py-1 rounded-full border-0 shadow-sm animate-pulse">
+          <AlertTriangle className="mr-1 h-3 w-3" />
+          {user.daysUntilExpiry === 0 ? 'Закінчується сьогодні!' : `${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
+        </Badge>
+      );
+    }
+
+    if (user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 7) {
+      return (
+        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white hover:bg-gradient-to-r hover:from-yellow-500 hover:to-orange-500 px-3 py-1 rounded-full border-0 shadow-sm">
+          <Bell className="mr-1 h-3 w-3" />
+          {user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-3 py-1 rounded-full border-0">
+        <CheckCircle className="mr-1 h-3 w-3" />
+        Активна ({user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry && user.daysUntilExpiry < 5 ? 'і' : 'ів'})
+      </Badge>
+    );
+  };
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -156,8 +207,31 @@ export default function Admin() {
         </Alert>
       )}
 
+      {/* Expiring Subscriptions Alert */}
+      {expiringUsers.length > 0 && (
+        <Alert className="rounded-2xl border-0 bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-l-orange-500">
+          <AlertTriangle className="h-5 w-5 text-orange-600" />
+          <AlertDescription className="font-medium text-gray-900 ml-2">
+            <div className="font-bold text-orange-700 mb-2">
+              ⚠️ Увага! {expiringUsers.length} підпис{expiringUsers.length === 1 ? 'ка' : expiringUsers.length < 5 ? 'ки' : 'ок'} закінчу{expiringUsers.length === 1 ? 'ється' : 'ються'} протягом 3 днів:
+            </div>
+            <ul className="space-y-1 mt-2">
+              {expiringUsers.map((user, idx) => (
+                <li key={idx} className="text-sm text-gray-700">
+                  <span className="font-semibold">{user.telegram}</span> ({user.username}) - 
+                  <span className="font-bold text-orange-600 ml-1">
+                    {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : `залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
+                  </span>
+                  <span className="text-gray-500 ml-1">(до {user.endDate})</span>
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -179,6 +253,18 @@ export default function Admin() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-green-600 tracking-tight">{activeUsers}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Закінчуються (≤3 дні)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold text-orange-600 tracking-tight">{expiringUsers.length}</div>
           </CardContent>
         </Card>
 
@@ -239,7 +325,14 @@ export default function Admin() {
                   </TableRow>
                 ) : (
                   users.map((user, index) => (
-                    <TableRow key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                    <TableRow 
+                      key={index} 
+                      className={`border-b border-gray-100 hover:bg-gray-50/50 transition-colors ${
+                        user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
+                          ? 'bg-orange-50/30'
+                          : ''
+                      }`}
+                    >
                       <TableCell className="font-medium text-gray-900">{user.telegram}</TableCell>
                       <TableCell className="text-gray-700">
                         {user.username}
@@ -250,17 +343,7 @@ export default function Admin() {
                       <TableCell className="text-gray-700">{user.startDate}</TableCell>
                       <TableCell className="text-gray-700">{user.endDate}</TableCell>
                       <TableCell>
-                        {user.isActive ? (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-3 py-1 rounded-full border-0">
-                            <CheckCircle className="mr-1 h-3 w-3" />
-                            Активна
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-red-100 text-red-700 hover:bg-red-100 px-3 py-1 rounded-full border-0">
-                            <XCircle className="mr-1 h-3 w-3" />
-                            Закінчилась
-                          </Badge>
-                        )}
+                        {getExpiryBadge(user)}
                       </TableCell>
                     </TableRow>
                   ))
