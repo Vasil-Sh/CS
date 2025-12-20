@@ -2,344 +2,332 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ExternalLink, TrendingUp, TrendingDown, Filter, RefreshCw, Search, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
-import { toast } from 'sonner';
+import { 
+  Trophy, 
+  AlertTriangle, 
+  Clock, 
+  Filter,
+  ArrowUpDown,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  TrendingDown
+} from 'lucide-react';
 
-interface BettingHistoryProps {
-  refreshTrigger?: number;
+interface Bet {
+  date: string;
+  match?: string;
+  team1?: string;
+  team2?: string;
+  betType: string;
+  format: string;
+  amount: number;
+  odds: number;
+  result: 'Win' | 'Loss' | 'Pending';
+  profit?: number;
+  roi?: number;
 }
 
-export default function BettingHistory({ refreshTrigger }: BettingHistoryProps) {
-  const [records, setRecords] = useState<any[]>([]);
+export default function BettingHistory() {
+  const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filteredRecords, setFilteredRecords] = useState<any[]>([]);
   
-  // Фільтри
-  const [filters, setFilters] = useState({
-    search: '',
-    result: 'all',
-    dateFrom: '',
-    dateTo: '',
-    betType: 'all'
-  });
+  // Filters
+  const [resultFilter, setResultFilter] = useState<'all' | 'Win' | 'Loss' | 'Pending'>('all');
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'week' | 'month' | 'quarter'>('all');
+  const [betTypeFilter, setBetTypeFilter] = useState<'all' | string>('all');
+  
+  // Sorting
+  const [sortBy, setSortBy] = useState<'date' | 'profit' | 'odds'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
-    loadRecords();
-  }, [refreshTrigger]);
+    loadBets();
+  }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [records, filters]);
-
-  const loadRecords = async () => {
+  const loadBets = async () => {
     try {
       setLoading(true);
       const data = await realGoogleSheetsService.fetchUSDTData();
-      setRecords(data.reverse()); // Показуємо найновіші спочатку
+      setBets(data);
     } catch (error) {
-      console.error('Error loading records:', error);
-      toast.error('Помилка при завантаженні історії ставок');
+      console.error('Error loading bets:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...records];
+  // Get unique bet types
+  const betTypes = Array.from(new Set(bets.map(bet => bet.betType)));
 
-    // Пошук по назві матчу
-    if (filters.search) {
-      filtered = filtered.filter(record => 
-        record.match?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        record.team1?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        record.team2?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        record.tournament?.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
-
-    // Фільтр по результату
-    if (filters.result !== 'all') {
-      filtered = filtered.filter(record => {
-        if (filters.result === 'pending') return record.result === 'Pending';
-        if (filters.result === 'win') return record.result === 'Win';
-        if (filters.result === 'loss') return record.result === 'Loss';
-        return true;
-      });
-    }
-
-    // Фільтр по типу ставки
-    if (filters.betType !== 'all') {
-      filtered = filtered.filter(record => 
-        record.betType?.toLowerCase().includes(filters.betType.toLowerCase())
-      );
-    }
-
-    // Фільтр по датах
-    if (filters.dateFrom) {
-      filtered = filtered.filter(record => 
-        new Date(record.date) >= new Date(filters.dateFrom)
-      );
-    }
-    if (filters.dateTo) {
-      filtered = filtered.filter(record => 
-        new Date(record.date) <= new Date(filters.dateTo)
-      );
-    }
-
-    setFilteredRecords(filtered);
-  };
-
-  const updateBetResult = async (betIndex: number, result: 'Win' | 'Loss') => {
-    try {
-      const bet = records[betIndex];
-      const profit = result === 'Win' ? (bet.odds - 1) * bet.amount : -bet.amount;
-      const roi = (profit / bet.amount) * 100;
-
-      await realGoogleSheetsService.updateBetResult(bet, result, profit, roi);
+  // Apply filters
+  const filteredBets = bets.filter(bet => {
+    // Result filter
+    if (resultFilter !== 'all' && bet.result !== resultFilter) return false;
+    
+    // Period filter
+    if (periodFilter !== 'all') {
+      const betDate = new Date(bet.date);
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - betDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      toast.success(`Ставка позначена як ${result === 'Win' ? 'виграшна' : 'програшна'}`);
-      
-      // Перезавантажуємо дані
-      loadRecords();
-    } catch (error) {
-      toast.error('Помилка при оновленні результату ставки');
-      console.error(error);
+      if (periodFilter === 'week' && diffDays > 7) return false;
+      if (periodFilter === 'month' && diffDays > 30) return false;
+      if (periodFilter === 'quarter' && diffDays > 90) return false;
+    }
+    
+    // Bet type filter
+    if (betTypeFilter !== 'all' && bet.betType !== betTypeFilter) return false;
+    
+    return true;
+  });
+
+  // Apply sorting
+  const sortedBets = [...filteredBets].sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortBy) {
+      case 'date':
+        comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+        break;
+      case 'profit':
+        comparison = (a.profit || 0) - (b.profit || 0);
+        break;
+      case 'odds':
+        comparison = a.odds - b.odds;
+        break;
+    }
+    
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
+  const toggleSort = (column: 'date' | 'profit' | 'odds') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
     }
   };
 
-  const getResultColor = (result: string) => {
-    switch (result) {
-      case 'Win': return 'bg-green-100 text-green-800';
-      case 'Loss': return 'bg-red-100 text-red-800';
-      case 'Pending': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getResultText = (result: string) => {
-    switch (result) {
-      case 'Win': return 'Виграш';
-      case 'Loss': return 'Програш';
-      case 'Pending': return 'Очікується';
-      default: return result;
-    }
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      search: '',
-      result: 'all',
-      dateFrom: '',
-      dateTo: '',
-      betType: 'all'
-    });
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Завантаження історії ставок...</div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Calculate stats for filtered bets
+  const completedBets = filteredBets.filter(bet => bet.result !== 'Pending');
+  const totalProfit = completedBets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
+  const winRate = completedBets.length > 0 
+    ? (completedBets.filter(bet => bet.result === 'Win').length / completedBets.length * 100).toFixed(1)
+    : '0';
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Історія ставок
-            </span>
-            <Button onClick={loadRecords} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Оновити
-            </Button>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Фільтри та сортування
           </CardTitle>
         </CardHeader>
-        
         <CardContent>
-          {/* Фільтри */}
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-4 w-4" />
-              <span className="font-medium">Фільтри</span>
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Очистити
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Пошук по матчу..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({...filters, search: e.target.value})}
-                  className="pl-10"
-                />
-              </div>
-              
-              <Select value={filters.result} onValueChange={(value) => setFilters({...filters, result: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Результат" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium">Результат:</label>
+              <Select value={resultFilter} onValueChange={(value: 'all' | 'Win' | 'Loss' | 'Pending') => setResultFilter(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Всі результати</SelectItem>
-                  <SelectItem value="pending">Очікується</SelectItem>
-                  <SelectItem value="win">Виграш</SelectItem>
-                  <SelectItem value="loss">Програш</SelectItem>
+                  <SelectItem value="all">Всі</SelectItem>
+                  <SelectItem value="Win">Виграш</SelectItem>
+                  <SelectItem value="Loss">Програш</SelectItem>
+                  <SelectItem value="Pending">Очікується</SelectItem>
                 </SelectContent>
               </Select>
-              
-              <Select value={filters.betType} onValueChange={(value) => setFilters({...filters, betType: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Тип ставки" />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium">Період:</label>
+              <Select value={periodFilter} onValueChange={(value: 'all' | 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Весь час</SelectItem>
+                  <SelectItem value="week">Останній тиждень</SelectItem>
+                  <SelectItem value="month">Останній місяць</SelectItem>
+                  <SelectItem value="quarter">Останній квартал</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium">Тип ставки:</label>
+              <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Всі типи</SelectItem>
-                  <SelectItem value="match winner">Переможець матчу</SelectItem>
-                  <SelectItem value="map winner">Переможець карти</SelectItem>
-                  <SelectItem value="total">Тотал</SelectItem>
-                  <SelectItem value="handicap">Фора</SelectItem>
+                  {betTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              
-              <Input
-                type="date"
-                placeholder="Від дати"
-                value={filters.dateFrom}
-                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
-              />
-              
-              <Input
-                type="date"
-                placeholder="До дати"
-                value={filters.dateTo}
-                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
-              />
             </div>
             
-            <div className="text-sm text-gray-600">
-              Показано {filteredRecords.length} з {records.length} ставок
+            <div>
+              <label className="text-sm font-medium">Сортування:</label>
+              <Select value={sortBy} onValueChange={(value: 'date' | 'profit' | 'odds') => setSortBy(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">За датою</SelectItem>
+                  <SelectItem value="profit">За прибутком</SelectItem>
+                  <SelectItem value="odds">За коефіцієнтом</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Таблиця */}
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Дата</TableHead>
-                  <TableHead>Матч</TableHead>
-                  <TableHead>Турнір</TableHead>
-                  <TableHead>Тип ставки</TableHead>
-                  <TableHead>Коеф.</TableHead>
-                  <TableHead>Сума</TableHead>
-                  <TableHead>Результат</TableHead>
-                  <TableHead>Профіт</TableHead>
-                  <TableHead>ROI</TableHead>
-                  <TableHead>Дії</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRecords.map((record, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{record.date}</TableCell>
-                    <TableCell className="font-medium">
-                      <div>
-                        <div>{record.match || `${record.team1} vs ${record.team2}`}</div>
-                        {record.format && (
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {record.format}
+      {/* Filtered Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Відфільтровано ставок</p>
+                <p className="text-2xl font-bold">{filteredBets.length}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Win Rate</p>
+                <p className="text-2xl font-bold text-green-600">{winRate}%</p>
+              </div>
+              <Trophy className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Профіт</p>
+                <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
+                </p>
+              </div>
+              <DollarSign className="h-8 w-8 text-gray-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bets Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Історія ставок</span>
+            <Badge variant="secondary">{sortedBets.length} записів</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Завантаження...</p>
+            </div>
+          ) : sortedBets.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('date')}>
+                      <div className="flex items-center gap-1">
+                        Дата
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th className="text-left p-3">Матч</th>
+                    <th className="text-left p-3">Тип</th>
+                    <th className="text-left p-3">Сума</th>
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('odds')}>
+                      <div className="flex items-center gap-1">
+                        Коефіцієнт
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th className="text-left p-3">Результат</th>
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('profit')}>
+                      <div className="flex items-center gap-1">
+                        Профіт
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedBets.map((bet, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="p-3 text-sm">{bet.date}</td>
+                      <td className="p-3">
+                        <div className="font-medium">{bet.match || `${bet.team1} vs ${bet.team2}`}</div>
+                        <Badge variant="outline" className="text-xs mt-1">{bet.format}</Badge>
+                      </td>
+                      <td className="p-3">
+                        <Badge variant="secondary">{bet.betType}</Badge>
+                      </td>
+                      <td className="p-3 font-medium">₴{bet.amount}</td>
+                      <td className="p-3 font-medium">{bet.odds}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          {bet.result === 'Win' ? (
+                            <Trophy className="h-4 w-4 text-green-600" />
+                          ) : bet.result === 'Loss' ? (
+                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                          ) : (
+                            <Clock className="h-4 w-4 text-blue-600" />
+                          )}
+                          <Badge 
+                            variant={bet.result === 'Win' ? 'default' : bet.result === 'Loss' ? 'destructive' : 'secondary'}
+                          >
+                            {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
                           </Badge>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        {bet.profit !== undefined && (
+                          <div className="flex items-center gap-1">
+                            {bet.profit >= 0 ? (
+                              <TrendingUp className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <TrendingDown className="h-4 w-4 text-red-600" />
+                            )}
+                            <span className={`font-medium ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
+                            </span>
+                          </div>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {record.tournament}
-                    </TableCell>
-                    <TableCell>{record.betType}</TableCell>
-                    <TableCell>{record.odds}</TableCell>
-                    <TableCell>{record.amount} ₴</TableCell>
-                    <TableCell>
-                      <Badge className={getResultColor(record.result)} variant="secondary">
-                        {getResultText(record.result)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className={record.profit > 0 ? 'text-green-600' : record.profit < 0 ? 'text-red-600' : ''}>
-                      {record.profit !== undefined && record.profit !== 0 ? (
-                        <span>{record.profit > 0 ? '+' : ''}{record.profit} ₴</span>
-                      ) : (
-                        record.result === 'Pending' ? '-' : '0 ₴'
-                      )}
-                    </TableCell>
-                    <TableCell className={record.roi > 0 ? 'text-green-600' : record.roi < 0 ? 'text-red-600' : ''}>
-                      {record.roi !== undefined && record.roi !== 0 ? (
-                        <span>{record.roi > 0 ? '+' : ''}{record.roi.toFixed(1)}%</span>
-                      ) : (
-                        record.result === 'Pending' ? '-' : '0%'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {record.result === 'Pending' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateBetResult(index, 'Win')}
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateBetResult(index, 'Loss')}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {record.matchUrl && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={record.matchUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {filteredRecords.length === 0 && (
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
             <div className="text-center py-8 text-gray-500">
-              {records.length === 0 ? (
-                <>
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Поки що немає записів про ставки</p>
-                  <p className="text-sm">Додайте свою першу ставку, щоб побачити історію</p>
-                </>
-              ) : (
-                <>
-                  <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Немає ставок, що відповідають фільтрам</p>
-                  <p className="text-sm">Спробуйте змінити критерії пошуку</p>
-                </>
-              )}
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p>Немає ставок за обраними фільтрами</p>
             </div>
           )}
         </CardContent>

@@ -4,11 +4,9 @@ import { cn } from '@/lib/utils';
 import { 
   BarChart3, 
   Trophy, 
-  Users, 
-  Target,
+  Wallet,
   Menu,
-  X,
-  Wallet
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -18,11 +16,9 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: 'Аналітика', href: '/', icon: Target },
+  { name: 'Аналітика', href: '/', icon: BarChart3 },
   { name: 'Матчі', href: '/matches', icon: Trophy },
-  { name: 'Аналіз Команд', href: '/teams', icon: Users },
   { name: 'Мої ставки', href: '/my-bets', icon: Wallet },
-  { name: 'Панель управління', href: '/dashboard', icon: BarChart3 },
 ];
 
 export default function Layout({ children }: LayoutProps) {
@@ -59,7 +55,7 @@ export default function Layout({ children }: LayoutProps) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 shadow-sm">
           <div className="flex h-16 shrink-0 items-center">
-            <h1 className="text-xl font-bold text-gray-900">CS2 Analytics Pro</h1>
+            <h1 className="text-xl font-bold text-gray-900">CS2 Betting Analytics</h1>
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -76,7 +72,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Mobile Navigation */}
       <div className="lg:hidden">
         <div className="flex items-center justify-between bg-white px-4 py-4 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">CS2 Analytics</h1>
+          <h1 className="text-lg font-semibold text-gray-900">CS2 Betting</h1>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
@@ -85,7 +81,7 @@ export default function Layout({ children }: LayoutProps) {
             </SheetTrigger>
             <SheetContent side="left" className="w-72">
               <div className="flex h-16 items-center">
-                <h1 className="text-xl font-bold text-gray-900">CS2 Analytics Pro</h1>
+                <h1 className="text-xl font-bold text-gray-900">CS2 Betting Analytics</h1>
               </div>
               <nav className="mt-8">
                 <ul className="space-y-1">

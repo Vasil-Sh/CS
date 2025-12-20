@@ -5,10 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import csharpDataService from '@/services/csharp-data-service';
-import CalendarHeatmap from '@/components/CalendarHeatmap';
 import BalanceChart from '@/components/BalanceChart';
-import KellyCalculator from '@/components/KellyCalculator';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import PredictiveAnalytics from '@/components/PredictiveAnalytics';
@@ -16,37 +15,25 @@ import {
   TrendingUp, 
   TrendingDown, 
   Target, 
-  Award, 
-  BarChart3, 
-  Calendar,
   Trophy,
   DollarSign,
   Percent,
-  Users,
   Filter,
   RefreshCw,
-  Calculator,
-  Shield,
   Download,
-  Brain,
-  GitCompare,
-  Zap,
+  Trash2,
   CheckCircle,
   AlertTriangle,
-  Star,
-  MapPin,
-  Clock,
-  TrendingUp as TrendUp,
-  TrendingDown as TrendDown,
   Wifi,
   WifiOff,
   Database,
-  Crown,
-  Map,
-  Trash2
+  ChevronDown,
+  ChevronUp,
+  Star,
+  BarChart3
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
-import type { Bet, BettingStats, TeamStats, OddsRange, CalendarData, BalanceData, ScatterData } from '@/types/betting';
+import type { Bet, BettingStats, TeamStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 interface TeamRecommendation {
   team: string;
@@ -69,71 +56,6 @@ interface TeamRecommendation {
   };
 }
 
-// Top 3 teams from HLTV ranking
-const topTeams = [
-  {
-    name: 'Spirit',
-    rank: 1,
-    points: 1000,
-    country: 'Росія',
-    logo: '🔥',
-    recentForm: ['W', 'W', 'W', 'L', 'W'],
-    winRate: 79,
-    mapWins: 145,
-    mapLosses: 38
-  },
-  {
-    name: 'FURIA',
-    rank: 2,
-    points: 950,
-    country: 'Бразилія',
-    logo: '⚡',
-    recentForm: ['W', 'L', 'W', 'W', 'W'],
-    winRate: 73,
-    mapWins: 132,
-    mapLosses: 49
-  },
-  {
-    name: 'NAVI',
-    rank: 3,
-    points: 900,
-    country: 'Україна',
-    logo: '🇺🇦',
-    recentForm: ['W', 'W', 'L', 'W', 'W'],
-    winRate: 72,
-    mapWins: 128,
-    mapLosses: 50
-  }
-];
-
-// Popular CS2 maps
-const popularMaps = [
-  {
-    name: 'Mirage',
-    image: '🏜️',
-    playRate: '23.4%',
-    description: 'Найпопулярніша карта в CS2',
-    avgRounds: 28.5,
-    tSideWinRate: 47.2
-  },
-  {
-    name: 'Inferno',
-    image: '🔥',
-    playRate: '19.8%',
-    description: 'Класична карта з вузькими проходами',
-    avgRounds: 29.1,
-    tSideWinRate: 45.8
-  },
-  {
-    name: 'Dust2',
-    image: '🏺',
-    playRate: '18.6%',
-    description: 'Легендарна карта Counter-Strike',
-    avgRounds: 27.9,
-    tSideWinRate: 48.1
-  }
-];
-
 export default function Analytics() {
   const [stats, setStats] = useState<BettingStats>({
     totalBets: 0,
@@ -148,8 +70,11 @@ export default function Analytics() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [recommendations, setRecommendations] = useState<TeamRecommendation[]>([]);
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
+  const [expandedRecommendation, setExpandedRecommendation] = useState<number | null>(null);
+  const [minBetsFilter, setMinBetsFilter] = useState(2);
+  const [topTeamsSortBy, setTopTeamsSortBy] = useState<'profit' | 'winRate'>('profit');
 
-  // Enhanced teams data with C# integration support
+  // Enhanced teams data
   const teams = {
     'Spirit': {
       name: 'Spirit',
@@ -261,7 +186,6 @@ export default function Analytics() {
     try {
       setLoading(true);
       
-      // Try to load data from C# backend first
       const [betsData, analyticsData] = await Promise.all([
         csharpDataService.getBettingData(),
         csharpDataService.getAnalyticsData()
@@ -285,7 +209,6 @@ export default function Analytics() {
     } catch (error) {
       console.error('❌ Error loading analytics from C# backend:', error);
       
-      // Clear all data instead of showing mock data
       setBets([]);
       setStats({
         totalBets: 0,
@@ -301,7 +224,6 @@ export default function Analytics() {
     }
   };
 
-  // Clear all data function
   const clearAllData = () => {
     setBets([]);
     setStats({
@@ -316,7 +238,6 @@ export default function Analytics() {
     console.log('🗑️ All analytics data cleared');
   };
 
-  // Generate recommendation with detailed analysis
   const generateRecommendation = (team1: string, team2: string): TeamRecommendation => {
     const t1 = teams[team1 as keyof typeof teams];
     const t2 = teams[team2 as keyof typeof teams];
@@ -348,7 +269,6 @@ export default function Analytics() {
     let confidence = 50;
     let recommendation: 'strong_bet' | 'moderate_bet' | 'avoid' | 'risky' = 'moderate_bet';
 
-    // Detailed analysis
     const detailedAnalysis = {
       tierComparison: '',
       rankComparison: '',
@@ -454,7 +374,7 @@ export default function Analytics() {
       detailedAnalysis.headToHeadAnalysis = 'Недостатньо даних для H2H аналізу.';
     }
 
-    // Map analysis (if data available)
+    // Map analysis
     if (t1.mapStats && t2.mapStats) {
       const commonMaps = Object.keys(t1.mapStats).filter(map => t2.mapStats[map]);
       commonMaps.forEach(map => {
@@ -531,7 +451,7 @@ export default function Analytics() {
       case 'strong_bet': return <CheckCircle className="h-4 w-4" />;
       case 'moderate_bet': return <Target className="h-4 w-4" />;
       case 'risky': return <AlertTriangle className="h-4 w-4" />;
-      case 'avoid': return <Shield className="h-4 w-4" />;
+      case 'avoid': return <AlertTriangle className="h-4 w-4" />;
       default: return <Target className="h-4 w-4" />;
     }
   };
@@ -546,7 +466,7 @@ export default function Analytics() {
     }
   };
 
-  // Calculate additional metrics
+  // Calculate metrics
   const completedBets = bets.filter((bet: Bet) => bet.result !== 'Pending');
   const winningBets = completedBets.filter((bet: Bet) => bet.result === 'Win');
   const losingBets = completedBets.filter((bet: Bet) => bet.result === 'Loss');
@@ -607,7 +527,7 @@ export default function Analytics() {
     ];
   };
 
-  // Top teams for analytics tab (betting stats only)
+  // Top teams analysis
   const teamAnalysis = (): TeamStats[] => {
     const teamStats: { [key: string]: { bets: number; wins: number; profit: number } } = {};
     
@@ -635,8 +555,8 @@ export default function Analytics() {
         winRate: stats.bets ? (stats.wins / stats.bets * 100).toFixed(1) : '0',
         profit: Math.round(stats.profit * 100) / 100
       }))
-      .filter(t => t.bets >= 2)
-      .sort((a, b) => b.bets - a.bets)
+      .filter(t => t.bets >= minBetsFilter)
+      .sort((a, b) => topTeamsSortBy === 'profit' ? b.profit - a.profit : Number(b.winRate) - Number(a.winRate))
       .slice(0, 10);
   };
 
@@ -662,7 +582,6 @@ export default function Analytics() {
     
     completedBets.forEach((bet: Bet) => {
       const date = new Date(bet.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleDateString('uk-UA', { month: 'long', year: 'numeric' });
       
       if (!monthlyData[monthName]) {
@@ -677,31 +596,9 @@ export default function Analytics() {
     }));
   };
 
-  // Calendar activity
-  const calendarData = (): CalendarData[] => {
-    const dailyData: { [key: string]: { count: number; profit: number } } = {};
-    
-    bets.forEach((bet: Bet) => {
-      const date = new Date(bet.date).toISOString().split('T')[0];
-      if (!dailyData[date]) {
-        dailyData[date] = { count: 0, profit: 0 };
-      }
-      dailyData[date].count++;
-      if (bet.result !== 'Pending') {
-        dailyData[date].profit += bet.profit || 0;
-      }
-    });
-    
-    return Object.entries(dailyData).map(([date, data]) => ({
-      date,
-      count: data.count,
-      profit: Math.round(data.profit * 100) / 100
-    }));
-  };
-
   // Balance over time
   const balanceOverTime = (): BalanceData[] => {
-    const initialBalance = 1000; // Can be made configurable
+    const initialBalance = 1000;
     let runningBalance = initialBalance;
     
     const sortedBets = [...completedBets].sort((a: Bet, b: Bet) => 
@@ -732,7 +629,6 @@ export default function Analytics() {
   };
 
   const exportReport = () => {
-    // Simple export to JSON (can be extended to PDF)
     const reportData = {
       summary: stats,
       bets: completedBets,
@@ -759,7 +655,6 @@ export default function Analytics() {
   const topTeamsData = teamAnalysis();
   const betTypes = betTypeDistribution();
   const monthlyProfit = monthlyProfitData();
-  const heatmapData = calendarData();
   const balanceData = balanceOverTime();
   const scatterData = oddsVsProfitData();
 
@@ -768,10 +663,10 @@ export default function Analytics() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            CS2 Betting Analytics
+            Аналітика
           </h1>
           <p className="text-gray-600">
-            Детальний аналіз вашої беттінг активності з інтеграцією C# backend
+            Детальний аналіз вашої беттінг активності
           </p>
         </div>
         
@@ -786,22 +681,22 @@ export default function Analytics() {
           </Button>
           <Button variant="destructive" onClick={clearAllData} className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
-            Очистити дані
+            Очистити
           </Button>
         </div>
       </div>
 
-      {/* Betting Backend Connection Status */}
+      {/* Backend Connection Status */}
       <Alert className={connectionStatus.connected ? 'border-green-200 bg-green-50' : 'border-yellow-200 bg-yellow-50'}>
         <div className="flex items-center gap-2">
           {connectionStatus.connected ? <Wifi className="h-4 w-4 text-green-600" /> : <WifiOff className="h-4 w-4 text-yellow-600" />}
           <Database className="h-4 w-4" />
         </div>
         <AlertDescription>
-          <strong>Betting Backend Status:</strong> {connectionStatus.environment} 
+          <strong>Backend Status:</strong> {connectionStatus.environment} 
           {connectionStatus.connected ? 
-            ' - З\'єднано з C# SQLite базою даних ставок' : 
-            ' - Немає підключення до бази даних ставок'
+            ' - З\'єднано з C# SQLite базою даних' : 
+            ' - Немає підключення до бази даних'
           }
         </AlertDescription>
       </Alert>
@@ -894,6 +789,36 @@ export default function Analytics() {
           <div className="grid grid-cols-1 gap-6">
             {bets.length > 0 ? (
               <>
+                {/* Date Filter */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Filter className="h-5 w-5" />
+                        Фільтри
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="text-sm font-medium">Період:</label>
+                        <Select value={timeFilter} onValueChange={setTimeFilter}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Весь час</SelectItem>
+                            <SelectItem value="week">Останній тиждень</SelectItem>
+                            <SelectItem value="month">Останній місяць</SelectItem>
+                            <SelectItem value="quarter">Останній квартал</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <BalanceChart data={balanceData} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -935,11 +860,34 @@ export default function Analytics() {
                   </Card>
                 </div>
 
-                {/* Top teams by betting stats only */}
+                {/* Top teams with filters */}
                 {topTeamsData.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Топ-10 команд за кількістю ставок</CardTitle>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Топ-10 команд</span>
+                        <div className="flex gap-2">
+                          <Select value={topTeamsSortBy} onValueChange={(value: 'profit' | 'winRate') => setTopTeamsSortBy(value)}>
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="profit">За профітом</SelectItem>
+                              <SelectItem value="winRate">За Win Rate</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select value={minBetsFilter.toString()} onValueChange={(value) => setMinBetsFilter(Number(value))}>
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">Мін. 2 ставки</SelectItem>
+                              <SelectItem value="5">Мін. 5 ставок</SelectItem>
+                              <SelectItem value="10">Мін. 10 ставок</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -993,33 +941,19 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Аналіз по коефіцієнтах</CardTitle>
+                <CardTitle>ROI & Win Rate по категоріях</CardTitle>
               </CardHeader>
               <CardContent>
                 {bets.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {oddsData.map((range) => (
-                      <div key={range.range} className="p-4 border rounded-lg">
-                        <h3 className="font-semibold mb-2">{range.range}</h3>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Ставок:</span>
-                            <span className="font-medium">{range.count}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Win Rate:</span>
-                            <span className="font-medium">{range.winRate}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Прибуток:</span>
-                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={oddsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="range" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="winRate" fill="#10b981" name="Win Rate %" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-8">
                     <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -1062,6 +996,45 @@ export default function Analytics() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Detailed odds analysis */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Детальний аналіз по коефіцієнтах</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {bets.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {oddsData.map((range) => (
+                      <div key={range.range} className="p-4 border rounded-lg">
+                        <h3 className="font-semibold mb-2">{range.range}</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Ставок:</span>
+                            <span className="font-medium">{range.count}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Win Rate:</span>
+                            <span className="font-medium">{range.winRate}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Прибуток:</span>
+                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
@@ -1077,8 +1050,8 @@ export default function Analytics() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Генератор рекомендацій на основі нової системи тірів
+                <Star className="h-5 w-5" />
+                AI Генератор рекомендацій
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1129,7 +1102,7 @@ export default function Analytics() {
                 </div>
 
                 {recommendations.map((rec, index) => (
-                  <div key={index} className={`p-6 border rounded-lg ${getRecommendationColor(rec.recommendation)}`}>
+                  <div key={index} className={`p-6 border-2 rounded-lg ${getRecommendationColor(rec.recommendation)}`}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         {getRecommendationIcon(rec.recommendation)}
@@ -1141,44 +1114,38 @@ export default function Analytics() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left column - Basic information */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Star className="h-4 w-4" />
-                          <span className="text-sm font-medium">Індекс стабільності: {rec.stabilityScore}/100</span>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium mb-2">Короткі причини:</p>
-                          <ul className="text-sm space-y-1">
-                            {rec.reasons.map((reason, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="text-xs mt-1">•</span>
-                                <span>{reason}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="p-3 bg-white/50 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-4 w-4" />
-                            <span className="text-sm font-medium">Рекомендація:</span>
-                          </div>
-                          <p className="text-sm">{rec.detailedAnalysis.recommendation}</p>
-                        </div>
+                    <div className="space-y-4">
+                      {/* Quick overview */}
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4" />
+                        <span className="text-sm font-medium">Індекс стабільності: {rec.stabilityScore}/100</span>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-medium mb-2">Короткі причини:</p>
+                        <ul className="text-sm space-y-1">
+                          {rec.reasons.map((reason, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-xs mt-1">•</span>
+                              <span>{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
 
-                      {/* Right column - Detailed analysis */}
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium mb-2 flex items-center gap-2">
-                            <BarChart3 className="h-4 w-4" />
-                            Детальний аналіз
-                          </h4>
-                          
-                          <div className="space-y-3 text-sm">
+                      {/* Collapsible detailed analysis */}
+                      <div className="border-t pt-4">
+                        <Button
+                          variant="ghost"
+                          className="w-full flex items-center justify-between p-0 hover:bg-transparent"
+                          onClick={() => setExpandedRecommendation(expandedRecommendation === index ? null : index)}
+                        >
+                          <span className="font-medium">Детальний аналіз</span>
+                          {expandedRecommendation === index ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
+                        
+                        {expandedRecommendation === index && (
+                          <div className="mt-4 space-y-3 text-sm">
                             <div>
                               <span className="font-medium text-blue-600">Тіри:</span>
                               <p className="text-gray-700">{rec.detailedAnalysis.tierComparison}</p>
@@ -1206,10 +1173,7 @@ export default function Analytics() {
                             
                             {rec.detailedAnalysis.mapAnalysis.length > 0 && (
                               <div>
-                                <span className="font-medium text-indigo-600 flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  Карти:
-                                </span>
+                                <span className="font-medium text-indigo-600">Карти:</span>
                                 <ul className="text-gray-700 ml-4">
                                   {rec.detailedAnalysis.mapAnalysis.map((analysis, i) => (
                                     <li key={i} className="text-xs">• {analysis}</li>
@@ -1222,39 +1186,47 @@ export default function Analytics() {
                               <span className="font-medium text-teal-600">Стабільність:</span>
                               <p className="text-gray-700">{rec.detailedAnalysis.stabilityAnalysis}</p>
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Strengths and risks */}
-                        <div className="grid grid-cols-2 gap-3">
-                          {rec.detailedAnalysis.strengths.length > 0 && (
-                            <div className="p-3 bg-green-50 rounded-lg">
-                              <div className="flex items-center gap-2 mb-2">
-                                <TrendUp className="h-3 w-3 text-green-600" />
-                                <span className="text-xs font-medium text-green-800">Сильні сторони</span>
-                              </div>
-                              <ul className="text-xs text-green-700 space-y-1">
-                                {rec.detailedAnalysis.strengths.map((strength, i) => (
-                                  <li key={i}>• {strength}</li>
-                                ))}
-                              </ul>
+                            {/* Strengths and risks */}
+                            <div className="grid grid-cols-2 gap-3 mt-4">
+                              {rec.detailedAnalysis.strengths.length > 0 && (
+                                <div className="p-3 bg-green-50 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="h-3 w-3 text-green-600" />
+                                    <span className="text-xs font-medium text-green-800">Сильні сторони</span>
+                                  </div>
+                                  <ul className="text-xs text-green-700 space-y-1">
+                                    {rec.detailedAnalysis.strengths.map((strength, i) => (
+                                      <li key={i}>• {strength}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {rec.detailedAnalysis.riskFactors.length > 0 && (
+                                <div className="p-3 bg-red-50 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <TrendingDown className="h-3 w-3 text-red-600" />
+                                    <span className="text-xs font-medium text-red-800">Ризик-фактори</span>
+                                  </div>
+                                  <ul className="text-xs text-red-700 space-y-1">
+                                    {rec.detailedAnalysis.riskFactors.map((risk, i) => (
+                                      <li key={i}>• {risk}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
-                          )}
-                          
-                          {rec.detailedAnalysis.riskFactors.length > 0 && (
-                            <div className="p-3 bg-red-50 rounded-lg">
-                              <div className="flex items-center gap-2 mb-2">
-                                <TrendDown className="h-3 w-3 text-red-600" />
-                                <span className="text-xs font-medium text-red-800">Ризик-фактори</span>
-                              </div>
-                              <ul className="text-xs text-red-700 space-y-1">
-                                {rec.detailedAnalysis.riskFactors.map((risk, i) => (
-                                  <li key={i}>• {risk}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-3 bg-white/50 rounded-lg border-t">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Target className="h-4 w-4" />
+                          <span className="text-sm font-medium">Рекомендація:</span>
                         </div>
+                        <p className="text-sm">{rec.detailedAnalysis.recommendation}</p>
                       </div>
                     </div>
                   </div>
@@ -1309,7 +1281,7 @@ export default function Analytics() {
                   {connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span className="text-sm">Підключено до C# SQLite бази даних ставок</span>
+                      <span className="text-sm">Підключено до C# SQLite бази даних</span>
                     </div>
                   )}
                   {bets.length === 0 && (
@@ -1361,7 +1333,7 @@ export default function Analytics() {
                   {!connectionStatus.connected && (
                     <div className="flex items-start gap-2">
                       <span className="text-yellow-500">!</span>
-                      <span className="text-sm">Немає підключення до C# backend ставок</span>
+                      <span className="text-sm">Немає підключення до C# backend</span>
                     </div>
                   )}
                   {bets.length === 0 && (
