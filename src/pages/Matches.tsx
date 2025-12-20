@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,12 @@ import {
   Users,
   Zap,
   ArrowUpDown,
-  Search
+  Search,
+  Loader2,
+  ExternalLink
 } from 'lucide-react';
+import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
+import { useToast } from '@/hooks/use-toast';
 
 // Form Stability Types
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
@@ -47,6 +51,7 @@ interface Match {
   tier: 'tier1' | 'tier2' | 'tier3';
   matchType: 'Bo1' | 'Bo3' | 'Bo5';
   upsetProbability: number;
+  url?: string;
 }
 
 // Mock data for demonstration
@@ -224,6 +229,7 @@ const getRiskLabel = (risk: number) => {
 
 export default function Matches() {
   const [matches, setMatches] = useState<Match[]>(mockMatches);
+  const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterTier, setFilterTier] = useState<'all' | 'tier1' | 'tier2' | 'tier3'>('all');
@@ -232,6 +238,7 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
 
   // Apply filters
   const filteredMatches = matches.filter(match => {
@@ -292,9 +299,71 @@ export default function Matches() {
     }
   };
 
-  const refreshMatches = () => {
-    // In real app, this would fetch from HLTV/Liquipedia
-    console.log('🔄 Оновлення матчів з HLTV/Liquipedia...');
+  const refreshMatches = async () => {
+    setIsLoading(true);
+    
+    try {
+      toast({
+        title: '🔄 Завантаження матчів з HLTV...',
+        description: 'Це може зайняти кілька секунд',
+      });
+
+      // Use CORS proxy for testing
+      const corsProxy = 'https://corsproxy.io/';
+      const hltvMatches = await fetchAndParseMatches(corsProxy);
+      
+      console.log('HLTV Matches fetched:', hltvMatches);
+      
+      if (hltvMatches && hltvMatches.length > 0) {
+        // Convert HLTV matches to our format
+        const formattedMatches = hltvMatches.map(match => {
+          const converted = convertToMatchFormat(match);
+          
+          console.log('Converted match:', converted);
+          
+          // Add mock AI data (in production, this would come from your AI analysis)
+          return {
+            ...converted,
+            aiConfidence: Math.floor(Math.random() * 30) + 60, // 60-90%
+            risk: Math.floor(Math.random() * 50) + 10, // 10-60%
+            odds: {
+              team1: match.odds1 || 1.5,
+              team2: match.odds2 || 2.5
+            },
+            playerForm: [],
+            tier: 'tier1' as const,
+            matchType: (match.type?.toUpperCase() || 'Bo3') as 'Bo1' | 'Bo3' | 'Bo5',
+            upsetProbability: Math.floor(Math.random() * 30) + 10, // 10-40%
+            formStability: 'stable' as FormStability
+          };
+        });
+
+        console.log('Formatted matches:', formattedMatches);
+        setMatches(formattedMatches);
+        
+        toast({
+          title: '✅ Матчі оновлено!',
+          description: `Завантажено ${formattedMatches.length} матчів з HLTV`,
+        });
+      } else {
+        console.warn('No matches found from HLTV');
+        toast({
+          title: '⚠️ Матчі не знайдено',
+          description: 'Використовуються демо-дані',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch HLTV matches:', error);
+      
+      toast({
+        title: '❌ Помилка завантаження',
+        description: 'Не вдалося завантажити матчі з HLTV. Використовуються демо-дані.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -305,11 +374,40 @@ export default function Matches() {
           <p className="text-gray-600">Аналітична система з AI прогнозами та Form Stability</p>
         </div>
         
-        <Button onClick={refreshMatches} className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Оновити матчі
+        <Button 
+          onClick={refreshMatches} 
+          className="flex items-center gap-2"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Завантаження...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="h-4 w-4" />
+              Оновити з HLTV
+            </>
+          )}
         </Button>
       </div>
+
+      {/* Info Banner */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-blue-900 mb-1">🚀 Реальні дані з HLTV</h3>
+              <p className="text-sm text-blue-800">
+                Натисніть "Оновити з HLTV" щоб завантажити актуальні матчі з HLTV.org. 
+                Парсер автоматично отримає список матчів, коефіцієнти та інформацію про команди.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -380,7 +478,7 @@ export default function Matches() {
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
               <label className="text-sm font-medium">Tier:</label>
-              <Select value={filterTier} onValueChange={(value: any) => setFilterTier(value)}>
+              <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -395,7 +493,7 @@ export default function Matches() {
             
             <div>
               <label className="text-sm font-medium">AI Confidence:</label>
-              <Select value={filterConfidence} onValueChange={(value: any) => setFilterConfidence(value)}>
+              <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -410,7 +508,7 @@ export default function Matches() {
             
             <div>
               <label className="text-sm font-medium">Ризик:</label>
-              <Select value={filterRisk} onValueChange={(value: any) => setFilterRisk(value)}>
+              <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -425,7 +523,7 @@ export default function Matches() {
             
             <div>
               <label className="text-sm font-medium">Тип матчу:</label>
-              <Select value={filterMatchType} onValueChange={(value: any) => setFilterMatchType(value)}>
+              <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -515,10 +613,24 @@ export default function Matches() {
                         </div>
                       </td>
                       <td className="p-3">
-                        <div className="font-medium">{match.team1} vs {match.team2}</div>
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {match.matchType}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-medium">{match.team1} vs {match.team2}</div>
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {match.matchType}
+                            </Badge>
+                          </div>
+                          {match.url && (
+                            <a 
+                              href={match.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3">
                         <div className="font-semibold text-blue-600">{match.favorite}</div>
@@ -584,29 +696,6 @@ export default function Matches() {
               <p className="text-gray-600">Немає матчів за обраними фільтрами</p>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Form Stability Legend */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Легенда Form Stability</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(['hot_streak', 'stable', 'momentum', 'falling', 'slump', 'inconsistent'] as FormStability[]).map((form) => {
-              const info = getFormStabilityInfo(form);
-              return (
-                <div key={form} className={`p-4 rounded-lg border-2 ${info.color}`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{info.icon}</span>
-                    <span className="font-semibold">{info.label}</span>
-                  </div>
-                  <p className="text-sm">{info.description}</p>
-                </div>
-              );
-            })}
-          </div>
         </CardContent>
       </Card>
     </div>
