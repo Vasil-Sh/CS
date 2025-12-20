@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, LogIn, AlertTriangle } from 'lucide-react';
+import { Loader2, LogIn, AlertTriangle, Sparkles } from 'lucide-react';
 
 interface User {
   username: string;
@@ -146,34 +146,37 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-md">
-              <LogIn className="w-8 h-8 text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+      <Card className="w-full max-w-md border-0 shadow-2xl rounded-3xl overflow-hidden bg-white/80 backdrop-blur-xl">
+        <CardHeader className="space-y-4 pb-8">
+          <div className="flex items-center justify-center">
+            <div className="relative">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg">
+                <Sparkles className="w-10 h-10 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center text-gray-900">
+          <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
             MatchIQ
           </CardTitle>
-          <CardDescription className="text-center text-gray-600">
+          <CardDescription className="text-center text-gray-600 font-medium">
             Увійдіть до свого облікового запису
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-8">
           {subscriptionExpired && (
-            <Alert className="mb-4 bg-orange-50 border-orange-200 text-orange-800">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="ml-2">
+            <Alert className="mb-6 bg-orange-50/80 border-0 rounded-2xl backdrop-blur-sm shadow-sm">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <AlertDescription className="ml-2 text-orange-800 font-medium">
                 Ваша підписка закінчилась. Будь ласка, зверніться до адміністратора для продовження.
               </AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-700">
+              <Label htmlFor="username" className="text-gray-700 font-semibold text-sm">
                 Юзернейм
               </Label>
               <Input
@@ -183,11 +186,11 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                className="bg-gray-50/80 border-0 rounded-2xl h-12 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 backdrop-blur-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-700">
+              <Label htmlFor="password" className="text-gray-700 font-semibold text-sm">
                 Пароль
               </Label>
               <Input
@@ -197,29 +200,29 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                className="bg-gray-50/80 border-0 rounded-2xl h-12 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 backdrop-blur-sm"
               />
             </div>
 
             {error && !subscriptionExpired && (
-              <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
-                <AlertDescription>{error}</AlertDescription>
+              <Alert className="bg-red-50/80 border-0 rounded-2xl backdrop-blur-sm shadow-sm">
+                <AlertDescription className="text-red-800 font-medium">{error}</AlertDescription>
               </Alert>
             )}
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg rounded-2xl h-12 text-base transition-all duration-200 hover:shadow-xl"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Завантаження...
                 </>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-4 w-4" />
+                  <LogIn className="mr-2 h-5 w-5" />
                   Увійти
                 </>
               )}
