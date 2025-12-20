@@ -168,15 +168,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'БАН':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
+        return 'bg-red-100 text-red-800 hover:bg-red-100 border-0 rounded-full';
       case 'Нестабільні':
-        return 'bg-orange-100 text-orange-800 hover:bg-orange-100';
+        return 'bg-orange-100 text-orange-800 hover:bg-orange-100 border-0 rounded-full';
       case 'Обережно':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-0 rounded-full';
       case 'Рідко':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-100 border-0 rounded-full';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-0 rounded-full';
     }
   };
 
@@ -388,44 +388,50 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     <div className="space-y-6">
       {/* Risk Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Рівень ризику</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Рівень ризику</CardTitle>
+            <div className="p-2 bg-purple-50 rounded-2xl">
+              <Shield className="h-4 w-4 text-purple-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${riskLevel.color}`}>
+            <div className={`text-2xl font-semibold tracking-tight ${riskLevel.color}`}>
               {riskLevel.level === 'high' ? 'Високий' : riskLevel.level === 'medium' ? 'Середній' : 'Низький'}
             </div>
-            <div className={`text-xs px-2 py-1 rounded-full mt-2 ${riskLevel.bgColor} ${riskLevel.color}`}>
+            <div className={`text-xs px-2.5 py-1 rounded-full mt-2 inline-block ${riskLevel.bgColor} ${riskLevel.color} font-medium`}>
               Поточна оцінка
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Макс. просадка</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Макс. просадка</CardTitle>
+            <div className="p-2 bg-red-50 rounded-2xl">
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-semibold text-red-600 tracking-tight">
               {riskMetrics.maxDrawdown}%
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 mt-1 font-medium">
               Максимальне падіння від піку
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Коефіцієнт Шарпа</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Коефіцієнт Шарпа</CardTitle>
+            <div className="p-2 bg-blue-50 rounded-2xl">
+              <BarChart3 className="h-4 w-4 text-blue-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{riskMetrics.sharpeRatio}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-semibold text-gray-900 tracking-tight">{riskMetrics.sharpeRatio}</div>
+            <p className="text-xs text-gray-500 mt-1 font-medium">
               {riskMetrics.sharpeRatio > 1 ? 'Відмінно' : 
                riskMetrics.sharpeRatio > 0.5 ? 'Добре' : 
                riskMetrics.sharpeRatio > 0 ? 'Задовільно' : 'Погано'}
@@ -433,14 +439,16 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Волатильність</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Волатильність</CardTitle>
+            <div className="p-2 bg-orange-50 rounded-2xl">
+              <TrendingUp className="h-4 w-4 text-orange-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{riskMetrics.volatility}%</div>
-            <Badge className="mt-2">
+            <div className="text-2xl font-semibold text-gray-900 tracking-tight">{riskMetrics.volatility}%</div>
+            <Badge className="mt-2 rounded-full bg-gray-100 text-gray-700 border-0">
               {volatilityLevel === 'low' ? 'Стабільно' : 
                volatilityLevel === 'medium' ? 'Помірно' : 'Нестабільно'}
             </Badge>
@@ -450,56 +458,56 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
       {/* Stats Cards for Teams */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-purple-50 to-purple-100 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-purple-900 flex items-center gap-2">
+            <CardTitle className="text-xs font-medium text-purple-900 uppercase tracking-wide flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               Всього команд
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-900">{riskyTeams.length}</div>
+            <div className="text-3xl font-semibold text-purple-900 tracking-tight">{riskyTeams.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-red-50 to-red-100 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-red-900">
+            <CardTitle className="text-xs font-medium text-red-900 uppercase tracking-wide">
               БАН
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-900">{teamsByStatus.БАН.length}</div>
+            <div className="text-3xl font-semibold text-red-900 tracking-tight">{teamsByStatus.БАН.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-orange-50 to-orange-100 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-orange-900">
+            <CardTitle className="text-xs font-medium text-orange-900 uppercase tracking-wide">
               Нестабільні
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-900">{teamsByStatus.Нестабільні.length}</div>
+            <div className="text-3xl font-semibold text-orange-900 tracking-tight">{teamsByStatus.Нестабільні.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-yellow-50 to-yellow-100 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-yellow-900">
+            <CardTitle className="text-xs font-medium text-yellow-900 uppercase tracking-wide">
               Обережно
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-yellow-900">{teamsByStatus.Обережно.length}</div>
+            <div className="text-3xl font-semibold text-yellow-900 tracking-tight">{teamsByStatus.Обережно.length}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Add New Team */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <Plus className="h-5 w-5" />
             Додати нову команду
           </CardTitle>
@@ -507,31 +515,31 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Назва команди</label>
+              <label className="text-sm font-medium text-gray-700">Назва команди</label>
               <Input
                 value={newTeam.name}
                 onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
                 placeholder="Введіть назву команди"
-                className="mt-1"
+                className="mt-1 rounded-xl"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Гра</label>
+              <label className="text-sm font-medium text-gray-700">Гра</label>
               <select
                 value={newTeam.game}
                 onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full p-2 border rounded-xl mt-1"
               >
                 <option value="CS">CS</option>
                 <option value="Дота">Дота</option>
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium">Статус</label>
+              <label className="text-sm font-medium text-gray-700">Статус</label>
               <select
                 value={newTeam.status}
                 onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
-                className="w-full p-2 border rounded-md mt-1"
+                className="w-full p-2 border rounded-xl mt-1"
               >
                 <option value="БАН">БАН</option>
                 <option value="Нестабільні">Нестабільні</option>
@@ -540,19 +548,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium">Примітки</label>
+              <label className="text-sm font-medium text-gray-700">Примітки</label>
               <Textarea
                 value={newTeam.notes}
                 onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
                 placeholder="Додайте примітки про команду"
-                className="mt-1"
+                className="mt-1 rounded-xl"
                 rows={3}
               />
             </div>
           </div>
           <Button
             onClick={addRiskyTeam}
-            className="mt-4 bg-purple-600 hover:bg-purple-700"
+            className="mt-4 bg-purple-600 hover:bg-purple-700 rounded-2xl font-medium"
             disabled={!newTeam.name.trim()}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -562,9 +570,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       </Card>
 
       {/* Search */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <Search className="h-5 w-5" />
             Пошук команд
           </CardTitle>
@@ -574,7 +582,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Пошук за назвою, грою, статусом або примітками..."
-            className="w-full"
+            className="w-full rounded-xl"
           />
         </CardContent>
       </Card>
@@ -582,11 +590,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       {/* Teams by Game */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* CS Teams */}
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
               <span>CS:GO команди</span>
-              <Badge variant="outline">{teamsByGame.CS.length}</Badge>
+              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{teamsByGame.CS.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -595,11 +603,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <p className="text-center text-gray-500 py-8">Немає команд CS</p>
               ) : (
                 teamsByGame.CS.map((team, index) => (
-                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                  <div key={index} className="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50/50 transition-colors">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">{team.name}</h3>
+                          <h3 className="font-semibold text-lg text-gray-900">{team.name}</h3>
                           <Badge className={getStatusBadge(team.status)}>
                             {team.status}
                           </Badge>
@@ -612,7 +620,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => deleteRiskyTeam(riskyTeams.findIndex(t => t === team))}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -625,11 +633,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </Card>
 
         {/* Dota Teams */}
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
               <span>Dota 2 команди</span>
-              <Badge variant="outline">{teamsByGame.Дота.length}</Badge>
+              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{teamsByGame.Дота.length}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -638,11 +646,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <p className="text-center text-gray-500 py-8">Немає команд Dota 2</p>
               ) : (
                 teamsByGame.Дота.map((team, index) => (
-                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                  <div key={index} className="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50/50 transition-colors">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">{team.name}</h3>
+                          <h3 className="font-semibold text-lg text-gray-900">{team.name}</h3>
                           <Badge className={getStatusBadge(team.status)}>
                             {team.status}
                           </Badge>
@@ -655,7 +663,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => deleteRiskyTeam(riskyTeams.findIndex(t => t === team))}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -670,64 +678,64 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
       {/* Detailed Risk Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Детальні ризик-метрики</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">Детальні ризик-метрики</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Поточна просадка:</span>
-              <span className="font-bold">{riskMetrics.currentDrawdown}%</span>
+              <span className="text-sm font-medium text-gray-700">Поточна просадка:</span>
+              <span className="font-semibold text-gray-900">{riskMetrics.currentDrawdown}%</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Послідовні програші:</span>
-              <span className="font-bold">{riskMetrics.consecutiveLosses}</span>
+              <span className="text-sm font-medium text-gray-700">Послідовні програші:</span>
+              <span className="font-semibold text-gray-900">{riskMetrics.consecutiveLosses}</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Середня ставка:</span>
-              <span className="font-bold">{riskMetrics.averageStake} ₴</span>
+              <span className="text-sm font-medium text-gray-700">Середня ставка:</span>
+              <span className="font-semibold text-gray-900">{riskMetrics.averageStake} ₴</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Найбільший програш:</span>
-              <span className="font-bold text-red-600">{riskMetrics.largestLoss} ₴</span>
+              <span className="text-sm font-medium text-gray-700">Найбільший програш:</span>
+              <span className="font-semibold text-red-600">{riskMetrics.largestLoss} ₴</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Келлі %:</span>
-              <span className={`font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className="text-sm font-medium text-gray-700">Келлі %:</span>
+              <span className={`font-semibold ${riskMetrics.kellyPercentage > 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {riskMetrics.kellyPercentage}%
               </span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Ризик виграшних серій:</span>
-              <span className="font-bold">{riskMetrics.winStreakRisk}%</span>
+              <span className="text-sm font-medium text-gray-700">Ризик виграшних серій:</span>
+              <span className="font-semibold text-gray-900">{riskMetrics.winStreakRisk}%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Періоди просадок</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">Періоди просадок</CardTitle>
           </CardHeader>
           <CardContent>
             {drawdownPeriods.length > 0 ? (
               <div className="space-y-3">
                 {drawdownPeriods.map((period, index) => (
-                  <div key={index} className="p-3 border rounded-lg">
+                  <div key={index} className="p-3 border border-gray-100 rounded-2xl">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium text-gray-900">
                         {new Date(period.start).toLocaleDateString('uk-UA')} - {new Date(period.end).toLocaleDateString('uk-UA')}
                       </span>
-                      <Badge variant={period.recovery ? 'default' : 'destructive'}>
+                      <Badge className={`rounded-full border-0 ${period.recovery ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {period.recovery ? 'Відновлено' : 'Поточна'}
                       </Badge>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Тривалість: {period.duration} днів</span>
+                      <span className="text-gray-600">Тривалість: {period.duration} днів</span>
                       <span className="font-medium text-red-600">-{period.maxDrawdown.toFixed(1)}%</span>
                     </div>
                   </div>
@@ -741,9 +749,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       </div>
 
       {/* Risk Recommendations */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <Target className="h-5 w-5" />
             Рекомендації з управління ризиками
           </CardTitle>
@@ -751,66 +759,66 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3 text-green-700">Позитивні аспекти</h4>
+              <h4 className="font-semibold mb-3 text-green-700">Позитивні аспекти</h4>
               <div className="space-y-2">
                 {riskMetrics.maxDrawdown < 15 && (
                   <div className="flex items-start gap-2">
                     <span className="text-green-500 text-xs mt-1">✓</span>
-                    <span className="text-sm">Низька максимальна просадка ({riskMetrics.maxDrawdown}%)</span>
+                    <span className="text-sm text-gray-700">Низька максимальна просадка ({riskMetrics.maxDrawdown}%)</span>
                   </div>
                 )}
                 {riskMetrics.sharpeRatio > 0.5 && (
                   <div className="flex items-start gap-2">
                     <span className="text-green-500 text-xs mt-1">✓</span>
-                    <span className="text-sm">Хороший коефіцієнт Шарпа ({riskMetrics.sharpeRatio})</span>
+                    <span className="text-sm text-gray-700">Хороший коефіцієнт Шарпа ({riskMetrics.sharpeRatio})</span>
                   </div>
                 )}
                 {riskMetrics.riskOfRuin < 10 && (
                   <div className="flex items-start gap-2">
                     <span className="text-green-500 text-xs mt-1">✓</span>
-                    <span className="text-sm">Низький ризик краху ({riskMetrics.riskOfRuin}%)</span>
+                    <span className="text-sm text-gray-700">Низький ризик краху ({riskMetrics.riskOfRuin}%)</span>
                   </div>
                 )}
                 {riskMetrics.consecutiveLosses < 5 && (
                   <div className="flex items-start gap-2">
                     <span className="text-green-500 text-xs mt-1">✓</span>
-                    <span className="text-sm">Контрольовані послідовні програші</span>
+                    <span className="text-sm text-gray-700">Контрольовані послідовні програші</span>
                   </div>
                 )}
               </div>
             </div>
 
             <div>
-              <h4 className="font-medium mb-3 text-red-700">Області для покращення</h4>
+              <h4 className="font-semibold mb-3 text-red-700">Області для покращення</h4>
               <div className="space-y-2">
                 {riskMetrics.maxDrawdown > 25 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Висока максимальна просадка - зменшіть розміри ставок</span>
+                    <span className="text-sm text-gray-700">Висока максимальна просадка - зменшіть розміри ставок</span>
                   </div>
                 )}
                 {riskMetrics.volatility > 30 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Висока волатильність - диверсифікуйте стратегії</span>
+                    <span className="text-sm text-gray-700">Висока волатильність - диверсифікуйте стратегії</span>
                   </div>
                 )}
                 {riskMetrics.riskOfRuin > 15 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Високий ризик краху - перегляньте управління капіталом</span>
+                    <span className="text-sm text-gray-700">Високий ризик краху - перегляньте управління капіталом</span>
                   </div>
                 )}
                 {riskMetrics.consecutiveLosses > 7 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Довгі серії програшів - встановіть стоп-лосси</span>
+                    <span className="text-sm text-gray-700">Довгі серії програшів - встановіть стоп-лосси</span>
                   </div>
                 )}
                 {riskMetrics.kellyPercentage < 0 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Негативний Келлі % - перегляньте стратегію</span>
+                    <span className="text-sm text-gray-700">Негативний Келлі % - перегляньте стратегію</span>
                   </div>
                 )}
               </div>
@@ -821,9 +829,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
       {/* Risk Alerts */}
       {(riskMetrics.currentDrawdown > 15 || riskMetrics.consecutiveLosses > 5) && (
-        <Alert className="border-red-200 bg-red-50">
+        <Alert className="rounded-2xl border-0 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
+          <AlertDescription className="text-red-800 font-medium">
             <strong>Попередження про ризик:</strong>
             {riskMetrics.currentDrawdown > 15 && ` Поточна просадка ${riskMetrics.currentDrawdown}% перевищує рекомендований поріг.`}
             {riskMetrics.consecutiveLosses > 5 && ` ${riskMetrics.consecutiveLosses} послідовних програшів вказують на необхідність перегляду стратегії.`}

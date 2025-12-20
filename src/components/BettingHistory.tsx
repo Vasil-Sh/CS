@@ -34,12 +34,10 @@ export default function BettingHistory() {
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Filters
   const [resultFilter, setResultFilter] = useState<'all' | 'Win' | 'Loss' | 'Pending'>('all');
   const [periodFilter, setPeriodFilter] = useState<'all' | 'week' | 'month' | 'quarter'>('all');
   const [betTypeFilter, setBetTypeFilter] = useState<'all' | string>('all');
   
-  // Sorting
   const [sortBy, setSortBy] = useState<'date' | 'profit' | 'odds'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -59,15 +57,11 @@ export default function BettingHistory() {
     }
   };
 
-  // Get unique bet types
   const betTypes = Array.from(new Set(bets.map(bet => bet.betType)));
 
-  // Apply filters
   const filteredBets = bets.filter(bet => {
-    // Result filter
     if (resultFilter !== 'all' && bet.result !== resultFilter) return false;
     
-    // Period filter
     if (periodFilter !== 'all') {
       const betDate = new Date(bet.date);
       const now = new Date();
@@ -78,13 +72,11 @@ export default function BettingHistory() {
       if (periodFilter === 'quarter' && diffDays > 90) return false;
     }
     
-    // Bet type filter
     if (betTypeFilter !== 'all' && bet.betType !== betTypeFilter) return false;
     
     return true;
   });
 
-  // Apply sorting
   const sortedBets = [...filteredBets].sort((a, b) => {
     let comparison = 0;
     
@@ -112,7 +104,6 @@ export default function BettingHistory() {
     }
   };
 
-  // Calculate stats for filtered bets
   const completedBets = filteredBets.filter(bet => bet.result !== 'Pending');
   const totalProfit = completedBets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
   const winRate = completedBets.length > 0 
@@ -121,10 +112,9 @@ export default function BettingHistory() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <Filter className="h-5 w-5" />
             Фільтри та сортування
           </CardTitle>
@@ -132,9 +122,9 @@ export default function BettingHistory() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium">Результат:</label>
+              <label className="text-sm font-medium text-gray-700">Результат:</label>
               <Select value={resultFilter} onValueChange={(value: 'all' | 'Win' | 'Loss' | 'Pending') => setResultFilter(value)}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,9 +137,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-medium">Період:</label>
+              <label className="text-sm font-medium text-gray-700">Період:</label>
               <Select value={periodFilter} onValueChange={(value: 'all' | 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,9 +152,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-medium">Тип ставки:</label>
+              <label className="text-sm font-medium text-gray-700">Тип ставки:</label>
               <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,9 +167,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-medium">Сортування:</label>
+              <label className="text-sm font-medium text-gray-700">Сортування:</label>
               <Select value={sortBy} onValueChange={(value: 'date' | 'profit' | 'odds') => setSortBy(value)}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -193,53 +183,57 @@ export default function BettingHistory() {
         </CardContent>
       </Card>
 
-      {/* Filtered Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Відфільтровано ставок</p>
-                <p className="text-2xl font-bold">{filteredBets.length}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Відфільтровано ставок</p>
+                <p className="text-2xl font-semibold text-gray-900 tracking-tight">{filteredBets.length}</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Win Rate</p>
-                <p className="text-2xl font-bold text-green-600">{winRate}%</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Win Rate</p>
+                <p className="text-2xl font-semibold text-green-600 tracking-tight">{winRate}%</p>
               </div>
-              <Trophy className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <Trophy className="h-6 w-6 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Профіт</p>
-                <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Профіт</p>
+                <p className={`text-2xl font-semibold tracking-tight ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
                 </p>
               </div>
-              <DollarSign className="h-8 w-8 text-gray-600" />
+              <div className={`p-3 rounded-2xl ${totalProfit >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                <DollarSign className={`h-6 w-6 ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Bets Table */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
             <span>Історія ставок</span>
-            <Badge variant="secondary">{sortedBets.length} записів</Badge>
+            <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{sortedBets.length} записів</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -251,25 +245,25 @@ export default function BettingHistory() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('date')}>
-                      <div className="flex items-center gap-1">
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl" onClick={() => toggleSort('date')}>
+                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Дата
                         <ArrowUpDown className="h-3 w-3" />
                       </div>
                     </th>
-                    <th className="text-left p-3">Матч</th>
-                    <th className="text-left p-3">Тип</th>
-                    <th className="text-left p-3">Сума</th>
-                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('odds')}>
-                      <div className="flex items-center gap-1">
+                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Матч</th>
+                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Тип</th>
+                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Сума</th>
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl" onClick={() => toggleSort('odds')}>
+                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Коефіцієнт
                         <ArrowUpDown className="h-3 w-3" />
                       </div>
                     </th>
-                    <th className="text-left p-3">Результат</th>
-                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('profit')}>
-                      <div className="flex items-center gap-1">
+                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Результат</th>
+                    <th className="text-left p-3 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl" onClick={() => toggleSort('profit')}>
+                      <div className="flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Профіт
                         <ArrowUpDown className="h-3 w-3" />
                       </div>
@@ -278,17 +272,17 @@ export default function BettingHistory() {
                 </thead>
                 <tbody>
                   {sortedBets.map((bet, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td className="p-3 text-sm">{bet.date}</td>
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                      <td className="p-3 text-sm text-gray-900">{bet.date}</td>
                       <td className="p-3">
-                        <div className="font-medium">{bet.match || `${bet.team1} vs ${bet.team2}`}</div>
-                        <Badge variant="outline" className="text-xs mt-1">{bet.format}</Badge>
+                        <div className="font-medium text-gray-900">{bet.match || `${bet.team1} vs ${bet.team2}`}</div>
+                        <Badge className="text-xs mt-1 rounded-full bg-gray-100 text-gray-700 border-0">{bet.format}</Badge>
                       </td>
                       <td className="p-3">
-                        <Badge variant="secondary">{bet.betType}</Badge>
+                        <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">{bet.betType}</Badge>
                       </td>
-                      <td className="p-3 font-medium">₴{bet.amount}</td>
-                      <td className="p-3 font-medium">{bet.odds}</td>
+                      <td className="p-3 font-medium text-gray-900">₴{bet.amount}</td>
+                      <td className="p-3 font-medium text-gray-900">{bet.odds}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           {bet.result === 'Win' ? (
@@ -299,7 +293,13 @@ export default function BettingHistory() {
                             <Clock className="h-4 w-4 text-blue-600" />
                           )}
                           <Badge 
-                            variant={bet.result === 'Win' ? 'default' : bet.result === 'Loss' ? 'destructive' : 'secondary'}
+                            className={`rounded-full border-0 ${
+                              bet.result === 'Win' 
+                                ? 'bg-green-100 text-green-700' 
+                                : bet.result === 'Loss' 
+                                ? 'bg-red-100 text-red-700' 
+                                : 'bg-blue-100 text-blue-700'
+                            }`}
                           >
                             {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
                           </Badge>

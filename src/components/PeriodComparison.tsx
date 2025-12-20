@@ -35,7 +35,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
     const completedBets = bets.filter(bet => bet.result !== 'Pending');
     const periodStats: { [key: string]: PeriodStats } = {};
 
-    // Групуємо ставки по періодах
     completedBets.forEach(bet => {
       const date = new Date(bet.date);
       let periodKey = '';
@@ -72,7 +71,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       stats.averageBetSize += bet.amount || 0;
     });
 
-    // Обчислюємо фінальні статистики
     Object.values(periodStats).forEach(stats => {
       const periodBets = completedBets.filter(bet => {
         const date = new Date(bet.date);
@@ -99,7 +97,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       stats.averageROI = stats.totalBets > 0 ? (stats.totalProfit / (stats.averageBetSize) * 100) : 0;
       stats.averageBetSize = stats.totalBets > 0 ? (stats.averageBetSize / stats.totalBets) : 0;
 
-      // Розрахунок streak'ів
       let currentStreak = 0;
       let bestStreak = 0;
       let worstStreak = 0;
@@ -118,14 +115,12 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       stats.worstStreak = Math.abs(worstStreak);
     });
 
-    // Сортуємо по періодах та беремо останні
     const sortedPeriods = Object.values(periodStats)
       .sort((a, b) => a.period.localeCompare(b.period))
-      .slice(-6); // Останні 6 періодів
+      .slice(-6);
 
     setSelectedPeriods(sortedPeriods);
 
-    // Створюємо дані для трендів
     const trendData = sortedPeriods.map(period => ({
       period: formatPeriodName(period.period),
       profit: Math.round(period.totalProfit * 100) / 100,
@@ -170,12 +165,12 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Порівняння періодів</h2>
-          <p className="text-gray-600">Аналіз динаміки показників у часі</p>
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Порівняння періодів</h2>
+          <p className="text-gray-500 font-medium">Аналіз динаміки показників у часі</p>
         </div>
         
         <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-48 rounded-xl">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -186,20 +181,19 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </Select>
       </div>
 
-      {/* Поточний vs Попередній період */}
       {currentPeriod && previousPeriod && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Загальний прибуток</CardTitle>
+              <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Загальний прибуток</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-semibold text-gray-900 tracking-tight">
                     {currentPeriod.totalProfit >= 0 ? '+' : ''}{currentPeriod.totalProfit.toFixed(2)} ₴
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 mt-1">
                     Попередній: {previousPeriod.totalProfit >= 0 ? '+' : ''}{previousPeriod.totalProfit.toFixed(2)} ₴
                   </div>
                 </div>
@@ -213,15 +207,15 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Win Rate</CardTitle>
+              <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Win Rate</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold">{currentPeriod.winRate.toFixed(1)}%</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-2xl font-semibold text-gray-900 tracking-tight">{currentPeriod.winRate.toFixed(1)}%</div>
+                  <div className="text-sm text-gray-500 mt-1">
                     Попередній: {previousPeriod.winRate.toFixed(1)}%
                   </div>
                 </div>
@@ -235,15 +229,15 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Кількість ставок</CardTitle>
+              <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Кількість ставок</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold">{currentPeriod.totalBets}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-2xl font-semibold text-gray-900 tracking-tight">{currentPeriod.totalBets}</div>
+                  <div className="text-sm text-gray-500 mt-1">
                     Попередній: {previousPeriod.totalBets}
                   </div>
                 </div>
@@ -257,17 +251,17 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Середній ROI</CardTitle>
+              <CardTitle className="text-xs font-medium text-gray-500 uppercase tracking-wide">Середній ROI</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-semibold text-gray-900 tracking-tight">
                     {currentPeriod.averageROI >= 0 ? '+' : ''}{currentPeriod.averageROI.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 mt-1">
                     Попередній: {previousPeriod.averageROI >= 0 ? '+' : ''}{previousPeriod.averageROI.toFixed(1)}%
                   </div>
                 </div>
@@ -283,11 +277,10 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </div>
       )}
 
-      {/* Графіки трендів */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Динаміка прибутку</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">Динаміка прибутку</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -309,9 +302,9 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Win Rate та ROI тренди</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">Win Rate та ROI тренди</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -333,44 +326,43 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </Card>
       </div>
 
-      {/* Детальна таблиця періодів */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle>Детальна статистика по періодах</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">Детальна статистика по періодах</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Період</th>
-                  <th className="text-right p-2">Ставок</th>
-                  <th className="text-right p-2">Win Rate</th>
-                  <th className="text-right p-2">Прибуток</th>
-                  <th className="text-right p-2">ROI</th>
-                  <th className="text-right p-2">Серія ↑</th>
-                  <th className="text-right p-2">Серія ↓</th>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Період</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Ставок</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Win Rate</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Прибуток</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">ROI</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Серія ↑</th>
+                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Серія ↓</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedPeriods.map((period, index) => (
-                  <tr key={period.period} className={`border-b ${index === selectedPeriods.length - 1 ? 'bg-blue-50' : ''}`}>
-                    <td className="p-2 font-medium">
+                  <tr key={period.period} className={`border-b border-gray-100 hover:bg-gray-50/50 transition-colors ${index === selectedPeriods.length - 1 ? 'bg-blue-50/50' : ''}`}>
+                    <td className="p-3 font-medium text-gray-900">
                       {formatPeriodName(period.period)}
                       {index === selectedPeriods.length - 1 && (
-                        <Badge variant="default" className="ml-2">Поточний</Badge>
+                        <Badge className="ml-2 rounded-full bg-blue-100 text-blue-700 border-0">Поточний</Badge>
                       )}
                     </td>
-                    <td className="text-right p-2">{period.totalBets}</td>
-                    <td className="text-right p-2">{period.winRate.toFixed(1)}%</td>
-                    <td className={`text-right p-2 font-medium ${period.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className="text-right p-3 text-gray-900">{period.totalBets}</td>
+                    <td className="text-right p-3 text-gray-900">{period.winRate.toFixed(1)}%</td>
+                    <td className={`text-right p-3 font-medium ${period.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
                     </td>
-                    <td className={`text-right p-2 ${period.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className={`text-right p-3 ${period.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
                     </td>
-                    <td className="text-right p-2 text-green-600">+{period.bestStreak}</td>
-                    <td className="text-right p-2 text-red-600">-{period.worstStreak}</td>
+                    <td className="text-right p-3 text-green-600">+{period.bestStreak}</td>
+                    <td className="text-right p-3 text-red-600">-{period.worstStreak}</td>
                   </tr>
                 ))}
               </tbody>

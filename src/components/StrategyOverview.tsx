@@ -18,7 +18,6 @@ export default function StrategyOverview() {
   const [bettingData, setBettingData] = useState<any[]>([]);
   const [strategyStats, setStrategyStats] = useState<any>({});
 
-  // Форма нової стратегії
   const [newStrategy, setNewStrategy] = useState({
     name: '',
     description: '',
@@ -52,7 +51,6 @@ export default function StrategyOverview() {
   const calculateStrategyStats = (bets: any[]) => {
     const stats: any = {};
     
-    // Групуємо ставки по стратегіях
     bets.forEach(bet => {
       const strategy = bet.strategy || 'Без стратегії';
       if (!stats[strategy]) {
@@ -80,7 +78,6 @@ export default function StrategyOverview() {
       }
     });
     
-    // Розраховуємо відсотки та ROI
     Object.keys(stats).forEach(strategy => {
       const completedBets = stats[strategy].wins + stats[strategy].losses;
       stats[strategy].winRate = completedBets > 0 ? (stats[strategy].wins / completedBets) * 100 : 0;
@@ -92,10 +89,10 @@ export default function StrategyOverview() {
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'Low': return 'bg-green-100 text-green-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'High': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Low': return 'bg-green-100 text-green-800 border-0 rounded-full';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-0 rounded-full';
+      case 'High': return 'bg-red-100 text-red-800 border-0 rounded-full';
+      default: return 'bg-gray-100 text-gray-800 border-0 rounded-full';
     }
   };
 
@@ -148,7 +145,6 @@ export default function StrategyOverview() {
 
     setStrategies(prev => [...prev, strategy]);
     
-    // Скидаємо форму
     setNewStrategy({
       name: '',
       description: '',
@@ -162,9 +158,9 @@ export default function StrategyOverview() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardContent className="p-6">
-          <div className="text-center">Завантаження стратегій...</div>
+          <div className="text-center text-gray-600">Завантаження стратегій...</div>
         </CardContent>
       </Card>
     );
@@ -173,18 +169,20 @@ export default function StrategyOverview() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Brain className="h-6 w-6" />
+        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight flex items-center gap-2">
+          <div className="p-2 bg-purple-50 rounded-2xl">
+            <Brain className="h-5 w-5 text-purple-600" />
+          </div>
           Мої стратегії
         </h2>
-        <p className="text-gray-600">Управління та аналіз ваших стратегій ставок на CS2</p>
+        <p className="text-gray-500 font-medium mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Огляд стратегій</TabsTrigger>
-          <TabsTrigger value="performance">Ефективність</TabsTrigger>
-          <TabsTrigger value="create">Створити нову</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl p-1 bg-gray-100">
+          <TabsTrigger value="overview" className="rounded-xl">Огляд стратегій</TabsTrigger>
+          <TabsTrigger value="performance" className="rounded-xl">Ефективність</TabsTrigger>
+          <TabsTrigger value="create" className="rounded-xl">Створити нову</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -193,14 +191,14 @@ export default function StrategyOverview() {
               const stats = strategyStats[strategy.name] || {};
               
               return (
-                <Card key={index}>
+                <Card key={index} className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
+                    <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
                       <span className="flex items-center gap-2">
                         {getRiskIcon(strategy.riskLevel)}
                         {strategy.name}
                       </span>
-                      <Badge className={getRiskColor(strategy.riskLevel)} variant="secondary">
+                      <Badge className={getRiskColor(strategy.riskLevel)}>
                         {strategy.riskLevel} Risk
                       </Badge>
                     </CardTitle>
@@ -209,44 +207,43 @@ export default function StrategyOverview() {
                   <CardContent className="space-y-4">
                     <p className="text-gray-600">{strategy.description}</p>
                     
-                    {/* Статистика стратегії */}
                     {stats.totalBets > 0 && (
-                      <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-2xl">
                         <div className="text-center">
-                          <div className="text-lg font-semibold">{stats.totalBets}</div>
-                          <div className="text-xs text-gray-600">Всього ставок</div>
+                          <div className="text-lg font-semibold text-gray-900">{stats.totalBets}</div>
+                          <div className="text-xs text-gray-600 font-medium">Всього ставок</div>
                         </div>
                         <div className="text-center">
                           <div className={`text-lg font-semibold ${stats.winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
                             {stats.winRate.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-gray-600">Win Rate</div>
+                          <div className="text-xs text-gray-600 font-medium">Win Rate</div>
                         </div>
                         <div className="text-center">
                           <div className={`text-lg font-semibold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(0)} ₴
                           </div>
-                          <div className="text-xs text-gray-600">Прибуток</div>
+                          <div className="text-xs text-gray-600 font-medium">Прибуток</div>
                         </div>
                         <div className="text-center">
                           <div className={`text-lg font-semibold ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-gray-600">ROI</div>
+                          <div className="text-xs text-gray-600 font-medium">ROI</div>
                         </div>
                       </div>
                     )}
                     
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Очікуваний ROI</span>
-                        <span className="text-sm text-green-600">+{strategy.expectedROI}%</span>
+                        <span className="text-sm font-medium text-gray-700">Очікуваний ROI</span>
+                        <span className="text-sm text-green-600 font-medium">+{strategy.expectedROI}%</span>
                       </div>
                       <Progress value={Math.min(strategy.expectedROI, 100)} className="h-2" />
                     </div>
                     
                     <div>
-                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
                         <Lightbulb className="h-4 w-4" />
                         Критерії стратегії:
                       </h4>
@@ -268,10 +265,9 @@ export default function StrategyOverview() {
 
         <TabsContent value="performance" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Загальна статистика */}
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <BarChart3 className="h-4 w-4" />
                   Загальна статистика
                 </CardTitle>
@@ -279,15 +275,15 @@ export default function StrategyOverview() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm">Всього стратегій:</span>
-                    <span className="font-medium">{strategies.length}</span>
+                    <span className="text-sm text-gray-600">Всього стратегій:</span>
+                    <span className="font-medium text-gray-900">{strategies.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Всього ставок:</span>
-                    <span className="font-medium">{bettingData.length}</span>
+                    <span className="text-sm text-gray-600">Всього ставок:</span>
+                    <span className="font-medium text-gray-900">{bettingData.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Найкраща стратегія:</span>
+                    <span className="text-sm text-gray-600">Найкраща стратегія:</span>
                     <span className="font-medium text-green-600">
                       {Object.keys(strategyStats).reduce((best, current) => 
                         (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
@@ -299,10 +295,9 @@ export default function StrategyOverview() {
               </CardContent>
             </Card>
 
-            {/* Топ стратегії по ROI */}
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Trophy className="h-4 w-4" />
                   Топ по ROI
                 </CardTitle>
@@ -316,7 +311,7 @@ export default function StrategyOverview() {
                       <div key={name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
-                          <span className="text-sm truncate">{name}</span>
+                          <span className="text-sm truncate text-gray-900">{name}</span>
                         </div>
                         <span className={`text-sm font-medium ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
@@ -327,25 +322,24 @@ export default function StrategyOverview() {
               </CardContent>
             </Card>
 
-            {/* Рекомендації */}
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Lightbulb className="h-4 w-4" />
                   Рекомендації
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 text-sm">
-                  <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="p-3 bg-blue-50 rounded-2xl">
                     <div className="font-medium text-blue-800">💡 Порада</div>
                     <div className="text-blue-700">Використовуйте стратегії з ROI більше 5% для стабільного зростання</div>
                   </div>
-                  <div className="p-3 bg-yellow-50 rounded-lg">
+                  <div className="p-3 bg-yellow-50 rounded-2xl">
                     <div className="font-medium text-yellow-800">⚠️ Увага</div>
                     <div className="text-yellow-700">Уникайте ризикованих команд при використанні консервативних стратегій</div>
                   </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="p-3 bg-green-50 rounded-2xl">
                     <div className="font-medium text-green-800">✅ Успіх</div>
                     <div className="text-green-700">Ведіть детальну статистику для покращення стратегій</div>
                   </div>
@@ -356,9 +350,9 @@ export default function StrategyOverview() {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-6">
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                 <Plus className="h-4 w-4" />
                 Створити нову стратегію
               </CardTitle>
@@ -366,19 +360,20 @@ export default function StrategyOverview() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="strategyName">Назва стратегії</Label>
+                  <Label htmlFor="strategyName" className="text-gray-700 font-medium">Назва стратегії</Label>
                   <Input
                     id="strategyName"
                     value={newStrategy.name}
                     onChange={(e) => setNewStrategy({...newStrategy, name: e.target.value})}
                     placeholder="Наприклад: Стратегія фаворитів"
+                    className="rounded-xl"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="riskLevel">Рівень ризику</Label>
+                  <Label htmlFor="riskLevel" className="text-gray-700 font-medium">Рівень ризику</Label>
                   <Select value={newStrategy.riskLevel} onValueChange={(value: any) => setNewStrategy({...newStrategy, riskLevel: value})}>
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -391,18 +386,19 @@ export default function StrategyOverview() {
               </div>
 
               <div>
-                <Label htmlFor="description">Опис стратегії</Label>
+                <Label htmlFor="description" className="text-gray-700 font-medium">Опис стратегії</Label>
                 <Textarea
                   id="description"
                   value={newStrategy.description}
                   onChange={(e) => setNewStrategy({...newStrategy, description: e.target.value})}
                   placeholder="Детальний опис стратегії, коли її використовувати..."
                   rows={3}
+                  className="rounded-xl"
                 />
               </div>
 
               <div>
-                <Label htmlFor="expectedROI">Очікуваний ROI (%)</Label>
+                <Label htmlFor="expectedROI" className="text-gray-700 font-medium">Очікуваний ROI (%)</Label>
                 <Input
                   id="expectedROI"
                   type="number"
@@ -410,13 +406,14 @@ export default function StrategyOverview() {
                   max="100"
                   value={newStrategy.expectedROI}
                   onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
+                  className="rounded-xl"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label>Критерії стратегії</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={addCriterion}>
+                  <Label className="text-gray-700 font-medium">Критерії стратегії</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-xl">
                     <Plus className="h-4 w-4 mr-2" />
                     Додати критерій
                   </Button>
@@ -429,6 +426,7 @@ export default function StrategyOverview() {
                         value={criterion}
                         onChange={(e) => updateCriterion(index, e.target.value)}
                         placeholder={`Критерій ${index + 1}`}
+                        className="rounded-xl"
                       />
                       {newStrategy.criteria.length > 1 && (
                         <Button
@@ -436,6 +434,7 @@ export default function StrategyOverview() {
                           variant="outline"
                           size="sm"
                           onClick={() => removeCriterion(index)}
+                          className="rounded-xl"
                         >
                           ✕
                         </Button>
@@ -445,7 +444,7 @@ export default function StrategyOverview() {
                 </div>
               </div>
 
-              <Button onClick={saveStrategy} className="w-full">
+              <Button onClick={saveStrategy} className="w-full rounded-2xl bg-blue-600 hover:bg-blue-700 font-medium">
                 Зберегти стратегію
               </Button>
             </CardContent>

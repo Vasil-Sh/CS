@@ -523,10 +523,10 @@ export default function Analytics() {
 
   const getRecommendationColor = (rec: string) => {
     switch (rec) {
-      case 'strong_bet': return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0';
-      case 'moderate_bet': return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0';
-      case 'risky': return 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white border-0';
-      case 'avoid': return 'bg-gradient-to-r from-red-500 to-red-600 text-white border-0';
+      case 'strong_bet': return 'bg-green-100 text-green-700 border-green-200';
+      case 'moderate_bet': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'risky': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'avoid': return 'bg-red-100 text-red-700 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -659,7 +659,7 @@ export default function Analytics() {
     
     const balanceData: BalanceData[] = [{ date: sortedBets[0]?.date || new Date().toISOString().split('T')[0], balance: initialBalance, profit: 0 }];
     
-    sortedBets.forEach((bet: Bet) => {
+    sortedBets.forEach((bet: any) => {
       runningBalance += bet.profit || 0;
       balanceData.push({
         date: bet.date,
@@ -687,36 +687,36 @@ export default function Analytics() {
   const scatterData = oddsVsProfitData();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
             Аналітика
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-500 mt-1 font-medium">
             Детальний аналіз вашої беттінг активності
           </p>
         </div>
         
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={loadAnalyticsData} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={loadAnalyticsData} className="rounded-2xl border-gray-200 hover:bg-gray-50 font-medium">
+            <RefreshCw className="h-4 w-4 mr-2" />
             Оновити
           </Button>
-          <Button variant="destructive" onClick={clearAllData} className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4" />
+          <Button variant="outline" onClick={clearAllData} className="rounded-2xl border-red-200 text-red-600 hover:bg-red-50 font-medium">
+            <Trash2 className="h-4 w-4 mr-2" />
             Очистити
           </Button>
         </div>
       </div>
 
       {/* Backend Connection Status */}
-      <Alert className={connectionStatus.connected ? 'border-green-200 bg-green-50' : 'border-yellow-200 bg-yellow-50'}>
+      <Alert className={`rounded-2xl border-0 ${connectionStatus.connected ? 'bg-green-50' : 'bg-yellow-50'}`}>
         <div className="flex items-center gap-2">
           {connectionStatus.connected ? <Wifi className="h-4 w-4 text-green-600" /> : <WifiOff className="h-4 w-4 text-yellow-600" />}
           <Database className="h-4 w-4" />
         </div>
-        <AlertDescription>
+        <AlertDescription className="font-medium">
           <strong>Backend Status:</strong> {connectionStatus.environment} 
           {connectionStatus.connected ? 
             ' - З\'єднано з C# SQLite базою даних' : 
@@ -727,81 +727,86 @@ export default function Analytics() {
 
       {/* No Data Warning */}
       {bets.length === 0 && (
-        <Alert className="border-blue-200 bg-blue-50">
+        <Alert className="rounded-2xl border-0 bg-blue-50">
           <AlertTriangle className="h-4 w-4 text-blue-600" />
-          <AlertDescription>
+          <AlertDescription className="font-medium">
             <strong>Немає даних для аналізу.</strong> Додайте ставки на сторінці "Мої ставки" для перегляду аналітики.
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Quick Stats з градієнтами */}
+      {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-orange-700 font-medium">Загальний профіт</p>
-                <p className={`text-3xl font-bold ${stats.totalProfit >= 0 ? 'text-orange-900' : 'text-red-700'}`}>
-                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Загальний профіт</p>
+                <p className={`text-3xl font-semibold tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
+                  {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
                 </p>
               </div>
-              <DollarSign className="h-10 w-10 text-orange-600" />
+              <div className="p-3 bg-orange-50 rounded-2xl">
+                <DollarSign className="h-7 w-7 text-orange-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-700 font-medium">Win Rate</p>
-                <p className="text-3xl font-bold text-green-900">{stats.winRate}%</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
+                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
               </div>
-              <Target className="h-10 w-10 text-green-600" />
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <BarChart3 className="h-7 w-7 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-700 font-medium">Поточна серія</p>
-                <p className={`text-3xl font-bold ${streaks.currentWinStreak > 0 ? 'text-blue-900' : streaks.currentLossStreak > 0 ? 'text-red-700' : 'text-gray-600'}`}>
-                  {streaks.currentWinStreak > 0 ? `+${streaks.currentWinStreak}` : 
-                   streaks.currentLossStreak > 0 ? `-${streaks.currentLossStreak}` : '0'}
-                </p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
+                <p className="text-3xl font-semibold text-green-600 tracking-tight">{stats.winRate || 0}%</p>
               </div>
-              <Trophy className="h-10 w-10 text-blue-600" />
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <Target className="h-7 w-7 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-700 font-medium">Середній ROI</p>
-                <p className={`text-3xl font-bold ${stats.averageROI >= 0 ? 'text-purple-900' : 'text-red-700'}`}>
-                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Середній ROI</p>
+                <p className={`text-3xl font-semibold tracking-tight ${(stats.averageROI || 0) >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                  {(stats.averageROI || 0) >= 0 ? '+' : ''}{stats.averageROI || 0}%
                 </p>
               </div>
-              <Percent className="h-10 w-10 text-purple-600" />
+              <div className="p-3 bg-purple-50 rounded-2xl">
+                <Percent className="h-7 w-7 text-purple-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="profit" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="profit">Прибуток</TabsTrigger>
-          <TabsTrigger value="odds">Коефіцієнти</TabsTrigger>
-          <TabsTrigger value="comparison">Періоди</TabsTrigger>
-          <TabsTrigger value="prediction">Прогнози</TabsTrigger>
-          <TabsTrigger value="recommendations">Рекомендації</TabsTrigger>
-          <TabsTrigger value="risks">Ризики</TabsTrigger>
-          <TabsTrigger value="insights">Висновки</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
+          <TabsTrigger value="profit" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прибуток</TabsTrigger>
+          <TabsTrigger value="odds" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Коефіцієнти</TabsTrigger>
+          <TabsTrigger value="comparison" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Періоди</TabsTrigger>
+          <TabsTrigger value="prediction" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прогнози</TabsTrigger>
+          <TabsTrigger value="recommendations" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Рекомендації</TabsTrigger>
+          <TabsTrigger value="risks" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ризики</TabsTrigger>
+          <TabsTrigger value="insights" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Висновки</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profit">
@@ -809,10 +814,10 @@ export default function Analytics() {
             {bets.length > 0 ? (
               <>
                 {/* Date Filter */}
-                <Card>
+                <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                         <Filter className="h-5 w-5" />
                         Фільтри
                       </span>
@@ -821,9 +826,9 @@ export default function Analytics() {
                   <CardContent>
                     <div className="flex gap-4">
                       <div className="flex-1">
-                        <label className="text-sm font-medium">Період:</label>
+                        <label className="text-sm font-medium text-gray-700">Період:</label>
                         <Select value={timeFilter} onValueChange={setTimeFilter}>
-                          <SelectTrigger className="mt-1">
+                          <SelectTrigger className="mt-1 rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -841,9 +846,9 @@ export default function Analytics() {
                 <BalanceChart data={balanceData} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                     <CardHeader>
-                      <CardTitle>Прибуток по місяцях</CardTitle>
+                      <CardTitle className="text-lg font-semibold text-gray-900">Прибуток по місяцях</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -858,9 +863,9 @@ export default function Analytics() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                     <CardHeader>
-                      <CardTitle>Коефіцієнти vs Прибуток</CardTitle>
+                      <CardTitle className="text-lg font-semibold text-gray-900">Коефіцієнти vs Прибуток</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -880,10 +885,12 @@ export default function Analytics() {
                 </div>
               </>
             ) : (
-              <Card>
+              <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                 <CardContent className="py-12 text-center">
-                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <DollarSign className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Немає даних про прибуток
                   </h3>
                   <p className="text-gray-600">
@@ -897,9 +904,9 @@ export default function Analytics() {
 
         <TabsContent value="odds">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle>ROI & Win Rate по категоріях</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">ROI & Win Rate по категоріях</CardTitle>
               </CardHeader>
               <CardContent>
                 {bets.length > 0 ? (
@@ -914,16 +921,18 @@ export default function Analytics() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-8">
-                    <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <Target className="h-10 w-10 text-gray-400" />
+                    </div>
                     <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle>Розподіл типів ставок</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">Розподіл типів ставок</CardTitle>
               </CardHeader>
               <CardContent>
                 {betTypes.length > 0 ? (
@@ -948,7 +957,9 @@ export default function Analytics() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-12">
-                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <BarChart3 className="h-10 w-10 text-gray-400" />
+                    </div>
                     <p className="text-gray-600">Немає даних про типи ставок</p>
                   </div>
                 )}
@@ -956,24 +967,24 @@ export default function Analytics() {
             </Card>
 
             {/* Detailed odds analysis */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle>Детальний аналіз по коефіцієнтах</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">Детальний аналіз по коефіцієнтах</CardTitle>
               </CardHeader>
               <CardContent>
                 {bets.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {oddsData.map((range) => (
-                      <div key={range.range} className="p-4 border rounded-lg">
-                        <h3 className="font-semibold mb-2">{range.range}</h3>
+                      <div key={range.range} className="p-4 border border-gray-100 rounded-2xl bg-gray-50/50">
+                        <h3 className="font-semibold mb-2 text-gray-900">{range.range}</h3>
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Ставок:</span>
-                            <span className="font-medium">{range.count}</span>
+                            <span className="font-medium text-gray-900">{range.count}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Win Rate:</span>
-                            <span className="font-medium">{range.winRate}%</span>
+                            <span className="font-medium text-gray-900">{range.winRate}%</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Прибуток:</span>
@@ -987,7 +998,9 @@ export default function Analytics() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                      <Target className="h-10 w-10 text-gray-400" />
+                    </div>
                     <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
                   </div>
                 )}
@@ -1005,9 +1018,9 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="recommendations">
-          <Card>
+          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                 <Star className="h-5 w-5" />
                 AI Генератор рекомендацій
               </CardTitle>
@@ -1016,9 +1029,9 @@ export default function Analytics() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Команда 1:</label>
+                    <label className="text-sm font-medium text-gray-700">Команда 1:</label>
                     <select 
-                      className="w-full p-2 border rounded-md mt-1"
+                      className="w-full p-2 border border-gray-200 rounded-xl mt-1 bg-white"
                       onChange={(e) => {
                         const team2 = (document.querySelector('select[data-team="2"]') as HTMLSelectElement)?.value;
                         if (e.target.value && team2 && e.target.value !== team2) {
@@ -1037,9 +1050,9 @@ export default function Analytics() {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-medium">Команда 2:</label>
+                    <label className="text-sm font-medium text-gray-700">Команда 2:</label>
                     <select 
-                      className="w-full p-2 border rounded-md mt-1"
+                      className="w-full p-2 border border-gray-200 rounded-xl mt-1 bg-white"
                       data-team="2"
                       onChange={(e) => {
                         const team1 = (document.querySelector('select:not([data-team])') as HTMLSelectElement)?.value;
@@ -1060,15 +1073,15 @@ export default function Analytics() {
                 </div>
 
                 {recommendations.map((rec, index) => (
-                  <div key={index} className={`p-6 border-2 rounded-lg ${getRecommendationColor(rec.recommendation)}`}>
+                  <div key={index} className={`p-6 border-2 rounded-2xl ${getRecommendationColor(rec.recommendation)}`}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         {getRecommendationIcon(rec.recommendation)}
                         <h3 className="font-semibold text-lg">{rec.team} vs {rec.opponent}</h3>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="font-medium bg-white/20">{getRecommendationText(rec.recommendation)}</Badge>
-                        <Badge variant="outline" className="font-medium bg-white/20">{rec.confidence}% впевненості</Badge>
+                        <Badge variant="secondary" className="font-medium px-3 py-1 rounded-full bg-white/50">{getRecommendationText(rec.recommendation)}</Badge>
+                        <Badge variant="secondary" className="font-medium px-3 py-1 rounded-full bg-white/50">{rec.confidence}% впевненості</Badge>
                       </div>
                     </div>
                     
@@ -1092,10 +1105,10 @@ export default function Analytics() {
                       </div>
 
                       {/* Collapsible detailed analysis */}
-                      <div className="border-t pt-4 border-white/20">
+                      <div className="border-t pt-4 border-gray-200">
                         <Button
                           variant="ghost"
-                          className="w-full flex items-center justify-between p-0 hover:bg-transparent text-white"
+                          className="w-full flex items-center justify-between p-0 hover:bg-transparent"
                           onClick={() => setExpandedRecommendation(expandedRecommendation === index ? null : index)}
                         >
                           <span className="font-medium">Детальний аналіз</span>
@@ -1148,7 +1161,7 @@ export default function Analytics() {
                             {/* Strengths and risks */}
                             <div className="grid grid-cols-2 gap-3 mt-4">
                               {rec.detailedAnalysis.strengths.length > 0 && (
-                                <div className="p-3 bg-white/10 rounded-lg">
+                                <div className="p-3 bg-white/20 rounded-xl">
                                   <div className="flex items-center gap-2 mb-2">
                                     <TrendingUp className="h-3 w-3" />
                                     <span className="text-xs font-medium">Сильні сторони</span>
@@ -1162,7 +1175,7 @@ export default function Analytics() {
                               )}
                               
                               {rec.detailedAnalysis.riskFactors.length > 0 && (
-                                <div className="p-3 bg-white/10 rounded-lg">
+                                <div className="p-3 bg-white/20 rounded-xl">
                                   <div className="flex items-center gap-2 mb-2">
                                     <TrendingDown className="h-3 w-3" />
                                     <span className="text-xs font-medium">Ризик-фактори</span>
@@ -1179,7 +1192,7 @@ export default function Analytics() {
                         )}
                       </div>
 
-                      <div className="p-3 bg-white/10 rounded-lg border-t border-white/20">
+                      <div className="p-3 bg-white/20 rounded-xl border-t border-gray-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Target className="h-4 w-4" />
                           <span className="text-sm font-medium">Рекомендація:</span>
@@ -1200,22 +1213,24 @@ export default function Analytics() {
 
         <TabsContent value="insights">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-green-700">Сильні сторони</CardTitle>
+                <CardTitle className="text-green-700 text-lg font-semibold">Сильні сторони</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {stats.winRate > 50 && (
+                  {(stats.winRate || 0) > 50 && (
                     <div className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span className="text-sm">Позитивний win rate ({stats.winRate}%)</span>
+                      <span className="text-sm">Позитивний win rate ({stats.winRate || 0}%)</span>
                     </div>
                   )}
-                  {stats.totalProfit > 0 && (
+                  {(stats.totalProfit || 0) > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span className="text-sm">Прибутковість: +{stats.totalProfit} ₴</span>
+                      <span className="text-sm">
+                        Прибутковість: +{(stats.totalProfit || 0).toFixed(2)} ₴
+                      </span>
                     </div>
                   )}
                   {streaks.maxWinStreak > 3 && (
@@ -1224,10 +1239,10 @@ export default function Analytics() {
                       <span className="text-sm">Максимальна серія: {streaks.maxWinStreak} виграшів</span>
                     </div>
                   )}
-                  {stats.averageROI > 0 && (
+                  {(stats.averageROI || 0) > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-green-500">✓</span>
-                      <span className="text-sm">Позитивний ROI: {stats.averageROI}%</span>
+                      <span className="text-sm">Позитивний ROI: {stats.averageROI || 0}%</span>
                     </div>
                   )}
                   {completedBets.length > 20 && (
@@ -1244,7 +1259,9 @@ export default function Analytics() {
                   )}
                   {bets.length === 0 && (
                     <div className="text-center py-8">
-                      <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <CheckCircle className="h-10 w-10 text-gray-400" />
+                      </div>
                       <p className="text-gray-600">Немає даних для аналізу сильних сторін</p>
                     </div>
                   )}
@@ -1252,9 +1269,9 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-orange-700">Області для покращення</CardTitle>
+                <CardTitle className="text-orange-700 text-lg font-semibold">Області для покращення</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -1264,10 +1281,10 @@ export default function Analytics() {
                       <span className="text-sm">Мало даних для аналізу (менше 10 ставок)</span>
                     </div>
                   )}
-                  {stats.winRate < 50 && stats.winRate > 0 && (
+                  {(stats.winRate || 0) < 50 && (stats.winRate || 0) > 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-orange-500">!</span>
-                      <span className="text-sm">Win rate нижче 50% ({stats.winRate}%)</span>
+                      <span className="text-sm">Win rate нижче 50% ({stats.winRate || 0}%)</span>
                     </div>
                   )}
                   {streaks.maxLossStreak > 5 && (
@@ -1276,16 +1293,18 @@ export default function Analytics() {
                       <span className="text-sm">Довга серія програшів: {streaks.maxLossStreak}</span>
                     </div>
                   )}
-                  {stats.totalProfit < 0 && (
+                  {(stats.totalProfit || 0) < 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-red-500">⚠</span>
-                      <span className="text-sm">Загальний збиток: {stats.totalProfit} ₴</span>
+                      <span className="text-sm">
+                        Загальний збиток: {(stats.totalProfit || 0).toFixed(2)} ₴
+                      </span>
                     </div>
                   )}
-                  {stats.averageROI < 0 && (
+                  {(stats.averageROI || 0) < 0 && (
                     <div className="flex items-start gap-2">
                       <span className="text-red-500">⚠</span>
-                      <span className="text-sm">Негативний ROI: {stats.averageROI}%</span>
+                      <span className="text-sm">Негативний ROI: {stats.averageROI || 0}%</span>
                     </div>
                   )}
                   {!connectionStatus.connected && (

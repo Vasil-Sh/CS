@@ -94,10 +94,10 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
               isActive
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             )}
           >
             <Icon className="h-5 w-5" />
@@ -114,9 +114,9 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
               isActive
-                ? 'bg-purple-100 text-purple-700'
+                ? 'bg-purple-50 text-purple-700'
                 : 'text-purple-600 hover:bg-purple-50 hover:text-purple-900'
             )}
           >
@@ -129,16 +129,16 @@ export default function Layout({ children }: LayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 shadow-sm">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/80 backdrop-blur-xl px-6 pb-4 border-r border-gray-100">
           <div className="flex h-16 shrink-0 items-center">
-            <h1 className="text-xl font-bold text-gray-900">MatchIQ</h1>
+            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">MatchIQ</h1>
           </div>
           
           {/* User Info */}
-          <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-2xl border border-gray-100">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700">
               <User className="h-5 w-5 text-white" />
             </div>
@@ -166,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-xl font-medium"
                 >
                   <LogOut className="h-5 w-5" />
                   Вийти
@@ -179,21 +179,21 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-white px-4 py-4 shadow-sm">
-          <h1 className="text-lg font-semibold text-gray-900">MatchIQ</h1>
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur-xl px-4 py-4 border-b border-gray-100">
+          <h1 className="text-lg font-semibold text-gray-900 tracking-tight">MatchIQ</h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="rounded-xl">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72">
               <div className="flex h-16 items-center">
-                <h1 className="text-xl font-bold text-gray-900">MatchIQ</h1>
+                <h1 className="text-xl font-semibold text-gray-900 tracking-tight">MatchIQ</h1>
               </div>
               
               {/* User Info Mobile */}
-              <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 mt-4">
+              <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-2xl border border-gray-100 mt-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700">
                   <User className="h-5 w-5 text-white" />
                 </div>
@@ -218,7 +218,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Button
                     onClick={handleLogout}
                     variant="outline"
-                    className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-xl font-medium"
                   >
                     <LogOut className="h-5 w-5" />
                     Вийти

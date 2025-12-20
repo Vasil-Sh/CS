@@ -45,9 +45,8 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
       return;
     }
 
-    // Розрахунок трендів за останні періоди
-    const recentBets = completedBets.slice(-20); // Останні 20 ставок
-    const olderBets = completedBets.slice(-40, -20); // Попередні 20 ставок
+    const recentBets = completedBets.slice(-20);
+    const olderBets = completedBets.slice(-40, -20);
 
     const calculateMetrics = (betGroup: Bet[]) => {
       const wins = betGroup.filter(bet => bet.result === 'Win').length;
@@ -65,10 +64,9 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
     const recentMetrics = calculateMetrics(recentBets);
     const olderMetrics = calculateMetrics(olderBets);
 
-    // Простий лінійний прогноз на основі трендів
     const predictMetric = (current: number, previous: number) => {
       const trend = current - previous;
-      return current + (trend * 0.5); // Консервативний прогноз
+      return current + (trend * 0.5);
     };
 
     const getTrend = (current: number, previous: number): 'up' | 'down' | 'stable' => {
@@ -117,7 +115,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         implementation: 'Зробіть ще 10-15 ставок для отримання статистично значущих рекомендацій'
       });
     } else {
-      // Аналіз win rate
       const winRate = (completedBets.filter(bet => bet.result === 'Win').length / completedBets.length) * 100;
       
       if (winRate < 45) {
@@ -129,7 +126,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         });
       }
 
-      // Аналіз коефіцієнтів
       const avgOdds = completedBets.reduce((sum, bet) => sum + (bet.odds || 0), 0) / completedBets.length;
       const highOddsBets = completedBets.filter(bet => bet.odds > 3.0);
       const highOddsWinRate = highOddsBets.length > 0 ? 
@@ -144,7 +140,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         });
       }
 
-      // Аналіз розміру ставок
       const amounts = completedBets.map(bet => bet.amount || 0);
       const avgAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
       const maxAmount = Math.max(...amounts);
@@ -158,8 +153,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         });
       }
 
-      // Аналіз серій
-      let currentStreak = 0;
       let maxLossStreak = 0;
       let tempLossStreak = 0;
 
@@ -181,7 +174,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         });
       }
 
-      // Позитивні рекомендації
       const totalProfit = completedBets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
       if (totalProfit > 0 && winRate > 55) {
         recommendations.push({
@@ -200,7 +192,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
     const completedBets = bets.filter(bet => bet.result !== 'Pending');
     if (completedBets.length < 5) return;
 
-    // Створюємо історичні дані по тижнях
     const weeklyData: { [key: string]: { profit: number; bets: number } } = {};
     
     completedBets.forEach(bet => {
@@ -225,7 +216,6 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         bets: data.bets
       }));
 
-    // Генеруємо прогноз на наступні 4 тижні
     const avgWeeklyProfit = historicalWeeks.reduce((sum, week) => sum + week.historical, 0) / historicalWeeks.length;
     const trend = historicalWeeks.length > 1 ? 
       (historicalWeeks[historicalWeeks.length - 1].historical - historicalWeeks[0].historical) / historicalWeeks.length : 0;
@@ -236,7 +226,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
       forecastWeeks.push({
         week: `Прогноз ${i}`,
         predicted: Math.round(predictedProfit * 100) / 100,
-        confidence: Math.max(30, 90 - (i * 15)) // Зменшення впевненості з часом
+        confidence: Math.max(30, 90 - (i * 15))
       });
     }
 
@@ -250,9 +240,9 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'destructive';
-      case 'medium': return 'secondary';
-      default: return 'default';
+      case 'high': return 'bg-red-100 text-red-700 border-0';
+      case 'medium': return 'bg-yellow-100 text-yellow-700 border-0';
+      default: return 'bg-blue-100 text-blue-700 border-0';
     }
   };
 
@@ -267,31 +257,32 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <Brain className="h-6 w-6 text-purple-600" />
-        <div>
-          <h2 className="text-2xl font-bold">Предиктивна аналітика</h2>
-          <p className="text-gray-600">AI-прогнози та рекомендації стратегій</p>
+        <div className="p-2.5 bg-purple-50 rounded-2xl">
+          <Brain className="h-5 w-5 text-purple-600" />
         </div>
-        <Badge variant="outline" className="ml-auto">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Предиктивна аналітика</h2>
+          <p className="text-gray-500 font-medium">AI-прогнози та рекомендації стратегій</p>
+        </div>
+        <Badge className="ml-auto rounded-full bg-purple-100 text-purple-700 border-0">
           Впевненість: {confidenceScore}%
         </Badge>
       </div>
 
       {confidenceScore < 50 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert className="rounded-2xl border-0 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-700 font-medium">
             Недостатньо даних для точних прогнозів. Рекомендується мінімум 20 завершених ставок.
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Прогнози метрик */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {predictions.map((prediction) => (
-          <Card key={prediction.metric}>
+          <Card key={prediction.metric} className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900">
                 {getTrendIcon(prediction.trend)}
                 {prediction.metric}
               </CardTitle>
@@ -300,7 +291,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Поточне:</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-gray-900">
                     {prediction.metric === 'Прибуток на ставку' 
                       ? `${prediction.current.toFixed(2)} ₴`
                       : `${prediction.current.toFixed(1)}%`
@@ -309,7 +300,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Прогноз:</span>
-                  <span className={`font-bold ${prediction.predicted > prediction.current ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`font-semibold ${prediction.predicted > prediction.current ? 'text-green-600' : 'text-red-600'}`}>
                     {prediction.metric === 'Прибуток на ставку' 
                       ? `${prediction.predicted.toFixed(2)} ₴`
                       : `${prediction.predicted.toFixed(1)}%`
@@ -318,8 +309,8 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Впевненість</span>
-                    <span>{prediction.confidence.toFixed(0)}%</span>
+                    <span className="text-gray-600">Впевненість</span>
+                    <span className="text-gray-900 font-medium">{prediction.confidence.toFixed(0)}%</span>
                   </div>
                   <Progress value={prediction.confidence} className="h-2" />
                 </div>
@@ -329,11 +320,10 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         ))}
       </div>
 
-      {/* Графік прогнозу */}
       {forecastData.length > 0 && (
-        <Card>
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Прогноз тижневого прибутку</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">Прогноз тижневого прибутку</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -370,10 +360,9 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         </Card>
       )}
 
-      {/* Рекомендації стратегій */}
-      <Card>
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
             <Lightbulb className="h-5 w-5 text-yellow-500" />
             Рекомендації стратегій
           </CardTitle>
@@ -381,13 +370,13 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         <CardContent>
           <div className="space-y-4">
             {recommendations.map((rec, index) => (
-              <div key={index} className="p-4 border rounded-lg">
+              <div key={index} className="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold flex items-center gap-2">
+                  <h4 className="font-semibold flex items-center gap-2 text-gray-900">
                     <Star className="h-4 w-4 text-yellow-500" />
                     {rec.strategy}
                   </h4>
-                  <Badge variant={getImpactColor(rec.impact) as any}>
+                  <Badge className={`${getImpactColor(rec.impact)} rounded-full`}>
                     {rec.impact === 'high' ? 'Високий' : rec.impact === 'medium' ? 'Середній' : 'Низький'} вплив
                   </Badge>
                 </div>
