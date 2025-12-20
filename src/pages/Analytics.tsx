@@ -21,7 +21,6 @@ import {
   Percent,
   Filter,
   RefreshCw,
-  Download,
   Trash2,
   CheckCircle,
   AlertTriangle,
@@ -681,28 +680,6 @@ export default function Analytics() {
     }));
   };
 
-  const exportReport = () => {
-    const reportData = {
-      summary: stats,
-      bets: completedBets,
-      analysis: {
-        streaks,
-        oddsAnalysis: oddsAnalysis()
-      },
-      connectionStatus,
-      generatedAt: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `cs2-betting-analytics-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   const oddsData = oddsAnalysis();
   const betTypes = betTypeDistribution();
   const monthlyProfit = monthlyProfitData();
@@ -722,10 +699,6 @@ export default function Analytics() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Експорт
-          </Button>
           <Button variant="outline" onClick={loadAnalyticsData} className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4" />
             Оновити
