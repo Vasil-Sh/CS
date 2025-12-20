@@ -55,6 +55,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     format: 'BO3',
     riskyTeams: [] as RiskyTeam[],
     betType: '',
+    betCategory: 'Ординар',
     selection: '',
     odds: '',
     stake: '',
@@ -244,6 +245,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       
       const stakeInUAH = convertToUAH(stakeAmount, formData.currency, exchangeRate);
       
+      const betTypeWithCategory = formData.betCategory === 'Експрес' 
+        ? `${formData.betType} - ${formData.selection} (Експрес)`
+        : `${formData.betType} - ${formData.selection}`;
+      
       const record: BetRecord = {
         date: formData.date,
         match: `${formData.team1} vs ${formData.team2}`,
@@ -252,7 +257,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         tournament: formData.tournament,
         format: formData.format,
         matchUrl: formData.matchUrl,
-        betType: `${formData.betType} - ${formData.selection}`,
+        betType: betTypeWithCategory,
         odds: parseFloat(formData.odds),
         amount: stakeInUAH,
         originalAmount: stakeAmount,
@@ -281,6 +286,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         format: 'BO3',
         riskyTeams: [],
         betType: '',
+        betCategory: 'Ординар',
         selection: '',
         odds: '',
         stake: '',
@@ -403,7 +409,20 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     Деталі ставки
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
+                      <Select value={formData.betCategory} onValueChange={(value) => setFormData({...formData, betCategory: value})}>
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Ординар">Ординар</SelectItem>
+                          <SelectItem value="Експрес">Експрес</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
                     <div>
                       <Label htmlFor="betType" className="text-gray-700 font-medium">Тип ставки</Label>
                       <Select value={formData.betType} onValueChange={(value) => setFormData({...formData, betType: value})}>
