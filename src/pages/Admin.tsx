@@ -12,7 +12,9 @@ import {
   XCircle,
   Loader2,
   Bell,
-  AlertTriangle
+  AlertTriangle,
+  DollarSign,
+  MessageCircle
 } from 'lucide-react';
 import {
   Table,
@@ -28,6 +30,8 @@ interface User {
   telegram: string;
   username: string;
   password: string;
+  priceMonth: string;
+  vipGroup: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -89,19 +93,21 @@ export default function Admin() {
       const response = await fetch(url);
       const text = await response.text();
       
-      // Parse CSV - 5 columns: Users Telegram, UserName, Password, StartDate, EndDate
+      // Parse CSV - 7 columns: Telegram, UserName, Password, PriceMonth, VIPGrup, StartDate, EndDate
       const rows = text.split('\n').slice(1); // Skip header
       const parsedUsers: User[] = rows
         .filter(row => row.trim())
         .map(row => {
           const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 5) return null;
+          if (!matches || matches.length < 7) return null;
           
           const telegram = matches[0].replace(/"/g, '').trim();
           const username = matches[1].replace(/"/g, '').trim();
           const password = matches[2].replace(/"/g, '').trim();
-          const startDate = matches[3].replace(/"/g, '').trim();
-          const endDate = matches[4].replace(/"/g, '').trim();
+          const priceMonth = matches[3].replace(/"/g, '').trim();
+          const vipGroup = matches[4].replace(/"/g, '').trim();
+          const startDate = matches[5].replace(/"/g, '').trim();
+          const endDate = matches[6].replace(/"/g, '').trim();
           
           const daysLeft = getDaysUntilExpiry(endDate);
           
@@ -109,6 +115,8 @@ export default function Admin() {
             telegram,
             username,
             password,
+            priceMonth,
+            vipGroup,
             startDate,
             endDate,
             isActive: isSubscriptionActive(endDate),
@@ -304,6 +312,8 @@ export default function Admin() {
                 <TableRow className="bg-gray-50/80 backdrop-blur-sm border-b border-gray-100">
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Telegram</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Username</TableHead>
+                  <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Ціна</TableHead>
+                  <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">VIP Група</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата початку</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата закінчення</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Статус</TableHead>
@@ -312,7 +322,7 @@ export default function Admin() {
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-gray-500 py-12">
+                    <TableCell colSpan={7} className="text-center text-gray-500 py-12">
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
                           <Loader2 className="h-5 w-5 animate-spin" />
@@ -339,6 +349,18 @@ export default function Admin() {
                         {user.username === ADMIN_USERNAME && (
                           <span className="ml-2 text-purple-600">👑</span>
                         )}
+                      </TableCell>
+                      <TableCell className="text-gray-700">
+                        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 px-2 py-1 rounded-full border-0">
+                          <DollarSign className="mr-1 h-3 w-3" />
+                          {user.priceMonth}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-700">
+                        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 px-2 py-1 rounded-full border-0">
+                          <MessageCircle className="mr-1 h-3 w-3" />
+                          {user.vipGroup}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-gray-700">{user.startDate}</TableCell>
                       <TableCell className="text-gray-700">{user.endDate}</TableCell>
