@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import Analytics from '@/pages/Analytics';
 import Matches from '@/pages/Matches';
 import MyBets from '@/pages/MyBets';
+import Admin from '@/pages/Admin';
 import Login from '@/pages/Login';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -55,6 +56,16 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Analytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Admin />
                 </Layout>
               </ProtectedRoute>
             }

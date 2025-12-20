@@ -7,7 +7,8 @@ import {
   Wallet,
   Menu,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -22,20 +23,37 @@ const navigation = [
   { name: 'Мої ставки', href: '/my-bets', icon: Wallet },
 ];
 
+const adminNavigation = [
+  { name: 'Адмін панель', href: '/admin', icon: Shield, adminOnly: true },
+];
+
+const ADMIN_USERNAME = 'super_gus23_7482';
+
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentUser = localStorage.getItem('currentUser');
   const userEndDate = localStorage.getItem('userEndDate');
+  const isAdmin = currentUser === ADMIN_USERNAME;
 
   useEffect(() => {
-    // Check subscription validity on every route change
+    // Check subscription validity once per day
+    const lastCheck = localStorage.getItem('lastSubscriptionCheck');
+    const today = new Date().toDateString();
+    
     if (currentUser && userEndDate) {
-      if (!isSubscriptionValid(userEndDate)) {
-        // Subscription expired, logout and redirect
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userEndDate');
-        navigate('/login');
+      // Only check if it's a new day or first time
+      if (!lastCheck || lastCheck !== today) {
+        if (!isSubscriptionValid(userEndDate)) {
+          // Subscription expired, logout and redirect
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('userEndDate');
+          localStorage.removeItem('lastSubscriptionCheck');
+          navigate('/login');
+        } else {
+          // Update last check date
+          localStorage.setItem('lastSubscriptionCheck', today);
+        }
       }
     }
   }, [location.pathname, currentUser, userEndDate, navigate]);
@@ -61,6 +79,7 @@ export default function Layout({ children }: LayoutProps) {
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userEndDate');
+    localStorage.removeItem('lastSubscriptionCheck');
     navigate('/login');
   };
 
@@ -79,6 +98,26 @@ export default function Layout({ children }: LayoutProps) {
               isActive
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+            )}
+          >
+            <Icon className="h-5 w-5" />
+            {item.name}
+          </Link>
+        );
+      })}
+      {isAdmin && adminNavigation.map((item) => {
+        const Icon = item.icon;
+        const isActive = location.pathname === item.href;
+        
+        return (
+          <Link
+            key={item.name}
+            to={item.href}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-purple-100 text-purple-700'
+                : 'text-purple-600 hover:bg-purple-50 hover:text-purple-900'
             )}
           >
             <Icon className="h-5 w-5" />
@@ -106,6 +145,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
                 @{currentUser}
+                {isAdmin && <span className="ml-1 text-purple-600">👑</span>}
               </p>
               {userEndDate && (
                 <p className="text-xs text-gray-500">
@@ -160,6 +200,7 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
                     @{currentUser}
+                    {isAdmin && <span className="ml-1 text-purple-600">👑</span>}
                   </p>
                   {userEndDate && (
                     <p className="text-xs text-gray-500">
