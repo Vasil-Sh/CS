@@ -110,6 +110,44 @@ export default function BettingHistory() {
     ? (completedBets.filter(bet => bet.result === 'Win').length / completedBets.length * 100).toFixed(1)
     : '0';
 
+  // Функція для парсингу експрес-подій
+  interface ParsedEvent {
+    number: string;
+    match: string;
+    betType: string;
+    selection: string;
+    odds: string;
+  }
+
+  const parseExpressEvents = (betType: string): ParsedEvent[] => {
+    if (!betType.includes('|')) return [];
+    
+    const fullString = betType.split('|').slice(1).join('|').trim();
+    const eventStrings = fullString.split('•').map(e => e.trim());
+    
+    return eventStrings.map(eventStr => {
+      const parts = eventStr.split('|').map(p => p.trim());
+      
+      if (parts.length >= 2) {
+        const matchPart = parts[0];
+        const betPart = parts[1];
+        
+        const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
+        const number = numberMatch ? numberMatch[1] : '';
+        const match = numberMatch ? numberMatch[2] : matchPart;
+        
+        const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
+        const betType = betMatch ? betMatch[1] : '';
+        const selection = betMatch ? betMatch[2] : '';
+        const odds = betMatch ? betMatch[3] : '';
+        
+        return { number, match, betType, selection, odds };
+      }
+      
+      return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
@@ -274,6 +312,7 @@ export default function BettingHistory() {
                   {sortedBets.map((bet, index) => {
                     const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
                     const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
+                    const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
                     
                     return (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
@@ -285,10 +324,37 @@ export default function BettingHistory() {
                           </Badge>
                         </td>
                         <td className="p-3">
-                          {isExpress ? (
-                            <Badge className="rounded-full bg-purple-100 text-purple-700 border-0">
-                              Експрес {bet.format}
-                            </Badge>
+                          {isExpress && parsedEvents.length > 0 ? (
+                            <div className="space-y-2 max-w-md">
+                              <Badge className="rounded-full bg-purple-100 text-purple-700 border-0 mb-2">
+                                Експрес {bet.format}
+                              </Badge>
+                              {parsedEvents.map((event, idx) => (
+                                <div key={idx} className="p-2 bg-white rounded-lg border border-gray-200 text-xs">
+                                  <div className="flex items-start gap-2 mb-1">
+                                    <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs">
+                                      #{event.number}
+                                    </Badge>
+                                    <span className="font-semibold text-gray-900 leading-tight flex-1">
+                                      {event.match}
+                                    </span>
+                                  </div>
+                                  <div className="ml-7 space-y-0.5">
+                                    <p className="text-gray-500 uppercase tracking-wide font-medium">
+                                      {event.betType}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-bold text-purple-700">
+                                        {event.selection}
+                                      </span>
+                                      <Badge className="text-xs bg-purple-100 text-purple-700 border-0 rounded-full">
+                                        Коеф {event.odds}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           ) : (
                             <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">
                               {bet.betType.split(' - ')[0]}
