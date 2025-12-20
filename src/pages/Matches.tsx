@@ -24,8 +24,7 @@ import {
   Shield,
   AlertCircle,
   Eye,
-  EyeOff,
-  ChevronRight
+  EyeOff
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -185,39 +184,39 @@ const getFormStabilityInfo = (form: FormStability) => {
   switch (form) {
     case 'hot_streak':
       return {
-        icon: <Flame className="h-3 w-3" />,
+        icon: <Flame className="h-3.5 w-3.5" />,
         label: 'Hot',
-        color: 'bg-red-100 text-red-700 border-0'
+        color: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0'
       };
     case 'stable':
       return {
-        icon: <Shield className="h-3 w-3" />,
+        icon: <Shield className="h-3.5 w-3.5" />,
         label: 'Stable',
-        color: 'bg-green-100 text-green-700 border-0'
+        color: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0'
       };
     case 'momentum':
       return {
-        icon: <TrendingUp className="h-3 w-3" />,
+        icon: <TrendingUp className="h-3.5 w-3.5" />,
         label: 'Up',
-        color: 'bg-blue-100 text-blue-700 border-0'
+        color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0'
       };
     case 'falling':
       return {
-        icon: <TrendingDown className="h-3 w-3" />,
+        icon: <TrendingDown className="h-3.5 w-3.5" />,
         label: 'Down',
-        color: 'bg-orange-100 text-orange-700 border-0'
+        color: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0'
       };
     case 'slump':
       return {
-        icon: <AlertCircle className="h-3 w-3" />,
+        icon: <AlertCircle className="h-3.5 w-3.5" />,
         label: 'Slump',
-        color: 'bg-red-100 text-red-700 border-0'
+        color: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0'
       };
     case 'inconsistent':
       return {
-        icon: <AlertTriangle className="h-3 w-3" />,
+        icon: <AlertTriangle className="h-3.5 w-3.5" />,
         label: 'Mixed',
-        color: 'bg-gray-100 text-gray-700 border-0'
+        color: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0'
       };
   }
 };
@@ -617,166 +616,188 @@ export default function Matches() {
         </CardContent>
       </Card>
 
-      {/* Match Cards */}
+      {/* Matches Table */}
       {sortedMatches.length > 0 ? (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-blue-50 rounded-2xl">
-              <Calendar className="h-5 w-5 text-blue-600" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900 tracking-tight">{currentDate}</span>
-          </div>
-
-          {sortedMatches.map((match) => {
-            const formInfo = getFormStabilityInfo(match.formStability);
-            const riskInfo = getRiskBadge(match.risk);
-            const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
-            const riskComments = getMatchRiskComments(match.team1, match.team2);
-            const isCommentVisible = visibleComments.has(match.id);
-            
-            return (
-              <Card key={match.id} className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden hover:shadow-xl transition-all duration-200">
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Teams Section */}
-                    <div className="lg:col-span-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
-                            {match.matchType}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
-                            {match.tier.toUpperCase()}
-                          </Badge>
-                          {isHotMatch && (
-                            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold">
-                              <Flame className="h-3 w-3 mr-1" />
-                              Hot
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900">
-                          {match.team1} <span className="text-gray-400 font-normal">vs</span> {match.team2}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Trophy className="h-4 w-4 text-blue-600" />
-                          <span className="font-semibold text-blue-700">Фаворит: {match.favorite}</span>
-                        </div>
+        <Card className="border-0 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-white/80 backdrop-blur-xl">
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-2.5 bg-blue-50 rounded-2xl">
+                <Calendar className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-xl font-semibold text-gray-900 tracking-tight">{currentDate}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-blue-50/30 backdrop-blur-sm border-b border-gray-200">
+                  <tr>
+                    <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Матч</th>
+                    <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Фаворит</th>
+                    <th 
+                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors"
+                      onClick={() => toggleSort('confidence')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        AI %
+                        <ArrowUpDown className="h-3.5 w-3.5" />
                       </div>
-                    </div>
-
-                    {/* Stats Section */}
-                    <div className="lg:col-span-5">
-                      <div className="grid grid-cols-2 gap-3">
-                        {/* AI Confidence */}
-                        <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">AI Confidence</p>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-blue-700">{match.aiConfidence}%</span>
-                            <span className="text-sm text-gray-500">/ {100 - match.aiConfidence}%</span>
-                          </div>
-                        </div>
-
-                        {/* Risk */}
-                        <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Ризик</p>
+                    </th>
+                    <th 
+                      className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100/50 rounded-xl transition-colors"
+                      onClick={() => toggleSort('risk')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        Ризик
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </div>
+                    </th>
+                    <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Коефіцієнти</th>
+                    <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Win Rate</th>
+                    <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Form</th>
+                    <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Турнір</th>
+                    <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Коментар</th>
+                    <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedMatches.map((match) => {
+                    const formInfo = getFormStabilityInfo(match.formStability);
+                    const riskInfo = getRiskBadge(match.risk);
+                    const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
+                    const riskComments = getMatchRiskComments(match.team1, match.team2);
+                    const isCommentVisible = visibleComments.has(match.id);
+                    
+                    return (
+                      <tr 
+                        key={match.id} 
+                        className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200"
+                      >
+                        <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${riskInfo.dotColor}`} />
-                            <span className="text-2xl font-bold text-gray-900">{match.risk}%</span>
+                            <div>
+                              <div className="font-bold text-gray-900 text-sm">
+                                {match.team1} <span className="text-gray-400 font-normal">vs</span> {match.team2}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
+                                  {match.matchType}
+                                </Badge>
+                                <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
+                                  {match.tier.toUpperCase()}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-600 mt-1 font-medium">{riskInfo.label}</p>
-                        </div>
-
-                        {/* Odds */}
-                        <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Коефіцієнти</p>
-                          <div className="space-y-1">
-                            <div className="text-sm"><span className="font-semibold text-gray-900">{match.odds.team1}</span> <span className="text-gray-500">({match.team1})</span></div>
-                            <div className="text-sm"><span className="font-semibold text-gray-900">{match.odds.team2}</span> <span className="text-gray-500">({match.team2})</span></div>
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold text-blue-700 text-sm">{match.favorite}</div>
+                        </td>
+                        <td className="p-4 text-center">
+                          <Badge 
+                            className={`font-bold px-3.5 py-1.5 rounded-full border-0 text-sm ${
+                              match.aiConfidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' :
+                              match.aiConfidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 
+                              'bg-gradient-to-r from-gray-400 to-gray-600 text-white'
+                            }`}
+                          >
+                            {match.aiConfidence}%
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-sm`} />
+                            <span className="text-sm font-bold text-gray-900">{match.risk}%</span>
                           </div>
-                        </div>
-
-                        {/* Win Rate & Form */}
-                        <div className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Win Rate & Form</p>
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="text-xs text-gray-600 mt-1 font-semibold">{riskInfo.label}</div>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-sm space-y-1">
+                            <div className="text-gray-700">{match.team1}: <span className="font-bold text-gray-900">{match.odds.team1}</span></div>
+                            <div className="text-gray-700">{match.team2}: <span className="font-bold text-gray-900">{match.odds.team2}</span></div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
                             {match.winRate >= 70 ? (
                               <TrendingUp className="h-4 w-4 text-green-600" />
                             ) : (
                               <TrendingDown className="h-4 w-4 text-red-600" />
                             )}
-                            <span className="text-xl font-bold text-gray-900">{match.winRate}%</span>
+                            <span className="font-bold text-gray-900 text-sm">{match.winRate}%</span>
                           </div>
-                          <Badge className={`${formInfo.color} flex items-center gap-1 w-fit px-2.5 py-1 rounded-full`}>
+                        </td>
+                        <td className="p-4 text-center">
+                          <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3.5 py-1.5 rounded-full font-semibold text-sm shadow-sm`}>
                             {formInfo.icon}
                             {formInfo.label}
                           </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Info Section */}
-                    <div className="lg:col-span-3">
-                      <div className="space-y-3">
-                        <div className="p-4 bg-gray-50 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Турнір</p>
-                          <p className="text-sm font-semibold text-gray-900">{match.context}</p>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-2xl">
-                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Коментар</p>
-                          <p className="text-sm text-gray-700">{match.comment}</p>
-                        </div>
-                        {riskComments && (
-                          <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-                            <div className="flex items-center justify-between mb-2">
-                              <p className="text-xs font-medium text-red-700 uppercase tracking-wide">Попередження</p>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-sm text-gray-700 font-medium">{match.context}</div>
+                          <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
+                        </td>
+                        <td className="p-4">
+                          {riskComments ? (
+                            <div className="flex flex-col gap-2">
+                              <div 
+                                className={`text-xs text-gray-700 whitespace-pre-line max-w-xs transition-all duration-300 ${
+                                  isCommentVisible ? '' : 'blur-sm select-none'
+                                }`}
+                              >
+                                {riskComments}
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleCommentVisibility(match.id)}
-                                className="h-6 px-2 text-xs flex items-center gap-1 rounded-full"
+                                className="h-7 px-3 text-xs flex items-center gap-1.5 self-start rounded-full font-semibold hover:bg-blue-100"
                               >
                                 {isCommentVisible ? (
                                   <>
-                                    <EyeOff className="h-3 w-3" />
+                                    <EyeOff className="h-3.5 w-3.5" />
                                     Приховати
                                   </>
                                 ) : (
                                   <>
-                                    <Eye className="h-3 w-3" />
+                                    <Eye className="h-3.5 w-3.5" />
                                     Показати
                                   </>
                                 )}
                               </Button>
                             </div>
-                            <div 
-                              className={`text-xs text-red-700 whitespace-pre-line transition-all duration-300 ${
-                                isCommentVisible ? '' : 'blur-sm select-none'
-                              }`}
-                            >
-                              {riskComments}
-                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400">—</div>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center gap-2 justify-center">
+                            {isHotMatch && (
+                              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full border-0 font-semibold shadow-sm">
+                                <Flame className="h-3.5 w-3.5 mr-1" />
+                                Hot
+                              </Badge>
+                            )}
+                            {match.url && (
+                              <a 
+                                href={match.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 transition-colors p-1.5 hover:bg-blue-50 rounded-lg"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
                           </div>
-                        )}
-                        {match.url && (
-                          <a 
-                            href={match.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            Переглянути на HLTV
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="py-20">
