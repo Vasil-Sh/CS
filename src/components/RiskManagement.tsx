@@ -1,30 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Shield, 
   AlertTriangle, 
   TrendingDown, 
   TrendingUp, 
-  DollarSign,
-  Percent,
   Target,
   BarChart3,
-  Calculator,
-  Settings,
   Plus,
   Edit,
   Trash2,
   Save,
   X
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import type { Bet } from '@/types/betting';
 
 interface RiskManagementProps {
@@ -474,11 +467,6 @@ const DEFAULT_RISKY_TEAMS: RiskyTeam[] = [
 ];
 
 export default function RiskManagement({ bets }: RiskManagementProps) {
-  const [bankroll, setBankroll] = useState(10000);
-  const [riskTolerance, setRiskTolerance] = useState(2);
-  const [maxStakePercent, setMaxStakePercent] = useState(5);
-  
-  // Ризиковані команди
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   const [editingTeam, setEditingTeam] = useState<string | null>(null);
   const [newTeam, setNewTeam] = useState({ name: '', comment: '', riskLevel: 'medium' as const });
@@ -493,7 +481,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       const saved = localStorage.getItem('riskyTeams');
       if (saved) {
         const savedTeams = JSON.parse(saved);
-        // Якщо збережених команд немає або їх менше 10, завантажуємо дефолтні
         if (savedTeams.length < 10) {
           setRiskyTeams(DEFAULT_RISKY_TEAMS);
           localStorage.setItem('riskyTeams', JSON.stringify(DEFAULT_RISKY_TEAMS));
@@ -501,13 +488,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           setRiskyTeams(savedTeams);
         }
       } else {
-        // Завантажуємо всі ваші команди як дефолтні
         setRiskyTeams(DEFAULT_RISKY_TEAMS);
         localStorage.setItem('riskyTeams', JSON.stringify(DEFAULT_RISKY_TEAMS));
       }
     } catch (error) {
       console.error('Error loading risky teams:', error);
-      // Fallback до дефолтних команд
       setRiskyTeams(DEFAULT_RISKY_TEAMS);
       localStorage.setItem('riskyTeams', JSON.stringify(DEFAULT_RISKY_TEAMS));
     }
@@ -552,13 +537,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     saveRiskyTeams(updatedTeams);
   };
 
-  // Filter completed bets
   const completedBets = useMemo(() => 
     bets.filter(bet => bet.result && bet.result !== 'Pending'), 
     [bets]
   );
 
-  // Calculate risk metrics
   const riskMetrics = useMemo((): RiskMetrics => {
     if (completedBets.length === 0) {
       return {
@@ -578,16 +561,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       };
     }
 
-    // Calculate running balance and drawdowns
+    const bankroll = 10000;
     let runningBalance = bankroll;
     let peak = bankroll;
     let maxDrawdown = 0;
     let currentDrawdown = 0;
-    let consecutiveLosses = 0;
     let maxConsecutiveLosses = 0;
     let currentLossStreak = 0;
 
-    const balanceHistory: number[] = [bankroll];
     const returns: number[] = [];
     const stakes: number[] = [];
 
@@ -596,14 +577,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       const stake = bet.stake || 0;
       
       runningBalance += profit;
-      balanceHistory.push(runningBalance);
       
       if (stake > 0) {
         returns.push(profit / stake);
         stakes.push(stake);
       }
 
-      // Track peak and drawdown
       if (runningBalance > peak) {
         peak = runningBalance;
       }
@@ -613,7 +592,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         maxDrawdown = currentDD;
       }
 
-      // Track consecutive losses
       if (bet.result === 'Loss') {
         currentLossStreak++;
         maxConsecutiveLosses = Math.max(maxConsecutiveLosses, currentLossStreak);
@@ -622,25 +600,20 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       }
     });
 
-    // Current drawdown
     currentDrawdown = (peak - runningBalance) / peak * 100;
 
-    // Calculate volatility (standard deviation of returns)
     const avgReturn = returns.length > 0 ? returns.reduce((a, b) => a + b, 0) / returns.length : 0;
     const variance = returns.length > 0 ? 
       returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length : 0;
     const volatility = Math.sqrt(variance) * 100;
 
-    // Calculate Sharpe ratio (assuming risk-free rate of 2%)
     const riskFreeRate = 0.02;
     const sharpeRatio = volatility > 0 ? (avgReturn - riskFreeRate) / (volatility / 100) : 0;
 
-    // Calculate Value at Risk (95% confidence)
     const sortedReturns = [...returns].sort((a, b) => a - b);
     const varIndex = Math.floor(sortedReturns.length * 0.05);
     const valueAtRisk = sortedReturns.length > 0 ? Math.abs(sortedReturns[varIndex] || 0) * 100 : 0;
 
-    // Simple Kelly Criterion calculation
     const winRate = completedBets.filter(bet => bet.result === 'Win').length / completedBets.length;
     const avgWinReturn = returns.filter(r => r > 0).reduce((a, b) => a + b, 0) / returns.filter(r => r > 0).length || 0;
     const avgLossReturn = Math.abs(returns.filter(r => r < 0).reduce((a, b) => a + b, 0) / returns.filter(r => r < 0).length || 0);
@@ -648,14 +621,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     const kellyPercentage = avgLossReturn > 0 ? 
       Math.max(0, (winRate * avgWinReturn - (1 - winRate) * avgLossReturn) / avgWinReturn * 100) : 0;
 
-    // Risk of Ruin calculation (simplified)
     const riskOfRuin = winRate < 0.5 ? 
       Math.min(100, Math.pow((1 - winRate) / winRate, bankroll / (stakes.reduce((a, b) => a + b, 0) / stakes.length || 1)) * 100) : 0;
 
-    // Largest loss
     const largestLoss = Math.abs(Math.min(...returns.map(r => r * (stakes.reduce((a, b) => a + b, 0) / stakes.length || 0))));
 
-    // Win streak risk (probability of overconfidence)
     const winStreaks = [];
     let currentWinStreak = 0;
     completedBets.forEach(bet => {
@@ -686,12 +656,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       largestLoss: isFinite(largestLoss) ? Number(largestLoss.toFixed(2)) : 0,
       winStreakRisk: isFinite(winStreakRisk) ? Number(winStreakRisk.toFixed(2)) : 0
     };
-  }, [completedBets, bankroll]);
+  }, [completedBets]);
 
-  // Calculate drawdown periods
   const drawdownPeriods = useMemo((): DrawdownPeriod[] => {
     if (completedBets.length === 0) return [];
 
+    const bankroll = 10000;
     let runningBalance = bankroll;
     let peak = bankroll;
     let drawdownStart: string | null = null;
@@ -703,7 +673,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       runningBalance += profit;
 
       if (runningBalance > peak) {
-        // End of drawdown period
         if (drawdownStart) {
           periods.push({
             start: drawdownStart,
@@ -717,7 +686,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         }
         peak = runningBalance;
       } else if (runningBalance < peak) {
-        // In drawdown
         if (!drawdownStart) {
           drawdownStart = bet.date;
         }
@@ -726,7 +694,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       }
     });
 
-    // Handle ongoing drawdown
     if (drawdownStart) {
       periods.push({
         start: drawdownStart,
@@ -738,9 +705,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     }
 
     return periods.sort((a, b) => b.maxDrawdown - a.maxDrawdown).slice(0, 5);
-  }, [completedBets, bankroll]);
+  }, [completedBets]);
 
-  // Risk level assessment
   const getRiskLevel = () => {
     const { maxDrawdown, volatility, riskOfRuin } = riskMetrics;
     
@@ -755,22 +721,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
   const riskLevel = getRiskLevel();
 
-  const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      default: return 'text-green-600';
-    }
-  };
-
-  const getRiskBadge = (level: string) => {
-    switch (level) {
-      case 'high': return { variant: 'destructive' as const, text: 'Високий ризик' };
-      case 'medium': return { variant: 'secondary' as const, text: 'Помірний ризик' };
-      default: return { variant: 'default' as const, text: 'Низький ризик' };
-    }
-  };
-
   const getTeamRiskBadge = (level: 'high' | 'medium' | 'low') => {
     switch (level) {
       case 'high': return { variant: 'destructive' as const, text: 'Високий' };
@@ -780,7 +730,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const volatilityLevel = riskMetrics.volatility > 30 ? 'high' : riskMetrics.volatility > 20 ? 'medium' : 'low';
-  const riskOfRuinLevel = riskMetrics.riskOfRuin > 15 ? 'high' : riskMetrics.riskOfRuin > 5 ? 'medium' : 'low';
 
   return (
     <div className="space-y-6">
@@ -838,62 +787,13 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{riskMetrics.volatility}%</div>
-            <Badge className={`mt-2 ${getRiskColor(volatilityLevel)}`}>
+            <Badge className="mt-2">
               {volatilityLevel === 'low' ? 'Стабільно' : 
                volatilityLevel === 'medium' ? 'Помірно' : 'Нестабільно'}
             </Badge>
           </CardContent>
         </Card>
       </div>
-
-      {/* Risk Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Налаштування ризик-менеджменту
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <Label htmlFor="bankroll">Поточний банкрол (₴)</Label>
-              <Input
-                id="bankroll"
-                type="number"
-                value={bankroll}
-                onChange={(e) => setBankroll(Number(e.target.value))}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="risk">Толерантність до ризику (%)</Label>
-              <Input
-                id="risk"
-                type="number"
-                value={riskTolerance}
-                onChange={(e) => setRiskTolerance(Number(e.target.value))}
-                min="0.5"
-                max="10"
-                step="0.5"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="maxStake">Макс. ставка від банкролу (%)</Label>
-              <Input
-                id="maxStake"
-                type="number"
-                value={maxStakePercent}
-                onChange={(e) => setMaxStakePercent(Number(e.target.value))}
-                min="1"
-                max="20"
-                className="mt-1"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Ризиковані команди */}
       <Card>
@@ -916,7 +816,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Форма додавання нової команди */}
             {showAddForm && (
               <div className="p-4 border rounded-lg bg-gray-50">
                 <h4 className="font-semibold mb-3">Додати ризиковану команду</h4>
@@ -972,7 +871,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             )}
 
-            {/* Список ризикованих команд */}
             <div className="max-h-96 overflow-y-auto space-y-3">
               {riskyTeams.map((team) => (
                 <div key={team.id} className="p-4 border rounded-lg">
@@ -1154,7 +1052,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 {riskMetrics.volatility > 30 && (
                   <div className="flex items-start gap-2">
                     <span className="text-red-500 text-xs mt-1">⚠</span>
-                    <span className="text-sm">Висока волатільність - диверсифікуйте стратегії</span>
+                    <span className="text-sm">Висока волатильність - диверсифікуйте стратегії</span>
                   </div>
                 )}
                 {riskMetrics.riskOfRuin > 15 && (
@@ -1196,7 +1094,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   );
 }
 
-// Компонент для редагування команди
 function EditTeamForm({ 
   team, 
   onSave, 

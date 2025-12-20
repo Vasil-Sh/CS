@@ -33,7 +33,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
-import type { Bet, BettingStats, TeamStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
+import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 interface TeamRecommendation {
   team: string;
@@ -71,8 +71,6 @@ export default function Analytics() {
   const [recommendations, setRecommendations] = useState<TeamRecommendation[]>([]);
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
   const [expandedRecommendation, setExpandedRecommendation] = useState<number | null>(null);
-  const [minBetsFilter, setMinBetsFilter] = useState(2);
-  const [topTeamsSortBy, setTopTeamsSortBy] = useState<'profit' | 'winRate'>('profit');
 
   // Enhanced teams data
   const teams = {
@@ -438,10 +436,10 @@ export default function Analytics() {
 
   const getRecommendationColor = (rec: string) => {
     switch (rec) {
-      case 'strong_bet': return 'bg-green-100 text-green-800 border-green-200';
-      case 'moderate_bet': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'risky': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'avoid': return 'bg-red-100 text-red-800 border-red-200';
+      case 'strong_bet': return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0';
+      case 'moderate_bet': return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0';
+      case 'risky': return 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white border-0';
+      case 'avoid': return 'bg-gradient-to-r from-red-500 to-red-600 text-white border-0';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -527,39 +525,6 @@ export default function Analytics() {
     ];
   };
 
-  // Top teams analysis
-  const teamAnalysis = (): TeamStats[] => {
-    const teamStats: { [key: string]: { bets: number; wins: number; profit: number } } = {};
-    
-    bets.forEach((bet: Bet) => {
-      const teams = bet.match ? bet.match.split(' vs ') : [bet.team1, bet.team2];
-      teams.forEach((team: string | undefined) => {
-        if (team && team.trim()) {
-          const teamName = team.trim();
-          if (!teamStats[teamName]) {
-            teamStats[teamName] = { bets: 0, wins: 0, profit: 0 };
-          }
-          if (bet.result !== 'Pending') {
-            teamStats[teamName].bets++;
-            if (bet.result === 'Win') teamStats[teamName].wins++;
-            teamStats[teamName].profit += bet.profit || 0;
-          }
-        }
-      });
-    });
-    
-    return Object.entries(teamStats)
-      .map(([team, stats]) => ({
-        team,
-        bets: stats.bets,
-        winRate: stats.bets ? (stats.wins / stats.bets * 100).toFixed(1) : '0',
-        profit: Math.round(stats.profit * 100) / 100
-      }))
-      .filter(t => t.bets >= minBetsFilter)
-      .sort((a, b) => topTeamsSortBy === 'profit' ? b.profit - a.profit : Number(b.winRate) - Number(a.winRate))
-      .slice(0, 10);
-  };
-
   // Bet type distribution
   const betTypeDistribution = () => {
     const distribution: { [key: string]: number } = {};
@@ -634,8 +599,7 @@ export default function Analytics() {
       bets: completedBets,
       analysis: {
         streaks,
-        oddsAnalysis: oddsAnalysis(),
-        topTeams: teamAnalysis()
+        oddsAnalysis: oddsAnalysis()
       },
       connectionStatus,
       generatedAt: new Date().toISOString()
@@ -652,7 +616,6 @@ export default function Analytics() {
   };
 
   const oddsData = oddsAnalysis();
-  const topTeamsData = teamAnalysis();
   const betTypes = betTypeDistribution();
   const monthlyProfit = monthlyProfitData();
   const balanceData = balanceOverTime();
@@ -711,65 +674,60 @@ export default function Analytics() {
         </Alert>
       )}
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Загальний профіт</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold flex items-center gap-1 ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.totalProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-              {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
+      {/* Quick Stats з градієнтами */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-orange-700 font-medium">Загальний профіт</p>
+                <p className={`text-3xl font-bold ${stats.totalProfit >= 0 ? 'text-orange-900' : 'text-red-700'}`}>
+                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
+                </p>
+              </div>
+              <DollarSign className="h-10 w-10 text-orange-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              З {completedBets.length} завершених ставок
-            </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Відсоток перемог</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.winRate}%
+        
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-700 font-medium">Win Rate</p>
+                <p className="text-3xl font-bold text-green-900">{stats.winRate}%</p>
+              </div>
+              <Target className="h-10 w-10 text-green-600" />
             </div>
-            <Progress value={stats.winRate} className="mt-2" />
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Поточна серія</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${streaks.currentWinStreak > 0 ? 'text-green-600' : streaks.currentLossStreak > 0 ? 'text-red-600' : 'text-gray-600'}`}>
-              {streaks.currentWinStreak > 0 ? `+${streaks.currentWinStreak}` : 
-               streaks.currentLossStreak > 0 ? `-${streaks.currentLossStreak}` : '0'}
+        
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-700 font-medium">Поточна серія</p>
+                <p className={`text-3xl font-bold ${streaks.currentWinStreak > 0 ? 'text-blue-900' : streaks.currentLossStreak > 0 ? 'text-red-700' : 'text-gray-600'}`}>
+                  {streaks.currentWinStreak > 0 ? `+${streaks.currentWinStreak}` : 
+                   streaks.currentLossStreak > 0 ? `-${streaks.currentLossStreak}` : '0'}
+                </p>
+              </div>
+              <Trophy className="h-10 w-10 text-blue-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Макс: +{streaks.maxWinStreak} / -{streaks.maxLossStreak}
-            </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Середній ROI</CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${stats.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+        
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-purple-700 font-medium">Середній ROI</p>
+                <p className={`text-3xl font-bold ${stats.averageROI >= 0 ? 'text-purple-900' : 'text-red-700'}`}>
+                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+                </p>
+              </div>
+              <Percent className="h-10 w-10 text-purple-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              На одну ставку
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -859,67 +817,6 @@ export default function Analytics() {
                     </CardContent>
                   </Card>
                 </div>
-
-                {/* Top teams with filters */}
-                {topTeamsData.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>Топ-10 команд</span>
-                        <div className="flex gap-2">
-                          <Select value={topTeamsSortBy} onValueChange={(value: 'profit' | 'winRate') => setTopTeamsSortBy(value)}>
-                            <SelectTrigger className="w-40">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="profit">За профітом</SelectItem>
-                              <SelectItem value="winRate">За Win Rate</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select value={minBetsFilter.toString()} onValueChange={(value) => setMinBetsFilter(Number(value))}>
-                            <SelectTrigger className="w-40">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="2">Мін. 2 ставки</SelectItem>
-                              <SelectItem value="5">Мін. 5 ставок</SelectItem>
-                              <SelectItem value="10">Мін. 10 ставок</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {topTeamsData.map((team, index) => (
-                          <div key={team.team} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {index + 1}
-                              </div>
-                              <div>
-                                <h3 className="font-semibold">{team.team}</h3>
-                                <p className="text-sm text-gray-600">{team.bets} ставок</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="flex items-center gap-4">
-                                <Badge variant={Number(team.winRate) > 50 ? 'default' : 'secondary'}>
-                                  {team.winRate}% WR
-                                </Badge>
-                                <span className={`font-medium ${team.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {team.profit >= 0 ? '+' : ''}{team.profit} ₴
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </>
             ) : (
               <Card>
@@ -1109,8 +1006,8 @@ export default function Analytics() {
                         <h3 className="font-semibold text-lg">{rec.team} vs {rec.opponent}</h3>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="font-medium">{getRecommendationText(rec.recommendation)}</Badge>
-                        <Badge variant="outline" className="font-medium">{rec.confidence}% впевненості</Badge>
+                        <Badge variant="outline" className="font-medium bg-white/20">{getRecommendationText(rec.recommendation)}</Badge>
+                        <Badge variant="outline" className="font-medium bg-white/20">{rec.confidence}% впевненості</Badge>
                       </div>
                     </div>
                     
@@ -1134,10 +1031,10 @@ export default function Analytics() {
                       </div>
 
                       {/* Collapsible detailed analysis */}
-                      <div className="border-t pt-4">
+                      <div className="border-t pt-4 border-white/20">
                         <Button
                           variant="ghost"
-                          className="w-full flex items-center justify-between p-0 hover:bg-transparent"
+                          className="w-full flex items-center justify-between p-0 hover:bg-transparent text-white"
                           onClick={() => setExpandedRecommendation(expandedRecommendation === index ? null : index)}
                         >
                           <span className="font-medium">Детальний аналіз</span>
@@ -1147,34 +1044,34 @@ export default function Analytics() {
                         {expandedRecommendation === index && (
                           <div className="mt-4 space-y-3 text-sm">
                             <div>
-                              <span className="font-medium text-blue-600">Тіри:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.tierComparison}</p>
+                              <span className="font-medium">Тіри:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.tierComparison}</p>
                             </div>
                             
                             <div>
-                              <span className="font-medium text-purple-600">Рейтинг:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.rankComparison}</p>
+                              <span className="font-medium">Рейтинг:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.rankComparison}</p>
                             </div>
                             
                             <div>
-                              <span className="font-medium text-green-600">Win Rate:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.winRateAnalysis}</p>
+                              <span className="font-medium">Win Rate:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.winRateAnalysis}</p>
                             </div>
                             
                             <div>
-                              <span className="font-medium text-orange-600">Форма:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.recentFormAnalysis}</p>
+                              <span className="font-medium">Форма:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.recentFormAnalysis}</p>
                             </div>
                             
                             <div>
-                              <span className="font-medium text-red-600">H2H:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.headToHeadAnalysis}</p>
+                              <span className="font-medium">H2H:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.headToHeadAnalysis}</p>
                             </div>
                             
                             {rec.detailedAnalysis.mapAnalysis.length > 0 && (
                               <div>
-                                <span className="font-medium text-indigo-600">Карти:</span>
-                                <ul className="text-gray-700 ml-4">
+                                <span className="font-medium">Карти:</span>
+                                <ul className="opacity-90 ml-4">
                                   {rec.detailedAnalysis.mapAnalysis.map((analysis, i) => (
                                     <li key={i} className="text-xs">• {analysis}</li>
                                   ))}
@@ -1183,19 +1080,19 @@ export default function Analytics() {
                             )}
                             
                             <div>
-                              <span className="font-medium text-teal-600">Стабільність:</span>
-                              <p className="text-gray-700">{rec.detailedAnalysis.stabilityAnalysis}</p>
+                              <span className="font-medium">Стабільність:</span>
+                              <p className="opacity-90">{rec.detailedAnalysis.stabilityAnalysis}</p>
                             </div>
 
                             {/* Strengths and risks */}
                             <div className="grid grid-cols-2 gap-3 mt-4">
                               {rec.detailedAnalysis.strengths.length > 0 && (
-                                <div className="p-3 bg-green-50 rounded-lg">
+                                <div className="p-3 bg-white/10 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <TrendingUp className="h-3 w-3 text-green-600" />
-                                    <span className="text-xs font-medium text-green-800">Сильні сторони</span>
+                                    <TrendingUp className="h-3 w-3" />
+                                    <span className="text-xs font-medium">Сильні сторони</span>
                                   </div>
-                                  <ul className="text-xs text-green-700 space-y-1">
+                                  <ul className="text-xs space-y-1">
                                     {rec.detailedAnalysis.strengths.map((strength, i) => (
                                       <li key={i}>• {strength}</li>
                                     ))}
@@ -1204,12 +1101,12 @@ export default function Analytics() {
                               )}
                               
                               {rec.detailedAnalysis.riskFactors.length > 0 && (
-                                <div className="p-3 bg-red-50 rounded-lg">
+                                <div className="p-3 bg-white/10 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <TrendingDown className="h-3 w-3 text-red-600" />
-                                    <span className="text-xs font-medium text-red-800">Ризик-фактори</span>
+                                    <TrendingDown className="h-3 w-3" />
+                                    <span className="text-xs font-medium">Ризик-фактори</span>
                                   </div>
-                                  <ul className="text-xs text-red-700 space-y-1">
+                                  <ul className="text-xs space-y-1">
                                     {rec.detailedAnalysis.riskFactors.map((risk, i) => (
                                       <li key={i}>• {risk}</li>
                                     ))}
@@ -1221,7 +1118,7 @@ export default function Analytics() {
                         )}
                       </div>
 
-                      <div className="p-3 bg-white/50 rounded-lg border-t">
+                      <div className="p-3 bg-white/10 rounded-lg border-t border-white/20">
                         <div className="flex items-center gap-2 mb-2">
                           <Target className="h-4 w-4" />
                           <span className="text-sm font-medium">Рекомендація:</span>

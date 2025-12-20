@@ -19,13 +19,26 @@ import {
   ArrowUpDown,
   Search,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Flame,
+  Shield,
+  AlertCircle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
 
 // Form Stability Types
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
+
+interface RiskyTeam {
+  id: string;
+  name: string;
+  comment: string;
+  riskLevel: 'high' | 'medium' | 'low';
+  dateAdded: string;
+}
 
 interface Match {
   id: string;
@@ -54,7 +67,7 @@ interface Match {
   url?: string;
 }
 
-// Mock data for demonstration
+// Mock data for demonstration - all matches on 2025-12-21
 const mockMatches: Match[] = [
   {
     id: '1',
@@ -124,7 +137,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '4',
-    date: '2025-12-22',
+    date: '2025-12-21',
     team1: 'FaZe',
     team2: 'Liquid',
     favorite: 'FaZe',
@@ -146,7 +159,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '5',
-    date: '2025-12-22',
+    date: '2025-12-21',
     team1: 'NIP',
     team2: 'Heroic',
     favorite: 'Heroic',
@@ -172,106 +185,161 @@ const getFormStabilityInfo = (form: FormStability) => {
   switch (form) {
     case 'hot_streak':
       return {
-        icon: '🔥',
-        label: 'Hot Streak',
-        description: '5W–0L — команда на піку форми',
-        color: 'bg-red-100 text-red-800 border-red-200'
+        icon: <Flame className="h-3 w-3" />,
+        label: 'Hot',
+        color: 'bg-gradient-to-r from-red-500 to-orange-500 text-white border-0'
       };
     case 'stable':
       return {
-        icon: '✅',
+        icon: <Shield className="h-3 w-3" />,
         label: 'Stable',
-        description: '3W–2L — стабільно тримає рівень',
-        color: 'bg-green-100 text-green-800 border-green-200'
+        color: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0'
       };
     case 'momentum':
       return {
-        icon: '⚡',
-        label: 'Momentum',
-        description: '4W–1L — набирає темп',
-        color: 'bg-blue-100 text-blue-800 border-blue-200'
+        icon: <TrendingUp className="h-3 w-3" />,
+        label: 'Up',
+        color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0'
       };
     case 'falling':
       return {
-        icon: '⚠️',
-        label: 'Falling',
-        description: '1W–4L — втрачає форму',
-        color: 'bg-orange-100 text-orange-800 border-orange-200'
+        icon: <TrendingDown className="h-3 w-3" />,
+        label: 'Down',
+        color: 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white border-0'
       };
     case 'slump':
       return {
-        icon: '📉',
+        icon: <AlertCircle className="h-3 w-3" />,
         label: 'Slump',
-        description: '0W–5L — глибокий спад',
-        color: 'bg-red-100 text-red-800 border-red-200'
+        color: 'bg-gradient-to-r from-red-600 to-red-700 text-white border-0'
       };
     case 'inconsistent':
       return {
-        icon: '🔄',
-        label: 'Inconsistent',
-        description: '2W–3L — нестабільна',
-        color: 'bg-gray-100 text-gray-800 border-gray-200'
+        icon: <AlertTriangle className="h-3 w-3" />,
+        label: 'Mixed',
+        color: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-0'
       };
   }
 };
 
-const getRiskColor = (risk: number) => {
-  if (risk <= 30) return 'text-green-600';
-  if (risk <= 50) return 'text-yellow-600';
-  return 'text-red-600';
-};
-
-const getRiskLabel = (risk: number) => {
-  if (risk <= 30) return 'Безпечний';
-  if (risk <= 50) return 'Помірний';
-  return 'Високий';
+const getRiskBadge = (risk: number) => {
+  if (risk <= 30) {
+    return {
+      label: 'Низький',
+      color: 'bg-green-100 text-green-800 border-green-300',
+      dotColor: 'bg-green-500'
+    };
+  }
+  if (risk <= 50) {
+    return {
+      label: 'Помірний',
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      dotColor: 'bg-yellow-500'
+    };
+  }
+  return {
+    label: 'Високий',
+    color: 'bg-red-100 text-red-800 border-red-300',
+    dotColor: 'bg-red-500'
+  };
 };
 
 export default function Matches() {
   const [matches, setMatches] = useState<Match[]>(mockMatches);
   const [isLoading, setIsLoading] = useState(false);
-  const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('confidence');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterTier, setFilterTier] = useState<'all' | 'tier1' | 'tier2' | 'tier3'>('all');
   const [filterConfidence, setFilterConfidence] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [filterRisk, setFilterRisk] = useState<'all' | 'safe' | 'moderate' | 'high'>('all');
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
+  const [visibleComments, setVisibleComments] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadRiskyTeams();
+  }, []);
+
+  const loadRiskyTeams = () => {
+    try {
+      const saved = localStorage.getItem('riskyTeams');
+      if (saved) {
+        setRiskyTeams(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading risky teams:', error);
+    }
+  };
+
+  const toggleCommentVisibility = (matchId: string) => {
+    setVisibleComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(matchId)) {
+        newSet.delete(matchId);
+      } else {
+        newSet.add(matchId);
+      }
+      return newSet;
+    });
+  };
+
+  const getTeamRiskComment = (teamName: string): { comment: string; riskLevel: 'high' | 'medium' | 'low' } | null => {
+    const team = riskyTeams.find(t => 
+      t.name.toLowerCase() === teamName.toLowerCase() ||
+      teamName.toLowerCase().includes(t.name.toLowerCase()) ||
+      t.name.toLowerCase().includes(teamName.toLowerCase())
+    );
+    
+    if (team) {
+      return {
+        comment: team.comment,
+        riskLevel: team.riskLevel
+      };
+    }
+    return null;
+  };
+
+  const getMatchRiskComments = (team1: string, team2: string): string => {
+    const team1Risk = getTeamRiskComment(team1);
+    const team2Risk = getTeamRiskComment(team2);
+    
+    const comments: string[] = [];
+    
+    if (team1Risk) {
+      const icon = team1Risk.riskLevel === 'high' ? '🔴' : team1Risk.riskLevel === 'medium' ? '🟡' : '🟢';
+      comments.push(`${icon} ${team1}: ${team1Risk.comment}`);
+    }
+    
+    if (team2Risk) {
+      const icon = team2Risk.riskLevel === 'high' ? '🔴' : team2Risk.riskLevel === 'medium' ? '🟡' : '🟢';
+      comments.push(`${icon} ${team2}: ${team2Risk.comment}`);
+    }
+    
+    return comments.length > 0 ? comments.join('\n') : '';
+  };
 
   // Apply filters
   const filteredMatches = matches.filter(match => {
-    // Tier filter
     if (filterTier !== 'all' && match.tier !== filterTier) return false;
-    
-    // Confidence filter
     if (filterConfidence === 'high' && match.aiConfidence <= 80) return false;
     if (filterConfidence === 'medium' && (match.aiConfidence <= 60 || match.aiConfidence > 80)) return false;
     if (filterConfidence === 'low' && match.aiConfidence > 60) return false;
-    
-    // Risk filter
     if (filterRisk === 'safe' && match.risk > 30) return false;
     if (filterRisk === 'moderate' && (match.risk <= 30 || match.risk > 50)) return false;
     if (filterRisk === 'high' && match.risk <= 50) return false;
-    
-    // Match type filter
     if (filterMatchType !== 'all' && match.matchType !== filterMatchType) return false;
-    
-    // Hot matches filter
     if (showHotMatches && (match.aiConfidence <= 70 || match.upsetProbability >= 20)) return false;
-    
-    // Search filter
     if (searchQuery && !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !match.team2.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    
     return true;
   });
 
   // Apply sorting
   const sortedMatches = [...filteredMatches].sort((a, b) => {
     let comparison = 0;
-    
     switch (sortBy) {
       case 'date':
         comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -286,48 +354,38 @@ export default function Matches() {
         comparison = b.upsetProbability - a.upsetProbability;
         break;
     }
-    
     return sortOrder === 'asc' ? comparison : -comparison;
   });
+
+  // Get the current date (assuming all matches are for the same date)
+  const currentDate = sortedMatches.length > 0 ? sortedMatches[0].date : new Date().toISOString().split('T')[0];
 
   const toggleSort = (column: 'date' | 'confidence' | 'risk' | 'upset') => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(column);
-      setSortOrder('asc');
+      setSortOrder(column === 'confidence' ? 'desc' : 'asc');
     }
   };
 
   const refreshMatches = async () => {
     setIsLoading(true);
-    
     try {
       toast({
         title: '🔄 Завантаження матчів з HLTV...',
         description: 'Використовується Supabase Edge Function',
       });
 
-      // Use Supabase Edge Function (more reliable than CORS proxy)
       const hltvMatches = await fetchAndParseMatches(true);
       
-      console.log('📊 Parsed HLTV matches:', hltvMatches);
-      
       if (hltvMatches && hltvMatches.length > 0) {
-        // Convert HLTV matches to our format
         const formattedMatches = hltvMatches.map(match => {
           const converted = convertToMatchFormat(match);
-          
-          console.log('🔄 Converting match:', {
-            original: match,
-            converted: converted
-          });
-          
-          // Add mock AI data (in production, this would come from your AI analysis)
           return {
             ...converted,
-            aiConfidence: Math.floor(Math.random() * 30) + 60, // 60-90%
-            risk: Math.floor(Math.random() * 50) + 10, // 10-60%
+            aiConfidence: Math.floor(Math.random() * 30) + 60,
+            risk: Math.floor(Math.random() * 50) + 10,
             odds: {
               team1: match.odds1 || 1.5,
               team2: match.odds2 || 2.5
@@ -335,20 +393,17 @@ export default function Matches() {
             playerForm: [],
             tier: 'tier1' as const,
             matchType: (match.type?.toUpperCase() || 'Bo3') as 'Bo1' | 'Bo3' | 'Bo5',
-            upsetProbability: Math.floor(Math.random() * 30) + 10, // 10-40%
+            upsetProbability: Math.floor(Math.random() * 30) + 10,
             formStability: 'stable' as FormStability
           };
         });
 
-        console.log('✅ Formatted matches:', formattedMatches);
         setMatches(formattedMatches);
-        
         toast({
           title: '✅ Матчі оновлено!',
           description: `Завантажено ${formattedMatches.length} матчів з HLTV`,
         });
       } else {
-        console.warn('⚠️ No matches found from HLTV');
         toast({
           title: '⚠️ Матчі не знайдено',
           description: 'Використовуються демо-дані',
@@ -356,8 +411,6 @@ export default function Matches() {
         });
       }
     } catch (error) {
-      console.error('❌ Failed to fetch HLTV matches:', error);
-      
       toast({
         title: '❌ Помилка завантаження',
         description: `Не вдалося завантажити матчі з HLTV: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -395,74 +448,58 @@ export default function Matches() {
         </Button>
       </div>
 
-      {/* Info Banner */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-blue-900 mb-1">🚀 Реальні дані з HLTV через Supabase</h3>
-              <p className="text-sm text-blue-800">
-                Натисніть "Оновити з HLTV" щоб завантажити актуальні матчі з HLTV.org через Supabase Edge Function. 
-                Це більш надійний спосіб, ніж CORS proxy.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Всього матчів</p>
-                <p className="text-2xl font-bold">{sortedMatches.length}</p>
+                <p className="text-sm text-blue-700 font-medium">Всього матчів</p>
+                <p className="text-3xl font-bold text-blue-900">{sortedMatches.length}</p>
               </div>
-              <Trophy className="h-8 w-8 text-blue-600" />
+              <Trophy className="h-10 w-10 text-blue-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Безпечні матчі</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm text-green-700 font-medium">Безпечні матчі</p>
+                <p className="text-3xl font-bold text-green-900">
                   {sortedMatches.filter(m => m.risk <= 30).length}
                 </p>
               </div>
-              <Target className="h-8 w-8 text-green-600" />
+              <Shield className="h-10 w-10 text-green-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Hot Matches ⚡</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {matches.filter(m => m.aiConfidence > 70 && m.upsetProbability < 20).length}
+                <p className="text-sm text-orange-700 font-medium">Hot Matches</p>
+                <p className="text-3xl font-bold text-orange-900">
+                  {sortedMatches.filter(m => m.aiConfidence > 70 && m.upsetProbability < 20).length}
                 </p>
               </div>
-              <Zap className="h-8 w-8 text-orange-600" />
+              <Flame className="h-10 w-10 text-orange-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Середній AI %</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {Math.round(matches.reduce((sum, m) => sum + m.aiConfidence, 0) / matches.length)}%
+                <p className="text-sm text-purple-700 font-medium">Середній AI %</p>
+                <p className="text-3xl font-bold text-purple-900">
+                  {sortedMatches.length > 0 ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length) : 0}%
                 </p>
               </div>
-              <Users className="h-8 w-8 text-blue-600" />
+              <Target className="h-10 w-10 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -516,9 +553,9 @@ export default function Matches() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Всі</SelectItem>
-                  <SelectItem value="safe">0-30% (Безпечні)</SelectItem>
-                  <SelectItem value="moderate">30-50% (Помірні)</SelectItem>
-                  <SelectItem value="high">50-100% (Високі)</SelectItem>
+                  <SelectItem value="safe">Низький</SelectItem>
+                  <SelectItem value="moderate">Помірний</SelectItem>
+                  <SelectItem value="high">Високий</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -552,7 +589,7 @@ export default function Matches() {
             </div>
             
             <div>
-              <label className="text-sm font-medium">Hot Match ⚡:</label>
+              <label className="text-sm font-medium">Hot Match:</label>
               <Button
                 variant={showHotMatches ? 'default' : 'outline'}
                 className="w-full mt-1"
@@ -565,141 +602,197 @@ export default function Matches() {
         </CardContent>
       </Card>
 
-      {/* Matches Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Матчі ({sortedMatches.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('date')}>
-                    <div className="flex items-center gap-1">
-                      📅 Дата
-                      <ArrowUpDown className="h-3 w-3" />
-                    </div>
-                  </th>
-                  <th className="text-left p-3">🎮 Матч</th>
-                  <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('confidence')}>
-                    <div className="flex items-center gap-1">
-                      ⭐ Фаворит
-                      <ArrowUpDown className="h-3 w-3" />
-                    </div>
-                  </th>
-                  <th className="text-left p-3 cursor-pointer hover:bg-gray-50" onClick={() => toggleSort('risk')}>
-                    <div className="flex items-center gap-1">
-                      ⚖️ Ризик
-                      <ArrowUpDown className="h-3 w-3" />
-                    </div>
-                  </th>
-                  <th className="text-left p-3">💬 Коментар</th>
-                  <th className="text-left p-3">💵 Коефіцієнт</th>
-                  <th className="text-left p-3">🏆 Win Rate</th>
-                  <th className="text-left p-3">🧩 Form Stability</th>
-                  <th className="text-left p-3">🕹️ Context</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedMatches.map((match) => {
-                  const formInfo = getFormStabilityInfo(match.formStability);
-                  const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
-                  
-                  return (
-                    <tr key={match.id} className={`border-b hover:bg-gray-50 ${isHotMatch ? 'bg-orange-50' : ''}`}>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{match.date}</span>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <div>
-                            <div className="font-medium">{match.team1} vs {match.team2}</div>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {match.matchType}
-                            </Badge>
+      {/* Single Matches Table */}
+      {sortedMatches.length > 0 ? (
+        <Card>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span className="text-blue-900">{currentDate}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Матч</th>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Фаворит</th>
+                    <th 
+                      className="text-center p-3 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => toggleSort('confidence')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        AI %
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th 
+                      className="text-center p-3 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => toggleSort('risk')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        Ризик
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Коефіцієнти</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Win Rate</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Form</th>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Турнір</th>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Коментар</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedMatches.map((match) => {
+                    const formInfo = getFormStabilityInfo(match.formStability);
+                    const riskInfo = getRiskBadge(match.risk);
+                    const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
+                    const riskComments = getMatchRiskComments(match.team1, match.team2);
+                    const isCommentVisible = visibleComments.has(match.id);
+                    
+                    return (
+                      <tr 
+                        key={match.id} 
+                        className={`border-b hover:bg-gray-50 transition-colors ${
+                          isHotMatch ? 'bg-orange-50' : ''
+                        }`}
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <div className="font-semibold text-gray-900">
+                                {match.team1} <span className="text-gray-400">vs</span> {match.team2}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                  {match.matchType}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {match.tier.toUpperCase()}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
-                          {match.url && (
-                            <a 
-                              href={match.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-semibold text-blue-600">{match.favorite}</div>
-                        <div className="text-sm text-gray-600">AI {match.aiConfidence}%</div>
-                      </td>
-                      <td className="p-3">
-                        <div className={`font-medium ${getRiskColor(match.risk)}`}>
-                          {match.risk}%
-                        </div>
-                        <div className="text-xs text-gray-600">{getRiskLabel(match.risk)}</div>
-                      </td>
-                      <td className="p-3">
-                        <div className="text-sm">{match.comment}</div>
-                        <div className="text-xs text-gray-500 mt-1">{match.aiSummary}</div>
-                      </td>
-                      <td className="p-3">
-                        <div className="text-sm">
-                          {match.team1}: {match.odds.team1}
-                        </div>
-                        <div className="text-sm">
-                          {match.team2}: {match.odds.team2}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-1">
-                          {match.winRate >= 70 ? (
-                            <TrendingUp className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-4 w-4 text-red-600" />
-                          )}
-                          <span className="font-medium">{match.winRate}%</span>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <Badge className={formInfo.color}>
-                          <span className="mr-1">{formInfo.icon}</span>
-                          {formInfo.label}
-                        </Badge>
-                        <div className="text-xs text-gray-600 mt-1">{formInfo.description}</div>
-                      </td>
-                      <td className="p-3">
-                        <div className="text-sm">{match.context}</div>
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {match.tier.toUpperCase()}
-                        </Badge>
-                        {isHotMatch && (
-                          <Badge className="text-xs mt-1 ml-1 bg-orange-600">
-                            <Zap className="h-3 w-3 mr-1" />
-                            Hot
+                        </td>
+                        <td className="p-3">
+                          <div className="font-semibold text-blue-700">{match.favorite}</div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge 
+                            className={`font-bold ${
+                              match.aiConfidence >= 80 ? 'bg-green-500' :
+                              match.aiConfidence >= 60 ? 'bg-blue-500' : 'bg-gray-500'
+                            } text-white`}
+                          >
+                            {match.aiConfidence}%
                           </Badge>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          
-          {sortedMatches.length === 0 && (
-            <div className="text-center py-12">
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${riskInfo.dotColor}`} />
+                            <span className="text-sm font-medium">{match.risk}%</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">{riskInfo.label}</div>
+                        </td>
+                        <td className="p-3">
+                          <div className="text-sm space-y-0.5">
+                            <div>{match.team1}: <span className="font-semibold">{match.odds.team1}</span></div>
+                            <div>{match.team2}: <span className="font-semibold">{match.odds.team2}</span></div>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            {match.winRate >= 70 ? (
+                              <TrendingUp className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <TrendingDown className="h-4 w-4 text-red-600" />
+                            )}
+                            <span className="font-semibold">{match.winRate}%</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge className={`${formInfo.color} flex items-center gap-1 justify-center`}>
+                            {formInfo.icon}
+                            {formInfo.label}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <div className="text-sm text-gray-700">{match.context}</div>
+                          <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
+                        </td>
+                        <td className="p-3">
+                          {riskComments ? (
+                            <div className="flex flex-col gap-2">
+                              <div 
+                                className={`text-xs text-gray-700 whitespace-pre-line max-w-xs transition-all duration-300 ${
+                                  isCommentVisible ? '' : 'blur-sm select-none'
+                                }`}
+                              >
+                                {riskComments}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleCommentVisibility(match.id)}
+                                className="h-6 px-2 text-xs flex items-center gap-1 self-start"
+                              >
+                                {isCommentVisible ? (
+                                  <>
+                                    <EyeOff className="h-3 w-3" />
+                                    Приховати
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="h-3 w-3" />
+                                    Показати
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400">—</div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex items-center gap-2 justify-center">
+                            {isHotMatch && (
+                              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs">
+                                <Flame className="h-3 w-3 mr-1" />
+                                Hot
+                              </Badge>
+                            )}
+                            {match.url && (
+                              <a 
+                                href={match.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
               <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">Немає матчів за обраними фільтрами</p>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

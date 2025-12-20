@@ -43,7 +43,7 @@ export default function MyBets() {
   const loadRecentBets = async () => {
     try {
       const data = await realGoogleSheetsService.fetchUSDTData();
-      setRecentBets(data.slice(-20)); // Останні 20 ставок для скролу
+      setRecentBets(data.slice(-20));
     } catch (error) {
       console.error('Error loading recent bets:', error);
     }
@@ -62,10 +62,8 @@ export default function MyBets() {
   const clearRecentBets = async () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі ставки, статистику та історію. Ця дія незворотна.')) {
       try {
-        // Очищуємо всі дані з localStorage
         await realGoogleSheetsService.clearAllData();
         
-        // Оновлюємо локальний стан
         setRecentBets([]);
         setStats({
           totalBets: 0,
@@ -78,7 +76,6 @@ export default function MyBets() {
         
         toast.success('Всі дані очищено');
         
-        // Перезавантажуємо дані для синхронізації
         setTimeout(() => {
           loadStats();
           loadRecentBets();
@@ -91,18 +88,15 @@ export default function MyBets() {
     }
   };
 
-  // Функція для оновлення результату ставки
   const updateBetResult = async (bet: any, result: 'Win' | 'Loss') => {
     try {
       const profit = result === 'Win' ? (bet.odds - 1) * bet.amount : -bet.amount;
       const roi = (profit / bet.amount) * 100;
 
-      // Оновлюємо ставку в Google Sheets
       await realGoogleSheetsService.updateBetResult(bet, result, profit, roi);
       
       toast.success(`Ставка позначена як ${result === 'Win' ? 'виграшна' : 'програшна'}`);
       
-      // Перезавантажуємо дані
       loadStats();
       loadRecentBets();
     } catch (error) {
@@ -111,13 +105,9 @@ export default function MyBets() {
     }
   };
 
-  // Фільтруємо та сортуємо ставки: спочатку Pending, потім інші по даті
   const sortedBets = [...recentBets].sort((a: any, b: any) => {
-    // Спочатку всі Pending ставки
     if (a.result === 'Pending' && b.result !== 'Pending') return -1;
     if (a.result !== 'Pending' && b.result === 'Pending') return 1;
-    
-    // Якщо обидві Pending або обидві не Pending, сортуємо по даті (новіші спочатку)
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
@@ -149,220 +139,249 @@ export default function MyBets() {
         </div>
       </div>
 
-      {/* Основна статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Всього ставок</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBets}</div>
-            <p className="text-xs text-muted-foreground">
-              Активних та завершених
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Відсоток перемог</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.winRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              З завершених ставок
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Загальний профіт</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold flex items-center gap-1 ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.totalProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-              {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
+      {/* Quick Stats з градієнтами */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-700 font-medium">Всього ставок</p>
+                <p className="text-3xl font-bold text-blue-900">{stats.totalBets}</p>
+              </div>
+              <BarChart3 className="h-10 w-10 text-blue-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              За весь період
-            </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Середній ROI</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${stats.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+        
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-700 font-medium">Win Rate</p>
+                <p className="text-3xl font-bold text-green-900">{stats.winRate}%</p>
+              </div>
+              <Target className="h-10 w-10 text-green-600" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              На одну ставку
-            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-orange-700 font-medium">Загальний профіт</p>
+                <p className={`text-3xl font-bold ${stats.totalProfit >= 0 ? 'text-orange-900' : 'text-red-700'}`}>
+                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
+                </p>
+              </div>
+              <DollarSign className="h-10 w-10 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-purple-700 font-medium">Середній ROI</p>
+                <p className={`text-3xl font-bold ${stats.averageROI >= 0 ? 'text-purple-900' : 'text-red-700'}`}>
+                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+                </p>
+              </div>
+              <TrendingUp className="h-10 w-10 text-purple-600" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Останні ставки з виділенням активних */}
+      {/* Таблиця останніх ставок */}
       <Card>
-        <CardHeader>
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Останні ставки
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span className="text-blue-900">Останні ставки</span>
             </div>
-            <div className="flex items-center gap-2">
-              {activeBets.length > 0 && (
-                <Badge variant="default" className="bg-blue-600 text-xs">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {activeBets.length} активних
-                </Badge>
-              )}
-              <Badge variant="secondary" className="text-xs">
-                {recentBets.length} записів
+            {activeBets.length > 0 && (
+              <Badge className="bg-blue-600 text-white">
+                <Clock className="h-3 w-3 mr-1" />
+                {activeBets.length} активних
               </Badge>
-            </div>
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {sortedBets.length > 0 ? (
-            <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
-              {sortedBets.map((bet: any, index) => {
-                const isPending = bet.result === 'Pending';
-                return (
-                  <div 
-                    key={`${bet.date}-${bet.match || bet.team1}-${index}`}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
-                      isPending 
-                        ? 'bg-blue-50 border-blue-200 border-2 shadow-sm hover:bg-blue-100 hover:border-blue-300' 
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        {bet.result === 'Win' ? (
-                          <Trophy className="h-4 w-4 text-green-600" />
-                        ) : bet.result === 'Loss' ? (
-                          <AlertTriangle className="h-4 w-4 text-red-600" />
-                        ) : (
-                          <Clock className="h-4 w-4 text-blue-600 animate-pulse" />
-                        )}
-                        <span className={`font-medium ${isPending ? 'text-blue-900' : ''}`}>
-                          {bet.match || `${bet.team1} vs ${bet.team2}`}
-                        </span>
-                      </div>
-                      <Badge variant={isPending ? "default" : "outline"} className={isPending ? "bg-blue-600" : ""}>
-                        {bet.betType}
-                      </Badge>
-                      <Badge variant="secondary">{bet.format}</Badge>
-                    </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left p-3 text-sm font-semibold text-gray-700">Матч</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Дата</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Тип ставки</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Сума</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Коефіцієнт</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Статус</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Профіт</th>
+                    <th className="text-center p-3 text-sm font-semibold text-gray-700">Дії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedBets.map((bet: any, index) => {
+                    const isPending = bet.result === 'Pending';
+                    const isWin = bet.result === 'Win';
+                    const isLoss = bet.result === 'Loss';
                     
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-gray-600">{bet.date}</span>
-                        <span className={`font-medium ${isPending ? 'text-blue-900' : ''}`}>₴{bet.amount}</span>
-                        <span className="text-gray-600">@{bet.odds}</span>
-                        <Badge 
-                          variant={bet.result === 'Win' ? 'default' : bet.result === 'Loss' ? 'destructive' : 'secondary'}
-                          className={isPending ? 'bg-blue-600 text-white' : ''}
-                        >
-                          {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
-                        </Badge>
-                        {bet.profit && (
-                          <span className={bet.profit > 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-                            {bet.profit > 0 ? '+' : ''}{bet.profit} ₴
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Кнопки для оновлення результату (тільки для Pending ставок) */}
-                      {bet.result === 'Pending' && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateBetResult(bet, 'Win')}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                    return (
+                      <tr 
+                        key={`${bet.date}-${bet.match || bet.team1}-${index}`}
+                        className={`border-b hover:bg-gray-50 transition-colors ${
+                          isPending ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            {isWin ? (
+                              <Trophy className="h-4 w-4 text-green-600" />
+                            ) : isLoss ? (
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-blue-600" />
+                            )}
+                            <span className="font-semibold text-gray-900">
+                              {bet.match || `${bet.team1} vs ${bet.team2}`}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="text-sm text-gray-600">{bet.date}</span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {bet.betType}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {bet.format}
+                            </Badge>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="font-semibold text-gray-900">₴{bet.amount}</span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge className="bg-gray-500 text-white font-bold">
+                            {bet.odds}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge 
+                            className={`${
+                              isWin ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0' :
+                              isLoss ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-0' :
+                              'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0'
+                            }`}
                           >
-                            <CheckCircle className="h-4 w-4" />
-                            Виграш
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateBetResult(bet, 'Loss')}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Програш
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                            {isWin ? (
+                              <>
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Виграш
+                              </>
+                            ) : isLoss ? (
+                              <>
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Програш
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-3 w-3 mr-1" />
+                                Очікується
+                              </>
+                            )}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center">
+                          {bet.profit !== undefined && bet.profit !== null ? (
+                            <span className={`font-bold ${bet.profit > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {bet.profit > 0 ? '+' : ''}{bet.profit} ₴
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {isPending && (
+                            <div className="flex gap-2 justify-center">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateBetResult(bet, 'Win')}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateBetResult(bet, 'Loss')}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-12">
               <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>Поки що немає ставок</p>
-              <p className="text-sm">Додайте свою першу ставку, щоб почати відстеження</p>
+              <p className="text-gray-600">Поки що немає ставок</p>
+              <p className="text-sm text-gray-500">Додайте свою першу ставку, щоб почати відстеження</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Швидкі дії з оновленими даними - тільки числа */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Target className="h-5 w-5 text-blue-600" />
-              Активні ставки
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {activeBets.length}
+      {/* Швидкі дії */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-700 font-medium">Активні ставки</p>
+                <p className="text-3xl font-bold text-blue-900">{activeBets.length}</p>
+              </div>
+              <Clock className="h-10 w-10 text-blue-600" />
             </div>
-            <p className="text-sm text-gray-600">Очікують результату</p>
           </CardContent>
         </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Trophy className="h-5 w-5 text-green-600" />
-              Виграшні ставки
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {winningBets.length}
+        
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-700 font-medium">Виграшні ставки</p>
+                <p className="text-3xl font-bold text-green-900">{winningBets.length}</p>
+              </div>
+              <Trophy className="h-10 w-10 text-green-600" />
             </div>
-            <p className="text-sm text-gray-600">З останніх {recentBets.length}</p>
           </CardContent>
         </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              Програшні ставки
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-2xl font-bold text-red-600">
-              {losingBets.length}
+        
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-red-700 font-medium">Програшні ставки</p>
+                <p className="text-3xl font-bold text-red-900">{losingBets.length}</p>
+              </div>
+              <AlertTriangle className="h-10 w-10 text-red-600" />
             </div>
-            <p className="text-sm text-gray-600">З останніх {recentBets.length}</p>
           </CardContent>
         </Card>
       </div>
