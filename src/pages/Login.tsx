@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, LogIn, AlertTriangle, Sparkles } from 'lucide-react';
+import { Loader2, LogIn, AlertTriangle, Sparkles, User, Lock } from 'lucide-react';
 
 interface User {
   username: string;
@@ -147,14 +147,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <Card className="w-full max-w-md border-0 shadow-2xl rounded-3xl overflow-hidden bg-white/80 backdrop-blur-xl">
-        <CardHeader className="space-y-4 pb-8">
+      <Card className="w-full max-w-md border-0 shadow-2xl rounded-3xl overflow-hidden bg-white/90 backdrop-blur-xl">
+        <CardHeader className="space-y-4 pb-8 pt-10">
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white animate-pulse"></div>
             </div>
           </div>
           <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
@@ -164,9 +164,9 @@ export default function Login() {
             Увійдіть до свого облікового запису
           </CardDescription>
         </CardHeader>
-        <CardContent className="pb-8">
+        <CardContent className="pb-10 px-8">
           {subscriptionExpired && (
-            <Alert className="mb-6 bg-orange-50/80 border-0 rounded-2xl backdrop-blur-sm shadow-sm">
+            <Alert className="mb-6 bg-orange-50 border border-orange-200 rounded-2xl shadow-sm">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
               <AlertDescription className="ml-2 text-orange-800 font-medium">
                 Ваша підписка закінчилась. Будь ласка, зверніться до адміністратора для продовження.
@@ -174,45 +174,55 @@ export default function Login() {
             </Alert>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-700 font-semibold text-sm">
+              <Label htmlFor="username" className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                <User className="h-4 w-4 text-blue-600" />
                 Юзернейм
               </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Введіть ваш юзернейм"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="bg-gray-50/80 border-0 rounded-2xl h-12 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 backdrop-blur-sm"
-              />
+              <div className="relative">
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Введіть ваш юзернейм"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="bg-white border-2 border-gray-200 rounded-2xl h-14 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 pl-4 pr-4 text-base font-medium"
+                />
+              </div>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-700 font-semibold text-sm">
+              <Label htmlFor="password" className="text-gray-700 font-semibold text-sm flex items-center gap-2">
+                <Lock className="h-4 w-4 text-purple-600" />
                 Пароль
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-gray-50/80 border-0 rounded-2xl h-12 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 backdrop-blur-sm"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Введіть ваш пароль"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-white border-2 border-gray-200 rounded-2xl h-14 text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-200 pl-4 pr-4 text-base font-medium"
+                />
+              </div>
             </div>
 
             {error && !subscriptionExpired && (
-              <Alert className="bg-red-50/80 border-0 rounded-2xl backdrop-blur-sm shadow-sm">
-                <AlertDescription className="text-red-800 font-medium">{error}</AlertDescription>
+              <Alert className="bg-red-50 border border-red-200 rounded-2xl shadow-sm">
+                <AlertDescription className="text-red-800 font-medium flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg rounded-2xl h-12 text-base transition-all duration-200 hover:shadow-xl"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg rounded-2xl h-14 text-base transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? (
@@ -228,6 +238,12 @@ export default function Login() {
               )}
             </Button>
           </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              Захищено шифруванням • Безпечний вхід
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
