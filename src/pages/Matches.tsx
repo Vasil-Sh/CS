@@ -24,7 +24,8 @@ import {
   Shield,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  ChevronRight
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -431,13 +432,13 @@ export default function Matches() {
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Матчі</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">Матчі</h1>
           <p className="text-gray-500 mt-1 font-medium">Аналітична система з AI прогнозами та Form Stability</p>
         </div>
         
         <Button 
           onClick={refreshMatches} 
-          className="rounded-2xl font-medium"
+          className="rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -616,141 +617,124 @@ export default function Matches() {
         </CardContent>
       </Card>
 
-      {/* Single Matches Table */}
+      {/* Match Cards */}
       {sortedMatches.length > 0 ? (
-        <Card className="border-0 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader className="border-b border-gray-100 bg-white/80 backdrop-blur-xl">
-            <CardTitle className="flex items-center gap-2">
-              <div className="p-2.5 bg-blue-50 rounded-2xl">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-              <span className="text-xl font-semibold text-gray-900 tracking-tight">{currentDate}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50/80 backdrop-blur-sm border-b border-gray-100">
-                  <tr>
-                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Матч</th>
-                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Фаворит</th>
-                    <th 
-                      className="text-center p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 rounded-xl"
-                      onClick={() => toggleSort('confidence')}
-                    >
-                      <div className="flex items-center justify-center gap-1">
-                        AI %
-                        <ArrowUpDown className="h-3 w-3" />
-                      </div>
-                    </th>
-                    <th 
-                      className="text-center p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 rounded-xl"
-                      onClick={() => toggleSort('risk')}
-                    >
-                      <div className="flex items-center justify-center gap-1">
-                        Ризик
-                        <ArrowUpDown className="h-3 w-3" />
-                      </div>
-                    </th>
-                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Коефіцієнти</th>
-                    <th className="text-center p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Win Rate</th>
-                    <th className="text-center p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Form</th>
-                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Турнір</th>
-                    <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Коментар</th>
-                    <th className="text-center p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedMatches.map((match) => {
-                    const formInfo = getFormStabilityInfo(match.formStability);
-                    const riskInfo = getRiskBadge(match.risk);
-                    const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
-                    const riskComments = getMatchRiskComments(match.team1, match.team2);
-                    const isCommentVisible = visibleComments.has(match.id);
-                    
-                    return (
-                      <tr 
-                        key={match.id} 
-                        className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                      >
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <div>
-                              <div className="font-semibold text-gray-900 text-sm">
-                                {match.team1} <span className="text-gray-400">vs</span> {match.team2}
-                              </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
-                                  {match.matchType}
-                                </Badge>
-                                <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
-                                  {match.tier.toUpperCase()}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <div className="font-semibold text-blue-700 text-sm">{match.favorite}</div>
-                        </td>
-                        <td className="p-3 text-center">
-                          <Badge 
-                            className={`font-semibold px-3 py-1 rounded-full border-0 ${
-                              match.aiConfidence >= 80 ? 'bg-green-100 text-green-700' :
-                              match.aiConfidence >= 60 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                            }`}
-                          >
-                            {match.aiConfidence}%
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-blue-50 rounded-2xl">
+              <Calendar className="h-5 w-5 text-blue-600" />
+            </div>
+            <span className="text-xl font-semibold text-gray-900 tracking-tight">{currentDate}</span>
+          </div>
+
+          {sortedMatches.map((match) => {
+            const formInfo = getFormStabilityInfo(match.formStability);
+            const riskInfo = getRiskBadge(match.risk);
+            const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
+            const riskComments = getMatchRiskComments(match.team1, match.team2);
+            const isCommentVisible = visibleComments.has(match.id);
+            
+            return (
+              <Card key={match.id} className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden hover:shadow-xl transition-all duration-200">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Teams Section */}
+                    <div className="lg:col-span-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
+                            {match.matchType}
                           </Badge>
-                        </td>
-                        <td className="p-3 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${riskInfo.dotColor}`} />
-                            <span className="text-sm font-medium text-gray-900">{match.risk}%</span>
+                          <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0 font-semibold">
+                            {match.tier.toUpperCase()}
+                          </Badge>
+                          {isHotMatch && (
+                            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold">
+                              <Flame className="h-3 w-3 mr-1" />
+                              Hot
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900">
+                          {match.team1} <span className="text-gray-400 font-normal">vs</span> {match.team2}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Trophy className="h-4 w-4 text-blue-600" />
+                          <span className="font-semibold text-blue-700">Фаворит: {match.favorite}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Section */}
+                    <div className="lg:col-span-5">
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* AI Confidence */}
+                        <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">AI Confidence</p>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-blue-700">{match.aiConfidence}%</span>
+                            <span className="text-sm text-gray-500">/ {100 - match.aiConfidence}%</span>
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">{riskInfo.label}</div>
-                        </td>
-                        <td className="p-3">
-                          <div className="text-sm space-y-0.5">
-                            <div className="text-gray-700">{match.team1}: <span className="font-semibold text-gray-900">{match.odds.team1}</span></div>
-                            <div className="text-gray-700">{match.team2}: <span className="font-semibold text-gray-900">{match.odds.team2}</span></div>
+                        </div>
+
+                        {/* Risk */}
+                        <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Ризик</p>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${riskInfo.dotColor}`} />
+                            <span className="text-2xl font-bold text-gray-900">{match.risk}%</span>
                           </div>
-                        </td>
-                        <td className="p-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                          <p className="text-xs text-gray-600 mt-1 font-medium">{riskInfo.label}</p>
+                        </div>
+
+                        {/* Odds */}
+                        <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Коефіцієнти</p>
+                          <div className="space-y-1">
+                            <div className="text-sm"><span className="font-semibold text-gray-900">{match.odds.team1}</span> <span className="text-gray-500">({match.team1})</span></div>
+                            <div className="text-sm"><span className="font-semibold text-gray-900">{match.odds.team2}</span> <span className="text-gray-500">({match.team2})</span></div>
+                          </div>
+                        </div>
+
+                        {/* Win Rate & Form */}
+                        <div className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Win Rate & Form</p>
+                          <div className="flex items-center gap-2 mb-2">
                             {match.winRate >= 70 ? (
                               <TrendingUp className="h-4 w-4 text-green-600" />
                             ) : (
                               <TrendingDown className="h-4 w-4 text-red-600" />
                             )}
-                            <span className="font-semibold text-gray-900">{match.winRate}%</span>
+                            <span className="text-xl font-bold text-gray-900">{match.winRate}%</span>
                           </div>
-                        </td>
-                        <td className="p-3 text-center">
-                          <Badge className={`${formInfo.color} flex items-center gap-1 justify-center px-3 py-1 rounded-full`}>
+                          <Badge className={`${formInfo.color} flex items-center gap-1 w-fit px-2.5 py-1 rounded-full`}>
                             {formInfo.icon}
                             {formInfo.label}
                           </Badge>
-                        </td>
-                        <td className="p-3">
-                          <div className="text-sm text-gray-700">{match.context}</div>
-                          <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
-                        </td>
-                        <td className="p-3">
-                          {riskComments ? (
-                            <div className="flex flex-col gap-2">
-                              <div 
-                                className={`text-xs text-gray-700 whitespace-pre-line max-w-xs transition-all duration-300 ${
-                                  isCommentVisible ? '' : 'blur-sm select-none'
-                                }`}
-                              >
-                                {riskComments}
-                              </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Section */}
+                    <div className="lg:col-span-3">
+                      <div className="space-y-3">
+                        <div className="p-4 bg-gray-50 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Турнір</p>
+                          <p className="text-sm font-semibold text-gray-900">{match.context}</p>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-2xl">
+                          <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">Коментар</p>
+                          <p className="text-sm text-gray-700">{match.comment}</p>
+                        </div>
+                        {riskComments && (
+                          <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs font-medium text-red-700 uppercase tracking-wide">Попередження</p>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleCommentVisibility(match.id)}
-                                className="h-6 px-2 text-xs flex items-center gap-1 self-start rounded-full"
+                                className="h-6 px-2 text-xs flex items-center gap-1 rounded-full"
                               >
                                 {isCommentVisible ? (
                                   <>
@@ -765,38 +749,34 @@ export default function Matches() {
                                 )}
                               </Button>
                             </div>
-                          ) : (
-                            <div className="text-xs text-gray-400">—</div>
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          <div className="flex items-center gap-2 justify-center">
-                            {isHotMatch && (
-                              <Badge className="bg-orange-100 text-orange-700 text-xs px-2.5 py-1 rounded-full border-0">
-                                <Flame className="h-3 w-3 mr-1" />
-                                Hot
-                              </Badge>
-                            )}
-                            {match.url && (
-                              <a 
-                                href={match.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 transition-colors"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            )}
+                            <div 
+                              className={`text-xs text-red-700 whitespace-pre-line transition-all duration-300 ${
+                                isCommentVisible ? '' : 'blur-sm select-none'
+                              }`}
+                            >
+                              {riskComments}
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                        )}
+                        {match.url && (
+                          <a 
+                            href={match.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Переглянути на HLTV
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       ) : (
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="py-20">
