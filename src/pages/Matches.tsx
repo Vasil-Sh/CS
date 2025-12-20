@@ -305,21 +305,23 @@ export default function Matches() {
     try {
       toast({
         title: '🔄 Завантаження матчів з HLTV...',
-        description: 'Це може зайняти кілька секунд',
+        description: 'Використовується Supabase Edge Function',
       });
 
-      // Use CORS proxy for testing
-      const corsProxy = 'https://corsproxy.io/';
-      const hltvMatches = await fetchAndParseMatches(corsProxy);
+      // Use Supabase Edge Function (more reliable than CORS proxy)
+      const hltvMatches = await fetchAndParseMatches(true);
       
-      console.log('HLTV Matches fetched:', hltvMatches);
+      console.log('📊 Parsed HLTV matches:', hltvMatches);
       
       if (hltvMatches && hltvMatches.length > 0) {
         // Convert HLTV matches to our format
         const formattedMatches = hltvMatches.map(match => {
           const converted = convertToMatchFormat(match);
           
-          console.log('Converted match:', converted);
+          console.log('🔄 Converting match:', {
+            original: match,
+            converted: converted
+          });
           
           // Add mock AI data (in production, this would come from your AI analysis)
           return {
@@ -338,7 +340,7 @@ export default function Matches() {
           };
         });
 
-        console.log('Formatted matches:', formattedMatches);
+        console.log('✅ Formatted matches:', formattedMatches);
         setMatches(formattedMatches);
         
         toast({
@@ -346,7 +348,7 @@ export default function Matches() {
           description: `Завантажено ${formattedMatches.length} матчів з HLTV`,
         });
       } else {
-        console.warn('No matches found from HLTV');
+        console.warn('⚠️ No matches found from HLTV');
         toast({
           title: '⚠️ Матчі не знайдено',
           description: 'Використовуються демо-дані',
@@ -354,11 +356,11 @@ export default function Matches() {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch HLTV matches:', error);
+      console.error('❌ Failed to fetch HLTV matches:', error);
       
       toast({
         title: '❌ Помилка завантаження',
-        description: 'Не вдалося завантажити матчі з HLTV. Використовуються демо-дані.',
+        description: `Не вдалося завантажити матчі з HLTV: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'destructive'
       });
     } finally {
@@ -399,10 +401,10 @@ export default function Matches() {
           <div className="flex items-start gap-3">
             <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-900 mb-1">🚀 Реальні дані з HLTV</h3>
+              <h3 className="font-semibold text-blue-900 mb-1">🚀 Реальні дані з HLTV через Supabase</h3>
               <p className="text-sm text-blue-800">
-                Натисніть "Оновити з HLTV" щоб завантажити актуальні матчі з HLTV.org. 
-                Парсер автоматично отримає список матчів, коефіцієнти та інформацію про команди.
+                Натисніть "Оновити з HLTV" щоб завантажити актуальні матчі з HLTV.org через Supabase Edge Function. 
+                Це більш надійний спосіб, ніж CORS proxy.
               </p>
             </div>
           </div>

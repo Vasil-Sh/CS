@@ -157,21 +157,69 @@ export async function parseTeamMaps(html: string): Promise<TeamMapStats[]> {
 }
 
 /**
- * Fetch and parse HLTV matches
- * Note: This requires a CORS proxy or backend service due to HLTV's CORS policy
+ * Fetch and parse HLTV matches using Supabase Edge Function
  */
-export async function fetchAndParseMatches(proxyUrl?: string): Promise<MatchData[]> {
-  const hltvUrl = 'https://www.hltv.org/matches';
-  const url = proxyUrl ? `${proxyUrl}?url=${encodeURIComponent(hltvUrl)}` : hltvUrl;
-  
+export async function fetchAndParseMatches(useSupabase: boolean = true): Promise<MatchData[]> {
   try {
-    const response = await fetch(url);
-    const html = await response.text();
-    return parseMatches(html);
+    if (useSupabase) {
+      // Use Supabase Edge Function (more reliable)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        console.warn('Supabase credentials not found, falling back to CORS proxy');
+        return fetchWithCorsProxy();
+      }
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/parse-hltv-matches`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Edge function returned status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.matches || [];
+    } else {
+      // Fallback to CORS proxy
+      return fetchWithCorsProxy();
+    }
   } catch (error) {
     console.error('Failed to fetch HLTV matches:', error);
     throw error;
   }
+}
+
+/**
+ * Fallback: Fetch using CORS proxy
+ */
+async function fetchWithCorsProxy(): Promise<MatchData[]> {
+  const corsProxies = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://cors-anywhere.herokuapp.com/',
+  ];
+  
+  const hltvUrl = 'https://www.hltv.org/matches';
+  
+  for (const proxy of corsProxies) {
+    try {
+      const url = `${proxy}${encodeURIComponent(hltvUrl)}`;
+      const response = await fetch(url);
+      const html = await response.text();
+      return parseMatches(html);
+    } catch (error) {
+      console.warn(`CORS proxy ${proxy} failed:`, error);
+      continue;
+    }
+  }
+  
+  throw new Error('All CORS proxies failed');
 }
 
 /**
