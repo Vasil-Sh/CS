@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CS2BettingForm from '@/components/CS2BettingForm';
 import BettingHistory from '@/components/BettingHistory';
-import GoogleSheetsConfig from '@/components/GoogleSheetsConfig';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
-import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, RefreshCw, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Bet } from '@/types/betting';
 
 export default function MyBets() {
   const currentUser = localStorage.getItem('currentUser') || '';
@@ -29,12 +29,12 @@ export default function MyBets() {
   
   const [loading, setLoading] = useState(true);
   
-  const [recentBets, setRecentBets] = useState(() => 
+  const [recentBets, setRecentBets] = useState<Bet[]>(() => 
     UserDataService.getUserData(currentUser, 'mybets_data', [])
   );
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [selectedBet, setSelectedBet] = useState<any>(null);
+  const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -116,11 +116,6 @@ export default function MyBets() {
     loadRecentBets();
   };
 
-  const refreshData = () => {
-    loadStats();
-    loadRecentBets();
-  };
-
   const clearRecentBets = async () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі ставки, статистику та історію. Ця дія незворотна.')) {
       try {
@@ -155,7 +150,7 @@ export default function MyBets() {
     }
   };
 
-  const updateBetResult = async (bet: any, result: 'Win' | 'Loss') => {
+  const updateBetResult = async (bet: Bet, result: 'Win' | 'Loss') => {
     try {
       console.log('🎯 updateBetResult called:', { bet, result });
       
@@ -192,7 +187,7 @@ export default function MyBets() {
       await realGoogleSheetsService.updateBetResult(bet, result, profitInUAH, roi);
       
       // Update in user-specific localStorage
-      const updatedBets = recentBets.map((b: any) => {
+      const updatedBets = recentBets.map((b: Bet) => {
         if (b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds) {
           const updatedBet = { 
             ...b, 
@@ -213,7 +208,7 @@ export default function MyBets() {
       
       console.log('💾 Saved to localStorage:', {
         totalBets: updatedBets.length,
-        updatedBet: updatedBets.find((b: any) => 
+        updatedBet: updatedBets.find((b: Bet) => 
           b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds
         )
       });
@@ -228,20 +223,20 @@ export default function MyBets() {
     }
   };
 
-  const handleShareBet = (bet: any) => {
+  const handleShareBet = (bet: Bet) => {
     setSelectedBet(bet);
     setShareModalOpen(true);
   };
 
-  const sortedBets = [...recentBets].sort((a: any, b: any) => {
+  const sortedBets = [...recentBets].sort((a: Bet, b: Bet) => {
     if (a.result === 'Pending' && b.result !== 'Pending') return -1;
     if (a.result !== 'Pending' && b.result === 'Pending') return 1;
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
-  const activeBets = recentBets.filter((bet: any) => bet.result === 'Pending');
-  const winningBets = recentBets.filter((bet: any) => bet.result === 'Win');
-  const losingBets = recentBets.filter((bet: any) => bet.result === 'Loss');
+  const activeBets = recentBets.filter((bet: Bet) => bet.result === 'Pending');
+  const winningBets = recentBets.filter((bet: Bet) => bet.result === 'Win');
+  const losingBets = recentBets.filter((bet: Bet) => bet.result === 'Loss');
 
   // Функція для отримання символу валюти
   const getCurrencySymbol = (currency?: string) => {
@@ -260,20 +255,12 @@ export default function MyBets() {
         
         <div className="flex gap-3">
           <Button 
-            onClick={refreshData} 
-            variant="outline" 
-            className="rounded-2xl border-gray-200 hover:bg-gray-50 font-medium"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Оновити
-          </Button>
-          <Button 
             onClick={clearRecentBets} 
             variant="outline"
             className="rounded-2xl border-red-200 text-red-600 hover:bg-red-50 font-medium"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Очистити
+            Очистити всі дані
           </Button>
         </div>
       </div>
@@ -341,7 +328,7 @@ export default function MyBets() {
         </Card>
       </div>
 
-      {/* Recent Bets Table - iOS style */}
+      {/* Recent Bets Table - iOS style with scroll */}
       <Card className="border-0 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
         <CardHeader className="border-b border-gray-100 bg-white/80 backdrop-blur-xl">
           <CardTitle className="flex items-center justify-between">
@@ -361,9 +348,9 @@ export default function MyBets() {
         </CardHeader>
         <CardContent className="p-0">
           {sortedBets.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
               <table className="w-full">
-                <thead className="bg-gray-50/80 backdrop-blur-sm border-b border-gray-100">
+                <thead className="bg-gray-50/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
                   <tr>
                     <th className="text-left p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Матч</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата</th>
@@ -377,7 +364,7 @@ export default function MyBets() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedBets.map((bet: any, index) => {
+                  {sortedBets.map((bet: Bet, index) => {
                     const isPending = bet.result === 'Pending';
                     const isWin = bet.result === 'Win';
                     const isLoss = bet.result === 'Loss';
@@ -580,7 +567,7 @@ export default function MyBets() {
 
       {/* Tabs - iOS style */}
       <Tabs defaultValue="add" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
           <TabsTrigger value="add" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Додати ставку
           </TabsTrigger>
@@ -589,9 +576,6 @@ export default function MyBets() {
           </TabsTrigger>
           <TabsTrigger value="strategies" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Стратегії
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Налаштування
           </TabsTrigger>
         </TabsList>
 
@@ -605,10 +589,6 @@ export default function MyBets() {
 
         <TabsContent value="strategies">
           <StrategyOverview />
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <GoogleSheetsConfig />
         </TabsContent>
       </Tabs>
 

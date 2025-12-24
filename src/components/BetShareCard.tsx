@@ -259,7 +259,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
           {/* Footer - iOS style subtle text */}
           <div className="pt-3 text-center">
-            <p className="text-xs text-gray-400 font-medium">CS2 Betting Tracker</p>
+            <p className="text-xs text-gray-400 font-medium">Betting Analytics Pro</p>
           </div>
         </CardContent>
       </Card>

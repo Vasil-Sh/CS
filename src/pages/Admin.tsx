@@ -14,7 +14,9 @@ import {
   Bell,
   AlertTriangle,
   DollarSign,
-  MessageCircle
+  MessageCircle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import {
   Table,
@@ -47,6 +49,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [error, setError] = useState('');
+  const [showUsernames, setShowUsernames] = useState(false);
   const currentUser = localStorage.getItem('currentUser');
 
   useEffect(() => {
@@ -217,6 +220,28 @@ export default function Admin() {
     );
   };
 
+  const renderUsername = (username: string) => {
+    if (!showUsernames) {
+      return (
+        <span className="blur-sm select-none transition-all duration-200">
+          {username}
+        </span>
+      );
+    }
+    return username;
+  };
+
+  const renderTelegram = (telegram: string) => {
+    if (!showUsernames) {
+      return (
+        <span className="blur-sm select-none transition-all duration-200">
+          {telegram}
+        </span>
+      );
+    }
+    return telegram;
+  };
+
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       {/* Header */}
@@ -232,28 +257,62 @@ export default function Admin() {
             Управління користувачами та підписками
           </p>
         </div>
-        <Button
-          onClick={fetchUsers}
-          disabled={loading}
-          className="rounded-2xl bg-purple-600 hover:bg-purple-700 font-medium"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Завантаження...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Оновити дані
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowUsernames(!showUsernames)}
+            variant="outline"
+            className="rounded-2xl border-2 font-medium"
+          >
+            {showUsernames ? (
+              <>
+                <EyeOff className="mr-2 h-4 w-4" />
+                Приховати дані
+              </>
+            ) : (
+              <>
+                <Eye className="mr-2 h-4 w-4" />
+                Показати дані
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="rounded-2xl bg-purple-600 hover:bg-purple-700 font-medium"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Завантаження...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Оновити дані
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {error && (
         <Alert className="rounded-2xl border-0 bg-red-50">
           <AlertDescription className="font-medium text-red-700">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Privacy Notice */}
+      {!showUsernames && (
+        <Alert className="rounded-2xl border-0 bg-blue-50 border-l-4 border-l-blue-500">
+          <Eye className="h-5 w-5 text-blue-600" />
+          <AlertDescription className="font-medium text-gray-900 ml-2">
+            <div className="font-bold text-blue-700 mb-1">
+              🔒 Режим приватності активний
+            </div>
+            <p className="text-sm text-gray-700">
+              Імена користувачів та Telegram приховані для захисту конфіденційності під час запису відео або демонстрації.
+            </p>
+          </AlertDescription>
         </Alert>
       )}
 
@@ -268,7 +327,7 @@ export default function Admin() {
             <ul className="space-y-1 mt-2">
               {expiringUsers.map((user, idx) => (
                 <li key={idx} className="text-sm text-gray-700">
-                  <span className="font-semibold">{user.telegram}</span> ({user.username}) - 
+                  <span className="font-semibold">{renderTelegram(user.telegram)}</span> ({renderUsername(user.username)}) - 
                   <span className="font-bold text-orange-600 ml-1">
                     {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : `залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
                   </span>
@@ -385,9 +444,9 @@ export default function Admin() {
                           : ''
                       }`}
                     >
-                      <TableCell className="font-medium text-gray-900">{user.telegram}</TableCell>
+                      <TableCell className="font-medium text-gray-900">{renderTelegram(user.telegram)}</TableCell>
                       <TableCell className="text-gray-700">
-                        {user.username}
+                        {renderUsername(user.username)}
                         {user.username === ADMIN_USERNAME && (
                           <span className="ml-2 text-purple-600">👑</span>
                         )}

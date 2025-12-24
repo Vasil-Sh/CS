@@ -280,9 +280,9 @@ export default function BettingHistory() {
               <p className="text-gray-600">Завантаження...</p>
             </div>
           ) : sortedBets.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
               <table className="w-full">
-                <thead>
+                <thead className="sticky top-0 bg-gray-50/80 backdrop-blur-sm z-10">
                   <tr className="border-b border-gray-100">
                     <th className="text-left p-3 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl" onClick={() => toggleSort('date')}>
                       <div className="flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wider">

@@ -27,9 +27,12 @@ import {
   Wifi,
   WifiOff,
   Database,
-  BarChart3
+  BarChart3,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 export default function Analytics() {
@@ -275,24 +278,43 @@ export default function Analytics() {
     }));
   };
 
-  // Monthly profit data
+  // Monthly profit data with cumulative
   const monthlyProfitData = () => {
-    const monthlyData: { [key: string]: number } = {};
+    const monthlyData: { [key: string]: { profit: number; wins: number; losses: number } } = {};
     
     completedBets.forEach((bet: Bet) => {
       const date = new Date(bet.date);
-      const monthName = date.toLocaleDateString('uk-UA', { month: 'long', year: 'numeric' });
+      const monthName = date.toLocaleDateString('uk-UA', { month: 'short', year: 'numeric' });
       
       if (!monthlyData[monthName]) {
-        monthlyData[monthName] = 0;
+        monthlyData[monthName] = { profit: 0, wins: 0, losses: 0 };
       }
-      monthlyData[monthName] += bet.profit || 0;
+      monthlyData[monthName].profit += bet.profit || 0;
+      if (bet.result === 'Win') {
+        monthlyData[monthName].wins += 1;
+      } else {
+        monthlyData[monthName].losses += 1;
+      }
     });
     
-    return Object.entries(monthlyData).map(([month, profit]) => ({
-      month,
-      profit: Math.round(profit * 100) / 100
-    }));
+    let cumulative = 0;
+    return Object.entries(monthlyData)
+      .sort((a, b) => {
+        const dateA = new Date(a[0]);
+        const dateB = new Date(b[0]);
+        return dateA.getTime() - dateB.getTime();
+      })
+      .map(([month, data]) => {
+        cumulative += data.profit;
+        return {
+          month,
+          profit: Math.round(data.profit * 100) / 100,
+          cumulative: Math.round(cumulative * 100) / 100,
+          wins: data.wins,
+          losses: data.losses,
+          winRate: data.wins + data.losses > 0 ? Math.round((data.wins / (data.wins + data.losses)) * 100) : 0
+        };
+      });
   };
 
   // Balance over time
@@ -306,7 +328,7 @@ export default function Analytics() {
     
     const balanceData: BalanceData[] = [{ date: sortedBets[0]?.date || new Date().toISOString().split('T')[0], balance: initialBalance, profit: 0 }];
     
-    sortedBets.forEach((bet: any) => {
+    sortedBets.forEach((bet: Bet) => {
       runningBalance += bet.profit || 0;
       balanceData.push({
         date: bet.date,
@@ -318,12 +340,13 @@ export default function Analytics() {
     return balanceData;
   };
 
-  // Scatter plot: Odds vs Profit
+  // Enhanced odds vs profit with color coding
   const oddsVsProfitData = (): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
       odds: bet.odds || 0,
       profit: bet.profit || 0,
-      result: bet.result
+      result: bet.result,
+      fill: bet.result === 'Win' ? '#10b981' : '#ef4444'
     }));
   };
 
@@ -491,40 +514,188 @@ export default function Analytics() {
                 <BalanceChart data={balanceData} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Enhanced Monthly Profit Chart with Area */}
                   <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                     <CardHeader>
-                      <CardTitle className="text-lg font-semibold text-gray-900">Прибуток по місяцях</CardTitle>
+                      <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <Calendar className="h-5 w-5" />
+                          Прибуток по місяцях
+                        </span>
+                        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                          Кумулятивний
+                        </Badge>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={monthlyProfit}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip formatter={(value) => [`${value} ₴`, 'Прибуток']} />
-                          <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} />
-                        </LineChart>
+                        <AreaChart data={monthlyProfit}>
+                          <defs>
+                            <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                            </linearGradient>
+                            <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis 
+                            dataKey="month" 
+                            tick={{ fontSize: 12 }}
+                            stroke="#6b7280"
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 12 }}
+                            stroke="#6b7280"
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                              border: 'none', 
+                              borderRadius: '12px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: number | string, name: string) => {
+                              if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
+                              if (name === 'cumulative') return [`${value} ₴`, 'Загальний прибуток'];
+                              if (name === 'winRate') return [`${value}%`, 'Win Rate'];
+                              return [value, name];
+                            }}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="profit" 
+                            stroke="#10b981" 
+                            strokeWidth={2}
+                            fillOpacity={1} 
+                            fill="url(#colorProfit)" 
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="cumulative" 
+                            stroke="#8b5cf6" 
+                            strokeWidth={2}
+                            fillOpacity={1} 
+                            fill="url(#colorCumulative)" 
+                          />
+                        </AreaChart>
                       </ResponsiveContainer>
+                      
+                      {/* Monthly Stats Summary */}
+                      <div className="mt-4 grid grid-cols-3 gap-3">
+                        <div className="text-center p-3 bg-green-50 rounded-xl">
+                          <p className="text-xs text-gray-600 mb-1">Кращий місяць</p>
+                          <p className="text-lg font-bold text-green-600">
+                            +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-red-50 rounded-xl">
+                          <p className="text-xs text-gray-600 mb-1">Гірший місяць</p>
+                          <p className="text-lg font-bold text-red-600">
+                            {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 rounded-xl">
+                          <p className="text-xs text-gray-600 mb-1">Середній</p>
+                          <p className="text-lg font-bold text-purple-600">
+                            {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
+                          </p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
 
+                  {/* Enhanced Scatter Chart with Win/Loss Colors */}
                   <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                     <CardHeader>
-                      <CardTitle className="text-lg font-semibold text-gray-900">Коефіцієнти vs Прибуток</CardTitle>
+                      <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <Target className="h-5 w-5" />
+                          Коефіцієнти vs Прибуток
+                        </span>
+                        <div className="flex gap-2">
+                          <Badge className="bg-green-500 text-white border-0 text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Виграш
+                          </Badge>
+                          <Badge className="bg-red-500 text-white border-0 text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Програш
+                          </Badge>
+                        </div>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
-                        <ScatterChart data={scatterData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="odds" name="Коефіцієнт" />
-                          <YAxis dataKey="profit" name="Прибуток" />
-                          <Tooltip formatter={(value, name) => [
-                            name === 'odds' ? value : `${value} ₴`,
-                            name === 'odds' ? 'Коефіцієнт' : 'Прибуток'
-                          ]} />
-                          <Scatter dataKey="profit" fill="#8b5cf6" />
+                        <ScatterChart>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis 
+                            dataKey="odds" 
+                            name="Коефіцієнт"
+                            tick={{ fontSize: 12 }}
+                            stroke="#6b7280"
+                            label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6b7280' } }}
+                          />
+                          <YAxis 
+                            dataKey="profit" 
+                            name="Прибуток"
+                            tick={{ fontSize: 12 }}
+                            stroke="#6b7280"
+                            label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                              border: 'none', 
+                              borderRadius: '12px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: number | string, name: string) => {
+                              if (name === 'odds') return [value, 'Коефіцієнт'];
+                              if (name === 'profit') return [`${value} ₴`, 'Прибуток'];
+                              return [value, name];
+                            }}
+                          />
+                          <Scatter 
+                            data={scatterData} 
+                            fill="#8b5cf6"
+                            shape={(props: { cx?: number; cy?: number; fill?: string }) => {
+                              const { cx, cy, fill } = props;
+                              return (
+                                <circle 
+                                  cx={cx} 
+                                  cy={cy} 
+                                  r={6} 
+                                  fill={fill}
+                                  opacity={0.7}
+                                  stroke="#fff"
+                                  strokeWidth={2}
+                                />
+                              );
+                            }}
+                          />
                         </ScatterChart>
                       </ResponsiveContainer>
+                      
+                      {/* Scatter Stats */}
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
+                          <ArrowUpRight className="h-8 w-8 text-green-600" />
+                          <div>
+                            <p className="text-xs text-gray-600">Виграшних ставок</p>
+                            <p className="text-lg font-bold text-green-600">{winningBets.length}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
+                          <ArrowDownRight className="h-8 w-8 text-red-600" />
+                          <div>
+                            <p className="text-xs text-gray-600">Програшних ставок</p>
+                            <p className="text-lg font-bold text-red-600">{losingBets.length}</p>
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

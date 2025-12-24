@@ -35,7 +35,7 @@ export default function KellyCalculator() {
     }
   };
 
-  const getRiskLevel = (percentage: number) => {
+  const getRiskLevel = (percentage: number): { level: string; color: 'default' | 'secondary' | 'destructive' } => {
     if (percentage === 0) return { level: 'Не ставити', color: 'destructive' };
     if (percentage < 2) return { level: 'Низький ризик', color: 'default' };
     if (percentage < 5) return { level: 'Помірний ризик', color: 'secondary' };
@@ -123,7 +123,7 @@ export default function KellyCalculator() {
               </div>
 
               <div className="flex justify-center">
-                <Badge variant={getRiskLevel(kellyPercentage).color as any}>
+                <Badge variant={getRiskLevel(kellyPercentage).color}>
                   {getRiskLevel(kellyPercentage).level}
                 </Badge>
               </div>

@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2 } from 'lucide-react';
-import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield } from 'lucide-react';
+import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { toast } from 'sonner';
 
 interface CS2BettingFormProps {
@@ -49,11 +49,18 @@ interface BetRecord {
   notes: string;
 }
 
+interface StrategyViolation {
+  type: 'odds' | 'format' | 'betType';
+  message: string;
+}
+
 export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
   const [lastAddedBet, setLastAddedBet] = useState<BetRecord | null>(null);
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>([]);
+  const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
+  const [strategyViolations, setStrategyViolations] = useState<StrategyViolation[]>([]);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     matchUrl: '',
@@ -69,7 +76,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     stake: '',
     currency: 'UAH',
     exchangeRate: '41',
-    bookmaker: '',
     confidence: '',
     strategy: '',
     reasoning: '',
@@ -77,6 +83,80 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     riskLevel: '',
     notes: ''
   });
+
+  useEffect(() => {
+    // Load primary strategy
+    const primaryStrategyName = localStorage.getItem('primaryStrategy');
+    if (primaryStrategyName) {
+      const strategy = realGoogleSheetsService.getStrategyByName(primaryStrategyName);
+      if (strategy) {
+        setPrimaryStrategy(strategy);
+        setFormData(prev => ({ ...prev, strategy: primaryStrategyName }));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Validate against primary strategy whenever relevant fields change
+    if (primaryStrategy) {
+      validateAgainstStrategy();
+    } else {
+      setStrategyViolations([]);
+    }
+  }, [formData.odds, formData.format, formData.betCategory, primaryStrategy]);
+
+  const validateAgainstStrategy = () => {
+    if (!primaryStrategy) {
+      setStrategyViolations([]);
+      return;
+    }
+
+    const violations: StrategyViolation[] = [];
+    const currentOdds = parseFloat(formData.odds);
+
+    // Only validate for Ординар
+    if (formData.betCategory !== 'Ординар') {
+      setStrategyViolations([]);
+      return;
+    }
+
+    // Check odds limits
+    if (currentOdds && primaryStrategy.minOdds && currentOdds < primaryStrategy.minOdds) {
+      violations.push({
+        type: 'odds',
+        message: `Коефіцієнт ${currentOdds} нижче мінімального ${primaryStrategy.minOdds}`
+      });
+    }
+
+    if (currentOdds && primaryStrategy.maxOdds && currentOdds > primaryStrategy.maxOdds) {
+      violations.push({
+        type: 'odds',
+        message: `Коефіцієнт ${currentOdds} вище максимального ${primaryStrategy.maxOdds}`
+      });
+    }
+
+    // Check format restrictions
+    if (primaryStrategy.allowedFormats && primaryStrategy.allowedFormats.length > 0) {
+      if (!primaryStrategy.allowedFormats.includes(formData.format)) {
+        violations.push({
+          type: 'format',
+          message: `Формат ${formData.format} не дозволений. Дозволені: ${primaryStrategy.allowedFormats.join(', ')}`
+        });
+      }
+    }
+
+    // Check bet type restrictions
+    if (primaryStrategy.allowedBetTypes && primaryStrategy.allowedBetTypes.length > 0) {
+      if (!primaryStrategy.allowedBetTypes.includes(formData.betCategory)) {
+        violations.push({
+          type: 'betType',
+          message: `Тип ставки "${formData.betCategory}" не дозволений. Дозволені: ${primaryStrategy.allowedBetTypes.join(', ')}`
+        });
+      }
+    }
+
+    setStrategyViolations(violations);
+  };
 
   const loadRiskyTeamsFromStorage = (): RiskyTeam[] => {
     try {
@@ -313,6 +393,18 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       return;
     }
 
+    // Show warning if there are strategy violations
+    if (strategyViolations.length > 0) {
+      const violationMessages = strategyViolations.map(v => v.message).join('\n');
+      const proceed = window.confirm(
+        `⚠️ ПОПЕРЕДЖЕННЯ: Порушення стратегії "${primaryStrategy?.name}"!\n\n${violationMessages}\n\nВи все одно хочете створити цю ставку?`
+      );
+      
+      if (!proceed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -386,9 +478,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         stake: '',
         currency: 'UAH',
         exchangeRate: '41',
-        bookmaker: '',
         confidence: '',
-        strategy: '',
+        strategy: primaryStrategy?.name || '',
         reasoning: '',
         keyFactors: '',
         riskLevel: '',
@@ -396,6 +487,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       });
       
       setExpressEvents([]);
+      setStrategyViolations([]);
 
       onRecordAdded?.();
     } catch (error) {
@@ -420,6 +512,41 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
   return (
     <div className="space-y-6">
+      {primaryStrategy && (
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-xl">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Активна стратегія: {primaryStrategy.name}</p>
+                <p className="text-xs text-gray-600">{primaryStrategy.description}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {strategyViolations.length > 0 && (
+        <Card className="border-2 border-orange-200 shadow-lg rounded-3xl bg-orange-50 overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-orange-900 mb-2">⚠️ Порушення стратегії "{primaryStrategy?.name}"</p>
+                <div className="space-y-1">
+                  {strategyViolations.map((violation, index) => (
+                    <p key={index} className="text-xs text-orange-800">• {violation.message}</p>
+                  ))}
+                </div>
+                <p className="text-xs text-orange-700 mt-2 font-medium">Ви все одно можете створити ставку, підтвердивши попередження.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
@@ -643,14 +770,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       <Label htmlFor="selection" className="text-gray-700 font-medium">
                         Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
                       </Label>
-                      <Input
-                        id="selection"
-                        value={formData.selection}
-                        onChange={(e) => setFormData({...formData, selection: e.target.value})}
-                        placeholder="NAVI, Over 2.5, +1.5..."
-                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl"
-                      />
+                      <Select 
+                        value={formData.selection} 
+                        onValueChange={(value) => setFormData({...formData, selection: value})}
+                        disabled={!formData.team1 || !formData.team2}
+                      >
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
+                          {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div>
@@ -692,7 +824,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         Фінальні деталі ставки
                       </h3>
 
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                           <Label htmlFor="currency" className="text-gray-700 font-medium">Валюта</Label>
                           <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
@@ -751,22 +883,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             required
                             className="rounded-xl"
                           />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="bookmaker" className="text-gray-700 font-medium">Букмекер</Label>
-                          <Select value={formData.bookmaker} onValueChange={(value) => setFormData({...formData, bookmaker: value})}>
-                            <SelectTrigger className="rounded-xl">
-                              <SelectValue placeholder="Оберіть" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Parimatch">Parimatch</SelectItem>
-                              <SelectItem value="1xBet">1xBet</SelectItem>
-                              <SelectItem value="FavBet">FavBet</SelectItem>
-                              <SelectItem value="Bet365">Bet365</SelectItem>
-                              <SelectItem value="GG.bet">GG.bet</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                       </div>
                       

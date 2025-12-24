@@ -22,10 +22,18 @@ interface PeriodStats {
   worstStreak: number;
 }
 
+interface TrendDataPoint {
+  period: string;
+  profit: number;
+  winRate: number;
+  bets: number;
+  roi: number;
+}
+
 export default function PeriodComparison({ bets }: PeriodComparisonProps) {
   const [comparisonType, setComparisonType] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [selectedPeriods, setSelectedPeriods] = useState<PeriodStats[]>([]);
-  const [trendData, setTrendData] = useState<any[]>([]);
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
 
   useEffect(() => {
     calculatePeriodComparisons();
@@ -40,16 +48,19 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       let periodKey = '';
 
       switch (comparisonType) {
-        case 'monthly':
+        case 'monthly': {
           periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           break;
-        case 'quarterly':
+        }
+        case 'quarterly': {
           const quarter = Math.floor(date.getMonth() / 3) + 1;
           periodKey = `${date.getFullYear()}-Q${quarter}`;
           break;
-        case 'yearly':
+        }
+        case 'yearly': {
           periodKey = `${date.getFullYear()}`;
           break;
+        }
       }
 
       if (!periodStats[periodKey]) {
@@ -77,16 +88,19 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         let periodKey = '';
         
         switch (comparisonType) {
-          case 'monthly':
+          case 'monthly': {
             periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             break;
-          case 'quarterly':
+          }
+          case 'quarterly': {
             const quarter = Math.floor(date.getMonth() / 3) + 1;
             periodKey = `${date.getFullYear()}-Q${quarter}`;
             break;
-          case 'yearly':
+          }
+          case 'yearly': {
             periodKey = `${date.getFullYear()}`;
             break;
+          }
         }
         
         return periodKey === stats.period;
@@ -121,7 +135,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
     setSelectedPeriods(sortedPeriods);
 
-    const trendData = sortedPeriods.map(period => ({
+    const newTrendData: TrendDataPoint[] = sortedPeriods.map(period => ({
       period: formatPeriodName(period.period),
       profit: Math.round(period.totalProfit * 100) / 100,
       winRate: Math.round(period.winRate * 10) / 10,
@@ -129,7 +143,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       roi: Math.round(period.averageROI * 10) / 10
     }));
 
-    setTrendData(trendData);
+    setTrendData(newTrendData);
   };
 
   const formatPeriodName = (period: string) => {
@@ -290,7 +304,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                 <YAxis yAxisId="profit" orientation="left" />
                 <YAxis yAxisId="bets" orientation="right" />
                 <Tooltip 
-                  formatter={(value, name) => [
+                  formatter={(value: number | string, name: string) => [
                     name === 'profit' ? `${value} ₴` : value,
                     name === 'profit' ? 'Прибуток' : 'Кількість ставок'
                   ]}
@@ -313,7 +327,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                 <XAxis dataKey="period" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [
+                  formatter={(value: number | string, name: string) => [
                     `${value}%`,
                     name === 'winRate' ? 'Win Rate' : 'ROI'
                   ]}

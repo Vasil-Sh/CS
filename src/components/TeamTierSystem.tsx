@@ -36,7 +36,13 @@ interface TierAnalysis {
   avgPoints: number;
   description: string;
   color: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface BettingRecommendation {
+  recommendation: string;
+  confidence: number;
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
 export default function TeamTierSystem() {
@@ -213,7 +219,7 @@ export default function TeamTierSystem() {
     return 'text-gray-600';
   };
 
-  const generateBettingRecommendation = (team1Rank: number, team2Rank: number) => {
+  const generateBettingRecommendation = (team1Rank: number, team2Rank: number): BettingRecommendation | null => {
     const team1 = rankings.find(t => t.rank === team1Rank);
     const team2 = rankings.find(t => t.rank === team2Rank);
     
@@ -224,7 +230,7 @@ export default function TeamTierSystem() {
     
     let recommendation = '';
     let confidence = 50;
-    let riskLevel = 'medium';
+    let riskLevel: 'low' | 'medium' | 'high' = 'medium';
 
     if (tierDiff === 0) {
       // Команди одного тіру

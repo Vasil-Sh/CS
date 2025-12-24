@@ -15,7 +15,8 @@ export interface CS2BettingRecord {
   format?: string;
   tournament?: string;
   matchUrl?: string;
-  riskyTeams?: any[];
+  riskyTeams?: string[];
+  id?: string;
 }
 
 export interface CS2Strategy {
@@ -24,6 +25,14 @@ export interface CS2Strategy {
   criteria: string[];
   riskLevel: 'Low' | 'Medium' | 'High';
   expectedROI: number;
+  maxOdds?: number;
+  minOdds?: number;
+  allowedFormats?: string[];
+  allowedBetTypes?: string[];
+}
+
+interface GoogleSheetsResponse {
+  values?: string[][];
 }
 
 class RealGoogleSheetsService {
@@ -36,7 +45,7 @@ class RealGoogleSheetsService {
   }
 
   // Fetch data from your Google Sheets (USDT tab)
-  async fetchUSDTData(): Promise<any[]> {
+  async fetchUSDTData(): Promise<CS2BettingRecord[]> {
     try {
       if (!this.apiKey) {
         console.warn('Google Sheets API key not set, using localStorage data');
@@ -47,7 +56,7 @@ class RealGoogleSheetsService {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
       
       const response = await fetch(url);
-      const data = await response.json();
+      const data: GoogleSheetsResponse = await response.json();
       
       if (data.values) {
         // Process the raw data from your sheets
@@ -73,7 +82,7 @@ class RealGoogleSheetsService {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
       
       const response = await fetch(url);
-      const data = await response.json();
+      const data: GoogleSheetsResponse = await response.json();
       
       if (data.values) {
         return this.processStrategyData(data.values);
@@ -87,7 +96,7 @@ class RealGoogleSheetsService {
   }
 
   // Process raw sheet data into structured format
-  private processSheetData(rawData: any[][]): CS2BettingRecord[] {
+  private processSheetData(rawData: string[][]): CS2BettingRecord[] {
     if (rawData.length < 2) return [];
     
     const headers = rawData[0];
@@ -122,7 +131,7 @@ class RealGoogleSheetsService {
   }
 
   // Process strategy data from sheets
-  private processStrategyData(rawData: any[][]): CS2Strategy[] {
+  private processStrategyData(rawData: string[][]): CS2Strategy[] {
     const strategies: CS2Strategy[] = [
       {
         name: 'Блок 1: Основна стратегія',
@@ -142,7 +151,7 @@ class RealGoogleSheetsService {
   }
 
   // Get data from localStorage as fallback
-  private getLocalStorageData(key: string): any[] {
+  private getLocalStorageData(key: string): CS2BettingRecord[] {
     try {
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : [];
@@ -193,15 +202,47 @@ class RealGoogleSheetsService {
     ];
   }
 
+  // Get strategy by name
+  getStrategyByName(strategyName: string): CS2Strategy | null {
+    try {
+      // First check custom strategies
+      const customStrategies = localStorage.getItem('customStrategies');
+      if (customStrategies) {
+        const strategies: CS2Strategy[] = JSON.parse(customStrategies);
+        const found = strategies.find(s => s.name === strategyName);
+        if (found) return found;
+      }
+      
+      // Then check mock strategies
+      const mockStrategies = this.getMockStrategyData();
+      return mockStrategies.find(s => s.name === strategyName) || null;
+    } catch (error) {
+      console.error('Error getting strategy:', error);
+      return null;
+    }
+  }
+
   // Add new record to your Google Sheets (would require write permissions)
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
       // For now, save to localStorage as we need write permissions for Google Sheets
       const existingData = this.getLocalStorageData('cs2_betting_records');
-      const newRecord = {
-        ...record,
+      const newRecord: CS2BettingRecord = {
         date: record.date || new Date().toISOString().split('T')[0],
+        match: record.match || '',
+        team1: record.team1 || '',
+        team2: record.team2 || '',
+        betType: record.betType || '',
+        odds: record.odds || 0,
+        amount: record.amount || 0,
         result: record.result || 'Pending',
+        profit: record.profit || 0,
+        roi: record.roi || 0,
+        strategy: record.strategy || '',
+        notes: record.notes || '',
+        format: record.format,
+        tournament: record.tournament,
+        matchUrl: record.matchUrl,
         id: Date.now().toString() // Add unique ID for updates
       };
       
@@ -216,12 +257,12 @@ class RealGoogleSheetsService {
   }
 
   // Update bet result
-  async updateBetResult(bet: any, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
+  async updateBetResult(bet: CS2BettingRecord, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
     try {
       const existingData = this.getLocalStorageData('cs2_betting_records');
       
       // Find the bet to update (match by multiple fields since we don't have unique IDs)
-      const betIndex = existingData.findIndex((record: any) => 
+      const betIndex = existingData.findIndex((record: CS2BettingRecord) => 
         record.date === bet.date &&
         record.match === bet.match &&
         record.amount === bet.amount &&

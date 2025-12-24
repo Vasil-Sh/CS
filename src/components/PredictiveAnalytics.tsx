@@ -26,10 +26,18 @@ interface StrategyRecommendation {
   implementation: string;
 }
 
+interface ForecastDataPoint {
+  week: string;
+  historical: number | null;
+  predicted: number | null;
+  confidence: number | null;
+  bets: number | null;
+}
+
 export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [recommendations, setRecommendations] = useState<StrategyRecommendation[]>([]);
-  const [forecastData, setForecastData] = useState<any[]>([]);
+  const [forecastData, setForecastData] = useState<ForecastDataPoint[]>([]);
   const [confidenceScore, setConfidenceScore] = useState(0);
 
   useEffect(() => {
@@ -213,26 +221,30 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
       .map(([week, data], index) => ({
         week: `Тиждень ${index + 1}`,
         historical: Math.round(data.profit * 100) / 100,
+        predicted: null,
+        confidence: null,
         bets: data.bets
       }));
 
-    const avgWeeklyProfit = historicalWeeks.reduce((sum, week) => sum + week.historical, 0) / historicalWeeks.length;
+    const avgWeeklyProfit = historicalWeeks.reduce((sum, week) => sum + (week.historical || 0), 0) / historicalWeeks.length;
     const trend = historicalWeeks.length > 1 ? 
-      (historicalWeeks[historicalWeeks.length - 1].historical - historicalWeeks[0].historical) / historicalWeeks.length : 0;
+      ((historicalWeeks[historicalWeeks.length - 1].historical || 0) - (historicalWeeks[0].historical || 0)) / historicalWeeks.length : 0;
 
-    const forecastWeeks = [];
+    const forecastWeeks: ForecastDataPoint[] = [];
     for (let i = 1; i <= 4; i++) {
       const predictedProfit = avgWeeklyProfit + (trend * i);
       forecastWeeks.push({
         week: `Прогноз ${i}`,
+        historical: null,
         predicted: Math.round(predictedProfit * 100) / 100,
-        confidence: Math.max(30, 90 - (i * 15))
+        confidence: Math.max(30, 90 - (i * 15)),
+        bets: null
       });
     }
 
-    const combinedData = [
-      ...historicalWeeks.map(week => ({ ...week, predicted: null, confidence: null })),
-      ...forecastWeeks.map(week => ({ ...week, historical: null, bets: null }))
+    const combinedData: ForecastDataPoint[] = [
+      ...historicalWeeks,
+      ...forecastWeeks
     ];
 
     setForecastData(combinedData);
@@ -332,7 +344,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 <XAxis dataKey="week" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [
+                  formatter={(value: number | string, name: string) => [
                     `${value} ₴`,
                     name === 'historical' ? 'Історичний' : 'Прогноз'
                   ]}

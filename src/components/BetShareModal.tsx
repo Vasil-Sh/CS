@@ -2,9 +2,10 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import BetShareCard from './BetShareCard';
+import type { Bet } from '@/types/betting';
 
 interface BetShareModalProps {
-  bet: any;
+  bet: Bet;
   open: boolean;
   onClose: () => void;
 }
