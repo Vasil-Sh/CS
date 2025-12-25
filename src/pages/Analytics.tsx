@@ -12,7 +12,10 @@ import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import PredictiveAnalytics from '@/components/PredictiveAnalytics';
 import GoalsManager from '@/components/GoalsManager';
+import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
+import { BankrollService } from '@/lib/bankrollService';
+import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -32,7 +35,9 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  Flag
+  Flag,
+  Wallet,
+  Edit
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -58,10 +63,18 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+  const [bankrollStats, setBankrollStats] = useState({
+    initialBank: 0,
+    currentBank: 0,
+    totalProfit: 0,
+    roi: 0
+  });
 
   useEffect(() => {
     loadAnalyticsData();
     updateConnectionStatus();
+    updateBankrollStats();
   }, []);
 
   // Save data whenever it changes
@@ -71,6 +84,12 @@ export default function Analytics() {
       UserDataService.setUserData(currentUser, 'analytics_bets', bets);
     }
   }, [stats, bets, currentUser]);
+
+  const updateBankrollStats = () => {
+    const allBets = realGoogleSheetsService.getAllRecords();
+    const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
+    setBankrollStats(bankStats);
+  };
 
   const updateConnectionStatus = () => {
     const status = csharpDataService.getConnectionStatus();
@@ -180,6 +199,7 @@ export default function Analytics() {
     } finally {
       setLoading(false);
       updateConnectionStatus();
+      updateBankrollStats();
     }
   };
 
@@ -200,6 +220,13 @@ export default function Analytics() {
       UserDataService.clearUserData(currentUser, 'analytics_stats');
       
       console.log('🗑️ All analytics data cleared for user:', currentUser);
+    }
+  };
+
+  const handleBankModalClose = (success: boolean) => {
+    setBankModalOpen(false);
+    if (success) {
+      updateBankrollStats();
     }
   };
 
@@ -360,6 +387,12 @@ export default function Analytics() {
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <InitialBankModal 
+        open={bankModalOpen} 
+        onClose={handleBankModalClose}
+        mode={BankrollService.isInitialized(currentUser) ? 'edit' : 'setup'}
+      />
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
@@ -407,8 +440,52 @@ export default function Analytics() {
         </Alert>
       )}
 
-      {/* Quick Stats */}
+      {/* Quick Stats - ОНОВЛЕНИЙ ПОРЯДОК */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* 1. Всього ставок */}
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
+                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <BarChart3 className="h-7 w-7 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 2. Поточний банк - АКЦЕНТНА КАРТКА */}
+        <Card 
+          className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 relative group"
+          onClick={() => setBankModalOpen(true)}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="pt-6 relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-white/90 uppercase tracking-wide mb-2 flex items-center gap-2">
+                  Поточний банк
+                  <Edit className="h-3 w-3 opacity-70" />
+                </p>
+                {BankrollService.isInitialized(currentUser) ? (
+                  <p className="text-3xl font-bold text-white tracking-tight">
+                    {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+                  </p>
+                ) : (
+                  <p className="text-lg font-semibold text-white/80">Не встановлено</p>
+                )}
+              </div>
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <Wallet className="h-7 w-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* 3. Профіт */}
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -424,21 +501,8 @@ export default function Analytics() {
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
-                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <BarChart3 className="h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
+
+        {/* 4. Win Rate */}
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -448,22 +512,6 @@ export default function Analytics() {
               </div>
               <div className="p-3 bg-green-50 rounded-2xl">
                 <Target className="h-7 w-7 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Середній ROI</p>
-                <p className={`text-3xl font-semibold tracking-tight ${(stats.averageROI || 0) >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
-                  {(stats.averageROI || 0) >= 0 ? '+' : ''}{stats.averageROI || 0}%
-                </p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-2xl">
-                <Percent className="h-7 w-7 text-purple-600" />
               </div>
             </div>
           </CardContent>

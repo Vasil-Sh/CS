@@ -237,6 +237,33 @@ class RealGoogleSheetsService {
     }
   }
 
+  // ДОДАНО: Get all records (синхронний метод для сумісності)
+  getAllRecords(): CS2BettingRecord[] {
+    try {
+      // Спочатку перевіряємо user-specific дані
+      const currentUser = localStorage.getItem('currentUser') || '';
+      if (currentUser) {
+        const userKey = `user_${currentUser}_mybets_data`;
+        const userData = localStorage.getItem(userKey);
+        if (userData) {
+          const userBets = JSON.parse(userData);
+          if (userBets.length > 0) {
+            console.log('✅ getAllRecords: loaded from user-specific storage:', userBets.length);
+            return userBets;
+          }
+        }
+      }
+      
+      // Fallback до загального сховища
+      const records = this.getLocalStorageData('cs2_betting_records');
+      console.log('✅ getAllRecords: loaded from general storage:', records.length);
+      return records;
+    } catch (error) {
+      console.error('❌ Error in getAllRecords:', error);
+      return [];
+    }
+  }
+
   // ВИПРАВЛЕНО: Add new record to your Google Sheets (would require write permissions)
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {

@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
+import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
 
 interface CS2BettingFormProps {
@@ -72,6 +73,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
   const [strategyViolations, setStrategyViolations] = useState<StrategyViolation[]>([]);
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
+  
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     matchUrl: '',
@@ -409,9 +411,27 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Перевірка чи встановлено початковий банк - тільки попередження
+    if (!BankrollService.isInitialized(currentUser)) {
+      toast.warning('⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.');
+      // НЕ блокуємо, продовжуємо
+    }
+
     if (formData.betCategory === 'Експрес' && expressEvents.length === 0) {
       toast.error('Додайте хоча б одну подію до експресу');
       return;
+    }
+
+    // Валідація суми ставки відносно поточного банку
+    const bets = realGoogleSheetsService.getAllRecords();
+    const validation = BankrollService.validateBetAmount(
+      currentUser, 
+      bets, 
+      parseFloat(formData.stake)
+    );
+
+    if (validation.warning) {
+      toast.warning(validation.warning);
     }
 
     // Show warning if there are strategy violations

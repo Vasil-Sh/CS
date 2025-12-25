@@ -7,9 +7,11 @@ import CS2BettingForm from '@/components/CS2BettingForm';
 import BettingHistory from '@/components/BettingHistory';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
+import InitialBankModal from '@/components/InitialBankModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
-import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag } from 'lucide-react';
+import { BankrollService } from '@/lib/bankrollService';
+import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag, Wallet, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
 
@@ -42,6 +44,15 @@ export default function MyBets() {
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+
+  // Bankroll stats
+  const [bankrollStats, setBankrollStats] = useState(() => 
+    BankrollService.getBankrollStats(currentUser, recentBets)
+  );
+  const [isBankrollInitialized, setIsBankrollInitialized] = useState(() => 
+    BankrollService.isInitialized(currentUser)
+  );
 
   useEffect(() => {
     loadStats();
@@ -55,6 +66,12 @@ export default function MyBets() {
       UserDataService.setUserData(currentUser, 'mybets_data', recentBets);
     }
   }, [stats, recentBets, currentUser]);
+
+  // Update bankroll stats when bets change
+  useEffect(() => {
+    setBankrollStats(BankrollService.getBankrollStats(currentUser, recentBets));
+    setIsBankrollInitialized(BankrollService.isInitialized(currentUser));
+  }, [recentBets, currentUser]);
 
   const loadStats = async () => {
     try {
@@ -237,6 +254,19 @@ export default function MyBets() {
     setShareModalOpen(true);
   };
 
+  const handleBankCardClick = () => {
+    setBankModalOpen(true);
+  };
+
+  const handleBankModalClose = (success: boolean) => {
+    setBankModalOpen(false);
+    if (success) {
+      // Refresh bankroll stats
+      setBankrollStats(BankrollService.getBankrollStats(currentUser, recentBets));
+      setIsBankrollInitialized(BankrollService.isInitialized(currentUser));
+    }
+  };
+
   const sortedBets = [...recentBets].sort((a: Bet, b: Bet) => {
     if (a.result === 'Pending' && b.result !== 'Pending') return -1;
     if (a.result !== 'Pending' && b.result === 'Pending') return 1;
@@ -282,7 +312,7 @@ export default function MyBets() {
       </div>
 
       {/* Quick Stats - iOS cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -315,13 +345,45 @@ export default function MyBets() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт (UAH)</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт</p>
                 <p className={`text-3xl font-semibold tracking-tight ${stats.totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
                   {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
                 </p>
               </div>
               <div className="p-3 bg-orange-50 rounded-2xl">
                 <DollarSign className="h-7 w-7 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CLICKABLE Bankroll Card */}
+        <Card 
+          className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
+          onClick={handleBankCardClick}
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Поточний банк</p>
+                {isBankrollInitialized ? (
+                  <>
+                    <p className={`text-3xl font-semibold tracking-tight ${bankrollStats.currentBank >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                      {bankrollStats.currentBank.toFixed(0)} ₴
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Старт: {bankrollStats.initialBank.toFixed(0)} ₴
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-500 mt-1">Не встановлено</p>
+                    <Edit className="h-3.5 w-3.5 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
+                <Wallet className="h-7 w-7 text-white" />
               </div>
             </div>
           </CardContent>
@@ -619,6 +681,13 @@ export default function MyBets() {
           <StrategyOverview />
         </TabsContent>
       </Tabs>
+
+      {/* Bank Modal */}
+      <InitialBankModal
+        open={bankModalOpen}
+        onClose={handleBankModalClose}
+        mode={isBankrollInitialized ? 'edit' : 'setup'}
+      />
 
       {/* Share Modal */}
       {selectedBet && (
