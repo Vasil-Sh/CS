@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield } from 'lucide-react';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
+import { UserDataService } from '@/lib/userDataService';
 import { toast } from 'sonner';
 
 interface CS2BettingFormProps {
@@ -47,6 +48,7 @@ interface BetRecord {
   strategy: string;
   riskyTeams: RiskyTeam[];
   notes: string;
+  goalId?: string;
 }
 
 interface StrategyViolation {
@@ -54,13 +56,22 @@ interface StrategyViolation {
   message: string;
 }
 
+interface Goal {
+  id: string;
+  name: string;
+  type: 'amount' | 'ladder' | 'roi' | 'winrate';
+  status: 'active' | 'completed' | 'failed';
+}
+
 export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
+  const currentUser = localStorage.getItem('currentUser') || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
   const [lastAddedBet, setLastAddedBet] = useState<BetRecord | null>(null);
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>([]);
   const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
   const [strategyViolations, setStrategyViolations] = useState<StrategyViolation[]>([]);
+  const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     matchUrl: '',
@@ -81,7 +92,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     reasoning: '',
     keyFactors: '',
     riskLevel: '',
-    notes: ''
+    notes: '',
+    goalId: ''
   });
 
   useEffect(() => {
@@ -94,7 +106,16 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         setFormData(prev => ({ ...prev, strategy: primaryStrategyName }));
       }
     }
+
+    // Load active goals
+    loadActiveGoals();
   }, []);
+
+  const loadActiveGoals = () => {
+    const goals = UserDataService.getUserData(currentUser, 'goals', []);
+    const active = goals.filter((g: Goal) => g.status === 'active');
+    setActiveGoals(active);
+  };
 
   useEffect(() => {
     // Validate against primary strategy whenever relevant fields change
@@ -434,6 +455,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         matchName = `${formData.team1} vs ${formData.team2}`;
       }
       
+      // ВИПРАВЛЕНО: Правильна обробка goalId
+      let finalGoalId: string | undefined = undefined;
+      if (formData.goalId && formData.goalId !== '' && formData.goalId !== 'all') {
+        finalGoalId = formData.goalId;
+        console.log('✅ Saving bet with goalId:', finalGoalId);
+      } else {
+        console.log('ℹ️ Saving bet without goalId (user selected "Без цілі" or left empty)');
+      }
+      
       const record: BetRecord = {
         date: formData.date,
         match: matchName,
@@ -453,14 +483,20 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         roi: 0,
         strategy: formData.strategy,
         riskyTeams: formData.riskyTeams,
-        notes: `${formData.reasoning}\n\nKey Factors: ${formData.keyFactors}\n\nNotes: ${formData.notes}`
+        notes: `${formData.reasoning}\n\nKey Factors: ${formData.keyFactors}\n\nNotes: ${formData.notes}`,
+        goalId: finalGoalId
       };
 
       await realGoogleSheetsService.addRecord(record);
       
       setLastAddedBet(record);
       
-      toast.success('Ставка успішно додана!');
+      if (finalGoalId) {
+        const goalName = activeGoals.find(g => g.id === finalGoalId)?.name;
+        toast.success(`Ставка додана і прив'язана до цілі: ${goalName}`);
+      } else {
+        toast.success('Ставка успішно додана!');
+      }
       
       // Очищуємо форму та події експресу
       setFormData({
@@ -483,7 +519,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         reasoning: '',
         keyFactors: '',
         riskLevel: '',
-        notes: ''
+        notes: '',
+        goalId: ''
       });
       
       setExpressEvents([]);
@@ -590,6 +627,37 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     </Select>
                   </div>
                 </div>
+
+                {activeGoals.length > 0 && (
+                  <div>
+                    <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
+                      <Flag className="h-4 w-4 text-blue-600" />
+                      Прив'язати до цілі (необов'язково)
+                    </Label>
+                    <Select 
+                      value={formData.goalId || 'all'} 
+                      onValueChange={(value) => {
+                        console.log('Goal selected:', value);
+                        setFormData({...formData, goalId: value === 'all' ? '' : value});
+                      }}
+                    >
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Без цілі</SelectItem>
+                        {activeGoals.map((goal) => (
+                          <SelectItem key={goal.id} value={goal.id}>
+                            {goal.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Ця ставка буде враховуватись у прогресі обраної цілі
+                    </p>
+                  </div>
+                )}
 
                 {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
                   <Card className="border-2 border-purple-200 bg-purple-50 rounded-2xl">

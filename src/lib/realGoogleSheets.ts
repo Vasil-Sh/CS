@@ -17,14 +17,74 @@ export interface CS2BettingRecord {
   matchUrl?: string;
   riskyTeams?: string[];
   id?: string;
+  goalId?: string; // ДОДАНО: підтримка goalId
+  currency?: string; // ДОДАНО: підтримка валюти
+  originalAmount?: number; // ДОДАНО: оригінальна сума
+  exchangeRate?: number | null; // ДОДАНО: курс обміну
+  originalProfit?: number; // ДОДАНО: оригінальний прибуток
+}
+
+export type ActionMode = 'warning' | 'block';
+
+export interface OddsControl {
+  enabled: boolean;
+  minOdds?: number;
+  maxOdds?: number;
+  separateForExpress?: boolean;
+  expressMinOdds?: number;
+  expressMaxOdds?: number;
+  actionMode: ActionMode;
+}
+
+export interface BetTypeRules {
+  enabled: boolean;
+  allowedTypes: string[]; // ['Ординар', 'Експрес', 'Система']
+  maxEventsInExpress?: number;
+  minTotalExpressOdds?: number;
+  actionMode: ActionMode;
+}
+
+export interface MatchFormatRules {
+  enabled: boolean;
+  allowedFormats: string[]; // ['BO1', 'BO3', 'BO5']
+  actionMode: ActionMode;
+}
+
+export interface ActivityLimits {
+  enabled: boolean;
+  maxBetsPerDay?: number;
+  maxBetsPerMatch?: number;
+  minPauseBetweenBets?: number; // in minutes
+  blockAfterLosses?: number;
+  actionMode: ActionMode;
+}
+
+export interface PsychologicalTriggers {
+  enabled: boolean;
+  warnOnLossStreak?: number; // warn after N losses
+  warnOnHighOdds?: number; // warn if odds > N
+  warnOnRepeatTeam?: boolean; // warn if betting on same team twice in a day
+  actionMode: ActionMode;
 }
 
 export interface CS2Strategy {
   name: string;
   description: string;
-  criteria: string[];
   riskLevel: 'Low' | 'Medium' | 'High';
   expectedROI: number;
+  
+  // New rule groups
+  oddsControl?: OddsControl;
+  betTypeRules?: BetTypeRules;
+  matchFormatRules?: MatchFormatRules;
+  activityLimits?: ActivityLimits;
+  psychologicalTriggers?: PsychologicalTriggers;
+  
+  // Custom rules (text-based)
+  customRules?: string[];
+  
+  // Legacy fields (for backward compatibility, will be removed)
+  criteria?: string[];
   maxOdds?: number;
   minOdds?: number;
   allowedFormats?: string[];
@@ -136,12 +196,6 @@ class RealGoogleSheetsService {
       {
         name: 'Блок 1: Основна стратегія',
         description: 'Базова стратегія для ставок на CS2 матчі',
-        criteria: [
-          'Аналіз форми команд',
-          'Статистика head-to-head',
-          'Карти в пулі',
-          'Мотивація команд'
-        ],
         riskLevel: 'Medium',
         expectedROI: 15
       }
@@ -162,50 +216,13 @@ class RealGoogleSheetsService {
 
   // Mock strategy data for demo
   private getMockStrategyData(): CS2Strategy[] {
-    return [
-      {
-        name: 'Блок 1: Основна стратегія',
-        description: 'Базова стратегія для ставок на CS2 матчі з фокусом на аналіз форми команд та статистики',
-        criteria: [
-          'Аналіз останніх 10 матчів команд',
-          'Статистика head-to-head зустрічей',
-          'Перевага на конкретних картах',
-          'Мотивація та важливість матчу',
-          'Стан складу (заміни, травми)'
-        ],
-        riskLevel: 'Medium',
-        expectedROI: 15
-      },
-      {
-        name: 'Стратегія андердогів',
-        description: 'Ставки на команди з високими коефіцієнтами при певних умовах',
-        criteria: [
-          'Коефіцієнт вище 2.5',
-          'Команда показала зростання форми',
-          'Фаворит в кризі або має проблеми',
-          'Карти підходять андердогу'
-        ],
-        riskLevel: 'High',
-        expectedROI: 25
-      },
-      {
-        name: 'Тотали та фори',
-        description: 'Консервативна стратегія на тотали карт та фори',
-        criteria: [
-          'Стабільна статистика команд по картах',
-          'Історія зустрічей команд',
-          'Стиль гри команд (агресивний/оборонний)'
-        ],
-        riskLevel: 'Low',
-        expectedROI: 8
-      }
-    ];
+    return [];
   }
 
   // Get strategy by name
   getStrategyByName(strategyName: string): CS2Strategy | null {
     try {
-      // First check custom strategies
+      // Check custom strategies from localStorage
       const customStrategies = localStorage.getItem('customStrategies');
       if (customStrategies) {
         const strategies: CS2Strategy[] = JSON.parse(customStrategies);
@@ -213,20 +230,22 @@ class RealGoogleSheetsService {
         if (found) return found;
       }
       
-      // Then check mock strategies
-      const mockStrategies = this.getMockStrategyData();
-      return mockStrategies.find(s => s.name === strategyName) || null;
+      return null;
     } catch (error) {
       console.error('Error getting strategy:', error);
       return null;
     }
   }
 
-  // Add new record to your Google Sheets (would require write permissions)
+  // ВИПРАВЛЕНО: Add new record to your Google Sheets (would require write permissions)
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
+      console.log('📝 addRecord called with:', record);
+      
       // For now, save to localStorage as we need write permissions for Google Sheets
       const existingData = this.getLocalStorageData('cs2_betting_records');
+      
+      // ВИПРАВЛЕНО: Зберігаємо ВСІ поля, включаючи goalId, currency, originalAmount, exchangeRate
       const newRecord: CS2BettingRecord = {
         date: record.date || new Date().toISOString().split('T')[0],
         match: record.match || '',
@@ -243,20 +262,39 @@ class RealGoogleSheetsService {
         format: record.format,
         tournament: record.tournament,
         matchUrl: record.matchUrl,
-        id: Date.now().toString() // Add unique ID for updates
+        id: Date.now().toString(),
+        // КРИТИЧНО: Зберігаємо goalId та інші нові поля!
+        goalId: record.goalId,
+        currency: record.currency,
+        originalAmount: record.originalAmount,
+        exchangeRate: record.exchangeRate,
+        originalProfit: record.originalProfit
       };
+      
+      console.log('💾 Saving record with goalId:', newRecord.goalId);
       
       existingData.push(newRecord);
       localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
       
-      console.log('Record added to localStorage:', newRecord);
+      // ДОДАНО: Також зберігаємо в user-specific ключ для синхронізації
+      const currentUser = localStorage.getItem('currentUser') || '';
+      if (currentUser) {
+        const userKey = `user_${currentUser}_mybets_data`;
+        const userData = localStorage.getItem(userKey);
+        const userBets = userData ? JSON.parse(userData) : [];
+        userBets.push(newRecord);
+        localStorage.setItem(userKey, JSON.stringify(userBets));
+        console.log('✅ Also saved to user-specific key:', userKey);
+      }
+      
+      console.log('✅ Record added to localStorage:', newRecord);
     } catch (error) {
-      console.error('Error adding record:', error);
+      console.error('❌ Error adding record:', error);
       throw error;
     }
   }
 
-  // Update bet result
+  // ВИПРАВЛЕНО: Update bet result
   async updateBetResult(bet: CS2BettingRecord, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
     try {
       const existingData = this.getLocalStorageData('cs2_betting_records');
@@ -270,15 +308,18 @@ class RealGoogleSheetsService {
       );
       
       if (betIndex !== -1) {
+        // ВИПРАВЛЕНО: Зберігаємо goalId при оновленні
         existingData[betIndex] = {
           ...existingData[betIndex],
           result,
           profit,
-          roi
+          roi,
+          // КРИТИЧНО: Зберігаємо goalId!
+          goalId: existingData[betIndex].goalId
         };
         
         localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
-        console.log('Bet result updated:', existingData[betIndex]);
+        console.log('✅ Bet result updated with goalId preserved:', existingData[betIndex]);
       } else {
         throw new Error('Bet not found for update');
       }

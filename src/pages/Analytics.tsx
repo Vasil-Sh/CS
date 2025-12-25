@@ -11,6 +11,7 @@ import BalanceChart from '@/components/BalanceChart';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import PredictiveAnalytics from '@/components/PredictiveAnalytics';
+import GoalsManager from '@/components/GoalsManager';
 import { UserDataService } from '@/lib/userDataService';
 import { 
   TrendingUp, 
@@ -30,7 +31,8 @@ import {
   BarChart3,
   Calendar,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Flag
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -469,8 +471,12 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="profit" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
+        <TabsList className="grid w-full grid-cols-6 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
           <TabsTrigger value="profit" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прибуток</TabsTrigger>
+          <TabsTrigger value="goals" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Flag className="h-4 w-4 mr-1" />
+            Цілі
+          </TabsTrigger>
           <TabsTrigger value="odds" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Коефіцієнти</TabsTrigger>
           <TabsTrigger value="comparison" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Періоди</TabsTrigger>
           <TabsTrigger value="prediction" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прогнози</TabsTrigger>
@@ -716,6 +722,10 @@ export default function Analytics() {
               </Card>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="goals">
+          <GoalsManager />
         </TabsContent>
 
         <TabsContent value="odds">

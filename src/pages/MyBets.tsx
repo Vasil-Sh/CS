@@ -9,9 +9,16 @@ import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
-import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
+
+interface Goal {
+  id: string;
+  name: string;
+  type: 'amount' | 'ladder' | 'roi' | 'winrate';
+  status: 'active' | 'completed' | 'failed';
+}
 
 export default function MyBets() {
   const currentUser = localStorage.getItem('currentUser') || '';
@@ -194,10 +201,12 @@ export default function MyBets() {
             result, 
             profit: profitInUAH,        // Прибуток в UAH для аналітики
             originalProfit: originalProfit, // Прибуток в оригінальній валюті (USD або UAH)
-            roi 
+            roi,
+            // КРИТИЧНО: Зберігаємо goalId при оновленні результату!
+            goalId: b.goalId
           };
           
-          console.log('✅ Updated bet:', updatedBet);
+          console.log('✅ Updated bet with goalId:', updatedBet);
           return updatedBet;
         }
         return b;
@@ -242,6 +251,13 @@ export default function MyBets() {
   const getCurrencySymbol = (currency?: string) => {
     if (currency === 'USD') return '$';
     return '₴';
+  };
+
+  const getGoalName = (goalId?: string) => {
+    if (!goalId) return null;
+    const goals = UserDataService.getUserData(currentUser, 'goals', []);
+    const goal = goals.find((g: Goal) => g.id === goalId);
+    return goal?.name || 'Видалена ціль';
   };
 
   return (
@@ -358,6 +374,7 @@ export default function MyBets() {
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Валюта</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Сума</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Коеф.</th>
+                    <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Ціль</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Статус</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Профіт</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Дії</th>
@@ -372,6 +389,7 @@ export default function MyBets() {
                     const currencySymbol = getCurrencySymbol(currency);
                     const displayAmount = bet.originalAmount || bet.amount;
                     const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
+                    const goalName = getGoalName(bet.goalId);
                     
                     return (
                       <tr 
@@ -426,6 +444,16 @@ export default function MyBets() {
                           <Badge className="bg-gray-100 text-gray-900 font-semibold px-3 py-1 rounded-full border-0">
                             {bet.odds}
                           </Badge>
+                        </td>
+                        <td className="p-4 text-center">
+                          {goalName ? (
+                            <Badge className="bg-blue-100 text-blue-700 font-medium px-2.5 py-1 rounded-full border-0 text-xs">
+                              <Flag className="h-3 w-3 mr-1" />
+                              {goalName}
+                            </Badge>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
                         </td>
                         <td className="p-4 text-center">
                           <Badge 
