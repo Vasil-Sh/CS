@@ -321,31 +321,31 @@ export default function BettingHistory() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr className="border-b-2 border-gray-200">
-                    <th className="text-left p-4 cursor-pointer hover:bg-gray-100 transition-colors rounded-tl-xl" onClick={() => toggleSort('date')}>
+                    <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors rounded-tl-xl" onClick={() => toggleSort('date')}>
                       <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
                         <Calendar className="h-4 w-4" />
                         Дата
                         <ArrowUpDown className="h-3 w-3" />
                       </div>
                     </th>
-                    <th className="text-left p-4">
+                    <th className="text-left p-4 min-w-[200px]">
                       <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
                         <Target className="h-4 w-4" />
                         Матч
                       </div>
                     </th>
-                    <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Тип</th>
-                    <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Валюта</th>
-                    <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Сума</th>
-                    <th className="text-left p-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('odds')}>
+                    <th className="text-left p-4 w-48 text-xs font-black text-gray-700 uppercase tracking-wider">Тип</th>
+                    <th className="text-left p-4 w-24 text-xs font-black text-gray-700 uppercase tracking-wider">Валюта</th>
+                    <th className="text-left p-4 w-28 text-xs font-black text-gray-700 uppercase tracking-wider">Сума</th>
+                    <th className="text-left p-4 w-24 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('odds')}>
                       <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
                         Коеф.
                         <ArrowUpDown className="h-3 w-3" />
                       </div>
                     </th>
-                    <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Ціль</th>
-                    <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Статус</th>
-                    <th className="text-left p-4 cursor-pointer hover:bg-gray-100 transition-colors rounded-tr-xl" onClick={() => toggleSort('profit')}>
+                    <th className="text-left p-4 w-32 text-xs font-black text-gray-700 uppercase tracking-wider">Ціль</th>
+                    <th className="text-left p-4 w-32 text-xs font-black text-gray-700 uppercase tracking-wider">Статус</th>
+                    <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors rounded-tr-xl" onClick={() => toggleSort('profit')}>
                       <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
                         Профіт
                         <ArrowUpDown className="h-3 w-3" />
@@ -372,9 +372,9 @@ export default function BettingHistory() {
                         </td>
                         <td className="p-4">
                           <div className="space-y-2">
-                            <div className="font-bold text-gray-900 text-base">{displayMatch}</div>
+                            <div className="font-bold text-gray-900 text-base truncate" title={displayMatch}>{displayMatch}</div>
                             {!isExpress && (
-                              <div className="text-xs text-gray-600">{bet.betType.split(' - ')[0]}</div>
+                              <div className="text-xs text-gray-600 truncate" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
                             )}
                             <Badge className="text-xs rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
                               {bet.format}
@@ -383,60 +383,31 @@ export default function BettingHistory() {
                         </td>
                         <td className="p-4">
                           {isExpress && parsedEvents.length > 0 ? (
-                            <div className="space-y-2 max-w-md">
-                              <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold mb-2 text-sm px-3 py-1">
+                            <div className="space-y-2">
+                              <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
                                 Express {bet.format}
                               </Badge>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => toggleExpressBet(index)}
-                                className="w-full rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700"
+                                className="w-full rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-2 py-1 h-7"
                               >
                                 {isExpanded ? (
                                   <>
-                                    <ChevronUp className="h-4 w-4 mr-1" />
-                                    Сховати деталі
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Сховати
                                   </>
                                 ) : (
                                   <>
-                                    <ChevronDown className="h-4 w-4 mr-1" />
+                                    <ChevronDown className="h-3 w-3 mr-1" />
                                     Деталі
                                   </>
                                 )}
                               </Button>
-                              {isExpanded && (
-                                <div className="space-y-2 mt-2">
-                                  {parsedEvents.map((event, idx) => (
-                                    <div key={idx} className="p-3 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
-                                      <div className="flex items-start gap-2 mb-2">
-                                        <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs px-2 py-1 font-bold">
-                                          #{event.number}
-                                        </Badge>
-                                        <span className="font-bold text-gray-900 text-sm flex-1">
-                                          {event.match}
-                                        </span>
-                                      </div>
-                                      <div className="ml-8 space-y-1">
-                                        <p className="text-gray-500 uppercase tracking-wide font-bold text-[10px]">
-                                          {event.betType}
-                                        </p>
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-bold text-purple-700 text-sm">
-                                            {event.selection}
-                                          </span>
-                                          <Badge className="text-xs bg-green-100 text-green-700 border-0 rounded-full px-2 py-1 font-bold">
-                                            @{parseFloat(event.odds).toFixed(2)}
-                                          </Badge>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
                             </div>
                           ) : (
-                            <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold">
+                            <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                               {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                             </Badge>
                           )}
@@ -458,7 +429,7 @@ export default function BettingHistory() {
                           </Badge>
                         </td>
                         <td className="p-4">
-                          <span className="text-gray-600 font-medium">{bet.goalId || '—'}</span>
+                          <span className="text-gray-600 font-medium text-xs truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-2">
@@ -511,6 +482,51 @@ export default function BettingHistory() {
                   })}
                 </tbody>
               </table>
+              
+              {/* Express Bet Details - Show below table */}
+              {Array.from(expandedExpressBets).map(index => {
+                const bet = sortedBets[index];
+                if (!bet) return null;
+                
+                const parsedEvents = parseExpressEvents(bet.betType);
+                if (parsedEvents.length === 0) return null;
+                
+                return (
+                  <div key={index} className="mt-4 p-4 bg-purple-50 rounded-2xl border-2 border-purple-200">
+                    <h4 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
+                      <Zap className="h-5 w-5" />
+                      Деталі експрес-ставки від {bet.date}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {parsedEvents.map((event, idx) => (
+                        <div key={idx} className="p-3 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                          <div className="flex items-start gap-2 mb-2">
+                            <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs px-2 py-1 font-bold flex-shrink-0">
+                              #{event.number}
+                            </Badge>
+                            <span className="font-bold text-gray-900 text-sm flex-1 break-words">
+                              {event.match}
+                            </span>
+                          </div>
+                          <div className="ml-8 space-y-1">
+                            <p className="text-gray-500 uppercase tracking-wide font-bold text-[10px]">
+                              {event.betType}
+                            </p>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-bold text-purple-700 text-sm truncate" title={event.selection}>
+                                {event.selection}
+                              </span>
+                              <Badge className="text-xs bg-green-100 text-green-700 border-0 rounded-full px-2 py-1 font-bold flex-shrink-0">
+                                @{parseFloat(event.odds).toFixed(2)}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
