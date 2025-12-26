@@ -39,7 +39,7 @@ import {
   Wallet,
   Edit
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart, Legend } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 export default function Analytics() {
@@ -291,18 +291,27 @@ export default function Analytics() {
     ];
   };
 
-  // Bet type distribution
+  // Bet type distribution with profit data
   const betTypeDistribution = () => {
-    const distribution: { [key: string]: number } = {};
+    const distribution: { [key: string]: { count: number; profit: number; wins: number } } = {};
     bets.forEach((bet: Bet) => {
       const type = bet.betType || 'Winner';
-      distribution[type] = (distribution[type] || 0) + 1;
+      if (!distribution[type]) {
+        distribution[type] = { count: 0, profit: 0, wins: 0 };
+      }
+      distribution[type].count += 1;
+      distribution[type].profit += bet.profit || 0;
+      if (bet.result === 'Win') {
+        distribution[type].wins += 1;
+      }
     });
     
     const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899'];
-    return Object.entries(distribution).map(([type, count], index) => ({
+    return Object.entries(distribution).map(([type, data], index) => ({
       name: type,
-      value: count,
+      value: data.count,
+      profit: Math.round(data.profit * 100) / 100,
+      winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
       color: colors[index % colors.length]
     }));
   };
@@ -384,6 +393,14 @@ export default function Analytics() {
   const monthlyProfit = monthlyProfitData();
   const balanceData = balanceOverTime();
   const scatterData = oddsVsProfitData();
+
+  // Enhanced odds data for combined chart
+  const oddsChartData = oddsData.map(range => ({
+    range: range.range.replace(/\s*\(.*?\)\s*/g, ''),
+    winRate: parseFloat(range.winRate),
+    roi: range.count > 0 ? Math.round((range.profit / (range.count * 100)) * 100) : 0,
+    bets: range.count
+  }));
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -783,24 +800,110 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="odds">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
+            {/* Combined Win Rate & ROI Chart */}
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                <CardTitle className="text-xl font-bold text-gray-900">ROI & Win Rate по категоріях</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  Win Rate & ROI по категоріях коефіцієнтів
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {bets.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={oddsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="range" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="winRate" fill="#10b981" name="Win Rate %" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={oddsChartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="range" 
+                          tick={{ fontSize: 13, fontWeight: 500 }}
+                          stroke="#6b7280"
+                        />
+                        <YAxis 
+                          yAxisId="left"
+                          tick={{ fontSize: 12 }}
+                          stroke="#6b7280"
+                          label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                        />
+                        <YAxis 
+                          yAxisId="right"
+                          orientation="right"
+                          tick={{ fontSize: 12 }}
+                          stroke="#6b7280"
+                          label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6b7280' } }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            border: 'none', 
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            padding: '12px'
+                          }}
+                          formatter={(value: number | string, name: string) => {
+                            if (name === 'winRate') return [`${value}%`, 'Win Rate'];
+                            if (name === 'roi') return [`${value}%`, 'ROI'];
+                            if (name === 'bets') return [value, 'Кількість ставок'];
+                            return [value, name];
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          formatter={(value) => {
+                            if (value === 'winRate') return 'Win Rate (%)';
+                            if (value === 'roi') return 'ROI (%)';
+                            return value;
+                          }}
+                        />
+                        <Bar 
+                          yAxisId="left"
+                          dataKey="winRate" 
+                          fill="#10b981" 
+                          name="winRate"
+                          radius={[8, 8, 0, 0]}
+                          maxBarSize={80}
+                        />
+                        <Bar 
+                          yAxisId="right"
+                          dataKey="roi" 
+                          fill="#8b5cf6" 
+                          name="roi"
+                          radius={[8, 8, 0, 0]}
+                          maxBarSize={80}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    
+                    {/* Summary cards */}
+                    <div className="mt-6 grid grid-cols-3 gap-4">
+                      {oddsData.map((range, index) => (
+                        <div key={index} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                          <h4 className="font-bold text-gray-900 mb-3 text-center">{range.range}</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Ставок:</span>
+                              <Badge className="bg-blue-100 text-blue-700 border-0 font-bold">{range.count}</Badge>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Win Rate:</span>
+                              <Badge className="bg-green-100 text-green-700 border-0 font-bold">{range.winRate}%</Badge>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Прибуток:</span>
+                              <Badge className={`border-0 font-bold ${range.profit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="text-center py-12">
                     <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                       <Target className="h-16 w-16 text-gray-400" />
                     </div>
@@ -810,78 +913,101 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
+            {/* Simplified Bet Type Distribution */}
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                <CardTitle className="text-xl font-bold text-gray-900">Розподіл типів ставок</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <Target className="h-6 w-6 text-blue-600" />
+                  </div>
+                  Розподіл типів ставок
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {betTypes.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={betTypes}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {betTypes.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Bar Chart instead of Pie */}
+                    <div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={betTypes} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis type="number" tick={{ fontSize: 12 }} stroke="#6b7280" />
+                          <YAxis 
+                            dataKey="name" 
+                            type="category" 
+                            tick={{ fontSize: 12, fontWeight: 500 }} 
+                            stroke="#6b7280"
+                            width={100}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                              border: 'none', 
+                              borderRadius: '12px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: number | string, name: string) => {
+                              if (name === 'value') return [value, 'Кількість ставок'];
+                              return [value, name];
+                            }}
+                          />
+                          <Bar 
+                            dataKey="value" 
+                            radius={[0, 8, 8, 0]}
+                            maxBarSize={40}
+                          >
+                            {betTypes.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    {/* Stats Cards */}
+                    <div className="space-y-3">
+                      {betTypes.map((type, index) => (
+                        <div 
+                          key={index} 
+                          className="p-4 rounded-2xl border-2 transition-all hover:shadow-md"
+                          style={{ 
+                            borderColor: type.color + '40',
+                            backgroundColor: type.color + '10'
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-bold text-gray-900">{type.name}</h4>
+                            <div 
+                              className="w-4 h-4 rounded-full" 
+                              style={{ backgroundColor: type.color }}
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div>
+                              <p className="text-gray-600 text-xs">Ставок</p>
+                              <p className="font-bold text-gray-900">{type.value}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600 text-xs">Win Rate</p>
+                              <p className="font-bold text-gray-900">{type.winRate}%</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600 text-xs">Прибуток</p>
+                              <p className={`font-bold ${type.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {type.profit >= 0 ? '+' : ''}{type.profit} ₴
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <div className="text-center py-12">
                     <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                       <BarChart3 className="h-16 w-16 text-gray-400" />
                     </div>
                     <p className="text-gray-600">Немає даних про типи ставок</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Detailed odds analysis */}
-            <Card className="lg:col-span-2 border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                <CardTitle className="text-xl font-bold text-gray-900">Детальний аналіз по коефіцієнтах</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {bets.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {oddsData.map((range) => (
-                      <div key={range.range} className="p-4 border-2 border-gray-200 rounded-2xl bg-gray-50/50 hover:border-blue-300 transition-colors">
-                        <h3 className="font-semibold mb-2 text-gray-900">{range.range}</h3>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Ставок:</span>
-                            <span className="font-medium text-gray-900">{range.count}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Win Rate:</span>
-                            <span className="font-medium text-gray-900">{range.winRate}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Прибуток:</span>
-                            <span className={`font-medium ${range.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {range.profit >= 0 ? '+' : ''}{Math.round(range.profit * 100) / 100} ₴
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
-                      <Target className="h-16 w-16 text-gray-400" />
-                    </div>
-                    <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
                   </div>
                 )}
               </CardContent>
