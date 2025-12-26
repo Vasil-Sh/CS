@@ -336,10 +336,10 @@ export default function StrategyOverview() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl p-1 bg-gray-100">
-          <TabsTrigger value="overview" className="rounded-xl">Огляд стратегій</TabsTrigger>
-          <TabsTrigger value="performance" className="rounded-xl">Ефективність</TabsTrigger>
-          <TabsTrigger value="create" className="rounded-xl">Створити нову</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
+          <TabsTrigger value="overview" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Огляд стратегій</TabsTrigger>
+          <TabsTrigger value="performance" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ефективність</TabsTrigger>
+          <TabsTrigger value="create" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Створити нову</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

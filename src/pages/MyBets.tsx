@@ -350,63 +350,74 @@ export default function MyBets() {
         </div>
       </div>
 
-      {/* Quick Stats - UPDATED WITH GRADIENTS */}
+      {/* Quick Stats - SAME AS ANALYTICS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Всього ставок</p>
-                <p className="text-4xl font-black text-white tracking-tight">{stats.totalBets}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
+                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets}</p>
               </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <BarChart3 className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-green-500 to-green-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Win Rate</p>
-                <p className="text-4xl font-black text-white tracking-tight">{stats.winRate}%</p>
-              </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <Target className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Профіт</p>
-                <p className="text-4xl font-black text-white tracking-tight">
-                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
-                </p>
-              </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <DollarSign className="h-8 w-8 text-white" />
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <BarChart3 className="h-7 w-7 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <Card 
+          className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 relative group"
+          onClick={handleBankCardClick}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="pt-6 relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-white/90 uppercase tracking-wide mb-2 flex items-center gap-2">
+                  Поточний банк
+                  <Edit className="h-3 w-3 opacity-70" />
+                </p>
+                {isBankrollInitialized ? (
+                  <p className="text-3xl font-bold text-white tracking-tight">
+                    {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+                  </p>
+                ) : (
+                  <p className="text-lg font-semibold text-white/80">Не встановлено</p>
+                )}
+              </div>
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <Wallet className="h-7 w-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Середній ROI</p>
-                <p className="text-4xl font-black text-white tracking-tight">
-                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт</p>
+                <p className={`text-3xl font-semibold tracking-tight ${stats.totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
+                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
                 </p>
               </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <TrendingUp className="h-8 w-8 text-white" />
+              <div className="p-3 bg-orange-50 rounded-2xl">
+                <DollarSign className="h-7 w-7 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
+                <p className="text-3xl font-semibold text-green-600 tracking-tight">{stats.winRate}%</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <Target className="h-7 w-7 text-green-600" />
               </div>
             </div>
           </CardContent>
@@ -415,74 +426,59 @@ export default function MyBets() {
 
       {/* Bankroll & Quick Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card 
-          className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105"
-          onClick={handleBankCardClick}
-        >
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Поточний банк</p>
-                {isBankrollInitialized ? (
-                  <>
-                    <p className="text-4xl font-black text-white tracking-tight">
-                      {bankrollStats.currentBank.toFixed(0)} ₴
-                    </p>
-                    <p className="text-xs text-white/70 mt-1 font-medium">
-                      Старт: {bankrollStats.initialBank.toFixed(0)} ₴
-                    </p>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-white/80 mt-1 font-medium">Не встановлено</p>
-                    <Edit className="h-4 w-4 text-white/70" />
-                  </div>
-                )}
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Активні</p>
+                <p className="text-3xl font-semibold text-blue-600 tracking-tight">{activeBets.length}</p>
               </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <Wallet className="h-8 w-8 text-white" />
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <Clock className="h-7 w-7 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Виграші</p>
+                <p className="text-3xl font-semibold text-green-600 tracking-tight">{winningBets.length}</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <Trophy className="h-7 w-7 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Програші</p>
+                <p className="text-3xl font-semibold text-red-600 tracking-tight">{losingBets.length}</p>
+              </div>
+              <div className="p-3 bg-red-50 rounded-2xl">
+                <AlertTriangle className="h-7 w-7 text-red-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-cyan-500 to-cyan-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Активні</p>
-                <p className="text-4xl font-black text-white tracking-tight">{activeBets.length}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Середній ROI</p>
+                <p className={`text-3xl font-semibold tracking-tight ${stats.averageROI >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+                </p>
               </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <Clock className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Виграші</p>
-                <p className="text-4xl font-black text-white tracking-tight">{winningBets.length}</p>
-              </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <Trophy className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-red-500 to-red-600 text-white overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-2">Програші</p>
-                <p className="text-4xl font-black text-white tracking-tight">{losingBets.length}</p>
-              </div>
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <AlertTriangle className="h-8 w-8 text-white" />
+              <div className="p-3 bg-purple-50 rounded-2xl">
+                <TrendingUp className="h-7 w-7 text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -491,14 +487,16 @@ export default function MyBets() {
 
       {/* Recent Bets Table */}
       <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <CardTitle className="flex items-center justify-between text-xl font-bold">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
             <div className="flex items-center gap-3">
-              <Zap className="h-6 w-6" />
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <Zap className="h-6 w-6 text-blue-600" />
+              </div>
               <span>Останні ставки</span>
             </div>
             {activeBets.length > 0 && (
-              <Badge className="rounded-full bg-white/20 text-white border-0 text-base px-4 py-1 font-bold">
+              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-base px-4 py-1 font-bold">
                 <Clock className="h-4 w-4 mr-1.5" />
                 {activeBets.length} активних
               </Badge>
@@ -553,7 +551,7 @@ export default function MyBets() {
                     return (
                       <tr 
                         key={betKey}
-                        className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all"
+                        className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all"
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-2">

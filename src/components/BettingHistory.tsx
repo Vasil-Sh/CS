@@ -17,7 +17,8 @@ import {
   ChevronDown,
   ChevronUp,
   Target,
-  Zap
+  Zap,
+  BarChart3
 } from 'lucide-react';
 
 interface Bet {
@@ -170,19 +171,21 @@ export default function BettingHistory() {
   return (
     <div className="space-y-6">
       {/* Filters Card */}
-      <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-          <CardTitle className="flex items-center gap-2 text-xl font-bold">
-            <Filter className="h-6 w-6" />
+      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <Filter className="h-6 w-6 text-blue-600" />
+            </div>
             Фільтри та сортування
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Результат:</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Результат:</label>
               <Select value={resultFilter} onValueChange={(value: 'all' | 'Win' | 'Loss' | 'Pending') => setResultFilter(value)}>
-                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-indigo-300 transition-colors">
+                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -195,9 +198,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Період:</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
               <Select value={periodFilter} onValueChange={(value: 'all' | 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
-                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-indigo-300 transition-colors">
+                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -210,9 +213,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Тип ставки:</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Тип ставки:</label>
               <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
-                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-indigo-300 transition-colors">
+                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,9 +228,9 @@ export default function BettingHistory() {
             </div>
             
             <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Сортування:</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Сортування:</label>
               <Select value={sortBy} onValueChange={(value: 'date' | 'profit' | 'odds') => setSortBy(value)}>
-                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-indigo-300 transition-colors">
+                <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -241,50 +244,50 @@ export default function BettingHistory() {
         </CardContent>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 overflow-hidden transform hover:scale-105 transition-transform">
-          <CardContent className="p-6">
+      {/* Stats Cards - SAME AS ANALYTICS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Відфільтровано ставок</p>
-                <p className="text-4xl font-black text-blue-900">{filteredBets.length}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Відфільтровано ставок</p>
+                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{filteredBets.length}</p>
               </div>
-              <div className="p-4 bg-blue-500 rounded-2xl shadow-lg">
-                <Calendar className="h-8 w-8 text-white" />
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <BarChart3 className="h-7 w-7 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 overflow-hidden transform hover:scale-105 transition-transform">
-          <CardContent className="p-6">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Win Rate</p>
-                <p className="text-4xl font-black text-green-900">{winRate}%</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
+                <p className="text-3xl font-semibold text-green-600 tracking-tight">{winRate}%</p>
               </div>
-              <div className="p-4 bg-green-500 rounded-2xl shadow-lg">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <Trophy className="h-7 w-7 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className={`border-0 shadow-xl rounded-3xl overflow-hidden transform hover:scale-105 transition-transform ${totalProfit >= 0 ? 'bg-gradient-to-br from-green-50 to-emerald-50' : 'bg-gradient-to-br from-red-50 to-orange-50'}`}>
-          <CardContent className="p-6">
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>Профіт</p>
-                <p className={`text-4xl font-black ${totalProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт</p>
+                <p className={`text-3xl font-semibold tracking-tight ${totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
                   {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
                 </p>
               </div>
-              <div className={`p-4 rounded-2xl shadow-lg ${totalProfit >= 0 ? 'bg-green-500' : 'bg-red-500'}`}>
+              <div className={`p-3 rounded-2xl ${totalProfit >= 0 ? 'bg-orange-50' : 'bg-red-50'}`}>
                 {totalProfit >= 0 ? (
-                  <TrendingUp className="h-8 w-8 text-white" />
+                  <TrendingUp className={`h-7 w-7 ${totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`} />
                 ) : (
-                  <TrendingDown className="h-8 w-8 text-white" />
+                  <TrendingDown className="h-7 w-7 text-red-600" />
                 )}
               </div>
             </div>
@@ -294,21 +297,23 @@ export default function BettingHistory() {
 
       {/* Betting History Table */}
       <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <CardTitle className="flex items-center justify-between text-xl font-bold">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
             <div className="flex items-center gap-3">
-              <Zap className="h-6 w-6" />
-              <span>Останні ставки</span>
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <Zap className="h-6 w-6 text-blue-600" />
+              </div>
+              <span>Історія ставок</span>
             </div>
-            <Badge className="rounded-full bg-white/20 text-white border-0 text-base px-4 py-1 font-bold">
-              {sortedBets.length} активних
+            <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-base px-4 py-1 font-bold">
+              {sortedBets.length} записів
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-purple-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600 font-medium">Завантаження...</p>
             </div>
           ) : sortedBets.length > 0 ? (
@@ -354,11 +359,9 @@ export default function BettingHistory() {
                     const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
                     const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
                     const isExpanded = expandedExpressBets.has(index);
-                    const showExpandButton = isExpress && parsedEvents.length > 3;
-                    const visibleEvents = isExpanded ? parsedEvents : parsedEvents.slice(0, 3);
                     
                     return (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all">
+                      <tr key={index} className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all">
                         <td className="p-4">
                           <div className="flex items-center gap-2">
                             <div className="p-2 bg-blue-100 rounded-lg">

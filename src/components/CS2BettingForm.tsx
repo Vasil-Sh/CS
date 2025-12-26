@@ -631,9 +631,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form Card */}
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                  <Plus className="h-6 w-6" />
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <Plus className="h-6 w-6 text-blue-600" />
+                  </div>
                   Додати нову ставку CS2
                 </CardTitle>
               </CardHeader>
@@ -1057,9 +1059,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         <div className="space-y-6">
           {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
             <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden sticky top-6">
-              <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                  <Calculator className="h-5 w-5" />
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <Calculator className="h-5 w-5 text-blue-600" />
+                  </div>
                   Розрахунки
                 </CardTitle>
               </CardHeader>
