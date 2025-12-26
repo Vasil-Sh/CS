@@ -25,7 +25,8 @@ import {
   AlertCircle,
   RefreshCw,
   Calculator,
-  TrendingDown
+  TrendingDown,
+  Info
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -427,7 +428,9 @@ export default function GoalsManager() {
       targetWinRate: 65
     });
 
-    toast.success('Ціль успішно створена!');
+    toast.success('Ціль успішно створена!', {
+      description: '💡 Не забудьте прив\'язати ставки до цієї цілі!'
+    });
   };
 
   const confirmDeleteGoal = (goalId: string) => {
@@ -530,6 +533,24 @@ export default function GoalsManager() {
           </Button>
         </div>
       </div>
+
+      {activeGoals.length > 0 && (
+        <Card className="border-2 border-blue-200 shadow-lg rounded-3xl bg-blue-50 overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-blue-900">💡 Як працювати з цілями</p>
+                <p className="text-xs text-blue-700 mt-1">
+                  1. При додаванні ставки оберіть ціль в полі "Прив'язати до цілі"<br/>
+                  2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди<br/>
+                  3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {activeGoals.length >= 3 && (
         <Card className="border-2 border-orange-200 shadow-lg rounded-3xl bg-orange-50 overflow-hidden">

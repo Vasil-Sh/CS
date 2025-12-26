@@ -13,7 +13,9 @@ import {
   Calendar,
   DollarSign,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface Bet {
@@ -40,6 +42,9 @@ export default function BettingHistory() {
   
   const [sortBy, setSortBy] = useState<'date' | 'profit' | 'odds'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  // Track expanded express bets
+  const [expandedExpressBets, setExpandedExpressBets] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadBets();
@@ -145,6 +150,18 @@ export default function BettingHistory() {
       }
       
       return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
+    });
+  };
+
+  const toggleExpressBet = (index: number) => {
+    setExpandedExpressBets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
     });
   };
 
@@ -313,6 +330,9 @@ export default function BettingHistory() {
                     const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
                     const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
                     const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
+                    const isExpanded = expandedExpressBets.has(index);
+                    const showExpandButton = isExpress && parsedEvents.length > 3;
+                    const visibleEvents = isExpanded ? parsedEvents : parsedEvents.slice(0, 3);
                     
                     return (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
@@ -327,33 +347,53 @@ export default function BettingHistory() {
                           {isExpress && parsedEvents.length > 0 ? (
                             <div className="space-y-2 max-w-md">
                               <Badge className="rounded-full bg-purple-100 text-purple-700 border-0 mb-2">
-                                Експрес {bet.format}
+                                Express {bet.format}
                               </Badge>
-                              {parsedEvents.map((event, idx) => (
+                              {visibleEvents.map((event, idx) => (
                                 <div key={idx} className="p-2 bg-white rounded-lg border border-gray-200 text-xs">
                                   <div className="flex items-start gap-2 mb-1">
-                                    <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs">
-                                      #{event.number}
+                                    <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center">
+                                      {event.number}
                                     </Badge>
                                     <span className="font-semibold text-gray-900 leading-tight flex-1">
                                       {event.match}
                                     </span>
                                   </div>
                                   <div className="ml-7 space-y-0.5">
-                                    <p className="text-gray-500 uppercase tracking-wide font-medium">
+                                    <p className="text-gray-500 uppercase tracking-wide font-medium text-[10px]">
                                       {event.betType}
                                     </p>
                                     <div className="flex items-center justify-between">
                                       <span className="font-bold text-purple-700">
                                         {event.selection}
                                       </span>
-                                      <Badge className="text-xs bg-purple-100 text-purple-700 border-0 rounded-full">
-                                        Коеф {event.odds}
+                                      <Badge className="text-xs bg-purple-100 text-purple-700 border-0 rounded-full px-1.5 py-0.5">
+                                        @{parseFloat(event.odds).toFixed(2)}
                                       </Badge>
                                     </div>
                                   </div>
                                 </div>
                               ))}
+                              {showExpandButton && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => toggleExpressBet(index)}
+                                  className="w-full h-8 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg mt-2"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronUp className="h-3 w-3 mr-1" />
+                                      Сховати {parsedEvents.length - 3} подій
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="h-3 w-3 mr-1" />
+                                      Показати ще {parsedEvents.length - 3} подій
+                                    </>
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           ) : (
                             <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">

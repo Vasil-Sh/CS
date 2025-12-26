@@ -12,6 +12,7 @@ import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
+import StrategyViolationDialog from './StrategyViolationDialog';
 
 interface CS2BettingFormProps {
   onRecordAdded?: () => void;
@@ -73,6 +74,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
   const [strategyViolations, setStrategyViolations] = useState<StrategyViolation[]>([]);
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
+  const [showViolationDialog, setShowViolationDialog] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -127,6 +130,13 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       setStrategyViolations([]);
     }
   }, [formData.odds, formData.format, formData.betCategory, primaryStrategy]);
+
+  // Check for risky teams whenever team names change
+  useEffect(() => {
+    if (formData.team1 || formData.team2) {
+      checkRiskyTeams(formData.team1, formData.team2);
+    }
+  }, [formData.team1, formData.team2]);
 
   const validateAgainstStrategy = () => {
     if (!primaryStrategy) {
@@ -197,6 +207,35 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return [];
   };
 
+  const checkRiskyTeams = (team1: string, team2: string) => {
+    if (!team1 && !team2) {
+      setFormData(prev => ({ ...prev, riskyTeams: [] }));
+      return;
+    }
+
+    const savedRiskyTeams = loadRiskyTeamsFromStorage();
+    const riskyTeamsFound: RiskyTeam[] = [];
+    
+    savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
+      const teamName = riskyTeam.name.toLowerCase();
+      const team1Lower = team1.toLowerCase();
+      const team2Lower = team2.toLowerCase();
+      
+      if (team1Lower.includes(teamName) || teamName.includes(team1Lower) ||
+          team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
+        riskyTeamsFound.push({
+          name: riskyTeam.name,
+          comment: riskyTeam.comment
+        });
+      }
+    });
+    
+    setFormData(prev => ({
+      ...prev,
+      riskyTeams: riskyTeamsFound
+    }));
+  };
+
   const parseMatchFromUrl = async (url: string) => {
     setIsParsingMatch(true);
     try {
@@ -264,30 +303,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             tournament: tournament || 'Unknown Tournament'
           }));
           
-          const savedRiskyTeams = loadRiskyTeamsFromStorage();
-          const riskyTeamsFound: RiskyTeam[] = [];
-          
-          savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-            const teamName = riskyTeam.name.toLowerCase();
-            const team1Lower = team1.toLowerCase();
-            const team2Lower = team2.toLowerCase();
-            
-            if (team1Lower.includes(teamName) || teamName.includes(team1Lower) ||
-                team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
-              riskyTeamsFound.push({
-                name: riskyTeam.name,
-                comment: riskyTeam.comment
-              });
-            }
-          });
-          
-          if (riskyTeamsFound.length > 0) {
-            setFormData(prev => ({
-              ...prev,
-              riskyTeams: riskyTeamsFound
-            }));
-            toast.warning(`Знайдено ${riskyTeamsFound.length} ризикованих команд!`);
-          }
+          // Risky teams will be checked automatically by the useEffect
           
           toast.success('Інформацію про матч успішно отримано!');
         } else {
@@ -345,7 +361,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
     setExpressEvents([...expressEvents, newEvent]);
     
-    // Очищуємо поля для наступної події
+    // Очищуємо поля для наступної події, включаючи ризиковані команди
     setFormData(prev => ({
       ...prev,
       matchUrl: '',
@@ -354,7 +370,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       tournament: '',
       betType: '',
       selection: '',
-      odds: ''
+      odds: '',
+      riskyTeams: []  // ВИПРАВЛЕНО: очищаємо ризиковані команди
     }));
 
     toast.success(`Подія ${expressEvents.length + 1} додана до експресу`);
@@ -408,44 +425,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return amount;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Перевірка чи встановлено початковий банк - тільки попередження
-    if (!BankrollService.isInitialized(currentUser)) {
-      toast.warning('⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.');
-      // НЕ блокуємо, продовжуємо
-    }
-
-    if (formData.betCategory === 'Експрес' && expressEvents.length === 0) {
-      toast.error('Додайте хоча б одну подію до експресу');
-      return;
-    }
-
-    // Валідація суми ставки відносно поточного банку
-    const bets = realGoogleSheetsService.getAllRecords();
-    const validation = BankrollService.validateBetAmount(
-      currentUser, 
-      bets, 
-      parseFloat(formData.stake)
-    );
-
-    if (validation.warning) {
-      toast.warning(validation.warning);
-    }
-
-    // Show warning if there are strategy violations
-    if (strategyViolations.length > 0) {
-      const violationMessages = strategyViolations.map(v => v.message).join('\n');
-      const proceed = window.confirm(
-        `⚠️ ПОПЕРЕДЖЕННЯ: Порушення стратегії "${primaryStrategy?.name}"!\n\n${violationMessages}\n\nВи все одно хочете створити цю ставку?`
-      );
-      
-      if (!proceed) {
-        return;
-      }
-    }
-
+  const processBetSubmission = async () => {
     setIsSubmitting(true);
 
     try {
@@ -552,7 +532,55 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
+      setPendingSubmit(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Перевірка чи встановлено початковий банк - тільки попередження
+    if (!BankrollService.isInitialized(currentUser)) {
+      toast.warning('⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.');
+      // НЕ блокуємо, продовжуємо
+    }
+
+    if (formData.betCategory === 'Експрес' && expressEvents.length === 0) {
+      toast.error('Додайте хоча б одну подію до експресу');
+      return;
+    }
+
+    // Валідація суми ставки відносно поточного банку
+    const bets = realGoogleSheetsService.getAllRecords();
+    const validation = BankrollService.validateBetAmount(
+      currentUser, 
+      bets, 
+      parseFloat(formData.stake)
+    );
+
+    if (validation.warning) {
+      toast.warning(validation.warning);
+    }
+
+    // Show dialog if there are strategy violations
+    if (strategyViolations.length > 0) {
+      setShowViolationDialog(true);
+      setPendingSubmit(true);
+      return;
+    }
+
+    // No violations, proceed directly
+    await processBetSubmission();
+  };
+
+  const handleViolationConfirm = async () => {
+    setShowViolationDialog(false);
+    await processBetSubmission();
+  };
+
+  const handleViolationCancel = () => {
+    setShowViolationDialog(false);
+    setPendingSubmit(false);
   };
 
   const expectedValue = calculateExpectedValue();
@@ -569,6 +597,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
   return (
     <div className="space-y-6">
+      <StrategyViolationDialog
+        open={showViolationDialog}
+        onOpenChange={setShowViolationDialog}
+        strategyName={primaryStrategy?.name || ''}
+        violations={strategyViolations}
+        onConfirm={handleViolationConfirm}
+        onCancel={handleViolationCancel}
+      />
+
       {primaryStrategy && (
         <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
           <CardContent className="p-4">
@@ -597,7 +634,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <p key={index} className="text-xs text-orange-800">• {violation.message}</p>
                   ))}
                 </div>
-                <p className="text-xs text-orange-700 mt-2 font-medium">Ви все одно можете створити ставку, підтвердивши попередження.</p>
+                <p className="text-xs text-orange-700 mt-2 font-medium">Ви все одно можете створити ставку, підтвердивши попередження. 🟨</p>
               </div>
             </div>
           </CardContent>

@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, TrendingDown, Target, Calendar, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, TrendingDown, Target, Calendar, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface BetShareCardProps {
   bet: {
@@ -33,6 +35,9 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   // Перевірка чи це експрес
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
+  
+  // State for expanded express events
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // Для експресу витягуємо інформацію та парсимо події
   interface ParsedEvent {
@@ -80,6 +85,10 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   const betTypeParts = bet.betType.split(' - ');
   const betCategory = betTypeParts[0] || bet.betType;
   const selection = betTypeParts[1] || '';
+
+  // Show first 3 events or all if expanded
+  const visibleEvents = isExpanded ? parsedEvents : parsedEvents.slice(0, 3);
+  const hasMoreEvents = parsedEvents.length > 3;
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-b from-gray-50 to-white">
@@ -145,53 +154,80 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                 </p>
               </div>
               
-              <div className="p-4 space-y-3">
-                {parsedEvents.map((event, index) => (
-                  <div key={index} className={`p-3 rounded-xl border ${
+              <div className="p-4 space-y-2">
+                {visibleEvents.map((event, index) => (
+                  <div key={index} className={`p-2.5 rounded-xl border ${
                     isWin 
                       ? 'bg-white/60 border-green-200' 
                       : isLoss
                       ? 'bg-white/60 border-red-200'
                       : 'bg-white/60 border-purple-200'
                   }`}>
-                    <div className="flex items-start gap-2 mb-2">
-                      <Badge className={`rounded-full text-xs font-bold ${
+                    <div className="flex items-start gap-2 mb-1.5">
+                      <Badge className={`rounded-full text-xs font-bold px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center ${
                         isWin 
                           ? 'bg-green-600 text-white' 
                           : isLoss
                           ? 'bg-red-600 text-white'
                           : 'bg-purple-600 text-white'
                       } border-0`}>
-                        #{event.number}
+                        {event.number}
                       </Badge>
-                      <p className="text-sm font-semibold text-gray-900 leading-tight flex-1">
+                      <p className="text-xs font-semibold text-gray-900 leading-tight flex-1">
                         {event.match}
                       </p>
                     </div>
                     
-                    <div className="space-y-1 ml-8">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                    <div className="space-y-0.5 ml-7">
+                      <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">
                         {event.betType}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className={`text-sm font-bold ${
+                        <p className={`text-xs font-bold ${
                           isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-purple-700'
                         }`}>
                           {event.selection}
                         </p>
-                        <Badge className={`text-xs font-semibold rounded-full ${
+                        <Badge className={`text-[10px] font-semibold rounded-full px-1.5 py-0.5 ${
                           isWin 
                             ? 'bg-green-100 text-green-700' 
                             : isLoss
                             ? 'bg-red-100 text-red-700'
                             : 'bg-purple-100 text-purple-700'
                         } border-0`}>
-                          @{event.odds}
+                          @{parseFloat(event.odds).toFixed(2)}
                         </Badge>
                       </div>
                     </div>
                   </div>
                 ))}
+                
+                {hasMoreEvents && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className={`w-full h-8 text-xs font-medium rounded-lg mt-2 ${
+                      isWin 
+                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
+                        : isLoss
+                        ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                        : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'
+                    }`}
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        Сховати {parsedEvents.length - 3} подій
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                        Показати ще {parsedEvents.length - 3} подій
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           ) : selection && (

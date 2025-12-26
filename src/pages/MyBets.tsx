@@ -11,7 +11,7 @@ import InitialBankModal from '@/components/InitialBankModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
-import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag, Wallet, Edit } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag, Wallet, Edit, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
 
@@ -20,6 +20,14 @@ interface Goal {
   name: string;
   type: 'amount' | 'ladder' | 'roi' | 'winrate';
   status: 'active' | 'completed' | 'failed';
+}
+
+interface ParsedEvent {
+  number: string;
+  match: string;
+  betType: string;
+  selection: string;
+  odds: string;
 }
 
 export default function MyBets() {
@@ -45,6 +53,9 @@ export default function MyBets() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
+  
+  // Expanded express bets tracking
+  const [expandedExpressBets, setExpandedExpressBets] = useState<Set<string>>(new Set());
 
   // Bankroll stats
   const [bankrollStats, setBankrollStats] = useState(() => 
@@ -290,6 +301,60 @@ export default function MyBets() {
     return goal?.name || 'Видалена ціль';
   };
 
+  // Функція для парсингу експрес-подій
+  const parseExpressEvents = (betType: string): ParsedEvent[] => {
+    if (!betType.includes('|')) return [];
+    
+    const fullString = betType.split('|').slice(1).join('|').trim();
+    const eventStrings = fullString.split('•').map(e => e.trim());
+    
+    return eventStrings.map(eventStr => {
+      const parts = eventStr.split('|').map(p => p.trim());
+      
+      if (parts.length >= 2) {
+        const matchPart = parts[0];
+        const betPart = parts[1];
+        
+        const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
+        const number = numberMatch ? numberMatch[1] : '';
+        const match = numberMatch ? numberMatch[2] : matchPart;
+        
+        const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
+        const betType = betMatch ? betMatch[1] : '';
+        const selection = betMatch ? betMatch[2] : '';
+        const odds = betMatch ? betMatch[3] : '';
+        
+        return { number, match, betType, selection, odds };
+      }
+      
+      return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
+    });
+  };
+
+  // Check if bet is express
+  const isExpressBet = (bet: Bet) => {
+    return bet.betType.includes('Експрес') || bet.format.includes('x');
+  };
+
+  // Get express event count
+  const getExpressEventCount = (bet: Bet) => {
+    const match = bet.format.match(/(\d+)x/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Toggle express bet expansion
+  const toggleExpressBet = (betKey: string) => {
+    setExpandedExpressBets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(betKey)) {
+        newSet.delete(betKey);
+      } else {
+        newSet.add(betKey);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       {/* Header - iOS style */}
@@ -430,8 +495,8 @@ export default function MyBets() {
               <table className="w-full">
                 <thead className="bg-gray-50/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
                   <tr>
+                    <th className="text-left p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата</th>
                     <th className="text-left p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Матч</th>
-                    <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Тип</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Валюта</th>
                     <th className="text-center p-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Сума</th>
@@ -453,11 +518,20 @@ export default function MyBets() {
                     const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
                     const goalName = getGoalName(bet.goalId);
                     
+                    const isExpress = isExpressBet(bet);
+                    const expressEventCount = isExpress ? getExpressEventCount(bet) : 0;
+                    const betKey = `${bet.date}-${bet.match || bet.team1}-${index}`;
+                    const isExpanded = expandedExpressBets.has(betKey);
+                    const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
+                    
                     return (
                       <tr 
-                        key={`${bet.date}-${bet.match || bet.team1}-${index}`}
+                        key={betKey}
                         className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
                       >
+                        <td className="p-4">
+                          <span className="text-sm text-gray-600 font-medium">{bet.date}</span>
+                        </td>
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-xl ${
@@ -476,18 +550,72 @@ export default function MyBets() {
                             </span>
                           </div>
                         </td>
-                        <td className="p-4 text-center">
-                          <span className="text-sm text-gray-600 font-medium">{bet.date}</span>
-                        </td>
-                        <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Badge variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
-                              {bet.betType}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
-                              {bet.format}
-                            </Badge>
-                          </div>
+                        <td className="p-4">
+                          {isExpress ? (
+                            <div className="flex flex-col items-center gap-2">
+                              <Badge className="bg-purple-100 text-purple-700 font-semibold px-3 py-1 rounded-full border-0 text-xs">
+                                Express {expressEventCount}×
+                              </Badge>
+                              {parsedEvents.length > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => toggleExpressBet(betKey)}
+                                  className="h-7 px-2 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronUp className="h-3 w-3 mr-1" />
+                                      Сховати
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="h-3 w-3 mr-1" />
+                                      Деталі
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                              {isExpanded && parsedEvents.length > 0 && (
+                                <div className="mt-2 space-y-1.5 w-full max-w-md">
+                                  {parsedEvents.map((event, idx) => (
+                                    <div key={idx} className="p-2 bg-purple-50/50 rounded-lg border border-purple-100 text-xs">
+                                      <div className="flex items-start gap-2 mb-1">
+                                        <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center">
+                                          {event.number}
+                                        </Badge>
+                                        <span className="font-semibold text-gray-900 leading-tight flex-1 text-left">
+                                          {event.match}
+                                        </span>
+                                      </div>
+                                      <div className="ml-6 space-y-0.5 text-left">
+                                        <p className="text-gray-500 uppercase tracking-wide font-medium text-[10px]">
+                                          {event.betType}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-bold text-purple-700 text-xs">
+                                            {event.selection}
+                                          </span>
+                                          <Badge className="text-[10px] bg-purple-100 text-purple-700 border-0 rounded-full px-1.5 py-0.5">
+                                            @{parseFloat(event.odds).toFixed(2)}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              <Badge variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
+                                {bet.betType}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
+                                {bet.format}
+                              </Badge>
+                            </div>
+                          )}
                         </td>
                         <td className="p-4 text-center">
                           <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
@@ -504,7 +632,7 @@ export default function MyBets() {
                         </td>
                         <td className="p-4 text-center">
                           <Badge className="bg-gray-100 text-gray-900 font-semibold px-3 py-1 rounded-full border-0">
-                            {bet.odds}
+                            {bet.odds.toFixed(2)}
                           </Badge>
                         </td>
                         <td className="p-4 text-center">
