@@ -184,7 +184,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </div>
         
         <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
-          <SelectTrigger className="w-48 rounded-xl">
+          <SelectTrigger className="w-48 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -293,10 +293,15 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Динаміка прибутку</CardTitle>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <TrendingUp className="h-6 w-6 text-blue-600" />
+              </div>
+              Динаміка прибутку
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -317,10 +322,15 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </Card>
 
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Win Rate та ROI тренди</CardTitle>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
+              Win Rate та ROI тренди
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -341,42 +351,42 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       </div>
 
       <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Детальна статистика по періодах</CardTitle>
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-900">Детальна статистика по періодах</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Період</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Ставок</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Win Rate</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Прибуток</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">ROI</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Серія ↑</th>
-                  <th className="text-right p-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Серія ↓</th>
+                <tr className="border-b-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                  <th className="text-left p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Період</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Ставок</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Win Rate</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Прибуток</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">ROI</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Серія ↑</th>
+                  <th className="text-right p-3 text-xs font-black text-gray-700 uppercase tracking-wider">Серія ↓</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedPeriods.map((period, index) => (
-                  <tr key={period.period} className={`border-b border-gray-100 hover:bg-gray-50/50 transition-colors ${index === selectedPeriods.length - 1 ? 'bg-blue-50/50' : ''}`}>
+                  <tr key={period.period} className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all ${index === selectedPeriods.length - 1 ? 'bg-blue-50/50' : ''}`}>
                     <td className="p-3 font-medium text-gray-900">
                       {formatPeriodName(period.period)}
                       {index === selectedPeriods.length - 1 && (
-                        <Badge className="ml-2 rounded-full bg-blue-100 text-blue-700 border-0">Поточний</Badge>
+                        <Badge className="ml-2 rounded-full bg-blue-100 text-blue-700 border-0 font-bold">Поточний</Badge>
                       )}
                     </td>
-                    <td className="text-right p-3 text-gray-900">{period.totalBets}</td>
-                    <td className="text-right p-3 text-gray-900">{period.winRate.toFixed(1)}%</td>
-                    <td className={`text-right p-3 font-medium ${period.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className="text-right p-3 text-gray-900 font-medium">{period.totalBets}</td>
+                    <td className="text-right p-3 text-gray-900 font-medium">{period.winRate.toFixed(1)}%</td>
+                    <td className={`text-right p-3 font-bold ${period.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
                     </td>
-                    <td className={`text-right p-3 ${period.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className={`text-right p-3 font-bold ${period.averageROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
                     </td>
-                    <td className="text-right p-3 text-green-600">+{period.bestStreak}</td>
-                    <td className="text-right p-3 text-red-600">-{period.worstStreak}</td>
+                    <td className="text-right p-3 text-green-600 font-bold">+{period.bestStreak}</td>
+                    <td className="text-right p-3 text-red-600 font-bold">-{period.worstStreak}</td>
                   </tr>
                 ))}
               </tbody>

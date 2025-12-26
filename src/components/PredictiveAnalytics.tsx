@@ -276,7 +276,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
           <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Предиктивна аналітика</h2>
           <p className="text-gray-500 font-medium">AI-прогнози та рекомендації стратегій</p>
         </div>
-        <Badge className="ml-auto rounded-full bg-purple-100 text-purple-700 border-0">
+        <Badge className="ml-auto rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
           Впевненість: {confidenceScore}%
         </Badge>
       </div>
@@ -334,10 +334,15 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
 
       {forecastData.length > 0 && (
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Прогноз тижневого прибутку</CardTitle>
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <Target className="h-6 w-6 text-blue-600" />
+              </div>
+              Прогноз тижневого прибутку
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={forecastData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -373,22 +378,24 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
       )}
 
       <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <Lightbulb className="h-5 w-5 text-yellow-500" />
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+            <div className="p-2 bg-yellow-100 rounded-xl">
+              <Lightbulb className="h-6 w-6 text-yellow-600" />
+            </div>
             Рекомендації стратегій
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-4">
             {recommendations.map((rec, index) => (
-              <div key={index} className="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50/50 transition-colors">
+              <div key={index} className="p-4 border-2 border-gray-200 rounded-2xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300 transition-all">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold flex items-center gap-2 text-gray-900">
                     <Star className="h-4 w-4 text-yellow-500" />
                     {rec.strategy}
                   </h4>
-                  <Badge className={`${getImpactColor(rec.impact)} rounded-full`}>
+                  <Badge className={`${getImpactColor(rec.impact)} rounded-full font-bold`}>
                     {rec.impact === 'high' ? 'Високий' : rec.impact === 'medium' ? 'Середній' : 'Низький'} вплив
                   </Badge>
                 </div>
