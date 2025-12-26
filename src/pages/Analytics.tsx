@@ -291,24 +291,47 @@ export default function Analytics() {
     ];
   };
 
+  // Helper function to shorten express bet names
+  const shortenBetTypeName = (betType: string): string => {
+    // Check if it's an express bet
+    if (betType.includes('Експрес') || betType.includes('|')) {
+      // Extract the express format (e.g., "10x")
+      const formatMatch = betType.match(/(\d+)x/);
+      if (formatMatch) {
+        return `Експрес ${formatMatch[1]}x`;
+      }
+      // If no format found but contains "|", count the events
+      const eventCount = (betType.match(/•/g) || []).length + 1;
+      if (eventCount > 1) {
+        return `Експрес ${eventCount}x`;
+      }
+    }
+    
+    // For non-express bets, return the original name
+    return betType;
+  };
+
   // Bet type distribution with profit data
   const betTypeDistribution = () => {
-    const distribution: { [key: string]: { count: number; profit: number; wins: number } } = {};
+    const distribution: { [key: string]: { count: number; profit: number; wins: number; originalName: string } } = {};
     bets.forEach((bet: Bet) => {
-      const type = bet.betType || 'Winner';
-      if (!distribution[type]) {
-        distribution[type] = { count: 0, profit: 0, wins: 0 };
+      const originalType = bet.betType || 'Winner';
+      const shortType = shortenBetTypeName(originalType);
+      
+      if (!distribution[shortType]) {
+        distribution[shortType] = { count: 0, profit: 0, wins: 0, originalName: originalType };
       }
-      distribution[type].count += 1;
-      distribution[type].profit += bet.profit || 0;
+      distribution[shortType].count += 1;
+      distribution[shortType].profit += bet.profit || 0;
       if (bet.result === 'Win') {
-        distribution[type].wins += 1;
+        distribution[shortType].wins += 1;
       }
     });
     
     const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899'];
     return Object.entries(distribution).map(([type, data], index) => ({
       name: type,
+      originalName: data.originalName,
       value: data.count,
       profit: Math.round(data.profit * 100) / 100,
       winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
@@ -935,9 +958,9 @@ export default function Analytics() {
                           <YAxis 
                             dataKey="name" 
                             type="category" 
-                            tick={{ fontSize: 12, fontWeight: 500 }} 
+                            tick={{ fontSize: 11, fontWeight: 500 }} 
                             stroke="#6b7280"
-                            width={100}
+                            width={120}
                           />
                           <Tooltip 
                             contentStyle={{ 
@@ -974,11 +997,12 @@ export default function Analytics() {
                             borderColor: type.color + '40',
                             backgroundColor: type.color + '10'
                           }}
+                          title={type.originalName}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-bold text-gray-900">{type.name}</h4>
+                            <h4 className="font-bold text-gray-900 truncate max-w-[200px]" title={type.name}>{type.name}</h4>
                             <div 
-                              className="w-4 h-4 rounded-full" 
+                              className="w-4 h-4 rounded-full flex-shrink-0" 
                               style={{ backgroundColor: type.color }}
                             />
                           </div>
