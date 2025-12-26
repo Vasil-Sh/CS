@@ -404,11 +404,11 @@ export default function Analytics() {
         </div>
         
         <div className="flex gap-3">
-          <Button variant="outline" onClick={loadAnalyticsData} className="rounded-2xl border-gray-200 hover:bg-gray-50 font-medium">
+          <Button variant="outline" onClick={loadAnalyticsData} className="rounded-2xl border-2 border-gray-200 hover:bg-gray-50 hover:border-blue-300 font-medium transition-colors">
             <RefreshCw className="h-4 w-4 mr-2" />
             Оновити
           </Button>
-          <Button variant="outline" onClick={clearAllData} className="rounded-2xl border-red-200 text-red-600 hover:bg-red-50 font-medium">
+          <Button variant="outline" onClick={clearAllData} className="rounded-2xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium transition-colors">
             <Trash2 className="h-4 w-4 mr-2" />
             Очистити
           </Button>
@@ -440,7 +440,7 @@ export default function Analytics() {
         </Alert>
       )}
 
-      {/* Quick Stats - ОНОВЛЕНИЙ ПОРЯДОК */}
+      {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* 1. Всього ставок */}
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
@@ -537,20 +537,22 @@ export default function Analytics() {
               <>
                 {/* Date Filter */}
                 <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                  <CardHeader>
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                     <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                        <Filter className="h-5 w-5" />
+                      <span className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                        <div className="p-2 bg-blue-100 rounded-xl">
+                          <Filter className="h-6 w-6 text-blue-600" />
+                        </div>
                         Фільтри
                       </span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <div className="flex gap-4">
                       <div className="flex-1">
-                        <label className="text-sm font-medium text-gray-700">Період:</label>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
                         <Select value={timeFilter} onValueChange={setTimeFilter}>
-                          <SelectTrigger className="mt-1 rounded-xl">
+                          <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -570,10 +572,12 @@ export default function Analytics() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Enhanced Monthly Profit Chart with Area */}
                   <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                      <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
                         <span className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5" />
+                          <div className="p-2 bg-blue-100 rounded-xl">
+                            <Calendar className="h-6 w-6 text-blue-600" />
+                          </div>
                           Прибуток по місяцях
                         </span>
                         <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
@@ -581,7 +585,7 @@ export default function Analytics() {
                         </Badge>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                       <ResponsiveContainer width="100%" height={300}>
                         <AreaChart data={monthlyProfit}>
                           <defs>
@@ -663,10 +667,12 @@ export default function Analytics() {
 
                   {/* Enhanced Scatter Chart with Win/Loss Colors */}
                   <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                      <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
                         <span className="flex items-center gap-2">
-                          <Target className="h-5 w-5" />
+                          <div className="p-2 bg-blue-100 rounded-xl">
+                            <Target className="h-6 w-6 text-blue-600" />
+                          </div>
                           Коефіцієнти vs Прибуток
                         </span>
                         <div className="flex gap-2">
@@ -681,7 +687,7 @@ export default function Analytics() {
                         </div>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                       <ResponsiveContainer width="100%" height={300}>
                         <ScatterChart>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -757,8 +763,8 @@ export default function Analytics() {
             ) : (
               <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                 <CardContent className="py-12 text-center">
-                  <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                    <DollarSign className="h-10 w-10 text-gray-400" />
+                  <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
+                    <DollarSign className="h-16 w-16 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Немає даних про прибуток
@@ -779,10 +785,10 @@ export default function Analytics() {
         <TabsContent value="odds">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">ROI & Win Rate по категоріях</CardTitle>
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                <CardTitle className="text-xl font-bold text-gray-900">ROI & Win Rate по категоріях</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 {bets.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={oddsData}>
@@ -795,8 +801,8 @@ export default function Analytics() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                      <Target className="h-10 w-10 text-gray-400" />
+                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
+                      <Target className="h-16 w-16 text-gray-400" />
                     </div>
                     <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
                   </div>
@@ -805,10 +811,10 @@ export default function Analytics() {
             </Card>
 
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">Розподіл типів ставок</CardTitle>
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                <CardTitle className="text-xl font-bold text-gray-900">Розподіл типів ставок</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 {betTypes.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -831,8 +837,8 @@ export default function Analytics() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                      <BarChart3 className="h-10 w-10 text-gray-400" />
+                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
+                      <BarChart3 className="h-16 w-16 text-gray-400" />
                     </div>
                     <p className="text-gray-600">Немає даних про типи ставок</p>
                   </div>
@@ -842,14 +848,14 @@ export default function Analytics() {
 
             {/* Detailed odds analysis */}
             <Card className="lg:col-span-2 border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">Детальний аналіз по коефіцієнтах</CardTitle>
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                <CardTitle className="text-xl font-bold text-gray-900">Детальний аналіз по коефіцієнтах</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 {bets.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {oddsData.map((range) => (
-                      <div key={range.range} className="p-4 border border-gray-100 rounded-2xl bg-gray-50/50">
+                      <div key={range.range} className="p-4 border-2 border-gray-200 rounded-2xl bg-gray-50/50 hover:border-blue-300 transition-colors">
                         <h3 className="font-semibold mb-2 text-gray-900">{range.range}</h3>
                         <div className="space-y-2">
                           <div className="flex justify-between">
@@ -872,8 +878,8 @@ export default function Analytics() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="p-4 bg-gray-50 rounded-3xl w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                      <Target className="h-10 w-10 text-gray-400" />
+                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
+                      <Target className="h-16 w-16 text-gray-400" />
                     </div>
                     <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
                   </div>
