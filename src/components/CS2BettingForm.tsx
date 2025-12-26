@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag } from 'lucide-react';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag, Users, MapPin, Gamepad2 } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
@@ -303,8 +303,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             tournament: tournament || 'Unknown Tournament'
           }));
           
-          // Risky teams will be checked automatically by the useEffect
-          
           toast.success('Інформацію про матч успішно отримано!');
         } else {
           toast.error('Не вдалося знайти "vs" у посиланні');
@@ -339,7 +337,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       return;
     }
 
-    // Перевірка обов'язкових полів з детальними підказками
     const missingFields = [];
     if (!formData.team1) missingFields.push('Команда 1');
     if (!formData.team2) missingFields.push('Команда 2');
@@ -361,7 +358,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
     setExpressEvents([...expressEvents, newEvent]);
     
-    // Очищуємо поля для наступної події, включаючи ризиковані команди
     setFormData(prev => ({
       ...prev,
       matchUrl: '',
@@ -371,7 +367,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       betType: '',
       selection: '',
       odds: '',
-      riskyTeams: []  // ВИПРАВЛЕНО: очищаємо ризиковані команди
+      riskyTeams: []
     }));
 
     toast.success(`Подія ${expressEvents.length + 1} додана до експресу`);
@@ -442,7 +438,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         const totalOdds = calculateTotalExpressOdds();
         finalOdds = totalOdds;
         
-        // Формуємо компактний рядок з усіма подіями експресу
         const eventsString = expressEvents.map((event, index) => 
           `${index + 1}. ${event.match} | ${event.betType}: ${event.selection} @${event.odds}`
         ).join(' • ');
@@ -455,13 +450,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         matchName = `${formData.team1} vs ${formData.team2}`;
       }
       
-      // ВИПРАВЛЕНО: Правильна обробка goalId
       let finalGoalId: string | undefined = undefined;
       if (formData.goalId && formData.goalId !== '' && formData.goalId !== 'all') {
         finalGoalId = formData.goalId;
-        console.log('✅ Saving bet with goalId:', finalGoalId);
-      } else {
-        console.log('ℹ️ Saving bet without goalId (user selected "Без цілі" or left empty)');
       }
       
       const record: BetRecord = {
@@ -498,7 +489,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         toast.success('Ставка успішно додана!');
       }
       
-      // Очищуємо форму та події експресу
       setFormData({
         date: new Date().toISOString().split('T')[0],
         matchUrl: '',
@@ -539,10 +529,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Перевірка чи встановлено початковий банк - тільки попередження
     if (!BankrollService.isInitialized(currentUser)) {
       toast.warning('⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.');
-      // НЕ блокуємо, продовжуємо
     }
 
     if (formData.betCategory === 'Експрес' && expressEvents.length === 0) {
@@ -550,7 +538,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       return;
     }
 
-    // Валідація суми ставки відносно поточного банку
     const bets = realGoogleSheetsService.getAllRecords();
     const validation = BankrollService.validateBetAmount(
       currentUser, 
@@ -562,14 +549,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       toast.warning(validation.warning);
     }
 
-    // Show dialog if there are strategy violations
     if (strategyViolations.length > 0) {
       setShowViolationDialog(true);
       setPendingSubmit(true);
       return;
     }
 
-    // No violations, proceed directly
     await processBetSubmission();
   };
 
@@ -643,203 +628,161 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                <Plus className="h-5 w-5" />
-                Додати нову ставку CS2
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="date" className="text-gray-700 font-medium">Дата матчу</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      required
-                      className="rounded-xl"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
-                    <Select value={formData.betCategory} onValueChange={(value) => {
-                      setFormData({...formData, betCategory: value});
-                      if (value === 'Ординар') {
-                        setExpressEvents([]);
-                      }
-                    }}>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Ординар">Ординар</SelectItem>
-                        <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {activeGoals.length > 0 && (
-                  <div>
-                    <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
-                      <Flag className="h-4 w-4 text-blue-600" />
-                      Прив'язати до цілі (необов'язково)
-                    </Label>
-                    <Select 
-                      value={formData.goalId || 'all'} 
-                      onValueChange={(value) => {
-                        console.log('Goal selected:', value);
-                        setFormData({...formData, goalId: value === 'all' ? '' : value});
-                      }}
-                    >
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Без цілі</SelectItem>
-                        {activeGoals.map((goal) => (
-                          <SelectItem key={goal.id} value={goal.id}>
-                            {goal.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Ця ставка буде враховуватись у прогресі обраної цілі
-                    </p>
-                  </div>
-                )}
-
-                {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                  <Card className="border-2 border-purple-200 bg-purple-50 rounded-2xl">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base font-semibold text-purple-900 flex items-center gap-2">
-                          <Trophy className="h-4 w-4" />
-                          Події експресу ({expressEvents.length}/10)
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-purple-600 text-white border-0 rounded-full">
-                            Коеф: {totalExpressOdds.toFixed(2)}
-                          </Badge>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearExpressEvents}
-                            className="text-red-600 hover:text-red-700 h-7 rounded-xl"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2 max-h-60 overflow-y-auto">
-                      {expressEvents.map((event, index) => (
-                        <div key={index} className="p-3 bg-white rounded-xl border border-purple-200 flex items-start justify-between gap-3">
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full text-xs">
-                                #{index + 1}
-                              </Badge>
-                              <span className="font-medium text-gray-900 text-sm">{event.match}</span>
-                            </div>
-                            <div className="text-xs text-gray-600">
-                              {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
-                            </div>
-                            <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
-                              Коеф {event.odds}
-                            </Badge>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeExpressEvent(index)}
-                            className="text-red-600 hover:text-red-700 h-6 w-6 p-0 rounded-xl flex-shrink-0"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {formData.betCategory === 'Ординар' && (
-                  <div>
-                    <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
-                    <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BO1">BO1</SelectItem>
-                        <SelectItem value="BO3">BO3</SelectItem>
-                        <SelectItem value="BO5">BO5</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div>
-                  <Label htmlFor="matchUrl" className="text-gray-700 font-medium">
-                    HLTV URL матчу (необов'язково)
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="matchUrl"
-                      value={formData.matchUrl}
-                      onChange={(e) => handleUrlChange(e.target.value)}
-                      placeholder="https://www.hltv.org/matches/2386647/500-vs-kono-nodwin-clutch-series-1"
-                      className="flex-1 rounded-xl"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => parseMatchFromUrl(formData.matchUrl)}
-                      disabled={isParsingMatch || !formData.matchUrl}
-                      className="rounded-xl"
-                    >
-                      <Link className="h-4 w-4" />
-                      {isParsingMatch ? 'Парсинг...' : 'Парсити'}
-                    </Button>
-                  </div>
-                </div>
-
-                {(formData.team1 || formData.team2 || formData.tournament) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-green-50 rounded-2xl">
-                    <div>
-                      <Label className="text-gray-700 font-medium">Команда 1</Label>
-                      <div className="font-medium text-green-700">{formData.team1}</div>
-                    </div>
-                    <div>
-                      <Label className="text-gray-700 font-medium">Команда 2</Label>
-                      <div className="font-medium text-green-700">{formData.team2}</div>
-                    </div>
-                    <div>
-                      <Label className="text-gray-700 font-medium">Турнір</Label>
-                      <div className="font-medium text-green-700">{formData.tournament}</div>
-                    </div>
-                  </div>
-                )}
-
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Main Form Card */}
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <Plus className="h-6 w-6" />
+                  Додати нову ставку CS2
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="p-6 space-y-6">
+                {/* Basic Settings Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900">
-                    <DollarSign className="h-4 w-4" />
-                    {formData.betCategory === 'Експрес' ? 'Деталі події' : 'Деталі ставки'}
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-blue-200">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    Основні налаштування
                   </h3>
                   
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="date" className="text-gray-700 font-medium">Дата матчу</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        required
+                        className="rounded-xl mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
+                      <Select value={formData.betCategory} onValueChange={(value) => {
+                        setFormData({...formData, betCategory: value});
+                        if (value === 'Ординар') {
+                          setExpressEvents([]);
+                        }
+                      }}>
+                        <SelectTrigger className="rounded-xl mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Ординар">Ординар</SelectItem>
+                          <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.betCategory === 'Ординар' && (
+                      <div>
+                        <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
+                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BO1">BO1</SelectItem>
+                            <SelectItem value="BO3">BO3</SelectItem>
+                            <SelectItem value="BO5">BO5</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  {activeGoals.length > 0 && (
+                    <div>
+                      <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
+                        <Flag className="h-4 w-4 text-blue-600" />
+                        Прив'язати до цілі (необов'язково)
+                      </Label>
+                      <Select 
+                        value={formData.goalId || 'all'} 
+                        onValueChange={(value) => {
+                          setFormData({...formData, goalId: value === 'all' ? '' : value});
+                        }}
+                      >
+                        <SelectTrigger className="rounded-xl mt-1">
+                          <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Без цілі</SelectItem>
+                          {activeGoals.map((goal) => (
+                            <SelectItem key={goal.id} value={goal.id}>
+                              {goal.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Ця ставка буде враховуватись у прогресі обраної цілі
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Match Information & Bet Details Combined Section */}
+                <div className="space-y-4">
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-green-200">
+                    <Users className="h-5 w-5 text-green-600" />
+                    Інформація про матч і деталі ставки
+                  </h3>
+                  
+                  <div>
+                    <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
+                      <Link className="h-4 w-4 text-blue-600" />
+                      HLTV URL матчу (необов'язково)
+                    </Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        id="matchUrl"
+                        value={formData.matchUrl}
+                        onChange={(e) => handleUrlChange(e.target.value)}
+                        placeholder="https://www.hltv.org/matches/..."
+                        className="flex-1 rounded-xl"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => parseMatchFromUrl(formData.matchUrl)}
+                        disabled={isParsingMatch || !formData.matchUrl}
+                        className="rounded-xl px-4"
+                      >
+                        {isParsingMatch ? 'Парсинг...' : 'Парсити'}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
+                  </div>
+
+                  {(formData.team1 || formData.team2 || formData.tournament) && (
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl border-2 border-green-200">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-gray-600 text-xs font-medium">Команда 1</Label>
+                          <div className="font-bold text-green-700 text-lg">{formData.team1}</div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-600 text-xs font-medium">Команда 2</Label>
+                          <div className="font-bold text-green-700 text-lg">{formData.team2}</div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-600 text-xs font-medium">Турнір</Label>
+                          <div className="font-bold text-green-700 text-sm">{formData.tournament}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="team1" className="text-gray-700 font-medium">
-                        Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
+                        Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                       </Label>
                       <Input
                         id="team1"
@@ -847,13 +790,13 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         onChange={(e) => setFormData({...formData, team1: e.target.value})}
                         placeholder="NAVI"
                         required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl"
+                        className="rounded-xl mt-1"
                       />
                     </div>
                     
                     <div>
                       <Label htmlFor="team2" className="text-gray-700 font-medium">
-                        Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
+                        Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                       </Label>
                       <Input
                         id="team2"
@@ -861,7 +804,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         onChange={(e) => setFormData({...formData, team2: e.target.value})}
                         placeholder="G2"
                         required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl"
+                        className="rounded-xl mt-1"
                       />
                     </div>
                   </div>
@@ -869,14 +812,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="betType" className="text-gray-700 font-medium">
-                        Тип ставки {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
+                        Тип ставки {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                       </Label>
                       <Select 
                         value={formData.betType} 
                         onValueChange={(value) => setFormData({...formData, betType: value})} 
                         required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                       >
-                        <SelectTrigger className="rounded-xl">
+                        <SelectTrigger className="rounded-xl mt-1">
                           <SelectValue placeholder="Оберіть тип ставки" />
                         </SelectTrigger>
                         <SelectContent>
@@ -893,14 +836,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     
                     <div>
                       <Label htmlFor="selection" className="text-gray-700 font-medium">
-                        Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
+                        Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                       </Label>
                       <Select 
                         value={formData.selection} 
                         onValueChange={(value) => setFormData({...formData, selection: value})}
                         disabled={!formData.team1 || !formData.team2}
                       >
-                        <SelectTrigger className="rounded-xl">
+                        <SelectTrigger className="rounded-xl mt-1">
                           <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
                         </SelectTrigger>
                         <SelectContent>
@@ -912,7 +855,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                     <div>
                       <Label htmlFor="odds" className="text-gray-700 font-medium">
-                        Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && '*'}
+                        Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                       </Label>
                       <Input
                         id="odds"
@@ -923,7 +866,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         onChange={(e) => setFormData({...formData, odds: e.target.value})}
                         placeholder="1.65"
                         required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl"
+                        className="rounded-xl mt-1"
                       />
                     </div>
                   </div>
@@ -933,27 +876,30 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       type="button"
                       onClick={addExpressEvent}
                       disabled={expressEvents.length >= 10}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-medium"
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-5 w-5 mr-2" />
                       Додати подію до експресу ({expressEvents.length}/10)
                     </Button>
                   )}
+                </div>
 
-                  {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
-                    <>
-                      <Separator />
-                      
-                      <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900">
-                        <Calculator className="h-4 w-4" />
-                        Фінальні деталі ставки
+                {/* Financial Details Section */}
+                {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
+                  <>
+                    <Separator />
+                    
+                    <div className="space-y-4">
+                      <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-yellow-200">
+                        <DollarSign className="h-5 w-5 text-yellow-600" />
+                        Фінансові деталі
                       </h3>
-
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                           <Label htmlFor="currency" className="text-gray-700 font-medium">Валюта</Label>
                           <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
-                            <SelectTrigger className="rounded-xl">
+                            <SelectTrigger className="rounded-xl mt-1">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -964,7 +910,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         </div>
                         
                         <div>
-                          <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки</Label>
+                          <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки <span className="text-red-500">*</span></Label>
                           <Input
                             id="stake"
                             type="number"
@@ -974,7 +920,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             onChange={(e) => setFormData({...formData, stake: e.target.value})}
                             placeholder="100"
                             required
-                            className="rounded-xl"
+                            className="rounded-xl mt-1"
                           />
                         </div>
                         
@@ -990,13 +936,13 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               onChange={(e) => setFormData({...formData, exchangeRate: e.target.value})}
                               placeholder="41.00"
                               required
-                              className="rounded-xl"
+                              className="rounded-xl mt-1"
                             />
                           </div>
                         )}
                         
                         <div>
-                          <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%)</Label>
+                          <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%) <span className="text-red-500">*</span></Label>
                           <Input
                             id="confidence"
                             type="number"
@@ -1006,126 +952,203 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             onChange={(e) => setFormData({...formData, confidence: e.target.value})}
                             placeholder="70"
                             required
-                            className="rounded-xl"
+                            className="rounded-xl mt-1"
                           />
                         </div>
                       </div>
                       
                       {formData.currency === 'USD' && formData.stake && formData.exchangeRate && (
-                        <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-blue-700 font-medium">Сума в UAH (для аналітики):</span>
-                            <span className="font-semibold text-blue-900">
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-blue-700 font-semibold">Сума в UAH (для аналітики):</span>
+                            <span className="font-bold text-blue-900 text-xl">
                               ₴{convertToUAH(parseFloat(formData.stake), formData.currency, parseFloat(formData.exchangeRate)).toFixed(2)}
                             </span>
                           </div>
                         </div>
                       )}
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || (formData.betCategory === 'Експрес' && expressEvents.length === 0)} 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium"
-                >
-                  {isSubmitting ? 'Додавання...' : 'Додати ставку'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+            {/* Express Events Display */}
+            {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
+              <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-lg">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold text-purple-900 flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      Події експресу ({expressEvents.length}/10)
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-purple-600 text-white border-0 rounded-full text-sm px-3 py-1">
+                        Коеф: {totalExpressOdds.toFixed(2)}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearExpressEvents}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 rounded-xl"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2 max-h-60 overflow-y-auto">
+                  {expressEvents.map((event, index) => (
+                    <div key={index} className="p-3 bg-white rounded-xl border-2 border-purple-200 flex items-start justify-between gap-3 hover:border-purple-300 transition-colors">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full text-xs font-bold">
+                            #{index + 1}
+                          </Badge>
+                          <span className="font-semibold text-gray-900 text-sm">{event.match}</span>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
+                          Коеф {event.odds}
+                        </Badge>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeExpressEvent(index)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-xl flex-shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Submit Button */}
+            {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-3xl font-bold py-8 text-lg shadow-2xl transform hover:scale-[1.02] transition-all"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    Додавання...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-6 w-6 mr-2" />
+                    Додати ставку
+                  </>
+                )}
+              </Button>
+            )}
+          </form>
         </div>
 
+        {/* Right Sidebar - Calculations & Warnings */}
         <div className="space-y-6">
           {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <Calculator className="h-4 w-4" />
+            <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden sticky top-6">
+              <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <Calculator className="h-5 w-5" />
                   Розрахунки
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-6 space-y-4">
                 {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 font-medium">Загальний коефіцієнт:</span>
-                    <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full">
-                      {totalExpressOdds.toFixed(2)}
-                    </Badge>
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-700 font-semibold">Загальний коефіцієнт:</span>
+                      <Badge className="bg-purple-600 text-white border-0 rounded-full text-lg px-4 py-1">
+                        {totalExpressOdds.toFixed(2)}
+                      </Badge>
+                    </div>
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">Потенційний прибуток:</span>
-                  <span className="font-semibold text-green-600">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700 font-semibold">Потенційний прибуток:</span>
+                    <span className="font-bold text-green-600 text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">Expected Value:</span>
-                  <Badge className={`rounded-full border-0 ${isValuePositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {isValuePositive ? '+' : ''}{expectedValue}%
-                  </Badge>
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700 font-semibold">Expected Value:</span>
+                    <Badge className={`rounded-full border-0 text-base px-4 py-1 ${isValuePositive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                      {isValuePositive ? '+' : ''}{expectedValue}%
+                    </Badge>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">Макс. програш:</span>
-                  <span className="font-semibold text-red-600">-{stakeInCurrency} {getCurrencySymbol()}</span>
+                <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border-2 border-red-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700 font-semibold">Макс. програш:</span>
+                    <span className="font-bold text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
+                  </div>
                 </div>
 
                 <Separator />
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-900">Рекомендація</span>
+                <div className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl border-2 border-gray-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm font-bold text-gray-900">Рекомендація</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    {isValuePositive ? (
-                      <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <TrendingUp className="h-4 w-4" />
-                        Позитивна очікувана вартість - рекомендована ставка
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-red-600 font-medium">
-                        <AlertTriangle className="h-4 w-4" />
-                        Негативна очікувана вартість - обережно
-                      </div>
-                    )}
-                  </div>
+                  {isValuePositive ? (
+                    <div className="flex items-center gap-2 text-green-600 font-semibold">
+                      <TrendingUp className="h-5 w-5" />
+                      <span className="text-sm">Позитивна очікувана вартість - рекомендована ставка</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-red-600 font-semibold">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span className="text-sm">Негативна очікувана вартість - обережно</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           )}
 
           {formData.riskyTeams.length > 0 && (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-red-700">
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
+            <Card className="border-2 border-red-300 shadow-xl rounded-3xl bg-gradient-to-br from-red-50 to-orange-50 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <AlertTriangle className="h-5 w-5" />
                   Ризиковані команди
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4">
                 <div className="space-y-3 max-h-60 overflow-y-auto">
                   {formData.riskyTeams.map((riskyTeam, index) => (
-                    <div key={index} className="p-3 border border-red-100 rounded-2xl bg-red-50 space-y-2">
+                    <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                          <span className="font-medium text-red-800">{riskyTeam.name}</span>
+                          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                          <span className="font-bold text-red-800">{riskyTeam.name}</span>
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeRiskyTeam(index)}
-                          className="text-red-600 hover:text-red-700 h-6 w-6 p-0 rounded-xl"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-100 h-7 w-7 p-0 rounded-xl"
                         >
                           ✕
                         </Button>
                       </div>
-                      <p className="text-xs text-red-700">{riskyTeam.comment}</p>
+                      <p className="text-xs text-red-700 font-medium">{riskyTeam.comment}</p>
                     </div>
                   ))}
                 </div>
@@ -1136,50 +1159,50 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       </div>
 
       {lastAddedBet && (
-        <Card className="border-0 shadow-lg rounded-3xl bg-green-50 overflow-hidden">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-700 text-lg font-semibold">
-              <Trophy className="h-5 w-5" />
+        <Card className="border-0 shadow-2xl rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold">
+              <Trophy className="h-6 w-6" />
               Ставка успішно додана!
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-white rounded-2xl border border-green-100 space-y-3">
+          <CardContent className="p-6">
+            <div className="p-6 bg-white rounded-2xl border-2 border-green-200 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-gray-900">{lastAddedBet.match}</span>
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                  <span className="font-bold text-gray-900 text-lg">{lastAddedBet.match}</span>
                 </div>
-                <span className="text-sm text-gray-600">{lastAddedBet.date}</span>
+                <span className="text-sm text-gray-600 font-medium">{lastAddedBet.date}</span>
               </div>
               
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="rounded-full bg-purple-100 text-purple-700 border-0">
+                <Badge className="rounded-full bg-purple-100 text-purple-700 border-0 text-sm px-3 py-1">
                   {lastAddedBet.format}
                 </Badge>
                 {lastAddedBet.currency && (
-                  <Badge className="rounded-full bg-blue-100 text-blue-700 border-0">
+                  <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-sm px-3 py-1">
                     {lastAddedBet.currency}
                   </Badge>
                 )}
-                <Badge className="rounded-full bg-yellow-100 text-yellow-700 border-0">Очікується</Badge>
+                <Badge className="rounded-full bg-yellow-100 text-yellow-700 border-0 text-sm px-3 py-1">Очікується</Badge>
               </div>
               
               {lastAddedBet.betType.includes('Експрес') && (
-                <div className="p-3 bg-purple-50 rounded-xl border border-purple-100">
-                  <p className="text-xs text-purple-900 font-medium mb-1">Події експресу:</p>
+                <div className="p-4 bg-purple-50 rounded-xl border-2 border-purple-200">
+                  <p className="text-xs text-purple-900 font-bold mb-2">Події експресу:</p>
                   <p className="text-xs text-purple-700 leading-relaxed">{lastAddedBet.betType}</p>
                 </div>
               )}
               
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="font-medium text-gray-900">
+              <div className="flex items-center justify-between pt-4 border-t-2 border-gray-200">
+                <div className="flex items-center gap-4">
+                  <span className="font-bold text-gray-900 text-lg">
                     {lastAddedBet.currency === 'USD' ? '$' : '₴'}{lastAddedBet.originalAmount}
                   </span>
-                  <span className="text-gray-600">@{lastAddedBet.odds.toFixed(2)}</span>
+                  <span className="text-gray-600 font-medium">@{lastAddedBet.odds.toFixed(2)}</span>
                 </div>
-                <span className="text-green-600 font-semibold">
+                <span className="text-green-600 font-bold text-xl">
                   +{((lastAddedBet.odds - 1) * lastAddedBet.originalAmount).toFixed(2)} {lastAddedBet.currency === 'USD' ? '$' : '₴'}
                 </span>
               </div>
