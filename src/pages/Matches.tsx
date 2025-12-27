@@ -27,10 +27,7 @@ import {
   EyeOff,
   MousePointerClick,
   CheckCircle,
-  Info,
-  Star,
-  SkipForward,
-  Bookmark
+  Info
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -43,9 +40,6 @@ import {
 
 // Form Stability Types
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
-
-// User Tag Types
-type UserTag = 'consider' | 'skip' | 'ladder' | 'favorite' | null;
 
 interface RiskyTeam {
   name: string;
@@ -79,7 +73,6 @@ interface Match {
   matchType: 'Bo1' | 'Bo3' | 'Bo5';
   upsetProbability: number;
   url?: string;
-  userTag?: UserTag;
 }
 
 // Mock data for demonstration - all matches on 2025-12-21
@@ -259,41 +252,6 @@ const getRiskBadge = (risk: number) => {
   };
 };
 
-const getUserTagInfo = (tag: UserTag) => {
-  switch (tag) {
-    case 'consider':
-      return {
-        icon: <Search className="h-4 w-4" />,
-        label: 'Розглянути',
-        color: 'bg-blue-500 hover:bg-blue-600',
-        tooltip: '🔍 Розглянути'
-      };
-    case 'skip':
-      return {
-        icon: <SkipForward className="h-4 w-4" />,
-        label: 'Пропустити',
-        color: 'bg-gray-500 hover:bg-gray-600',
-        tooltip: '⏭️ Пропустити'
-      };
-    case 'ladder':
-      return {
-        icon: <Target className="h-4 w-4" />,
-        label: 'В лесенку',
-        color: 'bg-green-500 hover:bg-green-600',
-        tooltip: '🎯 В лесенку'
-      };
-    case 'favorite':
-      return {
-        icon: <Star className="h-4 w-4" />,
-        label: 'Улюблене',
-        color: 'bg-yellow-500 hover:bg-yellow-600',
-        tooltip: '⭐ Улюблене'
-      };
-    default:
-      return null;
-  }
-};
-
 // Check if match is Safe Pick
 const isSafePick = (match: Match): boolean => {
   return (
@@ -376,7 +334,6 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterUserTag, setFilterUserTag] = useState<'all' | UserTag>('all');
   
   // Load risky teams from admin_risky_teams (global storage)
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
@@ -386,7 +343,6 @@ export default function Matches() {
 
   useEffect(() => {
     loadRiskyTeams();
-    loadUserTags();
   }, []);
 
   const loadRiskyTeams = () => {
@@ -398,47 +354,6 @@ export default function Matches() {
     } catch (error) {
       console.error('Error loading risky teams:', error);
     }
-  };
-
-  const loadUserTags = () => {
-    try {
-      const saved = localStorage.getItem('match_user_tags');
-      if (saved) {
-        const tags = JSON.parse(saved);
-        setMatches(prevMatches => 
-          prevMatches.map(match => ({
-            ...match,
-            userTag: tags[match.id] || null
-          }))
-        );
-      }
-    } catch (error) {
-      console.error('Error loading user tags:', error);
-    }
-  };
-
-  const saveUserTags = (updatedMatches: Match[]) => {
-    try {
-      const tags: Record<string, UserTag> = {};
-      updatedMatches.forEach(match => {
-        if (match.userTag) {
-          tags[match.id] = match.userTag;
-        }
-      });
-      localStorage.setItem('match_user_tags', JSON.stringify(tags));
-    } catch (error) {
-      console.error('Error saving user tags:', error);
-    }
-  };
-
-  const setUserTag = (matchId: string, tag: UserTag) => {
-    setMatches(prevMatches => {
-      const updatedMatches = prevMatches.map(match =>
-        match.id === matchId ? { ...match, userTag: tag } : match
-      );
-      saveUserTags(updatedMatches);
-      return updatedMatches;
-    });
   };
 
   const toggleCommentVisibility = (matchId: string) => {
@@ -503,7 +418,6 @@ export default function Matches() {
     if (filterRisk === 'high' && match.risk <= 50) return false;
     if (filterMatchType !== 'all' && match.matchType !== filterMatchType) return false;
     if (showHotMatches && (match.aiConfidence <= 70 || match.upsetProbability >= 20)) return false;
-    if (filterUserTag !== 'all' && match.userTag !== filterUserTag) return false;
     if (searchQuery && !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !match.team2.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -716,7 +630,7 @@ export default function Matches() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Tier:</label>
                 <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
@@ -773,22 +687,6 @@ export default function Matches() {
                     <SelectItem value="Bo1">Bo1</SelectItem>
                     <SelectItem value="Bo3">Bo3</SelectItem>
                     <SelectItem value="Bo5">Bo5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Мої теги:</label>
-                <Select value={filterUserTag} onValueChange={(value: 'all' | UserTag) => setFilterUserTag(value)}>
-                  <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Всі</SelectItem>
-                    <SelectItem value="consider">🔍 Розглянути</SelectItem>
-                    <SelectItem value="skip">⏭️ Пропустити</SelectItem>
-                    <SelectItem value="ladder">🎯 В лесенку</SelectItem>
-                    <SelectItem value="favorite">⭐ Улюблене</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -860,7 +758,6 @@ export default function Matches() {
                       <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Win Rate</th>
                       <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Form</th>
                       <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Турнір</th>
-                      <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Теги</th>
                       <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Коментар</th>
                       <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider"></th>
                     </tr>
@@ -874,7 +771,6 @@ export default function Matches() {
                       const riskComments = getMatchRiskComments(match.team1, match.team2);
                       const isCommentVisible = visibleComments.has(match.id);
                       const aiExplanation = getAIExplanation(match);
-                      const userTagInfo = getUserTagInfo(match.userTag);
                       
                       return (
                         <tr 
@@ -965,34 +861,6 @@ export default function Matches() {
                           <td className="p-4">
                             <div className="text-sm text-gray-700 font-medium">{match.context}</div>
                             <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center justify-center gap-1">
-                              {(['consider', 'skip', 'ladder', 'favorite'] as const).map((tag) => {
-                                const tagInfo = getUserTagInfo(tag);
-                                const isActive = match.userTag === tag;
-                                
-                                return (
-                                  <Tooltip key={tag}>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        onClick={() => setUserTag(match.id, isActive ? null : tag)}
-                                        className={`p-2 rounded-lg transition-all ${
-                                          isActive 
-                                            ? `${tagInfo?.color} text-white shadow-md scale-110` 
-                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
-                                        }`}
-                                      >
-                                        {tagInfo?.icon}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p className="text-xs">{tagInfo?.tooltip}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                );
-                              })}
-                            </div>
                           </td>
                           <td className="p-4">
                             {riskComments ? (
