@@ -687,53 +687,27 @@ export default function MyBets() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            {isWin ? (
-                              <div className="p-2 bg-green-100 rounded-lg">
-                                <Trophy className="h-5 w-5 text-green-600" />
-                              </div>
-                            ) : isLoss ? (
-                              <div className="p-2 bg-red-100 rounded-lg">
-                                <AlertTriangle className="h-5 w-5 text-red-600" />
-                              </div>
-                            ) : (
-                              <div className="p-2 bg-amber-200 rounded-lg">
-                                <Clock className="h-5 w-5 text-amber-700" />
-                              </div>
-                            )}
-                            <Badge 
-                              className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
-                                isWin ? 'bg-green-100 text-green-700' :
-                                isLoss ? 'bg-red-100 text-red-700' :
-                                'bg-amber-200 text-amber-800'
-                              }`}
-                            >
-                              {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
-                            </Badge>
-                          </div>
+                          <Badge 
+                            className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
+                              isWin ? 'bg-green-100 text-green-700' :
+                              isLoss ? 'bg-red-100 text-red-700' :
+                              'bg-amber-200 text-amber-800'
+                            }`}
+                          >
+                            {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
+                          </Badge>
                         </td>
                         <td className="p-4 text-center">
                           {displayProfit !== undefined && displayProfit !== null ? (
-                            <div className="flex items-center justify-center gap-2">
-                              {displayProfit >= 0 ? (
-                                <div className="p-2 bg-green-100 rounded-lg">
-                                  <TrendingUp className="h-5 w-5 text-green-600" />
-                                </div>
-                              ) : (
-                                <div className="p-2 bg-red-100 rounded-lg">
-                                  <TrendingDown className="h-5 w-5 text-red-600" />
+                            <div>
+                              <span className={`font-black text-base ${displayProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
+                              </span>
+                              {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
                                 </div>
                               )}
-                              <div>
-                                <span className={`font-black text-base ${displayProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
-                                </span>
-                                {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
-                                  </div>
-                                )}
-                              </div>
                             </div>
                           ) : (
                             <span className="text-gray-400">—</span>
