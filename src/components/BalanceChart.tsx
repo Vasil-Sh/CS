@@ -41,7 +41,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
             <p className="text-sm text-gray-700 mb-1">Ставка: {data.betName}</p>
           )}
           {data.odds && (
-            <p className="text-sm text-gray-700 mb-1">Коеф.: {data.odds}</p>
+            <p className="text-sm text-gray-700 mb-1">Коеф.: {data.odds.toFixed(2)}</p>
           )}
           <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             Профіт: {data.profit >= 0 ? '+' : ''}{data.profit.toFixed(2)} ₴
