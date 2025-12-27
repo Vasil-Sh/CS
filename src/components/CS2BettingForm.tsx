@@ -752,251 +752,255 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <CardContent className="p-6 space-y-6">
                 {/* Basic Settings Section */}
                 <div className="space-y-4">
-                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-blue-200">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    Основні налаштування
-                  </h3>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200">
+                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                      Основні налаштування
+                    </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="date" className="text-gray-700 font-medium">Дата матчу</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        required
-                        className="rounded-xl mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
-                      <Select value={formData.betCategory} onValueChange={(value) => {
-                        setFormData({...formData, betCategory: value});
-                        if (value === 'Ординар') {
-                          setExpressEvents([]);
-                        }
-                      }}>
-                        <SelectTrigger className="rounded-xl mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Ординар">Ординар</SelectItem>
-                          <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {formData.betCategory === 'Ординар' && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
-                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                        <Label htmlFor="date" className="text-gray-700 font-medium">Дата матчу</Label>
+                        <Input
+                          id="date"
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) => setFormData({...formData, date: e.target.value})}
+                          required
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
+                        <Select value={formData.betCategory} onValueChange={(value) => {
+                          setFormData({...formData, betCategory: value});
+                          if (value === 'Ординар') {
+                            setExpressEvents([]);
+                          }
+                        }}>
                           <SelectTrigger className="rounded-xl mt-1">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="BO1">BO1</SelectItem>
-                            <SelectItem value="BO3">BO3</SelectItem>
-                            <SelectItem value="BO5">BO5</SelectItem>
+                            <SelectItem value="Ординар">Ординар</SelectItem>
+                            <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+
+                      {formData.betCategory === 'Ординар' && (
+                        <div>
+                          <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
+                          <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                            <SelectTrigger className="rounded-xl mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="BO1">BO1</SelectItem>
+                              <SelectItem value="BO3">BO3</SelectItem>
+                              <SelectItem value="BO5">BO5</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Goals - Only in Advanced Mode */}
+                    {formMode === 'advanced' && activeGoals.length > 0 && (
+                      <div className="mt-4">
+                        <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
+                          <Flag className="h-4 w-4 text-blue-600" />
+                          Прив'язати до цілі (необов'язково)
+                        </Label>
+                        <Select 
+                          value={formData.goalId || 'all'} 
+                          onValueChange={(value) => {
+                            setFormData({...formData, goalId: value === 'all' ? '' : value});
+                          }}
+                        >
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Без цілі</SelectItem>
+                            {activeGoals.map((goal) => (
+                              <SelectItem key={goal.id} value={goal.id}>
+                                {goal.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Ця ставка буде враховуватись у прогресі обраної цілі
+                        </p>
+                      </div>
                     )}
                   </div>
-
-                  {/* Goals - Only in Advanced Mode */}
-                  {formMode === 'advanced' && activeGoals.length > 0 && (
-                    <div>
-                      <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
-                        <Flag className="h-4 w-4 text-blue-600" />
-                        Прив'язати до цілі (необов'язково)
-                      </Label>
-                      <Select 
-                        value={formData.goalId || 'all'} 
-                        onValueChange={(value) => {
-                          setFormData({...formData, goalId: value === 'all' ? '' : value});
-                        }}
-                      >
-                        <SelectTrigger className="rounded-xl mt-1">
-                          <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Без цілі</SelectItem>
-                          {activeGoals.map((goal) => (
-                            <SelectItem key={goal.id} value={goal.id}>
-                              {goal.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Ця ставка буде враховуватись у прогресі обраної цілі
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <Separator />
 
                 {/* Match Information & Bet Details Combined Section */}
                 <div className="space-y-4">
-                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-green-200">
-                    <Users className="h-5 w-5 text-green-600" />
-                    Інформація про матч і деталі ставки
-                  </h3>
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl border-2 border-green-200">
+                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
+                      <Users className="h-5 w-5 text-green-600" />
+                      Інформація про матч і деталі ставки
+                    </h3>
                   
-                  {/* HLTV URL - Only in Advanced Mode */}
-                  {formMode === 'advanced' && (
-                    <div>
-                      <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
-                        <Link className="h-4 w-4 text-blue-600" />
-                        HLTV URL матчу (необов'язково)
-                      </Label>
-                      <div className="flex gap-2 mt-1">
+                    {/* HLTV URL - Only in Advanced Mode */}
+                    {formMode === 'advanced' && (
+                      <div className="mb-4">
+                        <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
+                          <Link className="h-4 w-4 text-blue-600" />
+                          HLTV URL матчу (необов'язково)
+                        </Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input
+                            id="matchUrl"
+                            value={formData.matchUrl}
+                            onChange={(e) => handleUrlChange(e.target.value)}
+                            placeholder="https://www.hltv.org/matches/..."
+                            className="flex-1 rounded-xl"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => parseMatchFromUrl(formData.matchUrl)}
+                            disabled={isParsingMatch || !formData.matchUrl}
+                            className="rounded-xl px-4"
+                          >
+                            {isParsingMatch ? 'Парсинг...' : 'Парсити'}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
+                      </div>
+                    )}
+
+                    {(formData.team1 || formData.team2 || formData.tournament) && (
+                      <div className="p-4 bg-white rounded-2xl border-2 border-green-300 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label className="text-gray-600 text-xs font-medium">Команда 1</Label>
+                            <div className="font-bold text-green-700 text-lg">{formData.team1}</div>
+                          </div>
+                          <div>
+                            <Label className="text-gray-600 text-xs font-medium">Команда 2</Label>
+                            <div className="font-bold text-green-700 text-lg">{formData.team2}</div>
+                          </div>
+                          <div>
+                            <Label className="text-gray-600 text-xs font-medium">Турнір</Label>
+                            <div className="font-bold text-green-700 text-sm">{formData.tournament}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label htmlFor="team1" className="text-gray-700 font-medium">
+                          Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                        </Label>
                         <Input
-                          id="matchUrl"
-                          value={formData.matchUrl}
-                          onChange={(e) => handleUrlChange(e.target.value)}
-                          placeholder="https://www.hltv.org/matches/..."
-                          className="flex-1 rounded-xl"
+                          id="team1"
+                          value={formData.team1}
+                          onChange={(e) => setFormData({...formData, team1: e.target.value})}
+                          placeholder="NAVI"
+                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                          className="rounded-xl mt-1"
                         />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => parseMatchFromUrl(formData.matchUrl)}
-                          disabled={isParsingMatch || !formData.matchUrl}
-                          className="rounded-xl px-4"
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="team2" className="text-gray-700 font-medium">
+                          Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Input
+                          id="team2"
+                          value={formData.team2}
+                          onChange={(e) => setFormData({...formData, team2: e.target.value})}
+                          placeholder="G2"
+                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="betType" className="text-gray-700 font-medium">
+                          Тип ставки {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Select 
+                          value={formData.betType} 
+                          onValueChange={(value) => setFormData({...formData, betType: value})} 
+                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                         >
-                          {isParsingMatch ? 'Парсинг...' : 'Парсити'}
-                        </Button>
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue placeholder="Оберіть тип ставки" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Match Winner">Переможець матчу</SelectItem>
+                            <SelectItem value="Map Winner">Переможець карти</SelectItem>
+                            <SelectItem value="Total Maps">Тотал карт</SelectItem>
+                            <SelectItem value="Handicap">Фора</SelectItem>
+                            <SelectItem value="First Map">Перша карта</SelectItem>
+                            <SelectItem value="Pistol Round">Пістолетний раунд</SelectItem>
+                            <SelectItem value="Total Rounds">Тотал раундів</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
-                    </div>
-                  )}
+                      
+                      <div>
+                        <Label htmlFor="selection" className="text-gray-700 font-medium">
+                          Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Select 
+                          value={formData.selection} 
+                          onValueChange={(value) => setFormData({...formData, selection: value})}
+                          disabled={!formData.team1 || !formData.team2}
+                        >
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
+                            {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  {(formData.team1 || formData.team2 || formData.tournament) && (
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl border-2 border-green-200">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label className="text-gray-600 text-xs font-medium">Команда 1</Label>
-                          <div className="font-bold text-green-700 text-lg">{formData.team1}</div>
-                        </div>
-                        <div>
-                          <Label className="text-gray-600 text-xs font-medium">Команда 2</Label>
-                          <div className="font-bold text-green-700 text-lg">{formData.team2}</div>
-                        </div>
-                        <div>
-                          <Label className="text-gray-600 text-xs font-medium">Турнір</Label>
-                          <div className="font-bold text-green-700 text-sm">{formData.tournament}</div>
-                        </div>
+                      <div>
+                        <Label htmlFor="odds" className="text-gray-700 font-medium">
+                          Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Input
+                          id="odds"
+                          type="number"
+                          step="0.01"
+                          min="1.01"
+                          value={formData.odds}
+                          onChange={(e) => setFormData({...formData, odds: e.target.value})}
+                          placeholder="1.65"
+                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                          className="rounded-xl mt-1"
+                        />
                       </div>
                     </div>
-                  )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="team1" className="text-gray-700 font-medium">
-                        Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <Input
-                        id="team1"
-                        value={formData.team1}
-                        onChange={(e) => setFormData({...formData, team1: e.target.value})}
-                        placeholder="NAVI"
-                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="team2" className="text-gray-700 font-medium">
-                        Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <Input
-                        id="team2"
-                        value={formData.team2}
-                        onChange={(e) => setFormData({...formData, team2: e.target.value})}
-                        placeholder="G2"
-                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl mt-1"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="betType" className="text-gray-700 font-medium">
-                        Тип ставки {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <Select 
-                        value={formData.betType} 
-                        onValueChange={(value) => setFormData({...formData, betType: value})} 
-                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                    {formData.betCategory === 'Експрес' && (
+                      <Button
+                        type="button"
+                        onClick={addExpressEvent}
+                        disabled={expressEvents.length >= 10}
+                        className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
                       >
-                        <SelectTrigger className="rounded-xl mt-1">
-                          <SelectValue placeholder="Оберіть тип ставки" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Match Winner">Переможець матчу</SelectItem>
-                          <SelectItem value="Map Winner">Переможець карти</SelectItem>
-                          <SelectItem value="Total Maps">Тотал карт</SelectItem>
-                          <SelectItem value="Handicap">Фора</SelectItem>
-                          <SelectItem value="First Map">Перша карта</SelectItem>
-                          <SelectItem value="Pistol Round">Пістолетний раунд</SelectItem>
-                          <SelectItem value="Total Rounds">Тотал раундів</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="selection" className="text-gray-700 font-medium">
-                        Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <Select 
-                        value={formData.selection} 
-                        onValueChange={(value) => setFormData({...formData, selection: value})}
-                        disabled={!formData.team1 || !formData.team2}
-                      >
-                        <SelectTrigger className="rounded-xl mt-1">
-                          <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
-                          {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="odds" className="text-gray-700 font-medium">
-                        Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <Input
-                        id="odds"
-                        type="number"
-                        step="0.01"
-                        min="1.01"
-                        value={formData.odds}
-                        onChange={(e) => setFormData({...formData, odds: e.target.value})}
-                        placeholder="1.65"
-                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        className="rounded-xl mt-1"
-                      />
-                    </div>
+                        <Plus className="h-5 w-5 mr-2" />
+                        Додати подію до експресу ({expressEvents.length}/10)
+                      </Button>
+                    )}
                   </div>
-
-                  {formData.betCategory === 'Експрес' && (
-                    <Button
-                      type="button"
-                      onClick={addExpressEvent}
-                      disabled={expressEvents.length >= 10}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
-                    >
-                      <Plus className="h-5 w-5 mr-2" />
-                      Додати подію до експресу ({expressEvents.length}/10)
-                    </Button>
-                  )}
                 </div>
 
                 {/* Financial Details Section */}
@@ -1005,83 +1009,85 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <Separator />
                     
                     <div className="space-y-4">
-                      <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 pb-2 border-b-2 border-yellow-200">
-                        <DollarSign className="h-5 w-5 text-yellow-600" />
-                        Фінансові деталі
-                      </h3>
+                      <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
+                        <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
+                          <DollarSign className="h-5 w-5 text-yellow-600" />
+                          Фінансові деталі
+                        </h3>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <Label htmlFor="currency" className="text-gray-700 font-medium">Валюта</Label>
-                          <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
-                            <SelectTrigger className="rounded-xl mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="UAH">₴ UAH</SelectItem>
-                              <SelectItem value="USD">$ USD</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки <span className="text-red-500">*</span></Label>
-                          <Input
-                            id="stake"
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            value={formData.stake}
-                            onChange={(e) => setFormData({...formData, stake: e.target.value})}
-                            placeholder="100"
-                            required
-                            className="rounded-xl mt-1"
-                          />
-                        </div>
-                        
-                        {formData.currency === 'USD' && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
-                            <Label htmlFor="exchangeRate" className="text-gray-700 font-medium">Курс USD/UAH</Label>
+                            <Label htmlFor="currency" className="text-gray-700 font-medium">Валюта</Label>
+                            <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
+                              <SelectTrigger className="rounded-xl mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="UAH">₴ UAH</SelectItem>
+                                <SelectItem value="USD">$ USD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки <span className="text-red-500">*</span></Label>
                             <Input
-                              id="exchangeRate"
+                              id="stake"
                               type="number"
-                              step="0.01"
                               min="1"
-                              value={formData.exchangeRate}
-                              onChange={(e) => setFormData({...formData, exchangeRate: e.target.value})}
-                              placeholder="41.00"
+                              step="0.01"
+                              value={formData.stake}
+                              onChange={(e) => setFormData({...formData, stake: e.target.value})}
+                              placeholder="100"
                               required
                               className="rounded-xl mt-1"
                             />
                           </div>
-                        )}
-                        
-                        <div>
-                          <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%) <span className="text-red-500">*</span></Label>
-                          <Input
-                            id="confidence"
-                            type="number"
-                            min="1"
-                            max="100"
-                            value={formData.confidence}
-                            onChange={(e) => setFormData({...formData, confidence: e.target.value})}
-                            placeholder="70"
-                            required
-                            className="rounded-xl mt-1"
-                          />
-                        </div>
-                      </div>
-                      
-                      {formData.currency === 'USD' && formData.stake && formData.exchangeRate && (
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200">
-                          <div className="flex items-center justify-between">
-                            <span className="text-blue-700 font-semibold">Сума в UAH (для аналітики):</span>
-                            <span className="font-bold text-blue-900 text-xl">
-                              ₴{convertToUAH(parseFloat(formData.stake), formData.currency, parseFloat(formData.exchangeRate)).toFixed(2)}
-                            </span>
+                          
+                          {formData.currency === 'USD' && (
+                            <div>
+                              <Label htmlFor="exchangeRate" className="text-gray-700 font-medium">Курс USD/UAH</Label>
+                              <Input
+                                id="exchangeRate"
+                                type="number"
+                                step="0.01"
+                                min="1"
+                                value={formData.exchangeRate}
+                                onChange={(e) => setFormData({...formData, exchangeRate: e.target.value})}
+                                placeholder="41.00"
+                                required
+                                className="rounded-xl mt-1"
+                              />
+                            </div>
+                          )}
+                          
+                          <div>
+                            <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%) <span className="text-red-500">*</span></Label>
+                            <Input
+                              id="confidence"
+                              type="number"
+                              min="1"
+                              max="100"
+                              value={formData.confidence}
+                              onChange={(e) => setFormData({...formData, confidence: e.target.value})}
+                              placeholder="70"
+                              required
+                              className="rounded-xl mt-1"
+                            />
                           </div>
                         </div>
-                      )}
+                        
+                        {formData.currency === 'USD' && formData.stake && formData.exchangeRate && (
+                          <div className="p-4 bg-white rounded-2xl border-2 border-blue-300 mt-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-blue-700 font-semibold">Сума в UAH (для аналітики):</span>
+                              <span className="font-bold text-blue-900 text-xl">
+                                ₴{convertToUAH(parseFloat(formData.stake), formData.currency, parseFloat(formData.exchangeRate)).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </>
                 )}

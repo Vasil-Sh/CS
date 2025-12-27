@@ -264,11 +264,18 @@ export default function MyBets() {
     }
   };
 
-  // UPDATED: Sort bets - Pending first, then by date
+  // ОНОВЛЕНО: Sort bets - Pending first, then by createdAt timestamp (newest first)
   const sortedBets = [...recentBets].sort((a: Bet, b: Bet) => {
+    // Pending ставки завжди зверху
     if (a.result === 'Pending' && b.result !== 'Pending') return -1;
     if (a.result !== 'Pending' && b.result === 'Pending') return 1;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
+    
+    // Якщо обидві Pending або обидві не Pending, сортуємо за timestamp
+    const aTime = a.createdAt || new Date(a.date).getTime();
+    const bTime = b.createdAt || new Date(b.date).getTime();
+    
+    // Новіші ставки зверху (більший timestamp = новіша ставка)
+    return bTime - aTime;
   });
 
   const activeBets = recentBets.filter((bet: Bet) => bet.result === 'Pending');
@@ -497,7 +504,7 @@ export default function MyBets() {
         </Card>
       </div>
 
-      {/* Recent Bets Table - UPDATED with highlighted Pending bets */}
+      {/* Recent Bets Table - UPDATED with timestamp sorting */}
       <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
           <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">

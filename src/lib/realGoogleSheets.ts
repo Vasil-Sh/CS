@@ -17,11 +17,12 @@ export interface CS2BettingRecord {
   matchUrl?: string;
   riskyTeams?: string[];
   id?: string;
-  goalId?: string; // ДОДАНО: підтримка goalId
-  currency?: string; // ДОДАНО: підтримка валюти
-  originalAmount?: number; // ДОДАНО: оригінальна сума
-  exchangeRate?: number | null; // ДОДАНО: курс обміну
-  originalProfit?: number; // ДОДАНО: оригінальний прибуток
+  goalId?: string;
+  currency?: string;
+  originalAmount?: number;
+  exchangeRate?: number | null;
+  originalProfit?: number;
+  createdAt?: number; // ДОДАНО: timestamp для точного сортування
 }
 
 export type ActionMode = 'warning' | 'block';
@@ -237,7 +238,7 @@ class RealGoogleSheetsService {
     }
   }
 
-  // ДОДАНО: Get all records (синхронний метод для сумісності)
+  // Get all records (синхронний метод для сумісності)
   getAllRecords(): CS2BettingRecord[] {
     try {
       // Спочатку перевіряємо user-specific дані
@@ -264,7 +265,7 @@ class RealGoogleSheetsService {
     }
   }
 
-  // ВИПРАВЛЕНО: Add new record to your Google Sheets (would require write permissions)
+  // ОНОВЛЕНО: Add new record with timestamp
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
       console.log('📝 addRecord called with:', record);
@@ -272,7 +273,9 @@ class RealGoogleSheetsService {
       // For now, save to localStorage as we need write permissions for Google Sheets
       const existingData = this.getLocalStorageData('cs2_betting_records');
       
-      // ВИПРАВЛЕНО: Зберігаємо ВСІ поля, включаючи goalId, currency, originalAmount, exchangeRate
+      // ДОДАНО: timestamp для точного сортування
+      const timestamp = Date.now();
+      
       const newRecord: CS2BettingRecord = {
         date: record.date || new Date().toISOString().split('T')[0],
         match: record.match || '',
@@ -289,21 +292,21 @@ class RealGoogleSheetsService {
         format: record.format,
         tournament: record.tournament,
         matchUrl: record.matchUrl,
-        id: Date.now().toString(),
-        // КРИТИЧНО: Зберігаємо goalId та інші нові поля!
+        id: timestamp.toString(),
         goalId: record.goalId,
         currency: record.currency,
         originalAmount: record.originalAmount,
         exchangeRate: record.exchangeRate,
-        originalProfit: record.originalProfit
+        originalProfit: record.originalProfit,
+        createdAt: timestamp // ДОДАНО: зберігаємо точний час створення
       };
       
-      console.log('💾 Saving record with goalId:', newRecord.goalId);
+      console.log('💾 Saving record with timestamp:', newRecord.createdAt);
       
       existingData.push(newRecord);
       localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
       
-      // ДОДАНО: Також зберігаємо в user-specific ключ для синхронізації
+      // Також зберігаємо в user-specific ключ для синхронізації
       const currentUser = localStorage.getItem('currentUser') || '';
       if (currentUser) {
         const userKey = `user_${currentUser}_mybets_data`;
@@ -321,7 +324,7 @@ class RealGoogleSheetsService {
     }
   }
 
-  // ВИПРАВЛЕНО: Update bet result
+  // Update bet result
   async updateBetResult(bet: CS2BettingRecord, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
     try {
       const existingData = this.getLocalStorageData('cs2_betting_records');
@@ -335,13 +338,11 @@ class RealGoogleSheetsService {
       );
       
       if (betIndex !== -1) {
-        // ВИПРАВЛЕНО: Зберігаємо goalId при оновленні
         existingData[betIndex] = {
           ...existingData[betIndex],
           result,
           profit,
           roi,
-          // КРИТИЧНО: Зберігаємо goalId!
           goalId: existingData[betIndex].goalId
         };
         
