@@ -412,12 +412,7 @@ export default function BettingHistory() {
                           }`}
                         >
                           <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <div className={`p-2 rounded-lg ${isPending ? 'bg-amber-200' : 'bg-blue-100'}`}>
-                                <Calendar className={`h-4 w-4 ${isPending ? 'text-amber-700' : 'text-blue-600'}`} />
-                              </div>
-                              <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
-                            </div>
+                            <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
                           </td>
                           <td className="p-4">
                             <div className="space-y-2">

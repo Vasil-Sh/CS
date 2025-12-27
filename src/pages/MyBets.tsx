@@ -437,55 +437,36 @@ export default function MyBets() {
                           }`}
                         >
                           <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <div className={`p-2 rounded-lg ${isPending ? 'bg-amber-200' : 'bg-blue-100'}`}>
-                                <Calendar className={`h-4 w-4 ${isPending ? 'text-amber-700' : 'text-blue-600'}`} />
-                              </div>
-                              <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
-                            </div>
+                            <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
                           </td>
                           <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-xl ${
-                                isWin ? 'bg-green-100' : isLoss ? 'bg-red-100' : 'bg-amber-200'
+                            <div className="min-w-0">
+                              <div className={`font-bold text-base truncate ${isPending ? 'text-amber-900' : 'text-gray-900'}`} title={bet.match || `${bet.team1} vs ${bet.team2}`}>
+                                {bet.match || `${bet.team1} vs ${bet.team2}`}
+                              </div>
+                              {!isExpress && (
+                                <div className={`text-xs mt-1 truncate ${isPending ? 'text-amber-700' : 'text-gray-600'}`} title={bet.betType}>{bet.betType}</div>
+                              )}
+                              <Badge className={`text-xs rounded-full border-0 font-bold mt-1 ${
+                                isPending ? 'bg-amber-200 text-amber-800' : 'bg-purple-100 text-purple-700'
                               }`}>
-                                {isWin ? (
-                                  <Trophy className="h-5 w-5 text-green-600" />
-                                ) : isLoss ? (
-                                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                                ) : (
-                                  <Clock className="h-5 w-5 text-amber-700" />
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className={`font-bold text-base truncate ${isPending ? 'text-amber-900' : 'text-gray-900'}`} title={bet.match || `${bet.team1} vs ${bet.team2}`}>
-                                  {bet.match || `${bet.team1} vs ${bet.team2}`}
-                                </div>
-                                {!isExpress && (
-                                  <div className={`text-xs mt-1 truncate ${isPending ? 'text-amber-700' : 'text-gray-600'}`} title={bet.betType}>{bet.betType}</div>
-                                )}
-                                <Badge className={`text-xs rounded-full border-0 font-bold mt-1 ${
-                                  isPending ? 'bg-amber-200 text-amber-800' : 'bg-purple-100 text-purple-700'
-                                }`}>
-                                  {bet.format}
-                                </Badge>
-                              </div>
+                                {bet.format}
+                              </Badge>
                             </div>
                           </td>
                           <td className="p-4">
                             {isExpress ? (
-                              <div className="flex flex-col items-center gap-1.5">
-                                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-xs px-2.5 py-0.5 whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-2">
+                                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
                                   Express {expressEventCount}×
                                 </Badge>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleExpressDetailsClick(bet)}
-                                  className="rounded-lg border border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-medium text-purple-700 text-xs px-2 py-1 h-7"
+                                  className="rounded-lg border border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-medium text-purple-700 text-xs px-2.5 py-1 h-7"
                                 >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Деталі
+                                  Показати
                                 </Button>
                               </div>
                             ) : (
@@ -506,10 +487,7 @@ export default function MyBets() {
                             </Badge>
                           </td>
                           <td className="p-4 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <DollarSign className={`h-4 w-4 ${isPending ? 'text-amber-600' : 'text-green-600'}`} />
-                              <span className={`font-bold text-base ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{currencySymbol}{displayAmount}</span>
-                            </div>
+                            <span className={`font-bold text-base ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{currencySymbol}{displayAmount}</span>
                             {currency === 'USD' && bet.exchangeRate && (
                               <div className="text-xs text-gray-500 mt-1">
                                 ≈ ₴{(displayAmount * bet.exchangeRate).toFixed(2)}
