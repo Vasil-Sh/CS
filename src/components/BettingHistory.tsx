@@ -375,15 +375,15 @@ export default function BettingHistory() {
                         </div>
                       </th>
                       <th className="text-left p-4 w-48 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Тип</th>
-                      <th className="text-center p-4 w-24 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Валюта</th>
-                      <th className="text-center p-4 w-28 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Сума</th>
+                      <th className="text-left p-4 w-24 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Валюта</th>
+                      <th className="text-left p-4 w-28 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Сума</th>
                       <th className="text-left p-4 w-24 cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200" onClick={() => toggleSort('odds')}>
                         <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
                           Коеф.
                           <ArrowUpDown className="h-3 w-3" />
                         </div>
                       </th>
-                      <th className="text-center p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Ціль</th>
+                      <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Ціль</th>
                       <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Статус</th>
                       <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('profit')}>
                         <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -419,7 +419,7 @@ export default function BettingHistory() {
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             {isExpress ? (
-                              <div className="space-y-2">
+                              <div className="flex items-center gap-2">
                                 <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
                                   Express {bet.format}
                                 </Badge>
@@ -427,7 +427,7 @@ export default function BettingHistory() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleExpressDetailsClick(bet)}
-                                  className="w-full rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-2 py-1 h-7"
+                                  className="rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-2 py-1 h-7 whitespace-nowrap"
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
                                   Показати
@@ -439,12 +439,12 @@ export default function BettingHistory() {
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4 border-r border-gray-200 text-center">
+                          <td className="p-4 border-r border-gray-200">
                             <Badge className="rounded-full bg-cyan-100 text-cyan-700 border-0 font-bold text-sm px-3 py-1">
                               {bet.currency || 'UAH'}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-gray-200 text-center">
+                          <td className="p-4 border-r border-gray-200">
                             <span className="font-bold text-base text-gray-900">₴{bet.amount}</span>
                           </td>
                           <td className="p-4 border-r border-gray-200">
@@ -452,8 +452,8 @@ export default function BettingHistory() {
                               {bet.odds.toFixed(2)}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-gray-200 text-center">
-                            <span className="font-medium text-xs text-gray-600 truncate max-w-[120px] inline-block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                          <td className="p-4 border-r border-gray-200">
+                            <span className="font-medium text-xs text-gray-600 truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             <Badge 
