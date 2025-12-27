@@ -718,7 +718,7 @@ export default function Matches() {
           </CardContent>
         </Card>
 
-        {/* Matches Table */}
+        {/* Matches Table - Bordered Style with White Rows */}
         {sortedMatches.length > 0 ? (
           <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
@@ -731,13 +731,13 @@ export default function Matches() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Матч</th>
-                      <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Фаворит</th>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300">
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Матч</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Фаворит</th>
                       <th 
-                        className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200"
                         onClick={() => toggleSort('confidence')}
                       >
                         <div className="flex items-center justify-center gap-1">
@@ -746,7 +746,7 @@ export default function Matches() {
                         </div>
                       </th>
                       <th 
-                        className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200"
                         onClick={() => toggleSort('risk')}
                       >
                         <div className="flex items-center justify-center gap-1">
@@ -754,12 +754,12 @@ export default function Matches() {
                           <ArrowUpDown className="h-3.5 w-3.5" />
                         </div>
                       </th>
-                      <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Коефіцієнти</th>
-                      <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Win Rate</th>
-                      <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Form</th>
-                      <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Турнір</th>
-                      <th className="text-left p-4 text-xs font-black text-gray-700 uppercase tracking-wider">Коментар</th>
-                      <th className="text-center p-4 text-xs font-black text-gray-700 uppercase tracking-wider"></th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коефіцієнти</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Win Rate</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Form</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Турнір</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коментар</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -775,9 +775,9 @@ export default function Matches() {
                       return (
                         <tr 
                           key={match.id} 
-                          className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all"
+                          className="bg-white border-b border-gray-200 shadow-sm hover:shadow-md transition-all hover:bg-gray-50"
                         >
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             <div className="flex items-center gap-2">
                               <div>
                                 <div className="font-bold text-gray-900 text-base">
@@ -794,10 +794,10 @@ export default function Matches() {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             <div className="font-bold text-blue-700 text-sm">{match.favorite}</div>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="p-4 text-center border-r border-gray-200">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
@@ -829,20 +829,20 @@ export default function Matches() {
                               </TooltipContent>
                             </Tooltip>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="p-4 text-center border-r border-gray-200">
                             <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform" title="Клікніть для сортування">
                               <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-sm`} />
                               <span className="text-sm font-bold text-gray-900">{match.risk}%</span>
                             </div>
                             <div className="text-xs text-gray-600 mt-1 font-semibold">{riskInfo.label}</div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             <div className="text-sm space-y-1">
                               <div className="text-gray-700">{match.team1}: <span className="font-bold text-gray-900">{match.odds.team1}</span></div>
                               <div className="text-gray-700">{match.team2}: <span className="font-bold text-gray-900">{match.odds.team2}</span></div>
                             </div>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="p-4 text-center border-r border-gray-200">
                             <div className="flex items-center justify-center gap-1.5">
                               {match.winRate >= 70 ? (
                                 <TrendingUp className="h-4 w-4 text-green-600" />
@@ -852,17 +852,17 @@ export default function Matches() {
                               <span className="font-bold text-gray-900 text-sm">{match.winRate}%</span>
                             </div>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="p-4 text-center border-r border-gray-200">
                             <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3.5 py-1.5 rounded-full font-semibold text-sm shadow-sm`}>
                               {formInfo.icon}
                               {formInfo.label}
                             </Badge>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             <div className="text-sm text-gray-700 font-medium">{match.context}</div>
                             <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             {riskComments ? (
                               <div className="flex flex-col gap-2">
                                 <div 
