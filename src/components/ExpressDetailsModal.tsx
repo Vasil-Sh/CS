@@ -28,23 +28,23 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white to-gray-50">
-        {/* Header with gradient background */}
-        <DialogHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200 pb-6 -mx-6 -mt-6 px-6 pt-6 rounded-t-lg">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white">
+        {/* Header with better visibility */}
+        <DialogHeader className="bg-gray-100 border-b-2 border-gray-300 pb-6 -mx-6 -mt-6 px-6 pt-6 rounded-t-lg">
           <DialogTitle className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-lg">
+            <div className="p-3 bg-gray-900 rounded-2xl shadow-lg">
               <Zap className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-2xl font-bold text-gray-900">Експрес-ставка</span>
-                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-lg px-4 py-1.5 shadow-md">
+                <Badge className="rounded-full bg-gray-900 text-white border-0 font-bold text-lg px-4 py-1.5 shadow-md">
                   {parsedEvents.length}×
                 </Badge>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-semibold text-gray-600">Загальний коефіцієнт:</span>
-                <Badge className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 font-black text-2xl px-5 py-2 shadow-lg">
+                <Badge className="rounded-full bg-green-600 text-white border-0 font-black text-2xl px-5 py-2 shadow-lg">
                   {totalOdds.toFixed(2)}
                 </Badge>
               </div>
@@ -55,10 +55,10 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
 
         {/* Summary Stats */}
         <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="p-4 bg-white rounded-2xl border-2 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
+          <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Target className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-gray-200 rounded-xl">
+                <Target className="h-5 w-5 text-gray-700" />
               </div>
               <span className="text-sm font-bold text-gray-700">Сума ставки</span>
             </div>
@@ -67,10 +67,10 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             </p>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl border-2 border-green-200 shadow-md hover:shadow-lg transition-shadow">
+          <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-gray-200 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-gray-700" />
               </div>
               <span className="text-sm font-bold text-gray-700">Можливий виграш</span>
             </div>
@@ -79,10 +79,10 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             </p>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
+          <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 bg-amber-100 rounded-xl">
-                <Trophy className="h-5 w-5 text-amber-600" />
+              <div className="p-2 bg-gray-200 rounded-xl">
+                <Trophy className="h-5 w-5 text-gray-700" />
               </div>
               <span className="text-sm font-bold text-gray-700">Статус</span>
             </div>
@@ -100,13 +100,13 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
 
         {/* Events Section with prominent header */}
         <div className="mt-8">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-4 mb-4 shadow-md">
+          <div className="bg-gray-100 border-2 border-gray-300 rounded-2xl p-4 mb-4 shadow-md">
             <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-xl">
+              <div className="p-2 bg-gray-900 rounded-xl">
                 <Zap className="h-6 w-6 text-white" />
               </div>
               Події експресу
-              <Badge className="rounded-full bg-blue-600 text-white border-0 font-bold text-sm px-3 py-1">
+              <Badge className="rounded-full bg-gray-900 text-white border-0 font-bold text-sm px-3 py-1">
                 {parsedEvents.length} подій
               </Badge>
             </h3>
@@ -116,14 +116,14 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             {parsedEvents.map((event, idx) => (
               <div 
                 key={idx} 
-                className="group p-5 bg-white rounded-2xl border-2 border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-200"
+                className="group p-5 bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-200"
               >
                 {/* Event Number Badge */}
                 <div className="flex items-center justify-between mb-3">
-                  <Badge className="rounded-full bg-gradient-to-r from-gray-700 to-gray-900 text-white border-0 text-sm px-3 py-1 font-bold shadow-md">
+                  <Badge className="rounded-full bg-gray-900 text-white border-0 text-sm px-3 py-1 font-bold shadow-md">
                     Подія #{event.number}
                   </Badge>
-                  <Badge className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-base px-3 py-1 font-black shadow-md">
+                  <Badge className="rounded-full bg-green-600 text-white border-0 text-base px-3 py-1 font-black shadow-md">
                     @{parseFloat(event.odds).toFixed(2)}
                   </Badge>
                 </div>
@@ -140,7 +140,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                   <p className="text-gray-600 text-xs font-semibold mb-1.5 uppercase tracking-wide">
                     Тип ставки
                   </p>
-                  <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-sm px-3 py-1 font-bold">
+                  <Badge className="rounded-full bg-gray-200 text-gray-700 border-0 text-sm px-3 py-1 font-bold">
                     {event.betType}
                   </Badge>
                 </div>
@@ -150,7 +150,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                   <p className="text-gray-600 text-xs font-semibold mb-1.5 uppercase tracking-wide">
                     Вибір
                   </p>
-                  <p className="font-bold text-gray-900 text-sm break-words bg-purple-50 p-2 rounded-lg" title={event.selection}>
+                  <p className="font-bold text-gray-900 text-sm break-words bg-gray-100 p-2 rounded-lg" title={event.selection}>
                     {event.selection}
                   </p>
                 </div>
@@ -160,7 +160,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
         </div>
 
         {/* Footer Info */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 shadow-md">
+        <div className="mt-6 p-4 bg-gray-100 rounded-2xl border-2 border-gray-200 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
@@ -174,7 +174,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             {bet.goalId && (
               <div className="text-right">
                 <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Ціль</p>
-                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 text-base px-4 py-2 font-bold shadow-md">
+                <Badge className="rounded-full bg-gray-900 text-white border-0 text-base px-4 py-2 font-bold shadow-md">
                   {bet.goalId}
                 </Badge>
               </div>
