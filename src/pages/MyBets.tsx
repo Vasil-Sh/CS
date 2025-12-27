@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,11 @@ import InitialBankModal from '@/components/InitialBankModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
-import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3, Calendar, Trophy, AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, Flag, Wallet, Edit, ChevronDown, ChevronUp, Zap } from 'lucide-react';
+import { 
+  TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
+  AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
+  Flag, Wallet, Edit, ChevronDown, ChevronUp, Zap, LucideIcon
+} from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
 
@@ -30,51 +34,86 @@ interface ParsedEvent {
   odds: string;
 }
 
+interface BetStats {
+  totalBets: number;
+  winRate: number;
+  totalProfit: number;
+  averageROI: number;
+  profitByMonth: { month: string; profit: number }[];
+  profitByStrategy: { strategy: string; profit: number }[];
+}
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  colorClass: string;
+  bgClass: string;
+}
+
+const DEFAULT_STATS: BetStats = {
+  totalBets: 0,
+  winRate: 0,
+  totalProfit: 0,
+  averageROI: 0,
+  profitByMonth: [],
+  profitByStrategy: []
+};
+
+const StatCard = ({ title, value, icon: Icon, colorClass, bgClass }: StatCardProps) => (
+  <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+    <CardContent className="pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{title}</p>
+          <p className={`text-3xl font-semibold tracking-tight ${colorClass}`}>{value}</p>
+        </div>
+        <div className={`p-3 ${bgClass} rounded-2xl`}>
+          <Icon className={`h-7 w-7 ${colorClass}`} />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 export default function MyBets() {
   const currentUser = localStorage.getItem('currentUser') || '';
   
-  // NEW: Check and perform daily reset on component mount
+  const [stats, setStats] = useState<BetStats>(() => 
+    UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)
+  );
+  const [recentBets, setRecentBets] = useState<Bet[]>(() => 
+    UserDataService.getUserData(currentUser, 'mybets_data', [])
+  );
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+  const [expandedExpressBets, setExpandedExpressBets] = useState<Set<string>>(new Set());
+
+  const bankrollStats = useMemo(() => 
+    BankrollService.getBankrollStats(currentUser, recentBets),
+    [currentUser, recentBets]
+  );
+  
+  const isBankrollInitialized = useMemo(() => 
+    BankrollService.isInitialized(currentUser),
+    [currentUser]
+  );
+
+  // Daily reset check
   useEffect(() => {
     if (currentUser) {
       UserDataService.checkAndResetDailyBets(currentUser);
     }
   }, [currentUser]);
-  
-  const [stats, setStats] = useState(() => 
-    UserDataService.getUserData(currentUser, 'mybets_stats', {
-      totalBets: 0,
-      winRate: 0,
-      totalProfit: 0,
-      averageROI: 0,
-      profitByMonth: [] as { month: string; profit: number }[],
-      profitByStrategy: [] as { strategy: string; profit: number }[]
-    })
-  );
-  
-  const [loading, setLoading] = useState(true);
-  
-  const [recentBets, setRecentBets] = useState<Bet[]>(() => 
-    UserDataService.getUserData(currentUser, 'mybets_data', [])
-  );
 
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
-  const [bankModalOpen, setBankModalOpen] = useState(false);
-  
-  const [expandedExpressBets, setExpandedExpressBets] = useState<Set<string>>(new Set());
-
-  const [bankrollStats, setBankrollStats] = useState(() => 
-    BankrollService.getBankrollStats(currentUser, recentBets)
-  );
-  const [isBankrollInitialized, setIsBankrollInitialized] = useState(() => 
-    BankrollService.isInitialized(currentUser)
-  );
-
+  // Initial data load
   useEffect(() => {
     loadStats();
     loadRecentBets();
   }, []);
 
+  // Persist data to localStorage
   useEffect(() => {
     if (currentUser) {
       UserDataService.setUserData(currentUser, 'mybets_stats', stats);
@@ -82,219 +121,129 @@ export default function MyBets() {
     }
   }, [stats, recentBets, currentUser]);
 
-  useEffect(() => {
-    setBankrollStats(BankrollService.getBankrollStats(currentUser, recentBets));
-    setIsBankrollInitialized(BankrollService.isInitialized(currentUser));
-  }, [recentBets, currentUser]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
-      setLoading(true);
-      
       const data = await realGoogleSheetsService.getBettingStatistics();
-      
       if (data.totalBets > 0) {
         setStats(data);
       } else {
-        const savedStats = UserDataService.getUserData(currentUser, 'mybets_stats', {
-          totalBets: 0,
-          winRate: 0,
-          totalProfit: 0,
-          averageROI: 0,
-          profitByMonth: [],
-          profitByStrategy: []
-        });
-        setStats(savedStats);
+        setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
       }
     } catch (error) {
       console.error('Error loading stats:', error);
-      
-      const savedStats = UserDataService.getUserData(currentUser, 'mybets_stats', {
-        totalBets: 0,
-        winRate: 0,
-        totalProfit: 0,
-        averageROI: 0,
-        profitByMonth: [],
-        profitByStrategy: []
-      });
-      setStats(savedStats);
-    } finally {
-      setLoading(false);
+      setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
     }
-  };
+  }, [currentUser]);
 
-  const loadRecentBets = async () => {
+  const loadRecentBets = useCallback(async () => {
     try {
       const data = await realGoogleSheetsService.fetchUSDTData();
-      
-      if (data.length > 0) {
-        setRecentBets(data.slice(-20));
-      } else {
-        const savedBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
-        setRecentBets(savedBets);
-      }
+      setRecentBets(data.length > 0 ? data.slice(-20) : UserDataService.getUserData(currentUser, 'mybets_data', []));
     } catch (error) {
       console.error('Error loading recent bets:', error);
-      
-      const savedBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
-      setRecentBets(savedBets);
+      setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', []));
     }
-  };
+  }, [currentUser]);
 
-  const handleRecordAdded = () => {
+  const handleRecordAdded = useCallback(() => {
     loadStats();
     loadRecentBets();
-  };
+  }, [loadStats, loadRecentBets]);
 
-  const clearRecentBets = async () => {
+  const clearRecentBets = useCallback(async () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі ставки, статистику та історію. Ця дія незворотна.')) {
       try {
         await realGoogleSheetsService.clearAllData();
-        
         UserDataService.clearUserData(currentUser, 'mybets_data');
         UserDataService.clearUserData(currentUser, 'mybets_stats');
-        
         setRecentBets([]);
-        setStats({
-          totalBets: 0,
-          winRate: 0,
-          totalProfit: 0,
-          averageROI: 0,
-          profitByMonth: [],
-          profitByStrategy: []
-        });
-        
+        setStats(DEFAULT_STATS);
         toast.success('Всі дані очищено');
-        
         setTimeout(() => {
           loadStats();
           loadRecentBets();
         }, 100);
-        
       } catch (error) {
         toast.error('Помилка при очищенні даних');
         console.error(error);
       }
     }
-  };
+  }, [currentUser, loadStats, loadRecentBets]);
 
-  const updateBetResult = async (bet: Bet, result: 'Win' | 'Loss') => {
+  const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
     try {
-      console.log('🎯 updateBetResult called:', { bet, result });
-      
       const betAmount = bet.originalAmount || bet.amount;
-      
-      const originalProfit = result === 'Win' 
-        ? (bet.odds - 1) * betAmount
-        : -betAmount;
-      
-      console.log('💵 Original profit calculation:', {
-        betAmount,
-        odds: bet.odds,
-        result,
-        originalProfit,
-        currency: bet.currency
-      });
+      const originalProfit = result === 'Win' ? (bet.odds - 1) * betAmount : -betAmount;
       
       let profitInUAH = originalProfit;
       if (bet.currency === 'USD' && bet.exchangeRate) {
         profitInUAH = originalProfit * bet.exchangeRate;
-        console.log('💱 Converting USD to UAH:', {
-          originalProfit,
-          exchangeRate: bet.exchangeRate,
-          profitInUAH
-        });
       }
       
       const roi = (profitInUAH / bet.amount) * 100;
-
       await realGoogleSheetsService.updateBetResult(bet, result, profitInUAH, roi);
       
-      const updatedBets = recentBets.map((b: Bet) => {
-        if (b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds) {
-          const updatedBet = { 
-            ...b, 
-            result, 
-            profit: profitInUAH,
-            originalProfit: originalProfit,
-            roi,
-            goalId: b.goalId
-          };
-          
-          console.log('✅ Updated bet with goalId:', updatedBet);
-          return updatedBet;
-        }
-        return b;
-      });
+      const updatedBets = recentBets.map((b: Bet) => 
+        (b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds)
+          ? { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId }
+          : b
+      );
       
       setRecentBets(updatedBets);
       UserDataService.setUserData(currentUser, 'mybets_data', updatedBets);
-      
-      console.log('💾 Saved to localStorage:', {
-        totalBets: updatedBets.length,
-        updatedBet: updatedBets.find((b: Bet) => 
-          b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds
-        )
-      });
-      
       toast.success(`Ставка позначена як ${result === 'Win' ? 'виграшна' : 'програшна'}`);
       
       loadStats();
       loadRecentBets();
     } catch (error) {
       toast.error('Помилка при оновленні результату ставки');
-      console.error('❌ Error in updateBetResult:', error);
+      console.error('Error in updateBetResult:', error);
     }
-  };
+  }, [recentBets, currentUser, loadStats, loadRecentBets]);
 
-  const handleShareBet = (bet: Bet) => {
+  const handleShareBet = useCallback((bet: Bet) => {
     setSelectedBet(bet);
     setShareModalOpen(true);
-  };
+  }, []);
 
-  const handleBankCardClick = () => {
+  const handleBankCardClick = useCallback(() => {
     setBankModalOpen(true);
-  };
+  }, []);
 
-  const handleBankModalClose = (success: boolean) => {
+  const handleBankModalClose = useCallback((success: boolean) => {
     setBankModalOpen(false);
-    if (success) {
-      setBankrollStats(BankrollService.getBankrollStats(currentUser, recentBets));
-      setIsBankrollInitialized(BankrollService.isInitialized(currentUser));
-    }
-  };
+  }, []);
 
-  // ОНОВЛЕНО: Sort bets - Pending first, then by createdAt timestamp (newest first)
-  const sortedBets = [...recentBets].sort((a: Bet, b: Bet) => {
-    // Pending ставки завжди зверху
-    if (a.result === 'Pending' && b.result !== 'Pending') return -1;
-    if (a.result !== 'Pending' && b.result === 'Pending') return 1;
-    
-    // Якщо обидві Pending або обидві не Pending, сортуємо за timestamp
-    const aTime = a.createdAt || new Date(a.date).getTime();
-    const bTime = b.createdAt || new Date(b.date).getTime();
-    
-    // Новіші ставки зверху (більший timestamp = новіша ставка)
-    return bTime - aTime;
-  });
+  const sortedBets = useMemo(() => 
+    [...recentBets].sort((a: Bet, b: Bet) => {
+      if (a.result === 'Pending' && b.result !== 'Pending') return -1;
+      if (a.result !== 'Pending' && b.result === 'Pending') return 1;
+      const aTime = a.createdAt || new Date(a.date).getTime();
+      const bTime = b.createdAt || new Date(b.date).getTime();
+      return bTime - aTime;
+    }),
+    [recentBets]
+  );
 
-  const activeBets = recentBets.filter((bet: Bet) => bet.result === 'Pending');
-  const winningBets = recentBets.filter((bet: Bet) => bet.result === 'Win');
-  const losingBets = recentBets.filter((bet: Bet) => bet.result === 'Loss');
+  const { activeBets, winningBets, losingBets } = useMemo(() => ({
+    activeBets: recentBets.filter((bet: Bet) => bet.result === 'Pending'),
+    winningBets: recentBets.filter((bet: Bet) => bet.result === 'Win'),
+    losingBets: recentBets.filter((bet: Bet) => bet.result === 'Loss')
+  }), [recentBets]);
 
-  const getCurrencySymbol = (currency?: string) => {
-    if (currency === 'USD') return '$';
-    return '₴';
-  };
+  const getCurrencySymbol = useCallback((currency?: string) => 
+    currency === 'USD' ? '$' : '₴',
+    []
+  );
 
-  const getGoalName = (goalId?: string) => {
+  const getGoalName = useCallback((goalId?: string) => {
     if (!goalId) return null;
     const goals = UserDataService.getUserData(currentUser, 'goals', []);
     const goal = goals.find((g: Goal) => g.id === goalId);
     return goal?.name || 'Видалена ціль';
-  };
+  }, [currentUser]);
 
-  const parseExpressEvents = (betType: string): ParsedEvent[] => {
+  const parseExpressEvents = useCallback((betType: string): ParsedEvent[] => {
     if (!betType.includes('|')) return [];
     
     const fullString = betType.split('|').slice(1).join('|').trim();
@@ -321,18 +270,19 @@ export default function MyBets() {
       
       return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
     });
-  };
+  }, []);
 
-  const isExpressBet = (bet: Bet) => {
-    return bet.betType.includes('Експрес') || bet.format.includes('x');
-  };
+  const isExpressBet = useCallback((bet: Bet) => 
+    bet.betType.includes('Експрес') || bet.format.includes('x'),
+    []
+  );
 
-  const getExpressEventCount = (bet: Bet) => {
+  const getExpressEventCount = useCallback((bet: Bet) => {
     const match = bet.format.match(/(\d+)x/);
     return match ? parseInt(match[1]) : 0;
-  };
+  }, []);
 
-  const toggleExpressBet = (betKey: string) => {
+  const toggleExpressBet = useCallback((betKey: string) => {
     setExpandedExpressBets(prev => {
       const newSet = new Set(prev);
       if (newSet.has(betKey)) {
@@ -342,7 +292,7 @@ export default function MyBets() {
       }
       return newSet;
     });
-  };
+  }, []);
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -353,21 +303,18 @@ export default function MyBets() {
           <p className="text-gray-500 mt-1 font-medium">Управління ставками та аналіз результатів</p>
         </div>
         
-        <div className="flex gap-3">
-          <Button 
-            onClick={clearRecentBets} 
-            variant="outline"
-            className="rounded-2xl border-red-200 text-red-600 hover:bg-red-50 font-medium"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Очистити всі дані
-          </Button>
-        </div>
+        <Button 
+          onClick={clearRecentBets} 
+          variant="outline"
+          className="rounded-2xl border-red-200 text-red-600 hover:bg-red-50 font-medium"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Очистити всі дані
+        </Button>
       </div>
 
-      {/* Quick Stats - Поточний банк ПЕРШИЙ */}
+      {/* Primary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* 1. Поточний банк - ПЕРША КАРТКА */}
         <Card 
           className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 relative group"
           onClick={handleBankCardClick}
@@ -395,116 +342,32 @@ export default function MyBets() {
           </CardContent>
         </Card>
 
-        {/* 2. Всього ставок */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
-                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets}</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <BarChart3 className="h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* 3. Профіт */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт</p>
-                <p className={`text-3xl font-semibold tracking-tight ${stats.totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
-                  {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit} ₴
-                </p>
-              </div>
-              <div className="p-3 bg-orange-50 rounded-2xl">
-                <DollarSign className="h-7 w-7 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 4. Win Rate */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
-                <p className="text-3xl font-semibold text-green-600 tracking-tight">{stats.winRate}%</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-2xl">
-                <Target className="h-7 w-7 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard title="Всього ставок" value={stats.totalBets} icon={BarChart3} colorClass="text-gray-900" bgClass="bg-blue-50" />
+        <StatCard 
+          title="Профіт" 
+          value={`${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit} ₴`} 
+          icon={DollarSign} 
+          colorClass={stats.totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'} 
+          bgClass="bg-orange-50" 
+        />
+        <StatCard title="Win Rate" value={`${stats.winRate}%`} icon={Target} colorClass="text-green-600" bgClass="bg-green-50" />
       </div>
 
-      {/* Bankroll & Quick Stats Row */}
+      {/* Secondary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Активні</p>
-                <p className="text-3xl font-semibold text-blue-600 tracking-tight">{activeBets.length}</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <Clock className="h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Виграші</p>
-                <p className="text-3xl font-semibold text-green-600 tracking-tight">{winningBets.length}</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-2xl">
-                <Trophy className="h-7 w-7 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Програші</p>
-                <p className="text-3xl font-semibold text-red-600 tracking-tight">{losingBets.length}</p>
-              </div>
-              <div className="p-3 bg-red-50 rounded-2xl">
-                <AlertTriangle className="h-7 w-7 text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Середній ROI</p>
-                <p className={`text-3xl font-semibold tracking-tight ${stats.averageROI >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
-                  {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
-                </p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-2xl">
-                <TrendingUp className="h-7 w-7 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard title="Активні" value={activeBets.length} icon={Clock} colorClass="text-blue-600" bgClass="bg-blue-50" />
+        <StatCard title="Виграші" value={winningBets.length} icon={Trophy} colorClass="text-green-600" bgClass="bg-green-50" />
+        <StatCard title="Програші" value={losingBets.length} icon={AlertTriangle} colorClass="text-red-600" bgClass="bg-red-50" />
+        <StatCard 
+          title="Середній ROI" 
+          value={`${stats.averageROI >= 0 ? '+' : ''}${stats.averageROI}%`} 
+          icon={TrendingUp} 
+          colorClass={stats.averageROI >= 0 ? 'text-purple-600' : 'text-red-600'} 
+          bgClass="bg-purple-50" 
+        />
       </div>
 
-      {/* Recent Bets Table - UPDATED with timestamp sorting */}
+      {/* Recent Bets Table */}
       <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
           <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
@@ -552,7 +415,7 @@ export default function MyBets() {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedBets.map((bet: Bet, index) => {
+                    {sortedBets.map((bet: Bet) => {
                       const isPending = bet.result === 'Pending';
                       const isWin = bet.result === 'Win';
                       const isLoss = bet.result === 'Loss';
@@ -752,7 +615,6 @@ export default function MyBets() {
                             </td>
                           </tr>
                           
-                          {/* Express Bet Details - Show immediately after the bet row */}
                           {isExpanded && parsedEvents.length > 0 && (
                             <tr key={`${betKey}-details`}>
                               <td colSpan={10} className="p-0">
