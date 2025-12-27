@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
-import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, ChevronDown, Eye, Zap, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BetData {
@@ -18,6 +17,7 @@ interface BetData {
   amount?: number;
   result?: string;
   profit?: number;
+  date?: string;
 }
 
 interface StrategyStats {
@@ -29,7 +29,58 @@ interface StrategyStats {
   totalStake: number;
   winRate: number;
   roi: number;
+  profitHistory?: number[];
 }
+
+interface StrategyTemplate {
+  name: string;
+  description: string;
+  riskLevel: 'Low' | 'Medium' | 'High';
+  expectedROI: number;
+  criteria: string[];
+}
+
+const STRATEGY_TEMPLATES: StrategyTemplate[] = [
+  {
+    name: 'Консервативна стратегія',
+    description: 'Безпечний підхід з низьким ризиком. Підходить для стабільного зростання банку.',
+    riskLevel: 'Low',
+    expectedROI: 8,
+    criteria: [
+      'Мінімальний коефіцієнт 1.3',
+      'Максимальний коефіцієнт 1.8',
+      'Формат тільки BO3',
+      'Тільки ординари',
+      'Аналіз останніх 10 матчів команд'
+    ]
+  },
+  {
+    name: 'Збалансована стратегія',
+    description: 'Оптимальне співвідношення ризику та прибутку. Універсальний підхід.',
+    riskLevel: 'Medium',
+    expectedROI: 15,
+    criteria: [
+      'Мінімальний коефіцієнт 1.5',
+      'Максимальний коефіцієнт 2.5',
+      'Формат BO1 та BO3',
+      'Експреси та ординари',
+      'Розмір ставки 2-3% від банку'
+    ]
+  },
+  {
+    name: 'Агресивна стратегія',
+    description: 'Високий ризик, високий прибуток. Для досвідчених гравців.',
+    riskLevel: 'High',
+    expectedROI: 25,
+    criteria: [
+      'Мінімальний коефіцієнт 2.0',
+      'Тільки експреси',
+      'Формат BO1 та BO3',
+      'Розмір ставки 5% від банку',
+      'Фокус на андердогах'
+    ]
+  }
+];
 
 export default function StrategyOverview() {
   const [strategies, setStrategies] = useState<CS2Strategy[]>([]);
@@ -39,6 +90,15 @@ export default function StrategyOverview() {
   const [primaryStrategy, setPrimaryStrategy] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [strategyToDelete, setStrategyToDelete] = useState<string | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedStrategy, setSelectedStrategy] = useState<CS2Strategy | null>(null);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+
+  // Filters and sorting
+  const [searchQuery, setSearchQuery] = useState('');
+  const [riskFilter, setRiskFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'roi' | 'profit' | 'name'>('roi');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const [newStrategy, setNewStrategy] = useState({
     name: '',
@@ -57,13 +117,11 @@ export default function StrategyOverview() {
       setLoading(true);
       const betsData = await realGoogleSheetsService.fetchUSDTData();
       
-      // Load ONLY custom strategies from localStorage (no mock data)
       const customStrategies = loadCustomStrategiesFromStorage();
       setStrategies(customStrategies);
       setBettingData(betsData);
       calculateStrategyStats(betsData);
       
-      // Load primary strategy from localStorage
       const saved = localStorage.getItem('primaryStrategy');
       if (saved) {
         setPrimaryStrategy(saved);
@@ -109,7 +167,8 @@ export default function StrategyOverview() {
           totalProfit: 0,
           totalStake: 0,
           winRate: 0,
-          roi: 0
+          roi: 0,
+          profitHistory: []
         };
       }
       
@@ -125,6 +184,8 @@ export default function StrategyOverview() {
       } else {
         stats[strategy].pending++;
       }
+      
+      stats[strategy].profitHistory?.push(stats[strategy].totalProfit);
     });
     
     Object.keys(stats).forEach(strategy => {
@@ -191,19 +252,16 @@ export default function StrategyOverview() {
     criteria.forEach(criterion => {
       const lowerCriterion = criterion.toLowerCase();
       
-      // Parse min odds
       const minOddsMatch = lowerCriterion.match(/(?:мін|мінімальний|minimum|min).*?коеф.*?(\d+\.?\d*)/i);
       if (minOddsMatch) {
         result.minOdds = parseFloat(minOddsMatch[1]);
       }
       
-      // Parse max odds
       const maxOddsMatch = lowerCriterion.match(/(?:макс|максимальний|maximum|max).*?коеф.*?(\d+\.?\d*)/i);
       if (maxOddsMatch) {
         result.maxOdds = parseFloat(maxOddsMatch[1]);
       }
       
-      // Parse allowed formats
       const formatMatch = lowerCriterion.match(/формат.*?(bo[135](?:,?\s*(?:та|і|and|,)\s*bo[135])*)/i);
       if (formatMatch) {
         const formats = formatMatch[1].toUpperCase().match(/BO[135]/g);
@@ -212,7 +270,6 @@ export default function StrategyOverview() {
         }
       }
       
-      // Parse bet types
       if (lowerCriterion.includes('тільки експрес') || lowerCriterion.includes('только экспресс')) {
         result.allowedBetTypes = ['Експрес'];
       } else if (lowerCriterion.includes('тільки ординар') || lowerCriterion.includes('только ординар')) {
@@ -221,7 +278,6 @@ export default function StrategyOverview() {
         result.allowedBetTypes = ['Система'];
       } else if (lowerCriterion.match(/експрес.*(?:та|і|and).*(?:система|ординар)/i) || 
                  lowerCriterion.match(/(?:система|ординар).*(?:та|і|and).*експрес/i)) {
-        // Parse multiple bet types
         const betTypes: string[] = [];
         if (lowerCriterion.includes('експрес') || lowerCriterion.includes('экспресс')) betTypes.push('Експрес');
         if (lowerCriterion.includes('ординар')) betTypes.push('Ординар');
@@ -245,7 +301,6 @@ export default function StrategyOverview() {
       return;
     }
 
-    // Parse criteria to extract validation rules
     const validationRules = parseCriteriaForValidation(validCriteria);
 
     const strategy: CS2Strategy = {
@@ -274,6 +329,18 @@ export default function StrategyOverview() {
     toast.success('Стратегія успішно додана!');
   };
 
+  const applyTemplate = (template: StrategyTemplate) => {
+    setNewStrategy({
+      name: template.name,
+      description: template.description,
+      criteria: [...template.criteria],
+      riskLevel: template.riskLevel,
+      expectedROI: template.expectedROI
+    });
+    setTemplateDialogOpen(false);
+    toast.success(`Шаблон "${template.name}" застосовано!`);
+  };
+
   const confirmDeleteStrategy = (strategyName: string) => {
     setStrategyToDelete(strategyName);
     setDeleteDialogOpen(true);
@@ -288,7 +355,6 @@ export default function StrategyOverview() {
 
     setStrategies(updatedStrategies);
     
-    // If deleted strategy was primary, clear it
     if (primaryStrategy === strategyToDelete) {
       setPrimaryStrategy(null);
       localStorage.removeItem('primaryStrategy');
@@ -301,17 +367,149 @@ export default function StrategyOverview() {
 
   const togglePrimaryStrategy = (strategyName: string) => {
     if (primaryStrategy === strategyName) {
-      // Unset as primary
       setPrimaryStrategy(null);
       localStorage.removeItem('primaryStrategy');
       toast.success('Основну стратегію скасовано');
     } else {
-      // Set as primary
       setPrimaryStrategy(strategyName);
       localStorage.setItem('primaryStrategy', strategyName);
       toast.success(`"${strategyName}" встановлено як основну стратегію!`);
     }
   };
+
+  const openDetailsDialog = (strategy: CS2Strategy) => {
+    setSelectedStrategy(strategy);
+    setDetailsDialogOpen(true);
+  };
+
+  const renderSparkline = (profitHistory?: number[]) => {
+    if (!profitHistory || profitHistory.length < 2) {
+      return <div className="h-8 flex items-center justify-center text-xs text-gray-400">Немає даних</div>;
+    }
+
+    const max = Math.max(...profitHistory);
+    const min = Math.min(...profitHistory);
+    const range = max - min || 1;
+
+    const points = profitHistory.map((value, index) => {
+      const x = (index / (profitHistory.length - 1)) * 100;
+      const y = 100 - ((value - min) / range) * 100;
+      return `${x},${y}`;
+    }).join(' ');
+
+    const lastValue = profitHistory[profitHistory.length - 1];
+    const prevValue = profitHistory[profitHistory.length - 2];
+    const trend = lastValue > prevValue ? 'up' : lastValue < prevValue ? 'down' : 'neutral';
+
+    return (
+      <div className="relative h-8">
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <polyline
+            points={points}
+            fill="none"
+            stroke={trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#6b7280'}
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
+    );
+  };
+
+  const getTrendIndicator = (stats: StrategyStats) => {
+    if (!stats.profitHistory || stats.profitHistory.length < 2) return null;
+    
+    const lastValue = stats.profitHistory[stats.profitHistory.length - 1];
+    const prevValue = stats.profitHistory[stats.profitHistory.length - 2];
+    const change = ((lastValue - prevValue) / Math.abs(prevValue)) * 100;
+
+    if (Math.abs(change) < 1) return null;
+
+    return (
+      <div className={`flex items-center gap-1 text-xs font-medium ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+        {change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+        {change > 0 ? '+' : ''}{change.toFixed(1)}%
+      </div>
+    );
+  };
+
+  const generateDynamicRecommendations = () => {
+    const recommendations: { type: 'info' | 'warning' | 'success'; message: string }[] = [];
+
+    Object.entries(strategyStats).forEach(([name, stats]) => {
+      if (stats.roi < -5 && stats.totalBets > 5) {
+        recommendations.push({
+          type: 'warning',
+          message: `Стратегія "${name}" має ROI ${stats.roi.toFixed(1)}%. Розгляньте можливість перегляду критеріїв.`
+        });
+      }
+
+      if (stats.roi > 10 && stats.totalBets > 10) {
+        recommendations.push({
+          type: 'success',
+          message: `Стратегія "${name}" показує відмінні результати (ROI ${stats.roi.toFixed(1)}%). Продовжуйте використовувати!`
+        });
+      }
+
+      if (stats.winRate < 40 && stats.totalBets > 5) {
+        recommendations.push({
+          type: 'warning',
+          message: `Win Rate стратегії "${name}" становить ${stats.winRate.toFixed(1)}%. Можливо, варто знизити ризик.`
+        });
+      }
+    });
+
+    if (primaryStrategy) {
+      const primaryStats = strategyStats[primaryStrategy];
+      if (primaryStats && primaryStats.totalBets === 0) {
+        recommendations.push({
+          type: 'info',
+          message: `Ви встановили "${primaryStrategy}" як основну, але ще не використовували її. Спробуйте зробити першу ставку!`
+        });
+      }
+    }
+
+    if (recommendations.length === 0) {
+      recommendations.push(
+        {
+          type: 'info',
+          message: 'Використовуйте стратегії з ROI більше 5% для стабільного зростання'
+        },
+        {
+          type: 'warning',
+          message: 'Уникайте ризикованих команд при використанні консервативних стратегій'
+        },
+        {
+          type: 'success',
+          message: 'Ведіть детальну статистику для покращення стратегій'
+        }
+      );
+    }
+
+    return recommendations.slice(0, 3);
+  };
+
+  const filteredAndSortedStrategies = strategies
+    .filter(strategy => {
+      const matchesSearch = strategy.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesRisk = riskFilter === 'all' || strategy.riskLevel === riskFilter;
+      return matchesSearch && matchesRisk;
+    })
+    .sort((a, b) => {
+      const statsA = strategyStats[a.name];
+      const statsB = strategyStats[b.name];
+
+      let comparison = 0;
+      if (sortBy === 'roi') {
+        comparison = (statsA?.roi || 0) - (statsB?.roi || 0);
+      } else if (sortBy === 'profit') {
+        comparison = (statsA?.totalProfit || 0) - (statsB?.totalProfit || 0);
+      } else {
+        comparison = a.name.localeCompare(b.name);
+      }
+
+      return sortOrder === 'desc' ? -comparison : comparison;
+    });
 
   if (loading) {
     return (
@@ -356,134 +554,145 @@ export default function StrategyOverview() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {strategies.map((strategy, index) => {
-                const stats = strategyStats[strategy.name] || {};
-                const isPrimary = primaryStrategy === strategy.name;
-                
-                return (
-                  <Card key={index} className={`border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden ${isPrimary ? 'ring-2 ring-blue-500' : ''}`}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
-                        <span className="flex items-center gap-2">
-                          {getRiskIcon(strategy.riskLevel)}
-                          {strategy.name}
-                          {isPrimary && (
-                            <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full ml-2">
-                              <Star className="h-3 w-3 mr-1 fill-blue-700" />
-                              Основна
-                            </Badge>
-                          )}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getRiskColor(strategy.riskLevel)}>
-                            {strategy.riskLevel} Risk
-                          </Badge>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
+            <>
+              {/* Filters and Search */}
+              <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Пошук стратегій..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 rounded-xl"
+                      />
+                    </div>
                     
-                    <CardContent className="space-y-4">
-                      <p className="text-gray-600">{strategy.description}</p>
-                      
-                      {(strategy.maxOdds || strategy.minOdds || strategy.allowedFormats || strategy.allowedBetTypes) && (
-                        <div className="p-3 bg-blue-50 rounded-2xl space-y-2">
-                          <p className="text-xs font-semibold text-blue-900 uppercase">Обмеження стратегії:</p>
-                          {strategy.minOdds && (
-                            <div className="text-xs text-blue-700">
-                              • Мінімальний коефіцієнт: <span className="font-bold">{strategy.minOdds}</span>
-                            </div>
-                          )}
-                          {strategy.maxOdds && (
-                            <div className="text-xs text-blue-700">
-                              • Максимальний коефіцієнт: <span className="font-bold">{strategy.maxOdds}</span>
-                            </div>
-                          )}
-                          {strategy.allowedFormats && strategy.allowedFormats.length > 0 && (
-                            <div className="text-xs text-blue-700">
-                              • Дозволені формати: <span className="font-bold">{strategy.allowedFormats.join(', ')}</span>
-                            </div>
-                          )}
-                          {strategy.allowedBetTypes && strategy.allowedBetTypes.length > 0 && (
-                            <div className="text-xs text-blue-700">
-                              • Дозволені типи ставок: <span className="font-bold">{strategy.allowedBetTypes.join(', ')}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {stats.totalBets > 0 && (
-                        <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-2xl">
-                          <div className="text-center">
-                            <div className="text-lg font-semibold text-gray-900">{stats.totalBets}</div>
-                            <div className="text-xs text-gray-600 font-medium">Всього ставок</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`text-lg font-semibold ${stats.winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
-                              {stats.winRate.toFixed(1)}%
-                            </div>
-                            <div className="text-xs text-gray-600 font-medium">Win Rate</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`text-lg font-semibold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(0)} ₴
-                            </div>
-                            <div className="text-xs text-gray-600 font-medium">Прибуток</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`text-lg font-semibold ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
-                            </div>
-                            <div className="text-xs text-gray-600 font-medium">ROI</div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Очікуваний ROI</span>
-                          <span className="text-sm text-green-600 font-medium">+{strategy.expectedROI}%</span>
-                        </div>
-                        <Progress value={Math.min(strategy.expectedROI, 100)} className="h-2" />
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
-                          <Lightbulb className="h-4 w-4" />
-                          Критерії стратегії:
-                        </h4>
-                        <ul className="space-y-1">
-                          {strategy.criteria.map((criterion, idx) => (
-                            <li key={idx} className="text-sm text-gray-600 flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                              {criterion}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                    <Select value={riskFilter} onValueChange={setRiskFilter}>
+                      <SelectTrigger className="w-full md:w-48 rounded-xl">
+                        <Filter className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Фільтр за ризиком" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Всі рівні ризику</SelectItem>
+                        <SelectItem value="Low">Низький ризик</SelectItem>
+                        <SelectItem value="Medium">Середній ризик</SelectItem>
+                        <SelectItem value="High">Високий ризик</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          onClick={() => togglePrimaryStrategy(strategy.name)}
-                          variant="outline"
-                          className={`flex-1 rounded-xl ${isPrimary ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}
-                        >
-                          <Star className={`h-4 w-4 mr-2 ${isPrimary ? 'fill-blue-700' : ''}`} />
-                          {isPrimary ? 'Основна' : 'Зробити основною'}
-                        </Button>
-                        <Button
-                          onClick={() => confirmDeleteStrategy(strategy.name)}
-                          variant="outline"
-                          className="rounded-xl border-red-200 text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                    <Select value={sortBy} onValueChange={(value: 'roi' | 'profit' | 'name') => setSortBy(value)}>
+                      <SelectTrigger className="w-full md:w-48 rounded-xl">
+                        <ArrowUpDown className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Сортування" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="roi">За ROI</SelectItem>
+                        <SelectItem value="profit">За прибутком</SelectItem>
+                        <SelectItem value="name">За назвою</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="rounded-xl"
+                    >
+                      {sortOrder === 'desc' ? '↓' : '↑'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Strategy Cards - Simplified */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredAndSortedStrategies.map((strategy, index) => {
+                  const stats = strategyStats[strategy.name] || {};
+                  const isPrimary = primaryStrategy === strategy.name;
+                  
+                  return (
+                    <Card key={index} className={`border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden hover:shadow-xl transition-all ${isPrimary ? 'ring-2 ring-blue-500' : ''}`}>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center justify-between text-base font-semibold text-gray-900">
+                          <span className="flex items-center gap-2">
+                            {getRiskIcon(strategy.riskLevel)}
+                            <span className="truncate max-w-[150px]" title={strategy.name}>{strategy.name}</span>
+                            {isPrimary && (
+                              <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full text-xs px-2 py-0.5">
+                                <Star className="h-2.5 w-2.5 mr-0.5 fill-blue-700" />
+                                Основна
+                              </Badge>
+                            )}
+                          </span>
+                          <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2 py-0.5'}>
+                            {strategy.riskLevel}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-4">
+                        {/* Main Stats */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
+                            <div className={`text-2xl font-bold ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {stats.roi >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
+                            </div>
+                            <div className="text-xs text-gray-600 font-medium mt-1">ROI</div>
+                            {getTrendIndicator(stats)}
+                          </div>
+                          <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
+                            <div className={`text-2xl font-bold ${stats.winRate >= 50 ? 'text-blue-600' : 'text-gray-600'}`}>
+                              {stats.winRate?.toFixed(0) || 0}%
+                            </div>
+                            <div className="text-xs text-gray-600 font-medium mt-1">Win Rate</div>
+                            <div className="text-xs text-gray-500 mt-1">{stats.totalBets || 0} ставок</div>
+                          </div>
+                        </div>
+
+                        {/* Sparkline */}
+                        {stats.totalBets > 0 && (
+                          <div className="p-3 bg-gray-50 rounded-2xl">
+                            <div className="text-xs text-gray-600 font-medium mb-2">Тренд прибутку</div>
+                            {renderSparkline(stats.profitHistory)}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => openDetailsDialog(strategy)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 rounded-xl border-gray-200 hover:bg-gray-50"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Деталі
+                          </Button>
+                          <Button
+                            onClick={() => togglePrimaryStrategy(strategy.name)}
+                            variant="outline"
+                            size="sm"
+                            className={`rounded-xl ${isPrimary ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100' : 'border-gray-200 hover:bg-gray-50'}`}
+                          >
+                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-blue-700' : ''}`} />
+                          </Button>
+                          <Button
+                            onClick={() => confirmDeleteStrategy(strategy.name)}
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl border-red-200 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
           )}
         </TabsContent>
 
@@ -509,7 +718,10 @@ export default function StrategyOverview() {
                   {Object.keys(strategyStats).length > 0 && (
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Найкраща стратегія:</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-green-600 truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
+                        (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
+                        Object.keys(strategyStats)[0] || 'Немає'
+                      )}>
                         {Object.keys(strategyStats).reduce((best, current) => 
                           (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
                           Object.keys(strategyStats)[0] || 'Немає'
@@ -520,9 +732,9 @@ export default function StrategyOverview() {
                   {primaryStrategy && (
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Основна стратегія:</span>
-                      <span className="font-medium text-blue-600 flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-blue-600" />
-                        {primaryStrategy}
+                      <span className="font-medium text-blue-600 flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
+                        <Star className="h-3 w-3 fill-blue-600 flex-shrink-0" />
+                        <span className="truncate">{primaryStrategy}</span>
                       </span>
                     </div>
                   )}
@@ -545,14 +757,14 @@ export default function StrategyOverview() {
                       .slice(0, 5)
                       .map(([name, stats]: [string, StrategyStats], index) => (
                         <div key={name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
-                            <span className="text-sm truncate text-gray-900 flex items-center gap-1">
-                              {name}
-                              {primaryStrategy === name && <Star className="h-3 w-3 fill-blue-600 text-blue-600" />}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-sm font-medium text-gray-600 flex-shrink-0">#{index + 1}</span>
+                            <span className="text-sm truncate text-gray-900 flex items-center gap-1" title={name}>
+                              <span className="truncate">{name}</span>
+                              {primaryStrategy === name && <Star className="h-3 w-3 fill-blue-600 text-blue-600 flex-shrink-0" />}
                             </span>
                           </div>
-                          <span className={`text-sm font-medium ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`text-sm font-medium flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
                           </span>
                         </div>
@@ -573,18 +785,30 @@ export default function StrategyOverview() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 text-sm">
-                  <div className="p-3 bg-blue-50 rounded-2xl">
-                    <div className="font-medium text-blue-800">💡 Порада</div>
-                    <div className="text-blue-700">Використовуйте стратегії з ROI більше 5% для стабільного зростання</div>
-                  </div>
-                  <div className="p-3 bg-yellow-50 rounded-2xl">
-                    <div className="font-medium text-yellow-800">⚠️ Увага</div>
-                    <div className="text-yellow-700">Уникайте ризикованих команд при використанні консервативних стратегій</div>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-2xl">
-                    <div className="font-medium text-green-800">✅ Успіх</div>
-                    <div className="text-green-700">Ведіть детальну статистику для покращення стратегій</div>
-                  </div>
+                  {generateDynamicRecommendations().map((rec, index) => (
+                    <div key={index} className={`p-3 rounded-2xl ${
+                      rec.type === 'info' ? 'bg-blue-50' :
+                      rec.type === 'warning' ? 'bg-yellow-50' :
+                      'bg-green-50'
+                    }`}>
+                      <div className={`font-medium ${
+                        rec.type === 'info' ? 'text-blue-800' :
+                        rec.type === 'warning' ? 'text-yellow-800' :
+                        'text-green-800'
+                      }`}>
+                        {rec.type === 'info' ? '💡 Порада' :
+                         rec.type === 'warning' ? '⚠️ Увага' :
+                         '✅ Успіх'}
+                      </div>
+                      <div className={`${
+                        rec.type === 'info' ? 'text-blue-700' :
+                        rec.type === 'warning' ? 'text-yellow-700' :
+                        'text-green-700'
+                      }`}>
+                        {rec.message}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -594,9 +818,20 @@ export default function StrategyOverview() {
         <TabsContent value="create" className="space-y-6">
           <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                <Plus className="h-4 w-4" />
-                Створити нову стратегію
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+                <div className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Створити нову стратегію
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTemplateDialogOpen(true)}
+                  className="rounded-xl"
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  Використати шаблон
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -715,6 +950,162 @@ export default function StrategyOverview() {
         </TabsContent>
       </Tabs>
 
+      {/* Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="rounded-3xl max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <Info className="h-5 w-5 text-blue-600" />
+              Деталі стратегії
+            </DialogTitle>
+          </DialogHeader>
+          {selectedStrategy && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  {getRiskIcon(selectedStrategy.riskLevel)}
+                  {selectedStrategy.name}
+                  <Badge className={getRiskColor(selectedStrategy.riskLevel)}>
+                    {selectedStrategy.riskLevel} Risk
+                  </Badge>
+                </h3>
+                <p className="text-gray-600">{selectedStrategy.description}</p>
+              </div>
+
+              {(selectedStrategy.maxOdds || selectedStrategy.minOdds || selectedStrategy.allowedFormats || selectedStrategy.allowedBetTypes) && (
+                <div className="p-4 bg-blue-50 rounded-2xl space-y-2">
+                  <p className="text-sm font-semibold text-blue-900 uppercase">Обмеження стратегії:</p>
+                  {selectedStrategy.minOdds && (
+                    <div className="text-sm text-blue-700">
+                      • Мінімальний коефіцієнт: <span className="font-bold">{selectedStrategy.minOdds}</span>
+                    </div>
+                  )}
+                  {selectedStrategy.maxOdds && (
+                    <div className="text-sm text-blue-700">
+                      • Максимальний коефіцієнт: <span className="font-bold">{selectedStrategy.maxOdds}</span>
+                    </div>
+                  )}
+                  {selectedStrategy.allowedFormats && selectedStrategy.allowedFormats.length > 0 && (
+                    <div className="text-sm text-blue-700">
+                      • Дозволені формати: <span className="font-bold">{selectedStrategy.allowedFormats.join(', ')}</span>
+                    </div>
+                  )}
+                  {selectedStrategy.allowedBetTypes && selectedStrategy.allowedBetTypes.length > 0 && (
+                    <div className="text-sm text-blue-700">
+                      • Дозволені типи ставок: <span className="font-bold">{selectedStrategy.allowedBetTypes.join(', ')}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {strategyStats[selectedStrategy.name] && strategyStats[selectedStrategy.name].totalBets > 0 && (
+                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl">
+                  <div className="text-center">
+                    <div className="text-2xl font-semibold text-gray-900">{strategyStats[selectedStrategy.name].totalBets}</div>
+                    <div className="text-xs text-gray-600 font-medium">Всього ставок</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                      {strategyStats[selectedStrategy.name].winRate.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">Win Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {strategyStats[selectedStrategy.name].totalProfit >= 0 ? '+' : ''}{strategyStats[selectedStrategy.name].totalProfit.toFixed(0)} ₴
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">Прибуток</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {strategyStats[selectedStrategy.name].roi >= 0 ? '+' : ''}{strategyStats[selectedStrategy.name].roi.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">ROI</div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
+                  <Lightbulb className="h-4 w-4" />
+                  Критерії стратегії:
+                </h4>
+                <ul className="space-y-2">
+                  {selectedStrategy.criteria.map((criterion, idx) => (
+                    <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <span>{criterion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setDetailsDialogOpen(false)} className="rounded-xl">
+              Закрити
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+        <DialogContent className="rounded-3xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <Zap className="h-5 w-5 text-purple-600" />
+              Шаблони стратегій
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Виберіть готовий шаблон для швидкого створення стратегії
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {STRATEGY_TEMPLATES.map((template, index) => (
+              <Card key={index} className="border-2 border-gray-200 hover:border-blue-500 transition-all cursor-pointer" onClick={() => applyTemplate(template)}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between text-base font-semibold text-gray-900">
+                    <span className="flex items-center gap-2">
+                      {getRiskIcon(template.riskLevel)}
+                      {template.name}
+                    </span>
+                    <Badge className={getRiskColor(template.riskLevel) + ' text-xs'}>
+                      {template.riskLevel}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-gray-600">{template.description}</p>
+                  <div className="p-2 bg-green-50 rounded-xl text-center">
+                    <div className="text-lg font-bold text-green-600">+{template.expectedROI}%</div>
+                    <div className="text-xs text-gray-600">Очікуваний ROI</div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-1">Критерії:</p>
+                    <ul className="space-y-1">
+                      {template.criteria.slice(0, 3).map((criterion, idx) => (
+                        <li key={idx} className="text-xs text-gray-600 flex items-center gap-1">
+                          <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                          {criterion}
+                        </li>
+                      ))}
+                      {template.criteria.length > 3 && (
+                        <li className="text-xs text-gray-500">+ ще {template.criteria.length - 3}</li>
+                      )}
+                    </ul>
+                  </div>
+                  <Button className="w-full rounded-xl bg-blue-600 hover:bg-blue-700" size="sm">
+                    Використати шаблон
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="rounded-3xl">
           <DialogHeader>
