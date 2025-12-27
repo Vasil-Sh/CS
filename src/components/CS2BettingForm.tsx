@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag, Users, MapPin, Gamepad2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag, Users, MapPin, Gamepad2, Zap, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
@@ -56,6 +57,8 @@ interface BetRecord {
 interface StrategyViolation {
   type: 'odds' | 'format' | 'betType';
   message: string;
+  severity: 'acceptable' | 'serious';
+  explanation: string;
 }
 
 interface Goal {
@@ -76,6 +79,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
+  
+  // NEW: Form mode state
+  const [formMode, setFormMode] = useState<'quick' | 'advanced'>('quick');
+  
+  // NEW: EV details visibility
+  const [showEVDetails, setShowEVDetails] = useState(false);
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -124,19 +133,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
   useEffect(() => {
     // Validate against primary strategy whenever relevant fields change
-    if (primaryStrategy) {
+    if (primaryStrategy && formMode === 'advanced') {
       validateAgainstStrategy();
     } else {
       setStrategyViolations([]);
     }
-  }, [formData.odds, formData.format, formData.betCategory, primaryStrategy]);
+  }, [formData.odds, formData.format, formData.betCategory, primaryStrategy, formMode]);
 
   // Check for risky teams whenever team names change
   useEffect(() => {
-    if (formData.team1 || formData.team2) {
+    if (formMode === 'advanced' && (formData.team1 || formData.team2)) {
       checkRiskyTeams(formData.team1, formData.team2);
     }
-  }, [formData.team1, formData.team2]);
+  }, [formData.team1, formData.team2, formMode]);
 
   const validateAgainstStrategy = () => {
     if (!primaryStrategy) {
@@ -153,18 +162,30 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       return;
     }
 
-    // Check odds limits
+    // Check odds limits with severity levels
     if (currentOdds && primaryStrategy.minOdds && currentOdds < primaryStrategy.minOdds) {
+      const difference = primaryStrategy.minOdds - currentOdds;
+      const severity = difference > 0.3 ? 'serious' : 'acceptable';
       violations.push({
         type: 'odds',
-        message: `Коефіцієнт ${currentOdds} нижче мінімального ${primaryStrategy.minOdds}`
+        message: `Коефіцієнт ${currentOdds} нижче рекомендованого ${primaryStrategy.minOdds}`,
+        severity,
+        explanation: severity === 'serious' 
+          ? 'Низькі коефіцієнти зменшують потенційний прибуток та можуть не виправдати ризик.'
+          : 'Незначне відхилення від стратегії. Переконайтесь у впевненості в прогнозі.'
       });
     }
 
     if (currentOdds && primaryStrategy.maxOdds && currentOdds > primaryStrategy.maxOdds) {
+      const difference = currentOdds - primaryStrategy.maxOdds;
+      const severity = difference > 0.5 ? 'serious' : 'acceptable';
       violations.push({
         type: 'odds',
-        message: `Коефіцієнт ${currentOdds} вище максимального ${primaryStrategy.maxOdds}`
+        message: `Коефіцієнт ${currentOdds} вище рекомендованого ${primaryStrategy.maxOdds}`,
+        severity,
+        explanation: severity === 'serious'
+          ? 'Високі коефіцієнти часто означають низьку ймовірність виграшу. Перевірте аналіз.'
+          : 'Відхилення в межах допустимого. Переконайтесь у обґрунтованості вибору.'
       });
     }
 
@@ -173,7 +194,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       if (!primaryStrategy.allowedFormats.includes(formData.format)) {
         violations.push({
           type: 'format',
-          message: `Формат ${formData.format} не дозволений. Дозволені: ${primaryStrategy.allowedFormats.join(', ')}`
+          message: `Формат ${formData.format} не рекомендований. Рекомендовані: ${primaryStrategy.allowedFormats.join(', ')}`,
+          severity: 'acceptable',
+          explanation: 'Ваша стратегія оптимізована для інших форматів. Це може вплинути на результативність.'
         });
       }
     }
@@ -183,7 +206,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       if (!primaryStrategy.allowedBetTypes.includes(formData.betCategory)) {
         violations.push({
           type: 'betType',
-          message: `Тип ставки "${formData.betCategory}" не дозволений. Дозволені: ${primaryStrategy.allowedBetTypes.join(', ')}`
+          message: `Тип ставки "${formData.betCategory}" не рекомендований. Рекомендовані: ${primaryStrategy.allowedBetTypes.join(', ')}`,
+          severity: 'serious',
+          explanation: 'Ваша стратегія розроблена для інших типів ставок. Це може значно знизити ефективність.'
         });
       }
     }
@@ -421,6 +446,22 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return amount;
   };
 
+  // NEW: Get express risk level
+  const getExpressRiskLevel = () => {
+    const count = expressEvents.length;
+    if (count <= 3) return { level: 'moderate', color: 'green', text: 'Помірний ризик', progress: 33 };
+    if (count <= 6) return { level: 'elevated', color: 'orange', text: 'Підвищений ризик', progress: 66 };
+    return { level: 'high', color: 'red', text: 'Високий ризик', progress: 100 };
+  };
+
+  // NEW: Get EV verdict
+  const getEVVerdict = () => {
+    const ev = parseFloat(calculateExpectedValue());
+    if (ev > 5) return { icon: '✅', text: 'Позитивна ставка', color: 'green', description: 'Математично вигідна ставка з хорошим потенціалом' };
+    if (ev > 0) return { icon: '⚠️', text: 'Сумнівна ставка', color: 'yellow', description: 'Невелика позитивна вартість, потрібна висока впевненість' };
+    return { icon: '❌', text: 'Негативна ставка', color: 'red', description: 'Математично невигідна ставка, високий ризик втрат' };
+  };
+
   const processBetSubmission = async () => {
     setIsSubmitting(true);
 
@@ -549,7 +590,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       toast.warning(validation.warning);
     }
 
-    if (strategyViolations.length > 0) {
+    if (strategyViolations.length > 0 && formMode === 'advanced') {
       setShowViolationDialog(true);
       setPendingSubmit(true);
       return;
@@ -579,6 +620,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const potentialProfitInCurrency = calculatePotentialProfit();
   const stakeInCurrency = formData.stake;
   const totalExpressOdds = calculateTotalExpressOdds();
+  const expressRisk = getExpressRiskLevel();
+  const evVerdict = getEVVerdict();
 
   return (
     <div className="space-y-6">
@@ -591,7 +634,45 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         onCancel={handleViolationCancel}
       />
 
-      {primaryStrategy && (
+      {/* NEW: Form Mode Switcher */}
+      <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-indigo-50 to-purple-50 overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-600 rounded-xl">
+                <Zap className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Режим форми</p>
+                <p className="text-xs text-gray-600">
+                  {formMode === 'quick' ? 'Швидке додавання ставки' : 'Розширений режим з аналітикою'}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={formMode === 'quick' ? 'default' : 'outline'}
+                onClick={() => setFormMode('quick')}
+                className="rounded-xl"
+              >
+                ⚡ Швидкий
+              </Button>
+              <Button
+                type="button"
+                variant={formMode === 'advanced' ? 'default' : 'outline'}
+                onClick={() => setFormMode('advanced')}
+                className="rounded-xl"
+              >
+                🎯 Розширений
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Strategy Card - Only in Advanced Mode */}
+      {formMode === 'advanced' && primaryStrategy && (
         <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -607,19 +688,50 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         </Card>
       )}
 
-      {strategyViolations.length > 0 && (
-        <Card className="border-2 border-orange-200 shadow-lg rounded-3xl bg-orange-50 overflow-hidden">
+      {/* NEW: Strategy Deviations (not violations) - Only in Advanced Mode */}
+      {formMode === 'advanced' && strategyViolations.length > 0 && (
+        <Card className={`border-2 shadow-lg rounded-3xl overflow-hidden ${
+          strategyViolations.some(v => v.severity === 'serious') 
+            ? 'border-red-200 bg-red-50' 
+            : 'border-yellow-200 bg-yellow-50'
+        }`}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                strategyViolations.some(v => v.severity === 'serious') ? 'text-red-600' : 'text-yellow-600'
+              }`} />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-orange-900 mb-2">⚠️ Порушення стратегії "{primaryStrategy?.name}"</p>
-                <div className="space-y-1">
+                <p className={`text-sm font-semibold mb-2 ${
+                  strategyViolations.some(v => v.severity === 'serious') ? 'text-red-900' : 'text-yellow-900'
+                }`}>
+                  {strategyViolations.some(v => v.severity === 'serious') ? '🔴' : '🟡'} Відхилення від стратегії "{primaryStrategy?.name}"
+                </p>
+                <div className="space-y-2">
                   {strategyViolations.map((violation, index) => (
-                    <p key={index} className="text-xs text-orange-800">• {violation.message}</p>
+                    <div key={index} className={`p-2 rounded-xl ${
+                      violation.severity === 'serious' ? 'bg-red-100' : 'bg-yellow-100'
+                    }`}>
+                      <p className={`text-xs font-medium ${
+                        violation.severity === 'serious' ? 'text-red-800' : 'text-yellow-800'
+                      }`}>
+                        • {violation.message}
+                      </p>
+                      <p className={`text-xs mt-1 ${
+                        violation.severity === 'serious' ? 'text-red-700' : 'text-yellow-700'
+                      }`}>
+                        <Info className="h-3 w-3 inline mr-1" />
+                        {violation.explanation}
+                      </p>
+                    </div>
                   ))}
                 </div>
-                <p className="text-xs text-orange-700 mt-2 font-medium">Ви все одно можете створити ставку, підтвердивши попередження. 🟨</p>
+                <p className={`text-xs mt-2 font-medium ${
+                  strategyViolations.some(v => v.severity === 'serious') ? 'text-red-700' : 'text-yellow-700'
+                }`}>
+                  {strategyViolations.some(v => v.severity === 'serious') 
+                    ? '⚠️ Рекомендуємо переглянути вашу ставку перед підтвердженням.'
+                    : '💡 Ви можете продовжити, але врахуйте рекомендації стратегії.'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -636,7 +748,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   <div className="p-2 bg-blue-100 rounded-xl">
                     <Plus className="h-6 w-6 text-blue-600" />
                   </div>
-                  Додати нову ставку CS2
+                  {formMode === 'quick' ? '⚡ Швидка ставка CS2' : '🎯 Розширена ставка CS2'}
                 </CardTitle>
               </CardHeader>
               
@@ -696,7 +808,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     )}
                   </div>
 
-                  {activeGoals.length > 0 && (
+                  {/* Goals - Only in Advanced Mode */}
+                  {formMode === 'advanced' && activeGoals.length > 0 && (
                     <div>
                       <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
                         <Flag className="h-4 w-4 text-blue-600" />
@@ -736,31 +849,34 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     Інформація про матч і деталі ставки
                   </h3>
                   
-                  <div>
-                    <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
-                      <Link className="h-4 w-4 text-blue-600" />
-                      HLTV URL матчу (необов'язково)
-                    </Label>
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        id="matchUrl"
-                        value={formData.matchUrl}
-                        onChange={(e) => handleUrlChange(e.target.value)}
-                        placeholder="https://www.hltv.org/matches/..."
-                        className="flex-1 rounded-xl"
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => parseMatchFromUrl(formData.matchUrl)}
-                        disabled={isParsingMatch || !formData.matchUrl}
-                        className="rounded-xl px-4"
-                      >
-                        {isParsingMatch ? 'Парсинг...' : 'Парсити'}
-                      </Button>
+                  {/* HLTV URL - Only in Advanced Mode */}
+                  {formMode === 'advanced' && (
+                    <div>
+                      <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
+                        <Link className="h-4 w-4 text-blue-600" />
+                        HLTV URL матчу (необов'язково)
+                      </Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="matchUrl"
+                          value={formData.matchUrl}
+                          onChange={(e) => handleUrlChange(e.target.value)}
+                          placeholder="https://www.hltv.org/matches/..."
+                          className="flex-1 rounded-xl"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => parseMatchFromUrl(formData.matchUrl)}
+                          disabled={isParsingMatch || !formData.matchUrl}
+                          className="rounded-xl px-4"
+                        >
+                          {isParsingMatch ? 'Парсинг...' : 'Парсити'}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
-                  </div>
+                  )}
 
                   {(formData.team1 || formData.team2 || formData.tournament) && (
                     <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl border-2 border-green-200">
@@ -1000,34 +1116,77 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-60 overflow-y-auto">
-                  {expressEvents.map((event, index) => (
-                    <div key={index} className="p-3 bg-white rounded-xl border-2 border-purple-200 flex items-start justify-between gap-3 hover:border-purple-300 transition-colors">
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full text-xs font-bold">
-                            #{index + 1}
-                          </Badge>
-                          <span className="font-semibold text-gray-900 text-sm">{event.match}</span>
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
-                        </div>
-                        <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
-                          Коеф {event.odds}
-                        </Badge>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeExpressEvent(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-xl flex-shrink-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                <CardContent className="space-y-3">
+                  {/* NEW: Express Risk Indicator */}
+                  <div className={`p-3 rounded-2xl border-2 ${
+                    expressRisk.color === 'green' ? 'bg-green-50 border-green-200' :
+                    expressRisk.color === 'orange' ? 'bg-orange-50 border-orange-200' :
+                    'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-sm font-semibold ${
+                        expressRisk.color === 'green' ? 'text-green-800' :
+                        expressRisk.color === 'orange' ? 'text-orange-800' :
+                        'text-red-800'
+                      }`}>
+                        {expressRisk.color === 'green' ? '🟢' : expressRisk.color === 'orange' ? '🟠' : '🔴'} {expressRisk.text}
+                      </span>
+                      <span className={`text-xs font-medium ${
+                        expressRisk.color === 'green' ? 'text-green-700' :
+                        expressRisk.color === 'orange' ? 'text-orange-700' :
+                        'text-red-700'
+                      }`}>
+                        {expressEvents.length} {expressEvents.length === 1 ? 'подія' : expressEvents.length < 5 ? 'події' : 'подій'}
+                      </span>
                     </div>
-                  ))}
+                    <Progress 
+                      value={expressRisk.progress} 
+                      className={`h-2 ${
+                        expressRisk.color === 'green' ? '[&>div]:bg-green-600' :
+                        expressRisk.color === 'orange' ? '[&>div]:bg-orange-600' :
+                        '[&>div]:bg-red-600'
+                      }`}
+                    />
+                    <p className={`text-xs mt-2 ${
+                      expressRisk.color === 'green' ? 'text-green-700' :
+                      expressRisk.color === 'orange' ? 'text-orange-700' :
+                      'text-red-700'
+                    }`}>
+                      {expressRisk.color === 'green' && 'Оптимальна кількість подій для контролю ризику'}
+                      {expressRisk.color === 'orange' && 'Збільшений ризик через кількість подій. Рекомендуємо обережність.'}
+                      {expressRisk.color === 'red' && 'Дуже високий ризик! Кожна додаткова подія знижує ймовірність виграшу.'}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {expressEvents.map((event, index) => (
+                      <div key={index} className="p-3 bg-white rounded-xl border-2 border-purple-200 flex items-start justify-between gap-3 hover:border-purple-300 transition-colors">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full text-xs font-bold">
+                              #{index + 1}
+                            </Badge>
+                            <span className="font-semibold text-gray-900 text-sm">{event.match}</span>
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
+                            Коеф {event.odds}
+                          </Badge>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeExpressEvent(index)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-xl flex-shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -1086,12 +1245,61 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </div>
                 </div>
                 
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-700 font-semibold">Expected Value:</span>
-                    <Badge className={`rounded-full border-0 text-base px-4 py-1 ${isValuePositive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-                      {isValuePositive ? '+' : ''}{expectedValue}%
-                    </Badge>
+                {/* NEW: Simplified EV Display */}
+                <div className={`p-4 rounded-2xl border-2 ${
+                  evVerdict.color === 'green' ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' :
+                  evVerdict.color === 'yellow' ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200' :
+                  'bg-gradient-to-r from-red-50 to-orange-50 border-red-200'
+                }`}>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-semibold ${
+                        evVerdict.color === 'green' ? 'text-green-800' :
+                        evVerdict.color === 'yellow' ? 'text-yellow-800' :
+                        'text-red-800'
+                      }`}>
+                        {evVerdict.icon} {evVerdict.text}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowEVDetails(!showEVDetails)}
+                        className="h-6 px-2 text-xs"
+                      >
+                        {showEVDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                    <p className={`text-xs ${
+                      evVerdict.color === 'green' ? 'text-green-700' :
+                      evVerdict.color === 'yellow' ? 'text-yellow-700' :
+                      'text-red-700'
+                    }`}>
+                      {evVerdict.description}
+                    </p>
+                    
+                    {/* EV Details - Collapsible */}
+                    {showEVDetails && (
+                      <div className={`mt-3 pt-3 border-t ${
+                        evVerdict.color === 'green' ? 'border-green-200' :
+                        evVerdict.color === 'yellow' ? 'border-yellow-200' :
+                        'border-red-200'
+                      }`}>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Expected Value:</span>
+                            <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 ${
+                              isValuePositive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                            }`}>
+                              {isValuePositive ? '+' : ''}{expectedValue}%
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            EV показує математичну вигідність ставки з урахуванням вашої впевненості та коефіцієнта.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -1101,31 +1309,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <span className="font-bold text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
                   </div>
                 </div>
-
-                <Separator />
-
-                <div className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl border-2 border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-bold text-gray-900">Рекомендація</span>
-                  </div>
-                  {isValuePositive ? (
-                    <div className="flex items-center gap-2 text-green-600 font-semibold">
-                      <TrendingUp className="h-5 w-5" />
-                      <span className="text-sm">Позитивна очікувана вартість - рекомендована ставка</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-red-600 font-semibold">
-                      <AlertTriangle className="h-5 w-5" />
-                      <span className="text-sm">Негативна очікувана вартість - обережно</span>
-                    </div>
-                  )}
-                </div>
               </CardContent>
             </Card>
           )}
 
-          {formData.riskyTeams.length > 0 && (
+          {/* Risky Teams - Only in Advanced Mode */}
+          {formMode === 'advanced' && formData.riskyTeams.length > 0 && (
             <Card className="border-2 border-red-300 shadow-xl rounded-3xl bg-gradient-to-br from-red-50 to-orange-50 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold">
