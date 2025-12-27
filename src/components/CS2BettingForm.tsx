@@ -72,7 +72,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const currentUser = localStorage.getItem('currentUser') || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
-  const [lastAddedBet, setLastAddedBet] = useState<BetRecord | null>(null);
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>([]);
   const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
   const [strategyViolations, setStrategyViolations] = useState<StrategyViolation[]>([]);
@@ -521,13 +520,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       await realGoogleSheetsService.addRecord(record);
       
-      setLastAddedBet(record);
-      
       if (finalGoalId) {
         const goalName = activeGoals.find(g => g.id === finalGoalId)?.name;
         toast.success(`Ставка додана і прив'язана до цілі: ${goalName}`);
       } else {
-        toast.success('Ставка успішно додана!');
+        toast.success('Ставка додана!');
       }
       
       setFormData({
@@ -1350,59 +1347,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           )}
         </div>
       </div>
-
-      {lastAddedBet && (
-        <Card className="border-0 shadow-2xl rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-            <CardTitle className="flex items-center gap-2 text-xl font-bold">
-              <Trophy className="h-6 w-6" />
-              Ставка успішно додана!
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="p-6 bg-white rounded-2xl border-2 border-green-200 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <span className="font-bold text-gray-900 text-lg">{lastAddedBet.match}</span>
-                </div>
-                <span className="text-sm text-gray-600 font-medium">{lastAddedBet.date}</span>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="rounded-full bg-purple-100 text-purple-700 border-0 text-sm px-3 py-1">
-                  {lastAddedBet.format}
-                </Badge>
-                {lastAddedBet.currency && (
-                  <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-sm px-3 py-1">
-                    {lastAddedBet.currency}
-                  </Badge>
-                )}
-                <Badge className="rounded-full bg-yellow-100 text-yellow-700 border-0 text-sm px-3 py-1">Очікується</Badge>
-              </div>
-              
-              {lastAddedBet.betType.includes('Експрес') && (
-                <div className="p-4 bg-purple-50 rounded-xl border-2 border-purple-200">
-                  <p className="text-xs text-purple-900 font-bold mb-2">Події експресу:</p>
-                  <p className="text-xs text-purple-700 leading-relaxed">{lastAddedBet.betType}</p>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between pt-4 border-t-2 border-gray-200">
-                <div className="flex items-center gap-4">
-                  <span className="font-bold text-gray-900 text-lg">
-                    {lastAddedBet.currency === 'USD' ? '$' : '₴'}{lastAddedBet.originalAmount}
-                  </span>
-                  <span className="text-gray-600 font-medium">@{lastAddedBet.odds.toFixed(2)}</span>
-                </div>
-                <span className="text-green-600 font-bold text-xl">
-                  +{((lastAddedBet.odds - 1) * lastAddedBet.originalAmount).toFixed(2)} {lastAddedBet.currency === 'USD' ? '$' : '₴'}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
