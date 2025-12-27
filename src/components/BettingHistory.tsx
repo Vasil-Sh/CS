@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import ExpressDetailsModal from '@/components/ExpressDetailsModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { 
   Trophy, 
@@ -19,7 +20,8 @@ import {
   ChevronUp,
   Target,
   Zap,
-  BarChart3
+  BarChart3,
+  Eye
 } from 'lucide-react';
 
 interface Bet {
@@ -36,6 +38,17 @@ interface Bet {
   roi?: number;
   currency?: string;
   goalId?: string;
+  originalAmount?: number;
+  originalProfit?: number;
+  exchangeRate?: number;
+}
+
+interface ParsedEvent {
+  number: string;
+  match: string;
+  betType: string;
+  selection: string;
+  odds: string;
 }
 
 export default function BettingHistory() {
@@ -49,8 +62,10 @@ export default function BettingHistory() {
   const [sortBy, setSortBy] = useState<'date' | 'profit' | 'odds'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
-  const [expandedExpressBets, setExpandedExpressBets] = useState<Set<number>>(new Set());
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [expressModalOpen, setExpressModalOpen] = useState(false);
+  const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);
+  const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
 
   useEffect(() => {
     loadBets();
@@ -121,14 +136,6 @@ export default function BettingHistory() {
     ? (completedBets.filter(bet => bet.result === 'Win').length / completedBets.length * 100).toFixed(1)
     : '0';
 
-  interface ParsedEvent {
-    number: string;
-    match: string;
-    betType: string;
-    selection: string;
-    odds: string;
-  }
-
   const parseExpressEvents = (betType: string): ParsedEvent[] => {
     if (!betType.includes('|')) return [];
     
@@ -158,16 +165,11 @@ export default function BettingHistory() {
     });
   };
 
-  const toggleExpressBet = (index: number) => {
-    setExpandedExpressBets(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
+  const handleExpressDetailsClick = (bet: Bet) => {
+    const parsedEvents = parseExpressEvents(bet.betType);
+    setSelectedExpressBet(bet);
+    setSelectedExpressEvents(parsedEvents);
+    setExpressModalOpen(true);
   };
 
   return (
@@ -398,8 +400,6 @@ export default function BettingHistory() {
                     {sortedBets.map((bet, index) => {
                       const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
                       const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
-                      const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
-                      const isExpanded = expandedExpressBets.has(index);
                       const isPending = bet.result === 'Pending';
                       
                       return (
@@ -433,7 +433,7 @@ export default function BettingHistory() {
                             </div>
                           </td>
                           <td className="p-4">
-                            {isExpress && parsedEvents.length > 0 ? (
+                            {isExpress ? (
                               <div className="space-y-2">
                                 <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
                                   Express {bet.format}
@@ -441,20 +441,11 @@ export default function BettingHistory() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => toggleExpressBet(index)}
+                                  onClick={() => handleExpressDetailsClick(bet)}
                                   className="w-full rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-2 py-1 h-7"
                                 >
-                                  {isExpanded ? (
-                                    <>
-                                      <ChevronUp className="h-3 w-3 mr-1" />
-                                      Сховати
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ChevronDown className="h-3 w-3 mr-1" />
-                                      Деталі
-                                    </>
-                                  )}
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Деталі
                                 </Button>
                               </div>
                             ) : (
@@ -541,51 +532,6 @@ export default function BettingHistory() {
                     })}
                   </tbody>
                 </table>
-                
-                {/* Express Bet Details - Show below table */}
-                {Array.from(expandedExpressBets).map(index => {
-                  const bet = sortedBets[index];
-                  if (!bet) return null;
-                  
-                  const parsedEvents = parseExpressEvents(bet.betType);
-                  if (parsedEvents.length === 0) return null;
-                  
-                  return (
-                    <div key={index} className="mt-4 p-4 bg-purple-50 rounded-2xl border-2 border-purple-200">
-                      <h4 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
-                        <Zap className="h-5 w-5" />
-                        Деталі експрес-ставки від {bet.date}
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {parsedEvents.map((event, idx) => (
-                          <div key={idx} className="p-3 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
-                            <div className="flex items-start gap-2 mb-2">
-                              <Badge className="rounded-full bg-purple-600 text-white border-0 text-xs px-2 py-1 font-bold flex-shrink-0">
-                                #{event.number}
-                              </Badge>
-                              <span className="font-bold text-gray-900 text-sm flex-1 break-words">
-                                {event.match}
-                              </span>
-                            </div>
-                            <div className="ml-8 space-y-1">
-                              <p className="text-gray-500 uppercase tracking-wide font-bold text-[10px]">
-                                {event.betType}
-                              </p>
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="font-bold text-purple-700 text-sm truncate" title={event.selection}>
-                                  {event.selection}
-                                </span>
-                                <Badge className="text-xs bg-green-100 text-green-700 border-0 rounded-full px-2 py-1 font-bold flex-shrink-0">
-                                  @{parseFloat(event.odds).toFixed(2)}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -597,6 +543,19 @@ export default function BettingHistory() {
             )}
           </CardContent>
         </Card>
+
+        {selectedExpressBet && (
+          <ExpressDetailsModal
+            bet={selectedExpressBet}
+            open={expressModalOpen}
+            onClose={() => {
+              setExpressModalOpen(false);
+              setSelectedExpressBet(null);
+              setSelectedExpressEvents([]);
+            }}
+            parsedEvents={selectedExpressEvents}
+          />
+        )}
       </div>
     </TooltipProvider>
   );
