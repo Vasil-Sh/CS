@@ -13,15 +13,14 @@ import {
   Filter,
   ArrowUpDown,
   Calendar,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
   ChevronDown,
   ChevronUp,
   Target,
   Zap,
   BarChart3,
-  Eye
+  Eye,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 
 interface Bet {
@@ -338,7 +337,7 @@ export default function BettingHistory() {
           </Card>
         </div>
 
-        {/* Betting History Table */}
+        {/* Betting History Table - Bordered Style with White Rows */}
         <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
             <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
@@ -361,35 +360,33 @@ export default function BettingHistory() {
               </div>
             ) : sortedBets.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors rounded-tl-xl" onClick={() => toggleSort('date')}>
-                        <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
-                          <Calendar className="h-4 w-4" />
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300">
+                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200" onClick={() => toggleSort('date')}>
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
                           Дата
                           <ArrowUpDown className="h-3 w-3" />
                         </div>
                       </th>
-                      <th className="text-left p-4 min-w-[200px]">
-                        <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
-                          <Target className="h-4 w-4" />
+                      <th className="text-left p-4 min-w-[200px] border-r border-gray-200">
+                        <div className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                           Матч
                         </div>
                       </th>
-                      <th className="text-left p-4 w-48 text-xs font-black text-gray-700 uppercase tracking-wider">Тип</th>
-                      <th className="text-left p-4 w-24 text-xs font-black text-gray-700 uppercase tracking-wider">Валюта</th>
-                      <th className="text-left p-4 w-28 text-xs font-black text-gray-700 uppercase tracking-wider">Сума</th>
-                      <th className="text-left p-4 w-24 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('odds')}>
-                        <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
+                      <th className="text-left p-4 w-48 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Тип</th>
+                      <th className="text-left p-4 w-24 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Валюта</th>
+                      <th className="text-left p-4 w-28 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Сума</th>
+                      <th className="text-left p-4 w-24 cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200" onClick={() => toggleSort('odds')}>
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
                           Коеф.
                           <ArrowUpDown className="h-3 w-3" />
                         </div>
                       </th>
-                      <th className="text-left p-4 w-32 text-xs font-black text-gray-700 uppercase tracking-wider">Ціль</th>
-                      <th className="text-left p-4 w-32 text-xs font-black text-gray-700 uppercase tracking-wider">Статус</th>
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors rounded-tr-xl" onClick={() => toggleSort('profit')}>
-                        <div className="flex items-center gap-2 text-xs font-black text-gray-700 uppercase tracking-wider">
+                      <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Ціль</th>
+                      <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Статус</th>
+                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('profit')}>
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
                           Профіт
                           <ArrowUpDown className="h-3 w-3" />
                         </div>
@@ -400,34 +397,27 @@ export default function BettingHistory() {
                     {sortedBets.map((bet, index) => {
                       const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
                       const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
-                      const isPending = bet.result === 'Pending';
                       
                       return (
                         <tr 
                           key={index} 
-                          className={`border-b border-gray-100 transition-all ${
-                            isPending 
-                              ? 'bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-l-4 border-l-amber-400' 
-                              : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50'
-                          }`}
+                          className="bg-white border-b border-gray-200 shadow-sm hover:shadow-md transition-all hover:bg-gray-50"
                         >
-                          <td className="p-4">
-                            <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
+                          <td className="p-4 border-r border-gray-200">
+                            <span className="text-sm font-bold text-gray-900">{bet.date}</span>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             <div className="space-y-2">
-                              <div className={`font-bold text-base truncate ${isPending ? 'text-amber-900' : 'text-gray-900'}`} title={displayMatch}>{displayMatch}</div>
+                              <div className="font-bold text-base truncate text-gray-900" title={displayMatch}>{displayMatch}</div>
                               {!isExpress && (
-                                <div className={`text-xs truncate ${isPending ? 'text-amber-700' : 'text-gray-600'}`} title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
+                                <div className="text-xs truncate text-gray-600" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
                               )}
-                              <Badge className={`text-xs rounded-full border-0 font-bold ${
-                                isPending ? 'bg-amber-200 text-amber-800' : 'bg-purple-100 text-purple-700'
-                              }`}>
+                              <Badge className="text-xs rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
                                 {bet.format}
                               </Badge>
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 border-r border-gray-200">
                             {isExpress ? (
                               <div className="space-y-2">
                                 <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
@@ -444,82 +434,45 @@ export default function BettingHistory() {
                                 </Button>
                               </div>
                             ) : (
-                              <Badge className={`rounded-full border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate ${
-                                isPending ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-700'
-                              }`} title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                 {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4">
-                            <Badge className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
-                              isPending ? 'bg-amber-200 text-amber-800' : 'bg-cyan-100 text-cyan-700'
-                            }`}>
+                          <td className="p-4 border-r border-gray-200">
+                            <Badge className="rounded-full bg-cyan-100 text-cyan-700 border-0 font-bold text-sm px-3 py-1">
                               {bet.currency || 'UAH'}
                             </Badge>
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <DollarSign className={`h-4 w-4 ${isPending ? 'text-amber-600' : 'text-green-600'}`} />
-                              <span className={`font-bold text-base ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>₴{bet.amount}</span>
-                            </div>
+                          <td className="p-4 border-r border-gray-200">
+                            <span className="font-bold text-base text-gray-900">₴{bet.amount}</span>
                           </td>
-                          <td className="p-4">
-                            <Badge className={`rounded-full border-0 font-bold text-base px-3 py-1 ${
-                              isPending ? 'bg-amber-200 text-amber-800' : 'bg-orange-100 text-orange-700'
-                            }`}>
+                          <td className="p-4 border-r border-gray-200">
+                            <Badge className="rounded-full bg-orange-100 text-orange-700 border-0 font-bold text-base px-3 py-1">
                               {bet.odds.toFixed(2)}
                             </Badge>
                           </td>
-                          <td className="p-4">
-                            <span className={`font-medium text-xs truncate max-w-[120px] block ${
-                              isPending ? 'text-amber-700' : 'text-gray-600'
-                            }`} title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                          <td className="p-4 border-r border-gray-200">
+                            <span className="font-medium text-xs text-gray-600 truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              {bet.result === 'Win' ? (
-                                <div className="p-2 bg-green-100 rounded-lg">
-                                  <Trophy className="h-5 w-5 text-green-600" />
-                                </div>
-                              ) : bet.result === 'Loss' ? (
-                                <div className="p-2 bg-red-100 rounded-lg">
-                                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                                </div>
-                              ) : (
-                                <div className="p-2 bg-amber-200 rounded-lg">
-                                  <Clock className="h-5 w-5 text-amber-700" />
-                                </div>
-                              )}
-                              <Badge 
-                                className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
-                                  bet.result === 'Win' 
-                                    ? 'bg-green-100 text-green-700' 
-                                    : bet.result === 'Loss' 
-                                    ? 'bg-red-100 text-red-700' 
-                                    : 'bg-amber-200 text-amber-800'
-                                }`}
-                              >
-                                {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
-                              </Badge>
-                            </div>
+                          <td className="p-4 border-r border-gray-200">
+                            <Badge 
+                              className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
+                                bet.result === 'Win' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : bet.result === 'Loss' 
+                                  ? 'bg-red-100 text-red-700' 
+                                  : 'bg-amber-200 text-amber-800'
+                              }`}
+                            >
+                              {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
+                            </Badge>
                           </td>
                           <td className="p-4">
                             {bet.profit !== undefined && (
-                              <div className="flex items-center gap-2">
-                                {bet.profit >= 0 ? (
-                                  <div className="p-2 bg-green-100 rounded-lg">
-                                    <TrendingUp className="h-5 w-5 text-green-600" />
-                                  </div>
-                                ) : (
-                                  <div className="p-2 bg-red-100 rounded-lg">
-                                    <TrendingDown className="h-5 w-5 text-red-600" />
-                                  </div>
-                                )}
-                                <span className={`font-black text-base ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
-                                </span>
-                              </div>
+                              <span className={`font-black text-base ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
+                              </span>
                             )}
                           </td>
                         </tr>
