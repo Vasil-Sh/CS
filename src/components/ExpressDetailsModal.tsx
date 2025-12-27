@@ -40,14 +40,14 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                 <Badge className="rounded-full bg-gray-900 text-white border-0 font-semibold text-sm px-3 py-1">
                   {parsedEvents.length}×
                 </Badge>
+                <div className="flex items-center gap-2 ml-2">
+                  <span className="text-sm font-normal text-gray-500">Коефіцієнт:</span>
+                  <Badge className="rounded-full bg-green-600 text-white border-0 font-bold text-xl px-4 py-1.5">
+                    {totalOdds.toFixed(2)}
+                  </Badge>
+                </div>
               </div>
               <p className="text-xs font-normal text-gray-500 mt-1">від {bet.date}</p>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-gray-500 font-normal">Загальний коефіцієнт</div>
-              <Badge className="rounded-full bg-green-600 text-white border-0 font-semibold text-lg px-3 py-1.5 mt-1">
-                {totalOdds.toFixed(2)}
-              </Badge>
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -97,7 +97,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             </div>
             {bet.originalProfit !== undefined && bet.originalProfit !== null ? (
               <p className={`text-xl font-semibold ${bet.originalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {bet.originalProfit >= 0 ? '+' : ''}{bet.originalProfit.toFixed(2)} {bet.currency === 'USD' ? '$' : '₴'}
+                {bet.currency === 'USD' ? '$' : '₴'}{bet.originalProfit >= 0 ? '+' : ''}{bet.originalProfit.toFixed(2)}
               </p>
             ) : (
               <p className="text-xl font-semibold text-gray-400">—</p>
