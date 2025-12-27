@@ -9,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
-import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, ChevronDown, Eye, Zap, TrendingDown } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, ChevronDown, Eye, Zap, TrendingDown, PieChart } from 'lucide-react';
 import { toast } from 'sonner';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface BetData {
   strategy?: string;
@@ -18,6 +19,8 @@ interface BetData {
   result?: string;
   profit?: number;
   date?: string;
+  betType?: string;
+  format?: string;
 }
 
 interface StrategyStats {
@@ -38,6 +41,14 @@ interface StrategyTemplate {
   riskLevel: 'Low' | 'Medium' | 'High';
   expectedROI: number;
   criteria: string[];
+}
+
+interface BetTypeStats {
+  type: string;
+  count: number;
+  winRate: number;
+  roi: number;
+  profit: number;
 }
 
 const STRATEGY_TEMPLATES: StrategyTemplate[] = [
@@ -197,12 +208,63 @@ export default function StrategyOverview() {
     setStrategyStats(stats);
   };
 
+  const calculateBetTypeStats = (): BetTypeStats[] => {
+    const betTypeMap: Record<string, { count: number; wins: number; totalProfit: number; totalStake: number }> = {};
+    
+    bettingData.forEach(bet => {
+      const type = bet.betType || 'Невідомо';
+      if (!betTypeMap[type]) {
+        betTypeMap[type] = { count: 0, wins: 0, totalProfit: 0, totalStake: 0 };
+      }
+      
+      betTypeMap[type].count++;
+      betTypeMap[type].totalStake += bet.amount || 0;
+      
+      if (bet.result === 'Win') {
+        betTypeMap[type].wins++;
+      }
+      
+      if (bet.result === 'Win' || bet.result === 'Loss') {
+        betTypeMap[type].totalProfit += bet.profit || 0;
+      }
+    });
+    
+    return Object.entries(betTypeMap).map(([type, data]) => ({
+      type,
+      count: data.count,
+      winRate: data.count > 0 ? (data.wins / data.count) * 100 : 0,
+      roi: data.totalStake > 0 ? (data.totalProfit / data.totalStake) * 100 : 0,
+      profit: data.totalProfit
+    }));
+  };
+
+  const getRoiChartData = () => {
+    return Object.entries(strategyStats)
+      .map(([name, stats]) => ({
+        name: name.length > 15 ? name.substring(0, 15) + '...' : name,
+        fullName: name,
+        roi: parseFloat(stats.roi.toFixed(1)),
+        riskLevel: strategies.find(s => s.name === name)?.riskLevel || 'Medium'
+      }))
+      .sort((a, b) => b.roi - a.roi)
+      .slice(0, 5);
+  };
+
   const getRiskColor = (risk: string) => {
     switch (risk) {
       case 'Low': return 'bg-green-100 text-green-800 border-0 rounded-full';
       case 'Medium': return 'bg-yellow-100 text-yellow-800 border-0 rounded-full';
       case 'High': return 'bg-red-100 text-red-800 border-0 rounded-full';
       default: return 'bg-gray-100 text-gray-800 border-0 rounded-full';
+    }
+  };
+
+  const getRiskBarColor = (risk: string) => {
+    switch (risk) {
+      case 'Low': return '#10b981';
+      case 'Medium': return '#f59e0b';
+      case 'High': return '#ef4444';
+      default: return '#6b7280';
     }
   };
 
@@ -521,6 +583,9 @@ export default function StrategyOverview() {
     );
   }
 
+  const roiChartData = getRoiChartData();
+  const betTypeStats = calculateBetTypeStats();
+
   return (
     <div className="space-y-6">
       <div>
@@ -697,6 +762,7 @@ export default function StrategyOverview() {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
+          {/* Top Row - 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
               <CardHeader>
@@ -810,6 +876,185 @@ export default function StrategyOverview() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Middle Row - ROI Bar Chart */}
+          {roiChartData.length > 0 && (
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <BarChart3 className="h-5 w-5 text-purple-600" />
+                  Порівняння ROI стратегій
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={100}
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                    />
+                    <YAxis 
+                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280' } }}
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '8px 12px'
+                      }}
+                      formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']}
+                      labelFormatter={(label, payload) => {
+                        if (payload && payload[0]) {
+                          return payload[0].payload.fullName;
+                        }
+                        return label;
+                      }}
+                    />
+                    <Bar dataKey="roi" radius={[8, 8, 0, 0]}>
+                      {roiChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-gray-600">Низький ризик</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span className="text-gray-600">Середній ризик</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className="text-gray-600">Високий ризик</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Bottom Row - 2 Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bet Types Breakdown */}
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <PieChart className="h-5 w-5 text-blue-600" />
+                  Розбивка по типах ставок
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {betTypeStats.length > 0 ? (
+                  <div className="space-y-4">
+                    {betTypeStats.map((stat, index) => (
+                      <div key={index} className="p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-gray-900">{stat.type}</span>
+                          <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                            {stat.count} ставок
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div className="text-center">
+                            <div className={`font-bold ${stat.winRate >= 50 ? 'text-green-600' : 'text-gray-600'}`}>
+                              {stat.winRate.toFixed(0)}%
+                            </div>
+                            <div className="text-xs text-gray-500">Win Rate</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`font-bold ${stat.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {stat.roi >= 0 ? '+' : ''}{stat.roi.toFixed(1)}%
+                            </div>
+                            <div className="text-xs text-gray-500">ROI</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`font-bold ${stat.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {stat.profit >= 0 ? '+' : ''}{stat.profit.toFixed(0)}₴
+                            </div>
+                            <div className="text-xs text-gray-500">Прибуток</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-8">Немає даних для відображення</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Expected vs Actual ROI */}
+            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <Target className="h-5 w-5 text-green-600" />
+                  Очікуваний vs Реальний ROI
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {strategies.length > 0 ? (
+                  <div className="space-y-4">
+                    {strategies.slice(0, 5).map((strategy, index) => {
+                      const stats = strategyStats[strategy.name];
+                      const actualROI = stats?.roi || 0;
+                      const expectedROI = strategy.expectedROI || 0;
+                      const difference = actualROI - expectedROI;
+                      const isPositive = difference >= 0;
+                      
+                      return (
+                        <div key={index} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={strategy.name}>
+                              {strategy.name}
+                            </span>
+                            <span className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                              {isPositive ? '+' : ''}{difference.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-blue-400 rounded-full transition-all"
+                                  style={{ width: `${Math.min((expectedROI / 30) * 100, 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-xs text-gray-600 w-12 text-right">{expectedROI.toFixed(0)}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all ${actualROI >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                  style={{ width: `${Math.min(Math.abs(actualROI) / 30 * 100, 100)}%` }}
+                                />
+                              </div>
+                              <span className={`text-xs font-medium w-12 text-right ${actualROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {actualROI >= 0 ? '+' : ''}{actualROI.toFixed(0)}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>Очікуваний</span>
+                            <span>Реальний</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-8">Створіть стратегії для аналізу</p>
+                )}
               </CardContent>
             </Card>
           </div>
