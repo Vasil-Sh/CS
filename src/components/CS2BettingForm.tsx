@@ -632,11 +632,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       />
 
       {/* NEW: Form Mode Switcher */}
-      <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-indigo-50 to-purple-50 overflow-hidden">
+      <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-600 rounded-xl">
+              <div className="p-2 bg-gray-700 rounded-xl">
                 <Zap className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -670,7 +670,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       {/* Strategy Card - Only in Advanced Mode */}
       {formMode === 'advanced' && primaryStrategy && (
-        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
+        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-600 rounded-xl">
@@ -740,10 +740,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form Card */}
             <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Plus className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-gray-200 rounded-xl">
+                    <Plus className="h-6 w-6 text-gray-700" />
                   </div>
                   {formMode === 'quick' ? '⚡ Швидка ставка CS2' : '🎯 Розширена ставка CS2'}
                 </CardTitle>
@@ -752,9 +752,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <CardContent className="p-6 space-y-6">
                 {/* Basic Settings Section */}
                 <div className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200">
+                  <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
                     <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                      <Calendar className="h-5 w-5 text-blue-600" />
+                      <Calendar className="h-5 w-5 text-gray-600" />
                       Основні налаштування
                     </h3>
                   
@@ -810,7 +810,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     {formMode === 'advanced' && activeGoals.length > 0 && (
                       <div className="mt-4">
                         <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
-                          <Flag className="h-4 w-4 text-blue-600" />
+                          <Flag className="h-4 w-4 text-gray-600" />
                           Прив'язати до цілі (необов'язково)
                         </Label>
                         <Select 
@@ -843,9 +843,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                 {/* Match Information & Bet Details Combined Section */}
                 <div className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl border-2 border-green-200">
+                  <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
                     <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                      <Users className="h-5 w-5 text-green-600" />
+                      <Users className="h-5 w-5 text-gray-600" />
                       Інформація про матч і деталі ставки
                     </h3>
                   
@@ -853,7 +853,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     {formMode === 'advanced' && (
                       <div className="mb-4">
                         <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
-                          <Link className="h-4 w-4 text-blue-600" />
+                          <Link className="h-4 w-4 text-gray-600" />
                           HLTV URL матчу (необов'язково)
                         </Label>
                         <div className="flex gap-2 mt-1">
@@ -879,19 +879,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     )}
 
                     {(formData.team1 || formData.team2 || formData.tournament) && (
-                      <div className="p-4 bg-white rounded-2xl border-2 border-green-300 mb-4">
+                      <div className="p-4 bg-white rounded-2xl border-2 border-gray-300 mb-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <Label className="text-gray-600 text-xs font-medium">Команда 1</Label>
-                            <div className="font-bold text-green-700 text-lg">{formData.team1}</div>
+                            <div className="font-bold text-gray-800 text-lg">{formData.team1}</div>
                           </div>
                           <div>
                             <Label className="text-gray-600 text-xs font-medium">Команда 2</Label>
-                            <div className="font-bold text-green-700 text-lg">{formData.team2}</div>
+                            <div className="font-bold text-gray-800 text-lg">{formData.team2}</div>
                           </div>
                           <div>
                             <Label className="text-gray-600 text-xs font-medium">Турнір</Label>
-                            <div className="font-bold text-green-700 text-sm">{formData.tournament}</div>
+                            <div className="font-bold text-gray-800 text-sm">{formData.tournament}</div>
                           </div>
                         </div>
                       </div>
@@ -994,7 +994,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         type="button"
                         onClick={addExpressEvent}
                         disabled={expressEvents.length >= 10}
-                        className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
+                        className="w-full mt-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
                       >
                         <Plus className="h-5 w-5 mr-2" />
                         Додати подію до експресу ({expressEvents.length}/10)
@@ -1009,9 +1009,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <Separator />
                     
                     <div className="space-y-4">
-                      <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
+                      <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
                         <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                          <DollarSign className="h-5 w-5 text-yellow-600" />
+                          <DollarSign className="h-5 w-5 text-gray-600" />
                           Фінансові деталі
                         </h3>
                       
@@ -1078,10 +1078,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         </div>
                         
                         {formData.currency === 'USD' && formData.stake && formData.exchangeRate && (
-                          <div className="p-4 bg-white rounded-2xl border-2 border-blue-300 mt-4">
+                          <div className="p-4 bg-white rounded-2xl border-2 border-gray-300 mt-4">
                             <div className="flex items-center justify-between">
-                              <span className="text-blue-700 font-semibold">Сума в UAH (для аналітики):</span>
-                              <span className="font-bold text-blue-900 text-xl">
+                              <span className="text-gray-700 font-semibold">Сума в UAH (для аналітики):</span>
+                              <span className="font-bold text-gray-900 text-xl">
                                 ₴{convertToUAH(parseFloat(formData.stake), formData.currency, parseFloat(formData.exchangeRate)).toFixed(2)}
                               </span>
                             </div>
@@ -1096,15 +1096,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
             {/* Express Events Display */}
             {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-              <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-lg">
+              <Card className="border-2 border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-lg">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-purple-900 flex items-center gap-2">
+                    <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
                       <Trophy className="h-5 w-5" />
                       Події експресу ({expressEvents.length}/10)
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-purple-600 text-white border-0 rounded-full text-sm px-3 py-1">
+                      <Badge className="bg-gray-700 text-white border-0 rounded-full text-sm px-3 py-1">
                         Коеф: {totalExpressOdds.toFixed(2)}
                       </Badge>
                       <Button
@@ -1163,16 +1163,16 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {expressEvents.map((event, index) => (
-                      <div key={index} className="p-3 bg-white rounded-xl border-2 border-purple-200 flex items-start justify-between gap-3 hover:border-purple-300 transition-colors">
+                      <div key={index} className="p-3 bg-white rounded-xl border-2 border-gray-300 flex items-start justify-between gap-3 hover:border-gray-400 transition-colors">
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <Badge className="bg-purple-100 text-purple-700 border-0 rounded-full text-xs font-bold">
+                            <Badge className="bg-gray-200 text-gray-800 border-0 rounded-full text-xs font-bold">
                               #{index + 1}
                             </Badge>
                             <span className="font-semibold text-gray-900 text-sm">{event.match}</span>
                           </div>
                           <div className="text-xs text-gray-600">
-                            {event.betType}: <span className="font-medium text-purple-700">{event.selection}</span>
+                            {event.betType}: <span className="font-medium text-gray-800">{event.selection}</span>
                           </div>
                           <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
                             Коеф {event.odds}
@@ -1199,7 +1199,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-3xl font-bold py-8 text-lg shadow-2xl transform hover:scale-[1.02] transition-all"
+                className="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white rounded-3xl font-bold py-8 text-lg shadow-2xl transform hover:scale-[1.02] transition-all"
               >
                 {isSubmitting ? (
                   <>
@@ -1221,20 +1221,20 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         <div className="space-y-6">
           {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
             <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden sticky top-6">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Calculator className="h-5 w-5 text-blue-600" />
+                  <div className="p-2 bg-gray-200 rounded-xl">
+                    <Calculator className="h-5 w-5 text-gray-700" />
                   </div>
                   Розрахунки
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
+                  <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-300">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-700 font-semibold">Загальний коефіцієнт:</span>
-                      <Badge className="bg-purple-600 text-white border-0 rounded-full text-lg px-4 py-1">
+                      <Badge className="bg-gray-700 text-white border-0 rounded-full text-lg px-4 py-1">
                         {totalExpressOdds.toFixed(2)}
                       </Badge>
                     </div>
