@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, ChevronDown, Eye, Zap, TrendingDown, PieChart } from 'lucide-react';
 import { toast } from 'sonner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, Line, ComposedChart } from 'recharts';
 
 interface BetData {
   strategy?: string;
@@ -240,12 +240,18 @@ export default function StrategyOverview() {
 
   const getRoiChartData = () => {
     return Object.entries(strategyStats)
-      .map(([name, stats]) => ({
-        name: name.length > 15 ? name.substring(0, 15) + '...' : name,
-        fullName: name,
-        roi: parseFloat(stats.roi.toFixed(1)),
-        riskLevel: strategies.find(s => s.name === name)?.riskLevel || 'Medium'
-      }))
+      .map(([name, stats]) => {
+        const strategy = strategies.find(s => s.name === name);
+        return {
+          name: name.length > 12 ? name.substring(0, 12) + '...' : name,
+          fullName: name,
+          roi: parseFloat(stats.roi.toFixed(1)),
+          winRate: parseFloat(stats.winRate.toFixed(1)),
+          totalBets: stats.totalBets,
+          profit: parseFloat(stats.totalProfit.toFixed(0)),
+          riskLevel: strategy?.riskLevel || 'Medium'
+        };
+      })
       .sort((a, b) => b.roi - a.roi)
       .slice(0, 5);
   };
@@ -880,64 +886,126 @@ export default function StrategyOverview() {
             </Card>
           </div>
 
-          {/* Middle Row - ROI Bar Chart */}
+          {/* REDESIGNED: Enhanced ROI Comparison Chart */}
           {roiChartData.length > 0 && (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <BarChart3 className="h-5 w-5 text-purple-600" />
-                  Порівняння ROI стратегій
+            <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 backdrop-blur-xl overflow-hidden">
+              <CardHeader className="border-b border-gray-100 bg-white/60">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
+                    <BarChart3 className="h-5 w-5 text-white" />
+                  </div>
+                  Порівняння ефективності стратегій
                 </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">Детальний аналіз ROI, Win Rate та прибутку по кожній стратегії</p>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CardContent className="p-6">
+                <ResponsiveContainer width="100%" height={400}>
+                  <ComposedChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                    <defs>
+                      <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                     <XAxis 
                       dataKey="name" 
                       angle={-45} 
                       textAnchor="end" 
                       height={100}
+                      tick={{ fontSize: 12, fill: '#4b5563', fontWeight: 600 }}
+                    />
+                    <YAxis 
+                      yAxisId="left"
+                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontWeight: 600 } }}
                       tick={{ fontSize: 12, fill: '#6b7280' }}
                     />
                     <YAxis 
-                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280' } }}
+                      yAxisId="right"
+                      orientation="right"
+                      label={{ value: 'Win Rate (%)', angle: 90, position: 'insideRight', style: { fill: '#6b7280', fontWeight: 600 } }}
                       tick={{ fontSize: 12, fill: '#6b7280' }}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
-                        padding: '8px 12px'
+                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                        border: '2px solid #e5e7eb',
+                        borderRadius: '16px',
+                        padding: '12px 16px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                       }}
-                      formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']}
+                      formatter={(value: number, name: string) => {
+                        if (name === 'roi') return [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI'];
+                        if (name === 'winRate') return [`${value.toFixed(1)}%`, 'Win Rate'];
+                        if (name === 'profit') return [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток'];
+                        return [value, name];
+                      }}
                       labelFormatter={(label, payload) => {
                         if (payload && payload[0]) {
-                          return payload[0].payload.fullName;
+                          const data = payload[0].payload;
+                          return (
+                            <div className="font-bold text-gray-900">
+                              {data.fullName}
+                              <div className="text-xs text-gray-500 font-normal mt-1">
+                                {data.totalBets} ставок • Ризик: {data.riskLevel}
+                              </div>
+                            </div>
+                          );
                         }
                         return label;
                       }}
                     />
-                    <Bar dataKey="roi" radius={[8, 8, 0, 0]}>
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '20px' }}
+                      iconType="circle"
+                      formatter={(value) => {
+                        const labels: Record<string, string> = {
+                          roi: 'ROI (%)',
+                          winRate: 'Win Rate (%)',
+                          profit: 'Прибуток (₴)'
+                        };
+                        return <span className="text-sm font-medium text-gray-700">{labels[value] || value}</span>;
+                      }}
+                    />
+                    <Bar yAxisId="left" dataKey="roi" fill="url(#colorRoi)" radius={[12, 12, 0, 0]} barSize={60}>
                       {roiChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} />
+                        <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} opacity={0.9} />
                       ))}
                     </Bar>
-                  </BarChart>
+                    <Line 
+                      yAxisId="right" 
+                      type="monotone" 
+                      dataKey="winRate" 
+                      stroke="#10b981" 
+                      strokeWidth={3}
+                      dot={{ fill: '#10b981', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                      activeDot={{ r: 8 }}
+                    />
+                  </ComposedChart>
                 </ResponsiveContainer>
-                <div className="flex items-center justify-center gap-6 mt-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-gray-600">Низький ризик</span>
+                
+                {/* Enhanced Legend with Stats */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center justify-center gap-3 p-3 bg-green-50 rounded-2xl border border-green-200">
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    <div className="text-sm">
+                      <div className="font-bold text-green-900">Низький ризик</div>
+                      <div className="text-xs text-green-700">Стабільний прибуток</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-gray-600">Середній ризик</span>
+                  <div className="flex items-center justify-center gap-3 p-3 bg-yellow-50 rounded-2xl border border-yellow-200">
+                    <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                    <div className="text-sm">
+                      <div className="font-bold text-yellow-900">Середній ризик</div>
+                      <div className="text-xs text-yellow-700">Збалансований підхід</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-gray-600">Високий ризик</span>
+                  <div className="flex items-center justify-center gap-3 p-3 bg-red-50 rounded-2xl border border-red-200">
+                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                    <div className="text-sm">
+                      <div className="font-bold text-red-900">Високий ризик</div>
+                      <div className="text-xs text-red-700">Агресивна стратегія</div>
+                    </div>
                   </div>
                 </div>
               </CardContent>

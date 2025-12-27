@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { 
   Trophy, 
@@ -19,10 +19,7 @@ import {
   ChevronUp,
   Target,
   Zap,
-  BarChart3,
-  Lightbulb,
-  Info,
-  TrendingDown as TrendingDownIcon
+  BarChart3
 } from 'lucide-react';
 
 interface Bet {
@@ -39,14 +36,6 @@ interface Bet {
   roi?: number;
   currency?: string;
   goalId?: string;
-}
-
-interface QuickInsight {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  description: string;
-  color: string;
 }
 
 export default function BettingHistory() {
@@ -132,80 +121,6 @@ export default function BettingHistory() {
     ? (completedBets.filter(bet => bet.result === 'Win').length / completedBets.length * 100).toFixed(1)
     : '0';
 
-  // NEW: Calculate Quick Insights
-  const calculateQuickInsights = (): QuickInsight[] => {
-    if (completedBets.length === 0) return [];
-
-    // Most profitable bet type
-    const betTypeProfit: Record<string, number> = {};
-    completedBets.forEach(bet => {
-      const mainType = bet.betType.split(' - ')[0];
-      betTypeProfit[mainType] = (betTypeProfit[mainType] || 0) + (bet.profit || 0);
-    });
-    const mostProfitableType = Object.entries(betTypeProfit).sort((a, b) => b[1] - a[1])[0];
-
-    // Worst odds range
-    const oddsRanges = {
-      'low': { min: 1.0, max: 1.5, profit: 0, count: 0 },
-      'medium': { min: 1.5, max: 2.0, profit: 0, count: 0 },
-      'high': { min: 2.0, max: 3.0, profit: 0, count: 0 },
-      'veryHigh': { min: 3.0, max: 10.0, profit: 0, count: 0 }
-    };
-
-    completedBets.forEach(bet => {
-      if (bet.odds >= 1.0 && bet.odds < 1.5) {
-        oddsRanges.low.profit += (bet.profit || 0);
-        oddsRanges.low.count++;
-      } else if (bet.odds >= 1.5 && bet.odds < 2.0) {
-        oddsRanges.medium.profit += (bet.profit || 0);
-        oddsRanges.medium.count++;
-      } else if (bet.odds >= 2.0 && bet.odds < 3.0) {
-        oddsRanges.high.profit += (bet.profit || 0);
-        oddsRanges.high.count++;
-      } else if (bet.odds >= 3.0) {
-        oddsRanges.veryHigh.profit += (bet.profit || 0);
-        oddsRanges.veryHigh.count++;
-      }
-    });
-
-    const worstRange = Object.entries(oddsRanges)
-      .filter(([_, data]) => data.count > 0)
-      .sort((a, b) => a[1].profit - b[1].profit)[0];
-
-    const rangeLabels: Record<string, string> = {
-      low: '1.0-1.5',
-      medium: '1.5-2.0',
-      high: '2.0-3.0',
-      veryHigh: '3.0+'
-    };
-
-    const insights: QuickInsight[] = [];
-
-    if (mostProfitableType) {
-      insights.push({
-        icon: <Trophy className="h-5 w-5" />,
-        label: 'Найприбутковіший тип',
-        value: mostProfitableType[0],
-        description: `Принесено +${mostProfitableType[1].toFixed(2)} ₴`,
-        color: 'green'
-      });
-    }
-
-    if (worstRange) {
-      insights.push({
-        icon: <TrendingDownIcon className="h-5 w-5" />,
-        label: 'Найгірший діапазон коефіцієнтів',
-        value: rangeLabels[worstRange[0]],
-        description: `Втрачено ${worstRange[1].profit.toFixed(2)} ₴ на ${worstRange[1].count} ставках`,
-        color: 'red'
-      });
-    }
-
-    return insights;
-  };
-
-  const quickInsights = calculateQuickInsights();
-
   interface ParsedEvent {
     number: string;
     match: string;
@@ -258,58 +173,7 @@ export default function BettingHistory() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* NEW: Quick Insights Card */}
-        {quickInsights.length > 0 && (
-          <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-amber-50 to-orange-50 overflow-hidden">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg font-bold text-gray-900">
-                <div className="p-2 bg-amber-100 rounded-xl">
-                  <Lightbulb className="h-5 w-5 text-amber-600" />
-                </div>
-                💡 Швидкі інсайти
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quickInsights.map((insight, index) => (
-                  <Tooltip key={index}>
-                    <TooltipTrigger asChild>
-                      <div className={`p-4 rounded-2xl border-2 cursor-help transition-all hover:scale-[1.02] ${
-                        insight.color === 'green' 
-                          ? 'bg-green-50 border-green-200 hover:border-green-300' 
-                          : 'bg-red-50 border-red-200 hover:border-red-300'
-                      }`}>
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl ${
-                            insight.color === 'green' ? 'bg-green-100' : 'bg-red-100'
-                          }`}>
-                            <div className={insight.color === 'green' ? 'text-green-600' : 'text-red-600'}>
-                              {insight.icon}
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-600 mb-1">{insight.label}</p>
-                            <p className={`text-lg font-bold ${
-                              insight.color === 'green' ? 'text-green-700' : 'text-red-700'
-                            }`}>
-                              {insight.value}
-                            </p>
-                          </div>
-                          <Info className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs">
-                      <p className="text-sm">{insight.description}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* NEW: Improved Filters Card with Basic/Advanced Split */}
+        {/* Filters Card with Basic/Advanced Split */}
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -421,7 +285,7 @@ export default function BettingHistory() {
           </CardContent>
         </Card>
 
-        {/* Stats Cards - SAME AS ANALYTICS */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardContent className="pt-6">
@@ -536,24 +400,34 @@ export default function BettingHistory() {
                       const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
                       const parsedEvents = isExpress ? parseExpressEvents(bet.betType) : [];
                       const isExpanded = expandedExpressBets.has(index);
+                      const isPending = bet.result === 'Pending';
                       
                       return (
-                        <tr key={index} className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all">
+                        <tr 
+                          key={index} 
+                          className={`border-b border-gray-100 transition-all ${
+                            isPending 
+                              ? 'bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border-l-4 border-l-amber-400' 
+                              : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50'
+                          }`}
+                        >
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Calendar className="h-4 w-4 text-blue-600" />
+                              <div className={`p-2 rounded-lg ${isPending ? 'bg-amber-200' : 'bg-blue-100'}`}>
+                                <Calendar className={`h-4 w-4 ${isPending ? 'text-amber-700' : 'text-blue-600'}`} />
                               </div>
-                              <span className="text-sm font-bold text-gray-900">{bet.date}</span>
+                              <span className={`text-sm font-bold ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>{bet.date}</span>
                             </div>
                           </td>
                           <td className="p-4">
                             <div className="space-y-2">
-                              <div className="font-bold text-gray-900 text-base truncate" title={displayMatch}>{displayMatch}</div>
+                              <div className={`font-bold text-base truncate ${isPending ? 'text-amber-900' : 'text-gray-900'}`} title={displayMatch}>{displayMatch}</div>
                               {!isExpress && (
-                                <div className="text-xs text-gray-600 truncate" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
+                                <div className={`text-xs truncate ${isPending ? 'text-amber-700' : 'text-gray-600'}`} title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
                               )}
-                              <Badge className="text-xs rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
+                              <Badge className={`text-xs rounded-full border-0 font-bold ${
+                                isPending ? 'bg-amber-200 text-amber-800' : 'bg-purple-100 text-purple-700'
+                              }`}>
                                 {bet.format}
                               </Badge>
                             </div>
@@ -584,29 +458,37 @@ export default function BettingHistory() {
                                 </Button>
                               </div>
                             ) : (
-                              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                              <Badge className={`rounded-full border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate ${
+                                isPending ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-700'
+                              }`} title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                 {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                               </Badge>
                             )}
                           </td>
                           <td className="p-4">
-                            <Badge className="rounded-full bg-cyan-100 text-cyan-700 border-0 font-bold text-sm px-3 py-1">
+                            <Badge className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
+                              isPending ? 'bg-amber-200 text-amber-800' : 'bg-cyan-100 text-cyan-700'
+                            }`}>
                               {bet.currency || 'UAH'}
                             </Badge>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-green-600" />
-                              <span className="font-bold text-gray-900 text-base">₴{bet.amount}</span>
+                              <DollarSign className={`h-4 w-4 ${isPending ? 'text-amber-600' : 'text-green-600'}`} />
+                              <span className={`font-bold text-base ${isPending ? 'text-amber-900' : 'text-gray-900'}`}>₴{bet.amount}</span>
                             </div>
                           </td>
                           <td className="p-4">
-                            <Badge className="rounded-full bg-orange-100 text-orange-700 border-0 font-bold text-base px-3 py-1">
+                            <Badge className={`rounded-full border-0 font-bold text-base px-3 py-1 ${
+                              isPending ? 'bg-amber-200 text-amber-800' : 'bg-orange-100 text-orange-700'
+                            }`}>
                               {bet.odds.toFixed(2)}
                             </Badge>
                           </td>
                           <td className="p-4">
-                            <span className="text-gray-600 font-medium text-xs truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                            <span className={`font-medium text-xs truncate max-w-[120px] block ${
+                              isPending ? 'text-amber-700' : 'text-gray-600'
+                            }`} title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
@@ -619,8 +501,8 @@ export default function BettingHistory() {
                                   <AlertTriangle className="h-5 w-5 text-red-600" />
                                 </div>
                               ) : (
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                  <Clock className="h-5 w-5 text-blue-600" />
+                                <div className="p-2 bg-amber-200 rounded-lg">
+                                  <Clock className="h-5 w-5 text-amber-700" />
                                 </div>
                               )}
                               <Badge 
@@ -629,7 +511,7 @@ export default function BettingHistory() {
                                     ? 'bg-green-100 text-green-700' 
                                     : bet.result === 'Loss' 
                                     ? 'bg-red-100 text-red-700' 
-                                    : 'bg-blue-100 text-blue-700'
+                                    : 'bg-amber-200 text-amber-800'
                                 }`}
                               >
                                 {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}

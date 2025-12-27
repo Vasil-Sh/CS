@@ -530,24 +530,9 @@ export default function Analytics() {
         </Alert>
       )}
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Поточний банк ПЕРШИЙ */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* 1. Всього ставок */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
-                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <BarChart3 className="h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 2. Поточний банк - АКЦЕНТНА КАРТКА */}
+        {/* 1. Поточний банк - ПЕРША КАРТКА */}
         <Card 
           className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 relative group"
           onClick={() => setBankModalOpen(true)}
@@ -570,6 +555,21 @@ export default function Analytics() {
               </div>
               <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                 <Wallet className="h-7 w-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 2. Всього ставок */}
+        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
+                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <BarChart3 className="h-7 w-7 text-blue-600" />
               </div>
             </div>
           </CardContent>
