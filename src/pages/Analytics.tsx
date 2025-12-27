@@ -427,11 +427,11 @@ export default function Analytics() {
     return balanceData;
   };
 
-  // Enhanced odds vs profit with color coding and strategy
+  // Enhanced odds vs profit with color coding and strategy - ROUNDED TO 2 DECIMALS
   const oddsVsProfitData = (): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
-      odds: bet.odds || 0,
-      profit: bet.profit || 0,
+      odds: Math.round(Number(bet.odds) * 100) / 100,
+      profit: Math.round(Number(bet.profit) * 100) / 100,
       result: bet.result,
       betType: bet.betType || 'Winner',
       match: bet.match || '',
@@ -459,12 +459,12 @@ export default function Analytics() {
       const data = payload[0].payload;
       return (
         <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border-2 border-gray-200">
-          <p className="text-sm font-bold text-gray-900 mb-2">Коеф.: {data.odds}</p>
+          <p className="text-sm font-bold text-gray-900 mb-2">Коеф.: {Number(data.odds).toFixed(2)}</p>
           {data.match && (
             <p className="text-sm text-gray-700 mb-1">Ставка: {data.match}</p>
           )}
           <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            Профіт: {data.profit >= 0 ? '+' : ''}{data.profit.toFixed(2)} ₴
+            Профіт: {data.profit >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
           </p>
           {data.betType && (
             <p className="text-sm text-gray-600">Тип: {data.betType}</p>
@@ -823,6 +823,7 @@ export default function Analytics() {
                             tick={{ fontSize: 12 }}
                             stroke="#6b7280"
                             label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6b7280' } }}
+                            tickFormatter={(value) => Number(value).toFixed(2)}
                           />
                           <YAxis 
                             dataKey="profit" 

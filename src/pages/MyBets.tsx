@@ -402,7 +402,7 @@ export default function MyBets() {
                           Матч
                         </div>
                       </th>
-                      <th className="text-center p-4 w-48 text-xs font-black text-gray-700 uppercase tracking-wider">Тип</th>
+                      <th className="text-center p-4 w-40 text-xs font-black text-gray-700 uppercase tracking-wider">Тип</th>
                       <th className="text-center p-4 w-24 text-xs font-black text-gray-700 uppercase tracking-wider">Валюта</th>
                       <th className="text-center p-4 w-28 text-xs font-black text-gray-700 uppercase tracking-wider">Сума</th>
                       <th className="text-center p-4 w-24 text-xs font-black text-gray-700 uppercase tracking-wider">Коеф.</th>
@@ -474,24 +474,24 @@ export default function MyBets() {
                           </td>
                           <td className="p-4">
                             {isExpress ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
+                              <div className="flex flex-col items-center gap-1.5">
+                                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-xs px-2.5 py-0.5 whitespace-nowrap">
                                   Express {expressEventCount}×
                                 </Badge>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleExpressDetailsClick(bet)}
-                                  className="rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-3 py-1 h-8"
+                                  className="rounded-lg border border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-medium text-purple-700 text-xs px-2 py-1 h-7"
                                 >
-                                  <Eye className="h-3.5 w-3.5 mr-1" />
+                                  <Eye className="h-3 w-3 mr-1" />
                                   Деталі
                                 </Button>
                               </div>
                             ) : (
                               <div className="flex justify-center">
-                                <Badge className={`rounded-full border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate ${
-                                  isPending ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-700'
+                                <Badge className={`rounded-full border-0 font-medium text-xs px-2.5 py-1 max-w-[140px] truncate ${
+                                  isPending ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
                                 }`} title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                   {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                                 </Badge>

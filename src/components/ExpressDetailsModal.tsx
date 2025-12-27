@@ -52,8 +52,8 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
           </DialogTitle>
         </DialogHeader>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-4 gap-3 mt-4">
+        {/* Summary Stats - БЕЗ БЛОКУ ПРОФІТ */}
+        <div className="grid grid-cols-3 gap-3 mt-4">
           <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
             <div className="flex items-center gap-2 mb-1">
               <Target className="h-4 w-4 text-gray-600" />
@@ -88,20 +88,6 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             >
               {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
             </Badge>
-          </div>
-
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-gray-600" />
-              <span className="text-xs font-medium text-gray-600">Профіт</span>
-            </div>
-            {bet.originalProfit !== undefined && bet.originalProfit !== null ? (
-              <p className={`text-xl font-semibold ${bet.originalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {bet.currency === 'USD' ? '$' : '₴'}{bet.originalProfit >= 0 ? '+' : ''}{bet.originalProfit.toFixed(2)}
-              </p>
-            ) : (
-              <p className="text-xl font-semibold text-gray-400">—</p>
-            )}
           </div>
         </div>
 
