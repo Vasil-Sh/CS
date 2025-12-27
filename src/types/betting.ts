@@ -6,6 +6,7 @@ export interface Bet {
   betType: string;
   odds: number;
   amount: number;
+  stake?: number;
   date: string;
   result: 'Win' | 'Loss' | 'Pending';
   profit?: number;
@@ -45,10 +46,15 @@ export interface BalanceData {
   date: string;
   balance: number;
   profit: number;
+  betName?: string;
+  odds?: number;
 }
 
 export interface ScatterData {
   odds: number;
   profit: number;
   result: string;
+  betType?: string;
+  match?: string;
+  fill?: string;
 }

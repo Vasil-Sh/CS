@@ -39,8 +39,27 @@ import {
   Wallet,
   Edit
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart, Legend, ReferenceLine, ReferenceArea } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
+
+interface TooltipPayload {
+  payload: ScatterData;
+}
+
+interface ScatterTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+}
+
+interface MonthlyData {
+  month: string;
+  profit: number;
+  cumulative: number;
+  wins: number;
+  losses: number;
+  totalBets: number;
+  winRate: number;
+}
 
 export default function Analytics() {
   const currentUser = localStorage.getItem('currentUser') || '';
@@ -340,7 +359,7 @@ export default function Analytics() {
   };
 
   // Monthly profit data with cumulative
-  const monthlyProfitData = () => {
+  const monthlyProfitData = (): MonthlyData[] => {
     const monthlyData: { [key: string]: { profit: number; wins: number; losses: number } } = {};
     
     completedBets.forEach((bet: Bet) => {
@@ -373,40 +392,49 @@ export default function Analytics() {
           cumulative: Math.round(cumulative * 100) / 100,
           wins: data.wins,
           losses: data.losses,
+          totalBets: data.wins + data.losses,
           winRate: data.wins + data.losses > 0 ? Math.round((data.wins / (data.wins + data.losses)) * 100) : 0
         };
       });
   };
 
-  // Balance over time
+  // Balance over time with enhanced data
   const balanceOverTime = (): BalanceData[] => {
-    const initialBalance = 1000;
+    const initialBalance = bankrollStats.initialBank || 1000;
     let runningBalance = initialBalance;
     
     const sortedBets = [...completedBets].sort((a: Bet, b: Bet) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
-    const balanceData: BalanceData[] = [{ date: sortedBets[0]?.date || new Date().toISOString().split('T')[0], balance: initialBalance, profit: 0 }];
+    const balanceData: BalanceData[] = [{ 
+      date: sortedBets[0]?.date || new Date().toISOString().split('T')[0], 
+      balance: initialBalance, 
+      profit: 0 
+    }];
     
     sortedBets.forEach((bet: Bet) => {
       runningBalance += bet.profit || 0;
       balanceData.push({
         date: bet.date,
         balance: runningBalance,
-        profit: bet.profit || 0
+        profit: bet.profit || 0,
+        betName: bet.match || bet.betType || 'Ставка',
+        odds: bet.odds
       });
     });
     
     return balanceData;
   };
 
-  // Enhanced odds vs profit with color coding
+  // Enhanced odds vs profit with color coding and strategy
   const oddsVsProfitData = (): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
       odds: bet.odds || 0,
       profit: bet.profit || 0,
       result: bet.result,
+      betType: bet.betType || 'Winner',
+      match: bet.match || '',
       fill: bet.result === 'Win' ? '#10b981' : '#ef4444'
     }));
   };
@@ -424,6 +452,28 @@ export default function Analytics() {
     roi: range.count > 0 ? Math.round((range.profit / (range.count * 100)) * 100) : 0,
     bets: range.count
   }));
+
+  // Custom tooltip for scatter chart
+  const ScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border-2 border-gray-200">
+          <p className="text-sm font-bold text-gray-900 mb-2">Коеф.: {data.odds}</p>
+          {data.match && (
+            <p className="text-sm text-gray-700 mb-1">Ставка: {data.match}</p>
+          )}
+          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            Профіт: {data.profit >= 0 ? '+' : ''}{data.profit.toFixed(2)} ₴
+          </p>
+          {data.betType && (
+            <p className="text-sm text-gray-600">Тип: {data.betType}</p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -661,6 +711,13 @@ export default function Analytics() {
                               if (name === 'winRate') return [`${value}%`, 'Win Rate'];
                               return [value, name];
                             }}
+                            labelFormatter={(label: string) => {
+                              const monthData = monthlyProfit.find(m => m.month === label);
+                              if (monthData) {
+                                return `${label} (${monthData.totalBets} ставок)`;
+                              }
+                              return label;
+                            }}
                           />
                           <Area 
                             type="monotone" 
@@ -688,11 +745,17 @@ export default function Analytics() {
                           <p className="text-lg font-bold text-green-600">
                             +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
                           </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {monthlyProfit.find(m => m.profit === Math.max(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
+                          </p>
                         </div>
                         <div className="text-center p-3 bg-red-50 rounded-xl">
                           <p className="text-xs text-gray-600 mb-1">Гірший місяць</p>
                           <p className="text-lg font-bold text-red-600">
                             {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {monthlyProfit.find(m => m.profit === Math.min(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
                           </p>
                         </div>
                         <div className="text-center p-3 bg-purple-50 rounded-xl">
@@ -700,12 +763,15 @@ export default function Analytics() {
                           <p className="text-lg font-bold text-purple-600">
                             {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
                           </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {Math.round(monthlyProfit.reduce((sum, m) => sum + m.totalBets, 0) / monthlyProfit.length)} ставок
+                          </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Enhanced Scatter Chart with Win/Loss Colors */}
+                  {/* Enhanced Scatter Chart with Zones */}
                   <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                       <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
@@ -731,6 +797,26 @@ export default function Analytics() {
                       <ResponsiveContainer width="100%" height={300}>
                         <ScatterChart>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          
+                          {/* Vertical zones for odds ranges */}
+                          <ReferenceArea x1={0} x2={1.5} fill="#dbeafe" fillOpacity={0.3} />
+                          <ReferenceArea x1={1.5} x2={2.0} fill="#bfdbfe" fillOpacity={0.3} />
+                          <ReferenceArea x1={2.0} x2={3.0} fill="#93c5fd" fillOpacity={0.3} />
+                          <ReferenceArea x1={3.0} x2={10} fill="#60a5fa" fillOpacity={0.3} />
+                          
+                          {/* Zero profit line */}
+                          <ReferenceLine 
+                            y={0} 
+                            stroke="#9ca3af" 
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                            label={{ 
+                              value: 'Нульова лінія', 
+                              position: 'insideTopRight',
+                              style: { fontSize: 11, fill: '#6b7280', fontWeight: 500 }
+                            }}
+                          />
+                          
                           <XAxis 
                             dataKey="odds" 
                             name="Коефіцієнт"
@@ -745,19 +831,7 @@ export default function Analytics() {
                             stroke="#6b7280"
                             label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
                           />
-                          <Tooltip 
-                            contentStyle={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                              border: 'none', 
-                              borderRadius: '12px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                            }}
-                            formatter={(value: number | string, name: string) => {
-                              if (name === 'odds') return [value, 'Коефіцієнт'];
-                              if (name === 'profit') return [`${value} ₴`, 'Прибуток'];
-                              return [value, name];
-                            }}
-                          />
+                          <Tooltip content={<ScatterTooltip />} />
                           <Scatter 
                             data={scatterData} 
                             fill="#8b5cf6"
