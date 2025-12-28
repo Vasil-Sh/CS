@@ -27,7 +27,9 @@ import {
   EyeOff,
   MousePointerClick,
   CheckCircle,
-  Info
+  Info,
+  Brain,
+  Sparkles
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +39,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import AIRecommendationModal from '@/components/AIRecommendationModal';
+import { geminiService, type AIRecommendation } from '@/lib/geminiService';
 
 // Form Stability Types
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
@@ -335,6 +339,12 @@ export default function Matches() {
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // AI Recommendation Modal State
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  
   // Load risky teams from admin_risky_teams (global storage)
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   
@@ -405,6 +415,34 @@ export default function Matches() {
     }
     
     return comments.length > 0 ? comments.join('\n') : '';
+  };
+
+  const handleGetAIRecommendation = async (match: Match) => {
+    setSelectedMatch(match);
+    setAiModalOpen(true);
+    setAiLoading(true);
+    setAiRecommendation(null);
+
+    try {
+      const recommendation = await geminiService.getMatchRecommendation({
+        team1: match.team1,
+        team2: match.team2,
+        format: match.matchType,
+        tier: match.tier.toUpperCase(),
+        odds: match.odds
+      });
+
+      setAiRecommendation(recommendation);
+    } catch (error) {
+      console.error('Error getting AI recommendation:', error);
+      toast({
+        title: '❌ Помилка',
+        description: 'Не вдалося отримати AI рекомендацію',
+        variant: 'destructive'
+      });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   // Apply filters
@@ -758,6 +796,7 @@ export default function Matches() {
                       <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Win Rate</th>
                       <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Form</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Турнір</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">AI Рекомендація</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коментар</th>
                       <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider"></th>
                     </tr>
@@ -863,6 +902,16 @@ export default function Matches() {
                             <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
                           </td>
                           <td className="p-4 border-r border-gray-200">
+                            <Button
+                              onClick={() => handleGetAIRecommendation(match)}
+                              className="rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-md transition-all hover:scale-105 flex items-center gap-2"
+                              size="sm"
+                            >
+                              <Brain className="h-4 w-4" />
+                              Отримати прогноз
+                            </Button>
+                          </td>
+                          <td className="p-4 border-r border-gray-200">
                             {riskComments ? (
                               <div className="flex flex-col gap-2">
                                 <div 
@@ -948,6 +997,15 @@ export default function Matches() {
             </CardContent>
           </Card>
         )}
+
+        {/* AI Recommendation Modal */}
+        <AIRecommendationModal
+          open={aiModalOpen}
+          onClose={() => setAiModalOpen(false)}
+          matchInfo={selectedMatch ? `${selectedMatch.team1} vs ${selectedMatch.team2} (${selectedMatch.matchType}, ${selectedMatch.tier.toUpperCase()})` : ''}
+          recommendation={aiRecommendation}
+          loading={aiLoading}
+        />
       </div>
     </TooltipProvider>
   );
