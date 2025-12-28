@@ -794,8 +794,7 @@ export default function Matches() {
                       <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Info</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Турнір</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">AI Рекомендація</th>
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коментар</th>
-                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider"></th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Коментар</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -825,6 +824,16 @@ export default function Matches() {
                                   <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border-0 font-bold">
                                     {match.tier.toUpperCase()}
                                   </Badge>
+                                  {match.url && (
+                                    <a 
+                                      href={match.url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-blue-50 rounded-lg inline-block"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -889,16 +898,18 @@ export default function Matches() {
                           </td>
                           <td className="p-4 text-center border-r border-gray-200">
                             <div className="flex flex-col items-center gap-2">
-                              {/* Hot/Safe Pick Icons */}
+                              {/* Hot/Safe Pick Icons with Text */}
                               <div className="flex items-center gap-1.5">
                                 {safePick && (
-                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
                                     <Shield className="h-3 w-3" />
+                                    Safe Pick
                                   </Badge>
                                 )}
                                 {isHotMatch && (
-                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
+                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
                                     <Flame className="h-3 w-3" />
+                                    Hot
                                   </Badge>
                                 )}
                               </div>
@@ -923,7 +934,7 @@ export default function Matches() {
                               Отримати прогноз
                             </Button>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4">
                             {riskComments ? (
                               <Button
                                 onClick={() => handleShowComment(match)}
@@ -935,18 +946,6 @@ export default function Matches() {
                               </Button>
                             ) : (
                               <div className="text-xs text-gray-400">—</div>
-                            )}
-                          </td>
-                          <td className="p-4 text-center">
-                            {match.url && (
-                              <a 
-                                href={match.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 transition-colors p-1.5 hover:bg-blue-50 rounded-lg inline-block"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
                             )}
                           </td>
                         </tr>
