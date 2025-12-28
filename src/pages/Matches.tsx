@@ -40,6 +40,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import AIRecommendationModal from '@/components/AIRecommendationModal';
+import CommentModal from '@/components/CommentModal';
 import { geminiService, type AIRecommendation } from '@/lib/geminiService';
 
 // Form Stability Types
@@ -345,10 +346,13 @@ export default function Matches() {
   const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   
+  // Comment Modal State
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [selectedCommentMatch, setSelectedCommentMatch] = useState<Match | null>(null);
+  
   // Load risky teams from admin_risky_teams (global storage)
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   
-  const [visibleComments, setVisibleComments] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -364,18 +368,6 @@ export default function Matches() {
     } catch (error) {
       console.error('Error loading risky teams:', error);
     }
-  };
-
-  const toggleCommentVisibility = (matchId: string) => {
-    setVisibleComments(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(matchId)) {
-        newSet.delete(matchId);
-      } else {
-        newSet.add(matchId);
-      }
-      return newSet;
-    });
   };
 
   const getTeamRiskInfo = (teamName: string): { notes: string; status: string } | null => {
@@ -443,6 +435,11 @@ export default function Matches() {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const handleShowComment = (match: Match) => {
+    setSelectedCommentMatch(match);
+    setCommentModalOpen(true);
   };
 
   // Apply filters
@@ -808,7 +805,6 @@ export default function Matches() {
                       const isHotMatch = match.aiConfidence > 70 && match.upsetProbability < 20;
                       const safePick = isSafePick(match);
                       const riskComments = getMatchRiskComments(match.team1, match.team2);
-                      const isCommentVisible = visibleComments.has(match.id);
                       const aiExplanation = getAIExplanation(match);
                       
                       return (
@@ -913,39 +909,14 @@ export default function Matches() {
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             {riskComments ? (
-                              <div className="flex flex-col gap-2">
-                                <div 
-                                  className={`text-xs font-medium whitespace-pre-line max-w-xs transition-all duration-300 rounded-lg p-2 ${
-                                    isCommentVisible 
-                                      ? 'bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 text-gray-900 border border-orange-200' 
-                                      : 'blur-sm select-none bg-gray-100 text-gray-400 border border-gray-200'
-                                  }`}
-                                >
-                                  {riskComments}
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => toggleCommentVisibility(match.id)}
-                                  className={`h-7 px-3 text-xs flex items-center gap-1.5 self-start rounded-full font-semibold transition-all ${
-                                    isCommentVisible
-                                      ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600'
-                                      : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
-                                  }`}
-                                >
-                                  {isCommentVisible ? (
-                                    <>
-                                      <EyeOff className="h-3.5 w-3.5" />
-                                      Приховати
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Eye className="h-3.5 w-3.5" />
-                                      Показати
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
+                              <Button
+                                onClick={() => handleShowComment(match)}
+                                className="rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold shadow-md transition-all hover:scale-105 flex items-center gap-2"
+                                size="sm"
+                              >
+                                <Eye className="h-4 w-4" />
+                                Показати
+                              </Button>
                             ) : (
                               <div className="text-xs text-gray-400">—</div>
                             )}
@@ -1005,6 +976,14 @@ export default function Matches() {
           matchInfo={selectedMatch ? `${selectedMatch.team1} vs ${selectedMatch.team2} (${selectedMatch.matchType}, ${selectedMatch.tier.toUpperCase()})` : ''}
           recommendation={aiRecommendation}
           loading={aiLoading}
+        />
+
+        {/* Comment Modal */}
+        <CommentModal
+          open={commentModalOpen}
+          onClose={() => setCommentModalOpen(false)}
+          matchInfo={selectedCommentMatch ? `${selectedCommentMatch.team1} vs ${selectedCommentMatch.team2} (${selectedCommentMatch.matchType}, ${selectedCommentMatch.tier.toUpperCase()})` : ''}
+          comment={selectedCommentMatch ? getMatchRiskComments(selectedCommentMatch.team1, selectedCommentMatch.team2) : ''}
         />
       </div>
     </TooltipProvider>
