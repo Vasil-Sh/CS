@@ -791,7 +791,7 @@ export default function Matches() {
                       </th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коефіцієнти</th>
                       <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Win Rate</th>
-                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Form</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Info</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Турнір</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">AI Рекомендація</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коментар</th>
@@ -888,10 +888,26 @@ export default function Matches() {
                             </div>
                           </td>
                           <td className="p-4 text-center border-r border-gray-200">
-                            <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3.5 py-1.5 rounded-full font-semibold text-sm shadow-sm`}>
-                              {formInfo.icon}
-                              {formInfo.label}
-                            </Badge>
+                            <div className="flex flex-col items-center gap-2">
+                              {/* Hot/Safe Pick Icons */}
+                              <div className="flex items-center gap-1.5">
+                                {safePick && (
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
+                                    <Shield className="h-3 w-3" />
+                                  </Badge>
+                                )}
+                                {isHotMatch && (
+                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
+                                    <Flame className="h-3 w-3" />
+                                  </Badge>
+                                )}
+                              </div>
+                              {/* Form Badge */}
+                              <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1 rounded-full font-semibold text-xs shadow-sm`}>
+                                {formInfo.icon}
+                                {formInfo.label}
+                              </Badge>
+                            </div>
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             <div className="text-sm text-gray-700 font-medium">{match.context}</div>
@@ -922,30 +938,16 @@ export default function Matches() {
                             )}
                           </td>
                           <td className="p-4 text-center">
-                            <div className="flex flex-col items-center gap-2">
-                              {safePick && (
-                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-3 py-1.5 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
-                                  <CheckCircle className="h-3.5 w-3.5" />
-                                  Safe Pick
-                                </Badge>
-                              )}
-                              {isHotMatch && (
-                                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
-                                  <Flame className="h-3.5 w-3.5" />
-                                  Hot
-                                </Badge>
-                              )}
-                              {match.url && (
-                                <a 
-                                  href={match.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-800 transition-colors p-1.5 hover:bg-blue-50 rounded-lg"
-                                >
-                                  <ExternalLink className="h-4 w-4" />
-                                </a>
-                              )}
-                            </div>
+                            {match.url && (
+                              <a 
+                                href={match.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 transition-colors p-1.5 hover:bg-blue-50 rounded-lg inline-block"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
                           </td>
                         </tr>
                       );
