@@ -1,12 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, TrendingUp, AlertTriangle, Target } from 'lucide-react';
+import type { AIRecommendation } from '@/lib/geminiService';
 
 interface AIRecommendationModalProps {
   open: boolean;
   onClose: () => void;
   matchInfo: string;
-  recommendation: string;
+  recommendation: AIRecommendation | null;
   isLoading?: boolean;
 }
 
@@ -17,8 +18,28 @@ export default function AIRecommendationModal({
   recommendation,
   isLoading = false
 }: AIRecommendationModalProps) {
-  // Parse recommendation sections - add null check
-  const sections = recommendation ? recommendation.split('\n\n') : [];
+  // Helper function to get risk badge color
+  const getRiskColor = (riskLevel: 'low' | 'medium' | 'high') => {
+    switch (riskLevel) {
+      case 'low':
+        return { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-700' };
+      case 'high':
+        return { bg: 'bg-red-50', border: 'border-red-200', icon: 'text-red-700' };
+      default:
+        return { bg: 'bg-amber-50', border: 'border-amber-200', icon: 'text-amber-700' };
+    }
+  };
+
+  const getRiskLabel = (riskLevel: 'low' | 'medium' | 'high') => {
+    switch (riskLevel) {
+      case 'low':
+        return 'Низький ризик';
+      case 'high':
+        return 'Високий ризик';
+      default:
+        return 'Помірний ризик';
+    }
+  };
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -57,7 +78,7 @@ export default function AIRecommendationModal({
               <p className="text-gray-600 font-semibold">Аналізую матч...</p>
             </div>
           </div>
-        ) : !recommendation || sections.length === 0 ? (
+        ) : !recommendation ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="p-4 bg-gray-100 rounded-2xl border-2 border-gray-200 shadow-md inline-block">
@@ -69,52 +90,82 @@ export default function AIRecommendationModal({
           </div>
         ) : (
           <div className="space-y-6 mt-6">
-            {sections.map((section, index) => {
-              const lines = section.split('\n').filter(line => line.trim());
-              if (lines.length === 0) return null;
-
-              const title = lines[0];
-              const content = lines.slice(1);
-
-              // Determine icon and color based on section
-              let icon = <Target className="h-5 w-5 text-gray-700" />;
-              let bgColor = 'bg-gray-50';
-              let borderColor = 'border-gray-200';
-
-              if (title.includes('Рекомендація') || title.includes('Висновок')) {
-                icon = <TrendingUp className="h-5 w-5 text-green-700" />;
-                bgColor = 'bg-green-50';
-                borderColor = 'border-green-200';
-              } else if (title.includes('Ризик') || title.includes('Увага')) {
-                icon = <AlertTriangle className="h-5 w-5 text-amber-700" />;
-                bgColor = 'bg-amber-50';
-                borderColor = 'border-amber-200';
-              }
-
-              return (
-                <div 
-                  key={index}
-                  className={`p-5 rounded-2xl border-2 ${borderColor} ${bgColor} shadow-md hover:shadow-lg transition-all`}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
-                      {icon}
-                    </div>
-                    <h3 className="font-bold text-lg text-gray-900 flex-1">
-                      {title}
-                    </h3>
-                  </div>
-                  
-                  <div className="ml-[52px] space-y-2">
-                    {content.map((line, idx) => (
-                      <p key={idx} className="text-gray-700 leading-relaxed">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
+            {/* Prediction Section */}
+            <div className="p-5 rounded-2xl border-2 border-green-200 bg-green-50 shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
+                  <TrendingUp className="h-5 w-5 text-green-700" />
                 </div>
-              );
-            })}
+                <h3 className="font-bold text-lg text-gray-900 flex-1">
+                  Прогноз
+                </h3>
+              </div>
+              
+              <div className="ml-[52px] space-y-2">
+                <p className="text-gray-700 leading-relaxed">
+                  <span className="font-bold">Фаворит:</span> {recommendation.prediction}
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  <span className="font-bold">Впевненість AI:</span> {recommendation.confidence}%
+                </p>
+              </div>
+            </div>
+
+            {/* Reasoning Section */}
+            <div className="p-5 rounded-2xl border-2 border-gray-200 bg-gray-50 shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
+                  <Target className="h-5 w-5 text-gray-700" />
+                </div>
+                <h3 className="font-bold text-lg text-gray-900 flex-1">
+                  Обґрунтування
+                </h3>
+              </div>
+              
+              <div className="ml-[52px] space-y-2">
+                <p className="text-gray-700 leading-relaxed">
+                  {recommendation.reasoning}
+                </p>
+              </div>
+            </div>
+
+            {/* Suggested Bet Section */}
+            <div className="p-5 rounded-2xl border-2 border-blue-200 bg-blue-50 shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
+                  <Target className="h-5 w-5 text-blue-700" />
+                </div>
+                <h3 className="font-bold text-lg text-gray-900 flex-1">
+                  Рекомендована ставка
+                </h3>
+              </div>
+              
+              <div className="ml-[52px] space-y-2">
+                <p className="text-gray-700 leading-relaxed font-semibold">
+                  {recommendation.suggestedBet}
+                </p>
+              </div>
+            </div>
+
+            {/* Risk Level Section */}
+            {recommendation.riskLevel && (
+              <div className={`p-5 rounded-2xl border-2 ${getRiskColor(recommendation.riskLevel).border} ${getRiskColor(recommendation.riskLevel).bg} shadow-md hover:shadow-lg transition-all`}>
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
+                    <AlertTriangle className={`h-5 w-5 ${getRiskColor(recommendation.riskLevel).icon}`} />
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900 flex-1">
+                    Рівень ризику
+                  </h3>
+                </div>
+                
+                <div className="ml-[52px] space-y-2">
+                  <p className="text-gray-700 leading-relaxed font-semibold">
+                    {getRiskLabel(recommendation.riskLevel)}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Warning Footer */}
             <div className="p-4 bg-gray-100 rounded-2xl border-2 border-gray-200 shadow-md">

@@ -975,7 +975,7 @@ export default function Matches() {
           onClose={() => setAiModalOpen(false)}
           matchInfo={selectedMatch ? `${selectedMatch.team1} vs ${selectedMatch.team2} (${selectedMatch.matchType}, ${selectedMatch.tier.toUpperCase()})` : ''}
           recommendation={aiRecommendation}
-          loading={aiLoading}
+          isLoading={aiLoading}
         />
 
         {/* Comment Modal */}
