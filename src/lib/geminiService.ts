@@ -31,11 +31,11 @@ class GeminiService {
     if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
       try {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        // Use gemini-pro model which is stable and widely supported
+        // For free tier, use gemini-1.5-flash-latest which is available on free plan
         this.model = this.genAI.getGenerativeModel({ 
-          model: 'gemini-pro'
+          model: 'gemini-1.5-flash-latest'
         });
-        console.log('✅ Gemini API initialized successfully with model: gemini-pro');
+        console.log('✅ Gemini API initialized successfully with model: gemini-1.5-flash-latest (Free tier)');
       } catch (error) {
         console.error('❌ Failed to initialize Gemini API:', error);
       }
@@ -54,7 +54,7 @@ class GeminiService {
     }
 
     try {
-      console.log('📡 Calling Gemini API...');
+      console.log('📡 Calling Gemini API (Free tier)...');
       const prompt = this.buildPrompt(matchData);
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
@@ -70,7 +70,7 @@ class GeminiService {
       
       // If it's a model not found error, provide helpful information
       if (error instanceof Error && (error.message?.includes('not found') || (error as { status?: string }).status === 'NOT_FOUND')) {
-        console.error('💡 Tip: The API key might not have access to this model. Check your Google AI Studio settings.');
+        console.error('💡 Tip: Free tier API key detected. Make sure you are using the correct model name for free tier.');
       }
       
       return this.getMockRecommendation(matchData);
@@ -169,7 +169,7 @@ RISK_LEVEL: [low/medium/high]
     return {
       prediction: team1,
       confidence: 65,
-      reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). Для отримання реальних AI рекомендацій від Google Gemini, будь ласка, перевірте API ключ у Google AI Studio та переконайтеся, що він має доступ до моделі gemini-pro.`,
+      reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). Для отримання реальних AI рекомендацій від Google Gemini, будь ласка, перевірте API ключ у Google AI Studio.`,
       suggestedBet: 'П1',
       riskLevel: 'medium'
     };
