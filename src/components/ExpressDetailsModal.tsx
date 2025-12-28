@@ -29,26 +29,36 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white">
-        {/* Header with better visibility */}
+        {/* Header with vertical layout for better readability */}
         <DialogHeader className="bg-gray-100 border-b-2 border-gray-300 pb-6 -mx-6 -mt-6 px-6 pt-6 rounded-t-lg">
-          <DialogTitle className="flex items-center gap-4">
-            <div className="p-3 bg-gray-900 rounded-2xl shadow-lg">
-              <Zap className="h-7 w-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl font-bold text-gray-900">Експрес-ставка</span>
-                <Badge className="rounded-full bg-gray-900 text-white border-0 font-bold text-lg px-4 py-1.5 shadow-md">
-                  {parsedEvents.length}×
-                </Badge>
+          <DialogTitle>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="p-3 bg-gray-900 rounded-2xl shadow-lg">
+                <Zap className="h-7 w-7 text-white" />
               </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl font-bold text-gray-900">Експрес-ставка</span>
+                  <Badge className="rounded-full bg-gray-900 text-white border-0 font-bold text-lg px-4 py-1.5 shadow-md">
+                    {parsedEvents.length}×
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            {/* Vertical info blocks */}
+            <div className="space-y-3 ml-[68px]">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-gray-600">Загальний коефіцієнт:</span>
+                <span className="text-sm font-semibold text-gray-600 min-w-[180px]">Загальний коефіцієнт:</span>
                 <Badge className="rounded-full bg-green-600 text-white border-0 font-black text-2xl px-5 py-2 shadow-lg">
                   {totalOdds.toFixed(2)}
                 </Badge>
               </div>
-              <p className="text-sm font-medium text-gray-500 mt-2">Дата створення: {bet.date}</p>
+              
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-gray-600 min-w-[180px]">Дата створення:</span>
+                <span className="text-base font-bold text-gray-900">{bet.date}</span>
+              </div>
             </div>
           </DialogTitle>
         </DialogHeader>
