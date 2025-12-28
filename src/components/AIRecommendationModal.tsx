@@ -17,8 +17,8 @@ export default function AIRecommendationModal({
   recommendation,
   isLoading = false
 }: AIRecommendationModalProps) {
-  // Parse recommendation sections
-  const sections = recommendation.split('\n\n');
+  // Parse recommendation sections - add null check
+  const sections = recommendation ? recommendation.split('\n\n') : [];
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -55,6 +55,16 @@ export default function AIRecommendationModal({
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-gray-900 mb-4"></div>
               <p className="text-gray-600 font-semibold">Аналізую матч...</p>
+            </div>
+          </div>
+        ) : !recommendation || sections.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="p-4 bg-gray-100 rounded-2xl border-2 border-gray-200 shadow-md inline-block">
+                <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 font-semibold">Рекомендація недоступна</p>
+                <p className="text-gray-500 text-sm mt-2">Спробуйте отримати прогноз ще раз</p>
+              </div>
             </div>
           </div>
         ) : (
