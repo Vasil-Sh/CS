@@ -31,9 +31,11 @@ class GeminiService {
     if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
       try {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        // Use the latest Gemini model - gemini-1.5-flash is faster and cheaper
-        this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        console.log('✅ Gemini API initialized successfully with model: gemini-1.5-flash');
+        // Use gemini-pro model which is stable and widely supported
+        this.model = this.genAI.getGenerativeModel({ 
+          model: 'gemini-pro'
+        });
+        console.log('✅ Gemini API initialized successfully with model: gemini-pro');
       } catch (error) {
         console.error('❌ Failed to initialize Gemini API:', error);
       }
@@ -64,6 +66,13 @@ class GeminiService {
       return this.parseAIResponse(text);
     } catch (error) {
       console.error('❌ Gemini API error:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      
+      // If it's a model not found error, provide helpful information
+      if (error instanceof Error && (error.message?.includes('not found') || (error as { status?: string }).status === 'NOT_FOUND')) {
+        console.error('💡 Tip: The API key might not have access to this model. Check your Google AI Studio settings.');
+      }
+      
       return this.getMockRecommendation(matchData);
     }
   }
@@ -160,7 +169,7 @@ RISK_LEVEL: [low/medium/high]
     return {
       prediction: team1,
       confidence: 65,
-      reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). Для отримання реальних AI рекомендацій від Google Gemini, будь ласка, додайте API ключ у файл .env`,
+      reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). Для отримання реальних AI рекомендацій від Google Gemini, будь ласка, перевірте API ключ у Google AI Studio та переконайтеся, що він має доступ до моделі gemini-pro.`,
       suggestedBet: 'П1',
       riskLevel: 'medium'
     };
