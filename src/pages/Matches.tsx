@@ -200,37 +200,43 @@ const getFormStabilityInfo = (form: FormStability) => {
       return {
         icon: <Flame className="h-3.5 w-3.5" />,
         label: 'Hot',
-        color: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0'
+        color: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0',
+        tooltip: '🔥 Команда у топ-формі з серією перемог. Висока ймовірність продовження успішної гри.'
       };
     case 'stable':
       return {
         icon: <Shield className="h-3.5 w-3.5" />,
         label: 'Stable',
-        color: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0'
+        color: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0',
+        tooltip: '🛡️ Стабільна форма з передбачуваними результатами. Надійний вибір для ставок.'
       };
     case 'momentum':
       return {
         icon: <TrendingUp className="h-3.5 w-3.5" />,
         label: 'Up',
-        color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0'
+        color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0',
+        tooltip: '📈 Команда набирає темп і покращує результати. Позитивна динаміка.'
       };
     case 'falling':
       return {
         icon: <TrendingDown className="h-3.5 w-3.5" />,
         label: 'Down',
-        color: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0'
+        color: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0',
+        tooltip: '📉 Команда втрачає форму з погіршенням результатів. Обережно зі ставками.'
       };
     case 'slump':
       return {
         icon: <AlertCircle className="h-3.5 w-3.5" />,
         label: 'Slump',
-        color: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0'
+        color: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0',
+        tooltip: '⚠️ Команда у кризі з серією поразок. Високий ризик для ставок.'
       };
     case 'inconsistent':
       return {
         icon: <AlertTriangle className="h-3.5 w-3.5" />,
         label: 'Mixed',
-        color: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0'
+        color: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0',
+        tooltip: '⚡ Непередбачувана форма зі змінними результатами. Складно прогнозувати.'
       };
   }
 };
@@ -898,26 +904,53 @@ export default function Matches() {
                           </td>
                           <td className="p-4 text-center border-r border-gray-200">
                             <div className="flex flex-col items-center gap-2">
-                              {/* Hot/Safe Pick Icons with Text */}
+                              {/* Hot/Safe Pick Icons with Text and Tooltips */}
                               <div className="flex items-center gap-1.5">
                                 {safePick && (
-                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
-                                    <Shield className="h-3 w-3" />
-                                    Safe Pick
-                                  </Badge>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1 cursor-help">
+                                        <Shield className="h-3 w-3" />
+                                        Safe Pick
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="bg-white border-2 border-green-200 shadow-xl">
+                                      <p className="text-xs text-gray-700 max-w-xs">
+                                        🛡️ <strong>Safe Pick</strong> - Матч з високою впевненістю AI (&gt;80%), низьким ризиком (&lt;30%) та стабільною формою команди. Рекомендується для надійних ставок.
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
                                 )}
                                 {isHotMatch && (
-                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1">
-                                    <Flame className="h-3 w-3" />
-                                    Hot
-                                  </Badge>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1 cursor-help">
+                                        <Flame className="h-3 w-3" />
+                                        Hot
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="bg-white border-2 border-orange-200 shadow-xl">
+                                      <p className="text-xs text-gray-700 max-w-xs">
+                                        🔥 <strong>Hot Match</strong> - Матч з високою впевненістю AI (&gt;70%) та низькою ймовірністю несподіванки (&lt;20%). Гаряча можливість для ставки!
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
                                 )}
                               </div>
-                              {/* Form Badge */}
-                              <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1 rounded-full font-semibold text-xs shadow-sm`}>
-                                {formInfo.icon}
-                                {formInfo.label}
-                              </Badge>
+                              {/* Form Badge with Tooltip */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1 rounded-full font-semibold text-xs shadow-sm cursor-help`}>
+                                    {formInfo.icon}
+                                    {formInfo.label}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="bg-white border-2 border-gray-200 shadow-xl">
+                                  <p className="text-xs text-gray-700 max-w-xs">
+                                    {formInfo.tooltip}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                           </td>
                           <td className="p-4 border-r border-gray-200">
