@@ -25,27 +25,45 @@ class GeminiService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (apiKey && apiKey !== 'your_gemini_api_key_here') {
-      this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    console.log('🔑 Gemini API Key status:', apiKey ? 'Present' : 'Missing');
+    console.log('🔑 API Key length:', apiKey?.length || 0);
+    
+    if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
+      try {
+        this.genAI = new GoogleGenerativeAI(apiKey);
+        // Use the latest Gemini model - gemini-1.5-flash is faster and cheaper
+        this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        console.log('✅ Gemini API initialized successfully with model: gemini-1.5-flash');
+      } catch (error) {
+        console.error('❌ Failed to initialize Gemini API:', error);
+      }
+    } else {
+      console.warn('⚠️ Gemini API key not configured properly');
     }
   }
 
   async getMatchRecommendation(matchData: MatchData): Promise<AIRecommendation> {
+    console.log('🤖 Getting match recommendation for:', matchData.team1, 'vs', matchData.team2);
+    console.log('🤖 Model status:', this.model ? 'Available' : 'Not available');
+    
     if (!this.model) {
-      // Fallback to mock recommendation if API key is not configured
+      console.warn('⚠️ Using mock recommendation - API not initialized');
       return this.getMockRecommendation(matchData);
     }
 
     try {
+      console.log('📡 Calling Gemini API...');
       const prompt = this.buildPrompt(matchData);
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
+      console.log('✅ Gemini API response received');
+      console.log('📝 Response text:', text.substring(0, 200) + '...');
+      
       return this.parseAIResponse(text);
     } catch (error) {
-      console.error('Gemini API error:', error);
+      console.error('❌ Gemini API error:', error);
       return this.getMockRecommendation(matchData);
     }
   }
