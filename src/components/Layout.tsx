@@ -21,7 +21,7 @@ interface LayoutProps {
 const navigation = [
   { name: 'Аналітика', href: '/analytics', icon: BarChart3 },
   { name: 'Матчі', href: '/matches', icon: Trophy },
-  { name: 'Мої ставки', href: '/my-bets', icon: Wallet },
+  { name: 'Журнал прогнозів', href: '/my-bets', icon: Wallet },
 ];
 
 const adminNavigation = [
@@ -240,7 +240,7 @@ export default function Layout({ children }: LayoutProps) {
                     className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-2xl font-semibold h-12 transition-all duration-200"
                   >
                     <LogOut className="h-5 w-5" />
-                    Вийти
+                    Війти
                   </Button>
                 </div>
               </nav>

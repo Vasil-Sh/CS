@@ -25,7 +25,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
     team2: '',
     matchLink: '',
     
-    // Деталі ставки
+    // Деталі прогнозу
     betType: '',
     selection: '', // На кого/що ставимо
     odds: '',
@@ -108,7 +108,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
         team2: formData.team2,
         matchLink: formData.matchLink,
         
-        // Деталі ставки
+        // Деталі прогнозу
         betType: formData.betType,
         selection: formData.selection,
         odds: parseFloat(formData.odds),
@@ -159,7 +159,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
 
       await realGoogleSheetsService.addRecord(record);
       
-      toast.success('Ставка успішно додана до системи!');
+      toast.success('Запис успішно додано до системи!');
       
       // Очищаємо форму
       setFormData({
@@ -193,7 +193,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
 
       onRecordAdded?.();
     } catch (error) {
-      toast.error('Помилка при додаванні ставки');
+      toast.error('Помилка при додаванні запису');
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -209,7 +209,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Plus className="h-5 w-5" />
-          Додати нову ставку
+          Додати новий запис
         </CardTitle>
       </CardHeader>
       
@@ -277,16 +277,16 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
             </div>
           </div>
 
-          {/* Деталі ставки */}
+          {/* Деталі прогнозу */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">💰 Деталі ставки</h3>
+            <h3 className="text-lg font-semibold text-gray-900">💰 Деталі прогнозу</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="betType">Тип ставки</Label>
+                <Label htmlFor="betType">Тип прогнозу</Label>
                 <Select value={formData.betType} onValueChange={(value) => setFormData({...formData, betType: value})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Оберіть тип ставки" />
+                    <SelectValue placeholder="Оберіть тип прогнозу" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Match Winner">Переможець матчу</SelectItem>
@@ -440,7 +440,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
                     <SelectItem value="Main Strategy">Основна стратегія</SelectItem>
                     <SelectItem value="Underdog">Стратегія андердогів</SelectItem>
                     <SelectItem value="Totals">Тотали та фори</SelectItem>
-                    <SelectItem value="Live Betting">Лайв ставки</SelectItem>
+                    <SelectItem value="Live Betting">Лайв прогнози</SelectItem>
                     <SelectItem value="Experimental">Експериментальна</SelectItem>
                   </SelectContent>
                 </Select>
@@ -467,12 +467,12 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
             <h3 className="text-lg font-semibold text-gray-900">📝 Аналіз та причини</h3>
             
             <div>
-              <Label htmlFor="reason">Основна причина ставки</Label>
+              <Label htmlFor="reason">Основна причина прогнозу</Label>
               <Textarea
                 id="reason"
                 value={formData.reason}
                 onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                placeholder="Чому ви робите цю ставку? Основні аргументи..."
+                placeholder="Чому ви робите цей прогноз? Основні аргументи..."
                 rows={3}
               />
             </div>
@@ -547,7 +547,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
           )}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? 'Додавання ставки...' : 'Додати ставку до системи'}
+            {isSubmitting ? 'Додавання запису...' : 'Додати запис до системи'}
           </Button>
         </form>
       </CardContent>

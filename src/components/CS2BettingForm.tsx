@@ -205,7 +205,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       if (!primaryStrategy.allowedBetTypes.includes(formData.betCategory)) {
         violations.push({
           type: 'betType',
-          message: `Тип ставки "${formData.betCategory}" не рекомендований. Рекомендовані: ${primaryStrategy.allowedBetTypes.join(', ')}`,
+          message: `Тип прогнозу "${formData.betCategory}" не рекомендований. Рекомендовані: ${primaryStrategy.allowedBetTypes.join(', ')}`,
           severity: 'serious',
           explanation: 'Ваша стратегія розроблена для інших типів ставок. Це може значно знизити ефективність.'
         });
@@ -364,7 +364,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     const missingFields = [];
     if (!formData.team1) missingFields.push('Команда 1');
     if (!formData.team2) missingFields.push('Команда 2');
-    if (!formData.betType) missingFields.push('Тип ставки');
+    if (!formData.betType) missingFields.push('Тип прогнозу');
     if (!formData.selection) missingFields.push('Вибір');
     if (!formData.odds) missingFields.push('Коефіцієнт');
 
@@ -456,9 +456,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   // NEW: Get EV verdict
   const getEVVerdict = () => {
     const ev = parseFloat(calculateExpectedValue());
-    if (ev > 5) return { icon: '✅', text: 'Позитивна ставка', color: 'green', description: 'Математично вигідна ставка з хорошим потенціалом' };
+    if (ev > 5) return { icon: '✅', text: 'Позитивний прогноз', color: 'green', description: 'Математично вигідний прогноз з хорошим потенціалом' };
     if (ev > 0) return { icon: '⚠️', text: 'Сумнівна ставка', color: 'yellow', description: 'Невелика позитивна вартість, потрібна висока впевненість' };
-    return { icon: '❌', text: 'Негативна ставка', color: 'red', description: 'Математично невигідна ставка, високий ризик втрат' };
+    return { icon: '❌', text: 'Негативний прогноз', color: 'red', description: 'Математично невигідний прогноз, високий ризик втрат' };
   };
 
   const processBetSubmission = async () => {
@@ -522,9 +522,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       
       if (finalGoalId) {
         const goalName = activeGoals.find(g => g.id === finalGoalId)?.name;
-        toast.success(`Ставка додана і прив'язана до цілі: ${goalName}`);
+        toast.success(`Запис додано і прив'язана до цілі: ${goalName}`);
       } else {
-        toast.success('Ставка додана!');
+        toast.success('Запис додано!');
       }
       
       setFormData({
@@ -556,7 +556,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       onRecordAdded?.();
     } catch (error) {
-      toast.error('Помилка при додаванні ставки');
+      toast.error('Помилка при додаванні запису');
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -642,7 +642,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <div>
                 <p className="text-sm font-semibold text-gray-900">Режим форми</p>
                 <p className="text-xs text-gray-600">
-                  {formMode === 'quick' ? 'Швидке додавання ставки' : 'Розширений режим з аналітикою'}
+                  {formMode === 'quick' ? 'Швидке додавання запису' : 'Розширений режим з аналітикою'}
                 </p>
               </div>
             </div>
@@ -726,7 +726,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   strategyViolations.some(v => v.severity === 'serious') ? 'text-red-700' : 'text-yellow-700'
                 }`}>
                   {strategyViolations.some(v => v.severity === 'serious') 
-                    ? '⚠️ Рекомендуємо переглянути вашу ставку перед підтвердженням.'
+                    ? '⚠️ Рекомендуємо переглянути ваш запис перед підтвердженням.'
                     : '💡 Ви можете продовжити, але врахуйте рекомендації стратегії.'}
                 </p>
               </div>
@@ -745,7 +745,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   <div className="p-2 bg-gray-200 rounded-xl">
                     <Plus className="h-6 w-6 text-gray-700" />
                   </div>
-                  {formMode === 'quick' ? '⚡ Швидка ставка CS2' : '🎯 Розширена ставка CS2'}
+                  {formMode === 'quick' ? '⚡ Швидкий прогноз' : '🎯 Розширений прогноз'}
                 </CardTitle>
               </CardHeader>
               
@@ -772,7 +772,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                       
                       <div>
-                        <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія ставки</Label>
+                        <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія прогнозу</Label>
                         <Select value={formData.betCategory} onValueChange={(value) => {
                           setFormData({...formData, betCategory: value});
                           if (value === 'Ординар') {
@@ -846,7 +846,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
                     <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
                       <Users className="h-5 w-5 text-gray-600" />
-                      Інформація про матч і деталі ставки
+                      Інформація про матч і деталі прогнозу
                     </h3>
                   
                     {/* HLTV URL - Only in Advanced Mode */}
@@ -930,7 +930,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="betType" className="text-gray-700 font-medium">
-                          Тип ставки {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
+                          Тип прогнозу {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Select 
                           value={formData.betType} 
@@ -938,7 +938,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                         >
                           <SelectTrigger className="rounded-xl mt-1">
-                            <SelectValue placeholder="Оберіть тип ставки" />
+                            <SelectValue placeholder="Оберіть тип прогнозу" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="Match Winner">Переможець матчу</SelectItem>
@@ -1017,7 +1017,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки (₴) <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума прогнозу (₴) <span className="text-red-500">*</span></Label>
                             <Input
                               id="stake"
                               type="number"
@@ -1168,7 +1168,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 ) : (
                   <>
                     <Plus className="h-6 w-6 mr-2" />
-                    Додати ставку
+                    Додати запис
                   </>
                 )}
               </Button>
@@ -1257,7 +1257,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             </Badge>
                           </div>
                           <p className="text-xs text-gray-600">
-                            EV показує математичну вигідність ставки з урахуванням вашої впевненості та коефіцієнта.
+                            EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
                           </p>
                         </div>
                       </div>

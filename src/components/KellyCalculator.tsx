@@ -55,7 +55,7 @@ export default function KellyCalculator() {
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">
-                  Kelly Criterion допомагає визначити оптимальний розмір ставки 
+                  Kelly Criterion допомагає визначити оптимальний розмір прогнозу 
                   для максимізації довгострокового зростання капіталу
                 </p>
               </TooltipContent>
@@ -102,7 +102,7 @@ export default function KellyCalculator() {
           </div>
 
           <Button onClick={calculateKelly} className="w-full">
-            Розрахувати оптимальну ставку
+            Розрахувати оптимальний прогноз
           </Button>
 
           {kellyPercentage !== null && recommendedBet !== null && (
@@ -131,7 +131,7 @@ export default function KellyCalculator() {
               <div className="text-sm text-gray-600 space-y-1">
                 <p><strong>Рекомендації:</strong></p>
                 {kellyPercentage === 0 && (
-                  <p>• Ставка не рекомендується - негативне математичне очікування</p>
+                  <p>• Прогноз не рекомендується - негативне математичне очікування</p>
                 )}
                 {kellyPercentage > 0 && kellyPercentage < 2 && (
                   <p>• Консервативна ставка - низький ризик, стабільне зростання</p>
@@ -140,7 +140,7 @@ export default function KellyCalculator() {
                   <p>• Помірна ставка - збалансований ризик та потенціал</p>
                 )}
                 {kellyPercentage >= 5 && (
-                  <p>• Обережно! Високий ризик - розгляньте зменшення ставки</p>
+                  <p>• Обережно! Високий ризик - розгляньте зменшення прогнозу</p>
                 )}
                 <p>• Завжди ставте менше Kelly відсотка для зменшення волатильності</p>
               </div>

@@ -251,7 +251,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           {/* Bet Info */}
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Ставка</p>
+              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Прогноз</p>
               <p className="text-xl font-semibold text-gray-900">
                 {currencySymbol}{displayAmount}
               </p>

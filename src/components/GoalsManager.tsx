@@ -623,7 +623,7 @@ export default function GoalsManager() {
               <div>
                 <p className="text-sm font-semibold text-blue-900">💡 Як працювати з цілями</p>
                 <p className="text-xs text-blue-700 mt-1">
-                  1. При додаванні ставки оберіть ціль в полі "Прив'язати до цілі"<br/>
+                  1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"<br/>
                   2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди<br/>
                   3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
                 </p>
@@ -1125,7 +1125,7 @@ export default function GoalsManager() {
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <Label htmlFor="allowLive" className="cursor-pointer">Дозволити live-ставки</Label>
+                  <Label htmlFor="allowLive" className="cursor-pointer">Дозволити live-прогнози</Label>
                   <input
                     id="allowLive"
                     type="checkbox"
@@ -1485,7 +1485,7 @@ export default function GoalsManager() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Live-ставки:</span>
+                    <span className="text-gray-600">Live-прогнози:</span>
                     <span className="ml-1 font-semibold text-gray-900">
                       {selectedGoal.allowLive ? 'Дозволено' : 'Заборонено'}
                     </span>

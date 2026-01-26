@@ -38,7 +38,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
         <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border-2 border-gray-200">
           <p className="text-sm font-bold text-gray-900 mb-2">Дата: {date}</p>
           {data.betName && (
-            <p className="text-sm text-gray-700 mb-1">Ставка: {data.betName}</p>
+            <p className="text-sm text-gray-700 mb-1">Прогноз: {data.betName}</p>
           )}
           {data.odds && (
             <p className="text-sm text-gray-700 mb-1">Коеф.: {Number(data.odds).toFixed(2)}</p>

@@ -70,7 +70,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
               <div className="p-2 bg-gray-200 rounded-xl">
                 <Target className="h-5 w-5 text-gray-700" />
               </div>
-              <span className="text-sm font-bold text-gray-700">Сума ставки</span>
+              <span className="text-sm font-bold text-gray-700">Сума прогнозу</span>
             </div>
             <p className="text-2xl font-black text-gray-900">
               {bet.currency === 'USD' ? '$' : '₴'}{bet.originalAmount || bet.amount}
@@ -148,7 +148,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                 {/* Bet Type */}
                 <div className="mb-3">
                   <p className="text-gray-600 text-xs font-semibold mb-1.5 uppercase tracking-wide">
-                    Тип ставки
+                    Тип прогнозу
                   </p>
                   <Badge className="rounded-full bg-gray-200 text-gray-700 border-0 text-sm px-3 py-1 font-bold">
                     {event.betType}

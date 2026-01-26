@@ -253,7 +253,7 @@ export default function BettingHistory() {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Тип ставки:</label>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Тип прогнозу:</label>
                     <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
                       <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-purple-300 transition-colors">
                         <SelectValue />
@@ -292,7 +292,7 @@ export default function BettingHistory() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Відфільтровано ставок</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Відфільтровано записів</p>
                   <p className="text-3xl font-semibold text-gray-900 tracking-tight">{filteredBets.length}</p>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-2xl">
@@ -345,7 +345,7 @@ export default function BettingHistory() {
                 <div className="p-2 bg-blue-100 rounded-xl">
                   <Zap className="h-6 w-6 text-blue-600" />
                 </div>
-                <span>Історія ставок</span>
+                <span>Історія записів</span>
               </div>
               <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-base px-4 py-1 font-bold">
                 {sortedBets.length} записів
@@ -486,7 +486,7 @@ export default function BettingHistory() {
                 <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                   <Calendar className="h-16 w-16 text-gray-400" />
                 </div>
-                <p className="text-gray-600 font-bold text-lg">Немає ставок за обраними фільтрами</p>
+                <p className="text-gray-600 font-bold text-lg">Немає записів за обраними фільтрами</p>
               </div>
             )}
           </CardContent>

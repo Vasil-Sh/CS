@@ -154,7 +154,7 @@ export default function MyBets() {
   }, [loadStats, loadRecentBets]);
 
   const clearRecentBets = useCallback(async () => {
-    if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі ставки, статистику та історію. Ця дія незворотна.')) {
+    if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі записи, статистику та історію. Ця дія незворотна.')) {
       try {
         await realGoogleSheetsService.clearAllData();
         UserDataService.clearUserData(currentUser, 'mybets_data');
@@ -194,12 +194,12 @@ export default function MyBets() {
       
       setRecentBets(updatedBets);
       UserDataService.setUserData(currentUser, 'mybets_data', updatedBets);
-      toast.success(`Ставка позначена як ${result === 'Win' ? 'виграшна' : 'програшна'}`);
+      toast.success(`Запис позначено як ${result === 'Win' ? 'виграшний' : 'програшний'}`);
       
       loadStats();
       loadRecentBets();
     } catch (error) {
-      toast.error('Помилка при оновленні результату ставки');
+      toast.error('Помилка при оновленні результату запису');
       console.error('Error in updateBetResult:', error);
     }
   }, [recentBets, currentUser, loadStats, loadRecentBets]);
@@ -297,8 +297,8 @@ export default function MyBets() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Мої ставки</h1>
-          <p className="text-gray-500 mt-1 font-medium">Управління ставками та аналіз результатів</p>
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Журнал прогнозів</h1>
+          <p className="text-gray-500 mt-1 font-medium">Управління записами та аналіз результатів</p>
         </div>
         
         <Button 
@@ -322,7 +322,7 @@ export default function MyBets() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-white/90 uppercase tracking-wide mb-2 flex items-center gap-2">
-                  Поточний банк
+                  Бюджет аналізу
                   <Edit className="h-3 w-3 opacity-70" />
                 </p>
                 {isBankrollInitialized ? (
@@ -340,7 +340,7 @@ export default function MyBets() {
           </CardContent>
         </Card>
 
-        <StatCard title="Всього ставок" value={stats.totalBets} icon={BarChart3} colorClass="text-gray-900" bgClass="bg-blue-50" />
+        <StatCard title="Всього записів" value={stats.totalBets} icon={BarChart3} colorClass="text-gray-900" bgClass="bg-blue-50" />
         <StatCard 
           title="Профіт" 
           value={`${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit} ₴`} 
@@ -373,7 +373,7 @@ export default function MyBets() {
               <div className="p-2 bg-blue-100 rounded-xl">
                 <Zap className="h-6 w-6 text-blue-600" />
               </div>
-              <span>Останні ставки</span>
+              <span>Останні записи</span>
             </div>
             {activeBets.length > 0 && (
               <Badge className="rounded-full bg-amber-100 text-amber-700 border-0 text-base px-4 py-1 font-bold animate-pulse">
@@ -583,8 +583,8 @@ export default function MyBets() {
               <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                 <Calendar className="h-16 w-16 text-gray-400" />
               </div>
-              <p className="text-gray-900 font-bold text-lg">Поки що немає ставок</p>
-              <p className="text-sm text-gray-500 mt-2">Додайте свою першу ставку, щоб почати відстеження</p>
+              <p className="text-gray-900 font-bold text-lg">Поки що немає записів</p>
+              <p className="text-sm text-gray-500 mt-2">Додайте свій перший запис, щоб почати відстеження</p>
             </div>
           )}
         </CardContent>
@@ -594,7 +594,7 @@ export default function MyBets() {
       <Tabs defaultValue="add" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
           <TabsTrigger value="add" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Додати ставку
+            Додати запис
           </TabsTrigger>
           <TabsTrigger value="history" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Історія

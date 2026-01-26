@@ -104,6 +104,7 @@ export default function StrategyOverview() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState<CS2Strategy | null>(null);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Filters and sorting
   const [searchQuery, setSearchQuery] = useState('');
@@ -395,6 +396,7 @@ export default function StrategyOverview() {
     });
 
     toast.success('Стратегія успішно додана!');
+    setActiveTab('overview');
   };
 
   const applyTemplate = (template: StrategyTemplate) => {
@@ -604,7 +606,7 @@ export default function StrategyOverview() {
         <p className="text-gray-500 font-medium mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
           <TabsTrigger value="overview" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Огляд стратегій</TabsTrigger>
           <TabsTrigger value="performance" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ефективність</TabsTrigger>
@@ -618,7 +620,10 @@ export default function StrategyOverview() {
                 <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Немає стратегій</h3>
                 <p className="text-gray-600 mb-4">Створіть свою першу стратегію для ставок на CS2</p>
-                <Button onClick={() => document.querySelector('[value="create"]')?.dispatchEvent(new Event('click', { bubbles: true }))} className="rounded-xl bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  onClick={() => setActiveTab('create')} 
+                  className="rounded-xl bg-blue-600 hover:bg-blue-700"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Створити стратегію
                 </Button>

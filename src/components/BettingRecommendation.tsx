@@ -39,7 +39,7 @@ export default function BettingRecommendation({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {getIcon()}
-          Рекомендація для ставки
+          Рекомендація для прогнозу
         </CardTitle>
       </CardHeader>
       
@@ -71,10 +71,10 @@ export default function BettingRecommendation({
               'Ця ставка має хороший потенціал прибутку з низьким ризиком.'
             }
             {recommendation === 'risky' && 
-              'Ставка може бути прибутковою, але несе підвищений ризик.'
+              'Прогноз може бути прибутковим, але несе підвищений ризик.'
             }
             {recommendation === 'avoid' && 
-              'Не рекомендується робити ставку через високий ризик втрат.'
+              'Не рекомендується робити прогноз через високий ризик втрат.'
             }
           </AlertDescription>
         </Alert>

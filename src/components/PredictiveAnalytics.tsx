@@ -99,7 +99,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         trend: getTrend(recentMetrics.roi, olderMetrics.roi)
       },
       {
-        metric: 'Прибуток на ставку',
+        metric: 'Прибуток на прогноз',
         current: recentMetrics.profitPerBet,
         predicted: predictMetric(recentMetrics.profitPerBet, olderMetrics.profitPerBet),
         confidence: Math.min(85, completedBets.length * 1.5),
@@ -157,7 +157,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
           strategy: 'Банкрол-менеджмент',
           reason: 'Виявлено непостійність у розмірах ставок',
           impact: 'high',
-          implementation: 'Використовуйте фіксований відсоток від банкролу (2-3%) для кожної ставки'
+          implementation: 'Використовуйте фіксований відсоток від банкролу (2-3%) для кожного прогнозу'
         });
       }
 
@@ -304,7 +304,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Поточне:</span>
                   <span className="font-medium text-gray-900">
-                    {prediction.metric === 'Прибуток на ставку' 
+                    {prediction.metric === 'Прибуток на прогноз' 
                       ? `${prediction.current.toFixed(2)} ₴`
                       : `${prediction.current.toFixed(1)}%`
                     }
@@ -313,7 +313,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Прогноз:</span>
                   <span className={`font-semibold ${prediction.predicted > prediction.current ? 'text-green-600' : 'text-red-600'}`}>
-                    {prediction.metric === 'Прибуток на ставку' 
+                    {prediction.metric === 'Прибуток на прогноз' 
                       ? `${prediction.predicted.toFixed(2)} ₴`
                       : `${prediction.predicted.toFixed(1)}%`
                     }
