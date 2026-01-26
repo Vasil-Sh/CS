@@ -79,14 +79,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
   
-  // NEW: Form mode state
   const [formMode, setFormMode] = useState<'quick' | 'advanced'>('quick');
-  
-  // NEW: EV details visibility
   const [showEVDetails, setShowEVDetails] = useState(false);
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
+    game: 'CS2' as 'CS2' | 'Dota2',
     matchUrl: '',
     tournament: '',
     team1: '',
@@ -110,7 +108,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   });
 
   useEffect(() => {
-    // Load primary strategy
     const primaryStrategyName = localStorage.getItem('primaryStrategy');
     if (primaryStrategyName) {
       const strategy = realGoogleSheetsService.getStrategyByName(primaryStrategyName);
@@ -120,7 +117,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       }
     }
 
-    // Load active goals
     loadActiveGoals();
   }, []);
 
@@ -131,7 +127,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   };
 
   useEffect(() => {
-    // Validate against primary strategy whenever relevant fields change
     if (primaryStrategy && formMode === 'advanced') {
       validateAgainstStrategy();
     } else {
@@ -139,7 +134,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     }
   }, [formData.odds, formData.format, formData.betCategory, primaryStrategy, formMode]);
 
-  // Check for risky teams whenever team names change
   useEffect(() => {
     if (formMode === 'advanced' && (formData.team1 || formData.team2)) {
       checkRiskyTeams(formData.team1, formData.team2);
@@ -155,13 +149,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     const violations: StrategyViolation[] = [];
     const currentOdds = parseFloat(formData.odds);
 
-    // Only validate for Ординар
     if (formData.betCategory !== 'Ординар') {
       setStrategyViolations([]);
       return;
     }
 
-    // Check odds limits with severity levels
     if (currentOdds && primaryStrategy.minOdds && currentOdds < primaryStrategy.minOdds) {
       const difference = primaryStrategy.minOdds - currentOdds;
       const severity = difference > 0.3 ? 'serious' : 'acceptable';
@@ -188,7 +180,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       });
     }
 
-    // Check format restrictions
     if (primaryStrategy.allowedFormats && primaryStrategy.allowedFormats.length > 0) {
       if (!primaryStrategy.allowedFormats.includes(formData.format)) {
         violations.push({
@@ -200,7 +191,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       }
     }
 
-    // Check bet type restrictions
     if (primaryStrategy.allowedBetTypes && primaryStrategy.allowedBetTypes.length > 0) {
       if (!primaryStrategy.allowedBetTypes.includes(formData.betCategory)) {
         violations.push({
@@ -260,8 +250,38 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     }));
   };
 
-  const parseMatchFromUrl = async (url: string) => {
-    setIsParsingMatch(true);
+  const parseDota2MatchFromUrl = (url: string): { team1: string; team2: string; tournament: string } | null => {
+    try {
+      const regex = /dota2\/[^/]+\/([a-z0-9\-_]+-vs-[a-z0-9\-_]+)\//i;
+      const match = url.match(regex);
+      
+      if (match && match[1]) {
+        const matchInfo = match[1];
+        const parts = matchInfo.split('-');
+        const vsIndex = parts.findIndex(part => part === 'vs');
+        
+        if (vsIndex > 0 && vsIndex < parts.length - 1) {
+          const team1Parts = parts.slice(0, vsIndex);
+          const team1 = team1Parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+          
+          const team2Parts = parts.slice(vsIndex + 1);
+          const team2 = team2Parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+          
+          return {
+            team1,
+            team2,
+            tournament: 'Dota 2 Tournament'
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing Dota 2 URL:', error);
+      return null;
+    }
+  };
+
+  const parseCS2MatchFromUrl = (url: string): { team1: string; team2: string; tournament: string } | null => {
     try {
       const urlParts = url.split('/');
       const matchInfo = urlParts[urlParts.length - 1];
@@ -320,17 +340,55 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             .replace(/SEASON (\d+)/g, 'Season $1')
             .replace(/NODWIN CLUTCH SERIES/g, 'NODWIN Clutch Series');
           
+          return {
+            team1,
+            team2,
+            tournament: tournament || 'Unknown Tournament'
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error parsing CS2 URL:', error);
+      return null;
+    }
+  };
+
+  const parseMatchFromUrl = async (url: string) => {
+    setIsParsingMatch(true);
+    try {
+      let result = null;
+      
+      if (url.includes('dota2')) {
+        result = parseDota2MatchFromUrl(url);
+        if (result) {
           setFormData(prev => ({
             ...prev,
-            team1: team1,
-            team2: team2,
-            tournament: tournament || 'Unknown Tournament'
+            game: 'Dota2',
+            team1: result.team1,
+            team2: result.team2,
+            tournament: result.tournament
           }));
-          
-          toast.success('Інформацію про матч успішно отримано!');
+          toast.success('Інформацію про Dota 2 матч успішно отримано!');
+        } else {
+          toast.error('Не вдалося розпарсити Dota 2 URL');
+        }
+      } else if (url.includes('hltv.org/matches/')) {
+        result = parseCS2MatchFromUrl(url);
+        if (result) {
+          setFormData(prev => ({
+            ...prev,
+            game: 'CS2',
+            team1: result.team1,
+            team2: result.team2,
+            tournament: result.tournament
+          }));
+          toast.success('Інформацію про CS2 матч успішно отримано!');
         } else {
           toast.error('Не вдалося знайти "vs" у посиланні');
         }
+      } else {
+        toast.error('Невідомий формат URL. Підтримуються HLTV (CS2) та Dota 2');
       }
     } catch (error) {
       toast.error('Помилка при парсингу URL матчу');
@@ -343,7 +401,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const handleUrlChange = (url: string) => {
     setFormData(prev => ({ ...prev, matchUrl: url }));
     
-    if (url.includes('hltv.org/matches/')) {
+    if (url.includes('hltv.org/matches/') || url.includes('dota2')) {
       parseMatchFromUrl(url);
     }
   };
@@ -445,7 +503,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return amount;
   };
 
-  // NEW: Get express risk level
   const getExpressRiskLevel = () => {
     const count = expressEvents.length;
     if (count <= 3) return { level: 'moderate', color: 'green', text: 'Помірний ризик', progress: 33 };
@@ -453,7 +510,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return { level: 'high', color: 'red', text: 'Високий ризик', progress: 100 };
   };
 
-  // NEW: Get EV verdict
   const getEVVerdict = () => {
     const ev = parseFloat(calculateExpectedValue());
     if (ev > 5) return { icon: '✅', text: 'Позитивний прогноз', color: 'green', description: 'Математично вигідний прогноз з хорошим потенціалом' };
@@ -529,6 +585,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       
       setFormData({
         date: new Date().toISOString().split('T')[0],
+        game: 'CS2',
         matchUrl: '',
         tournament: '',
         team1: '',
@@ -620,6 +677,30 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const expressRisk = getExpressRiskLevel();
   const evVerdict = getEVVerdict();
 
+  const getBetTypeOptions = () => {
+    if (formData.game === 'Dota2') {
+      return [
+        { value: 'Match Winner', label: 'Переможець матчу' },
+        { value: 'Map Winner', label: 'Переможець карти' },
+        { value: 'Total Maps', label: 'Тотал карт' },
+        { value: 'Handicap', label: 'Фора' },
+        { value: 'First Blood', label: 'Перша кров' },
+        { value: 'Total Kills', label: 'Тотал вбивств' },
+        { value: 'Roshan', label: 'Рошан' }
+      ];
+    } else {
+      return [
+        { value: 'Match Winner', label: 'Переможець матчу' },
+        { value: 'Map Winner', label: 'Переможець карти' },
+        { value: 'Total Maps', label: 'Тотал карт' },
+        { value: 'Handicap', label: 'Фора' },
+        { value: 'First Map', label: 'Перша карта' },
+        { value: 'Pistol Round', label: 'Пістолетний раунд' },
+        { value: 'Total Rounds', label: 'Тотал раундів' }
+      ];
+    }
+  };
+
   return (
     <div className="space-y-6">
       <StrategyViolationDialog
@@ -631,7 +712,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         onCancel={handleViolationCancel}
       />
 
-      {/* NEW: Form Mode Switcher */}
+      {/* Form Mode Switcher */}
       <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -685,7 +766,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         </Card>
       )}
 
-      {/* NEW: Strategy Deviations (not violations) - Only in Advanced Mode */}
+      {/* Strategy Deviations - Only in Advanced Mode */}
       {formMode === 'advanced' && strategyViolations.length > 0 && (
         <Card className={`border-2 shadow-lg rounded-3xl overflow-hidden ${
           strategyViolations.some(v => v.severity === 'serious') 
@@ -770,6 +851,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           className="rounded-xl mt-1"
                         />
                       </div>
+
+                      <div>
+                        <Label htmlFor="game" className="text-gray-700 font-medium">Гра</Label>
+                        <Select value={formData.game} onValueChange={(value: 'CS2' | 'Dota2') => setFormData({...formData, game: value})}>
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CS2">🎯 CS2</SelectItem>
+                            <SelectItem value="Dota2">🛡️ Dota 2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       
                       <div>
                         <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія прогнозу</Label>
@@ -788,23 +882,23 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           </SelectContent>
                         </Select>
                       </div>
-
-                      {formData.betCategory === 'Ординар' && (
-                        <div>
-                          <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
-                          <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                            <SelectTrigger className="rounded-xl mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="BO1">BO1</SelectItem>
-                              <SelectItem value="BO3">BO3</SelectItem>
-                              <SelectItem value="BO5">BO5</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
                     </div>
+
+                    {formData.betCategory === 'Ординар' && (
+                      <div className="mt-4">
+                        <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
+                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                          <SelectTrigger className="rounded-xl mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BO1">BO1</SelectItem>
+                            <SelectItem value="BO3">BO3</SelectItem>
+                            <SelectItem value="BO5">BO5</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     {/* Goals - Only in Advanced Mode */}
                     {formMode === 'advanced' && activeGoals.length > 0 && (
@@ -849,19 +943,19 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       Інформація про матч і деталі прогнозу
                     </h3>
                   
-                    {/* HLTV URL - Only in Advanced Mode */}
+                    {/* Match URL - Only in Advanced Mode */}
                     {formMode === 'advanced' && (
                       <div className="mb-4">
                         <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
                           <Link className="h-4 w-4 text-gray-600" />
-                          HLTV URL матчу (необов'язково)
+                          {formData.game === 'CS2' ? 'HLTV URL матчу' : 'Dota 2 URL матчу'} (необов'язково)
                         </Label>
                         <div className="flex gap-2 mt-1">
                           <Input
                             id="matchUrl"
                             value={formData.matchUrl}
                             onChange={(e) => handleUrlChange(e.target.value)}
-                            placeholder="https://www.hltv.org/matches/..."
+                            placeholder={formData.game === 'CS2' ? 'https://www.hltv.org/matches/...' : 'https://...dota2/.../team1-vs-team2/...'}
                             className="flex-1 rounded-xl"
                           />
                           <Button 
@@ -874,7 +968,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             {isParsingMatch ? 'Парсинг...' : 'Парсити'}
                           </Button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Вставте посилання з HLTV для автозаповнення</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formData.game === 'CS2' ? 'Вставте посилання з HLTV для автозаповнення' : 'Вставте посилання на Dota 2 матч для автозаповнення'}
+                        </p>
                       </div>
                     )}
 
@@ -906,7 +1002,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           id="team1"
                           value={formData.team1}
                           onChange={(e) => setFormData({...formData, team1: e.target.value})}
-                          placeholder="NAVI"
+                          placeholder={formData.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                           className="rounded-xl mt-1"
                         />
@@ -920,7 +1016,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           id="team2"
                           value={formData.team2}
                           onChange={(e) => setFormData({...formData, team2: e.target.value})}
-                          placeholder="G2"
+                          placeholder={formData.game === 'CS2' ? 'G2' : 'OG'}
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                           className="rounded-xl mt-1"
                         />
@@ -941,13 +1037,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             <SelectValue placeholder="Оберіть тип прогнозу" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Match Winner">Переможець матчу</SelectItem>
-                            <SelectItem value="Map Winner">Переможець карти</SelectItem>
-                            <SelectItem value="Total Maps">Тотал карт</SelectItem>
-                            <SelectItem value="Handicap">Фора</SelectItem>
-                            <SelectItem value="First Map">Перша карта</SelectItem>
-                            <SelectItem value="Pistol Round">Пістолетний раунд</SelectItem>
-                            <SelectItem value="Total Rounds">Тотал раундів</SelectItem>
+                            {getBetTypeOptions().map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1079,7 +1173,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {/* NEW: Express Risk Indicator */}
+                  {/* Express Risk Indicator */}
                   <div className={`p-3 rounded-2xl border-2 ${
                     expressRisk.color === 'green' ? 'bg-green-50 border-green-200' :
                     expressRisk.color === 'orange' ? 'bg-orange-50 border-orange-200' :
@@ -1207,7 +1301,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </div>
                 </div>
                 
-                {/* NEW: Simplified EV Display */}
+                {/* Simplified EV Display */}
                 <div className={`p-4 rounded-2xl border-2 ${
                   evVerdict.color === 'green' ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' :
                   evVerdict.color === 'yellow' ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200' :
