@@ -52,6 +52,7 @@ interface BetRecord {
   riskyTeams: RiskyTeam[];
   notes: string;
   goalId?: string;
+  winProbability?: number;
 }
 
 interface StrategyViolation {
@@ -523,6 +524,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     try {
       const stakeAmount = parseFloat(formData.stake);
       const exchangeRate = parseFloat(formData.exchangeRate);
+      const winProbability = parseFloat(formData.confidence);
       
       const stakeInUAH = convertToUAH(stakeAmount, formData.currency, exchangeRate);
       
@@ -571,7 +573,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         strategy: formData.strategy,
         riskyTeams: formData.riskyTeams,
         notes: `${formData.reasoning}\n\nKey Factors: ${formData.keyFactors}\n\nNotes: ${formData.notes}`,
-        goalId: finalGoalId
+        goalId: finalGoalId,
+        winProbability: winProbability
       };
 
       await realGoogleSheetsService.addRecord(record);
@@ -683,7 +686,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         { value: 'Match Winner', label: 'Переможець матчу' },
         { value: 'Map Winner', label: 'Переможець карти' },
         { value: 'Total Maps', label: 'Тотал карт' },
-        { value: 'Handicap', label: 'Фора' },
+        { value: 'Handicap +1.5', label: 'Фора +1.5' },
+        { value: 'Handicap -1.5', label: 'Фора -1.5' },
+        { value: 'Handicap +2.5', label: 'Фора +2.5' },
+        { value: 'Handicap -2.5', label: 'Фора -2.5' },
         { value: 'First Blood', label: 'Перша кров' },
         { value: 'Total Kills', label: 'Тотал вбивств' },
         { value: 'Roshan', label: 'Рошан' }
@@ -693,7 +699,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         { value: 'Match Winner', label: 'Переможець матчу' },
         { value: 'Map Winner', label: 'Переможець карти' },
         { value: 'Total Maps', label: 'Тотал карт' },
-        { value: 'Handicap', label: 'Фора' },
+        { value: 'Handicap +1.5', label: 'Фора +1.5' },
+        { value: 'Handicap -1.5', label: 'Фора -1.5' },
+        { value: 'Handicap +2.5', label: 'Фора +2.5' },
+        { value: 'Handicap -2.5', label: 'Фора -2.5' },
         { value: 'First Map', label: 'Перша карта' },
         { value: 'Pistol Round', label: 'Пістолетний раунд' },
         { value: 'Total Rounds', label: 'Тотал раундів' }
@@ -1361,7 +1370,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 
                 <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border-2 border-red-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-700 font-semibold">Макс. програш:</span>
+                    <span className="text-sm text-gray-700 font-medium">Макс. програш:</span>
                     <span className="font-bold text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
                   </div>
                 </div>
