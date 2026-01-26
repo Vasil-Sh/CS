@@ -577,27 +577,15 @@ export default function MyBets() {
                               >
                                 <Share2 className="h-5 w-5" />
                               </Button>
-                              {isExpress ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleExpressDetailsClick(bet)}
-                                  className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                                  title="Деталі експресу"
-                                >
-                                  <Eye className="h-5 w-5" />
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleBetDetailsClick(bet)}
-                                  className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                                  title="Деталі"
-                                >
-                                  <Eye className="h-5 w-5" />
-                                </Button>
-                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleBetDetailsClick(bet)}
+                                className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                                title="Деталі для Telegram"
+                              >
+                                <Eye className="h-5 w-5" />
+                              </Button>
                             </div>
                           </td>
                         </tr>
