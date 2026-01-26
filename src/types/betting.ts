@@ -20,6 +20,7 @@ export interface Bet {
   goalId?: string;
   selection?: string;
   matchUrl?: string;
+  winProbability?: number;
 }
 
 export interface BettingStats {
