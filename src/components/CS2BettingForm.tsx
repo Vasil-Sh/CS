@@ -611,7 +611,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const isValuePositive = parseFloat(expectedValue) > 0;
 
   const getCurrencySymbol = () => {
-    return formData.currency === 'USD' ? '$' : '₴';
+    return '₴';
   };
 
   const potentialProfitInCurrency = calculatePotentialProfit();
@@ -1015,22 +1015,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           Фінансові деталі
                         </h3>
                       
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="currency" className="text-gray-700 font-medium">Валюта</Label>
-                            <Select value={formData.currency} onValueChange={(value) => setFormData({...formData, currency: value})}>
-                              <SelectTrigger className="rounded-xl mt-1">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="UAH">₴ UAH</SelectItem>
-                                <SelectItem value="USD">$ USD</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума ставки (₴) <span className="text-red-500">*</span></Label>
                             <Input
                               id="stake"
                               type="number"
@@ -1043,23 +1030,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               className="rounded-xl mt-1"
                             />
                           </div>
-                          
-                          {formData.currency === 'USD' && (
-                            <div>
-                              <Label htmlFor="exchangeRate" className="text-gray-700 font-medium">Курс USD/UAH</Label>
-                              <Input
-                                id="exchangeRate"
-                                type="number"
-                                step="0.01"
-                                min="1"
-                                value={formData.exchangeRate}
-                                onChange={(e) => setFormData({...formData, exchangeRate: e.target.value})}
-                                placeholder="41.00"
-                                required
-                                className="rounded-xl mt-1"
-                              />
-                            </div>
-                          )}
                           
                           <div>
                             <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%) <span className="text-red-500">*</span></Label>
@@ -1076,17 +1046,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             />
                           </div>
                         </div>
-                        
-                        {formData.currency === 'USD' && formData.stake && formData.exchangeRate && (
-                          <div className="p-4 bg-white rounded-2xl border-2 border-gray-300 mt-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-700 font-semibold">Сума в UAH (для аналітики):</span>
-                              <span className="font-bold text-gray-900 text-xl">
-                                ₴{convertToUAH(parseFloat(formData.stake), formData.currency, parseFloat(formData.exchangeRate)).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </>
