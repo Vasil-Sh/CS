@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, TrendingUp, AlertTriangle, Target, CheckCircle, XCircle, Info, Brain, Zap } from 'lucide-react';
-import type { AIRecommendation } from '@/lib/geminiService';
+import type { AIRecommendation } from '@/lib/openRouterService';
 
 interface AIRecommendationModalProps {
   open: boolean;
@@ -85,7 +85,7 @@ export default function AIRecommendationModal({
                   <h2 className="text-2xl font-bold text-gray-900">AI Рекомендація</h2>
                   <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 font-bold text-sm px-4 py-1.5 shadow-md">
                     <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    Gemini AI
+                    Claude 3.5 Sonnet
                   </Badge>
                 </div>
                 <p className="text-base text-gray-600 font-medium mt-1.5">{matchInfo}</p>

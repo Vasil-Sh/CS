@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/tooltip";
 import AIRecommendationModal from '@/components/AIRecommendationModal';
 import CommentModal from '@/components/CommentModal';
-import { geminiService, type AIRecommendation } from '@/lib/geminiService';
+import { openRouterService, type AIRecommendation } from '@/lib/openRouterService';
 
 // Form Stability Types
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
@@ -423,7 +423,7 @@ export default function Matches() {
     setAiRecommendation(null);
 
     try {
-      const recommendation = await geminiService.getMatchRecommendation({
+      const recommendation = await openRouterService.getMatchRecommendation({
         team1: match.team1,
         team2: match.team2,
         format: match.matchType,
