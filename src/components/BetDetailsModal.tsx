@@ -18,6 +18,14 @@ interface User {
   isAdmin?: boolean;
 }
 
+interface ParsedEvent {
+  number: string;
+  match: string;
+  betType: string;
+  selection: string;
+  odds: string;
+}
+
 export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalProps) {
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -84,32 +92,88 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   const currencySymbol = bet.currency === 'USD' ? '$' : '₴';
   const displayAmount = bet.originalAmount || bet.amount;
+  
+  const isExpressBet = bet.betType.includes('Експрес') || bet.format.includes('x');
+
+  const parseExpressEvents = (betType: string): ParsedEvent[] => {
+    if (!betType.includes('|')) return [];
+    
+    const fullString = betType.split('|').slice(1).join('|').trim();
+    const eventStrings = fullString.split('•').map(e => e.trim());
+    
+    return eventStrings.map(eventStr => {
+      const parts = eventStr.split('|').map(p => p.trim());
+      
+      if (parts.length >= 2) {
+        const matchPart = parts[0];
+        const betPart = parts[1];
+        
+        const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
+        const number = numberMatch ? numberMatch[1] : '';
+        const match = numberMatch ? numberMatch[2] : matchPart;
+        
+        const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
+        const betType = betMatch ? betMatch[1] : '';
+        const selection = betMatch ? betMatch[2] : '';
+        const odds = betMatch ? betMatch[3] : '';
+        
+        return { number, match, betType, selection, odds };
+      }
+      
+      return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
+    });
+  };
 
   const generateTelegramText = () => {
-    const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
-    const winProbability = bet.winProbability || 65;
-    
-    let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
-    text += `📊 Тип прогнозу: ${bet.betType}\n`;
-    
-    if (bet.selection) {
-      text += `🎯 Вибір: ${bet.selection}\n`;
-    }
-    
-    text += `💰 Коефіцієнт: ${bet.odds.toFixed(2)}\n`;
-    text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
-    text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
-    
-    const matchUrl = bet.matchUrl || '';
-    if (matchUrl) {
-      text += `🎯 Посилання на гру: ${matchUrl}\n\n`;
+    if (isExpressBet) {
+      const parsedEvents = parseExpressEvents(bet.betType);
+      const eventCount = parsedEvents.length;
+      
+      let text = `🚨 Експрес-прогноз (${eventCount} події)\n\n`;
+      
+      parsedEvents.forEach((event, index) => {
+        text += `📌 Подія ${index + 1}:\n`;
+        text += `⚽ Матч: ${event.match}\n`;
+        text += `📊 Тип: ${event.betType}\n`;
+        text += `🎯 Вибір: ${event.selection}\n`;
+        text += `💰 Коефіцієнт: ${event.odds}\n\n`;
+      });
+      
+      text += `💵 Загальний коефіцієнт: ${bet.odds.toFixed(2)}\n`;
+      text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
+      
+      const potentialWin = displayAmount * bet.odds;
+      text += `💎 Можливий виграш: ${potentialWin.toFixed(2)}${currencySymbol}\n\n`;
+      
+      text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
+      
+      return text;
     } else {
-      text += `🎯 Посилання на гру: [Вставте посилання на HLTV]\n\n`;
-    }
-    
-    text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
+      const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
+      const winProbability = bet.winProbability || 65;
+      
+      let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
+      text += `📊 Тип прогнозу: ${bet.betType}\n`;
+      
+      if (bet.selection) {
+        text += `🎯 Вибір: ${bet.selection}\n`;
+      }
+      
+      text += `💰 Коефіцієнт: ${bet.odds.toFixed(2)}\n`;
+      text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
+      text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
+      
+      const matchUrl = bet.matchUrl || '';
+      if (matchUrl) {
+        text += `🎯 Посилання на гру: ${matchUrl}\n\n`;
+      } else {
+        text += `🎯 Посилання на гру: [Вставте посилання на HLTV]\n\n`;
+      }
+      
+      text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
 
-    return text;
+      return text;
+    }
   };
 
   const handleCopyToClipboard = () => {
@@ -194,7 +258,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
             className="min-h-[350px] font-mono text-sm bg-gray-50 border-2 border-gray-300 rounded-2xl p-4 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <p className="text-xs text-gray-500 italic">
-            💡 Ви можете відредагувати текст перед копіюванням. {!bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
+            💡 Ви можете відредагувати текст перед копіюванням. {!isExpressBet && !bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
           </p>
         </div>
       </DialogContent>
