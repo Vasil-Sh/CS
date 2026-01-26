@@ -8,6 +8,7 @@ import BettingHistory from '@/components/BettingHistory';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import ExpressDetailsModal from '@/components/ExpressDetailsModal';
+import BetDetailsModal from '@/components/BetDetailsModal';
 import InitialBankModal from '@/components/InitialBankModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
@@ -15,7 +16,7 @@ import { BankrollService } from '@/lib/bankrollService';
 import { 
   TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
-  Flag, Wallet, Edit, Zap, LucideIcon
+  Flag, Wallet, Edit, Zap, LucideIcon, Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -90,8 +91,10 @@ export default function MyBets() {
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [expressModalOpen, setExpressModalOpen] = useState(false);
+  const [betDetailsModalOpen, setBetDetailsModalOpen] = useState(false);
   const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
+  const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
 
   const bankrollStats = useMemo(() => 
     BankrollService.getBankrollStats(currentUser, recentBets),
@@ -291,6 +294,11 @@ export default function MyBets() {
     setSelectedExpressEvents(parsedEvents);
     setExpressModalOpen(true);
   }, [parseExpressEvents]);
+
+  const handleBetDetailsClick = useCallback((bet: Bet) => {
+    setSelectedDetailsBet(bet);
+    setBetDetailsModalOpen(true);
+  }, []);
 
   return (
     <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -569,6 +577,17 @@ export default function MyBets() {
                               >
                                 <Share2 className="h-5 w-5" />
                               </Button>
+                              {!isExpress && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleBetDetailsClick(bet)}
+                                  className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                                  title="Деталі"
+                                >
+                                  <Eye className="h-5 w-5" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -644,6 +663,17 @@ export default function MyBets() {
             setSelectedExpressEvents([]);
           }}
           parsedEvents={selectedExpressEvents}
+        />
+      )}
+
+      {selectedDetailsBet && (
+        <BetDetailsModal
+          bet={selectedDetailsBet}
+          open={betDetailsModalOpen}
+          onClose={() => {
+            setBetDetailsModalOpen(false);
+            setSelectedDetailsBet(null);
+          }}
         />
       )}
     </div>

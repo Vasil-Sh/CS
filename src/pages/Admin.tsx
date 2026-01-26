@@ -14,9 +14,9 @@ import {
   Bell,
   AlertTriangle,
   DollarSign,
-  MessageCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Crown
 } from 'lucide-react';
 import {
   Table,
@@ -33,11 +33,10 @@ interface User {
   username: string;
   password: string;
   priceMonth: string;
-  vipGroupStartDate: string;
-  vipGroupEndDate: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
+  isAdmin: boolean;
   daysUntilExpiry?: number;
 }
 
@@ -97,22 +96,21 @@ export default function Admin() {
       const response = await fetch(url);
       const text = await response.text();
       
-      // Parse CSV - 9 columns: Telegram, UserName, Password, PriceMonth, VIPGrupStartDate, VIPGrupEdnDate, StartDate, EdnDate
+      // Parse CSV - 7 columns: Telegram, UserName, Password, PriceMonth, StartDate, EdnDate, isAdmin
       const rows = text.split('\n').slice(1); // Skip header
       const parsedUsers: User[] = rows
         .filter(row => row.trim())
         .map(row => {
           const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 8) return null;
+          if (!matches || matches.length < 7) return null;
           
           const telegram = matches[0].replace(/"/g, '').trim();
           const username = matches[1].replace(/"/g, '').trim();
           const password = matches[2].replace(/"/g, '').trim();
           const priceMonth = matches[3].replace(/"/g, '').trim();
-          const vipGroupStartDate = matches[4].replace(/"/g, '').trim();
-          const vipGroupEndDate = matches[5].replace(/"/g, '').trim();
-          const startDate = matches[6].replace(/"/g, '').trim();
-          const endDate = matches[7].replace(/"/g, '').trim();
+          const startDate = matches[4].replace(/"/g, '').trim();
+          const endDate = matches[5].replace(/"/g, '').trim();
+          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
           
           const daysLeft = getDaysUntilExpiry(endDate);
           
@@ -121,11 +119,10 @@ export default function Admin() {
             username,
             password,
             priceMonth,
-            vipGroupStartDate,
-            vipGroupEndDate,
             startDate,
             endDate,
             isActive: isSubscriptionActive(endDate),
+            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes',
             daysUntilExpiry: daysLeft,
           };
         })
@@ -143,6 +140,7 @@ export default function Admin() {
 
   const activeUsers = users.filter(u => u.isActive).length;
   const inactiveUsers = users.filter(u => !u.isActive).length;
+  const adminUsers = users.filter(u => u.isAdmin).length;
   const expiringUsers = users.filter(u => u.isActive && u.daysUntilExpiry !== undefined && u.daysUntilExpiry <= 3 && u.daysUntilExpiry >= 0);
 
   const getExpiryBadge = (user: User) => {
@@ -177,45 +175,6 @@ export default function Admin() {
       <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-3 py-1 rounded-full border-0">
         <CheckCircle className="mr-1 h-3 w-3" />
         Активна ({user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry && user.daysUntilExpiry < 5 ? 'і' : 'ів'})
-      </Badge>
-    );
-  };
-
-  const getVipGroupStatus = (startDate: string, endDate: string) => {
-    if (!startDate || !endDate) {
-      return (
-        <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-full border-0">
-          <MessageCircle className="mr-1 h-3 w-3" />
-          Немає доступу
-        </Badge>
-      );
-    }
-
-    const daysLeft = getDaysUntilExpiry(endDate);
-    const isActive = daysLeft >= 0;
-
-    if (!isActive) {
-      return (
-        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 px-2 py-1 rounded-full border-0">
-          <XCircle className="mr-1 h-3 w-3" />
-          Закінчився
-        </Badge>
-      );
-    }
-
-    if (daysLeft <= 3) {
-      return (
-        <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 px-2 py-1 rounded-full border-0">
-          <AlertTriangle className="mr-1 h-3 w-3" />
-          {daysLeft} дн{daysLeft === 1 ? 'ень' : daysLeft < 5 ? 'і' : 'ів'}
-        </Badge>
-      );
-    }
-
-    return (
-      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-2 py-1 rounded-full border-0">
-        <CheckCircle className="mr-1 h-3 w-3" />
-        Активний ({daysLeft} дн{daysLeft === 1 ? 'ень' : daysLeft < 5 ? 'і' : 'ів'})
       </Badge>
     );
   };
@@ -368,12 +327,12 @@ export default function Admin() {
         <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Закінчуються (≤3 дні)
+              <Crown className="h-4 w-4" />
+              Адміністратори
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold text-orange-600 tracking-tight">{expiringUsers.length}</div>
+            <div className="text-3xl font-semibold text-purple-600 tracking-tight">{adminUsers}</div>
           </CardContent>
         </Card>
 
@@ -414,10 +373,10 @@ export default function Admin() {
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Telegram</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Username</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Ціна</TableHead>
-                  <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">VIP Група</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата початку</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Дата закінчення</TableHead>
                   <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Статус</TableHead>
+                  <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Адмін</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -457,13 +416,22 @@ export default function Admin() {
                           {user.priceMonth}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-700">
-                        {getVipGroupStatus(user.vipGroupStartDate, user.vipGroupEndDate)}
-                      </TableCell>
                       <TableCell className="text-gray-700">{user.startDate}</TableCell>
                       <TableCell className="text-gray-700">{user.endDate}</TableCell>
                       <TableCell>
                         {getExpiryBadge(user)}
+                      </TableCell>
+                      <TableCell>
+                        {user.isAdmin ? (
+                          <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 px-2 py-1 rounded-full border-0">
+                            <Crown className="mr-1 h-3 w-3" />
+                            Так
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-full border-0">
+                            Ні
+                          </Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))

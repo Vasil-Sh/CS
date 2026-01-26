@@ -11,6 +11,15 @@ export interface Bet {
   result: 'Win' | 'Loss' | 'Pending';
   profit?: number;
   strategy?: string;
+  format?: string;
+  currency?: string;
+  originalAmount?: number;
+  exchangeRate?: number;
+  originalProfit?: number;
+  roi?: number;
+  goalId?: string;
+  selection?: string;
+  matchUrl?: string;
 }
 
 export interface BettingStats {

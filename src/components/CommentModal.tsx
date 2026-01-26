@@ -19,17 +19,17 @@ export default function CommentModal({
   const commentLines = comment.split('\n').filter(line => line.trim());
   
   const getStatusColor = (line: string) => {
-    if (line.includes('🔴')) return { bg: 'bg-red-50', border: 'border-red-200' };
-    if (line.includes('🟠')) return { bg: 'bg-orange-50', border: 'border-orange-200' };
-    if (line.includes('🟡')) return { bg: 'bg-yellow-50', border: 'border-yellow-200' };
-    return { bg: 'bg-blue-50', border: 'border-blue-200' };
+    if (line.includes('🔴')) return { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-700' };
+    if (line.includes('🟠')) return { bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-700' };
+    if (line.includes('🟡')) return { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-700' };
+    return { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700' };
   };
 
   const getStatusIcon = (line: string) => {
-    if (line.includes('🔴')) return <AlertTriangle className="h-5 w-5 text-red-700" />;
-    if (line.includes('🟠')) return <AlertTriangle className="h-5 w-5 text-orange-700" />;
-    if (line.includes('🟡')) return <Info className="h-5 w-5 text-yellow-700" />;
-    return <Shield className="h-5 w-5 text-blue-700" />;
+    if (line.includes('🔴')) return <AlertTriangle className="h-4 w-4 text-red-600" />;
+    if (line.includes('🟠')) return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+    if (line.includes('🟡')) return <Info className="h-4 w-4 text-yellow-600" />;
+    return <Shield className="h-4 w-4 text-blue-600" />;
   };
 
   const removeEmojis = (text: string) => {
@@ -38,35 +38,26 @@ export default function CommentModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50 border-0 shadow-2xl rounded-3xl">
         {/* Header */}
-        <DialogHeader className="bg-gray-100 border-b-2 border-gray-300 pb-6 -mx-6 -mt-6 px-6 pt-6 rounded-t-lg">
+        <DialogHeader className="border-b border-gray-200 pb-5">
           <DialogTitle>
-            <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 bg-gray-900 rounded-2xl shadow-lg">
-                <MessageSquare className="h-7 w-7 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl shadow-lg">
+                <MessageSquare className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl font-bold text-gray-900">Коментар адміністратора</span>
-                  <Badge className="rounded-full bg-gray-900 text-white border-0 font-bold text-sm px-4 py-1.5 shadow-md">
-                    Важлива інформація
-                  </Badge>
-                </div>
+                <h2 className="text-xl font-bold text-gray-900">Коментар адміністратора</h2>
+                <p className="text-sm text-gray-500 font-medium mt-0.5">{matchInfo}</p>
               </div>
-            </div>
-            
-            {/* Match info */}
-            <div className="ml-[68px]">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-gray-600 min-w-[100px]">Матч:</span>
-                <span className="text-base font-bold text-gray-900">{matchInfo}</span>
-              </div>
+              <Badge className="rounded-full bg-gradient-to-r from-orange-600 to-red-600 text-white border-0 font-semibold text-xs px-3 py-1 shadow-md">
+                Ризики
+              </Badge>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-6">
+        <div className="space-y-4 py-2">
           {commentLines.map((line, index) => {
             if (!line.trim()) return null;
             
@@ -80,17 +71,17 @@ export default function CommentModal({
             return (
               <div 
                 key={index}
-                className={`p-5 rounded-2xl border-2 ${colors.border} ${colors.bg} shadow-md hover:shadow-lg transition-all`}
+                className={`p-4 rounded-2xl ${colors.bg} border ${colors.border} shadow-sm`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
+                  <div className="p-2 bg-white rounded-xl shadow-sm">
                     {getStatusIcon(line)}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-lg text-gray-900 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-bold text-sm ${colors.text} mb-1.5`}>
                       {removeEmojis(teamPart)}
                     </div>
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-sm text-gray-700 leading-relaxed">
                       {commentPart}
                     </p>
                   </div>
@@ -99,19 +90,18 @@ export default function CommentModal({
             );
           })}
 
-          {/* Warning Footer */}
-          <div className="p-4 bg-gray-100 rounded-2xl border-2 border-gray-200 shadow-md">
+          {/* Warning */}
+          <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-xl border-2 border-gray-300 shadow-sm">
-                <AlertTriangle className="h-5 w-5 text-gray-700" />
+              <div className="p-2 bg-white rounded-xl shadow-sm">
+                <AlertTriangle className="h-4 w-4 text-gray-600" />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">
                   Увага
                 </p>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  Ця інформація надана адміністратором на основі аналізу ризиків команд. 
-                  Використовуйте її для прийняття більш обґрунтованих рішень щодо ставок.
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Інформація надана адміністратором на основі аналізу ризиків команд. Використовуйте для прийняття обґрунтованих рішень.
                 </p>
               </div>
             </div>

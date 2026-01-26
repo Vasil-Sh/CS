@@ -156,7 +156,7 @@ const mockMatches: Match[] = [
     favorite: 'FaZe',
     aiConfidence: 58,
     risk: 42,
-    comment: 'Обидві команди нестабільні',
+    comment: '',
     aiSummary: 'FaZe втрачає форму, Liquid набирає темп',
     odds: { team1: 1.85, team2: 1.95 },
     winRate: 55,
@@ -392,6 +392,7 @@ export default function Matches() {
     return null;
   };
 
+  // Get admin risk comments only (from Аналітика - Ризики)
   const getMatchRiskComments = (team1: string, team2: string): string => {
     const team1Risk = getTeamRiskInfo(team1);
     const team2Risk = getTeamRiskInfo(team2);
@@ -412,7 +413,7 @@ export default function Matches() {
       comments.push(`${icon} ${team2}: ${team2Risk.notes || team2Risk.status}`);
     }
     
-    return comments.length > 0 ? comments.join('\n') : '';
+    return comments.length > 0 ? comments.join('\n\n') : '';
   };
 
   const handleGetAIRecommendation = async (match: Match) => {
@@ -955,7 +956,6 @@ export default function Matches() {
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             <div className="text-sm text-gray-700 font-medium">{match.context}</div>
-                            <div className="text-xs text-gray-500 mt-1">{match.comment}</div>
                           </td>
                           <td className="p-4 border-r border-gray-200">
                             <Button
