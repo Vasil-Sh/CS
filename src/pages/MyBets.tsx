@@ -8,7 +8,6 @@ import BettingHistory from '@/components/BettingHistory';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import ExpressDetailsModal from '@/components/ExpressDetailsModal';
-import ExpressTelegramModal from '@/components/ExpressTelegramModal';
 import BetDetailsModal from '@/components/BetDetailsModal';
 import InitialBankModal from '@/components/InitialBankModal';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
@@ -17,7 +16,7 @@ import { BankrollService } from '@/lib/bankrollService';
 import { 
   TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
-  Flag, Wallet, Edit, Zap, LucideIcon, Eye, Send
+  Flag, Wallet, Edit, Zap, LucideIcon, Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -52,12 +51,6 @@ interface StatCardProps {
   icon: LucideIcon;
   colorClass: string;
   bgClass: string;
-}
-
-interface User {
-  telegram: string;
-  username: string;
-  isAdmin?: boolean;
 }
 
 const DEFAULT_STATS: BetStats = {
@@ -98,15 +91,10 @@ export default function MyBets() {
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [expressModalOpen, setExpressModalOpen] = useState(false);
-  const [expressTelegramModalOpen, setExpressTelegramModalOpen] = useState(false);
   const [betDetailsModalOpen, setBetDetailsModalOpen] = useState(false);
   const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
-  const [selectedExpressTelegramBet, setSelectedExpressTelegramBet] = useState<Bet | null>(null);
-  const [selectedExpressTelegramEvents, setSelectedExpressTelegramEvents] = useState<ParsedEvent[]>([]);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
 
   const bankrollStats = useMemo(() => 
     BankrollService.getBankrollStats(currentUser, recentBets),
@@ -117,55 +105,6 @@ export default function MyBets() {
     BankrollService.isInitialized(currentUser),
     [currentUser]
   );
-
-  // Fetch users and check admin status
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (users.length > 0) {
-      checkAdminStatus();
-    }
-  }, [users]);
-
-  const fetchUsers = async () => {
-    try {
-      const SHEET_ID = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-      
-      const response = await fetch(url);
-      const text = await response.text();
-      
-      const rows = text.split('\n').slice(1);
-      const parsedUsers: User[] = rows
-        .filter(row => row.trim())
-        .map(row => {
-          const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 7) return null;
-          
-          const telegram = matches[0].replace(/"/g, '').trim();
-          const username = matches[1].replace(/"/g, '').trim();
-          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
-          
-          return {
-            telegram,
-            username,
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes'
-          };
-        })
-        .filter((user): user is User => user !== null);
-      
-      setUsers(parsedUsers);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-    }
-  };
-
-  const checkAdminStatus = () => {
-    const user = users.find(u => u.username === currentUser);
-    setIsAdmin(user?.isAdmin || false);
-  };
 
   // Daily reset check
   useEffect(() => {
@@ -354,13 +293,6 @@ export default function MyBets() {
     setSelectedExpressBet(bet);
     setSelectedExpressEvents(parsedEvents);
     setExpressModalOpen(true);
-  }, [parseExpressEvents]);
-
-  const handleExpressTelegramClick = useCallback((bet: Bet) => {
-    const parsedEvents = parseExpressEvents(bet.betType);
-    setSelectedExpressTelegramBet(bet);
-    setSelectedExpressTelegramEvents(parsedEvents);
-    setExpressTelegramModalOpen(true);
   }, [parseExpressEvents]);
 
   const handleBetDetailsClick = useCallback((bet: Bet) => {
@@ -645,18 +577,17 @@ export default function MyBets() {
                               >
                                 <Share2 className="h-5 w-5" />
                               </Button>
-                              {isExpress && isAdmin && (
+                              {isExpress ? (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleExpressTelegramClick(bet)}
-                                  className="h-10 w-10 p-0 rounded-full border-2 border-purple-300 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-                                  title="Текст для Telegram"
+                                  onClick={() => handleExpressDetailsClick(bet)}
+                                  className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                                  title="Деталі експресу"
                                 >
-                                  <Send className="h-5 w-5" />
+                                  <Eye className="h-5 w-5" />
                                 </Button>
-                              )}
-                              {!isExpress && (
+                              ) : (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -742,19 +673,6 @@ export default function MyBets() {
             setSelectedExpressEvents([]);
           }}
           parsedEvents={selectedExpressEvents}
-        />
-      )}
-
-      {selectedExpressTelegramBet && (
-        <ExpressTelegramModal
-          bet={selectedExpressTelegramBet}
-          open={expressTelegramModalOpen}
-          onClose={() => {
-            setExpressTelegramModalOpen(false);
-            setSelectedExpressTelegramBet(null);
-            setSelectedExpressTelegramEvents([]);
-          }}
-          parsedEvents={selectedExpressTelegramEvents}
         />
       )}
 
