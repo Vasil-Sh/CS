@@ -85,8 +85,9 @@ interface Goal {
 interface LadderStep {
   step: number;
   startAmount: number;
-  minPlannedAmount: number;  // NEW: minimum expected amount (using minOdds)
-  maxPlannedAmount: number;  // NEW: maximum expected amount (using maxOdds)
+  minPlannedAmount?: number;  // Optional for backward compatibility
+  maxPlannedAmount?: number;  // Optional for backward compatibility
+  plannedAmount?: number;     // Old field for backward compatibility
   actualAmount?: number;
   actualOdds?: number;
   deviation?: number;
@@ -108,11 +109,35 @@ export default function GoalsManager() {
     const loadedGoals = UserDataService.getUserData(currentUser, 'goals', []);
     
     return loadedGoals.map((goal: Goal) => {
-      if (goal.type === 'ladder' && !goal.avgOdds && goal.minOdds && goal.maxOdds) {
-        return {
-          ...goal,
-          avgOdds: goal.minOdds
-        };
+      if (goal.type === 'ladder') {
+        // Migrate old goals to new structure
+        if (goal.steps && goal.minOdds && goal.maxOdds) {
+          const migratedSteps = goal.steps.map(step => {
+            if (!step.minPlannedAmount || !step.maxPlannedAmount) {
+              // Old step structure, migrate it
+              const plannedAmount = step.plannedAmount || step.startAmount * (goal.minOdds || 1.3);
+              return {
+                ...step,
+                minPlannedAmount: step.startAmount * (goal.minOdds || 1.3),
+                maxPlannedAmount: step.startAmount * (goal.maxOdds || 5)
+              };
+            }
+            return step;
+          });
+          
+          return {
+            ...goal,
+            steps: migratedSteps,
+            avgOdds: goal.avgOdds || goal.minOdds
+          };
+        }
+        
+        if (!goal.avgOdds && goal.minOdds && goal.maxOdds) {
+          return {
+            ...goal,
+            avgOdds: goal.minOdds
+          };
+        }
       }
       return goal;
     });
@@ -214,11 +239,13 @@ export default function GoalsManager() {
             
             // If bet amount matches (within tolerance) and odds are in range, complete this step
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
+              const minPlanned = currentStep.minPlannedAmount || currentStep.startAmount * minOdds;
+              
               steps[currentStepIndex].status = 'completed';
               steps[currentStepIndex].completedAt = bet.date;
               steps[currentStepIndex].actualAmount = actualWinAmount;
               steps[currentStepIndex].actualOdds = bet.odds;
-              steps[currentStepIndex].deviation = actualWinAmount - currentStep.minPlannedAmount;
+              steps[currentStepIndex].deviation = actualWinAmount - minPlanned;
               
               currentStepIndex++;
               
@@ -1346,60 +1373,66 @@ export default function GoalsManager() {
                     <div className="p-4 bg-gray-50 rounded-2xl">
                       <h5 className="text-base font-semibold text-gray-900 mb-3">📋 Детальний перегляд кроків</h5>
                       <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {selectedGoal.steps.slice(0, 10).map((step) => (
-                          <div
-                            key={step.step}
-                            className={`p-4 rounded-xl border-2 ${
-                              step.status === 'completed'
-                                ? 'bg-green-50 border-green-300'
-                                : step.status === 'current'
-                                ? 'bg-orange-50 border-orange-300'
-                                : 'bg-white border-gray-200'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-base font-bold text-gray-900">Крок {step.step}</span>
-                              <Badge className={`text-xs font-semibold ${
+                        {selectedGoal.steps.slice(0, 10).map((step) => {
+                          // Get values with fallbacks for old structure
+                          const minPlanned = step.minPlannedAmount || step.plannedAmount || step.startAmount * (selectedGoal.minOdds || 1.3);
+                          const maxPlanned = step.maxPlannedAmount || step.startAmount * (selectedGoal.maxOdds || 5);
+                          
+                          return (
+                            <div
+                              key={step.step}
+                              className={`p-4 rounded-xl border-2 ${
                                 step.status === 'completed'
-                                  ? 'bg-green-600 text-white'
+                                  ? 'bg-green-50 border-green-300'
                                   : step.status === 'current'
-                                  ? 'bg-orange-600 text-white'
-                                  : 'bg-gray-400 text-white'
-                              }`}>
-                                {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний' : 'Заблоковано'}
-                              </Badge>
+                                  ? 'bg-orange-50 border-orange-300'
+                                  : 'bg-white border-gray-200'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-base font-bold text-gray-900">Крок {step.step}</span>
+                                <Badge className={`text-xs font-semibold ${
+                                  step.status === 'completed'
+                                    ? 'bg-green-600 text-white'
+                                    : step.status === 'current'
+                                    ? 'bg-orange-600 text-white'
+                                    : 'bg-gray-400 text-white'
+                                }`}>
+                                  {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний' : 'Заблоковано'}
+                                </Badge>
+                              </div>
+                              {step.status === 'completed' && step.actualAmount ? (
+                                <div className="space-y-1 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">План:</span>
+                                    <span className="font-medium text-gray-900">
+                                      {step.startAmount.toFixed(2)} → {minPlanned.toFixed(2)}-{maxPlanned.toFixed(2)} грн
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Факт:</span>
+                                    <span className="font-semibold text-green-700">
+                                      {step.startAmount.toFixed(2)} → {step.actualAmount.toFixed(2)} грн (коеф. {(step.actualOdds || 0).toFixed(2)})
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Старт:</span>
+                                    <span className="font-medium text-gray-900">{step.startAmount.toFixed(2)} грн</span>
+                                  </div>
+                                  <div className="flex justify-between mt-1">
+                                    <span className="text-gray-600">План:</span>
+                                    <span className="font-medium text-gray-900">
+                                      {minPlanned.toFixed(2)}-{maxPlanned.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            {step.status === 'completed' && step.actualAmount ? (
-                              <div className="space-y-1 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">План:</span>
-                                  <span className="font-medium text-gray-900">
-                                    {step.startAmount.toFixed(2)} → {step.minPlannedAmount.toFixed(2)}-{step.maxPlannedAmount.toFixed(2)} грн
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Факт:</span>
-                                  <span className="font-semibold text-green-700">
-                                    {step.startAmount.toFixed(2)} → {step.actualAmount.toFixed(2)} грн (коеф. {(step.actualOdds || 0).toFixed(2)})
-                                  </span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Старт:</span>
-                                  <span className="font-medium text-gray-900">{step.startAmount.toFixed(2)} грн</span>
-                                </div>
-                                <div className="flex justify-between mt-1">
-                                  <span className="text-gray-600">План:</span>
-                                  <span className="font-medium text-gray-900">
-                                    {step.minPlannedAmount.toFixed(2)}-{step.maxPlannedAmount.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                         {selectedGoal.steps.length > 10 && (
                           <p className="text-xs text-gray-500 text-center py-2">
                             Показано перші 10 кроків з {selectedGoal.steps.length}
