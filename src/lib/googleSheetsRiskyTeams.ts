@@ -10,22 +10,24 @@ class GoogleSheetsRiskyTeamsService {
   private readonly SHEET_ID = '1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw';
 
   /**
-   * Parse team data from combined text format
-   * Format examples:
-   * - "Tyloo (СS: Рідко коли вистрілює як команда...)"
-   * - "Virtus Pro Дота: БАН проти топ 100..."
-   * - "Team Falcons Дота: БАН - в якій би не були..."
+   * Parse team data from name and notes
+   * Name is in one column, notes in the next column
+   * Notes format examples:
+   * - "(СS: Рідко коли вистрілює як команда...)"
+   * - "Дота: БАН проти топ 100..."
+   * - "Дота: БАН - в якій би не були..."
    */
-  private parseTeamData(text: string): RiskyTeamFromSheet | null {
-    if (!text || text.trim() === '' || text.includes('⛔ Ризикована команда')) {
+  private parseTeamData(name: string, notes: string): RiskyTeamFromSheet | null {
+    if (!name || name.trim() === '' || name.includes('⛔ Ризикована команда')) {
       return null;
     }
 
-    const cleanText = text.trim();
+    const cleanName = name.trim();
+    const cleanNotes = notes ? notes.trim() : '';
     
     // Detect game (CS or Dota)
-    let game = 'CS';
-    const gameMatch = cleanText.match(/(?:СS|CS|Дота):/i);
+    let game = 'CS'; // default
+    const gameMatch = cleanNotes.match(/(?:СS|CS|Дота)/i);
     if (gameMatch) {
       const gameStr = gameMatch[0].toLowerCase();
       game = gameStr.includes('дота') ? 'Дота' : 'CS';
@@ -33,55 +35,29 @@ class GoogleSheetsRiskyTeamsService {
 
     // Detect status
     let status = 'Обережно'; // default
-    if (cleanText.includes('БАН')) {
+    if (cleanNotes.includes('БАН')) {
       status = 'БАН';
-    } else if (cleanText.includes('Нестабільні') || cleanText.includes('нестабільн')) {
+    } else if (cleanNotes.includes('Нестабільні') || cleanNotes.includes('нестабільн')) {
       status = 'Нестабільні';
-    } else if (cleanText.includes('Рідко') || cleanText.includes('рідко')) {
+    } else if (cleanNotes.includes('Рідко') || cleanNotes.includes('рідко')) {
       status = 'Рідко';
-    } else if (cleanText.includes('Обережно') || cleanText.includes('обережно')) {
+    } else if (cleanNotes.includes('Обережно') || cleanNotes.includes('обережно')) {
       status = 'Обережно';
     }
 
-    // Extract team name (everything before the game indicator or opening parenthesis)
-    let teamName = cleanText;
-    
-    // Try to extract name before game indicator
-    const gameIndicatorMatch = cleanText.match(/^(.+?)(?:\s*\(?\s*(?:СS|CS|Дота):)/i);
-    if (gameIndicatorMatch) {
-      teamName = gameIndicatorMatch[1].trim();
-    } else {
-      // Try to extract name before opening parenthesis
-      const parenMatch = cleanText.match(/^(.+?)\s*\(/);
-      if (parenMatch) {
-        teamName = parenMatch[1].trim();
-      }
-    }
-
-    // Extract notes (everything after the game indicator)
-    let notes = '';
-    const notesMatch = cleanText.match(/(?:СS|CS|Дота):\s*(.+)/i);
-    if (notesMatch) {
-      notes = notesMatch[1].trim();
-      // Remove status from notes if it's at the beginning
-      notes = notes.replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '');
-    }
-
-    // Clean up team name
-    teamName = teamName
-      .replace(/\s*\(.*$/, '') // Remove anything after opening parenthesis
-      .replace(/\s+$/, '') // Remove trailing spaces
+    // Clean up notes - remove game indicator and status from the beginning
+    const finalNotes = cleanNotes
+      .replace(/^\s*\(?\s*(?:СS|CS|Дота):\s*/i, '') // Remove game indicator
+      .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status
+      .replace(/^\s*\(/, '') // Remove opening parenthesis
+      .replace(/\)\s*$/, '') // Remove closing parenthesis
       .trim();
 
-    if (!teamName) {
-      return null;
-    }
-
     return {
-      name: teamName,
+      name: cleanName,
       game,
       status,
-      notes
+      notes: finalNotes
     };
   }
 
@@ -111,18 +87,25 @@ class GoogleSheetsRiskyTeamsService {
         // Parse CSV line (handle quoted values)
         const values = this.parseCSVLine(line);
         
-        // Process columns L and N (indices 11 and 13)
-        // Column L is at index 11
+        // Process columns L and M (indices 11 and 12)
+        // Column L (index 11) = team name
+        // Column M (index 12) = notes
         if (values.length > 11 && values[11]) {
-          const teamData = this.parseTeamData(values[11]);
+          const teamName = values[11];
+          const teamNotes = values.length > 12 ? values[12] : '';
+          const teamData = this.parseTeamData(teamName, teamNotes);
           if (teamData) {
             riskyTeams.push(teamData);
           }
         }
         
-        // Column N is at index 13
+        // Process columns N and O (indices 13 and 14)
+        // Column N (index 13) = team name
+        // Column O (index 14) = notes
         if (values.length > 13 && values[13]) {
-          const teamData = this.parseTeamData(values[13]);
+          const teamName = values[13];
+          const teamNotes = values.length > 14 ? values[14] : '';
+          const teamData = this.parseTeamData(teamName, teamNotes);
           if (teamData) {
             riskyTeams.push(teamData);
           }
