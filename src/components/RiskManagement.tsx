@@ -156,6 +156,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
+  // Normalize team name for comparison
+  const normalizeTeamName = (name: string): string => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9]/g, '');
+  };
+
   const updateFromGoogleSheets = async () => {
     setIsUpdating(true);
     try {
@@ -166,14 +175,40 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return;
       }
 
-      // Update risky teams with data from Google Sheets
-      setRiskyTeams(teamsFromSheet);
+      // Merge logic: Add only NEW teams from Google Sheets
+      const existingTeams = riskyTeams;
+      const newTeamsToAdd: RiskyTeam[] = [];
+      
+      teamsFromSheet.forEach(sheetTeam => {
+        const normalizedSheetTeam = normalizeTeamName(sheetTeam.name);
+        
+        // Check if this team already exists (by normalized name and game)
+        const exists = existingTeams.some(existingTeam => 
+          normalizeTeamName(existingTeam.name) === normalizedSheetTeam && 
+          existingTeam.game === sheetTeam.game
+        );
+        
+        if (!exists) {
+          newTeamsToAdd.push(sheetTeam);
+        }
+      });
+
+      if (newTeamsToAdd.length === 0) {
+        toast.info('Немає нових команд для додавання', {
+          description: 'Всі команди з Google Sheets вже присутні у списку'
+        });
+        return;
+      }
+
+      // Merge: existing teams + new teams from Google Sheets
+      const mergedTeams = [...existingTeams, ...newTeamsToAdd];
+      setRiskyTeams(mergedTeams);
       
       // Also update the service's storage
-      localStorage.setItem('admin_risky_teams', JSON.stringify(teamsFromSheet));
+      localStorage.setItem('admin_risky_teams', JSON.stringify(mergedTeams));
       
-      toast.success(`Успішно оновлено ${teamsFromSheet.length} команд з Google Sheets!`, {
-        description: 'Дані ризикованих команд синхронізовано'
+      toast.success(`Успішно додано ${newTeamsToAdd.length} нових команд з Google Sheets!`, {
+        description: `Всього команд: ${mergedTeams.length}`
       });
     } catch (error) {
       console.error('Error updating from Google Sheets:', error);
@@ -214,6 +249,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-0 rounded-full font-bold';
     }
+  };
+
+  const getGameEmoji = (game: string) => {
+    return game === 'CS' ? '🎯 CS:' : '🛡️ Дота:';
   };
 
   const filteredTeams = riskyTeams.filter(team => 
@@ -671,7 +710,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
               <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
-                <span>CS:GO команди</span>
+                <span>🎯 CS команди</span>
                 <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold">{teamsByGame.CS.length}</Badge>
               </CardTitle>
             </CardHeader>
@@ -685,7 +724,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg text-gray-900">{team.name}</h3>
+                            <h3 className="font-semibold text-lg text-gray-900">
+                              {getGameEmoji(team.game)} {team.name}
+                            </h3>
                             <Badge className={getStatusBadge(team.status)}>
                               {team.status}
                             </Badge>
@@ -714,7 +755,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
               <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
-                <span>Dota 2 команди</span>
+                <span>🛡️ Dota 2 команди</span>
                 <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold">{teamsByGame.Дота.length}</Badge>
               </CardTitle>
             </CardHeader>
@@ -728,7 +769,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg text-gray-900">{team.name}</h3>
+                            <h3 className="font-semibold text-lg text-gray-900">
+                              {getGameEmoji(team.game)} {team.name}
+                            </h3>
                             <Badge className={getStatusBadge(team.status)}>
                               {team.status}
                             </Badge>
