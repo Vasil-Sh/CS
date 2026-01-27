@@ -224,6 +224,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     return [];
   };
 
+  const normalizeTeamName = (name: string): string => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9]/g, '');
+  };
+
   const checkRiskyTeams = (team1: string, team2: string) => {
     if (!team1 && !team2) {
       setFormData(prev => ({ ...prev, riskyTeams: [] }));
@@ -233,13 +241,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     const savedRiskyTeams = loadRiskyTeamsFromStorage();
     const riskyTeamsFound: RiskyTeam[] = [];
     
+    const normalizedTeam1 = normalizeTeamName(team1);
+    const normalizedTeam2 = normalizeTeamName(team2);
+    
     savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-      const teamName = riskyTeam.name.toLowerCase();
-      const team1Lower = team1.toLowerCase();
-      const team2Lower = team2.toLowerCase();
+      const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
       
-      if (team1Lower.includes(teamName) || teamName.includes(team1Lower) ||
-          team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
+      // Exact match or risky team name is contained in input (but not vice versa to avoid false positives)
+      if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
+          normalizedTeam1.includes(normalizedRiskyTeam) || normalizedTeam2.includes(normalizedRiskyTeam)) {
         riskyTeamsFound.push({
           name: riskyTeam.name,
           game: riskyTeam.game,
@@ -370,13 +380,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           const savedRiskyTeams = loadRiskyTeamsFromStorage();
           const riskyTeamsFound: RiskyTeam[] = [];
           
+          const normalizedTeam1 = normalizeTeamName(result.team1);
+          const normalizedTeam2 = normalizeTeamName(result.team2);
+          
           savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-            const teamName = riskyTeam.name.toLowerCase();
-            const team1Lower = result.team1.toLowerCase();
-            const team2Lower = result.team2.toLowerCase();
+            const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
             
-            if (team1Lower.includes(teamName) || teamName.includes(team1Lower) ||
-                team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
+            if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
+                normalizedTeam1.includes(normalizedRiskyTeam) || normalizedTeam2.includes(normalizedRiskyTeam)) {
               riskyTeamsFound.push({
                 name: riskyTeam.name,
                 game: riskyTeam.game,
@@ -405,13 +416,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           const savedRiskyTeams = loadRiskyTeamsFromStorage();
           const riskyTeamsFound: RiskyTeam[] = [];
           
+          const normalizedTeam1 = normalizeTeamName(result.team1);
+          const normalizedTeam2 = normalizeTeamName(result.team2);
+          
           savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-            const teamName = riskyTeam.name.toLowerCase();
-            const team1Lower = result.team1.toLowerCase();
-            const team2Lower = result.team2.toLowerCase();
+            const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
             
-            if (team1Lower.includes(teamName) || teamName.includes(team1Lower) ||
-                team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
+            if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
+                normalizedTeam1.includes(normalizedRiskyTeam) || normalizedTeam2.includes(normalizedRiskyTeam)) {
               riskyTeamsFound.push({
                 name: riskyTeam.name,
                 game: riskyTeam.game,
@@ -1422,7 +1434,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               </CardHeader>
               <CardContent className="p-4">
                 {formData.riskyTeams.length > 0 ? (
-                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
                       <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2">
                         <div className="flex justify-between items-start">
