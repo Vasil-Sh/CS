@@ -75,17 +75,15 @@ class GoogleSheetsRiskyTeamsService {
       }
       
       const csvText = await response.text();
-      const lines = csvText.split('\n');
+      
+      // Parse CSV properly handling multiline values in quotes
+      const rows = this.parseCSV(csvText);
       
       const riskyTeams: RiskyTeamFromSheet[] = [];
       
       // Skip header row, start from row 2 (index 1)
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        
-        // Parse CSV line (handle quoted values)
-        const values = this.parseCSVLine(line);
+      for (let i = 1; i < rows.length; i++) {
+        const values = rows[i];
         
         // Process columns L and M (indices 11 and 12)
         // Column L (index 11) = team name
@@ -120,34 +118,57 @@ class GoogleSheetsRiskyTeamsService {
   }
 
   /**
-   * Parse a CSV line handling quoted values
+   * Parse CSV text into rows, properly handling quoted multiline values
    */
-  private parseCSVLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
+  private parseCSV(text: string): string[][] {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentValue = '';
     let inQuotes = false;
     
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
       
       if (char === '"') {
-        // Handle escaped quotes
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote inside quoted value
+          currentValue += '"';
           i++; // Skip next quote
         } else {
+          // Toggle quote mode
           inQuotes = !inQuotes;
         }
       } else if (char === ',' && !inQuotes) {
-        result.push(current);
-        current = '';
+        // End of field
+        currentRow.push(currentValue);
+        currentValue = '';
+      } else if (char === '\n' && !inQuotes) {
+        // End of row
+        currentRow.push(currentValue);
+        rows.push(currentRow);
+        currentRow = [];
+        currentValue = '';
+      } else if (char === '\r' && nextChar === '\n' && !inQuotes) {
+        // Windows line ending
+        currentRow.push(currentValue);
+        rows.push(currentRow);
+        currentRow = [];
+        currentValue = '';
+        i++; // Skip \n
       } else {
-        current += char;
+        // Regular character (including \n inside quotes)
+        currentValue += char;
       }
     }
     
-    result.push(current);
-    return result;
+    // Add last value and row if not empty
+    if (currentValue || currentRow.length > 0) {
+      currentRow.push(currentValue);
+      rows.push(currentRow);
+    }
+    
+    return rows;
   }
 
   /**
