@@ -21,7 +21,9 @@ interface CS2BettingFormProps {
 
 interface RiskyTeam {
   name: string;
-  comment: string;
+  game: string;
+  status: string;
+  notes: string;
 }
 
 interface ExpressEvent {
@@ -206,12 +208,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
   const loadRiskyTeamsFromStorage = (): RiskyTeam[] => {
     try {
-      const saved = localStorage.getItem('riskyTeams');
+      const saved = localStorage.getItem('admin_risky_teams');
       if (saved) {
         const savedTeams = JSON.parse(saved) as RiskyTeam[];
         return savedTeams.map((team: RiskyTeam) => ({
           name: team.name,
-          comment: team.comment
+          game: team.game || 'CS',
+          status: team.status || 'Обережно',
+          notes: team.notes || ''
         }));
       }
     } catch (error) {
@@ -238,7 +242,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
         riskyTeamsFound.push({
           name: riskyTeam.name,
-          comment: riskyTeam.comment
+          game: riskyTeam.game,
+          status: riskyTeam.status,
+          notes: riskyTeam.notes
         });
       }
     });
@@ -373,7 +379,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
               riskyTeamsFound.push({
                 name: riskyTeam.name,
-                comment: riskyTeam.comment
+                game: riskyTeam.game,
+                status: riskyTeam.status,
+                notes: riskyTeam.notes
               });
             }
           });
@@ -406,7 +414,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 team2Lower.includes(teamName) || teamName.includes(team2Lower)) {
               riskyTeamsFound.push({
                 name: riskyTeam.name,
-                comment: riskyTeam.comment
+                game: riskyTeam.game,
+                status: riskyTeam.status,
+                notes: riskyTeam.notes
               });
             }
           });
@@ -448,6 +458,21 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       ...prev,
       riskyTeams: prev.riskyTeams.filter((_, i) => i !== index)
     }));
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'БАН':
+        return 'bg-red-100 text-red-800 hover:bg-red-100 border-0 rounded-full font-bold';
+      case 'Нестабільні':
+        return 'bg-orange-100 text-orange-800 hover:bg-orange-100 border-0 rounded-full font-bold';
+      case 'Обережно':
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-0 rounded-full font-bold';
+      case 'Рідко':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-100 border-0 rounded-full font-bold';
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-0 rounded-full font-bold';
+    }
   };
 
   const addExpressEvent = () => {
@@ -1401,9 +1426,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     {formData.riskyTeams.map((riskyTeam, index) => (
                       <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2">
                         <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                            <span className="font-bold text-red-800">{riskyTeam.name}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                              <span className="font-bold text-red-800">{riskyTeam.name}</span>
+                            </div>
+                            <Badge className={getStatusBadge(riskyTeam.status)}>
+                              {riskyTeam.status}
+                            </Badge>
                           </div>
                           <Button
                             type="button"
@@ -1415,7 +1445,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             ✕
                           </Button>
                         </div>
-                        <p className="text-xs text-red-700 font-medium">{riskyTeam.comment}</p>
+                        {riskyTeam.notes && (
+                          <p className="text-xs text-red-700 font-medium whitespace-pre-wrap">{riskyTeam.notes}</p>
+                        )}
                       </div>
                     ))}
                   </div>
