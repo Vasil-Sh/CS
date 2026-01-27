@@ -16,9 +16,13 @@ import {
   Plus,
   Trash2,
   Search,
-  Info
+  Info,
+  RefreshCw,
+  Download
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
+import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
+import { toast } from 'sonner';
 
 interface RiskManagementProps {
   bets: Bet[];
@@ -146,10 +150,40 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   });
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
   }, [riskyTeams]);
+
+  const updateFromGoogleSheets = async () => {
+    setIsUpdating(true);
+    try {
+      const teamsFromSheet = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+      
+      if (teamsFromSheet.length === 0) {
+        toast.error('Не знайдено команд у документі');
+        return;
+      }
+
+      // Update risky teams with data from Google Sheets
+      setRiskyTeams(teamsFromSheet);
+      
+      // Also update the service's storage
+      localStorage.setItem('admin_risky_teams', JSON.stringify(teamsFromSheet));
+      
+      toast.success(`Успішно оновлено ${teamsFromSheet.length} команд з Google Sheets!`, {
+        description: 'Дані ризикованих команд синхронізовано'
+      });
+    } catch (error) {
+      console.error('Error updating from Google Sheets:', error);
+      toast.error('Помилка оновлення', {
+        description: error instanceof Error ? error.message : 'Не вдалося завантажити дані з Google Sheets'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const addRiskyTeam = () => {
     if (!newTeam.name.trim()) return;
@@ -396,6 +430,25 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Управління ризиками</h2>
               <p className="text-gray-500 font-medium">Аналіз ризиків та контроль банкролу</p>
             </div>
+            
+            {/* Admin: Update from Google Sheets Button */}
+            <Button
+              onClick={updateFromGoogleSheets}
+              disabled={isUpdating}
+              className="rounded-2xl bg-green-600 hover:bg-green-700 font-medium"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Оновлення...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Оновити з Google Sheets
+                </>
+              )}
+            </Button>
           </div>
           
           {/* Legal Disclaimer */}
