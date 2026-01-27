@@ -131,7 +131,7 @@ export default function GoalsManager() {
     startAmount: 100,
     targetLadderAmount: 100000,
     minOdds: 1.3,
-    maxOdds: 1.5,
+    maxOdds: 5,
     ladderMode: 'soft' as LadderMode,
     targetROI: 50,
     targetWinRate: 65,
@@ -183,43 +183,44 @@ export default function GoalsManager() {
           const goalBets = betsData.filter((bet: Bet) => 
             bet.goalId === goal.id &&
             bet.odds >= (goal.minOdds || 1.3) && 
-            bet.odds <= (goal.maxOdds || 1.5) && 
+            bet.odds <= (goal.maxOdds || 5) && 
             bet.result === 'Win'
           );
 
           let currentStepIndex = goal.currentStep || 0;
           const steps = [...(goal.steps || [])];
-          const avgOdds = goal.avgOdds || ((goal.minOdds || 1.3) + (goal.maxOdds || 1.5)) / 2;
+          const avgOdds = goal.avgOdds || ((goal.minOdds || 1.3) + (goal.maxOdds || 5)) / 2;
 
           const sortedBets = goalBets.sort((a: Bet, b: Bet) => 
             new Date(a.date).getTime() - new Date(b.date).getTime()
           );
 
+          // IMPROVED LOGIC: More flexible matching
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             
             const currentStep = steps[currentStepIndex];
             if (currentStep.status !== 'current') return;
 
-            const expectedBetAmount = currentStep.startAmount;
             const betAmount = bet.amount || 0;
-            
-            const expectedWinAmount = currentStep.plannedAmount;
             const actualWinAmount = betAmount * bet.odds;
             
-            const tolerance = 0.10;
+            // More flexible tolerance - check if bet amount is close to expected start amount
+            const tolerance = 0.20; // Increased to 20% tolerance
+            const expectedBetAmount = currentStep.startAmount;
             const betAmountMatches = Math.abs(betAmount - expectedBetAmount) / expectedBetAmount <= tolerance;
-            const winAmountMatches = Math.abs(actualWinAmount - expectedWinAmount) / expectedWinAmount <= tolerance;
-
-            if (betAmountMatches && winAmountMatches) {
+            
+            // If bet amount matches (within tolerance), complete this step
+            if (betAmountMatches) {
               steps[currentStepIndex].status = 'completed';
               steps[currentStepIndex].completedAt = bet.date;
               steps[currentStepIndex].actualAmount = actualWinAmount;
               steps[currentStepIndex].actualOdds = bet.odds;
-              steps[currentStepIndex].deviation = actualWinAmount - expectedWinAmount;
+              steps[currentStepIndex].deviation = actualWinAmount - currentStep.plannedAmount;
               
               currentStepIndex++;
               
+              // Setup next step
               if (currentStepIndex < steps.length) {
                 steps[currentStepIndex].startAmount = actualWinAmount;
                 steps[currentStepIndex].plannedAmount = actualWinAmount * avgOdds;
@@ -442,7 +443,7 @@ export default function GoalsManager() {
       startAmount: 100,
       targetLadderAmount: 100000,
       minOdds: 1.3,
-      maxOdds: 1.5,
+      maxOdds: 5,
       ladderMode: 'soft',
       targetROI: 50,
       targetWinRate: 65,
@@ -1044,7 +1045,7 @@ export default function GoalsManager() {
                       min="1.01"
                       step="0.01"
                       value={newGoal.maxOdds}
-                      onChange={(e) => setNewGoal({ ...newGoal, maxOdds: parseFloat(e.target.value) || 1.5 })}
+                      onChange={(e) => setNewGoal({ ...newGoal, maxOdds: parseFloat(e.target.value) || 5 })}
                       className="rounded-xl"
                     />
                   </div>
@@ -1297,9 +1298,9 @@ export default function GoalsManager() {
                             selectedGoal.startAmount || 100,
                             selectedGoal.targetLadderAmount || 100000,
                             selectedGoal.minOdds || 1.3,
-                            selectedGoal.maxOdds || 1.5
+                            selectedGoal.maxOdds || 5
                           ).map((scenario, index) => {
-                            const avgOdds = ((selectedGoal.minOdds || 1.3) + (selectedGoal.maxOdds || 1.5)) / 2;
+                            const avgOdds = ((selectedGoal.minOdds || 1.3) + (selectedGoal.maxOdds || 5)) / 2;
                             const isRecommended = Math.abs(scenario.odds - avgOdds) < 0.01;
                             
                             return (
