@@ -941,55 +941,56 @@ export default function GoalsManager() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {completedGoals.map(goal => (
                 <Card 
                   key={goal.id} 
-                  className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
+                  className="border-0 shadow-lg rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
                   onClick={() => openCompletedGoalResult(goal)}
                 >
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
-                      <span className="flex items-center gap-2">
-                        <div className="p-2 bg-green-100 rounded-xl">
-                          <Trophy className="h-5 w-5 text-green-600" />
-                        </div>
-                        {goal.name}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white border-0 rounded-full">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Завершено
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            confirmDeleteGoal(goal.id);
-                          }}
-                          className="text-red-600 hover:text-red-700 h-8 w-8 p-0 rounded-xl"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-2 bg-green-100 rounded-xl">
+                        <Trophy className="h-4 w-4 text-green-600" />
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmDeleteGoal(goal.id);
+                        }}
+                        className="text-red-600 hover:text-red-700 h-7 w-7 p-0 rounded-lg"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <CardTitle className="text-base font-semibold text-gray-900 line-clamp-2">
+                      {goal.name}
                     </CardTitle>
                   </CardHeader>
 
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
+                  <CardContent className="space-y-2 pt-0">
+                    <Badge className="bg-green-600 text-white border-0 rounded-full text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Завершено
+                    </Badge>
+                    
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-600">Тип цілі:</span>
-                      <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                      <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full text-xs">
                         {getGoalTypeLabel(goal.type)}
                       </Badge>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-600">Завершено:</span>
                       <span className="font-medium text-green-600">
                         {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
                       </span>
                     </div>
-                    <div className="mt-3 p-2 bg-green-100 rounded-xl text-center">
+                    
+                    <div className="mt-2 p-2 bg-green-100 rounded-lg text-center">
                       <p className="text-xs text-green-700 font-medium">👆 Клікніть, щоб переглянути детальний результат</p>
                     </div>
                   </CardContent>
