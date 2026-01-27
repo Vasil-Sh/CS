@@ -110,7 +110,7 @@ export default function GoalsManager() {
       if (goal.type === 'ladder' && !goal.avgOdds && goal.minOdds && goal.maxOdds) {
         return {
           ...goal,
-          avgOdds: (goal.minOdds + goal.maxOdds) / 2
+          avgOdds: goal.minOdds // FIXED: Always use minOdds for safest approach
         };
       }
       return goal;
@@ -189,7 +189,7 @@ export default function GoalsManager() {
 
           let currentStepIndex = goal.currentStep || 0;
           const steps = [...(goal.steps || [])];
-          const avgOdds = goal.avgOdds || ((goal.minOdds || 1.3) + (goal.maxOdds || 5)) / 2;
+          const avgOdds = goal.avgOdds || goal.minOdds || 1.3; // FIXED: Use minOdds as default
 
           const sortedBets = goalBets.sort((a: Bet, b: Bet) => 
             new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -402,7 +402,7 @@ export default function GoalsManager() {
       }
 
       case 'ladder': {
-        const avgOdds = (newGoal.minOdds + newGoal.maxOdds) / 2;
+        const avgOdds = newGoal.minOdds; // FIXED: Always use minOdds for safest approach
         const steps = calculateLadderSteps(
           newGoal.startAmount,
           newGoal.targetLadderAmount,
@@ -990,8 +990,8 @@ export default function GoalsManager() {
                   id="targetAmount"
                   type="number"
                   min="1"
-                  value={newGoal.targetAmount}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetAmount: parseFloat(e.target.value) || 0 })}
+                  value={newGoal.targetAmount === 0 ? '' : newGoal.targetAmount}
+                  onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                   className="rounded-xl"
                 />
               </div>
@@ -1006,8 +1006,8 @@ export default function GoalsManager() {
                       id="startAmount"
                       type="number"
                       min="1"
-                      value={newGoal.startAmount}
-                      onChange={(e) => setNewGoal({ ...newGoal, startAmount: parseFloat(e.target.value) || 0 })}
+                      value={newGoal.startAmount === 0 ? '' : newGoal.startAmount}
+                      onChange={(e) => setNewGoal({ ...newGoal, startAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                       className="rounded-xl"
                     />
                   </div>
@@ -1017,8 +1017,8 @@ export default function GoalsManager() {
                       id="targetLadderAmount"
                       type="number"
                       min="1"
-                      value={newGoal.targetLadderAmount}
-                      onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: parseFloat(e.target.value) || 0 })}
+                      value={newGoal.targetLadderAmount === 0 ? '' : newGoal.targetLadderAmount}
+                      onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                       className="rounded-xl"
                     />
                   </div>
@@ -1032,8 +1032,8 @@ export default function GoalsManager() {
                       type="number"
                       min="1.01"
                       step="0.01"
-                      value={newGoal.minOdds}
-                      onChange={(e) => setNewGoal({ ...newGoal, minOdds: parseFloat(e.target.value) || 1.3 })}
+                      value={newGoal.minOdds === 0 ? '' : newGoal.minOdds}
+                      onChange={(e) => setNewGoal({ ...newGoal, minOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                       className="rounded-xl"
                     />
                   </div>
@@ -1044,8 +1044,8 @@ export default function GoalsManager() {
                       type="number"
                       min="1.01"
                       step="0.01"
-                      value={newGoal.maxOdds}
-                      onChange={(e) => setNewGoal({ ...newGoal, maxOdds: parseFloat(e.target.value) || 5 })}
+                      value={newGoal.maxOdds === 0 ? '' : newGoal.maxOdds}
+                      onChange={(e) => setNewGoal({ ...newGoal, maxOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                       className="rounded-xl"
                     />
                   </div>
@@ -1064,14 +1064,14 @@ export default function GoalsManager() {
                   </Select>
                 </div>
 
-                {newGoal.startAmount && newGoal.targetLadderAmount && newGoal.minOdds && newGoal.maxOdds && (
+                {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
                   <div className="p-3 bg-blue-50 rounded-xl">
-                    <p className="text-sm font-medium text-blue-900 mb-1">📊 Розрахунок:</p>
+                    <p className="text-sm font-medium text-blue-900 mb-1">📊 Розрахунок (найбезпечніший варіант):</p>
                     <p className="text-sm text-blue-700">
-                      Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, (newGoal.minOdds + newGoal.maxOdds) / 2).length}
+                      Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds).length}
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
-                      Діапазон коефіцієнтів: {newGoal.minOdds} - {newGoal.maxOdds} (середній: {((newGoal.minOdds + newGoal.maxOdds) / 2).toFixed(2)})
+                      Використовується мінімальний коефіцієнт {newGoal.minOdds} для максимальної безпеки
                     </p>
                   </div>
                 )}
@@ -1086,8 +1086,8 @@ export default function GoalsManager() {
                   type="number"
                   min="0"
                   max="1000"
-                  value={newGoal.targetROI}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetROI: parseFloat(e.target.value) || 0 })}
+                  value={newGoal.targetROI === 0 ? '' : newGoal.targetROI}
+                  onChange={(e) => setNewGoal({ ...newGoal, targetROI: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                   className="rounded-xl"
                 />
               </div>
@@ -1101,8 +1101,8 @@ export default function GoalsManager() {
                   type="number"
                   min="0"
                   max="100"
-                  value={newGoal.targetWinRate}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: parseFloat(e.target.value) || 0 })}
+                  value={newGoal.targetWinRate === 0 ? '' : newGoal.targetWinRate}
+                  onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                   className="rounded-xl"
                 />
               </div>
@@ -1119,8 +1119,8 @@ export default function GoalsManager() {
                     id="betsPerDay"
                     type="number"
                     min="0"
-                    value={newGoal.betsPerDay}
-                    onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: parseInt(e.target.value) || 0 })}
+                    value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
+                    onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
                     className="rounded-xl"
                   />
                 </div>
@@ -1266,7 +1266,7 @@ export default function GoalsManager() {
                       <strong>Прогрес:</strong> {selectedGoal.currentStep} / {selectedGoal.totalSteps} кроків виконано
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
-                      Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds} (середній: {selectedGoal.avgOdds?.toFixed(2)})
+                      Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds} (використовується: {selectedGoal.avgOdds?.toFixed(2)})
                     </p>
                   </div>
 
@@ -1300,14 +1300,13 @@ export default function GoalsManager() {
                             selectedGoal.minOdds || 1.3,
                             selectedGoal.maxOdds || 5
                           ).map((scenario, index) => {
-                            const avgOdds = ((selectedGoal.minOdds || 1.3) + (selectedGoal.maxOdds || 5)) / 2;
-                            const isRecommended = Math.abs(scenario.odds - avgOdds) < 0.01;
+                            const isCurrentlyUsed = Math.abs(scenario.odds - (selectedGoal.avgOdds || 0)) < 0.01;
                             
                             return (
                               <div
                                 key={index}
                                 className={`p-2.5 rounded-xl border transition-all ${
-                                  isRecommended
+                                  isCurrentlyUsed
                                     ? 'bg-blue-100 border-blue-300 shadow-sm'
                                     : 'bg-white border-gray-200'
                                 }`}
@@ -1320,9 +1319,9 @@ export default function GoalsManager() {
                                         <p className="text-sm font-semibold text-gray-900">
                                           Коеф. {scenario.odds}
                                         </p>
-                                        {isRecommended && (
+                                        {isCurrentlyUsed && (
                                           <Badge className="bg-blue-600 text-white text-xs px-1.5 py-0 rounded-full border-0">
-                                            ⭐
+                                            Використовується
                                           </Badge>
                                         )}
                                       </div>
@@ -1340,7 +1339,7 @@ export default function GoalsManager() {
                         </div>
                         <div className="p-2 bg-blue-50 rounded-xl mt-3">
                           <p className="text-xs text-blue-800">
-                            💡 <strong>Порада:</strong> Використовуйте середні коефіцієнти для оптимального балансу.
+                            💡 <strong>Порада:</strong> За замовчуванням використовується мінімальний коефіцієнт для найбезпечнішого підходу.
                           </p>
                         </div>
                       </div>
