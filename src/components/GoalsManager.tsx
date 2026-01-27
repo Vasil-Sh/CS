@@ -172,6 +172,19 @@ export default function GoalsManager() {
     }
   }, [goals, currentUser]);
 
+  // Helper function to calculate remaining steps dynamically
+  const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
+    let steps = 0;
+    let amount = currentBank;
+    
+    while (amount < targetAmount && steps < 100) { // Safety limit
+      amount = amount * minOdds;
+      steps++;
+    }
+    
+    return steps;
+  };
+
   const updateGoalsProgress = () => {
     const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
     
@@ -263,12 +276,21 @@ export default function GoalsManager() {
             ? steps[currentStepIndex - 1].actualAmount 
             : goal.startAmount || 0;
 
-          const isCompleted = currentStepIndex >= steps.length;
+          // Calculate dynamic total steps based on current bank and target
+          const remainingSteps = calculateRemainingSteps(
+            currentBank,
+            goal.targetLadderAmount || 100000,
+            minOdds
+          );
+          const dynamicTotalSteps = currentStepIndex + remainingSteps;
+
+          const isCompleted = currentBank >= (goal.targetLadderAmount || 100000);
 
           return {
             ...goal,
             avgOdds: minOdds,
             currentStep: currentStepIndex,
+            totalSteps: dynamicTotalSteps, // Dynamic calculation
             currentBank,
             steps,
             status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
@@ -1303,23 +1325,26 @@ export default function GoalsManager() {
                     <p className="text-xs text-blue-700 mt-1">
                       Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds}
                     </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      💡 Загальна кількість кроків оновлюється динамічно на основі ваших фактичних коефіцієнтів
+                    </p>
                   </div>
 
                   {/* Speed Calculator - Collapsible */}
                   <Collapsible open={isCalculatorExpanded} onOpenChange={setIsCalculatorExpanded}>
                     <CollapsibleTrigger asChild>
                       <Button
-                        variant="outline"
-                        className="w-full rounded-xl justify-between"
+                        variant="ghost"
+                        className="w-full rounded-xl justify-between h-auto px-4 py-3 hover:bg-gray-100"
                       >
-                        <span className="flex items-center gap-2">
-                          <span className="text-lg">🧮</span>
+                        <span className="flex items-center gap-2 text-sm font-medium">
+                          <span className="text-base">🧮</span>
                           Калькулятор швидкості
                         </span>
                         {isCalculatorExpanded ? (
-                          <ChevronUp className="h-4 w-4" />
+                          <ChevronUp className="h-4 w-4 text-gray-500" />
                         ) : (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-4 w-4 text-gray-500" />
                         )}
                       </Button>
                     </CollapsibleTrigger>
@@ -1330,7 +1355,7 @@ export default function GoalsManager() {
                         </p>
                         <div className="space-y-2">
                           {calculateOddsScenarios(
-                            selectedGoal.startAmount || 100,
+                            selectedGoal.currentBank || selectedGoal.startAmount || 100,
                             selectedGoal.targetLadderAmount || 100000,
                             selectedGoal.minOdds || 1.3,
                             selectedGoal.maxOdds || 5

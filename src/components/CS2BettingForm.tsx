@@ -1429,10 +1429,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             </Card>
 
             {/* Risky Teams Card */}
-            <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-3xl bg-gradient-to-br from-red-50 to-orange-50 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                  <AlertTriangle className="h-5 w-5" />
+            <Card className="border-2 border-red-300 bg-gradient-to-br from-red-50 to-orange-50 rounded-3xl shadow-lg overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
                   Ризиковані команди
                 </CardTitle>
               </CardHeader>
@@ -1440,7 +1440,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2">
+                      <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2 hover:border-red-300 transition-colors">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
