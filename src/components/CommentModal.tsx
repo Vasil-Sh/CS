@@ -38,26 +38,26 @@ export default function CommentModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50 border-0 shadow-2xl rounded-3xl">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-gradient-to-b from-gray-50 to-white border-0 shadow-xl rounded-3xl">
         {/* Header */}
-        <DialogHeader className="border-b border-gray-200 pb-5">
+        <DialogHeader className="border-b border-gray-100 pb-4">
           <DialogTitle>
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl shadow-lg">
-                <MessageSquare className="h-6 w-6 text-white" />
+              <div className="p-2 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl shadow-sm">
+                <MessageSquare className="h-5 w-5 text-orange-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-900">Коментар адміністратора</h2>
-                <p className="text-sm text-gray-500 font-medium mt-0.5">{matchInfo}</p>
+                <h2 className="text-lg font-semibold text-gray-900">Коментар адміністратора</h2>
+                <p className="text-sm text-gray-500 font-normal mt-0.5">{matchInfo}</p>
               </div>
-              <Badge className="rounded-full bg-gradient-to-r from-orange-600 to-red-600 text-white border-0 font-semibold text-xs px-3 py-1 shadow-md">
+              <Badge className="rounded-xl bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-0 font-semibold text-xs px-3 py-1 shadow-sm">
                 Ризики
               </Badge>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-3 py-2">
           {commentLines.map((line, index) => {
             if (!line.trim()) return null;
             
@@ -71,14 +71,19 @@ export default function CommentModal({
             return (
               <div 
                 key={index}
-                className={`p-4 rounded-2xl ${colors.bg} border ${colors.border} shadow-sm`}
+                className="border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-4"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-white rounded-xl shadow-sm">
+                  <div className={`p-2 rounded-xl shadow-sm ${
+                    line.includes('🔴') ? 'bg-gradient-to-br from-red-100 to-orange-100' :
+                    line.includes('🟠') ? 'bg-gradient-to-br from-orange-100 to-amber-100' :
+                    line.includes('🟡') ? 'bg-gradient-to-br from-yellow-100 to-amber-100' :
+                    'bg-gradient-to-br from-blue-100 to-indigo-100'
+                  }`}>
                     {getStatusIcon(line)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`font-bold text-sm ${colors.text} mb-1.5`}>
+                    <div className="font-semibold text-sm text-gray-900 mb-1">
                       {removeEmojis(teamPart)}
                     </div>
                     <p className="text-sm text-gray-700 leading-relaxed">
@@ -91,9 +96,9 @@ export default function CommentModal({
           })}
 
           {/* Warning */}
-          <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
+          <div className="border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-xl shadow-sm">
+              <div className="p-1.5 bg-gray-100 rounded-lg shadow-sm">
                 <AlertTriangle className="h-4 w-4 text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">

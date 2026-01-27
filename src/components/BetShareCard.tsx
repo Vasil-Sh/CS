@@ -90,14 +90,14 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
     <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-b from-gray-50 to-white">
       <Card className="border-0 shadow-xl rounded-3xl overflow-hidden bg-white">
         {/* Clean Header */}
-        <div className={`p-6 ${
+        <div className={`p-6 shadow-sm ${
           isWin ? 'bg-green-500' :
           isLoss ? 'bg-red-500' :
           'bg-blue-500'
         }`}>
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-white/20 rounded-2xl">
+              <div className="p-2.5 bg-white/20 rounded-2xl shadow-sm">
                 {isWin ? (
                   <Trophy className="h-6 w-6" />
                 ) : isLoss ? (
@@ -110,7 +110,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                 {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm font-medium bg-white/20 px-3 py-1.5 rounded-full">
+            <div className="flex items-center gap-1.5 text-sm font-medium bg-white/20 px-3 py-1.5 rounded-full shadow-sm">
               <Calendar className="h-3.5 w-3.5" />
               <span>{bet.date}</span>
             </div>
@@ -123,21 +123,21 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             <h3 className="text-2xl font-semibold text-gray-900">
               {bet.match || `${bet.team1} vs ${bet.team2}`}
             </h3>
-            <Badge className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
+            <Badge className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 border-0 shadow-sm">
               {bet.format}
             </Badge>
           </div>
 
           {/* Express Events or Regular Selection */}
           {isExpress && parsedEvents.length > 0 ? (
-            <div className={`rounded-2xl border overflow-hidden ${
+            <div className={`rounded-2xl border overflow-hidden shadow-md ${
               isWin 
                 ? 'bg-green-50/50 border-green-200' 
                 : isLoss
                 ? 'bg-red-50/50 border-red-200'
                 : 'bg-blue-50/50 border-blue-200'
             }`}>
-              <div className={`flex items-center justify-center gap-2 py-3 px-4 ${
+              <div className={`flex items-center justify-center gap-2 py-3 px-4 shadow-sm ${
                 isWin 
                   ? 'bg-green-100/50' 
                   : isLoss
@@ -152,7 +152,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
               
               <div className="p-4 space-y-2">
                 {visibleEvents.map((event, index) => (
-                  <div key={index} className={`p-2.5 rounded-xl border bg-white ${
+                  <div key={index} className={`p-2.5 rounded-xl border bg-white shadow-sm ${
                     isWin 
                       ? 'border-green-200' 
                       : isLoss
@@ -160,7 +160,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                       : 'border-blue-200'
                   }`}>
                     <div className="flex items-start gap-2 mb-1.5">
-                      <Badge className={`rounded-full text-xs font-bold px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center ${
+                      <Badge className={`rounded-full text-xs font-bold px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center shadow-sm ${
                         isWin 
                           ? 'bg-green-600 text-white' 
                           : isLoss
@@ -184,7 +184,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                         }`}>
                           {event.selection}
                         </p>
-                        <Badge className={`text-[10px] font-semibold rounded-full px-1.5 py-0.5 ${
+                        <Badge className={`text-[10px] font-semibold rounded-full px-1.5 py-0.5 shadow-sm ${
                           isWin 
                             ? 'bg-green-100 text-green-700' 
                             : isLoss
@@ -227,7 +227,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
               </div>
             </div>
           ) : selection && (
-            <div className={`p-4 rounded-2xl border ${
+            <div className={`p-4 rounded-2xl border shadow-md ${
               isWin 
                 ? 'bg-green-50/50 border-green-200' 
                 : isLoss
@@ -250,13 +250,13 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
           {/* Bet Info */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
               <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Прогноз</p>
               <p className="text-xl font-semibold text-gray-900">
                 {currencySymbol}{displayAmount}
               </p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
               <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Коефіцієнт</p>
               <p className="text-xl font-semibold text-gray-900">
                 {bet.odds.toFixed(2)}
@@ -266,7 +266,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
           {/* Profit */}
           {!isPending && displayProfit !== undefined && displayProfit !== null && (
-            <div className={`p-5 rounded-2xl border ${
+            <div className={`p-5 rounded-2xl border shadow-md ${
               isWin 
                 ? 'bg-green-50/50 border-green-100' 
                 : 'bg-red-50/50 border-red-100'
@@ -281,18 +281,13 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           )}
 
           {isPending && (
-            <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
+            <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 shadow-md">
               <p className="text-xs font-medium text-gray-500 mb-2 uppercase text-center">Можливий виграш</p>
               <p className="text-3xl font-semibold text-blue-600 text-center">
                 +{((bet.odds - 1) * displayAmount).toFixed(2)} {currencySymbol}
               </p>
             </div>
           )}
-
-          {/* Footer */}
-          <div className="pt-3 text-center">
-            <p className="text-xs text-gray-400 font-medium">Betting Analytics Pro</p>
-          </div>
         </CardContent>
       </Card>
     </div>
