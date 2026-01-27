@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calculator, Calendar } from 'lucide-react';
-import { googleSheetsService, BettingRecord } from '@/lib/googleSheets';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Calculator, AlertTriangle, Info } from 'lucide-react';
+import { googleSheetsService } from '@/lib/googleSheets';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
+import { riskyTeamsService, RiskyTeam } from '@/lib/riskyTeamsService';
 import { toast } from 'sonner';
 
 interface BettingFormProps {
@@ -56,6 +58,35 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
     profit: '',
     roi: ''
   });
+
+  // Check for risky teams when team names change
+  const [teamRisks, setTeamRisks] = useState<{
+    team1Risk: RiskyTeam | null;
+    team2Risk: RiskyTeam | null;
+  }>({ team1Risk: null, team2Risk: null });
+
+  useEffect(() => {
+    if (formData.team1 || formData.team2) {
+      const risks = riskyTeamsService.checkMatchRisks(formData.team1, formData.team2);
+      setTeamRisks(risks);
+      
+      // Auto-populate concerns field with risky team info
+      const riskyTeams = [];
+      if (risks.team1Risk) {
+        riskyTeams.push(`${formData.team1}: ${risks.team1Risk.notes || risks.team1Risk.status}`);
+      }
+      if (risks.team2Risk) {
+        riskyTeams.push(`${formData.team2}: ${risks.team2Risk.notes || risks.team2Risk.status}`);
+      }
+      
+      if (riskyTeams.length > 0 && !formData.concerns) {
+        setFormData(prev => ({
+          ...prev,
+          concerns: riskyTeams.join('\n')
+        }));
+      }
+    }
+  }, [formData.team1, formData.team2]);
 
   const calculateImpliedProbability = (odds: number) => {
     if (odds > 0) {
@@ -140,6 +171,19 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
         roi: 0
       };
 
+      // Prepare riskyTeam field based on detected risks
+      let riskyTeamField = 'Немає';
+      const riskyTeams = [];
+      if (teamRisks.team1Risk) {
+        riskyTeams.push(formData.team1);
+      }
+      if (teamRisks.team2Risk) {
+        riskyTeams.push(formData.team2);
+      }
+      if (riskyTeams.length > 0) {
+        riskyTeamField = riskyTeams.join(', ');
+      }
+
       // Додаємо до обох сервісів для сумісності
       await googleSheetsService.addBettingRecord({
         date: formData.date,
@@ -154,7 +198,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
         value: parseFloat(calculateValue()),
         amount: parseFloat(formData.amount),
         result: 'Очікується',
-        riskyTeam: formData.concerns || 'Немає'
+        riskyTeam: riskyTeamField
       });
 
       await realGoogleSheetsService.addRecord(record);
@@ -190,6 +234,7 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
         profit: '',
         roi: ''
       });
+      setTeamRisks({ team1Risk: null, team2Risk: null });
 
       onRecordAdded?.();
     } catch (error) {
@@ -275,6 +320,53 @@ export default function BettingForm({ onRecordAdded }: BettingFormProps) {
                 />
               </div>
             </div>
+
+            {/* Risky Teams Warning */}
+            {(teamRisks.team1Risk || teamRisks.team2Risk) && (
+              <Alert className="rounded-2xl border-2 border-orange-300 bg-orange-50">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <p className="font-bold text-orange-900">⚠️ Попередження про ризикові команди!</p>
+                    
+                    {teamRisks.team1Risk && (
+                      <div className="p-3 bg-white rounded-xl border-2 border-orange-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-bold text-gray-900">{formData.team1}</span>
+                          <Badge className={riskyTeamsService.getStatusColor(teamRisks.team1Risk.status)}>
+                            {riskyTeamsService.getStatusIcon(teamRisks.team1Risk.status)} {teamRisks.team1Risk.status}
+                          </Badge>
+                        </div>
+                        {teamRisks.team1Risk.notes && (
+                          <p className="text-sm text-gray-700">{teamRisks.team1Risk.notes}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {teamRisks.team2Risk && (
+                      <div className="p-3 bg-white rounded-xl border-2 border-orange-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-bold text-gray-900">{formData.team2}</span>
+                          <Badge className={riskyTeamsService.getStatusColor(teamRisks.team2Risk.status)}>
+                            {riskyTeamsService.getStatusIcon(teamRisks.team2Risk.status)} {teamRisks.team2Risk.status}
+                          </Badge>
+                        </div>
+                        {teamRisks.team2Risk.notes && (
+                          <p className="text-sm text-gray-700">{teamRisks.team2Risk.notes}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-start gap-2 p-2 bg-orange-100 rounded-lg mt-2">
+                      <Info className="h-4 w-4 text-orange-700 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-orange-800 font-medium">
+                        Ця інформація автоматично додана до поля "Ризики та занепокоєння". Ви можете редагувати її за потреби.
+                      </p>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           {/* Деталі прогнозу */}

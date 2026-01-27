@@ -23,6 +23,44 @@ interface BetShareCardProps {
   };
 }
 
+// Translation map for bet types
+const betTypeTranslations: Record<string, string> = {
+  'Handicap': 'Фора',
+  'Total': 'Тотал',
+  'Winner': 'Переможець',
+  'Both Teams to Score': 'Обидві команди заб\'ють',
+  'Double Chance': 'Подвійний шанс',
+  'Draw No Bet': 'Повернення при нічиї',
+  'Correct Score': 'Точний рахунок',
+  'Half Time/Full Time': 'Перший тайм/Матч',
+  'Asian Handicap': 'Азіатська фора',
+  'Over': 'Більше',
+  'Under': 'Менше',
+  '1X2': '1X2',
+  'Home': 'Господарі',
+  'Away': 'Гості',
+  'Draw': 'Нічия',
+  'Yes': 'Так',
+  'No': 'Ні',
+};
+
+// Function to translate bet type
+const translateBetType = (betType: string): string => {
+  // Check if exact match exists
+  if (betTypeTranslations[betType]) {
+    return betTypeTranslations[betType];
+  }
+  
+  // Check for partial matches (e.g., "Handicap +1.5" -> "Фора +1.5")
+  for (const [english, ukrainian] of Object.entries(betTypeTranslations)) {
+    if (betType.startsWith(english)) {
+      return betType.replace(english, ukrainian);
+    }
+  }
+  
+  return betType;
+};
+
 export default function BetShareCard({ bet }: BetShareCardProps) {
   const isWin = bet.result === 'Win';
   const isLoss = bet.result === 'Loss';
@@ -66,7 +104,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         const match = numberMatch ? numberMatch[2] : matchPart;
         
         const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
-        const betType = betMatch ? betMatch[1] : '';
+        const betType = betMatch ? translateBetType(betMatch[1]) : '';
         const selection = betMatch ? betMatch[2] : '';
         const odds = betMatch ? betMatch[3] : '';
         
@@ -79,7 +117,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   // Extract selection from betType for regular bets
   const betTypeParts = bet.betType.split(' - ');
-  const betCategory = betTypeParts[0] || bet.betType;
+  const betCategory = translateBetType(betTypeParts[0] || bet.betType);
   const selection = betTypeParts[1] || '';
 
   // Show first 3 events or all if expanded
