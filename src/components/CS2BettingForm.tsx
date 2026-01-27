@@ -487,6 +487,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     }
   };
 
+  const getGameEmoji = (game: string) => {
+    return game === 'CS' ? '🎯 CS:' : '🛡️ Дота:';
+  };
+
   const addExpressEvent = () => {
     if (expressEvents.length >= 10) {
       toast.error('Максимум 10 подій в експресі');
@@ -1441,7 +1445,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                              <span className="font-bold text-red-800">{riskyTeam.name}</span>
+                              <span className="font-bold text-red-800">
+                                {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
+                              </span>
                             </div>
                             <Badge className={getStatusBadge(riskyTeam.status)}>
                               {riskyTeam.status}
