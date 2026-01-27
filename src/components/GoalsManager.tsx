@@ -85,7 +85,8 @@ interface Goal {
 interface LadderStep {
   step: number;
   startAmount: number;
-  plannedAmount: number;
+  minPlannedAmount: number;  // NEW: minimum expected amount (using minOdds)
+  maxPlannedAmount: number;  // NEW: maximum expected amount (using maxOdds)
   actualAmount?: number;
   actualOdds?: number;
   deviation?: number;
@@ -110,7 +111,7 @@ export default function GoalsManager() {
       if (goal.type === 'ladder' && !goal.avgOdds && goal.minOdds && goal.maxOdds) {
         return {
           ...goal,
-          avgOdds: goal.minOdds // FIXED: Always use minOdds for safest approach
+          avgOdds: goal.minOdds
         };
       }
       return goal;
@@ -189,13 +190,14 @@ export default function GoalsManager() {
 
           let currentStepIndex = goal.currentStep || 0;
           const steps = [...(goal.steps || [])];
-          const avgOdds = goal.avgOdds || goal.minOdds || 1.3; // FIXED: Use minOdds as default
+          const minOdds = goal.minOdds || 1.3;
+          const maxOdds = goal.maxOdds || 5;
 
           const sortedBets = goalBets.sort((a: Bet, b: Bet) => 
             new Date(a.date).getTime() - new Date(b.date).getTime()
           );
 
-          // IMPROVED LOGIC: More flexible matching
+          // FLEXIBLE LOGIC: Accept any bet within the odds range
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             
@@ -205,25 +207,26 @@ export default function GoalsManager() {
             const betAmount = bet.amount || 0;
             const actualWinAmount = betAmount * bet.odds;
             
-            // More flexible tolerance - check if bet amount is close to expected start amount
-            const tolerance = 0.20; // Increased to 20% tolerance
+            // Flexible tolerance - check if bet amount is close to expected start amount
+            const tolerance = 0.20; // 20% tolerance
             const expectedBetAmount = currentStep.startAmount;
             const betAmountMatches = Math.abs(betAmount - expectedBetAmount) / expectedBetAmount <= tolerance;
             
-            // If bet amount matches (within tolerance), complete this step
-            if (betAmountMatches) {
+            // If bet amount matches (within tolerance) and odds are in range, complete this step
+            if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
               steps[currentStepIndex].status = 'completed';
               steps[currentStepIndex].completedAt = bet.date;
               steps[currentStepIndex].actualAmount = actualWinAmount;
               steps[currentStepIndex].actualOdds = bet.odds;
-              steps[currentStepIndex].deviation = actualWinAmount - currentStep.plannedAmount;
+              steps[currentStepIndex].deviation = actualWinAmount - currentStep.minPlannedAmount;
               
               currentStepIndex++;
               
-              // Setup next step
+              // Setup next step with range
               if (currentStepIndex < steps.length) {
                 steps[currentStepIndex].startAmount = actualWinAmount;
-                steps[currentStepIndex].plannedAmount = actualWinAmount * avgOdds;
+                steps[currentStepIndex].minPlannedAmount = actualWinAmount * minOdds;
+                steps[currentStepIndex].maxPlannedAmount = actualWinAmount * maxOdds;
                 steps[currentStepIndex].status = 'current';
               }
             }
@@ -237,7 +240,7 @@ export default function GoalsManager() {
 
           return {
             ...goal,
-            avgOdds,
+            avgOdds: minOdds,
             currentStep: currentStepIndex,
             currentBank,
             steps,
@@ -306,20 +309,25 @@ export default function GoalsManager() {
     setTimeout(() => setIsUpdating(false), 500);
   };
 
-  const calculateLadderSteps = (start: number, target: number, avgOdds: number): LadderStep[] => {
+  const calculateLadderSteps = (start: number, target: number, minOdds: number, maxOdds: number): LadderStep[] => {
     const steps: LadderStep[] = [];
     let currentAmount = start;
     let stepNumber = 1;
 
+    // Use minOdds to calculate the number of steps (safest approach)
     while (currentAmount < target) {
-      const nextAmount = currentAmount * avgOdds;
+      const minNextAmount = currentAmount * minOdds;
+      const maxNextAmount = currentAmount * maxOdds;
+      
       steps.push({
         step: stepNumber,
         startAmount: currentAmount,
-        plannedAmount: nextAmount,
+        minPlannedAmount: minNextAmount,
+        maxPlannedAmount: maxNextAmount,
         status: stepNumber === 1 ? 'current' : 'locked'
       });
-      currentAmount = nextAmount;
+      
+      currentAmount = minNextAmount; // Use minOdds for step calculation
       stepNumber++;
     }
 
@@ -331,7 +339,7 @@ export default function GoalsManager() {
     const oddsRange = [minOdds, minOdds + 0.05, (minOdds + maxOdds) / 2, maxOdds - 0.05, maxOdds];
     
     oddsRange.forEach(odds => {
-      const steps = calculateLadderSteps(start, target, odds);
+      const steps = calculateLadderSteps(start, target, odds, odds);
       let speed = '';
       let emoji = '';
       let description = '';
@@ -402,17 +410,17 @@ export default function GoalsManager() {
       }
 
       case 'ladder': {
-        const avgOdds = newGoal.minOdds; // FIXED: Always use minOdds for safest approach
         const steps = calculateLadderSteps(
           newGoal.startAmount,
           newGoal.targetLadderAmount,
-          avgOdds
+          newGoal.minOdds,
+          newGoal.maxOdds
         );
         goal.startAmount = newGoal.startAmount;
         goal.targetLadderAmount = newGoal.targetLadderAmount;
         goal.minOdds = newGoal.minOdds;
         goal.maxOdds = newGoal.maxOdds;
-        goal.avgOdds = avgOdds;
+        goal.avgOdds = newGoal.minOdds;
         goal.currentStep = 0;
         goal.totalSteps = steps.length;
         goal.ladderMode = newGoal.ladderMode;
@@ -1066,12 +1074,12 @@ export default function GoalsManager() {
 
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
                   <div className="p-3 bg-blue-50 rounded-xl">
-                    <p className="text-sm font-medium text-blue-900 mb-1">📊 Розрахунок (найбезпечніший варіант):</p>
+                    <p className="text-sm font-medium text-blue-900 mb-1">📊 Розрахунок кроків:</p>
                     <p className="text-sm text-blue-700">
-                      Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds).length}
+                      Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
-                      Використовується мінімальний коефіцієнт {newGoal.minOdds} для максимальної безпеки
+                      💡 Система прийматиме будь-який коефіцієнт в діапазоні {newGoal.minOdds} - {newGoal.maxOdds}
                     </p>
                   </div>
                 )}
@@ -1266,7 +1274,7 @@ export default function GoalsManager() {
                       <strong>Прогрес:</strong> {selectedGoal.currentStep} / {selectedGoal.totalSteps} кроків виконано
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
-                      Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds} (використовується: {selectedGoal.avgOdds?.toFixed(2)})
+                      Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds}
                     </p>
                   </div>
 
@@ -1300,31 +1308,18 @@ export default function GoalsManager() {
                             selectedGoal.minOdds || 1.3,
                             selectedGoal.maxOdds || 5
                           ).map((scenario, index) => {
-                            const isCurrentlyUsed = Math.abs(scenario.odds - (selectedGoal.avgOdds || 0)) < 0.01;
-                            
                             return (
                               <div
                                 key={index}
-                                className={`p-2.5 rounded-xl border transition-all ${
-                                  isCurrentlyUsed
-                                    ? 'bg-blue-100 border-blue-300 shadow-sm'
-                                    : 'bg-white border-gray-200'
-                                }`}
+                                className="p-2.5 rounded-xl border bg-white border-gray-200"
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
                                     <span className="text-lg">{scenario.emoji}</span>
                                     <div>
-                                      <div className="flex items-center gap-1.5">
-                                        <p className="text-sm font-semibold text-gray-900">
-                                          Коеф. {scenario.odds}
-                                        </p>
-                                        {isCurrentlyUsed && (
-                                          <Badge className="bg-blue-600 text-white text-xs px-1.5 py-0 rounded-full border-0">
-                                            Використовується
-                                          </Badge>
-                                        )}
-                                      </div>
+                                      <p className="text-sm font-semibold text-gray-900">
+                                        Коеф. {scenario.odds}
+                                      </p>
                                       <p className="text-xs text-gray-600">{scenario.description}</p>
                                     </div>
                                   </div>
@@ -1339,7 +1334,7 @@ export default function GoalsManager() {
                         </div>
                         <div className="p-2 bg-blue-50 rounded-xl mt-3">
                           <p className="text-xs text-blue-800">
-                            💡 <strong>Порада:</strong> За замовчуванням використовується мінімальний коефіцієнт для найбезпечнішого підходу.
+                            💡 <strong>Порада:</strong> Система прийматиме будь-який коефіцієнт в вашому діапазоні.
                           </p>
                         </div>
                       </div>
@@ -1379,7 +1374,7 @@ export default function GoalsManager() {
                                 <div className="flex justify-between">
                                   <span className="text-gray-600">План:</span>
                                   <span className="font-medium text-gray-900">
-                                    {step.startAmount.toFixed(2)} → {step.plannedAmount.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
+                                    {step.startAmount.toFixed(2)} → {step.minPlannedAmount.toFixed(2)}-{step.maxPlannedAmount.toFixed(2)} грн
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -1398,7 +1393,7 @@ export default function GoalsManager() {
                                 <div className="flex justify-between mt-1">
                                   <span className="text-gray-600">План:</span>
                                   <span className="font-medium text-gray-900">
-                                    {step.plannedAmount.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
+                                    {step.minPlannedAmount.toFixed(2)}-{step.maxPlannedAmount.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
                                   </span>
                                 </div>
                               </div>
