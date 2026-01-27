@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserDataService } from '@/lib/userDataService';
+import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { 
   Target, 
   TrendingUp, 
@@ -85,9 +86,9 @@ interface Goal {
 interface LadderStep {
   step: number;
   startAmount: number;
-  minPlannedAmount?: number;  // Optional for backward compatibility
-  maxPlannedAmount?: number;  // Optional for backward compatibility
-  plannedAmount?: number;     // Old field for backward compatibility
+  minPlannedAmount?: number;
+  maxPlannedAmount?: number;
+  plannedAmount?: number;
   actualAmount?: number;
   actualOdds?: number;
   deviation?: number;
@@ -110,12 +111,9 @@ export default function GoalsManager() {
     
     return loadedGoals.map((goal: Goal) => {
       if (goal.type === 'ladder') {
-        // Migrate old goals to new structure
         if (goal.steps && goal.minOdds && goal.maxOdds) {
           const migratedSteps = goal.steps.map(step => {
             if (!step.minPlannedAmount || !step.maxPlannedAmount) {
-              // Old step structure, migrate it
-              const plannedAmount = step.plannedAmount || step.startAmount * (goal.minOdds || 1.3);
               return {
                 ...step,
                 minPlannedAmount: step.startAmount * (goal.minOdds || 1.3),
@@ -145,6 +143,7 @@ export default function GoalsManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showCompletedResultModal, setShowCompletedResultModal] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -172,12 +171,11 @@ export default function GoalsManager() {
     }
   }, [goals, currentUser]);
 
-  // Helper function to calculate remaining steps dynamically
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
     let steps = 0;
     let amount = currentBank;
     
-    while (amount < targetAmount && steps < 100) { // Safety limit
+    while (amount < targetAmount && steps < 100) {
       amount = amount * minOdds;
       steps++;
     }
@@ -235,7 +233,6 @@ export default function GoalsManager() {
             new Date(a.date).getTime() - new Date(b.date).getTime()
           );
 
-          // FLEXIBLE LOGIC: Accept any bet within the odds range
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             
@@ -245,12 +242,10 @@ export default function GoalsManager() {
             const betAmount = bet.amount || 0;
             const actualWinAmount = betAmount * bet.odds;
             
-            // Flexible tolerance - check if bet amount is close to expected start amount
-            const tolerance = 0.20; // 20% tolerance
+            const tolerance = 0.20;
             const expectedBetAmount = currentStep.startAmount;
             const betAmountMatches = Math.abs(betAmount - expectedBetAmount) / expectedBetAmount <= tolerance;
             
-            // If bet amount matches (within tolerance) and odds are in range, complete this step
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
               const minPlanned = currentStep.minPlannedAmount || currentStep.startAmount * minOdds;
               
@@ -262,7 +257,6 @@ export default function GoalsManager() {
               
               currentStepIndex++;
               
-              // Setup next step with range
               if (currentStepIndex < steps.length) {
                 steps[currentStepIndex].startAmount = actualWinAmount;
                 steps[currentStepIndex].minPlannedAmount = actualWinAmount * minOdds;
@@ -276,7 +270,6 @@ export default function GoalsManager() {
             ? steps[currentStepIndex - 1].actualAmount 
             : goal.startAmount || 0;
 
-          // Calculate dynamic total steps based on current bank and target
           const remainingSteps = calculateRemainingSteps(
             currentBank,
             goal.targetLadderAmount || 100000,
@@ -290,7 +283,7 @@ export default function GoalsManager() {
             ...goal,
             avgOdds: minOdds,
             currentStep: currentStepIndex,
-            totalSteps: dynamicTotalSteps, // Dynamic calculation
+            totalSteps: dynamicTotalSteps,
             currentBank,
             steps,
             status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
@@ -363,7 +356,6 @@ export default function GoalsManager() {
     let currentAmount = start;
     let stepNumber = 1;
 
-    // Use minOdds to calculate the number of steps (safest approach)
     while (currentAmount < target) {
       const minNextAmount = currentAmount * minOdds;
       const maxNextAmount = currentAmount * maxOdds;
@@ -376,7 +368,7 @@ export default function GoalsManager() {
         status: stepNumber === 1 ? 'current' : 'locked'
       });
       
-      currentAmount = minNextAmount; // Use minOdds for step calculation
+      currentAmount = minNextAmount;
       stepNumber++;
     }
 
@@ -539,6 +531,11 @@ export default function GoalsManager() {
   const openDetailsDialog = (goal: Goal) => {
     setSelectedGoal(goal);
     setShowDetailsDialog(true);
+  };
+
+  const openCompletedGoalResult = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setShowCompletedResultModal(true);
   };
 
   const getGoalProgress = (goal: Goal): number => {
@@ -735,7 +732,6 @@ export default function GoalsManager() {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* Primary Goal - Large Card */}
               {primaryGoal && (
                 <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
                   <CardHeader className="pb-3">
@@ -771,7 +767,6 @@ export default function GoalsManager() {
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                    {/* Key Metric */}
                     <div className="p-4 bg-white rounded-2xl border border-gray-100">
                       <p className="text-sm text-gray-600 mb-1">{getKeyMetric(primaryGoal).label}</p>
                       <p className={`text-3xl font-bold ${getKeyMetric(primaryGoal).color}`}>
@@ -779,7 +774,6 @@ export default function GoalsManager() {
                       </p>
                     </div>
 
-                    {/* Progress Bar */}
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm text-gray-600">Прогрес</span>
@@ -790,7 +784,6 @@ export default function GoalsManager() {
                       <Progress value={Math.min(getGoalProgress(primaryGoal), 100)} className="h-3" />
                     </div>
 
-                    {/* Goal Rules */}
                     <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
                       <p className="text-sm font-semibold text-gray-900 mb-2">📋 Правила цілі</p>
                       <div className="grid grid-cols-2 gap-3 text-xs">
@@ -821,7 +814,6 @@ export default function GoalsManager() {
                       </div>
                     </div>
 
-                    {/* Discipline Status */}
                     <div className={`p-3 rounded-2xl border ${
                       getDisciplineStatus(primaryGoal).status === 'good' 
                         ? 'bg-green-50 border-green-200' 
@@ -845,7 +837,6 @@ export default function GoalsManager() {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       <Button
                         variant="outline"
@@ -860,7 +851,6 @@ export default function GoalsManager() {
                 </Card>
               )}
 
-              {/* Secondary Goals - Compact List */}
               {secondaryGoals.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold text-gray-700 px-1">Інші активні цілі</h3>
@@ -953,7 +943,11 @@ export default function GoalsManager() {
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {completedGoals.map(goal => (
-                <Card key={goal.id} className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden">
+                <Card 
+                  key={goal.id} 
+                  className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
+                  onClick={() => openCompletedGoalResult(goal)}
+                >
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
                       <span className="flex items-center gap-2">
@@ -970,7 +964,10 @@ export default function GoalsManager() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => confirmDeleteGoal(goal.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDeleteGoal(goal.id);
+                          }}
                           className="text-red-600 hover:text-red-700 h-8 w-8 p-0 rounded-xl"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -991,6 +988,9 @@ export default function GoalsManager() {
                       <span className="font-medium text-green-600">
                         {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
                       </span>
+                    </div>
+                    <div className="mt-3 p-2 bg-green-100 rounded-xl text-center">
+                      <p className="text-xs text-green-700 font-medium">👆 Клікніть, щоб переглянути детальний результат</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -1165,7 +1165,6 @@ export default function GoalsManager() {
               </div>
             )}
 
-            {/* Goal Rules Section */}
             <div className="pt-4 border-t border-gray-200">
               <h4 className="text-sm font-semibold text-gray-900 mb-3">📋 Правила цілі</h4>
               
@@ -1243,7 +1242,7 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog */}
+      {/* Goal Details Dialog - keeping existing implementation */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent className="rounded-3xl max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1255,7 +1254,6 @@ export default function GoalsManager() {
 
           {selectedGoal && (
             <div className="space-y-4">
-              {/* Basic Info */}
               <div className="p-4 bg-gray-50 rounded-2xl space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Тип цілі:</span>
@@ -1277,7 +1275,6 @@ export default function GoalsManager() {
                 </div>
               </div>
 
-              {/* Detailed Progress */}
               {selectedGoal.type === 'amount' && (
                 <div className="space-y-2">
                   <h4 className="font-semibold text-gray-900">Прогрес за сумою</h4>
@@ -1330,7 +1327,6 @@ export default function GoalsManager() {
                     </p>
                   </div>
 
-                  {/* Speed Calculator - Collapsible */}
                   <Collapsible open={isCalculatorExpanded} onOpenChange={setIsCalculatorExpanded}>
                     <CollapsibleTrigger asChild>
                       <Button
@@ -1393,13 +1389,11 @@ export default function GoalsManager() {
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Steps Details - Enhanced visibility */}
                   {selectedGoal.steps && selectedGoal.steps.length > 0 && (
                     <div className="p-4 bg-gray-50 rounded-2xl">
                       <h5 className="text-base font-semibold text-gray-900 mb-3">📋 Детальний перегляд кроків</h5>
                       <div className="space-y-3 max-h-96 overflow-y-auto">
                         {selectedGoal.steps.slice(0, 10).map((step) => {
-                          // Get values with fallbacks for old structure
                           const minPlanned = step.minPlannedAmount || step.plannedAmount || step.startAmount * (selectedGoal.minOdds || 1.3);
                           const maxPlanned = step.maxPlannedAmount || step.startAmount * (selectedGoal.maxOdds || 5);
                           
@@ -1511,7 +1505,6 @@ export default function GoalsManager() {
                 </div>
               )}
 
-              {/* Goal Rules */}
               <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
                 <h4 className="font-semibold text-gray-900 mb-3">📋 Правила цілі</h4>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -1561,6 +1554,16 @@ export default function GoalsManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Completed Goal Result Modal */}
+      <CompletedGoalResultModal
+        goal={selectedGoal}
+        isOpen={showCompletedResultModal}
+        onClose={() => {
+          setShowCompletedResultModal(false);
+          setSelectedGoal(null);
+        }}
+      />
     </div>
   );
 }
