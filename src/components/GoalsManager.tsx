@@ -168,6 +168,7 @@ export default function GoalsManager() {
   useEffect(() => {
     if (currentUser) {
       UserDataService.setUserData(currentUser, 'goals', goals);
+      console.log('✅ Goals saved to localStorage:', goals.length, 'goals');
     }
   }, [goals, currentUser]);
 
@@ -483,7 +484,13 @@ export default function GoalsManager() {
       }
     }
 
-    setGoals([...goals, goal]);
+    const updatedGoals = [...goals, goal];
+    setGoals(updatedGoals);
+    
+    // Явно зберігаємо в localStorage одразу після створення
+    UserDataService.setUserData(currentUser, 'goals', updatedGoals);
+    console.log('✅ Goal created and saved:', goal.name, 'Total goals:', updatedGoals.length);
+    
     setShowCreateDialog(false);
     setNewGoal({
       name: '',
@@ -514,7 +521,13 @@ export default function GoalsManager() {
   const deleteGoal = () => {
     if (!goalToDelete) return;
 
-    setGoals(goals.filter(g => g.id !== goalToDelete));
+    const updatedGoals = goals.filter(g => g.id !== goalToDelete);
+    setGoals(updatedGoals);
+    
+    // Явно зберігаємо після видалення
+    UserDataService.setUserData(currentUser, 'goals', updatedGoals);
+    console.log('✅ Goal deleted, remaining:', updatedGoals.length);
+    
     setShowDeleteDialog(false);
     setGoalToDelete(null);
     toast.success('Ціль видалена');
