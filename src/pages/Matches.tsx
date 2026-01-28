@@ -245,20 +245,20 @@ const getRiskBadge = (risk: number) => {
   if (risk <= 30) {
     return {
       label: 'Низький',
-      color: 'bg-green-100 text-green-800 border-green-300',
+      color: 'bg-green-50 text-green-700 border-green-300',
       dotColor: 'bg-green-500'
     };
   }
   if (risk <= 50) {
     return {
       label: 'Помірний',
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      color: 'bg-yellow-50 text-yellow-700 border-yellow-300',
       dotColor: 'bg-yellow-500'
     };
   }
   return {
     label: 'Високий',
-    color: 'bg-red-100 text-red-800 border-red-300',
+    color: 'bg-red-50 text-red-700 border-red-300',
     dotColor: 'bg-red-500'
   };
 };
@@ -554,27 +554,28 @@ export default function Matches() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <div className="space-y-8 p-6 bg-white min-h-screen">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Матчі</h1>
-            <p className="text-gray-500 mt-1 font-medium">Аналітична система з AI прогнозами та Form Stability</p>
+            <h1 className="text-3xl font-bold text-black tracking-tight">Матчі</h1>
+            <p className="text-gray-600 mt-1 font-medium">Аналітична система з AI прогнозами та Form Stability</p>
           </div>
           
           <Button 
             onClick={refreshMatches} 
-            className="rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+            className="group relative rounded-2xl font-bold bg-black hover:bg-gray-800 shadow-xl shadow-black/20 transition-all duration-300 overflow-hidden"
             disabled={isLoading}
           >
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Завантаження...
+                <Loader2 className="h-4 w-4 mr-2 animate-spin relative z-10" />
+                <span className="relative z-10">Завантаження...</span>
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Оновити з HLTV
+                <RefreshCw className="h-4 w-4 mr-2 relative z-10" />
+                <span className="relative z-10">Оновити з HLTV</span>
               </>
             )}
           </Button>
@@ -582,79 +583,79 @@ export default function Matches() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-black/10 shadow-xl rounded-3xl bg-white overflow-hidden hover:shadow-2xl transition-all duration-300">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього матчів</p>
-                  <p className="text-3xl font-semibold text-gray-900 tracking-tight">{sortedMatches.length}</p>
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Всього матчів</p>
+                  <p className="text-3xl font-bold text-black tracking-tight">{sortedMatches.length}</p>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-2xl">
-                  <Trophy className="h-7 w-7 text-blue-600" />
+                <div className="p-3 bg-black rounded-2xl shadow-lg shadow-black/20">
+                  <Trophy className="h-7 w-7 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-green-200 shadow-xl rounded-3xl bg-gradient-to-br from-green-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Безпечні матчі</p>
-                  <p className="text-3xl font-semibold text-green-600 tracking-tight">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Безпечні матчі</p>
+                  <p className="text-3xl font-bold text-green-600 tracking-tight">
                     {sortedMatches.filter(m => m.risk <= 30).length}
                   </p>
                 </div>
-                <div className="p-3 bg-green-50 rounded-2xl">
-                  <Shield className="h-7 w-7 text-green-600" />
+                <div className="p-3 bg-green-500 rounded-2xl shadow-lg shadow-green-500/30">
+                  <Shield className="h-7 w-7 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-orange-200 shadow-xl rounded-3xl bg-gradient-to-br from-orange-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Hot Matches</p>
-                  <p className="text-3xl font-semibold text-orange-600 tracking-tight">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Hot Matches</p>
+                  <p className="text-3xl font-bold text-orange-600 tracking-tight">
                     {sortedMatches.filter(m => m.aiConfidence > 70 && m.upsetProbability < 20).length}
                   </p>
                 </div>
-                <div className="p-3 bg-orange-50 rounded-2xl">
-                  <Flame className="h-7 w-7 text-orange-600" />
+                <div className="p-3 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/30">
+                  <Flame className="h-7 w-7 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-emerald-200 shadow-xl rounded-3xl bg-gradient-to-br from-emerald-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Safe Picks</p>
-                  <p className="text-3xl font-semibold text-emerald-600 tracking-tight">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Safe Picks</p>
+                  <p className="text-3xl font-bold text-emerald-600 tracking-tight">
                     {safePicksCount}
                   </p>
                 </div>
-                <div className="p-3 bg-emerald-50 rounded-2xl">
-                  <CheckCircle className="h-7 w-7 text-emerald-600" />
+                <div className="p-3 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/30">
+                  <CheckCircle className="h-7 w-7 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-black/20 shadow-xl rounded-3xl bg-gradient-to-br from-gray-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Середній AI %</p>
-                  <p className="text-3xl font-semibold text-purple-600 tracking-tight">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Середній AI %</p>
+                  <p className="text-3xl font-bold text-black tracking-tight">
                     {sortedMatches.length > 0 ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length) : 0}%
                   </p>
                 </div>
-                <div className="p-3 bg-purple-50 rounded-2xl">
-                  <Target className="h-7 w-7 text-purple-600" />
+                <div className="p-3 bg-black rounded-2xl shadow-lg shadow-black/20">
+                  <Target className="h-7 w-7 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -662,11 +663,11 @@ export default function Matches() {
         </div>
 
         {/* Filters */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Filter className="h-6 w-6 text-blue-600" />
+        <Card className="border-2 border-black/10 shadow-xl rounded-3xl bg-white overflow-hidden">
+          <CardHeader className="bg-gray-50 border-b-2 border-black/10">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
+              <div className="p-2 bg-black rounded-xl shadow-lg shadow-black/20">
+                <Filter className="h-6 w-6 text-white" />
               </div>
               Фільтри та сортування
             </CardTitle>
@@ -674,9 +675,9 @@ export default function Matches() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Tier:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Tier:</label>
                 <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                  <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                  <SelectTrigger className="rounded-xl border-2 border-black/20 hover:border-black/40 transition-colors font-medium">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -689,9 +690,9 @@ export default function Matches() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">AI Confidence:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">AI Confidence:</label>
                 <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                  <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                  <SelectTrigger className="rounded-xl border-2 border-black/20 hover:border-black/40 transition-colors font-medium">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -704,9 +705,9 @@ export default function Matches() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Ризик:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Ризик:</label>
                 <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                  <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                  <SelectTrigger className="rounded-xl border-2 border-black/20 hover:border-black/40 transition-colors font-medium">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -719,9 +720,9 @@ export default function Matches() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Тип матчу:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Тип матчу:</label>
                 <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                  <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                  <SelectTrigger className="rounded-xl border-2 border-black/20 hover:border-black/40 transition-colors font-medium">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -734,23 +735,27 @@ export default function Matches() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Пошук:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Пошук:</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Команда..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors"
+                    className="pl-9 rounded-xl border-2 border-black/20 hover:border-black/40 transition-colors font-medium"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Hot Match:</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Hot Match:</label>
                 <Button
                   variant={showHotMatches ? 'default' : 'outline'}
-                  className="w-full rounded-xl"
+                  className={`w-full rounded-xl font-bold transition-all duration-300 ${
+                    showHotMatches 
+                      ? 'bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20' 
+                      : 'border-2 border-black/20 hover:bg-black/5'
+                  }`}
                   onClick={() => setShowHotMatches(!showHotMatches)}
                 >
                   {showHotMatches ? 'Увімкнено' : 'Вимкнено'}
@@ -760,13 +765,13 @@ export default function Matches() {
           </CardContent>
         </Card>
 
-        {/* Matches Table - Bordered Style with White Rows */}
+        {/* Matches Table */}
         {sortedMatches.length > 0 ? (
-          <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-              <CardTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+          <Card className="border-2 border-black/10 shadow-2xl rounded-3xl bg-white overflow-hidden">
+            <CardHeader className="bg-gray-50 border-b-2 border-black/10">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold text-black">
+                <div className="p-2 bg-black rounded-xl shadow-lg shadow-black/20">
+                  <Calendar className="h-6 w-6 text-white" />
                 </div>
                 <span>{currentDate}</span>
               </CardTitle>
@@ -775,11 +780,11 @@ export default function Matches() {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Матч</th>
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Фаворит</th>
+                    <tr className="border-b-2 border-black/20">
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Матч</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Фаворит</th>
                       <th 
-                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200"
+                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-50 transition-colors border-r-2 border-black/10"
                         onClick={() => toggleSort('confidence')}
                       >
                         <div className="flex items-center justify-center gap-1">
@@ -788,7 +793,7 @@ export default function Matches() {
                         </div>
                       </th>
                       <th 
-                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200"
+                        className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-50 transition-colors border-r-2 border-black/10"
                         onClick={() => toggleSort('risk')}
                       >
                         <div className="flex items-center justify-center gap-1">
@@ -796,11 +801,11 @@ export default function Matches() {
                           <ArrowUpDown className="h-3.5 w-3.5" />
                         </div>
                       </th>
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Коефіцієнти</th>
-                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Win Rate</th>
-                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Info</th>
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Турнір</th>
-                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">AI Рекомендація</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Коефіцієнти</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Win Rate</th>
+                      <th className="text-center p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Info</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">Турнір</th>
+                      <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider border-r-2 border-black/10">AI Рекомендація</th>
                       <th className="text-left p-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Коментар</th>
                     </tr>
                   </thead>
@@ -815,19 +820,19 @@ export default function Matches() {
                       return (
                         <tr 
                           key={match.id} 
-                          className="bg-white border-b border-gray-200 shadow-sm hover:shadow-md transition-all hover:bg-gray-50"
+                          className="bg-white border-b-2 border-black/5 hover:bg-gray-50 transition-all"
                         >
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r-2 border-black/5">
                             <div className="flex items-center gap-2">
                               <div>
-                                <div className="font-bold text-gray-900 text-base">
+                                <div className="font-bold text-black text-base">
                                   {match.team1} <span className="text-gray-400 font-normal">vs</span> {match.team2}
                                 </div>
                                 <div className="flex items-center gap-2 mt-1.5">
-                                  <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
+                                  <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-black/10 text-black border-0 font-bold">
                                     {match.matchType}
                                   </Badge>
-                                  <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border-0 font-bold">
+                                  <Badge variant="secondary" className="text-xs px-2.5 py-1 rounded-full bg-black/10 text-black border-0 font-bold">
                                     {match.tier.toUpperCase()}
                                   </Badge>
                                   {match.url && (
@@ -835,7 +840,7 @@ export default function Matches() {
                                       href={match.url} 
                                       target="_blank" 
                                       rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-blue-50 rounded-lg inline-block"
+                                      className="text-black hover:text-gray-700 transition-colors p-1 hover:bg-black/5 rounded-lg inline-block"
                                     >
                                       <ExternalLink className="h-3.5 w-3.5" />
                                     </a>
@@ -844,34 +849,34 @@ export default function Matches() {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <div className="font-bold text-blue-700 text-sm">{match.favorite}</div>
+                          <td className="p-4 border-r-2 border-black/5">
+                            <div className="font-bold text-black text-sm">{match.favorite}</div>
                           </td>
-                          <td className="p-4 text-center border-r border-gray-200">
+                          <td className="p-4 text-center border-r-2 border-black/5">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
                                   className={`font-bold px-3.5 py-1.5 rounded-full border-0 text-sm cursor-help hover:scale-105 transition-transform ${
-                                    match.aiConfidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' :
-                                    match.aiConfidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 
-                                    'bg-gradient-to-r from-gray-400 to-gray-600 text-white'
+                                    match.aiConfidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30' :
+                                    match.aiConfidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' : 
+                                    'bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-lg shadow-gray-500/30'
                                   }`}
                                 >
                                   <Info className="h-3 w-3 mr-1" />
                                   {match.aiConfidence}%
                                 </Badge>
                               </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-md p-4 bg-white border-2 border-blue-200 shadow-xl">
+                              <TooltipContent side="right" className="max-w-md p-4 bg-white border-2 border-black/20 shadow-2xl">
                                 <div className="space-y-2">
-                                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
-                                    <Info className="h-4 w-4 text-blue-600" />
-                                    <p className="font-bold text-sm text-gray-900">Пояснення AI прогнозу</p>
+                                  <div className="flex items-center gap-2 mb-3 pb-2 border-b-2 border-black/10">
+                                    <Info className="h-4 w-4 text-black" />
+                                    <p className="font-bold text-sm text-black">Пояснення AI прогнозу</p>
                                   </div>
-                                  <div className="text-xs text-gray-700 whitespace-pre-line leading-relaxed">
+                                  <div className="text-xs text-gray-700 whitespace-pre-line leading-relaxed font-medium">
                                     {aiExplanation}
                                   </div>
-                                  <div className="mt-3 pt-2 border-t border-gray-200">
-                                    <p className="text-xs text-gray-500 italic">
+                                  <div className="mt-3 pt-2 border-t-2 border-black/10">
+                                    <p className="text-xs text-gray-600 italic font-medium">
                                       💡 AI аналізує форму команд, історію матчів, коефіцієнти та інші фактори
                                     </p>
                                   </div>
@@ -879,88 +884,87 @@ export default function Matches() {
                               </TooltipContent>
                             </Tooltip>
                           </td>
-                          <td className="p-4 text-center border-r border-gray-200">
+                          <td className="p-4 text-center border-r-2 border-black/5">
                             <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform" title="Клікніть для сортування">
-                              <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-sm`} />
-                              <span className="text-sm font-bold text-gray-900">{match.risk}%</span>
+                              <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-md`} />
+                              <span className="text-sm font-bold text-black">{match.risk}%</span>
                             </div>
-                            <div className="text-xs text-gray-600 mt-1 font-semibold">{riskInfo.label}</div>
+                            <div className="text-xs text-gray-600 mt-1 font-bold">{riskInfo.label}</div>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r-2 border-black/5">
                             <div className="text-sm space-y-1">
-                              <div className="text-gray-700">{match.team1}: <span className="font-bold text-gray-900">{match.odds.team1}</span></div>
-                              <div className="text-gray-700">{match.team2}: <span className="font-bold text-gray-900">{match.odds.team2}</span></div>
+                              <div className="text-gray-700 font-medium">{match.team1}: <span className="font-bold text-black">{match.odds.team1}</span></div>
+                              <div className="text-gray-700 font-medium">{match.team2}: <span className="font-bold text-black">{match.odds.team2}</span></div>
                             </div>
                           </td>
-                          <td className="p-4 text-center border-r border-gray-200">
+                          <td className="p-4 text-center border-r-2 border-black/5">
                             <div className="flex items-center justify-center gap-1.5">
                               {match.winRate >= 70 ? (
                                 <TrendingUp className="h-4 w-4 text-green-600" />
                               ) : (
                                 <TrendingDown className="h-4 w-4 text-red-600" />
                               )}
-                              <span className="font-bold text-gray-900 text-sm">{match.winRate}%</span>
+                              <span className="font-bold text-black text-sm">{match.winRate}%</span>
                             </div>
                           </td>
-                          <td className="p-4 text-center border-r border-gray-200">
+                          <td className="p-4 text-center border-r-2 border-black/5">
                             <div className="flex flex-col items-center gap-2">
-                              {/* Safe Pick Badge */}
                               {safePick && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-semibold shadow-sm flex items-center gap-1 cursor-help">
+                                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2.5 py-1 rounded-full border-0 font-bold shadow-lg shadow-green-500/30 flex items-center gap-1 cursor-help">
                                       <Shield className="h-3 w-3" />
                                       Safe Pick
                                     </Badge>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="bg-white border-2 border-green-200 shadow-xl">
-                                    <p className="text-xs text-gray-700 max-w-xs">
+                                  <TooltipContent side="top" className="bg-white border-2 border-green-200 shadow-2xl">
+                                    <p className="text-xs text-gray-700 max-w-xs font-medium">
                                       🛡️ <strong>Safe Pick</strong> - Матч з високою впевненістю AI (&gt;80%), низьким ризиком (&lt;30%) та стабільною формою команди. Рекомендується для надійних ставок.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
-                              {/* Form Badge with Tooltip */}
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1 rounded-full font-semibold text-xs shadow-sm cursor-help`}>
+                                  <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1 rounded-full font-bold text-xs shadow-lg cursor-help`}>
                                     {formInfo.icon}
                                     {formInfo.label}
                                   </Badge>
                                 </TooltipTrigger>
-                                <TooltipContent side="top" className="bg-white border-2 border-gray-200 shadow-xl">
-                                  <p className="text-xs text-gray-700 max-w-xs">
+                                <TooltipContent side="top" className="bg-white border-2 border-black/20 shadow-2xl">
+                                  <p className="text-xs text-gray-700 max-w-xs font-medium">
                                     {formInfo.tooltip}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
                             </div>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <div className="text-sm text-gray-700 font-medium">{match.context}</div>
+                          <td className="p-4 border-r-2 border-black/5">
+                            <div className="text-sm text-gray-700 font-bold">{match.context}</div>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r-2 border-black/5">
                             <Button
                               onClick={() => handleGetAIRecommendation(match)}
-                              className="rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-md transition-all hover:scale-105 flex items-center gap-2"
+                              className="group relative rounded-xl bg-black hover:bg-gray-800 text-white font-bold shadow-xl shadow-black/20 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
                               size="sm"
                             >
-                              <Brain className="h-4 w-4" />
-                              Отримати прогноз
+                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              <Brain className="h-4 w-4 relative z-10" />
+                              <span className="relative z-10">Отримати прогноз</span>
                             </Button>
                           </td>
                           <td className="p-4">
                             {riskComments ? (
                               <Button
                                 onClick={() => handleShowComment(match)}
-                                className="rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold shadow-md transition-all hover:scale-105 flex items-center gap-2"
+                                className="rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold shadow-xl shadow-orange-500/30 transition-all hover:scale-105 flex items-center gap-2"
                                 size="sm"
                               >
                                 <Eye className="h-4 w-4" />
                                 Показати
                               </Button>
                             ) : (
-                              <div className="text-xs text-gray-400">—</div>
+                              <div className="text-xs text-gray-400 font-medium">—</div>
                             )}
                           </td>
                         </tr>
@@ -972,14 +976,14 @@ export default function Matches() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-2 border-black/10 shadow-xl rounded-3xl bg-white overflow-hidden">
             <CardContent className="py-20">
               <div className="text-center">
                 <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                   <AlertTriangle className="h-16 w-16 text-gray-400" />
                 </div>
-                <p className="text-gray-900 font-bold text-lg">Немає матчів за обраними фільтрами</p>
-                <p className="text-sm text-gray-500 mt-2">Спробуйте змінити фільтри або оновити дані</p>
+                <p className="text-black font-bold text-lg">Немає матчів за обраними фільтрами</p>
+                <p className="text-sm text-gray-600 mt-2 font-medium">Спробуйте змінити фільтри або оновити дані</p>
               </div>
             </CardContent>
           </Card>
