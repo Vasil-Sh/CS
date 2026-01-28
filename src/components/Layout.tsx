@@ -9,7 +9,7 @@ import {
   LogOut,
   User,
   Shield,
-  Sparkles
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -61,14 +61,21 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200',
+              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-100/80 hover:text-gray-900'
+                ? 'bg-gradient-to-r from-black via-gray-800 to-black text-white shadow-2xl shadow-black/40'
+                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >
-            <Icon className="h-5 w-5" />
-            {item.name}
+            {/* Liquid shine effect for active state */}
+            {isActive && (
+              <>
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/20 rounded-2xl pointer-events-none" />
+              </>
+            )}
+            <Icon className="h-5 w-5 relative z-10" />
+            <span className="relative z-10">{item.name}</span>
           </Link>
         );
       })}
@@ -81,14 +88,21 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200',
+              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                : 'text-purple-600 hover:bg-purple-100/80 hover:text-purple-900'
+                ? 'bg-gradient-to-r from-black via-gray-800 to-black text-white shadow-2xl shadow-black/40'
+                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >
-            <Icon className="h-5 w-5" />
-            {item.name}
+            {/* Liquid shine effect for active state */}
+            {isActive && (
+              <>
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/20 rounded-2xl pointer-events-none" />
+              </>
+            )}
+            <Icon className="h-5 w-5 relative z-10" />
+            <span className="relative z-10">{item.name}</span>
           </Link>
         );
       })}
@@ -96,33 +110,38 @@ export default function Layout({ children }: LayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+    <div className="min-h-screen bg-white">
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/80 backdrop-blur-xl px-6 pb-4 border-r border-gray-200/50 shadow-xl">
-          {/* Logo Header */}
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/90 backdrop-blur-xl px-6 pb-4 border-r-2 border-black/10 shadow-2xl">
+          {/* Logo Header with liquid style */}
           <div className="flex h-20 shrink-0 items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20 hover:scale-105 hover:rotate-3 transition-all duration-300">
+              <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-              MatchIQ
+            <h1 className="text-2xl font-bold text-black tracking-tight">
+              Match<span className="text-gray-600">IQ</span>
             </h1>
           </div>
           
-          {/* User Info Card */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-gray-50 to-blue-50/50 rounded-2xl border border-gray-200/50 shadow-sm">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
-              <User className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 truncate">
-                @{username || 'User'}
-                {isAdmin && <span className="ml-1">👑</span>}
-              </p>
-              <p className="text-xs text-gray-500 font-medium">
-                {isAdmin ? 'Адміністратор' : 'Користувач'}
-              </p>
+          {/* User Info Card with liquid style */}
+          <div className="relative group/card">
+            {/* Glow effect on hover */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-black/20 via-gray-500/20 to-black/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition duration-500" />
+            
+            <div className="relative flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-black/15 shadow-lg">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-black via-gray-800 to-black shadow-xl shadow-black/30">
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-black truncate">
+                  @{username || 'User'}
+                  {isAdmin && <span className="ml-1">👑</span>}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">
+                  {isAdmin ? 'Адміністратор' : 'Користувач'}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -137,10 +156,12 @@ export default function Layout({ children }: LayoutProps) {
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-2xl font-semibold h-12 transition-all duration-200"
+                  className="group relative w-full justify-start gap-3 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-600 rounded-2xl font-bold h-12 transition-all duration-300 overflow-hidden"
                 >
-                  <LogOut className="h-5 w-5" />
-                  Вийти
+                  {/* Liquid effect on hover */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  <LogOut className="h-5 w-5 relative z-10" />
+                  <span className="relative z-10">Вийти</span>
                 </Button>
               </li>
             </ul>
@@ -150,44 +171,48 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-white/80 backdrop-blur-xl px-4 py-4 border-b border-gray-200/50 shadow-sm">
+        <div className="flex items-center justify-between bg-white/90 backdrop-blur-xl px-4 py-4 border-b-2 border-black/10 shadow-lg">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center shadow-xl shadow-black/20">
+              <TrendingUp className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-              MatchIQ
+            <h1 className="text-lg font-bold text-black tracking-tight">
+              Match<span className="text-gray-600">IQ</span>
             </h1>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl border-gray-300">
+              <Button variant="outline" size="icon" className="rounded-xl border-2 border-black/20 hover:bg-black/5">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 bg-white/95 backdrop-blur-xl">
+            <SheetContent side="left" className="w-72 bg-white/95 backdrop-blur-xl border-r-2 border-black/10">
               <div className="flex h-16 items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20">
+                  <TrendingUp className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-                  MatchIQ
+                <h1 className="text-xl font-bold text-black tracking-tight">
+                  Match<span className="text-gray-600">IQ</span>
                 </h1>
               </div>
               
               {/* User Info Mobile */}
-              <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-gray-50 to-blue-50/50 rounded-2xl border border-gray-200/50 shadow-sm mt-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
-                  <User className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">
-                    @{username || 'User'}
-                    {isAdmin && <span className="ml-1">👑</span>}
-                  </p>
-                  <p className="text-xs text-gray-500 font-medium">
-                    {isAdmin ? 'Адміністратор' : 'Користувач'}
-                  </p>
+              <div className="relative group/card mt-4">
+                <div className="absolute -inset-1 bg-gradient-to-r from-black/20 via-gray-500/20 to-black/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition duration-500" />
+                
+                <div className="relative flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-black/15 shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-black via-gray-800 to-black shadow-xl shadow-black/30">
+                    <User className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-black truncate">
+                      @{username || 'User'}
+                      {isAdmin && <span className="ml-1">👑</span>}
+                    </p>
+                    <p className="text-xs text-gray-600 font-medium">
+                      {isAdmin ? 'Адміністратор' : 'Користувач'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -199,10 +224,11 @@ export default function Layout({ children }: LayoutProps) {
                   <Button
                     onClick={handleLogout}
                     variant="outline"
-                    className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-2xl font-semibold h-12 transition-all duration-200"
+                    className="group relative w-full justify-start gap-3 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-600 rounded-2xl font-bold h-12 transition-all duration-300 overflow-hidden"
                   >
-                    <LogOut className="h-5 w-5" />
-                    Вийти
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    <LogOut className="h-5 w-5 relative z-10" />
+                    <span className="relative z-10">Вийти</span>
                   </Button>
                 </div>
               </nav>
