@@ -136,15 +136,6 @@ export default function Login() {
         <div className="absolute bottom-1/8 right-3/5 w-2 h-2 bg-black/18 rounded-full animate-float animation-delay-18000 shadow-lg" />
         <div className="absolute top-5/6 left-1/6 w-3 h-3 bg-black/19 rounded-full animate-float animation-delay-19000 shadow-lg" />
         
-        {/* Liquid wave effect - enhanced */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/5 to-transparent animate-wave" />
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/5 to-transparent animate-wave animation-delay-3000" />
-        
-        {/* Liquid drip effects */}
-        <div className="absolute top-0 left-1/3 w-1 h-24 bg-gradient-to-b from-black/15 to-transparent animate-drip" />
-        <div className="absolute top-0 right-1/3 w-1 h-32 bg-gradient-to-b from-black/12 to-transparent animate-drip animation-delay-2000" />
-        <div className="absolute top-0 left-2/3 w-1 h-20 bg-gradient-to-b from-black/10 to-transparent animate-drip animation-delay-4000" />
-        
         {/* Liquid splash circles */}
         <div className="absolute top-1/4 left-1/4 w-32 h-32 border-2 border-black/10 rounded-full animate-splash" />
         <div className="absolute bottom-1/3 right-1/3 w-40 h-40 border-2 border-black/8 rounded-full animate-splash animation-delay-3000" />
@@ -354,35 +345,12 @@ export default function Login() {
           }
         }
         
-        @keyframes wave {
-          0%, 100% {
-            transform: translateX(0%) scaleY(1);
-          }
-          50% {
-            transform: translateX(-25%) scaleY(1.1);
-          }
-        }
-        
         @keyframes pulse-slow {
           0%, 100% {
             opacity: 0;
           }
           50% {
             opacity: 1;
-          }
-        }
-        
-        @keyframes drip {
-          0% {
-            transform: translateY(-100%) scaleY(0);
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100%) scaleY(2);
-            opacity: 0;
           }
         }
         
@@ -405,16 +373,8 @@ export default function Login() {
           animation: float 10s ease-in-out infinite;
         }
         
-        .animate-wave {
-          animation: wave 15s ease-in-out infinite;
-        }
-        
         .animate-pulse-slow {
           animation: pulse-slow 3s ease-in-out infinite;
-        }
-        
-        .animate-drip {
-          animation: drip 8s ease-in-out infinite;
         }
         
         .animate-splash {
