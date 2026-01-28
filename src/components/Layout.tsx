@@ -63,16 +63,13 @@ export default function Layout({ children }: LayoutProps) {
             className={cn(
               'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-black/90 text-white shadow-2xl shadow-black/40'
+                ? 'bg-black/5 text-black border-2 border-black/20 shadow-lg'
                 : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >
             {/* Liquid shine effect for active state */}
             {isActive && (
-              <>
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/10 rounded-2xl pointer-events-none" />
-              </>
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-black/10 to-transparent" />
             )}
             <Icon className="h-5 w-5 relative z-10" />
             <span className="relative z-10">{item.name}</span>
@@ -90,16 +87,13 @@ export default function Layout({ children }: LayoutProps) {
             className={cn(
               'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-black/90 text-white shadow-2xl shadow-black/40'
+                ? 'bg-black/5 text-black border-2 border-black/20 shadow-lg'
                 : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >
             {/* Liquid shine effect for active state */}
             {isActive && (
-              <>
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/10 rounded-2xl pointer-events-none" />
-              </>
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-black/10 to-transparent" />
             )}
             <Icon className="h-5 w-5 relative z-10" />
             <span className="relative z-10">{item.name}</span>
