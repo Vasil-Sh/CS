@@ -61,18 +61,42 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
+              'ios-liquid-button group relative flex items-center gap-3 px-5 py-3.5 rounded-[18px] text-sm font-semibold transition-all duration-500 overflow-hidden',
               isActive
-                ? 'bg-black/90 text-white backdrop-blur-sm shadow-2xl shadow-black/40'
-                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
+                ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] scale-[0.98]'
+                : 'bg-gradient-to-br from-gray-50 to-white text-gray-700 hover:text-black hover:shadow-[0_4px_16px_rgba(0,0,0,0.1)] hover:scale-[1.02] border border-gray-200/50'
             )}
           >
-            {/* Liquid shine effect for active state */}
-            {isActive && (
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+            {/* iOS-style inner shadow for depth */}
+            <div className={cn(
+              "absolute inset-0 rounded-[18px] transition-opacity duration-500",
+              isActive 
+                ? "shadow-[inset_0_2px_8px_rgba(255,255,255,0.1),inset_0_-2px_8px_rgba(0,0,0,0.3)]"
+                : "shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_2px_rgba(0,0,0,0.05)]"
+            )} />
+            
+            {/* Liquid shine effect - iOS style */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-out bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-[18px]" />
+            
+            {/* Subtle glow on hover */}
+            {!isActive && (
+              <div className="absolute inset-0 rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/40 via-transparent to-white/20" />
             )}
-            <Icon className="h-5 w-5 relative z-10" />
-            <span className="relative z-10">{item.name}</span>
+            
+            {/* Active state glow */}
+            {isActive && (
+              <div className="absolute -inset-1 bg-gradient-to-br from-gray-600/30 via-black/20 to-gray-600/30 rounded-[20px] blur-xl opacity-60 animate-pulse" />
+            )}
+            
+            <Icon className={cn(
+              "h-5 w-5 relative z-10 transition-transform duration-500",
+              isActive && "drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]",
+              "group-hover:scale-110"
+            )} />
+            <span className={cn(
+              "relative z-10 transition-all duration-500",
+              isActive && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.2)]"
+            )}>{item.name}</span>
           </Link>
         );
       })}
@@ -85,18 +109,42 @@ export default function Layout({ children }: LayoutProps) {
             key={item.name}
             to={item.href}
             className={cn(
-              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
+              'ios-liquid-button group relative flex items-center gap-3 px-5 py-3.5 rounded-[18px] text-sm font-semibold transition-all duration-500 overflow-hidden',
               isActive
-                ? 'bg-black/90 text-white backdrop-blur-sm shadow-2xl shadow-black/40'
-                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
+                ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] scale-[0.98]'
+                : 'bg-gradient-to-br from-gray-50 to-white text-gray-700 hover:text-black hover:shadow-[0_4px_16px_rgba(0,0,0,0.1)] hover:scale-[1.02] border border-gray-200/50'
             )}
           >
-            {/* Liquid shine effect for active state */}
-            {isActive && (
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+            {/* iOS-style inner shadow for depth */}
+            <div className={cn(
+              "absolute inset-0 rounded-[18px] transition-opacity duration-500",
+              isActive 
+                ? "shadow-[inset_0_2px_8px_rgba(255,255,255,0.1),inset_0_-2px_8px_rgba(0,0,0,0.3)]"
+                : "shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_2px_rgba(0,0,0,0.05)]"
+            )} />
+            
+            {/* Liquid shine effect - iOS style */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-out bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-[18px]" />
+            
+            {/* Subtle glow on hover */}
+            {!isActive && (
+              <div className="absolute inset-0 rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/40 via-transparent to-white/20" />
             )}
-            <Icon className="h-5 w-5 relative z-10" />
-            <span className="relative z-10">{item.name}</span>
+            
+            {/* Active state glow */}
+            {isActive && (
+              <div className="absolute -inset-1 bg-gradient-to-br from-gray-600/30 via-black/20 to-gray-600/30 rounded-[20px] blur-xl opacity-60 animate-pulse" />
+            )}
+            
+            <Icon className={cn(
+              "h-5 w-5 relative z-10 transition-transform duration-500",
+              isActive && "drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]",
+              "group-hover:scale-110"
+            )} />
+            <span className={cn(
+              "relative z-10 transition-all duration-500",
+              isActive && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.2)]"
+            )}>{item.name}</span>
           </Link>
         );
       })}
