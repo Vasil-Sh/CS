@@ -85,7 +85,8 @@ const StatCard = ({ title, value, icon: Icon, colorClass, bgClass }: StatCardPro
 );
 
 export default function MyBets() {
-  const currentUser = localStorage.getItem('currentUser') || '';
+  // FIX: Use 'username' instead of 'currentUser' to match Login.tsx
+  const currentUser = localStorage.getItem('username') || '';
   
   const [stats, setStats] = useState<BetStats>(() => 
     UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)
@@ -120,7 +121,7 @@ export default function MyBets() {
   }, []);
 
   useEffect(() => {
-    if (users.length > 0) {
+    if (users.length > 0 && currentUser) {
       checkAdminStatus();
     }
   }, [users, currentUser]);
@@ -147,11 +148,12 @@ export default function MyBets() {
           return {
             telegram,
             username,
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes'
+            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes' || isAdminStr === 'так'
           };
         })
         .filter((user): user is User => user !== null);
       
+      console.log('Fetched users:', parsedUsers);
       setUsers(parsedUsers);
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -159,7 +161,13 @@ export default function MyBets() {
   };
 
   const checkAdminStatus = () => {
-    const user = users.find(u => u.username === currentUser);
+    console.log('Checking admin status for:', currentUser);
+    console.log('Available users:', users);
+    
+    const user = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
+    console.log('Found user:', user);
+    console.log('Is admin:', user?.isAdmin);
+    
     setIsAdmin(user?.isAdmin || false);
   };
 
