@@ -12,12 +12,6 @@ interface BetDetailsModalProps {
   onClose: () => void;
 }
 
-interface User {
-  telegram: string;
-  username: string;
-  isAdmin?: boolean;
-}
-
 interface ParsedEvent {
   number: string;
   match: string;
@@ -28,65 +22,14 @@ interface ParsedEvent {
 
 export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalProps) {
   const [copied, setCopied] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
   const [editableText, setEditableText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (users.length > 0) {
-      checkAdminStatus();
-    }
-  }, [users]);
 
   useEffect(() => {
     if (bet) {
       setEditableText(generateTelegramText());
     }
   }, [bet]);
-
-  const fetchUsers = async () => {
-    try {
-      const SHEET_ID = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-      
-      const response = await fetch(url);
-      const text = await response.text();
-      
-      const rows = text.split('\n').slice(1);
-      const parsedUsers: User[] = rows
-        .filter(row => row.trim())
-        .map(row => {
-          const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 7) return null;
-          
-          const telegram = matches[0].replace(/"/g, '').trim();
-          const username = matches[1].replace(/"/g, '').trim();
-          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
-          
-          return {
-            telegram,
-            username,
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes'
-          };
-        })
-        .filter((user): user is User => user !== null);
-      
-      setUsers(parsedUsers);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-    }
-  };
-
-  const checkAdminStatus = () => {
-    const currentUser = localStorage.getItem('currentUser') || '';
-    const user = users.find(u => u.username === currentUser);
-    setIsAdmin(user?.isAdmin || false);
-  };
 
   if (!bet) return null;
 
@@ -214,10 +157,6 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       console.error('Copy error:', error);
     }
   };
-
-  if (!isAdmin) {
-    return null;
-  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
