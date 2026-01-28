@@ -63,7 +63,7 @@ export default function Layout({ children }: LayoutProps) {
             className={cn(
               'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-blue-500/90 text-white shadow-2xl shadow-blue-500/40'
+                ? 'bg-black/90 text-white shadow-2xl shadow-black/40'
                 : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >
@@ -90,7 +90,7 @@ export default function Layout({ children }: LayoutProps) {
             className={cn(
               'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
               isActive
-                ? 'bg-purple-500/90 text-white shadow-2xl shadow-purple-500/40'
+                ? 'bg-black/90 text-white shadow-2xl shadow-black/40'
                 : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
             )}
           >

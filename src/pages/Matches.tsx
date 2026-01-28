@@ -945,10 +945,10 @@ export default function Matches() {
                           <td className="p-4 border-r-2 border-black/5">
                             <Button
                               onClick={() => handleGetAIRecommendation(match)}
-                              className="group relative rounded-xl bg-blue-500/90 hover:bg-blue-600/90 text-white font-bold shadow-xl shadow-blue-500/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
+                              className="group relative rounded-xl bg-black/90 hover:bg-black text-white font-bold shadow-xl shadow-black/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
                               size="sm"
                             >
-                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                               <Brain className="h-4 w-4 relative z-10" />
                               <span className="relative z-10">Отримати прогноз</span>
                             </Button>
@@ -957,10 +957,10 @@ export default function Matches() {
                             {riskComments ? (
                               <Button
                                 onClick={() => handleShowComment(match)}
-                                className="group relative rounded-xl bg-amber-500/90 hover:bg-amber-600/90 text-white font-bold shadow-xl shadow-amber-500/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
+                                className="group relative rounded-xl bg-black/90 hover:bg-black text-white font-bold shadow-xl shadow-black/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
                                 size="sm"
                               >
-                                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                                 <Eye className="h-4 w-4 relative z-10" />
                                 <span className="relative z-10">Показати</span>
                               </Button>
