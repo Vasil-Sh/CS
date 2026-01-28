@@ -945,7 +945,7 @@ export default function Matches() {
                           <td className="p-4 border-r-2 border-black/5">
                             <Button
                               onClick={() => handleGetAIRecommendation(match)}
-                              className="group relative rounded-xl bg-black hover:bg-gray-800 text-white font-bold shadow-xl shadow-black/20 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
+                              className="group relative rounded-xl bg-blue-500/90 hover:bg-blue-600/90 text-white font-bold shadow-xl shadow-blue-500/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
                               size="sm"
                             >
                               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -957,11 +957,12 @@ export default function Matches() {
                             {riskComments ? (
                               <Button
                                 onClick={() => handleShowComment(match)}
-                                className="rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold shadow-xl shadow-orange-500/30 transition-all hover:scale-105 flex items-center gap-2"
+                                className="group relative rounded-xl bg-amber-500/90 hover:bg-amber-600/90 text-white font-bold shadow-xl shadow-amber-500/30 transition-all hover:scale-105 flex items-center gap-2 overflow-hidden"
                                 size="sm"
                               >
-                                <Eye className="h-4 w-4" />
-                                Показати
+                                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                <Eye className="h-4 w-4 relative z-10" />
+                                <span className="relative z-10">Показати</span>
                               </Button>
                             ) : (
                               <div className="text-xs text-gray-400 font-medium">—</div>
