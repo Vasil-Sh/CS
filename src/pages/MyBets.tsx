@@ -28,6 +28,12 @@ interface Goal {
   status: 'active' | 'completed' | 'failed';
 }
 
+interface User {
+  telegram: string;
+  username: string;
+  isAdmin?: boolean;
+}
+
 interface ParsedEvent {
   number: string;
   match: string;
@@ -95,6 +101,8 @@ export default function MyBets() {
   const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   const bankrollStats = useMemo(() => 
     BankrollService.getBankrollStats(currentUser, recentBets),
@@ -105,6 +113,55 @@ export default function MyBets() {
     BankrollService.isInitialized(currentUser),
     [currentUser]
   );
+
+  // Fetch users and check admin status
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (users.length > 0) {
+      checkAdminStatus();
+    }
+  }, [users, currentUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const SHEET_ID = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+      
+      const response = await fetch(url);
+      const text = await response.text();
+      
+      const rows = text.split('\n').slice(1);
+      const parsedUsers: User[] = rows
+        .filter(row => row.trim())
+        .map(row => {
+          const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+          if (!matches || matches.length < 7) return null;
+          
+          const telegram = matches[0].replace(/"/g, '').trim();
+          const username = matches[1].replace(/"/g, '').trim();
+          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
+          
+          return {
+            telegram,
+            username,
+            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes'
+          };
+        })
+        .filter((user): user is User => user !== null);
+      
+      setUsers(parsedUsers);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    }
+  };
+
+  const checkAdminStatus = () => {
+    const user = users.find(u => u.username === currentUser);
+    setIsAdmin(user?.isAdmin || false);
+  };
 
   // Daily reset check
   useEffect(() => {
@@ -577,15 +634,17 @@ export default function MyBets() {
                               >
                                 <Share2 className="h-5 w-5" />
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleBetDetailsClick(bet)}
-                                className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                                title="Деталі для Telegram"
-                              >
-                                <Eye className="h-5 w-5" />
-                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleBetDetailsClick(bet)}
+                                  className="h-10 w-10 p-0 rounded-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                                  title="Деталі для Telegram (тільки для адмінів)"
+                                >
+                                  <Eye className="h-5 w-5" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
