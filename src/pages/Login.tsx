@@ -18,16 +18,14 @@ export default function Login() {
 
   useEffect(() => {
     // Clear any existing auth tokens when login page loads
-    // This ensures users must log in again
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
     localStorage.removeItem("username");
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent multiple simultaneous login attempts
     if (isAuthenticating.current) {
       return;
     }
@@ -44,11 +42,9 @@ export default function Login() {
         return;
       }
 
-      // Validate user credentials (checks both admin and regular users)
       const validation = await authService.validateUser(username, password);
 
       if (validation.isValid) {
-        // Check if user is admin
         const isAdminUser = await authService.validateAdmin(username, password);
         
         if (isAdminUser) {
@@ -61,7 +57,6 @@ export default function Login() {
           localStorage.setItem("username", username);
         }
         
-        // Navigate with replace to prevent back button issues
         navigate("/", { replace: true });
       } else {
         setError(validation.message || "Невірний логін або пароль");
@@ -77,226 +72,195 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Enhanced animated liquid background with radial fade grid */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* iOS 18 Liquid Glass Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Radial fade grid - sharp near center, fades to edges */}
+        {/* Subtle grid pattern */}
         <div 
-          className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.08)_1px,transparent_1px)] bg-[size:48px_48px]"
+          className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]"
           style={{
-            maskImage: 'radial-gradient(circle at center, black 20%, transparent 70%)',
-            WebkitMaskImage: 'radial-gradient(circle at center, black 20%, transparent 70%)'
+            maskImage: 'radial-gradient(circle at center, black 30%, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 80%)'
           }}
         />
         
-        {/* Large liquid blob 1 - enhanced visibility */}
-        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-gradient-to-br from-black/15 via-gray-500/10 to-transparent rounded-full blur-3xl animate-blob" />
+        {/* Liquid glass blobs - iOS 18 style */}
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-100/30 via-purple-100/20 to-transparent rounded-full blur-3xl animate-blob-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-[700px] h-[700px] bg-gradient-to-tl from-pink-100/25 via-blue-100/20 to-transparent rounded-full blur-3xl animate-blob-slow animation-delay-4000" />
+        <div className="absolute top-1/2 right-1/3 w-[550px] h-[550px] bg-gradient-to-br from-purple-100/20 via-blue-100/15 to-transparent rounded-full blur-3xl animate-blob-slow animation-delay-8000" />
         
-        {/* Large liquid blob 2 - enhanced visibility */}
-        <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-gradient-to-tl from-black/12 via-gray-400/10 to-transparent rounded-full blur-3xl animate-blob animation-delay-2000" />
-        
-        {/* Medium liquid blob 3 - enhanced visibility */}
-        <div className="absolute top-1/3 right-1/3 w-[600px] h-[600px] bg-gradient-to-br from-gray-300/10 via-black/10 to-transparent rounded-full blur-3xl animate-blob animation-delay-4000" />
-        
-        {/* Additional liquid blob 4 - enhanced visibility */}
-        <div className="absolute top-1/2 left-1/2 w-[650px] h-[650px] bg-gradient-to-tr from-black/10 via-gray-400/8 to-transparent rounded-full blur-3xl animate-blob animation-delay-6000" />
-        
-        {/* Additional liquid blob 5 - enhanced visibility */}
-        <div className="absolute bottom-1/4 left-1/4 w-[550px] h-[550px] bg-gradient-to-bl from-gray-300/10 via-black/8 to-transparent rounded-full blur-3xl animate-blob animation-delay-8000" />
-        
-        {/* Additional liquid blob 6 - enhanced visibility */}
-        <div className="absolute top-1/4 right-1/2 w-[620px] h-[620px] bg-gradient-to-br from-black/12 via-gray-500/8 to-transparent rounded-full blur-3xl animate-blob animation-delay-10000" />
-        
-        {/* Extra liquid blobs for more liquid effect */}
-        <div className="absolute top-1/5 left-1/5 w-[500px] h-[500px] bg-gradient-to-br from-gray-400/8 via-black/6 to-transparent rounded-full blur-3xl animate-blob animation-delay-3000" />
-        <div className="absolute bottom-1/5 right-1/5 w-[580px] h-[580px] bg-gradient-to-tl from-black/10 via-gray-300/7 to-transparent rounded-full blur-3xl animate-blob animation-delay-7000" />
-        <div className="absolute top-2/5 left-3/5 w-[520px] h-[520px] bg-gradient-to-tr from-gray-500/7 via-black/7 to-transparent rounded-full blur-3xl animate-blob animation-delay-9000" />
-        
-        {/* Floating particles - MORE particles around the form */}
-        <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-black/20 rounded-full animate-float shadow-lg" />
-        <div className="absolute top-2/3 right-1/4 w-4 h-4 bg-black/18 rounded-full animate-float animation-delay-1000 shadow-lg" />
-        <div className="absolute bottom-1/4 left-1/2 w-3 h-3 bg-black/22 rounded-full animate-float animation-delay-2000 shadow-lg" />
-        <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-black/20 rounded-full animate-float animation-delay-3000 shadow-lg" />
-        <div className="absolute top-1/5 left-2/3 w-3 h-3 bg-black/19 rounded-full animate-float animation-delay-4000 shadow-lg" />
-        <div className="absolute bottom-1/3 right-1/2 w-4 h-4 bg-black/21 rounded-full animate-float animation-delay-5000 shadow-lg" />
-        <div className="absolute top-3/4 left-1/4 w-3 h-3 bg-black/18 rounded-full animate-float animation-delay-6000 shadow-lg" />
-        <div className="absolute bottom-1/2 right-1/5 w-3 h-3 bg-black/20 rounded-full animate-float animation-delay-7000 shadow-lg" />
-        
-        {/* Additional floating particles */}
-        <div className="absolute top-1/6 left-1/2 w-2 h-2 bg-black/17 rounded-full animate-float animation-delay-8000 shadow-lg" />
-        <div className="absolute top-1/3 right-1/6 w-3 h-3 bg-black/19 rounded-full animate-float animation-delay-9000 shadow-lg" />
-        <div className="absolute bottom-1/5 left-1/3 w-2 h-2 bg-black/16 rounded-full animate-float animation-delay-10000 shadow-lg" />
-        <div className="absolute top-2/5 left-1/5 w-4 h-4 bg-black/20 rounded-full animate-float animation-delay-11000 shadow-lg" />
-        <div className="absolute bottom-2/5 right-1/4 w-2 h-2 bg-black/18 rounded-full animate-float animation-delay-12000 shadow-lg" />
-        <div className="absolute top-3/5 right-2/5 w-3 h-3 bg-black/19 rounded-full animate-float animation-delay-13000 shadow-lg" />
-        <div className="absolute bottom-1/6 left-2/5 w-2 h-2 bg-black/17 rounded-full animate-float animation-delay-14000 shadow-lg" />
-        <div className="absolute top-4/5 right-1/3 w-3 h-3 bg-black/20 rounded-full animate-float animation-delay-15000 shadow-lg" />
-        <div className="absolute bottom-2/3 left-3/5 w-2 h-2 bg-black/16 rounded-full animate-float animation-delay-16000 shadow-lg" />
-        <div className="absolute top-1/8 right-2/3 w-4 h-4 bg-black/21 rounded-full animate-float animation-delay-17000 shadow-lg" />
-        <div className="absolute bottom-1/8 right-3/5 w-2 h-2 bg-black/18 rounded-full animate-float animation-delay-18000 shadow-lg" />
-        <div className="absolute top-5/6 left-1/6 w-3 h-3 bg-black/19 rounded-full animate-float animation-delay-19000 shadow-lg" />
-        
-        {/* Liquid splash circles */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 border-2 border-black/10 rounded-full animate-splash" />
-        <div className="absolute bottom-1/3 right-1/3 w-40 h-40 border-2 border-black/8 rounded-full animate-splash animation-delay-3000" />
-        <div className="absolute top-2/3 right-1/4 w-28 h-28 border-2 border-black/12 rounded-full animate-splash animation-delay-6000" />
+        {/* Floating glass particles */}
+        <div className="absolute top-1/3 left-1/3 w-2 h-2 bg-white/40 rounded-full animate-float-gentle shadow-lg backdrop-blur-sm" />
+        <div className="absolute top-2/3 right-1/4 w-3 h-3 bg-white/30 rounded-full animate-float-gentle animation-delay-2000 shadow-lg backdrop-blur-sm" />
+        <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-white/35 rounded-full animate-float-gentle animation-delay-4000 shadow-lg backdrop-blur-sm" />
+        <div className="absolute top-1/2 right-1/2 w-2 h-2 bg-white/40 rounded-full animate-float-gentle animation-delay-6000 shadow-lg backdrop-blur-sm" />
       </div>
 
       {/* Main login container */}
       <div className="w-full max-w-md relative z-10">
-        {/* Logo/Brand section with app name */}
-        <div className="text-center mb-12">
+        {/* Logo/Brand section - iOS 18 style */}
+        <div className="text-center mb-10">
           <div className="inline-flex flex-col items-center gap-4">
-            {/* Logo icon */}
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-3xl shadow-2xl shadow-black/20 hover:scale-105 hover:rotate-3 transition-all duration-300">
-              <TrendingUp className="w-10 h-10 text-white" />
+            {/* Logo with liquid glass effect */}
+            <div className="relative group/logo">
+              <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-[2rem] blur-2xl opacity-0 group-hover/logo:opacity-100 transition-all duration-700" />
+              <div className="relative w-20 h-20 bg-gradient-to-br from-black via-gray-900 to-black rounded-[1.75rem] shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center backdrop-blur-xl border border-white/10 hover:scale-105 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-[1.75rem]" />
+                <TrendingUp className="w-10 h-10 text-white relative z-10 drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]" />
+              </div>
             </div>
             
-            {/* App name - MatchIQ */}
-            <div className="flex items-center gap-2">
-              <h2 className="text-3xl font-bold text-black tracking-tight">
-                Match<span className="text-gray-600">IQ</span>
-              </h2>
-            </div>
+            {/* App name */}
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent tracking-tight">
+              MatchIQ
+            </h2>
           </div>
           
-          <h1 className="text-4xl font-bold text-black mb-3 tracking-tight mt-6">
+          <h1 className="text-4xl font-bold text-black mb-2 tracking-tight mt-8">
             Вітаємо знову
           </h1>
-          <p className="text-gray-600 text-base">
+          <p className="text-gray-600 text-base font-medium">
             Увійдіть до свого облікового запису
           </p>
         </div>
 
-        {/* Login form card with enhanced glassmorphism */}
-        <div className="relative group">
-          {/* Enhanced glow effect on hover */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-black/20 via-gray-500/20 to-black/20 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-500 animate-pulse-slow" />
+        {/* Login form card - iOS 18 Liquid Glass */}
+        <div className="relative group/card">
+          {/* Outer glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover/card:opacity-100 transition-all duration-700" />
           
-          <div className="relative bg-white/80 backdrop-blur-2xl rounded-[2rem] border-2 border-black/15 p-8 shadow-2xl">
-            {/* Admin indicator */}
-            {isAdmin && (
-              <div className="mb-6 flex items-center justify-center gap-2 py-3 px-5 bg-black/10 backdrop-blur-sm rounded-2xl border-2 border-black/20 shadow-lg">
-                <Crown className="w-5 h-5 text-black animate-pulse" />
-                <span className="text-sm font-bold text-black">
-                  Режим адміністратора
-                </span>
-              </div>
-            )}
-
-            {/* Error alert */}
-            {error && (
-              <Alert className="mb-6 bg-red-500/10 border-2 border-red-500/30 backdrop-blur-sm rounded-2xl shadow-lg">
-                <AlertDescription className="text-red-700 text-sm font-medium">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Login form */}
-            <form onSubmit={handleLogin} className="space-y-6">
-              {/* Username field */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-black/90 block tracking-wide">
-                  Ім'я користувача
-                </label>
-                <div className="relative group/input">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 transition-colors duration-200 group-focus-within/input:text-black z-10" />
-                  <Input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    disabled={isLoading}
-                    className={`pl-12 h-14 bg-white/50 border-2 border-black/15 rounded-2xl text-black placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/70 hover:border-black/25 focus:bg-white/70 focus:border-black/40 focus:ring-4 focus:ring-black/10 disabled:opacity-50 shadow-lg ${
-                      isAdmin ? "blur-sm focus:blur-none" : ""
-                    }`}
-                    placeholder="Введіть ім'я користувача"
-                  />
-                  {/* Enhanced input glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-black/0 via-black/10 to-black/0 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Password field */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-black/90 block tracking-wide">
-                  Пароль
-                </label>
-                <div className="relative group/input">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 transition-colors duration-200 group-focus-within/input:text-black z-10" />
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    className="pl-12 h-14 bg-white/50 border-2 border-black/15 rounded-2xl text-black placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/70 hover:border-black/25 focus:bg-white/70 focus:border-black/40 focus:ring-4 focus:ring-black/10 disabled:opacity-50 shadow-lg"
-                    placeholder="Введіть пароль"
-                  />
-                  {/* Enhanced input glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-black/0 via-black/10 to-black/0 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Submit button with LIQUID STYLE */}
-              <div className="relative group/button">
-                {/* Multiple layer glow effects for liquid look */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-black/30 via-gray-600/30 to-black/30 rounded-3xl blur-xl opacity-40 group-hover/button:opacity-80 transition duration-500" />
-                <div className="absolute -inset-2 bg-gradient-to-r from-transparent via-black/20 to-transparent rounded-3xl blur-2xl opacity-0 group-hover/button:opacity-100 transition duration-700 animate-pulse-slow" />
-                
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="relative w-full h-14 bg-gradient-to-r from-black via-gray-800 to-black hover:from-gray-900 hover:via-black hover:to-gray-900 text-white font-bold text-base rounded-3xl shadow-2xl shadow-black/40 transition-all duration-500 hover:scale-[1.03] active:scale-[0.97] overflow-hidden group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-black/20"
-                >
-                  {/* Liquid shine effect - multiple layers */}
-                  <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-                  <div className="absolute inset-0 translate-x-full group-hover/btn:-translate-x-full transition-transform duration-1500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  
-                  {/* Liquid ripple effect - multiple ripples */}
-                  <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 group-hover/btn:w-full group-hover/btn:h-full bg-white/10 rounded-full transition-all duration-700" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 group-hover/btn:w-[120%] group-hover/btn:h-[120%] bg-white/5 rounded-full transition-all duration-1000 delay-100" />
-                  </div>
-                  
-                  {/* Liquid bubble effect on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
-                    <div className="absolute top-2 left-4 w-2 h-2 bg-white/30 rounded-full animate-float" />
-                    <div className="absolute bottom-3 right-6 w-3 h-3 bg-white/20 rounded-full animate-float animation-delay-1000" />
-                    <div className="absolute top-1/2 right-4 w-2 h-2 bg-white/25 rounded-full animate-float animation-delay-2000" />
-                  </div>
-                  
-                  {/* Glossy liquid overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/20 rounded-3xl pointer-events-none" />
-                  
-                  <span className="relative flex items-center justify-center gap-2 z-10">
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Перевірка...
-                      </>
-                    ) : (
-                      <>
-                        Увійти
-                        <ArrowRight className="w-5 h-5 transition-transform group-hover/btn:translate-x-1 duration-300" />
-                      </>
-                    )}
+          {/* Glass card */}
+          <div className="relative bg-white/70 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-8">
+            {/* Inner glass shine */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/5 to-transparent rounded-[2.5rem] pointer-events-none" />
+            
+            {/* Content */}
+            <div className="relative z-10">
+              {/* Admin indicator */}
+              {isAdmin && (
+                <div className="mb-6 flex items-center justify-center gap-2 py-3 px-5 bg-black/5 backdrop-blur-xl rounded-[1.25rem] border border-black/10 shadow-lg">
+                  <Crown className="w-5 h-5 text-black animate-pulse" />
+                  <span className="text-sm font-bold text-black">
+                    Режим адміністратора
                   </span>
-                </Button>
-              </div>
-            </form>
+                </div>
+              )}
 
-            {/* Additional info */}
-            <div className="mt-8 pt-6 border-t-2 border-black/10">
-              <p className="text-center text-sm text-gray-600">
-                Потрібна допомога?{" "}
-                <a
-                  href="#"
-                  className="text-black font-bold hover:text-gray-700 transition-colors duration-200 relative group/link"
-                >
-                  Зв'яжіться з підтримкою
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black group-hover/link:w-full transition-all duration-300" />
-                </a>
-              </p>
+              {/* Error alert */}
+              {error && (
+                <Alert className="mb-6 bg-red-50/80 backdrop-blur-xl border border-red-200/50 rounded-[1.25rem] shadow-lg">
+                  <AlertDescription className="text-red-700 text-sm font-medium">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Login form */}
+              <form onSubmit={handleLogin} className="space-y-5">
+                {/* Username field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-black/80 block">
+                    Ім'я користувача
+                  </label>
+                  <div className="relative group/input">
+                    {/* Icon */}
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 transition-all duration-300 group-focus-within/input:text-black z-10" />
+                    
+                    {/* Input with liquid glass effect */}
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        disabled={isLoading}
+                        className="pl-12 h-14 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-[1.25rem] text-black placeholder:text-gray-400 text-base transition-all duration-300 hover:bg-white/80 hover:border-gray-300/60 focus:bg-white/90 focus:border-black/20 focus:ring-4 focus:ring-black/5 disabled:opacity-50 shadow-[0_2px_16px_rgba(0,0,0,0.04)]"
+                        placeholder="Введіть ім'я користувача"
+                      />
+                      {/* Glass shine overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-[1.25rem] pointer-events-none" />
+                      {/* Focus glow */}
+                      <div className="absolute inset-0 rounded-[1.25rem] opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-500 shadow-[inset_0_0_20px_rgba(0,0,0,0.03)] pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-black/80 block">
+                    Пароль
+                  </label>
+                  <div className="relative group/input">
+                    {/* Icon */}
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 transition-all duration-300 group-focus-within/input:text-black z-10" />
+                    
+                    {/* Input with liquid glass effect */}
+                    <div className="relative">
+                      <Input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                        className="pl-12 h-14 bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-[1.25rem] text-black placeholder:text-gray-400 text-base transition-all duration-300 hover:bg-white/80 hover:border-gray-300/60 focus:bg-white/90 focus:border-black/20 focus:ring-4 focus:ring-black/5 disabled:opacity-50 shadow-[0_2px_16px_rgba(0,0,0,0.04)]"
+                        placeholder="Введіть пароль"
+                      />
+                      {/* Glass shine overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-[1.25rem] pointer-events-none" />
+                      {/* Focus glow */}
+                      <div className="absolute inset-0 rounded-[1.25rem] opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-500 shadow-[inset_0_0_20px_rgba(0,0,0,0.03)] pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit button - iOS 18 Liquid Glass style */}
+                <div className="relative group/button pt-2">
+                  {/* Outer glow */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-black/30 via-gray-600/30 to-black/30 rounded-[1.5rem] blur-xl opacity-40 group-hover/button:opacity-70 transition-all duration-500" />
+                  
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="relative w-full h-14 bg-gradient-to-br from-black via-gray-900 to-black text-white font-semibold text-base rounded-[1.5rem] shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-white/10"
+                  >
+                    {/* Glass shine layers */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-[1.5rem]" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-white/10 via-transparent to-transparent rounded-[1.5rem]" />
+                    
+                    {/* Liquid shine effect */}
+                    <div className="absolute inset-0 -translate-x-full group-hover/button:translate-x-full transition-transform duration-[1200ms] ease-out bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                    
+                    {/* Hover glow */}
+                    <div className="absolute inset-0 opacity-0 group-hover/button:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/10 via-transparent to-white/5 rounded-[1.5rem]" />
+                    
+                    <span className="relative flex items-center justify-center gap-2 z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Перевірка...
+                        </>
+                      ) : (
+                        <>
+                          Увійти
+                          <ArrowRight className="w-5 h-5 transition-transform group-hover/button:translate-x-1 duration-300" />
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </div>
+              </form>
+
+              {/* Additional info */}
+              <div className="mt-7 pt-6 border-t border-gray-200/50">
+                <p className="text-center text-sm text-gray-600">
+                  Потрібна допомога?{" "}
+                  <a
+                    href="#"
+                    className="text-black font-semibold hover:text-gray-700 transition-colors duration-200 relative group/link"
+                  >
+                    Зв'яжіться з підтримкою
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black group-hover/link:w-full transition-all duration-300" />
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -309,152 +273,53 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Enhanced animations */}
+      {/* iOS 18 Animations */}
       <style>{`
-        @keyframes blob {
+        @keyframes blob-slow {
           0%, 100% {
             transform: translate(0, 0) scale(1) rotate(0deg);
           }
-          25% {
-            transform: translate(30px, -60px) scale(1.15) rotate(90deg);
+          33% {
+            transform: translate(40px, -40px) scale(1.1) rotate(120deg);
           }
-          50% {
-            transform: translate(-30px, 30px) scale(0.85) rotate(180deg);
-          }
-          75% {
-            transform: translate(60px, 60px) scale(1.1) rotate(270deg);
+          66% {
+            transform: translate(-40px, 40px) scale(0.9) rotate(240deg);
           }
         }
         
-        @keyframes float {
+        @keyframes float-gentle {
           0%, 100% {
-            transform: translateY(0px) translateX(0px) scale(1);
-            opacity: 0.4;
-          }
-          25% {
-            transform: translateY(-30px) translateX(15px) scale(1.1);
-            opacity: 0.7;
+            transform: translateY(0px) translateX(0px);
+            opacity: 0.3;
           }
           50% {
-            transform: translateY(-60px) translateX(-15px) scale(1.2);
-            opacity: 1;
-          }
-          75% {
-            transform: translateY(-30px) translateX(10px) scale(1.1);
+            transform: translateY(-20px) translateX(10px);
             opacity: 0.6;
           }
         }
         
-        @keyframes pulse-slow {
-          0%, 100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
+        .animate-blob-slow {
+          animation: blob-slow 30s ease-in-out infinite;
         }
         
-        @keyframes splash {
-          0% {
-            transform: scale(0);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(3);
-            opacity: 0;
-          }
-        }
-        
-        .animate-blob {
-          animation: blob 25s ease-in-out infinite;
-        }
-        
-        .animate-float {
-          animation: float 10s ease-in-out infinite;
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 3s ease-in-out infinite;
-        }
-        
-        .animate-splash {
-          animation: splash 4s ease-out infinite;
-        }
-        
-        .animation-delay-1000 {
-          animation-delay: 1s;
+        .animate-float-gentle {
+          animation: float-gentle 8s ease-in-out infinite;
         }
         
         .animation-delay-2000 {
           animation-delay: 2s;
         }
         
-        .animation-delay-3000 {
-          animation-delay: 3s;
-        }
-        
         .animation-delay-4000 {
           animation-delay: 4s;
-        }
-        
-        .animation-delay-5000 {
-          animation-delay: 5s;
         }
         
         .animation-delay-6000 {
           animation-delay: 6s;
         }
         
-        .animation-delay-7000 {
-          animation-delay: 7s;
-        }
-        
         .animation-delay-8000 {
           animation-delay: 8s;
-        }
-        
-        .animation-delay-9000 {
-          animation-delay: 9s;
-        }
-        
-        .animation-delay-10000 {
-          animation-delay: 10s;
-        }
-        
-        .animation-delay-11000 {
-          animation-delay: 11s;
-        }
-        
-        .animation-delay-12000 {
-          animation-delay: 12s;
-        }
-        
-        .animation-delay-13000 {
-          animation-delay: 13s;
-        }
-        
-        .animation-delay-14000 {
-          animation-delay: 14s;
-        }
-        
-        .animation-delay-15000 {
-          animation-delay: 15s;
-        }
-        
-        .animation-delay-16000 {
-          animation-delay: 16s;
-        }
-        
-        .animation-delay-17000 {
-          animation-delay: 17s;
-        }
-        
-        .animation-delay-18000 {
-          animation-delay: 18s;
-        }
-        
-        .animation-delay-19000 {
-          animation-delay: 19s;
         }
       `}</style>
     </div>
