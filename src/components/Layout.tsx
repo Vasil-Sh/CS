@@ -28,59 +28,25 @@ const adminNavigation = [
   { name: 'Адмін панель', href: '/admin', icon: Shield, adminOnly: true },
 ];
 
-const ADMIN_USERNAME = 'super_gus23_7482';
-
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentUser = localStorage.getItem('currentUser');
-  const userEndDate = localStorage.getItem('userEndDate');
-  const isAdmin = currentUser === ADMIN_USERNAME;
+  const username = localStorage.getItem('username');
+  const userRole = localStorage.getItem('userRole');
+  const isAdmin = userRole === 'admin';
 
   useEffect(() => {
-    // Check subscription validity once per day
-    const lastCheck = localStorage.getItem('lastSubscriptionCheck');
-    const today = new Date().toDateString();
-    
-    if (currentUser && userEndDate) {
-      // Only check if it's a new day or first time
-      if (!lastCheck || lastCheck !== today) {
-        if (!isSubscriptionValid(userEndDate)) {
-          // Subscription expired, logout and redirect
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('userEndDate');
-          localStorage.removeItem('lastSubscriptionCheck');
-          navigate('/login');
-        } else {
-          // Update last check date
-          localStorage.setItem('lastSubscriptionCheck', today);
-        }
-      }
+    // Check if user is authenticated
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      navigate('/login');
     }
-  }, [location.pathname, currentUser, userEndDate, navigate]);
-
-  const isSubscriptionValid = (endDateStr: string): boolean => {
-    try {
-      // Parse date in format DD/MM/YYYY
-      const [day, month, year] = endDateStr.split('/').map(Number);
-      const endDate = new Date(year, month - 1, day);
-      const today = new Date();
-      
-      // Set time to start of day for accurate comparison
-      today.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
-      
-      return endDate >= today;
-    } catch (err) {
-      console.error('Error parsing date:', err);
-      return false;
-    }
-  };
+  }, [location.pathname, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('userEndDate');
-    localStorage.removeItem('lastSubscriptionCheck');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username');
     navigate('/login');
   };
 
@@ -151,14 +117,12 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gray-900 truncate">
-                @{currentUser}
+                @{username || 'User'}
                 {isAdmin && <span className="ml-1">👑</span>}
               </p>
-              {userEndDate && (
-                <p className="text-xs text-gray-500 font-medium">
-                  До: {userEndDate}
-                </p>
-              )}
+              <p className="text-xs text-gray-500 font-medium">
+                {isAdmin ? 'Адміністратор' : 'Користувач'}
+              </p>
             </div>
           </div>
 
@@ -218,14 +182,12 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-900 truncate">
-                    @{currentUser}
+                    @{username || 'User'}
                     {isAdmin && <span className="ml-1">👑</span>}
                   </p>
-                  {userEndDate && (
-                    <p className="text-xs text-gray-500 font-medium">
-                      До: {userEndDate}
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-500 font-medium">
+                    {isAdmin ? 'Адміністратор' : 'Користувач'}
+                  </p>
                 </div>
               </div>
 
@@ -240,7 +202,7 @@ export default function Layout({ children }: LayoutProps) {
                     className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-2xl font-semibold h-12 transition-all duration-200"
                   >
                     <LogOut className="h-5 w-5" />
-                    Війти
+                    Вийти
                   </Button>
                 </div>
               </nav>

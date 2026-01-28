@@ -1,53 +1,78 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, User, Lock, ArrowRight } from "lucide-react";
+import { Crown, User, Lock, ArrowRight, TrendingUp, Loader2 } from "lucide-react";
+import { authService } from "@/lib/authService";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const isAuthenticating = useRef(false);
 
-  const isAdmin = username.toLowerCase() === "admin";
+  const isAdmin = username.toLowerCase() === "admin" || username.toLowerCase() === "super_gus23_7482";
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      navigate("/");
-    }
-  }, [navigate]);
+    // Clear any existing auth tokens when login page loads
+    // This ensures users must log in again
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("username");
+  }, []); // Empty dependency array - only run once on mount
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (!username || !password) {
-      setError("Будь ласка, заповніть всі поля");
+    
+    // Prevent multiple simultaneous login attempts
+    if (isAuthenticating.current) {
       return;
     }
+    
+    setError("");
+    setIsLoading(true);
+    isAuthenticating.current = true;
 
-    if (username.toLowerCase() === "admin" && password === "admin123") {
-      localStorage.setItem("authToken", "admin-token");
-      localStorage.setItem("userRole", "admin");
-      localStorage.setItem("username", username);
-      navigate("/");
-    } else if (password === "user123") {
-      const subscriptionEnd = localStorage.getItem(`subscription_${username}`);
-      const now = new Date().getTime();
-
-      if (subscriptionEnd && parseInt(subscriptionEnd) > now) {
-        localStorage.setItem("authToken", "user-token");
-        localStorage.setItem("userRole", "user");
-        localStorage.setItem("username", username);
-        navigate("/");
-      } else {
-        setError("Ваша підписка закінчилася. Зверніться до адміністратора.");
+    try {
+      if (!username || !password) {
+        setError("Будь ласка, заповніть всі поля");
+        setIsLoading(false);
+        isAuthenticating.current = false;
+        return;
       }
-    } else {
-      setError("Невірний логін або пароль");
+
+      // Validate user credentials (checks both admin and regular users)
+      const validation = await authService.validateUser(username, password);
+
+      if (validation.isValid) {
+        // Check if user is admin
+        const isAdminUser = await authService.validateAdmin(username, password);
+        
+        if (isAdminUser) {
+          localStorage.setItem("authToken", "admin-token");
+          localStorage.setItem("userRole", "admin");
+          localStorage.setItem("username", username);
+        } else {
+          localStorage.setItem("authToken", "user-token");
+          localStorage.setItem("userRole", "user");
+          localStorage.setItem("username", username);
+        }
+        
+        // Navigate with replace to prevent back button issues
+        navigate("/", { replace: true });
+      } else {
+        setError(validation.message || "Невірний логін або пароль");
+        setIsLoading(false);
+        isAuthenticating.current = false;
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Помилка з'єднання. Спробуйте ще раз.");
+      setIsLoading(false);
+      isAuthenticating.current = false;
     }
   };
 
@@ -64,11 +89,24 @@ export default function Login() {
         {/* Medium liquid blob 3 */}
         <div className="absolute top-1/3 right-1/3 w-[500px] h-[500px] bg-gradient-to-br from-gray-300/5 via-white/5 to-transparent rounded-full blur-3xl animate-blob animation-delay-4000" />
         
+        {/* Additional liquid blob 4 */}
+        <div className="absolute top-1/2 left-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-white/6 via-gray-400/4 to-transparent rounded-full blur-3xl animate-blob animation-delay-6000" />
+        
+        {/* Additional liquid blob 5 */}
+        <div className="absolute bottom-1/4 left-1/4 w-[450px] h-[450px] bg-gradient-to-bl from-gray-300/6 via-white/4 to-transparent rounded-full blur-3xl animate-blob animation-delay-8000" />
+        
+        {/* Additional liquid blob 6 */}
+        <div className="absolute top-1/4 right-1/2 w-[520px] h-[520px] bg-gradient-to-br from-white/7 via-gray-500/4 to-transparent rounded-full blur-3xl animate-blob animation-delay-10000" />
+        
         {/* Floating particles */}
         <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-white/20 rounded-full animate-float" />
         <div className="absolute top-2/3 right-1/4 w-3 h-3 bg-white/15 rounded-full animate-float animation-delay-1000" />
         <div className="absolute bottom-1/4 left-1/2 w-2 h-2 bg-white/25 rounded-full animate-float animation-delay-2000" />
         <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-white/20 rounded-full animate-float animation-delay-3000" />
+        <div className="absolute top-1/5 left-2/3 w-2 h-2 bg-white/18 rounded-full animate-float animation-delay-4000" />
+        <div className="absolute bottom-1/3 right-1/2 w-3 h-3 bg-white/22 rounded-full animate-float animation-delay-5000" />
+        <div className="absolute top-3/4 left-1/4 w-2 h-2 bg-white/16 rounded-full animate-float animation-delay-6000" />
+        <div className="absolute bottom-1/2 right-1/5 w-2 h-2 bg-white/19 rounded-full animate-float animation-delay-7000" />
         
         {/* Subtle grid overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
@@ -79,7 +117,7 @@ export default function Login() {
         {/* Logo/Brand section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl mb-6 shadow-2xl shadow-white/10 hover:scale-105 transition-transform duration-300">
-            <span className="text-black text-3xl font-bold">CS</span>
+            <TrendingUp className="w-10 h-10 text-black" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
             Вітаємо знову
@@ -127,7 +165,8 @@ export default function Login() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className={`pl-12 h-14 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/10 focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/10 ${
+                    disabled={isLoading}
+                    className={`pl-12 h-14 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/10 focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/10 disabled:opacity-50 ${
                       isAdmin ? "blur-sm focus:blur-none" : ""
                     }`}
                     placeholder="Введіть ім'я користувача"
@@ -148,7 +187,8 @@ export default function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-12 h-14 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/10 focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/10"
+                    disabled={isLoading}
+                    className="pl-12 h-14 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-gray-500 text-base transition-all duration-300 hover:bg-white/10 focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/10 disabled:opacity-50"
                     placeholder="Введіть пароль"
                   />
                   {/* Input glow effect */}
@@ -163,14 +203,24 @@ export default function Login() {
                 
                 <Button
                   type="submit"
-                  className="relative w-full h-14 bg-white hover:bg-gray-100 text-black font-bold text-base rounded-2xl shadow-2xl shadow-white/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden group/btn"
+                  disabled={isLoading}
+                  className="relative w-full h-14 bg-white hover:bg-gray-100 text-black font-bold text-base rounded-2xl shadow-2xl shadow-white/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {/* Liquid shine effect */}
                   <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
                   
                   <span className="relative flex items-center justify-center gap-2">
-                    Увійти
-                    <ArrowRight className="w-5 h-5 transition-transform group-hover/btn:translate-x-1 duration-300" />
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Перевірка...
+                      </>
+                    ) : (
+                      <>
+                        Увійти
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover/btn:translate-x-1 duration-300" />
+                      </>
+                    )}
                   </span>
                 </Button>
               </div>
@@ -195,7 +245,7 @@ export default function Login() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-600">
-            © 2026 CS Betting Platform. Всі права захищені.
+            © 2026 Платформа аналітики. Всі права захищені.
           </p>
         </div>
       </div>
@@ -258,6 +308,26 @@ export default function Login() {
         
         .animation-delay-4000 {
           animation-delay: 4s;
+        }
+        
+        .animation-delay-5000 {
+          animation-delay: 5s;
+        }
+        
+        .animation-delay-6000 {
+          animation-delay: 6s;
+        }
+        
+        .animation-delay-7000 {
+          animation-delay: 7s;
+        }
+        
+        .animation-delay-8000 {
+          animation-delay: 8s;
+        }
+        
+        .animation-delay-10000 {
+          animation-delay: 10s;
         }
       `}</style>
     </div>

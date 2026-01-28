@@ -40,8 +40,6 @@ interface User {
   daysUntilExpiry?: number;
 }
 
-const ADMIN_USERNAME = 'super_gus23_7482';
-
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -49,18 +47,18 @@ export default function Admin() {
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [error, setError] = useState('');
   const [showUsernames, setShowUsernames] = useState(false);
-  const currentUser = localStorage.getItem('currentUser');
+  const userRole = localStorage.getItem('userRole');
 
   useEffect(() => {
     // Check if user is admin
-    if (currentUser !== ADMIN_USERNAME) {
+    if (userRole !== 'admin') {
       navigate('/matches');
       return;
     }
 
     // Load users on mount
     fetchUsers();
-  }, [currentUser, navigate]);
+  }, [userRole, navigate]);
 
   const getDaysUntilExpiry = (endDateStr: string): number => {
     try {
@@ -406,7 +404,7 @@ export default function Admin() {
                       <TableCell className="font-medium text-gray-900">{renderTelegram(user.telegram)}</TableCell>
                       <TableCell className="text-gray-700">
                         {renderUsername(user.username)}
-                        {user.username === ADMIN_USERNAME && (
+                        {user.isAdmin && (
                           <span className="ml-2 text-purple-600">👑</span>
                         )}
                       </TableCell>
