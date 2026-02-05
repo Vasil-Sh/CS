@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Wallet, TrendingUp, Target, BarChart3 } from 'lucide-react';
+import { Wallet, TrendingUp, Target, BarChart3, X } from 'lucide-react';
 import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
 
@@ -48,17 +48,29 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
     onClose(false);
   };
 
+  const handleClose = () => {
+    onClose(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[500px] rounded-3xl" onInteractOutside={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
-              <Wallet className="h-6 w-6 text-white" />
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[560px] rounded-[32px] border-2 border-[#E8E6DC] shadow-[0_16px_48px_rgba(0,0,0,0.12)] bg-white p-0 gap-0">
+        {/* Custom Close Button - RonDesignLab style */}
+        <button
+          onClick={handleClose}
+          className="absolute right-6 top-6 p-2.5 rounded-[16px] bg-[#F5F5F3] hover:bg-[#E8E6DC] transition-all duration-300 z-50 group"
+        >
+          <X className="h-5 w-5 text-[#6B6B6B] group-hover:text-[#4A4A4A] transition-colors" strokeWidth={1.5} />
+        </button>
+
+        <DialogHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8 rounded-t-[30px]">
+          <DialogTitle className="flex items-center gap-4 text-[32px] font-normal text-[#2A2A2A]">
+            <div className="p-4 bg-[#F4E157] rounded-[24px] shadow-[0_4px_16px_rgba(244,225,87,0.4)]">
+              <Wallet className="h-7 w-7 text-[#2A2A2A]" strokeWidth={1.5} />
             </div>
             {mode === 'edit' ? 'Редагувати стартовий банк' : 'Налаштування стартового банку'}
           </DialogTitle>
-          <DialogDescription className="text-base pt-2">
+          <DialogDescription className="text-[17px] pt-3 font-normal text-[#5A5A5A] ml-[76px]">
             {mode === 'edit' 
               ? 'Змініть ваш стартовий банк для точного відстеження прогресу'
               : 'Введіть ваш стартовий банк для точного відстеження прогресу та аналітики'
@@ -66,10 +78,10 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 p-8">
           {/* Input Field */}
           <div className="space-y-3">
-            <Label htmlFor="initialBank" className="text-sm font-semibold text-gray-700">
+            <Label htmlFor="initialBank" className="text-[15px] font-medium text-[#5A5A5A] uppercase tracking-wider">
               Стартовий банк (₴)
             </Label>
             <Input
@@ -78,7 +90,7 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="1000"
-              className="text-lg h-12 rounded-xl"
+              className="text-2xl h-16 rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] focus:border-[#F4E157] transition-colors font-normal bg-white text-[#2A2A2A]"
               autoFocus
             />
           </div>
@@ -86,54 +98,54 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
           {mode === 'setup' && (
             <>
               {/* Benefits */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 space-y-3">
-                <p className="text-sm font-semibold text-gray-700 mb-3">Це допоможе вам:</p>
+              <div className="bg-[#F5F5F3] rounded-[24px] p-6 space-y-4 border-2 border-[#E8E6DC]">
+                <p className="text-[15px] font-medium text-[#2A2A2A] mb-4 uppercase tracking-wider">Це допоможе вам:</p>
                 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-white rounded-xl">
-                    <BarChart3 className="h-4 w-4 text-blue-600" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-[16px] border-2 border-[#E8E6DC]">
+                    <BarChart3 className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Відстежувати поточний банк</p>
-                    <p className="text-xs text-gray-600">Бачити реальний стан ваших коштів</p>
+                    <p className="text-[17px] font-medium text-[#2A2A2A]">Відстежувати поточний банк</p>
+                    <p className="text-[15px] text-[#5A5A5A] font-normal mt-1">Бачити реальний стан ваших коштів</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-white rounded-xl">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-[16px] border-2 border-[#E8E6DC]">
+                    <TrendingUp className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Розраховувати ROI</p>
-                    <p className="text-xs text-gray-600">Точний відсоток прибутковості</p>
+                    <p className="text-[17px] font-medium text-[#2A2A2A]">Розраховувати ROI</p>
+                    <p className="text-[15px] text-[#5A5A5A] font-normal mt-1">Точний відсоток прибутковості</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-white rounded-xl">
-                    <Target className="h-4 w-4 text-purple-600" />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-[16px] border-2 border-[#E8E6DC]">
+                    <Target className="h-5 w-5 text-[#8b5cf6]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Планувати лесенки</p>
-                    <p className="text-xs text-gray-600">Автоматичний розрахунок розміру ставок</p>
+                    <p className="text-[17px] font-medium text-[#2A2A2A]">Планувати лесенки</p>
+                    <p className="text-[15px] text-[#5A5A5A] font-normal mt-1">Автоматичний розрахунок розміру ставок</p>
                   </div>
                 </div>
               </div>
 
               {/* Info */}
-              <p className="text-xs text-gray-500 text-center">
+              <p className="text-[15px] text-[#7A7A7A] text-center font-normal">
                 💡 Ви зможете змінити цю суму пізніше
               </p>
             </>
           )}
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-3 p-8 pt-0">
           {mode === 'setup' && (
             <Button
               variant="outline"
               onClick={handleSkip}
-              className="rounded-xl"
+              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#F5F5F3] hover:border-[#C4C2B8] font-medium h-14 px-6 text-[16px] transition-all duration-300 text-[#2A2A2A]"
             >
               Пропустити
             </Button>
@@ -141,17 +153,17 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
           {mode === 'edit' && (
             <Button
               variant="outline"
-              onClick={() => onClose(false)}
-              className="rounded-xl"
+              onClick={handleClose}
+              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#F5F5F3] hover:border-[#C4C2B8] font-medium h-14 px-6 text-[16px] transition-all duration-300 text-[#2A2A2A]"
             >
               Скасувати
             </Button>
           )}
           <Button
             onClick={handleSubmit}
-            className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2A2A2A] font-medium h-14 px-6 text-[16px] shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)] transition-all duration-300"
           >
-            <Wallet className="h-4 w-4 mr-2" />
+            <Wallet className="h-5 w-5 mr-2" strokeWidth={1.5} />
             {mode === 'edit' ? 'Оновити' : 'Почати'}
           </Button>
         </DialogFooter>

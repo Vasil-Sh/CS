@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, AlertTriangle, Target, CheckCircle, XCircle, Info, Brain, Zap } from 'lucide-react';
+import { Sparkles, AlertTriangle, Target, CheckCircle, XCircle, Info, Brain, Zap, X } from 'lucide-react';
 import type { AIRecommendation } from '@/lib/openRouterService';
 
 interface AIRecommendationModalProps {
@@ -23,27 +23,27 @@ export default function AIRecommendationModal({
     switch (riskLevel) {
       case 'low':
         return { 
-          bg: 'bg-gradient-to-br from-green-50 to-emerald-50', 
-          border: 'border-green-300', 
-          text: 'text-green-800',
-          icon: 'text-green-600',
-          badge: 'bg-green-600'
+          bg: 'bg-[#F5F5F3]', 
+          border: 'border-[#4CAF50]', 
+          text: 'text-[#2A2A2A]',
+          icon: 'text-[#4CAF50]',
+          badge: 'bg-[#4CAF50]'
         };
       case 'high':
         return { 
-          bg: 'bg-gradient-to-br from-red-50 to-orange-50', 
-          border: 'border-red-300', 
-          text: 'text-red-800',
-          icon: 'text-red-600',
-          badge: 'bg-red-600'
+          bg: 'bg-[#F5F5F3]', 
+          border: 'border-[#F44336]', 
+          text: 'text-[#2A2A2A]',
+          icon: 'text-[#F44336]',
+          badge: 'bg-[#F44336]'
         };
       default:
         return { 
-          bg: 'bg-gradient-to-br from-yellow-50 to-amber-50', 
-          border: 'border-yellow-300', 
-          text: 'text-yellow-800',
-          icon: 'text-yellow-600',
-          badge: 'bg-yellow-600'
+          bg: 'bg-[#F5F5F3]', 
+          border: 'border-[#F4E157]', 
+          text: 'text-[#2A2A2A]',
+          icon: 'text-[#F4E157]',
+          badge: 'bg-[#F4E157]'
         };
     }
   };
@@ -62,114 +62,122 @@ export default function AIRecommendationModal({
   const getRiskIcon = (riskLevel: 'low' | 'medium' | 'high') => {
     switch (riskLevel) {
       case 'low':
-        return <CheckCircle className="h-6 w-6" />;
+        return <CheckCircle className="h-6 w-6" strokeWidth={1.5} />;
       case 'high':
-        return <XCircle className="h-6 w-6" />;
+        return <XCircle className="h-6 w-6" strokeWidth={1.5} />;
       default:
-        return <AlertTriangle className="h-6 w-6" />;
+        return <AlertTriangle className="h-6 w-6" strokeWidth={1.5} />;
     }
   };
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-gray-50 to-white border-0 shadow-xl rounded-3xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] border-2 border-[#E8E6DC] shadow-[0_16px_48px_rgba(0,0,0,0.12)] bg-white p-0 gap-0">
+        {/* Custom Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute right-6 top-6 p-2.5 rounded-[16px] bg-[#F5F5F3] hover:bg-[#E8E6DC] transition-all duration-300 z-50 group"
+        >
+          <X className="h-5 w-5 text-[#6B6B6B] group-hover:text-[#4A4A4A] transition-colors" strokeWidth={1.5} />
+        </button>
+
         {/* Header */}
-        <DialogHeader className="border-b border-gray-100 pb-4">
+        <DialogHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8 rounded-t-[30px]">
           <DialogTitle>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-50 to-slate-100 rounded-xl shadow-sm">
-                <Brain className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-[#F4E157] rounded-[24px] shadow-[0_4px_16px_rgba(244,225,87,0.4)]">
+                <Brain className="h-7 w-7 text-[#2A2A2A]" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-gray-900">AI Рекомендація</h2>
-                  <Badge className="rounded-xl bg-gradient-to-r from-blue-50 to-slate-100 text-blue-700 border-0 font-semibold text-xs px-3 py-1 shadow-sm">
-                    <Sparkles className="h-3 w-3 mr-1" />
+                  <h2 className="text-[32px] font-normal text-[#2A2A2A]">AI Рекомендація</h2>
+                  <Badge className="rounded-[16px] bg-white border-2 border-[#E8E6DC] text-[#5A5A5A] font-medium text-[14px] px-4 py-1.5 shadow-sm">
+                    <Sparkles className="h-4 w-4 mr-1.5 text-[#F4E157]" strokeWidth={1.5} />
                     Claude 3.5 Sonnet
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500 font-normal mt-0.5">{matchInfo}</p>
+                <p className="text-[17px] text-[#5A5A5A] font-normal mt-2">{matchInfo}</p>
               </div>
             </div>
           </DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20 px-8">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600 mb-4"></div>
-              <p className="text-gray-700 font-semibold text-base">Аналізую матч...</p>
-              <p className="text-gray-500 text-sm mt-2">Зачекайте, будь ласка</p>
+              <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#E8E6DC] border-t-[#F4E157] mb-6"></div>
+              <p className="text-[#2A2A2A] font-medium text-[17px]">Аналізую матч...</p>
+              <p className="text-[#5A5A5A] text-[15px] mt-2">Зачекайте, будь ласка</p>
             </div>
           </div>
         ) : !recommendation ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20 px-8">
             <div className="text-center">
-              <div className="p-4 bg-gray-100 rounded-2xl inline-block mb-4">
-                <AlertTriangle className="h-12 w-12 text-gray-400" />
+              <div className="p-6 bg-[#F5F5F3] rounded-[24px] inline-block mb-6 border-2 border-[#E8E6DC]">
+                <AlertTriangle className="h-16 w-16 text-[#7A7A7A]" strokeWidth={1.5} />
               </div>
-              <p className="text-gray-800 font-bold text-lg">Рекомендація недоступна</p>
-              <p className="text-gray-500 text-sm mt-2">Спробуйте ще раз пізніше</p>
+              <p className="text-[#2A2A2A] font-medium text-[19px]">Рекомендація недоступна</p>
+              <p className="text-[#5A5A5A] text-[15px] mt-2">Спробуйте ще раз пізніше</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-4 py-3">
+          <div className="space-y-5 p-8">
             {/* Main Recommendation Card */}
-            <div className={`border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-5 ${
+            <div className={`border-2 shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[24px] bg-white overflow-hidden p-6 ${
               recommendation.riskLevel === 'low' 
-                ? 'ring-2 ring-green-200' 
+                ? 'border-[#4CAF50]' 
                 : recommendation.riskLevel === 'high'
-                ? 'ring-2 ring-red-200'
-                : 'ring-2 ring-yellow-200'
+                ? 'border-[#F44336]'
+                : 'border-[#F4E157]'
             }`}>
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-xl shadow-sm ${
-                  recommendation.riskLevel === 'low' ? 'bg-gradient-to-br from-green-100 to-emerald-100' :
-                  recommendation.riskLevel === 'high' ? 'bg-gradient-to-br from-red-100 to-orange-100' : 
-                  'bg-gradient-to-br from-yellow-100 to-amber-100'
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-[20px] shadow-sm ${
+                  recommendation.riskLevel === 'low' ? 'bg-[#E8F5E9]' :
+                  recommendation.riskLevel === 'high' ? 'bg-[#FFEBEE]' : 
+                  'bg-[#FFFDE7]'
                 }`}>
                   <div className={
-                    recommendation.riskLevel === 'low' ? 'text-green-600' :
-                    recommendation.riskLevel === 'high' ? 'text-red-600' : 'text-yellow-600'
+                    recommendation.riskLevel === 'low' ? 'text-[#4CAF50]' :
+                    recommendation.riskLevel === 'high' ? 'text-[#F44336]' : 'text-[#F4E157]'
                   }>
                     {recommendation.riskLevel && getRiskIcon(recommendation.riskLevel)}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <h3 className="text-base font-bold text-gray-900">Головна рекомендація</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    <h3 className="text-[19px] font-medium text-[#2A2A2A]">Головна рекомендація</h3>
                     {recommendation.riskLevel && (
-                      <Badge className={`rounded-xl border-0 font-semibold text-xs px-2.5 py-1 shadow-sm ${
-                        recommendation.riskLevel === 'low' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' :
-                        recommendation.riskLevel === 'high' ? 'bg-gradient-to-r from-red-100 to-orange-100 text-red-700' :
-                        'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700'
+                      <Badge className={`rounded-[16px] border-2 font-medium text-[14px] px-3 py-1 shadow-sm ${
+                        recommendation.riskLevel === 'low' ? 'bg-[#E8F5E9] border-[#4CAF50] text-[#2A2A2A]' :
+                        recommendation.riskLevel === 'high' ? 'bg-[#FFEBEE] border-[#F44336] text-[#2A2A2A]' :
+                        'bg-[#FFFDE7] border-[#F4E157] text-[#2A2A2A]'
                       }`}>
                         {getRiskLabel(recommendation.riskLevel)}
                       </Badge>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-medium text-gray-500">Прогноз:</span>
-                      <span className="text-base font-semibold text-gray-900">{recommendation.prediction}</span>
+                  <div className="space-y-3">
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-[15px] font-medium text-[#5A5A5A]">Прогноз:</span>
+                      <span className="text-[17px] font-medium text-[#2A2A2A]">{recommendation.prediction}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-500">Впевненість AI:</span>
-                      <div className="flex items-center gap-2 flex-1">
-                        <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex items-center gap-4">
+                      <span className="text-[15px] font-medium text-[#5A5A5A]">Впевненість AI:</span>
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="flex-1 h-3 bg-[#E8E6DC] rounded-full overflow-hidden">
                           <div 
                             className={`h-full rounded-full transition-all ${
-                              recommendation.confidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                              recommendation.confidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                              'bg-gradient-to-r from-gray-400 to-gray-600'
+                              recommendation.confidence >= 80 ? 'bg-[#4CAF50]' :
+                              recommendation.confidence >= 60 ? 'bg-[#2196F3]' :
+                              'bg-[#9E9E9E]'
                             }`}
                             style={{ width: `${recommendation.confidence}%` }}
                           />
                         </div>
-                        <Badge className={`font-semibold text-sm px-2.5 py-1 rounded-xl border-0 shadow-sm ${
-                          recommendation.confidence >= 80 ? 'bg-green-600 text-white' :
-                          recommendation.confidence >= 60 ? 'bg-blue-600 text-white' :
-                          'bg-gray-600 text-white'
+                        <Badge className={`font-medium text-[15px] px-3 py-1.5 rounded-[16px] border-0 shadow-sm ${
+                          recommendation.confidence >= 80 ? 'bg-[#4CAF50] text-white' :
+                          recommendation.confidence >= 60 ? 'bg-[#2196F3] text-white' :
+                          'bg-[#9E9E9E] text-white'
                         }`}>
                           {recommendation.confidence}%
                         </Badge>
@@ -181,15 +189,15 @@ export default function AIRecommendationModal({
             </div>
 
             {/* Suggested Bet */}
-            <div className="border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-50 to-slate-100 rounded-xl shadow-sm">
-                  <Target className="h-5 w-5 text-blue-600" />
+            <div className="border-2 border-[#E8E6DC] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[24px] bg-white overflow-hidden p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-[#E3F2FD] rounded-[20px] shadow-sm">
+                  <Target className="h-6 w-6 text-[#2196F3]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-base font-bold text-gray-900 mb-2">Рекомендована ставка</h3>
-                  <div className="p-3 bg-gradient-to-r from-slate-50 to-gray-100 rounded-xl border border-slate-200">
-                    <p className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-[19px] font-medium text-[#2A2A2A] mb-3">Рекомендована ставка</h3>
+                  <div className="p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
+                    <p className="text-[16px] font-medium text-[#2A2A2A]">
                       {recommendation.suggestedBet}
                     </p>
                   </div>
@@ -198,14 +206,14 @@ export default function AIRecommendationModal({
             </div>
 
             {/* Reasoning */}
-            <div className="border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-gray-100 rounded-xl shadow-sm">
-                  <Info className="h-5 w-5 text-gray-600" />
+            <div className="border-2 border-[#E8E6DC] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[24px] bg-white overflow-hidden p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-[#F5F5F3] rounded-[20px] shadow-sm border-2 border-[#E8E6DC]">
+                  <Info className="h-6 w-6 text-[#5A5A5A]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-base font-bold text-gray-900 mb-2">Обґрунтування прогнозу</h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                  <h3 className="text-[19px] font-medium text-[#2A2A2A] mb-3">Обґрунтування прогнозу</h3>
+                  <p className="text-[15px] text-[#5A5A5A] leading-relaxed font-normal">
                     {recommendation.reasoning}
                   </p>
                 </div>
@@ -213,16 +221,16 @@ export default function AIRecommendationModal({
             </div>
 
             {/* Warning */}
-            <div className="border-0 shadow-lg rounded-2xl bg-white/80 backdrop-blur-xl overflow-hidden p-4">
-              <div className="flex items-start gap-3">
-                <div className="p-1.5 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg shadow-sm">
-                  <Zap className="h-4 w-4 text-amber-600" />
+            <div className="border-2 border-[#FFE082] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[24px] bg-[#FFFDE7] overflow-hidden p-5">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-white rounded-[16px] shadow-sm border-2 border-[#FFE082]">
+                  <Zap className="h-5 w-5 text-[#FFA000]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-1">
+                  <p className="text-[14px] font-medium text-[#2A2A2A] uppercase tracking-wider mb-2">
                     ⚠️ Важливо
                   </p>
-                  <p className="text-xs text-gray-700 leading-relaxed">
+                  <p className="text-[14px] text-[#5A5A5A] leading-relaxed font-normal">
                     Ця рекомендація створена штучним інтелектом на основі аналізу доступних даних. Використовуйте її як додатковий інструмент для прийняття рішень, але завжди проводьте власний аналіз та враховуйте актуальні новини про команди.
                   </p>
                 </div>
