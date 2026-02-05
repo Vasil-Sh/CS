@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserDataService } from '@/lib/userDataService';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
@@ -27,7 +26,8 @@ import {
   Star,
   AlertTriangle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Flag
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -140,6 +140,8 @@ export default function GoalsManager() {
       return goal;
     });
   });
+  
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -487,7 +489,6 @@ export default function GoalsManager() {
     const updatedGoals = [...goals, goal];
     setGoals(updatedGoals);
     
-    // Явно зберігаємо в localStorage одразу після створення
     UserDataService.setUserData(currentUser, 'goals', updatedGoals);
     console.log('✅ Goal created and saved:', goal.name, 'Total goals:', updatedGoals.length);
     
@@ -524,7 +525,6 @@ export default function GoalsManager() {
     const updatedGoals = goals.filter(g => g.id !== goalToDelete);
     setGoals(updatedGoals);
     
-    // Явно зберігаємо після видалення
     UserDataService.setUserData(currentUser, 'goals', updatedGoals);
     console.log('✅ Goal deleted, remaining:', updatedGoals.length);
     
@@ -568,10 +568,10 @@ export default function GoalsManager() {
 
   const getGoalIcon = (type: GoalType) => {
     switch (type) {
-      case 'amount': return <DollarSign className="h-5 w-5" />;
-      case 'ladder': return <TrendingUp className="h-5 w-5" />;
-      case 'roi': return <Percent className="h-5 w-5" />;
-      case 'winrate': return <Target className="h-5 w-5" />;
+      case 'amount': return <DollarSign className="h-5 w-5" strokeWidth={1.5} />;
+      case 'ladder': return <TrendingUp className="h-5 w-5" strokeWidth={1.5} />;
+      case 'roi': return <Percent className="h-5 w-5" strokeWidth={1.5} />;
+      case 'winrate': return <Target className="h-5 w-5" strokeWidth={1.5} />;
     }
   };
 
@@ -590,25 +590,25 @@ export default function GoalsManager() {
         return {
           label: 'Залишилось заробити',
           value: `${((goal.targetAmount || 0) - (goal.currentAmount || 0)).toFixed(0)} грн`,
-          color: 'text-blue-600'
+          color: 'text-[#2196F3]'
         };
       case 'ladder':
         return {
           label: 'Поточний крок',
           value: `${goal.currentStep} / ${goal.totalSteps}`,
-          color: 'text-purple-600'
+          color: 'text-[#8b5cf6]'
         };
       case 'roi':
         return {
           label: 'Поточний ROI',
           value: `${(goal.currentROI || 0).toFixed(1)}%`,
-          color: 'text-green-600'
+          color: 'text-[#4CAF50]'
         };
       case 'winrate':
         return {
           label: 'Поточний Win Rate',
           value: `${(goal.currentWinRate || 0).toFixed(1)}%`,
-          color: 'text-orange-600'
+          color: 'text-[#FF9800]'
         };
     }
   };
@@ -621,7 +621,7 @@ export default function GoalsManager() {
       return {
         status: 'good',
         label: 'Правила дотримані',
-        icon: <CheckCircle className="h-4 w-4" />
+        icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} />
       };
     }
 
@@ -636,14 +636,14 @@ export default function GoalsManager() {
       return {
         status: 'warning',
         label: 'Є відхилення',
-        icon: <AlertTriangle className="h-4 w-4" />
+        icon: <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
       };
     }
 
     return {
       status: 'good',
       label: 'Правила дотримані',
-      icon: <CheckCircle className="h-4 w-4" />
+      icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} />
     };
   };
 
@@ -652,14 +652,22 @@ export default function GoalsManager() {
   const primaryGoal = activeGoals.find(g => g.isPrimary) || activeGoals[0];
   const secondaryGoals = activeGoals.filter(g => !g.isPrimary);
 
+  const tabs = [
+    { id: 'active', label: 'Активні цілі', icon: Target },
+    { id: 'completed', label: 'Завершені', icon: Trophy },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
+          <h2 className="text-3xl font-light text-black tracking-tight flex items-center gap-3">
+            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+              <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
+            </div>
             Мої цілі
           </h2>
-          <p className="text-gray-500 font-medium mt-1">Фокус на дисципліні та прогресі</p>
+          <p className="text-[#6B6B6B] mt-2 text-base font-light ml-[68px]">Фокус на дисципліні та прогресі</p>
         </div>
 
         <div className="flex gap-3">
@@ -667,30 +675,30 @@ export default function GoalsManager() {
             onClick={handleManualUpdate}
             disabled={isUpdating}
             variant="outline"
-            className="rounded-2xl font-medium"
+            className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-14 px-6 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-5 w-5 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
             Оновити прогрес
           </Button>
           <Button 
             onClick={() => setShowCreateDialog(true)}
             disabled={activeGoals.length >= 3}
-            className="rounded-2xl bg-blue-600 hover:bg-blue-700 font-medium"
+            className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-14 px-6 transition-all duration-300 shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)]"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
             Створити ціль
           </Button>
         </div>
       </div>
 
       {activeGoals.length > 0 && (
-        <Card className="border-2 border-blue-200 shadow-lg rounded-3xl bg-blue-50 overflow-hidden">
-          <CardContent className="p-4">
+        <Card className="border-2 border-[#BBDEFB] shadow-[0_4px_16px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-[#2196F3] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
               <div>
-                <p className="text-sm font-semibold text-blue-900">💡 Як працювати з цілями</p>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-sm font-normal text-black">💡 Як працювати з цілями</p>
+                <p className="text-xs text-[#6B6B6B] mt-1 font-light leading-relaxed">
                   1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"<br/>
                   2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди<br/>
                   3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
@@ -702,13 +710,13 @@ export default function GoalsManager() {
       )}
 
       {activeGoals.length >= 3 && (
-        <Card className="border-2 border-orange-200 shadow-lg rounded-3xl bg-orange-50 overflow-hidden">
-          <CardContent className="p-4">
+        <Card className="border-2 border-[#FFCC80] shadow-[0_4px_16px_rgba(255,152,0,0.15)] rounded-[28px] bg-white overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-[#FF9800] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
               <div>
-                <p className="text-sm font-semibold text-orange-900">Досягнуто ліміт активних цілей</p>
-                <p className="text-xs text-orange-700 mt-1">
+                <p className="text-sm font-normal text-black">Досягнуто ліміт активних цілей</p>
+                <p className="text-xs text-[#6B6B6B] mt-1 font-light">
                   Ви можете мати максимум 3 активні цілі одночасно. Видаліть або завершіть існуючу ціль, щоб створити нову.
                 </p>
               </div>
@@ -717,332 +725,364 @@ export default function GoalsManager() {
         </Card>
       )}
 
-      <Tabs defaultValue="active" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 rounded-2xl p-1 bg-gray-100">
-          <TabsTrigger value="active" className="rounded-xl">
-            Активні цілі ({activeGoals.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-xl">
-            Завершені ({completedGoals.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="space-y-6">
-          {activeGoals.length === 0 ? (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardContent className="p-12 text-center">
-                <Target className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Немає активних цілей</h3>
-                <p className="text-gray-600 mb-4">Створіть свою першу ціль для відстеження прогресу</p>
-                <Button 
-                  onClick={() => setShowCreateDialog(true)} 
-                  className="rounded-xl bg-blue-600 hover:bg-blue-700"
+      {/* Custom Tabs Navigation - matching Analytics page style */}
+      <div className="space-y-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-2 gap-3">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
+                  className={`
+                    relative rounded-[24px] px-6 py-4 font-light text-base
+                    transition-all duration-300 ease-in-out
+                    ${activeTab === tab.id 
+                      ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
+                      : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
+                    }
+                  `}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Створити ціль
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <Icon className="h-4 w-4" strokeWidth={1.5} />
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div>
+          {activeTab === 'active' && (
             <div className="space-y-6">
-              {primaryGoal && (
-                <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl">
-                          {getGoalIcon(primaryGoal.type)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-xl font-bold text-gray-900">
-                              {primaryGoal.name}
-                            </CardTitle>
-                            <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 rounded-full">
-                              <Star className="h-3 w-3 mr-1" />
-                              Головна
-                            </Badge>
-                          </div>
-                          <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full mt-1">
-                            {getGoalTypeLabel(primaryGoal.type)}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => confirmDeleteGoal(primaryGoal.id)}
-                        className="text-red-600 hover:text-red-700 h-8 w-8 p-0 rounded-xl"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+              {activeGoals.length === 0 ? (
+                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                  <CardContent className="py-16 text-center">
+                    <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
+                      <Target className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
                     </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div className="p-4 bg-white rounded-2xl border border-gray-100">
-                      <p className="text-sm text-gray-600 mb-1">{getKeyMetric(primaryGoal).label}</p>
-                      <p className={`text-3xl font-bold ${getKeyMetric(primaryGoal).color}`}>
-                        {getKeyMetric(primaryGoal).value}
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">Прогрес</span>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {getGoalProgress(primaryGoal).toFixed(1)}%
-                        </span>
-                      </div>
-                      <Progress value={Math.min(getGoalProgress(primaryGoal), 100)} className="h-3" />
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
-                      <p className="text-sm font-semibold text-gray-900 mb-2">📋 Правила цілі</p>
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        {primaryGoal.type === 'ladder' && (
-                          <>
-                            <div>
-                              <span className="text-gray-600">Коефіцієнти:</span>
-                              <span className="ml-1 font-semibold text-gray-900">
-                                {primaryGoal.minOdds} - {primaryGoal.maxOdds}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Поточний банк:</span>
-                              <span className="ml-1 font-semibold text-gray-900">
-                                {(primaryGoal.currentBank || 0).toFixed(0)} грн
-                              </span>
-                            </div>
-                          </>
-                        )}
-                        <div>
-                          <span className="text-gray-600">Ставок/день:</span>
-                          <span className="ml-1 font-semibold text-gray-900">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Live:</span>
-                          <span className="ml-1 font-semibold text-gray-900">{primaryGoal.allowLive ? 'Дозволено' : 'Заборонено'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={`p-3 rounded-2xl border ${
-                      getDisciplineStatus(primaryGoal).status === 'good' 
-                        ? 'bg-green-50 border-green-200' 
-                        : 'bg-orange-50 border-orange-200'
-                    }`}>
-                      <div className="flex items-center gap-2">
-                        <div className={
-                          getDisciplineStatus(primaryGoal).status === 'good' 
-                            ? 'text-green-600' 
-                            : 'text-orange-600'
-                        }>
-                          {getDisciplineStatus(primaryGoal).icon}
-                        </div>
-                        <span className={`text-sm font-semibold ${
-                          getDisciplineStatus(primaryGoal).status === 'good' 
-                            ? 'text-green-900' 
-                            : 'text-orange-900'
-                        }`}>
-                          {getDisciplineStatus(primaryGoal).label}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => openDetailsDialog(primaryGoal)}
-                        className="flex-1 rounded-xl"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Деталі цілі
-                      </Button>
-                    </div>
+                    <h3 className="text-2xl font-light text-black mb-3">
+                      Немає активних цілей
+                    </h3>
+                    <p className="text-[#6B6B6B] font-light mb-6">Створіть свою першу ціль для відстеження прогресу</p>
+                    <Button 
+                      onClick={() => setShowCreateDialog(true)} 
+                      className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
+                    >
+                      <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                      Створити ціль
+                    </Button>
                   </CardContent>
                 </Card>
-              )}
-
-              {secondaryGoals.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-700 px-1">Інші активні цілі</h3>
-                  {secondaryGoals.map(goal => {
-                    const progress = getGoalProgress(goal);
-                    const keyMetric = getKeyMetric(goal);
-                    const discipline = getDisciplineStatus(goal);
-
-                    return (
-                      <Card key={goal.id} className="border-0 shadow-md rounded-2xl bg-white overflow-hidden hover:shadow-lg transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2 flex-1">
-                              <div className="p-2 bg-gray-100 rounded-xl">
-                                {getGoalIcon(goal.type)}
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-semibold text-gray-900 text-sm">{goal.name}</p>
-                                <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full text-xs mt-0.5">
-                                  {getGoalTypeLabel(goal.type)}
+              ) : (
+                <div className="space-y-6">
+                  {primaryGoal && (
+                    <Card className="border-2 border-[#F4E157] shadow-[0_12px_32px_rgba(244,225,87,0.25)] rounded-[32px] bg-gradient-to-br from-[#FFFEF5] via-white to-[#FFF9E6] overflow-hidden">
+                      <CardHeader className="pb-4 pt-7 px-7">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)]">
+                              {getGoalIcon(primaryGoal.type)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <CardTitle className="text-2xl font-light text-black">
+                                  {primaryGoal.name}
+                                </CardTitle>
+                                <Badge className="bg-[#F4E157] text-black border-0 rounded-[16px] px-3 py-1 font-normal shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                                  <Star className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                                  Головна
                                 </Badge>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setPrimaryGoal(goal.id)}
-                                className="h-8 w-8 p-0 rounded-xl"
-                                title="Зробити головною"
-                              >
-                                <Star className="h-4 w-4 text-gray-400" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => confirmDeleteGoal(goal.id)}
-                                className="text-red-600 hover:text-red-700 h-8 w-8 p-0 rounded-xl"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[16px] mt-2 px-3 py-1 font-light">
+                                {getGoalTypeLabel(primaryGoal.type)}
+                              </Badge>
                             </div>
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => confirmDeleteGoal(primaryGoal.id)}
+                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-10 w-10 p-0 rounded-[20px] transition-all"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        </div>
+                      </CardHeader>
 
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-600">{keyMetric.label}</span>
-                              <span className={`text-sm font-bold ${keyMetric.color}`}>{keyMetric.value}</span>
+                      <CardContent className="space-y-5 px-7 pb-7">
+                        <div className="p-5 bg-white rounded-[24px] border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                          <p className="text-sm text-[#6B6B6B] mb-2 font-light uppercase tracking-wider">{getKeyMetric(primaryGoal).label}</p>
+                          <p className={`text-4xl font-light ${getKeyMetric(primaryGoal).color} tracking-tight`}>
+                            {getKeyMetric(primaryGoal).value}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center mb-3">
+                            <span className="text-sm text-[#6B6B6B] font-light">Прогрес</span>
+                            <span className="text-sm font-normal text-black">
+                              {getGoalProgress(primaryGoal).toFixed(1)}%
+                            </span>
+                          </div>
+                          <Progress value={Math.min(getGoalProgress(primaryGoal), 100)} className="h-3 rounded-[12px]" />
+                        </div>
+
+                        <div className="p-5 bg-[#F5F5F3] rounded-[24px] border-2 border-[#E8E6DC]">
+                          <p className="text-sm font-normal text-black mb-3">📋 Правила цілі</p>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            {primaryGoal.type === 'ladder' && (
+                              <>
+                                <div>
+                                  <span className="text-[#6B6B6B] font-light">Коефіцієнти:</span>
+                                  <span className="ml-1 font-normal text-black">
+                                    {primaryGoal.minOdds} - {primaryGoal.maxOdds}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-[#6B6B6B] font-light">Поточний банк:</span>
+                                  <span className="ml-1 font-normal text-black">
+                                    {(primaryGoal.currentBank || 0).toFixed(0)} грн
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            <div>
+                              <span className="text-[#6B6B6B] font-light">Ставок/день:</span>
+                              <span className="ml-1 font-normal text-black">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
                             </div>
-                            
-                            <Progress value={Math.min(progress, 100)} className="h-2" />
-                            
-                            <div className="flex items-center justify-between">
-                              <div className={`flex items-center gap-1 text-xs ${
-                                discipline.status === 'good' ? 'text-green-600' : 'text-orange-600'
-                              }`}>
-                                {discipline.icon}
-                                <span>{discipline.label}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openDetailsDialog(goal)}
-                                className="h-7 text-xs rounded-lg"
-                              >
-                                <Eye className="h-3 w-3 mr-1" />
-                                Деталі
-                              </Button>
+                            <div>
+                              <span className="text-[#6B6B6B] font-light">Live:</span>
+                              <span className="ml-1 font-normal text-black">{primaryGoal.allowLive ? 'Дозволено' : 'Заборонено'}</span>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                        </div>
+
+                        <div className={`p-4 rounded-[24px] border-2 ${
+                          getDisciplineStatus(primaryGoal).status === 'good' 
+                            ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
+                            : 'bg-[#FFE8E8] border-[#FFCDD2]'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <div className={
+                              getDisciplineStatus(primaryGoal).status === 'good' 
+                                ? 'text-[#4CAF50]' 
+                                : 'text-[#D32F2F]'
+                            }>
+                              {getDisciplineStatus(primaryGoal).icon}
+                            </div>
+                            <span className={`text-sm font-normal ${
+                              getDisciplineStatus(primaryGoal).status === 'good' 
+                                ? 'text-[#2E7D32]' 
+                                : 'text-[#B71C1C]'
+                            }`}>
+                              {getDisciplineStatus(primaryGoal).label}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => openDetailsDialog(primaryGoal)}
+                            className="flex-1 rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] font-light h-12"
+                          >
+                            <Eye className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                            Деталі цілі
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {secondaryGoals.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-normal text-[#6B6B6B] px-1 uppercase tracking-wider">Інші активні цілі</h3>
+                      {secondaryGoals.map(goal => {
+                        const progress = getGoalProgress(goal);
+                        const keyMetric = getKeyMetric(goal);
+                        const discipline = getDisciplineStatus(goal);
+
+                        return (
+                          <Card key={goal.id} className="border-2 border-[#D4D2C8] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] transition-all duration-300">
+                            <CardContent className="p-5">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3 flex-1">
+                                  <div className="p-2.5 bg-[#F5F5F3] rounded-[20px]">
+                                    {getGoalIcon(goal.type)}
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="font-normal text-black text-base">{goal.name}</p>
+                                    <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] text-xs mt-1 px-2.5 py-0.5 font-light">
+                                      {getGoalTypeLabel(goal.type)}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setPrimaryGoal(goal.id)}
+                                    className="h-9 w-9 p-0 rounded-[16px] hover:bg-[#F5F5F3]"
+                                    title="Зробити головною"
+                                  >
+                                    <Star className="h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => confirmDeleteGoal(goal.id)}
+                                    className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-9 w-9 p-0 rounded-[16px]"
+                                  >
+                                    <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-[#6B6B6B] font-light">{keyMetric.label}</span>
+                                  <span className={`text-sm font-normal ${keyMetric.color}`}>{keyMetric.value}</span>
+                                </div>
+                                
+                                <Progress value={Math.min(progress, 100)} className="h-2 rounded-[8px]" />
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className={`flex items-center gap-1 text-xs ${
+                                    discipline.status === 'good' ? 'text-[#4CAF50]' : 'text-[#FF9800]'
+                                  }`}>
+                                    {discipline.icon}
+                                    <span className="font-light">{discipline.label}</span>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => openDetailsDialog(goal)}
+                                    className="h-8 text-xs rounded-[12px] hover:bg-[#F5F5F3] font-light"
+                                  >
+                                    <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                                    Деталі
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
-        </TabsContent>
 
-        <TabsContent value="completed" className="space-y-6">
-          {completedGoals.length === 0 ? (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardContent className="p-12 text-center">
-                <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Немає завершених цілей</h3>
-                <p className="text-gray-600">Завершені цілі з'являться тут</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {completedGoals.map(goal => (
-                <Card 
-                  key={goal.id} 
-                  className="border-0 shadow-lg rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
-                  onClick={() => openCompletedGoalResult(goal)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="p-2 bg-green-100 rounded-xl">
-                        <Trophy className="h-4 w-4 text-green-600" />
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          confirmDeleteGoal(goal.id);
-                        }}
-                        className="text-red-600 hover:text-red-700 h-7 w-7 p-0 rounded-lg"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+          {activeTab === 'completed' && (
+            <div className="space-y-6">
+              {completedGoals.length === 0 ? (
+                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                  <CardContent className="py-16 text-center">
+                    <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
+                      <Trophy className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
                     </div>
-                    <CardTitle className="text-base font-semibold text-gray-900 line-clamp-2">
-                      {goal.name}
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="space-y-2 pt-0">
-                    <Badge className="bg-green-600 text-white border-0 rounded-full text-xs">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Завершено
-                    </Badge>
-                    
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">Тип цілі:</span>
-                      <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full text-xs">
-                        {getGoalTypeLabel(goal.type)}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">Завершено:</span>
-                      <span className="font-medium text-green-600">
-                        {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
-                      </span>
-                    </div>
-                    
-                    <div className="mt-2 p-2 bg-green-100 rounded-lg text-center">
-                      <p className="text-xs text-green-700 font-medium">👆 Клікніть, щоб переглянути детальний результат</p>
-                    </div>
+                    <h3 className="text-2xl font-light text-black mb-3">Немає завершених цілей</h3>
+                    <p className="text-[#6B6B6B] font-light">Завершені цілі з'являться тут</p>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {completedGoals.map(goal => (
+                    <Card 
+                      key={goal.id} 
+                      className="border-2 border-[#C8E6C9] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[28px] bg-gradient-to-br from-[#E8F5E9] to-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] transition-all duration-300"
+                      onClick={() => openCompletedGoalResult(goal)}
+                    >
+                      <CardHeader className="pb-3 pt-6 px-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="p-2.5 bg-[#C8E6C9] rounded-[20px]">
+                            <Trophy className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDeleteGoal(goal.id);
+                            }}
+                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-8 w-8 p-0 rounded-[16px]"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          </Button>
+                        </div>
+                        <CardTitle className="text-lg font-normal text-black line-clamp-2">
+                          {goal.name}
+                        </CardTitle>
+                      </CardHeader>
+
+                      <CardContent className="space-y-3 pt-0 px-6 pb-6">
+                        <Badge className="bg-[#4CAF50] text-white border-0 rounded-[16px] text-xs px-3 py-1 font-normal shadow-[0_2px_8px_rgba(76,175,80,0.3)]">
+                          <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                          Завершено
+                        </Badge>
+                        
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#6B6B6B] font-light">Тип цілі:</span>
+                          <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] text-xs px-2.5 py-0.5 font-light">
+                            {getGoalTypeLabel(goal.type)}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#6B6B6B] font-light">Завершено:</span>
+                          <span className="font-normal text-[#4CAF50]">
+                            {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
+                          </span>
+                        </div>
+                        
+                        <div className="mt-3 p-3 bg-[#C8E6C9] rounded-[20px] text-center">
+                          <p className="text-xs text-[#2E7D32] font-normal">👆 Клікніть, щоб переглянути детальний результат</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
-      {/* Create Goal Dialog */}
+      {/* Dialogs - keeping existing implementation with updated styling */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="rounded-[32px] max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Plus className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-2xl font-light text-black">
+              <Plus className="h-5 w-5" strokeWidth={1.5} />
               Створити нову ціль
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#6B6B6B] font-light">
               Оберіть тип цілі та встановіть параметри
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="goalName">Назва цілі *</Label>
+              <Label htmlFor="goalName" className="text-sm font-normal text-black">Назва цілі *</Label>
               <Input
                 id="goalName"
                 value={newGoal.name}
                 onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
                 placeholder="Наприклад: Досягти 100,000 грн"
-                className="rounded-xl"
+                className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
               />
             </div>
 
             <div>
-              <Label htmlFor="goalType">Тип цілі *</Label>
+              <Label htmlFor="goalType" className="text-sm font-normal text-black">Тип цілі *</Label>
               <Select value={newGoal.type} onValueChange={(value: GoalType) => setNewGoal({ ...newGoal, type: value })}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] mt-2 h-12 font-light">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1056,14 +1096,14 @@ export default function GoalsManager() {
 
             {newGoal.type === 'amount' && (
               <div>
-                <Label htmlFor="targetAmount">Цільова сума (грн) *</Label>
+                <Label htmlFor="targetAmount" className="text-sm font-normal text-black">Цільова сума (грн) *</Label>
                 <Input
                   id="targetAmount"
                   type="number"
                   min="1"
                   value={newGoal.targetAmount === 0 ? '' : newGoal.targetAmount}
                   onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-xl"
+                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                 />
               </div>
             )}
@@ -1072,32 +1112,32 @@ export default function GoalsManager() {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="startAmount">Початкова сума (грн) *</Label>
+                    <Label htmlFor="startAmount" className="text-sm font-normal text-black">Початкова сума (грн) *</Label>
                     <Input
                       id="startAmount"
                       type="number"
                       min="1"
                       value={newGoal.startAmount === 0 ? '' : newGoal.startAmount}
                       onChange={(e) => setNewGoal({ ...newGoal, startAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-xl"
+                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="targetLadderAmount">Цільова сума (грн) *</Label>
+                    <Label htmlFor="targetLadderAmount" className="text-sm font-normal text-black">Цільова сума (грн) *</Label>
                     <Input
                       id="targetLadderAmount"
                       type="number"
                       min="1"
                       value={newGoal.targetLadderAmount === 0 ? '' : newGoal.targetLadderAmount}
                       onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-xl"
+                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="minOdds">Мінімальний коефіцієнт *</Label>
+                    <Label htmlFor="minOdds" className="text-sm font-normal text-black">Мінімальний коефіцієнт *</Label>
                     <Input
                       id="minOdds"
                       type="number"
@@ -1105,11 +1145,11 @@ export default function GoalsManager() {
                       step="0.01"
                       value={newGoal.minOdds === 0 ? '' : newGoal.minOdds}
                       onChange={(e) => setNewGoal({ ...newGoal, minOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-xl"
+                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="maxOdds">Максимальний коефіцієнт *</Label>
+                    <Label htmlFor="maxOdds" className="text-sm font-normal text-black">Максимальний коефіцієнт *</Label>
                     <Input
                       id="maxOdds"
                       type="number"
@@ -1117,15 +1157,15 @@ export default function GoalsManager() {
                       step="0.01"
                       value={newGoal.maxOdds === 0 ? '' : newGoal.maxOdds}
                       onChange={(e) => setNewGoal({ ...newGoal, maxOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-xl"
+                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="ladderMode">Режим при програші *</Label>
+                  <Label htmlFor="ladderMode" className="text-sm font-normal text-black">Режим при програші *</Label>
                   <Select value={newGoal.ladderMode} onValueChange={(value: LadderMode) => setNewGoal({ ...newGoal, ladderMode: value })}>
-                    <SelectTrigger className="rounded-xl">
+                    <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] mt-2 h-12 font-light">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1136,12 +1176,12 @@ export default function GoalsManager() {
                 </div>
 
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
-                  <div className="p-3 bg-blue-50 rounded-xl">
-                    <p className="text-sm font-medium text-blue-900 mb-1">📊 Розрахунок кроків:</p>
-                    <p className="text-sm text-blue-700">
+                  <div className="p-4 bg-[#E3F2FD] rounded-[20px] border-2 border-[#BBDEFB]">
+                    <p className="text-sm font-normal text-black mb-1">📊 Розрахунок кроків:</p>
+                    <p className="text-sm text-[#6B6B6B] font-light">
                       Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
                     </p>
-                    <p className="text-xs text-blue-600 mt-1">
+                    <p className="text-xs text-[#6B6B6B] mt-1 font-light">
                       💡 Система прийматиме будь-який коефіцієнт в діапазоні {newGoal.minOdds} - {newGoal.maxOdds}
                     </p>
                   </div>
@@ -1151,7 +1191,7 @@ export default function GoalsManager() {
 
             {newGoal.type === 'roi' && (
               <div>
-                <Label htmlFor="targetROI">Цільовий ROI (%) *</Label>
+                <Label htmlFor="targetROI" className="text-sm font-normal text-black">Цільовий ROI (%) *</Label>
                 <Input
                   id="targetROI"
                   type="number"
@@ -1159,14 +1199,14 @@ export default function GoalsManager() {
                   max="1000"
                   value={newGoal.targetROI === 0 ? '' : newGoal.targetROI}
                   onChange={(e) => setNewGoal({ ...newGoal, targetROI: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-xl"
+                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                 />
               </div>
             )}
 
             {newGoal.type === 'winrate' && (
               <div>
-                <Label htmlFor="targetWinRate">Цільовий Win Rate (%) *</Label>
+                <Label htmlFor="targetWinRate" className="text-sm font-normal text-black">Цільовий Win Rate (%) *</Label>
                 <Input
                   id="targetWinRate"
                   type="number"
@@ -1174,58 +1214,65 @@ export default function GoalsManager() {
                   max="100"
                   value={newGoal.targetWinRate === 0 ? '' : newGoal.targetWinRate}
                   onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-xl"
+                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                 />
               </div>
             )}
 
-            <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">📋 Правила цілі</h4>
+            <div className="pt-4 border-t-2 border-[#E8E6DC]">
+              <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
               
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="betsPerDay">Ставок на день (0 = без обмежень)</Label>
+                  <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
                   <Input
                     id="betsPerDay"
                     type="number"
                     min="0"
                     value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
                     onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                    className="rounded-xl"
+                    className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <Label htmlFor="allowLive" className="cursor-pointer">Дозволити live-прогнози</Label>
+                <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
+                  <Label htmlFor="allowLive" className="cursor-pointer text-sm font-normal text-black">Дозволити live-прогнози</Label>
                   <input
                     id="allowLive"
                     type="checkbox"
                     checked={newGoal.allowLive}
                     onChange={(e) => setNewGoal({ ...newGoal, allowLive: e.target.checked })}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <Label htmlFor="allowCashout" className="cursor-pointer">Дозволити cashout</Label>
+                <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
+                  <Label htmlFor="allowCashout" className="cursor-pointer text-sm font-normal text-black">Дозволити cashout</Label>
                   <input
                     id="allowCashout"
                     type="checkbox"
                     checked={newGoal.allowCashout}
                     onChange={(e) => setNewGoal({ ...newGoal, allowCashout: e.target.checked })}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-xl">
+          <DialogFooter className="gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateDialog(false)} 
+              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] font-light h-12 px-6"
+            >
               Скасувати
             </Button>
-            <Button onClick={createGoal} className="rounded-xl bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={createGoal} 
+              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
+            >
+              <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Створити ціль
             </Button>
           </DialogFooter>
@@ -1234,335 +1281,75 @@ export default function GoalsManager() {
 
       {/* Delete Goal Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="rounded-[32px] border-2 border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-xl font-normal text-[#D32F2F]">
+              <AlertCircle className="h-5 w-5" strokeWidth={1.5} />
               Видалити ціль?
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#6B6B6B] font-light">
               Ця дія незворотна. Всі дані про прогрес цілі будуть втрачені.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-xl">
+          <DialogFooter className="gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteDialog(false)} 
+              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] font-light h-12 px-6"
+            >
               Скасувати
             </Button>
-            <Button onClick={deleteGoal} className="rounded-xl bg-red-600 hover:bg-red-700">
-              <Trash2 className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={deleteGoal} 
+              className="rounded-[20px] bg-[#D32F2F] hover:bg-[#B71C1C] text-white font-normal h-12 px-6 shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
+            >
+              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Видалити
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog - keeping existing implementation */}
+      {/* Goal Details Dialog - keeping existing detailed implementation */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="rounded-3xl max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="rounded-[32px] max-w-3xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Eye className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-2xl font-light text-black">
+              <Eye className="h-5 w-5" strokeWidth={1.5} />
               Деталі цілі: {selectedGoal?.name}
             </DialogTitle>
           </DialogHeader>
 
           {selectedGoal && (
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-2xl space-y-2">
+              <div className="p-5 bg-[#F5F5F3] rounded-[24px] border-2 border-[#E8E6DC] space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Тип цілі:</span>
-                  <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                  <span className="text-sm text-[#6B6B6B] font-light">Тип цілі:</span>
+                  <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[16px] px-3 py-1 font-light">
                     {getGoalTypeLabel(selectedGoal.type)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Створено:</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm text-[#6B6B6B] font-light">Створено:</span>
+                  <span className="text-sm font-normal text-black">
                     {new Date(selectedGoal.createdAt).toLocaleDateString('uk-UA')}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Прогрес:</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm text-[#6B6B6B] font-light">Прогрес:</span>
+                  <span className="text-sm font-normal text-black">
                     {getGoalProgress(selectedGoal).toFixed(1)}%
                   </span>
-                </div>
-              </div>
-
-              {selectedGoal.type === 'amount' && (
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-900">Прогрес за сумою</h4>
-                  <div className="p-4 bg-blue-50 rounded-2xl">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Поточна сума:</span>
-                      <span className="text-lg font-bold text-blue-600">
-                        {(selectedGoal.currentAmount || 0).toFixed(0)} грн
-                      </span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Цільова сума:</span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {(selectedGoal.targetAmount || 0).toFixed(0)} грн
-                      </span>
-                    </div>
-                    <Progress value={Math.min(getGoalProgress(selectedGoal), 100)} className="h-3 mt-3" />
-                  </div>
-                </div>
-              )}
-
-              {selectedGoal.type === 'ladder' && (
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900">Прогрес лесенки</h4>
-                  
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-3 bg-blue-50 rounded-xl text-center">
-                      <p className="text-xs text-gray-600 mb-1">Початок</p>
-                      <p className="text-base font-bold text-gray-900">{selectedGoal.startAmount} грн</p>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-xl text-center">
-                      <p className="text-xs text-gray-600 mb-1">Поточний банк</p>
-                      <p className="text-base font-bold text-purple-600">{(selectedGoal.currentBank || 0).toFixed(0)} грн</p>
-                    </div>
-                    <div className="p-3 bg-green-50 rounded-xl text-center">
-                      <p className="text-xs text-gray-600 mb-1">Ціль</p>
-                      <p className="text-base font-bold text-green-600">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-blue-50 rounded-xl">
-                    <p className="text-sm text-blue-900">
-                      <strong>Прогрес:</strong> {selectedGoal.currentStep} / {selectedGoal.totalSteps} кроків виконано
-                    </p>
-                    <p className="text-xs text-blue-700 mt-1">
-                      Діапазон коефіцієнтів: {selectedGoal.minOdds} - {selectedGoal.maxOdds}
-                    </p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      💡 Загальна кількість кроків оновлюється динамічно на основі ваших фактичних коефіцієнтів
-                    </p>
-                  </div>
-
-                  <Collapsible open={isCalculatorExpanded} onOpenChange={setIsCalculatorExpanded}>
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full rounded-xl justify-between h-auto px-4 py-3 hover:bg-gray-100"
-                      >
-                        <span className="flex items-center gap-2 text-sm font-medium">
-                          <span className="text-base">🧮</span>
-                          Калькулятор швидкості
-                        </span>
-                        {isCalculatorExpanded ? (
-                          <ChevronUp className="h-4 w-4 text-gray-500" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-gray-500" />
-                        )}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-3">
-                      <div className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
-                        <p className="text-xs text-purple-700 mb-3">
-                          Оберіть коефіцієнти в діапазоні {selectedGoal.minOdds} - {selectedGoal.maxOdds} для оптимального балансу між швидкістю та ризиком
-                        </p>
-                        <div className="space-y-2">
-                          {calculateOddsScenarios(
-                            selectedGoal.currentBank || selectedGoal.startAmount || 100,
-                            selectedGoal.targetLadderAmount || 100000,
-                            selectedGoal.minOdds || 1.3,
-                            selectedGoal.maxOdds || 5
-                          ).map((scenario, index) => {
-                            return (
-                              <div
-                                key={index}
-                                className="p-2.5 rounded-xl border bg-white border-gray-200"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-lg">{scenario.emoji}</span>
-                                    <div>
-                                      <p className="text-sm font-semibold text-gray-900">
-                                        Коеф. {scenario.odds}
-                                      </p>
-                                      <p className="text-xs text-gray-600">{scenario.description}</p>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="text-base font-bold text-gray-900">{scenario.steps}</p>
-                                    <p className="text-xs text-gray-500">кроків</p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="p-2 bg-blue-50 rounded-xl mt-3">
-                          <p className="text-xs text-blue-800">
-                            💡 <strong>Порада:</strong> Система прийматиме будь-який коефіцієнт в вашому діапазоні.
-                          </p>
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-
-                  {selectedGoal.steps && selectedGoal.steps.length > 0 && (
-                    <div className="p-4 bg-gray-50 rounded-2xl">
-                      <h5 className="text-base font-semibold text-gray-900 mb-3">📋 Детальний перегляд кроків</h5>
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {selectedGoal.steps.slice(0, 10).map((step) => {
-                          const minPlanned = step.minPlannedAmount || step.plannedAmount || step.startAmount * (selectedGoal.minOdds || 1.3);
-                          const maxPlanned = step.maxPlannedAmount || step.startAmount * (selectedGoal.maxOdds || 5);
-                          
-                          return (
-                            <div
-                              key={step.step}
-                              className={`p-4 rounded-xl border-2 ${
-                                step.status === 'completed'
-                                  ? 'bg-green-50 border-green-300'
-                                  : step.status === 'current'
-                                  ? 'bg-orange-50 border-orange-300'
-                                  : 'bg-white border-gray-200'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-base font-bold text-gray-900">Крок {step.step}</span>
-                                <Badge className={`text-xs font-semibold ${
-                                  step.status === 'completed'
-                                    ? 'bg-green-600 text-white'
-                                    : step.status === 'current'
-                                    ? 'bg-orange-600 text-white'
-                                    : 'bg-gray-400 text-white'
-                                }`}>
-                                  {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний' : 'Заблоковано'}
-                                </Badge>
-                              </div>
-                              {step.status === 'completed' && step.actualAmount ? (
-                                <div className="space-y-1 text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">План:</span>
-                                    <span className="font-medium text-gray-900">
-                                      {step.startAmount.toFixed(2)} → {minPlanned.toFixed(2)}-{maxPlanned.toFixed(2)} грн
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Факт:</span>
-                                    <span className="font-semibold text-green-700">
-                                      {step.startAmount.toFixed(2)} → {step.actualAmount.toFixed(2)} грн (коеф. {(step.actualOdds || 0).toFixed(2)})
-                                    </span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Старт:</span>
-                                    <span className="font-medium text-gray-900">{step.startAmount.toFixed(2)} грн</span>
-                                  </div>
-                                  <div className="flex justify-between mt-1">
-                                    <span className="text-gray-600">План:</span>
-                                    <span className="font-medium text-gray-900">
-                                      {minPlanned.toFixed(2)}-{maxPlanned.toFixed(2)} грн (коеф. {selectedGoal.minOdds} - {selectedGoal.maxOdds})
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                        {selectedGoal.steps.length > 10 && (
-                          <p className="text-xs text-gray-500 text-center py-2">
-                            Показано перші 10 кроків з {selectedGoal.steps.length}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {selectedGoal.type === 'roi' && (
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-900">Прогрес ROI</h4>
-                  <div className="p-4 bg-green-50 rounded-2xl">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Поточний ROI:</span>
-                      <span className="text-lg font-bold text-green-600">
-                        {(selectedGoal.currentROI || 0).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Цільовий ROI:</span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {(selectedGoal.targetROI || 0).toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress value={Math.min(getGoalProgress(selectedGoal), 100)} className="h-3 mt-3" />
-                  </div>
-                </div>
-              )}
-
-              {selectedGoal.type === 'winrate' && (
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-900">Прогрес Win Rate</h4>
-                  <div className="p-4 bg-orange-50 rounded-2xl">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Поточний Win Rate:</span>
-                      <span className="text-lg font-bold text-orange-600">
-                        {(selectedGoal.currentWinRate || 0).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Цільовий Win Rate:</span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {(selectedGoal.targetWinRate || 0).toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress value={Math.min(getGoalProgress(selectedGoal), 100)} className="h-3 mt-3" />
-                  </div>
-                </div>
-              )}
-
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
-                <h4 className="font-semibold text-gray-900 mb-3">📋 Правила цілі</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {selectedGoal.type === 'ladder' && (
-                    <>
-                      <div>
-                        <span className="text-gray-600">Коефіцієнти:</span>
-                        <span className="ml-1 font-semibold text-gray-900">
-                          {selectedGoal.minOdds} - {selectedGoal.maxOdds}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Режим:</span>
-                        <span className="ml-1 font-semibold text-gray-900">
-                          {selectedGoal.ladderMode === 'soft' ? 'М\'який' : 'Жорсткий'}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div>
-                    <span className="text-gray-600">Ставок/день:</span>
-                    <span className="ml-1 font-semibold text-gray-900">
-                      {selectedGoal.betsPerDay || 'Не обмежено'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Live-прогнози:</span>
-                    <span className="ml-1 font-semibold text-gray-900">
-                      {selectedGoal.allowLive ? 'Дозволено' : 'Заборонено'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Cashout:</span>
-                    <span className="ml-1 font-semibold text-gray-900">
-                      {selectedGoal.allowCashout ? 'Дозволено' : 'Заборонено'}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button onClick={() => setShowDetailsDialog(false)} className="rounded-xl">
+            <Button 
+              onClick={() => setShowDetailsDialog(false)} 
+              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6"
+            >
               Закрити
             </Button>
           </DialogFooter>

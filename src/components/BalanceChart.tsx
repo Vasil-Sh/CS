@@ -35,18 +35,18 @@ export default function BalanceChart({ data }: BalanceChartProps) {
       });
       
       return (
-        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border-2 border-gray-200">
-          <p className="text-sm font-bold text-gray-900 mb-2">Дата: {date}</p>
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border-2 border-[#E8E6DC]">
+          <p className="text-sm font-bold text-black mb-2">Дата: {date}</p>
           {data.betName && (
-            <p className="text-sm text-gray-700 mb-1">Прогноз: {data.betName}</p>
+            <p className="text-sm text-[#6B6B6B] mb-1">Прогноз: {data.betName}</p>
           )}
           {data.odds && (
-            <p className="text-sm text-gray-700 mb-1">Коеф.: {Number(data.odds).toFixed(2)}</p>
+            <p className="text-sm text-[#6B6B6B] mb-1">Коеф.: {Number(data.odds).toFixed(2)}</p>
           )}
-          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
             Профіт: {data.profit >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
           </p>
-          <p className="text-sm font-bold text-blue-600">
+          <p className="text-sm font-bold text-[#3D3D3D]">
             Банк: {Number(data.balance).toFixed(2)} ₴
           </p>
         </div>
@@ -57,9 +57,9 @@ export default function BalanceChart({ data }: BalanceChartProps) {
 
   // Determine point colors based on profit
   const getPointColor = (profit: number) => {
-    if (profit > 0) return '#10b981'; // green
-    if (profit < 0) return '#ef4444'; // red
-    return '#6b7280'; // gray
+    if (profit > 0) return '#4CAF50'; // green - design system
+    if (profit < 0) return '#D32F2F'; // red - design system
+    return '#8B8B8B'; // gray - design system
   };
 
   interface DotProps {
@@ -81,37 +81,37 @@ export default function BalanceChart({ data }: BalanceChartProps) {
       <CardContent className="p-8">
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E8E6DC" />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 12 }}
-              stroke="#6b7280"
+              tick={{ fontSize: 12, fill: '#6B6B6B' }}
+              stroke="#D4D2C8"
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
               }}
             />
             <YAxis 
-              tick={{ fontSize: 12 }}
-              stroke="#6b7280"
-              label={{ value: 'Баланс (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+              tick={{ fontSize: 12, fill: '#6B6B6B' }}
+              stroke="#D4D2C8"
+              label={{ value: 'Баланс (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B6B6B' } }}
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine 
               y={initialBalance} 
-              stroke="#9ca3af" 
+              stroke="#8B8B8B" 
               strokeDasharray="5 5"
               label={{ 
                 value: `Початковий банк: ${initialBalance} ₴`, 
                 position: 'insideTopRight',
-                style: { fontSize: 11, fill: '#6b7280', fontWeight: 500 }
+                style: { fontSize: 11, fill: '#6B6B6B', fontWeight: 500 }
               }}
             />
             <Line 
               type="monotone" 
               dataKey="balance" 
-              stroke="#3b82f6" 
-              strokeWidth={3}
+              stroke="#6B6B6B" 
+              strokeWidth={2.5}
               dot={(props: DotProps) => {
                 const { cx, cy, payload } = props;
                 return (
@@ -125,7 +125,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
                   />
                 );
               }}
-              activeDot={{ r: 8, strokeWidth: 2 }}
+              activeDot={{ r: 8, strokeWidth: 2, fill: '#3D3D3D' }}
             />
           </LineChart>
         </ResponsiveContainer>
