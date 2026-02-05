@@ -69,16 +69,16 @@ export default function BalanceChart({ data }: BalanceChartProps) {
   }
 
   return (
-    <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-        <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-          <div className="p-2 bg-blue-100 rounded-xl">
-            <TrendingUp className="h-6 w-6 text-blue-600" />
+    <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+      <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+        <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+          <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+            <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
           </div>
           Баланс в часі
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-8">
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

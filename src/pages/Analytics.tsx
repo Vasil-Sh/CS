@@ -89,6 +89,7 @@ export default function Analytics() {
     totalProfit: 0,
     roi: 0
   });
+  const [activeTab, setActiveTab] = useState('profit');
 
   useEffect(() => {
     loadAnalyticsData();
@@ -475,657 +476,701 @@ export default function Analytics() {
     return null;
   };
 
+  const tabs = [
+    { id: 'profit', label: 'Прибуток', icon: null },
+    { id: 'goals', label: 'Цілі', icon: Flag },
+    { id: 'odds', label: 'Коефіцієнти', icon: null },
+    { id: 'comparison', label: 'Періоди', icon: null },
+    { id: 'prediction', label: 'Прогнози', icon: null },
+    { id: 'risks', label: 'Ризики', icon: null },
+  ];
+
   return (
-    <div className="space-y-8 p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <InitialBankModal 
-        open={bankModalOpen} 
-        onClose={handleBankModalClose}
-        mode={BankrollService.isInitialized(currentUser) ? 'edit' : 'setup'}
+    <div className="min-h-screen bg-[#FAFAF8] relative overflow-hidden">
+      {/* Decorative elements with hatching pattern - RonDesignLab style */}
+      <div className="absolute top-16 right-16 w-40 h-40 rounded-[40px] bg-[#E8E6DC] opacity-20" 
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px)`
+        }} 
       />
+      <div className="absolute bottom-24 left-16 w-32 h-32 rounded-[36px] bg-[#D4D2C8] opacity-15"
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px)`
+        }}
+      />
+      
+      {/* Subtle grid pattern overlay */}
+      <svg className="absolute top-0 left-0 w-full h-full opacity-[0.015] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" patternUnits="userSpaceOnUse" width="40" height="40">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000000" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
 
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
-            Аналітика
-          </h1>
-          <p className="text-gray-500 mt-1 font-medium">
-            Детальний аналіз вашої беттінг активності
-          </p>
-        </div>
-        
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={loadAnalyticsData} className="rounded-2xl border-2 border-gray-200 hover:bg-gray-50 hover:border-blue-300 font-medium transition-colors">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Оновити
-          </Button>
-          <Button variant="outline" onClick={clearAllData} className="rounded-2xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium transition-colors">
-            <Trash2 className="h-4 w-4 mr-2" />
-            Очистити
-          </Button>
-        </div>
-      </div>
+      <div className="relative z-10 space-y-10 p-8">
+        <InitialBankModal 
+          open={bankModalOpen} 
+          onClose={handleBankModalClose}
+          mode={BankrollService.isInitialized(currentUser) ? 'edit' : 'setup'}
+        />
 
-      {/* Backend Connection Status */}
-      <Alert className={`rounded-2xl border-0 ${connectionStatus.connected ? 'bg-green-50' : 'bg-yellow-50'}`}>
-        <div className="flex items-center gap-2">
-          {connectionStatus.connected ? <Wifi className="h-4 w-4 text-green-600" /> : <WifiOff className="h-4 w-4 text-yellow-600" />}
-          <Database className="h-4 w-4" />
+        {/* Enhanced Header with background */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[40px] p-8 border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-6xl font-light text-black tracking-tight flex items-center gap-5">
+                <div className="p-4 bg-[#F4E157] rounded-[36px] shadow-[0_12px_32px_rgba(244,225,87,0.4)]">
+                  <BarChart3 className="h-10 w-10 text-black" strokeWidth={1.5} />
+                </div>
+                Аналітика
+              </h1>
+              <p className="text-[#6B6B6B] mt-4 text-xl font-light ml-[88px]">
+                Детальний аналіз вашої беттінг активності
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={loadAnalyticsData}
+                variant="outline"
+                className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-16 px-7 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)] text-base"
+              >
+                <RefreshCw className="mr-2.5 h-5 w-5" strokeWidth={1.5} />
+                Оновити
+              </Button>
+              <Button
+                onClick={clearAllData}
+                variant="outline"
+                className="rounded-[24px] border-2 border-[#FFCDD2] hover:bg-[#FFE8E8] hover:border-[#FFAB91] bg-white font-normal h-16 px-7 text-[#D32F2F] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)] text-base"
+              >
+                <Trash2 className="mr-2.5 h-5 w-5" strokeWidth={1.5} />
+                Очистити
+              </Button>
+            </div>
+          </div>
         </div>
-        <AlertDescription className="font-medium">
-          <strong>Backend Status:</strong> {connectionStatus.environment} 
-          {connectionStatus.connected ? 
-            ' - З\'єднано з C# SQLite базою даних' : 
-            ' - Використовується user-specific localStorage'
-          }
-        </AlertDescription>
-      </Alert>
 
-      {/* No Data Warning */}
-      {bets.length === 0 && (
-        <Alert className="rounded-2xl border-0 bg-blue-50">
-          <AlertTriangle className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="font-medium">
-            <strong>Немає даних для аналізу.</strong> Додайте ставки на сторінці "Мої ставки" для перегляду аналітики.
+        {/* Backend Connection Status */}
+        <Alert className={`rounded-[28px] border-2 ${connectionStatus.connected ? 'border-[#C8E6C9] bg-white' : 'border-[#FFCC80] bg-white'} shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6`}>
+          <div className="flex items-center gap-2">
+            {connectionStatus.connected ? <Wifi className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} /> : <WifiOff className="h-5 w-5 text-[#FF9800]" strokeWidth={1.5} />}
+            <Database className="h-5 w-5" strokeWidth={1.5} />
+          </div>
+          <AlertDescription className="font-light text-black ml-2">
+            <strong className="font-normal">Backend Status:</strong> {connectionStatus.environment} 
+            {connectionStatus.connected ? 
+              ' - З\'єднано з C# SQLite базою даних' : 
+              ' - Використовується user-specific localStorage'
+            }
           </AlertDescription>
         </Alert>
-      )}
 
-      {/* Quick Stats - Поточний банк ПЕРШИЙ */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* 1. Поточний банк - ПЕРША КАРТКА */}
-        <Card 
-          className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 relative group"
-          onClick={() => setBankModalOpen(true)}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CardContent className="pt-6 relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white/90 uppercase tracking-wide mb-2 flex items-center gap-2">
-                  Поточний банк
-                  <Edit className="h-3 w-3 opacity-70" />
-                </p>
-                {BankrollService.isInitialized(currentUser) ? (
-                  <p className="text-3xl font-bold text-white tracking-tight">
-                    {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-                  </p>
-                ) : (
-                  <p className="text-lg font-semibold text-white/80">Не встановлено</p>
-                )}
-              </div>
-              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                <Wallet className="h-7 w-7 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* No Data Warning */}
+        {bets.length === 0 && (
+          <Alert className="rounded-[28px] border-2 border-[#BBDEFB] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+            <AlertTriangle className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+            <AlertDescription className="font-light text-black ml-2">
+              <strong className="font-normal">Немає даних для аналізу.</strong> Додайте ставки на сторінці "Мої ставки" для перегляду аналітики.
+            </AlertDescription>
+          </Alert>
+        )}
 
-        {/* 2. Всього ставок */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Всього ставок</p>
-                <p className="text-3xl font-semibold text-gray-900 tracking-tight">{stats.totalBets || 0}</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <BarChart3 className="h-7 w-7 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* 3. Профіт */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Загальний профіт</p>
-                <p className={`text-3xl font-semibold tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
-                  {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
-                </p>
-              </div>
-              <div className="p-3 bg-orange-50 rounded-2xl">
-                <DollarSign className="h-7 w-7 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 4. Win Rate */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
-                <p className="text-3xl font-semibold text-green-600 tracking-tight">{stats.winRate || 0}%</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-2xl">
-                <Target className="h-7 w-7 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="profit" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
-          <TabsTrigger value="profit" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прибуток</TabsTrigger>
-          <TabsTrigger value="goals" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Flag className="h-4 w-4 mr-1" />
-            Цілі
-          </TabsTrigger>
-          <TabsTrigger value="odds" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Коефіцієнти</TabsTrigger>
-          <TabsTrigger value="comparison" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Періоди</TabsTrigger>
-          <TabsTrigger value="prediction" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Прогнози</TabsTrigger>
-          <TabsTrigger value="risks" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ризики</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profit">
-          <div className="grid grid-cols-1 gap-6">
-            {bets.length > 0 ? (
-              <>
-                {/* Date Filter */}
-                <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                        <div className="p-2 bg-blue-100 rounded-xl">
-                          <Filter className="h-6 w-6 text-blue-600" />
-                        </div>
-                        Фільтри
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
-                        <Select value={timeFilter} onValueChange={setTimeFilter}>
-                          <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Весь час</SelectItem>
-                            <SelectItem value="week">Останній тиждень</SelectItem>
-                            <SelectItem value="month">Останній місяць</SelectItem>
-                            <SelectItem value="quarter">Останній квартал</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <BalanceChart data={balanceData} />
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Enhanced Monthly Profit Chart with Area */}
-                  <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                      <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
-                        <span className="flex items-center gap-2">
-                          <div className="p-2 bg-blue-100 rounded-xl">
-                            <Calendar className="h-6 w-6 text-blue-600" />
-                          </div>
-                          Прибуток по місяцях
-                        </span>
-                        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-                          Кумулятивний
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={monthlyProfit}>
-                          <defs>
-                            <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
-                            </linearGradient>
-                            <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis 
-                            dataKey="month" 
-                            tick={{ fontSize: 12 }}
-                            stroke="#6b7280"
-                          />
-                          <YAxis 
-                            tick={{ fontSize: 12 }}
-                            stroke="#6b7280"
-                          />
-                          <Tooltip 
-                            contentStyle={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                              border: 'none', 
-                              borderRadius: '12px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                            }}
-                            formatter={(value: number | string, name: string) => {
-                              if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
-                              if (name === 'cumulative') return [`${value} ₴`, 'Загальний прибуток'];
-                              if (name === 'winRate') return [`${value}%`, 'Win Rate'];
-                              return [value, name];
-                            }}
-                            labelFormatter={(label: string) => {
-                              const monthData = monthlyProfit.find(m => m.month === label);
-                              if (monthData) {
-                                return `${label} (${monthData.totalBets} ставок)`;
-                              }
-                              return label;
-                            }}
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="profit" 
-                            stroke="#10b981" 
-                            strokeWidth={2}
-                            fillOpacity={1} 
-                            fill="url(#colorProfit)" 
-                          />
-                          <Area 
-                            type="monotone" 
-                            dataKey="cumulative" 
-                            stroke="#8b5cf6" 
-                            strokeWidth={2}
-                            fillOpacity={1} 
-                            fill="url(#colorCumulative)" 
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                      
-                      {/* Monthly Stats Summary */}
-                      <div className="mt-4 grid grid-cols-3 gap-3">
-                        <div className="text-center p-3 bg-green-50 rounded-xl">
-                          <p className="text-xs text-gray-600 mb-1">Кращий місяць</p>
-                          <p className="text-lg font-bold text-green-600">
-                            +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {monthlyProfit.find(m => m.profit === Math.max(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
-                          </p>
-                        </div>
-                        <div className="text-center p-3 bg-red-50 rounded-xl">
-                          <p className="text-xs text-gray-600 mb-1">Гірший місяць</p>
-                          <p className="text-lg font-bold text-red-600">
-                            {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {monthlyProfit.find(m => m.profit === Math.min(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
-                          </p>
-                        </div>
-                        <div className="text-center p-3 bg-purple-50 rounded-xl">
-                          <p className="text-xs text-gray-600 mb-1">Середній</p>
-                          <p className="text-lg font-bold text-purple-600">
-                            {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {Math.round(monthlyProfit.reduce((sum, m) => sum + m.totalBets, 0) / monthlyProfit.length)} ставок
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Enhanced Scatter Chart with Zones */}
-                  <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                      <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
-                        <span className="flex items-center gap-2">
-                          <div className="p-2 bg-blue-100 rounded-xl">
-                            <Target className="h-6 w-6 text-blue-600" />
-                          </div>
-                          Коефіцієнти vs Прибуток
-                        </span>
-                        <div className="flex gap-2">
-                          <Badge className="bg-green-500 text-white border-0 text-xs">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Виграш
-                          </Badge>
-                          <Badge className="bg-red-500 text-white border-0 text-xs">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            Програш
-                          </Badge>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <ScatterChart>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          
-                          {/* Vertical zones for odds ranges */}
-                          <ReferenceArea x1={0} x2={1.5} fill="#dbeafe" fillOpacity={0.3} />
-                          <ReferenceArea x1={1.5} x2={2.0} fill="#bfdbfe" fillOpacity={0.3} />
-                          <ReferenceArea x1={2.0} x2={3.0} fill="#93c5fd" fillOpacity={0.3} />
-                          <ReferenceArea x1={3.0} x2={10} fill="#60a5fa" fillOpacity={0.3} />
-                          
-                          {/* Zero profit line */}
-                          <ReferenceLine 
-                            y={0} 
-                            stroke="#9ca3af" 
-                            strokeWidth={2}
-                            strokeDasharray="5 5"
-                            label={{ 
-                              value: 'Нульова лінія', 
-                              position: 'insideTopRight',
-                              style: { fontSize: 11, fill: '#6b7280', fontWeight: 500 }
-                            }}
-                          />
-                          
-                          <XAxis 
-                            dataKey="odds" 
-                            name="Коефіцієнт"
-                            tick={{ fontSize: 12 }}
-                            stroke="#6b7280"
-                            label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6b7280' } }}
-                            tickFormatter={(value) => Number(value).toFixed(2)}
-                          />
-                          <YAxis 
-                            dataKey="profit" 
-                            name="Прибуток"
-                            tick={{ fontSize: 12 }}
-                            stroke="#6b7280"
-                            label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
-                          />
-                          <Tooltip content={<ScatterTooltip />} />
-                          <Scatter 
-                            data={scatterData} 
-                            fill="#8b5cf6"
-                            shape={(props: { cx?: number; cy?: number; fill?: string }) => {
-                              const { cx, cy, fill } = props;
-                              return (
-                                <circle 
-                                  cx={cx} 
-                                  cy={cy} 
-                                  r={6} 
-                                  fill={fill}
-                                  opacity={0.7}
-                                  stroke="#fff"
-                                  strokeWidth={2}
-                                />
-                              );
-                            }}
-                          />
-                        </ScatterChart>
-                      </ResponsiveContainer>
-                      
-                      {/* Scatter Stats */}
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
-                          <ArrowUpRight className="h-8 w-8 text-green-600" />
-                          <div>
-                            <p className="text-xs text-gray-600">Виграшних ставок</p>
-                            <p className="text-lg font-bold text-green-600">{winningBets.length}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
-                          <ArrowDownRight className="h-8 w-8 text-red-600" />
-                          <div>
-                            <p className="text-xs text-gray-600">Програшних ставок</p>
-                            <p className="text-lg font-bold text-red-600">{losingBets.length}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+        {/* Quick Stats - Поточний банк ПЕРШИЙ */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* 1. Поточний банк - ПЕРША КАРТКА */}
+          <Card 
+            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300"
+            onClick={() => setBankModalOpen(true)}
+          >
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <Wallet className="h-5 w-5" strokeWidth={1.5} />
+                Поточний банк
+                <Edit className="h-4 w-4 opacity-70" strokeWidth={1.5} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              {BankrollService.isInitialized(currentUser) ? (
+                <div className="text-6xl font-light text-black tracking-tight">
+                  {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
                 </div>
-              </>
-            ) : (
-              <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-                <CardContent className="py-12 text-center">
-                  <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
-                    <DollarSign className="h-16 w-16 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Немає даних про прибуток
-                  </h3>
-                  <p className="text-gray-600">
-                    Додайте ставки для перегляду аналізу прибутку
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+              ) : (
+                <div className="text-2xl font-light text-[#8B8B8B]">Не встановлено</div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 2. Всього ставок */}
+          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" strokeWidth={1.5} />
+                Всього ставок
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-black tracking-tight">{stats.totalBets || 0}</div>
+            </CardContent>
+          </Card>
+          
+          {/* 3. Профіт */}
+          <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <DollarSign className="h-5 w-5" strokeWidth={1.5} />
+                Загальний профіт
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className={`text-6xl font-light tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 4. Win Rate */}
+          <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <Target className="h-5 w-5" strokeWidth={1.5} />
+                Win Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-[#4CAF50] tracking-tight">{stats.winRate || 0}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Custom Tabs Navigation */}
+        <div className="space-y-6">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="grid grid-cols-6 gap-3">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      relative rounded-[24px] px-6 py-4 font-light text-base
+                      transition-all duration-300 ease-in-out
+                      ${activeTab === tab.id 
+                        ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
+                        : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
+                      }
+                    `}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      {Icon && <Icon className="h-4 w-4" strokeWidth={1.5} />}
+                      {tab.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="goals">
-          <GoalsManager />
-        </TabsContent>
-
-        <TabsContent value="odds">
-          <div className="grid grid-cols-1 gap-6">
-            {/* Combined Win Rate & ROI Chart */}
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <BarChart3 className="h-6 w-6 text-blue-600" />
-                  </div>
-                  Win Rate & ROI по категоріях коефіцієнтів
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+          {/* Tab Content */}
+          <div>
+            {activeTab === 'profit' && (
+              <div className="grid grid-cols-1 gap-6">
                 {bets.length > 0 ? (
                   <>
-                    <ResponsiveContainer width="100%" height={350}>
-                      <BarChart data={oddsChartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="range" 
-                          tick={{ fontSize: 13, fontWeight: 500 }}
-                          stroke="#6b7280"
-                        />
-                        <YAxis 
-                          yAxisId="left"
-                          tick={{ fontSize: 12 }}
-                          stroke="#6b7280"
-                          label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
-                        />
-                        <YAxis 
-                          yAxisId="right"
-                          orientation="right"
-                          tick={{ fontSize: 12 }}
-                          stroke="#6b7280"
-                          label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6b7280' } }}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                            border: 'none', 
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            padding: '12px'
-                          }}
-                          formatter={(value: number | string, name: string) => {
-                            if (name === 'winRate') return [`${value}%`, 'Win Rate'];
-                            if (name === 'roi') return [`${value}%`, 'ROI'];
-                            if (name === 'bets') return [value, 'Кількість ставок'];
-                            return [value, name];
-                          }}
-                        />
-                        <Legend 
-                          wrapperStyle={{ paddingTop: '20px' }}
-                          formatter={(value) => {
-                            if (value === 'winRate') return 'Win Rate (%)';
-                            if (value === 'roi') return 'ROI (%)';
-                            return value;
-                          }}
-                        />
-                        <Bar 
-                          yAxisId="left"
-                          dataKey="winRate" 
-                          fill="#10b981" 
-                          name="winRate"
-                          radius={[8, 8, 0, 0]}
-                          maxBarSize={80}
-                        />
-                        <Bar 
-                          yAxisId="right"
-                          dataKey="roi" 
-                          fill="#8b5cf6" 
-                          name="roi"
-                          radius={[8, 8, 0, 0]}
-                          maxBarSize={80}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                    
-                    {/* Summary cards */}
-                    <div className="mt-6 grid grid-cols-3 gap-4">
-                      {oddsData.map((range, index) => (
-                        <div key={index} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
-                          <h4 className="font-bold text-gray-900 mb-3 text-center">{range.range}</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Ставок:</span>
-                              <Badge className="bg-blue-100 text-blue-700 border-0 font-bold">{range.count}</Badge>
+                    {/* Date Filter */}
+                    <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                      <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-3 text-3xl font-light text-black">
+                            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                              <Filter className="h-6 w-6 text-black" strokeWidth={1.5} />
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Win Rate:</span>
-                              <Badge className="bg-green-100 text-green-700 border-0 font-bold">{range.winRate}%</Badge>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Прибуток:</span>
-                              <Badge className={`border-0 font-bold ${range.profit >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
-                              </Badge>
-                            </div>
+                            Фільтри
+                          </span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-8">
+                        <div className="flex gap-4">
+                          <div className="flex-1">
+                            <label className="text-sm font-normal text-[#6B6B6B] mb-2 block uppercase tracking-wider">Період:</label>
+                            <Select value={timeFilter} onValueChange={setTimeFilter}>
+                              <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-14 font-light">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">Весь час</SelectItem>
+                                <SelectItem value="week">Останній тиждень</SelectItem>
+                                <SelectItem value="month">Останній місяць</SelectItem>
+                                <SelectItem value="quarter">Останній квартал</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
-                      <Target className="h-16 w-16 text-gray-400" />
-                    </div>
-                    <p className="text-gray-600">Немає даних для аналізу коефіцієнтів</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      </CardContent>
+                    </Card>
 
-            {/* Simplified Bet Type Distribution */}
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Target className="h-6 w-6 text-blue-600" />
-                  </div>
-                  Розподіл типів ставок
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {betTypes.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Bar Chart instead of Pie */}
-                    <div>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={betTypes} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis type="number" tick={{ fontSize: 12 }} stroke="#6b7280" />
-                          <YAxis 
-                            dataKey="name" 
-                            type="category" 
-                            tick={{ fontSize: 11, fontWeight: 500 }} 
-                            stroke="#6b7280"
-                            width={120}
-                          />
-                          <Tooltip 
-                            contentStyle={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                              border: 'none', 
-                              borderRadius: '12px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                            }}
-                            formatter={(value: number | string, name: string) => {
-                              if (name === 'value') return [value, 'Кількість ставок'];
-                              return [value, name];
-                            }}
-                          />
-                          <Bar 
-                            dataKey="value" 
-                            radius={[0, 8, 8, 0]}
-                            maxBarSize={40}
-                          >
-                            {betTypes.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <BalanceChart data={balanceData} />
                     
-                    {/* Stats Cards */}
-                    <div className="space-y-3">
-                      {betTypes.map((type, index) => (
-                        <div 
-                          key={index} 
-                          className="p-4 rounded-2xl border-2 transition-all hover:shadow-md"
-                          style={{ 
-                            borderColor: type.color + '40',
-                            backgroundColor: type.color + '10'
-                          }}
-                          title={type.originalName}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-bold text-gray-900 truncate max-w-[200px]" title={type.name}>{type.name}</h4>
-                            <div 
-                              className="w-4 h-4 rounded-full flex-shrink-0" 
-                              style={{ backgroundColor: type.color }}
-                            />
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 text-sm">
-                            <div>
-                              <p className="text-gray-600 text-xs">Ставок</p>
-                              <p className="font-bold text-gray-900">{type.value}</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Enhanced Monthly Profit Chart with Area */}
+                      <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+                          <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
+                            <span className="flex items-center gap-3">
+                              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                                <Calendar className="h-6 w-6 text-black" strokeWidth={1.5} />
+                              </div>
+                              Прибуток по місяцях
+                            </span>
+                            <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-5 py-2 rounded-[20px] border-2 border-[#C8E6C9] font-normal text-sm">
+                              Кумулятивний
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                          <ResponsiveContainer width="100%" height={300}>
+                            <AreaChart data={monthlyProfit}>
+                              <defs>
+                                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                                </linearGradient>
+                                <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis 
+                                dataKey="month" 
+                                tick={{ fontSize: 12 }}
+                                stroke="#6b7280"
+                              />
+                              <YAxis 
+                                tick={{ fontSize: 12 }}
+                                stroke="#6b7280"
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                  border: 'none', 
+                                  borderRadius: '12px',
+                                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                }}
+                                formatter={(value: number | string, name: string) => {
+                                  if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
+                                  if (name === 'cumulative') return [`${value} ₴`, 'Загальний прибуток'];
+                                  if (name === 'winRate') return [`${value}%`, 'Win Rate'];
+                                  return [value, name];
+                                }}
+                                labelFormatter={(label: string) => {
+                                  const monthData = monthlyProfit.find(m => m.month === label);
+                                  if (monthData) {
+                                    return `${label} (${monthData.totalBets} ставок)`;
+                                  }
+                                  return label;
+                                }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="profit" 
+                                stroke="#10b981" 
+                                strokeWidth={2}
+                                fillOpacity={1} 
+                                fill="url(#colorProfit)" 
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="cumulative" 
+                                stroke="#8b5cf6" 
+                                strokeWidth={2}
+                                fillOpacity={1} 
+                                fill="url(#colorCumulative)" 
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                          
+                          {/* Monthly Stats Summary */}
+                          <div className="mt-6 grid grid-cols-3 gap-4">
+                            <div className="text-center p-4 bg-[#E8F5E9] rounded-[20px] border-2 border-[#C8E6C9]">
+                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Кращий місяць</p>
+                              <p className="text-2xl font-light text-[#4CAF50]">
+                                +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
+                              </p>
+                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
+                                {monthlyProfit.find(m => m.profit === Math.max(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
+                              </p>
                             </div>
-                            <div>
-                              <p className="text-gray-600 text-xs">Win Rate</p>
-                              <p className="font-bold text-gray-900">{type.winRate}%</p>
+                            <div className="text-center p-4 bg-[#FFE8E8] rounded-[20px] border-2 border-[#FFCDD2]">
+                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Гірший місяць</p>
+                              <p className="text-2xl font-light text-[#D32F2F]">
+                                {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
+                              </p>
+                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
+                                {monthlyProfit.find(m => m.profit === Math.min(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
+                              </p>
                             </div>
-                            <div>
-                              <p className="text-gray-600 text-xs">Прибуток</p>
-                              <p className={`font-bold ${type.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {type.profit >= 0 ? '+' : ''}{type.profit} ₴
+                            <div className="text-center p-4 bg-[#F3E5F5] rounded-[20px] border-2 border-[#E1BEE7]">
+                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Середній</p>
+                              <p className="text-2xl font-light text-[#8b5cf6]">
+                                {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
+                              </p>
+                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
+                                {Math.round(monthlyProfit.reduce((sum, m) => sum + m.totalBets, 0) / monthlyProfit.length)} ставок
                               </p>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </CardContent>
+                      </Card>
+
+                      {/* Enhanced Scatter Chart with Zones */}
+                      <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+                          <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
+                            <span className="flex items-center gap-3">
+                              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                                <Target className="h-6 w-6 text-black" strokeWidth={1.5} />
+                              </div>
+                              Коефіцієнти vs Прибуток
+                            </span>
+                            <div className="flex gap-2">
+                              <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-4 py-2 rounded-[16px] border-2 border-[#C8E6C9] font-normal text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                                Виграш
+                              </Badge>
+                              <Badge className="bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] px-4 py-2 rounded-[16px] border-2 border-[#FFCDD2] font-normal text-xs">
+                                <AlertTriangle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                                Програш
+                              </Badge>
+                            </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                          <ResponsiveContainer width="100%" height={300}>
+                            <ScatterChart>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              
+                              {/* Vertical zones for odds ranges */}
+                              <ReferenceArea x1={0} x2={1.5} fill="#dbeafe" fillOpacity={0.3} />
+                              <ReferenceArea x1={1.5} x2={2.0} fill="#bfdbfe" fillOpacity={0.3} />
+                              <ReferenceArea x1={2.0} x2={3.0} fill="#93c5fd" fillOpacity={0.3} />
+                              <ReferenceArea x1={3.0} x2={10} fill="#60a5fa" fillOpacity={0.3} />
+                              
+                              {/* Zero profit line */}
+                              <ReferenceLine 
+                                y={0} 
+                                stroke="#9ca3af" 
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                label={{ 
+                                  value: 'Нульова лінія', 
+                                  position: 'insideTopRight',
+                                  style: { fontSize: 11, fill: '#6b7280', fontWeight: 500 }
+                                }}
+                              />
+                              
+                              <XAxis 
+                                dataKey="odds" 
+                                name="Коефіцієнт"
+                                tick={{ fontSize: 12 }}
+                                stroke="#6b7280"
+                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6b7280' } }}
+                                tickFormatter={(value) => Number(value).toFixed(2)}
+                              />
+                              <YAxis 
+                                dataKey="profit" 
+                                name="Прибуток"
+                                tick={{ fontSize: 12 }}
+                                stroke="#6b7280"
+                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                              />
+                              <Tooltip content={<ScatterTooltip />} />
+                              <Scatter 
+                                data={scatterData} 
+                                fill="#8b5cf6"
+                                shape={(props: { cx?: number; cy?: number; fill?: string }) => {
+                                  const { cx, cy, fill } = props;
+                                  return (
+                                    <circle 
+                                      cx={cx} 
+                                      cy={cy} 
+                                      r={6} 
+                                      fill={fill}
+                                      opacity={0.7}
+                                      stroke="#fff"
+                                      strokeWidth={2}
+                                    />
+                                  );
+                                }}
+                              />
+                            </ScatterChart>
+                          </ResponsiveContainer>
+                          
+                          {/* Scatter Stats */}
+                          <div className="mt-6 grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-4 p-4 bg-[#E8F5E9] rounded-[20px] border-2 border-[#C8E6C9]">
+                              <ArrowUpRight className="h-8 w-8 text-[#4CAF50]" strokeWidth={1.5} />
+                              <div>
+                                <p className="text-xs text-[#6B6B6B] font-normal uppercase tracking-wider">Виграшних ставок</p>
+                                <p className="text-2xl font-light text-[#4CAF50]">{winningBets.length}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-[#FFE8E8] rounded-[20px] border-2 border-[#FFCDD2]">
+                              <ArrowDownRight className="h-8 w-8 text-[#D32F2F]" strokeWidth={1.5} />
+                              <div>
+                                <p className="text-xs text-[#6B6B6B] font-normal uppercase tracking-wider">Програшних ставок</p>
+                                <p className="text-2xl font-light text-[#D32F2F]">{losingBets.length}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
-                      <BarChart3 className="h-16 w-16 text-gray-400" />
-                    </div>
-                    <p className="text-gray-600">Немає даних про типи ставок</p>
-                  </div>
+                  <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                    <CardContent className="py-16 text-center">
+                      <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
+                        <DollarSign className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-2xl font-light text-black mb-3">
+                        Немає даних про прибуток
+                      </h3>
+                      <p className="text-[#6B6B6B] font-light text-base">
+                        Додайте ставки для перегляду аналізу прибутку
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            )}
+
+            {activeTab === 'goals' && <GoalsManager />}
+
+            {activeTab === 'odds' && (
+              <div className="grid grid-cols-1 gap-6">
+                {/* Combined Win Rate & ROI Chart */}
+                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+                    <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+                      <div className="p-3 bg-white rounded-[24px] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                        <BarChart3 className="h-6 w-6 text-black" strokeWidth={1.5} />
+                      </div>
+                      Win Rate & ROI по категоріях коефіцієнтів
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    {bets.length > 0 ? (
+                      <>
+                        <ResponsiveContainer width="100%" height={350}>
+                          <BarChart data={oddsChartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis 
+                              dataKey="range" 
+                              tick={{ fontSize: 13, fontWeight: 500 }}
+                              stroke="#6b7280"
+                            />
+                            <YAxis 
+                              yAxisId="left"
+                              tick={{ fontSize: 12 }}
+                              stroke="#6b7280"
+                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                            />
+                            <YAxis 
+                              yAxisId="right"
+                              orientation="right"
+                              tick={{ fontSize: 12 }}
+                              stroke="#6b7280"
+                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6b7280' } }}
+                            />
+                            <Tooltip 
+                              contentStyle={{ 
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                border: 'none', 
+                                borderRadius: '12px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                padding: '12px'
+                              }}
+                              formatter={(value: number | string, name: string) => {
+                                if (name === 'winRate') return [`${value}%`, 'Win Rate'];
+                                if (name === 'roi') return [`${value}%`, 'ROI'];
+                                if (name === 'bets') return [value, 'Кількість ставок'];
+                                return [value, name];
+                              }}
+                            />
+                            <Legend 
+                              wrapperStyle={{ paddingTop: '20px' }}
+                              formatter={(value) => {
+                                if (value === 'winRate') return 'Win Rate (%)';
+                                if (value === 'roi') return 'ROI (%)';
+                                return value;
+                              }}
+                            />
+                            <Bar 
+                              yAxisId="left"
+                              dataKey="winRate" 
+                              fill="#10b981" 
+                              name="winRate"
+                              radius={[8, 8, 0, 0]}
+                              maxBarSize={80}
+                            />
+                            <Bar 
+                              yAxisId="right"
+                              dataKey="roi" 
+                              fill="#8b5cf6" 
+                              name="roi"
+                              radius={[8, 8, 0, 0]}
+                              maxBarSize={80}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                        
+                        {/* Summary cards */}
+                        <div className="mt-8 grid grid-cols-3 gap-6">
+                          {oddsData.map((range, index) => (
+                            <div key={index} className="p-6 bg-[#F5F5F3] rounded-[24px] border-2 border-[#E8E6DC]">
+                              <h4 className="font-normal text-black mb-4 text-center text-lg">{range.range}</h4>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-[#6B6B6B] font-light">Ставок:</span>
+                                  <Badge className="bg-[#BBDEFB] text-[#2196F3] hover:bg-[#BBDEFB] px-4 py-2 rounded-[16px] border-2 border-[#90CAF9] font-normal">{range.count}</Badge>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-[#6B6B6B] font-light">Win Rate:</span>
+                                  <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-4 py-2 rounded-[16px] border-2 border-[#C8E6C9] font-normal">{range.winRate}%</Badge>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-[#6B6B6B] font-light">Прибуток:</span>
+                                  <Badge className={`border-2 font-normal px-4 py-2 rounded-[16px] ${range.profit >= 0 ? 'bg-[#E8F5E9] text-[#4CAF50] border-[#C8E6C9]' : 'bg-[#FFE8E8] text-[#D32F2F] border-[#FFCDD2]'}`}>
+                                    {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-16">
+                        <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
+                          <Target className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
+                        </div>
+                        <p className="text-[#6B6B6B] font-light text-base">Немає даних для аналізу коефіцієнтів</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Simplified Bet Type Distribution */}
+                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+                    <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+                      <div className="p-3 bg-white rounded-[24px] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                        <Target className="h-6 w-6 text-black" strokeWidth={1.5} />
+                      </div>
+                      Розподіл типів ставок
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    {betTypes.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Bar Chart instead of Pie */}
+                        <div>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={betTypes} layout="vertical">
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis type="number" tick={{ fontSize: 12 }} stroke="#6b7280" />
+                              <YAxis 
+                                dataKey="name" 
+                                type="category" 
+                                tick={{ fontSize: 11, fontWeight: 500 }} 
+                                stroke="#6b7280"
+                                width={120}
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                                  border: 'none', 
+                                  borderRadius: '12px',
+                                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                }}
+                                formatter={(value: number | string, name: string) => {
+                                  if (name === 'value') return [value, 'Кількість ставок'];
+                                  return [value, name];
+                                }}
+                              />
+                              <Bar 
+                                dataKey="value" 
+                                radius={[0, 8, 8, 0]}
+                                maxBarSize={40}
+                              >
+                                {betTypes.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        
+                        {/* Stats Cards */}
+                        <div className="space-y-3">
+                          {betTypes.map((type, index) => (
+                            <div 
+                              key={index} 
+                              className="p-5 rounded-[20px] border-2 transition-all hover:shadow-md"
+                              style={{ 
+                                borderColor: type.color + '40',
+                                backgroundColor: type.color + '10'
+                              }}
+                              title={type.originalName}
+                            >
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className="font-normal text-black truncate max-w-[200px]" title={type.name}>{type.name}</h4>
+                                <div 
+                                  className="w-4 h-4 rounded-full flex-shrink-0" 
+                                  style={{ backgroundColor: type.color }}
+                                />
+                              </div>
+                              <div className="grid grid-cols-3 gap-3 text-sm">
+                                <div>
+                                  <p className="text-[#6B6B6B] text-xs font-light uppercase tracking-wider">Ставок</p>
+                                  <p className="font-normal text-black text-base">{type.value}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[#6B6B6B] text-xs font-light uppercase tracking-wider">Win Rate</p>
+                                  <p className="font-normal text-black text-base">{type.winRate}%</p>
+                                </div>
+                                <div>
+                                  <p className="text-[#6B6B6B] text-xs font-light uppercase tracking-wider">Прибуток</p>
+                                  <p className={`font-normal text-base ${type.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                    {type.profit >= 0 ? '+' : ''}{type.profit} ₴
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-16">
+                        <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
+                          <BarChart3 className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
+                        </div>
+                        <p className="text-[#6B6B6B] font-light text-base">Немає даних про типи ставок</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {activeTab === 'comparison' && <PeriodComparison bets={bets} />}
+            {activeTab === 'prediction' && <PredictiveAnalytics bets={bets} />}
+            {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
-        </TabsContent>
-
-        <TabsContent value="comparison">
-          <PeriodComparison bets={bets} />
-        </TabsContent>
-
-        <TabsContent value="prediction">
-          <PredictiveAnalytics bets={bets} />
-        </TabsContent>
-
-        <TabsContent value="risks">
-          <RiskManagement bets={bets} />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
