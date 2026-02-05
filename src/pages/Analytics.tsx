@@ -578,16 +578,20 @@ export default function Analytics() {
 
         {/* Quick Stats - Поточний банк ПЕРШИЙ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* 1. Поточний банк - ПЕРША КАРТКА */}
+          {/* 1. Поточний банк - ПЕРША КАРТКА з ЖОВТОЮ іконкою Edit */}
           <Card 
-            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300"
+            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300 group"
             onClick={() => setBankModalOpen(true)}
           >
             <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <Wallet className="h-5 w-5" strokeWidth={1.5} />
-                Поточний банк
-                <Edit className="h-4 w-4 opacity-70" strokeWidth={1.5} />
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" strokeWidth={1.5} />
+                  Поточний банк
+                </div>
+                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] group-hover:shadow-[0_4px_12px_rgba(244,225,87,0.5)] transition-all">
+                  <Edit className="h-5 w-5 text-black" strokeWidth={2} />
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="px-7 pb-7">
@@ -713,7 +717,7 @@ export default function Analytics() {
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Enhanced Monthly Profit Chart with Area */}
+                      {/* Monthly Profit Chart and Scatter Chart remain the same */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -824,7 +828,7 @@ export default function Analytics() {
                         </CardContent>
                       </Card>
 
-                      {/* Enhanced Scatter Chart with Zones */}
+                      {/* Scatter Chart */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -950,7 +954,7 @@ export default function Analytics() {
 
             {activeTab === 'odds' && (
               <div className="grid grid-cols-1 gap-6">
-                {/* Combined Win Rate & ROI Chart */}
+                {/* Odds analysis content remains the same */}
                 <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                   <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                     <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
@@ -1062,7 +1066,7 @@ export default function Analytics() {
                   </CardContent>
                 </Card>
 
-                {/* Simplified Bet Type Distribution */}
+                {/* Bet Type Distribution Card remains the same */}
                 <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                   <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                     <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
@@ -1075,7 +1079,7 @@ export default function Analytics() {
                   <CardContent className="p-8">
                     {betTypes.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Bar Chart instead of Pie */}
+                        {/* Bar Chart */}
                         <div>
                           <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={betTypes} layout="vertical">
