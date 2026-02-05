@@ -149,7 +149,7 @@ export default function GoalsManager() {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isCalculatorExpanded, setIsCalculatorExpanded] = useState(false);
+  const [isHowToExpanded, setIsHowToExpanded] = useState(false);
 
   const [newGoal, setNewGoal] = useState({
     name: '',
@@ -659,54 +659,79 @@ export default function GoalsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-light text-black tracking-tight flex items-center gap-3">
-            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-              <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
-            </div>
-            Мої цілі
-          </h2>
-          <p className="text-[#6B6B6B] mt-2 text-base font-light ml-[68px]">Фокус на дисципліні та прогресі</p>
-        </div>
-
-        <div className="flex gap-3">
-          <Button 
-            onClick={handleManualUpdate}
-            disabled={isUpdating}
-            variant="outline"
-            className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-14 px-6 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-          >
-            <RefreshCw className={`h-5 w-5 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
-            Оновити прогрес
-          </Button>
-          <Button 
-            onClick={() => setShowCreateDialog(true)}
-            disabled={activeGoals.length >= 3}
-            className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-14 px-6 transition-all duration-300 shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)]"
-          >
-            <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
-            Створити ціль
-          </Button>
-        </div>
-      </div>
-
-      {activeGoals.length > 0 && (
-        <Card className="border-2 border-[#BBDEFB] shadow-[0_4px_16px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-[#2196F3] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+      {/* Header Section */}
+      <Card className="border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] flex-shrink-0">
+                <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
+              </div>
               <div>
-                <p className="text-sm font-normal text-black">💡 Як працювати з цілями</p>
-                <p className="text-xs text-[#6B6B6B] mt-1 font-light leading-relaxed">
-                  1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"<br/>
-                  2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди<br/>
-                  3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
-                </p>
+                <h2 className="text-3xl font-light text-black tracking-tight">Мої цілі</h2>
+                <p className="text-[#6B6B6B] mt-1 text-base font-light">Фокус на дисципліні та прогресі</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleManualUpdate}
+                disabled={isUpdating}
+                variant="outline"
+                className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-14 px-6 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+              >
+                <RefreshCw className={`h-5 w-5 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
+                Оновити прогрес
+              </Button>
+              <Button 
+                onClick={() => setShowCreateDialog(true)}
+                disabled={activeGoals.length >= 3}
+                className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-14 px-6 transition-all duration-300 shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)]"
+              >
+                <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                Створити ціль
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* How to Work with Goals - Collapsible */}
+      {activeGoals.length > 0 && (
+        <Collapsible open={isHowToExpanded} onOpenChange={setIsHowToExpanded}>
+          <Card className="border-2 border-[#BBDEFB] shadow-[0_4px_16px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden">
+            <CollapsibleTrigger className="w-full">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Info className="h-5 w-5 text-[#2196F3] flex-shrink-0" strokeWidth={1.5} />
+                    <p className="text-sm font-normal text-black">💡 Як працювати з цілями</p>
+                  </div>
+                  {isHowToExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+                  )}
+                </div>
+              </CardContent>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="px-6 pb-6 pt-0">
+                <div className="pl-8 space-y-2">
+                  <p className="text-xs text-[#6B6B6B] font-light leading-relaxed">
+                    1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"
+                  </p>
+                  <p className="text-xs text-[#6B6B6B] font-light leading-relaxed">
+                    2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди
+                  </p>
+                  <p className="text-xs text-[#6B6B6B] font-light leading-relaxed">
+                    3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
+                  </p>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       )}
 
       {activeGoals.length >= 3 && (
