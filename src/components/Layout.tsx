@@ -57,18 +57,14 @@ export default function Layout() {
             key={item.name}
             to={item.href}
             className={cn(
-              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
+              'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-black/90 text-white backdrop-blur-sm shadow-2xl shadow-black/40'
-                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
+                ? 'bg-[#F4E157] text-black shadow-[0_4px_16px_rgba(244,225,87,0.25)]'
+                : 'text-[#6B6B6B] hover:text-black hover:bg-[#FAFAF8]'
             )}
           >
-            {/* Liquid shine effect for active state */}
-            {isActive && (
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-            )}
-            <Icon className="h-5 w-5 relative z-10" />
-            <span className="relative z-10">{item.name}</span>
+            <Icon className="h-5 w-5" strokeWidth={1.5} />
+            <span>{item.name}</span>
           </Link>
         );
       })}
@@ -81,18 +77,14 @@ export default function Layout() {
             key={item.name}
             to={item.href}
             className={cn(
-              'group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden',
+              'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-black/90 text-white backdrop-blur-sm shadow-2xl shadow-black/40'
-                : 'text-gray-700 hover:text-black hover:bg-gray-100/80'
+                ? 'bg-[#F4E157] text-black shadow-[0_4px_16px_rgba(244,225,87,0.25)]'
+                : 'text-[#6B6B6B] hover:text-black hover:bg-[#FAFAF8]'
             )}
           >
-            {/* Liquid shine effect for active state */}
-            {isActive && (
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-            )}
-            <Icon className="h-5 w-5 relative z-10" />
-            <span className="relative z-10">{item.name}</span>
+            <Icon className="h-5 w-5" strokeWidth={1.5} />
+            <span>{item.name}</span>
           </Link>
         );
       })}
@@ -100,35 +92,32 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAFAF8]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white/90 backdrop-blur-xl px-6 pb-4 border-r-2 border-black/10 shadow-2xl">
-          {/* Logo Header with liquid style */}
-          <div className="flex h-20 shrink-0 items-center gap-3">
-            <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20 hover:scale-105 hover:rotate-3 transition-all duration-300">
-              <TrendingUp className="w-5 h-5 text-white" />
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
+        <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/95 backdrop-blur-xl px-8 py-8 border-r border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
+          {/* Logo Header */}
+          <div className="flex h-24 shrink-0 items-center gap-4">
+            <div className="w-16 h-16 bg-[#F4E157] rounded-[28px] flex items-center justify-center shadow-[0_4px_16px_rgba(244,225,87,0.25)]">
+              <TrendingUp className="w-8 h-8 text-black" strokeWidth={1.5} />
             </div>
-            <h1 className="text-2xl font-bold text-black tracking-tight">
-              Match<span className="text-gray-600">IQ</span>
+            <h1 className="text-3xl font-light text-black tracking-tight">
+              MatchIQ
             </h1>
           </div>
           
-          {/* User Info Card with liquid style */}
-          <div className="relative group/card">
-            {/* Glow effect on hover */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-black/20 via-gray-500/20 to-black/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition duration-500" />
-            
-            <div className="relative flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-black/15 shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-black via-gray-800 to-black shadow-xl shadow-black/30">
-                <User className="h-6 w-6 text-white" />
+          {/* User Info Card */}
+          <div className="relative">
+            <div className="flex items-center gap-4 px-5 py-4 bg-[#FAFAF8] rounded-[28px] border border-[#E8E6DC]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
+                <User className="h-7 w-7 text-black" strokeWidth={1.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-black truncate">
+                <p className="text-base font-normal text-black truncate">
                   @{username || 'User'}
                   {isAdmin && <span className="ml-1">👑</span>}
                 </p>
-                <p className="text-xs text-gray-600 font-medium">
+                <p className="text-sm text-[#8B8B8B] font-light">
                   {isAdmin ? 'Адміністратор' : 'Користувач'}
                 </p>
               </div>
@@ -136,7 +125,7 @@ export default function Layout() {
           </div>
 
           <nav className="flex flex-1 flex-col">
-            <ul role="list" className="flex flex-1 flex-col gap-y-7">
+            <ul role="list" className="flex flex-1 flex-col gap-y-8">
               <li>
                 <ul role="list" className="space-y-2">
                   <NavItems />
@@ -146,12 +135,10 @@ export default function Layout() {
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="group relative w-full justify-start gap-3 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-600 rounded-2xl font-bold h-12 transition-all duration-300 overflow-hidden"
+                  className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300"
                 >
-                  {/* Liquid effect on hover */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  <LogOut className="h-5 w-5 relative z-10" />
-                  <span className="relative z-10">Вийти</span>
+                  <LogOut className="h-5 w-5" strokeWidth={1.5} />
+                  <span>Вийти</span>
                 </Button>
               </li>
             </ul>
@@ -161,45 +148,43 @@ export default function Layout() {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-white/90 backdrop-blur-xl px-4 py-4 border-b-2 border-black/10 shadow-lg">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center shadow-xl shadow-black/20">
-              <TrendingUp className="w-4 h-4 text-white" />
+        <div className="flex items-center justify-between bg-white/95 backdrop-blur-xl px-6 py-5 border-b border-[#E8E6DC] shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#F4E157] rounded-[20px] flex items-center justify-center shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
+              <TrendingUp className="w-6 h-6 text-black" strokeWidth={1.5} />
             </div>
-            <h1 className="text-lg font-bold text-black tracking-tight">
-              Match<span className="text-gray-600">IQ</span>
+            <h1 className="text-2xl font-light text-black tracking-tight">
+              MatchIQ
             </h1>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl border-2 border-black/20 hover:bg-black/5">
-                <Menu className="h-5 w-5" />
+              <Button variant="outline" size="icon" className="rounded-[20px] border border-[#E8E6DC] hover:bg-[#FAFAF8] w-12 h-12">
+                <Menu className="h-6 w-6" strokeWidth={1.5} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 bg-white/95 backdrop-blur-xl border-r-2 border-black/10">
-              <div className="flex h-16 items-center gap-3">
-                <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20">
-                  <TrendingUp className="w-5 h-5 text-white" />
+            <SheetContent side="left" className="w-80 bg-white/95 backdrop-blur-xl border-r border-[#E8E6DC]">
+              <div className="flex h-20 items-center gap-4">
+                <div className="w-14 h-14 bg-[#F4E157] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
+                  <TrendingUp className="w-7 h-7 text-black" strokeWidth={1.5} />
                 </div>
-                <h1 className="text-xl font-bold text-black tracking-tight">
-                  Match<span className="text-gray-600">IQ</span>
+                <h1 className="text-2xl font-light text-black tracking-tight">
+                  MatchIQ
                 </h1>
               </div>
               
               {/* User Info Mobile */}
-              <div className="relative group/card mt-4">
-                <div className="absolute -inset-1 bg-gradient-to-r from-black/20 via-gray-500/20 to-black/20 rounded-2xl blur-xl opacity-0 group-hover/card:opacity-100 transition duration-500" />
-                
-                <div className="relative flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-black/15 shadow-lg">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-black via-gray-800 to-black shadow-xl shadow-black/30">
-                    <User className="h-6 w-6 text-white" />
+              <div className="relative mt-6">
+                <div className="flex items-center gap-4 px-5 py-4 bg-[#FAFAF8] rounded-[28px] border border-[#E8E6DC]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
+                    <User className="h-7 w-7 text-black" strokeWidth={1.5} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-black truncate">
+                    <p className="text-base font-normal text-black truncate">
                       @{username || 'User'}
                       {isAdmin && <span className="ml-1">👑</span>}
                     </p>
-                    <p className="text-xs text-gray-600 font-medium">
+                    <p className="text-sm text-[#8B8B8B] font-light">
                       {isAdmin ? 'Адміністратор' : 'Користувач'}
                     </p>
                   </div>
@@ -214,11 +199,10 @@ export default function Layout() {
                   <Button
                     onClick={handleLogout}
                     variant="outline"
-                    className="group relative w-full justify-start gap-3 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-600 rounded-2xl font-bold h-12 transition-all duration-300 overflow-hidden"
+                    className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300"
                   >
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    <LogOut className="h-5 w-5 relative z-10" />
-                    <span className="relative z-10">Вийти</span>
+                    <LogOut className="h-5 w-5" strokeWidth={1.5} />
+                    <span>Вийти</span>
                   </Button>
                 </div>
               </nav>
@@ -227,9 +211,9 @@ export default function Layout() {
         </div>
       </div>
 
-      {/* Main Content - FIXED: Using Outlet instead of children */}
-      <main className="lg:pl-72">
-        <div className="px-4 py-6 sm:px-6 lg:px-8">
+      {/* Main Content */}
+      <main className="lg:pl-80">
+        <div className="px-6 py-8 sm:px-8 lg:px-10">
           <Outlet />
         </div>
       </main>
