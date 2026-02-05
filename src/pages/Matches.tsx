@@ -29,7 +29,9 @@ import {
   CheckCircle,
   Info,
   Brain,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -345,6 +347,7 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // AI Recommendation Modal State
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -552,6 +555,16 @@ export default function Matches() {
     }
   };
 
+  // Count active filters
+  const activeFiltersCount = [
+    filterTier !== 'all',
+    filterConfidence !== 'all',
+    filterRisk !== 'all',
+    filterMatchType !== 'all',
+    showHotMatches,
+    searchQuery !== ''
+  ].filter(Boolean).length;
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-[#FAFAF8] relative overflow-hidden">
@@ -685,107 +698,137 @@ export default function Matches() {
             </Card>
           </div>
 
-          {/* Filters */}
+          {/* Collapsible Filters */}
           <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="text-3xl font-light text-black tracking-tight flex items-center gap-3">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_8px_20px_rgba(244,225,87,0.3)]">
-                  <Filter className="h-7 w-7 text-black" strokeWidth={1.5} />
-                </div>
-                Фільтри та сортування
-              </CardTitle>
+            <CardHeader 
+              className="border-b-2 border-[#E8E6DC] p-6 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+              onClick={() => setFiltersExpanded(!filtersExpanded)}
+            >
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl font-light text-black tracking-tight flex items-center gap-3">
+                  <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_6px_16px_rgba(244,225,87,0.3)]">
+                    <Filter className="h-6 w-6 text-black" strokeWidth={1.5} />
+                  </div>
+                  Фільтри та сортування
+                  {activeFiltersCount > 0 && (
+                    <Badge className="ml-2 bg-[#F4E157] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
+                      {activeFiltersCount} активних
+                    </Badge>
+                  )}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-[16px] hover:bg-[#F5F5F3] text-black"
+                >
+                  {filtersExpanded ? (
+                    <>
+                      <ChevronUp className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                      Згорнути
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                      Розгорнути
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">Tier:</label>
-                  <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                    <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі</SelectItem>
-                      <SelectItem value="tier1">Tier 1</SelectItem>
-                      <SelectItem value="tier2">Tier 2</SelectItem>
-                      <SelectItem value="tier3">Tier 3</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">AI Confidence:</label>
-                  <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                    <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі</SelectItem>
-                      <SelectItem value="high">&gt;80%</SelectItem>
-                      <SelectItem value="medium">60-80%</SelectItem>
-                      <SelectItem value="low">&lt;60%</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">Ризик:</label>
-                  <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                    <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі</SelectItem>
-                      <SelectItem value="safe">Низький</SelectItem>
-                      <SelectItem value="moderate">Помірний</SelectItem>
-                      <SelectItem value="high">Високий</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">Тип матчу:</label>
-                  <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                    <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі</SelectItem>
-                      <SelectItem value="Bo1">Bo1</SelectItem>
-                      <SelectItem value="Bo3">Bo3</SelectItem>
-                      <SelectItem value="Bo5">Bo5</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">Пошук:</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3.5 h-5 w-5 text-[#8B8B8B]" strokeWidth={1.5} />
-                    <Input
-                      placeholder="Команда..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-12"
-                    />
+            
+            {filtersExpanded && (
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5">
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Tier:</label>
+                    <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Всі</SelectItem>
+                        <SelectItem value="tier1">Tier 1</SelectItem>
+                        <SelectItem value="tier2">Tier 2</SelectItem>
+                        <SelectItem value="tier3">Tier 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">AI Confidence:</label>
+                    <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Всі</SelectItem>
+                        <SelectItem value="high">&gt;80%</SelectItem>
+                        <SelectItem value="medium">60-80%</SelectItem>
+                        <SelectItem value="low">&lt;60%</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Ризик:</label>
+                    <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Всі</SelectItem>
+                        <SelectItem value="safe">Низький</SelectItem>
+                        <SelectItem value="moderate">Помірний</SelectItem>
+                        <SelectItem value="high">Високий</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Тип матчу:</label>
+                    <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Всі</SelectItem>
+                        <SelectItem value="Bo1">Bo1</SelectItem>
+                        <SelectItem value="Bo3">Bo3</SelectItem>
+                        <SelectItem value="Bo5">Bo5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Пошук:</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-5 w-5 text-[#8B8B8B]" strokeWidth={1.5} />
+                      <Input
+                        placeholder="Команда..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Hot Match:</label>
+                    <Button
+                      variant={showHotMatches ? 'default' : 'outline'}
+                      className={`w-full rounded-[16px] font-normal h-11 transition-all duration-300 ${
+                        showHotMatches 
+                          ? 'bg-[#F4E157] hover:bg-[#E8D54A] text-black shadow-[0_4px_12px_rgba(244,225,87,0.3)] border-0' 
+                          : 'border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white text-black'
+                      }`}
+                      onClick={() => setShowHotMatches(!showHotMatches)}
+                    >
+                      {showHotMatches ? 'Увімкнено' : 'Вимкнено'}
+                    </Button>
                   </div>
                 </div>
-                
-                <div>
-                  <label className="text-sm font-normal text-[#6B6B6B] mb-3 block">Hot Match:</label>
-                  <Button
-                    variant={showHotMatches ? 'default' : 'outline'}
-                    className={`w-full rounded-[16px] font-normal h-12 transition-all duration-300 ${
-                      showHotMatches 
-                        ? 'bg-[#F4E157] hover:bg-[#E8D54A] text-black shadow-[0_4px_12px_rgba(244,225,87,0.3)] border-0' 
-                        : 'border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white text-black'
-                    }`}
-                    onClick={() => setShowHotMatches(!showHotMatches)}
-                  >
-                    {showHotMatches ? 'Увімкнено' : 'Вимкнено'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           {/* Matches Table */}

@@ -37,7 +37,9 @@ import {
   ArrowDownRight,
   Flag,
   Wallet,
-  Edit
+  Edit,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, Area, AreaChart, Legend, ReferenceLine, ReferenceArea } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -81,6 +83,7 @@ export default function Analytics() {
   
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [bankrollStats, setBankrollStats] = useState({
@@ -485,6 +488,9 @@ export default function Analytics() {
     { id: 'risks', label: 'Ризики', icon: null },
   ];
 
+  // Count active filters
+  const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] relative overflow-hidden">
       {/* Decorative elements with hatching pattern - RonDesignLab style */}
@@ -682,36 +688,64 @@ export default function Analytics() {
               <div className="grid grid-cols-1 gap-6">
                 {bets.length > 0 ? (
                   <>
-                    {/* Date Filter */}
+                    {/* Collapsible Date Filter */}
                     <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-                      <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
-                        <CardTitle className="flex items-center justify-between">
-                          <span className="flex items-center gap-3 text-3xl font-light text-black">
-                            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                      <CardHeader 
+                        className="border-b-2 border-[#E8E6DC] p-6 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+                        onClick={() => setFiltersExpanded(!filtersExpanded)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-2xl font-light text-black tracking-tight flex items-center gap-3">
+                            <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_6px_16px_rgba(244,225,87,0.3)]">
                               <Filter className="h-6 w-6 text-black" strokeWidth={1.5} />
                             </div>
                             Фільтри
-                          </span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-8">
-                        <div className="flex gap-4">
-                          <div className="flex-1">
-                            <label className="text-sm font-normal text-[#6B6B6B] mb-2 block uppercase tracking-wider">Період:</label>
-                            <Select value={timeFilter} onValueChange={setTimeFilter}>
-                              <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-14 font-light">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all">Весь час</SelectItem>
-                                <SelectItem value="week">Останній тиждень</SelectItem>
-                                <SelectItem value="month">Останній місяць</SelectItem>
-                                <SelectItem value="quarter">Останній квартал</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                            {activeFiltersCount > 0 && (
+                              <Badge className="ml-2 bg-[#F4E157] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
+                                {activeFiltersCount} активних
+                              </Badge>
+                            )}
+                          </CardTitle>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-[16px] hover:bg-[#F5F5F3] text-black"
+                          >
+                            {filtersExpanded ? (
+                              <>
+                                <ChevronUp className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                                Згорнути
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                                Розгорнути
+                              </>
+                            )}
+                          </Button>
                         </div>
-                      </CardContent>
+                      </CardHeader>
+                      
+                      {filtersExpanded && (
+                        <CardContent className="p-6">
+                          <div className="flex gap-4">
+                            <div className="flex-1">
+                              <label className="text-sm font-normal text-[#6B6B6B] mb-2 block uppercase tracking-wider">Період:</label>
+                              <Select value={timeFilter} onValueChange={setTimeFilter}>
+                                <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-12 font-light">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="all">Весь час</SelectItem>
+                                  <SelectItem value="week">Останній тиждень</SelectItem>
+                                  <SelectItem value="month">Останній місяць</SelectItem>
+                                  <SelectItem value="quarter">Останній квартал</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </CardContent>
+                      )}
                     </Card>
 
                     <BalanceChart data={balanceData} />
