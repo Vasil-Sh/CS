@@ -8,13 +8,19 @@ interface AdminUser {
   isAdmin: string;
 }
 
+interface LoginResult {
+  success: boolean;
+  error?: string;
+  isAdmin?: boolean;
+}
+
 class AuthService {
   private spreadsheetId = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
   private apiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || '';
 
   async fetchUsers(): Promise<AdminUser[]> {
     try {
-      const range = 'Доступи!A2:G100'; // Using correct sheet name "Доступи"
+      const range = 'Доступи!A2:G100';
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
       
       console.log('Fetching users from Google Sheets...');
@@ -47,6 +53,70 @@ class AuthService {
     } catch (error) {
       console.error('Error fetching users:', error);
       return [];
+    }
+  }
+
+  async login(username: string, password: string): Promise<LoginResult> {
+    try {
+      console.log('=== Starting login ===');
+      console.log('Username:', username);
+      
+      const users = await this.fetchUsers();
+      console.log('Total users fetched:', users.length);
+      
+      const user = users.find(
+        u => u.username.toLowerCase() === username.toLowerCase() && 
+             u.password === password
+      );
+
+      if (!user) {
+        console.log('User not found or password mismatch');
+        return { 
+          success: false, 
+          error: "Невірний логін або пароль" 
+        };
+      }
+
+      console.log('User found:', user);
+
+      // Check if user is admin
+      const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
+      console.log('Is admin:', isAdmin);
+      
+      if (isAdmin) {
+        console.log('Admin user logged in successfully');
+        localStorage.setItem("authToken", "admin-token");
+        localStorage.setItem("userRole", "admin");
+        localStorage.setItem("username", username);
+        return { success: true, isAdmin: true };
+      }
+
+      // Check subscription for regular users
+      const endDate = this.parseDate(user.endDate);
+      const now = new Date();
+
+      console.log('End date:', endDate);
+      console.log('Current date:', now);
+
+      if (endDate && endDate > now) {
+        console.log('Subscription is valid');
+        localStorage.setItem("authToken", "user-token");
+        localStorage.setItem("userRole", "user");
+        localStorage.setItem("username", username);
+        return { success: true, isAdmin: false };
+      } else {
+        console.log('Subscription expired');
+        return { 
+          success: false, 
+          error: "Ваша підписка закінчилася. Зверніться до адміністратора." 
+        };
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      return { 
+        success: false, 
+        error: "Помилка з'єднання. Спробуйте ще раз." 
+      };
     }
   }
 
@@ -93,7 +163,7 @@ class AuthService {
 
       console.log('User found:', user);
 
-      // Check if user is admin (check both Ukrainian "так" and English "yes")
+      // Check if user is admin
       const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
       console.log('Is admin:', isAdmin);
       

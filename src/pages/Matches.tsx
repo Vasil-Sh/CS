@@ -80,11 +80,11 @@ interface Match {
   url?: string;
 }
 
-// Mock data for demonstration - all matches on 2025-12-21
+// Mock data for demonstration - updated to current date 2026-02-05
 const mockMatches: Match[] = [
   {
     id: '1',
-    date: '2025-12-21',
+    date: '2026-02-05',
     team1: 'NAVI',
     team2: 'Spirit',
     favorite: 'NAVI',
@@ -106,7 +106,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '2',
-    date: '2025-12-21',
+    date: '2026-02-05',
     team1: 'FURIA',
     team2: 'G2',
     favorite: 'FURIA',
@@ -128,7 +128,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '3',
-    date: '2025-12-21',
+    date: '2026-02-05',
     team1: 'Vitality',
     team2: 'Astralis',
     favorite: 'Vitality',
@@ -150,7 +150,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '4',
-    date: '2025-12-21',
+    date: '2026-02-05',
     team1: 'FaZe',
     team2: 'Liquid',
     favorite: 'FaZe',
@@ -172,7 +172,7 @@ const mockMatches: Match[] = [
   },
   {
     id: '5',
-    date: '2025-12-21',
+    date: '2026-02-05',
     team1: 'NIP',
     team2: 'Heroic',
     favorite: 'Heroic',

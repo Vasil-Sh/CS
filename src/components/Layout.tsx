@@ -1,5 +1,5 @@
-import { ReactNode, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   BarChart3, 
@@ -14,10 +14,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
 const navigation = [
   { name: 'Аналітика', href: '/analytics', icon: BarChart3 },
   { name: 'Матчі', href: '/matches', icon: Trophy },
@@ -28,7 +24,7 @@ const adminNavigation = [
   { name: 'Адмін панель', href: '/admin', icon: Shield, adminOnly: true },
 ];
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
@@ -231,10 +227,10 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - FIXED: Using Outlet instead of children */}
       <main className="lg:pl-72">
         <div className="px-4 py-6 sm:px-6 lg:px-8">
-          {children}
+          <Outlet />
         </div>
       </main>
     </div>
