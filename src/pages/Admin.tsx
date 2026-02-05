@@ -144,8 +144,8 @@ export default function Admin() {
   const getExpiryBadge = (user: User) => {
     if (!user.isActive) {
       return (
-        <Badge className="bg-red-50 text-red-700 hover:bg-red-50 px-3 py-1 rounded-full border-2 border-red-200 font-bold">
-          <XCircle className="mr-1 h-3 w-3" />
+        <Badge className="bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] px-5 py-2 rounded-[20px] border-2 border-[#FFCDD2] font-normal text-sm">
+          <XCircle className="mr-2 h-4 w-4" strokeWidth={1.5} />
           Закінчилась
         </Badge>
       );
@@ -153,8 +153,8 @@ export default function Admin() {
 
     if (user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0) {
       return (
-        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 px-3 py-1 rounded-full border-0 shadow-lg font-bold animate-pulse">
-          <AlertTriangle className="mr-1 h-3 w-3" />
+        <Badge className="bg-gradient-to-r from-[#FF9800] to-[#F44336] text-white hover:from-[#FB8C00] hover:to-[#E53935] px-5 py-2 rounded-[20px] border-0 shadow-[0_4px_12px_rgba(244,67,54,0.3)] font-normal text-sm animate-pulse">
+          <AlertTriangle className="mr-2 h-4 w-4" strokeWidth={1.5} />
           {user.daysUntilExpiry === 0 ? 'Закінчується сьогодні!' : `${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
         </Badge>
       );
@@ -162,16 +162,16 @@ export default function Admin() {
 
     if (user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 7) {
       return (
-        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white hover:from-yellow-500 hover:to-orange-500 px-3 py-1 rounded-full border-0 shadow-md font-bold">
-          <Bell className="mr-1 h-3 w-3" />
+        <Badge className="bg-gradient-to-r from-[#F4E157] to-[#FF9800] text-black hover:from-[#F4E157] hover:to-[#FB8C00] px-5 py-2 rounded-[20px] border-0 shadow-[0_4px_12px_rgba(244,225,87,0.3)] font-normal text-sm">
+          <Bell className="mr-2 h-4 w-4" strokeWidth={1.5} />
           {user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}
         </Badge>
       );
     }
 
     return (
-      <Badge className="bg-green-50 text-green-700 hover:bg-green-50 px-3 py-1 rounded-full border-2 border-green-200 font-bold">
-        <CheckCircle className="mr-1 h-3 w-3" />
+      <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-5 py-2 rounded-[20px] border-2 border-[#C8E6C9] font-normal text-sm">
+        <CheckCircle className="mr-2 h-4 w-4" strokeWidth={1.5} />
         Активна ({user.daysUntilExpiry} дн{user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry && user.daysUntilExpiry < 5 ? 'і' : 'ів'})
       </Badge>
     );
@@ -200,246 +200,272 @@ export default function Admin() {
   };
 
   return (
-    <div className="space-y-8 p-6 bg-white min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-black tracking-tight flex items-center gap-3">
-            <div className="p-2.5 bg-black rounded-2xl shadow-xl shadow-black/20">
-              <Shield className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-[#FAFAF8] relative overflow-hidden">
+      {/* Decorative elements with hatching pattern - RonDesignLab style */}
+      <div className="absolute top-16 right-16 w-40 h-40 rounded-[40px] bg-[#E8E6DC] opacity-20" 
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px)`
+        }} 
+      />
+      <div className="absolute bottom-24 left-16 w-32 h-32 rounded-[36px] bg-[#D4D2C8] opacity-15"
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px)`
+        }}
+      />
+      
+      {/* Subtle grid pattern overlay */}
+      <svg className="absolute top-0 left-0 w-full h-full opacity-[0.015] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" patternUnits="userSpaceOnUse" width="40" height="40">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000000" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+
+      <div className="relative z-10 space-y-10 p-8">
+        {/* Enhanced Header with background */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[40px] p-8 border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-6xl font-light text-black tracking-tight flex items-center gap-5">
+                <div className="p-4 bg-[#F4E157] rounded-[36px] shadow-[0_12px_32px_rgba(244,225,87,0.4)]">
+                  <Shield className="h-10 w-10 text-black" strokeWidth={1.5} />
+                </div>
+                Адмін панель
+              </h1>
+              <p className="text-[#6B6B6B] mt-4 text-xl font-light ml-[88px]">
+                Управління користувачами та підписками
+              </p>
             </div>
-            Адмін панель
-          </h1>
-          <p className="text-gray-600 mt-2 font-medium">
-            Управління користувачами та підписками
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={() => setShowUsernames(!showUsernames)}
-            variant="outline"
-            className="rounded-2xl border-2 border-black/20 font-bold hover:bg-black/5 transition-all duration-300"
-          >
-            {showUsernames ? (
-              <>
-                <EyeOff className="mr-2 h-4 w-4" />
-                Приховати дані
-              </>
-            ) : (
-              <>
-                <Eye className="mr-2 h-4 w-4" />
-                Показати дані
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={fetchUsers}
-            disabled={loading}
-            className="group relative rounded-2xl bg-black hover:bg-gray-800 font-bold transition-all duration-300 overflow-hidden shadow-xl shadow-black/20"
-          >
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin relative z-10" />
-                <span className="relative z-10">Завантаження...</span>
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 relative z-10" />
-                <span className="relative z-10">Оновити дані</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {error && (
-        <Alert className="rounded-2xl border-2 border-red-200 bg-red-50">
-          <AlertDescription className="font-bold text-red-700">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Privacy Notice */}
-      {!showUsernames && (
-        <Alert className="rounded-2xl border-2 border-blue-200 bg-blue-50">
-          <Eye className="h-5 w-5 text-blue-600" />
-          <AlertDescription className="font-medium text-gray-900 ml-2">
-            <div className="font-bold text-blue-700 mb-1">
-              🔒 Режим приватності активний
-            </div>
-            <p className="text-sm text-gray-700">
-              Імена користувачів та Telegram приховані для захисту конфіденційності під час запису відео або демонстрації.
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Expiring Subscriptions Alert */}
-      {expiringUsers.length > 0 && (
-        <Alert className="rounded-2xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-red-50">
-          <AlertTriangle className="h-5 w-5 text-orange-600" />
-          <AlertDescription className="font-medium text-gray-900 ml-2">
-            <div className="font-bold text-orange-700 mb-2">
-              ⚠️ Увага! {expiringUsers.length} підпис{expiringUsers.length === 1 ? 'ка' : expiringUsers.length < 5 ? 'ки' : 'ок'} закінчу{expiringUsers.length === 1 ? 'ється' : 'ються'} протягом 3 днів:
-            </div>
-            <ul className="space-y-1 mt-2">
-              {expiringUsers.map((user, idx) => (
-                <li key={idx} className="text-sm text-gray-700">
-                  <span className="font-bold">{renderTelegram(user.telegram)}</span> ({renderUsername(user.username)}) - 
-                  <span className="font-bold text-orange-600 ml-1">
-                    {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : `залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
-                  </span>
-                  <span className="text-gray-500 ml-1">(до {user.endDate})</span>
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-2 border-black/10 shadow-xl rounded-3xl bg-white overflow-hidden hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Всього користувачів
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-black tracking-tight">{users.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-green-200 shadow-xl rounded-3xl bg-gradient-to-br from-green-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Активні підписки
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600 tracking-tight">{activeUsers}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-black/20 shadow-xl rounded-3xl bg-gradient-to-br from-gray-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <Crown className="h-4 w-4" />
-              Адміністратори
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-black tracking-tight">{adminUsers}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-red-200 shadow-xl rounded-3xl bg-gradient-to-br from-red-50 to-white overflow-hidden hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <XCircle className="h-4 w-4" />
-              Неактивні підписки
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-600 tracking-tight">{inactiveUsers}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Users Table */}
-      <Card className="border-2 border-black/10 shadow-2xl rounded-3xl bg-white overflow-hidden">
-        <CardHeader className="border-b-2 border-black/10 bg-white">
-          <CardTitle className="flex items-center justify-between">
-            <span className="text-xl font-bold text-black tracking-tight">Список користувачів</span>
-            {lastUpdate && (
-              <span className="text-sm font-medium text-gray-600 flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                Оновлено: {lastUpdate}
-              </span>
-            )}
-          </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">
-            Дані з Google Sheets (ID: 1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50 border-b-2 border-black/10">
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Telegram</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Username</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Ціна</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Дата початку</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Дата закінчення</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</TableHead>
-                  <TableHead className="text-xs font-bold text-gray-700 uppercase tracking-wider">Адмін</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-gray-500 py-12">
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          Завантаження...
-                        </div>
-                      ) : (
-                        'Немає даних'
-                      )}
-                    </TableCell>
-                  </TableRow>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setShowUsernames(!showUsernames)}
+                variant="outline"
+                className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-16 px-7 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)] text-base"
+              >
+                {showUsernames ? (
+                  <>
+                    <EyeOff className="mr-2.5 h-5 w-5" strokeWidth={1.5} />
+                    Приховати дані
+                  </>
                 ) : (
-                  users.map((user, index) => (
-                    <TableRow 
-                      key={index} 
-                      className={`border-b border-black/5 hover:bg-gray-50 transition-colors ${
-                        user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
-                          ? 'bg-orange-50/50'
-                          : ''
-                      }`}
-                    >
-                      <TableCell className="font-bold text-black">{renderTelegram(user.telegram)}</TableCell>
-                      <TableCell className="text-gray-700 font-medium">
-                        {renderUsername(user.username)}
-                        {user.isAdmin && (
-                          <span className="ml-2 text-black">👑</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-gray-700">
-                        <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 px-3 py-1 rounded-full border-2 border-blue-200 font-bold">
-                          <DollarSign className="mr-1 h-3 w-3" />
-                          {user.priceMonth}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-gray-700 font-medium">{user.startDate}</TableCell>
-                      <TableCell className="text-gray-700 font-medium">{user.endDate}</TableCell>
-                      <TableCell>
-                        {getExpiryBadge(user)}
-                      </TableCell>
-                      <TableCell>
-                        {user.isAdmin ? (
-                          <Badge className="bg-black text-white hover:bg-gray-800 px-3 py-1 rounded-full border-0 font-bold shadow-lg shadow-black/20">
-                            <Crown className="mr-1 h-3 w-3" />
-                            Так
-                          </Badge>
+                  <>
+                    <Eye className="mr-2.5 h-5 w-5" strokeWidth={1.5} />
+                    Показати дані
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={fetchUsers}
+                disabled={loading}
+                className="group relative rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-16 px-7 transition-all duration-300 overflow-hidden shadow-[0_6px_20px_rgba(244,225,87,0.35)] text-base"
+              >
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2.5 h-5 w-5 animate-spin relative z-10" strokeWidth={1.5} />
+                    <span className="relative z-10">Завантаження...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2.5 h-5 w-5 relative z-10" strokeWidth={1.5} />
+                    <span className="relative z-10">Оновити дані</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <Alert className="rounded-[28px] border-2 border-[#FFCDD2] bg-white shadow-[0_4px_16px_rgba(244,67,54,0.15)] p-6">
+            <AlertDescription className="font-normal text-[#D32F2F] text-base">{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Privacy Notice */}
+        {!showUsernames && (
+          <Alert className="rounded-[28px] border-2 border-[#E8DDD0] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+            <Eye className="h-5 w-5 text-[#A67C52]" strokeWidth={1.5} />
+            <AlertDescription className="font-normal text-black ml-2">
+              <div className="font-normal text-[#A67C52] mb-2 text-base">
+                🔒 Режим приватності активний
+              </div>
+              <p className="text-[15px] text-[#6B6B6B] font-light leading-relaxed">
+                Імена користувачів та Telegram приховані для захисту конфіденційності під час запису відео або демонстрації.
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Expiring Subscriptions Alert */}
+        {expiringUsers.length > 0 && (
+          <Alert className="rounded-[28px] border-2 border-[#FFCC80] bg-white shadow-[0_4px_16px_rgba(255,152,0,0.15)] p-6">
+            <AlertTriangle className="h-5 w-5 text-[#FF9800]" strokeWidth={1.5} />
+            <AlertDescription className="font-normal text-black ml-2">
+              <div className="font-normal text-[#FF9800] mb-3 text-base">
+                ⚠️ Увага! {expiringUsers.length} підпис{expiringUsers.length === 1 ? 'ка' : expiringUsers.length < 5 ? 'ки' : 'ок'} закінчу{expiringUsers.length === 1 ? 'ється' : 'ються'} протягом 3 днів:
+              </div>
+              <ul className="space-y-2 mt-3">
+                {expiringUsers.map((user, idx) => (
+                  <li key={idx} className="text-[15px] text-[#6B6B6B] font-light leading-relaxed">
+                    <span className="font-normal">{renderTelegram(user.telegram)}</span> ({renderUsername(user.username)}) - 
+                    <span className="font-normal text-[#FF9800] ml-1">
+                      {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : `залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
+                    </span>
+                    <span className="text-[#8B8B8B] ml-1">(до {user.endDate})</span>
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Stats Cards with more spacing */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <Users className="h-5 w-5" strokeWidth={1.5} />
+                Всього користувачів
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-black tracking-tight">{users.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" strokeWidth={1.5} />
+                Активні підписки
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-[#4CAF50] tracking-tight">{activeUsers}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <Crown className="h-5 w-5" strokeWidth={1.5} />
+                Адміністратори
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-black tracking-tight">{adminUsers}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-[#FFAB91] shadow-[0_8px_24px_rgba(244,67,54,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(244,67,54,0.25)] hover:border-[#FF8A65] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <XCircle className="h-5 w-5" strokeWidth={1.5} />
+                Неактивні підписки
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-7 pb-7">
+              <div className="text-6xl font-light text-[#D32F2F] tracking-tight">{inactiveUsers}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Users Table */}
+        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+          <CardHeader className="border-b-2 border-[#E8E6DC] p-8">
+            <CardTitle className="flex items-center justify-between">
+              <span className="text-3xl font-light text-black tracking-tight">Список користувачів</span>
+              {lastUpdate && (
+                <span className="text-base font-light text-[#6B6B6B] flex items-center gap-2">
+                  <Calendar className="h-5 w-5" strokeWidth={1.5} />
+                  Оновлено: {lastUpdate}
+                </span>
+              )}
+            </CardTitle>
+            <CardDescription className="text-[#8B8B8B] font-light text-base mt-2">
+              Дані з Google Sheets (ID: 1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC]">
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Telegram</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Username</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Ціна</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Дата початку</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Дата закінчення</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Статус</TableHead>
+                    <TableHead className="text-sm font-normal text-[#2A2A2A] uppercase tracking-wider py-5 px-6">Адмін</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-[#8B8B8B] py-16 text-base">
+                        {loading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.5} />
+                            Завантаження...
+                          </div>
                         ) : (
-                          <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 px-3 py-1 rounded-full border-2 border-gray-200 font-bold">
-                            Ні
-                          </Badge>
+                          'Немає даних'
                         )}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  ) : (
+                    users.map((user, index) => (
+                      <TableRow 
+                        key={index} 
+                        className={`border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-colors ${
+                          user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
+                            ? 'bg-[#FFF3E0]/70'
+                            : ''
+                        }`}
+                      >
+                        <TableCell className="font-normal text-black py-5 px-6 text-[15px]">{renderTelegram(user.telegram)}</TableCell>
+                        <TableCell className="text-[#6B6B6B] font-light py-5 px-6 text-[15px]">
+                          {renderUsername(user.username)}
+                          {user.isAdmin && (
+                            <span className="ml-2 text-black">👑</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-[#6B6B6B] py-5 px-6">
+                          <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-5 py-2 rounded-[20px] border-2 border-[#C8E6C9] font-normal text-sm">
+                            <DollarSign className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                            {user.priceMonth}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-[#6B6B6B] font-light py-5 px-6 text-[15px]">{user.startDate}</TableCell>
+                        <TableCell className="text-[#6B6B6B] font-light py-5 px-6 text-[15px]">{user.endDate}</TableCell>
+                        <TableCell className="py-5 px-6">
+                          {getExpiryBadge(user)}
+                        </TableCell>
+                        <TableCell className="py-5 px-6">
+                          {user.isAdmin ? (
+                            <Badge className="bg-[#F4E157] text-black hover:bg-[#E8D54A] px-5 py-2 rounded-[20px] border-0 font-normal text-sm shadow-[0_4px_12px_rgba(244,225,87,0.3)]">
+                              <Crown className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                              Так
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-white text-[#8B8B8B] hover:bg-white px-5 py-2 rounded-[20px] border-2 border-[#E8E6DC] font-light text-sm">
+                              Ні
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
