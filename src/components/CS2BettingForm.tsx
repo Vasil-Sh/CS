@@ -476,15 +476,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'БАН':
-        return 'bg-red-100 text-red-800 hover:bg-red-100 border-0 rounded-full font-bold';
+        return 'bg-red-100 text-red-700 hover:bg-red-100 border-0 rounded-full font-normal';
       case 'Нестабільні':
-        return 'bg-orange-100 text-orange-800 hover:bg-orange-100 border-0 rounded-full font-bold';
+        return 'bg-orange-100 text-orange-700 hover:bg-orange-100 border-0 rounded-full font-normal';
       case 'Обережно':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-0 rounded-full font-bold';
+        return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-0 rounded-full font-normal';
       case 'Рідко':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-100 border-0 rounded-full font-bold';
+        return 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-0 rounded-full font-normal';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-0 rounded-full font-bold';
+        return 'bg-gray-100 text-gray-700 hover:bg-gray-100 border-0 rounded-full font-normal';
     }
   };
 
@@ -1276,16 +1276,16 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               </Card>
             )}
 
-            {/* Submit Button */}
+            {/* Submit Button - YELLOW */}
             {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="w-full bg-[#2D2D2D] hover:bg-[#1A1A1A] text-white rounded-[32px] font-normal py-8 text-lg shadow-[0_4px_16px_rgba(0,0,0,0.12)] transform hover:scale-[1.01] transition-all"
+                className="w-full bg-[#F4E157] hover:bg-[#E5D24E] text-[#2D2D2D] rounded-[32px] font-normal py-8 text-lg shadow-[0_4px_16px_rgba(244,225,87,0.3)] transform hover:scale-[1.01] transition-all"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#2D2D2D] mr-3"></div>
                     Додавання...
                   </>
                 ) : (
@@ -1410,11 +1410,13 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               </CardContent>
             </Card>
 
-            {/* Risky Teams Card */}
-            <Card className="border-[1.5px] border-red-300 bg-red-50/50 rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-              <CardHeader className="pb-3">
+            {/* Risky Teams Card - SOFTER DESIGN */}
+            <Card className="border-[1.5px] border-[#E8E6DC] bg-white/80 backdrop-blur-sm rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+              <CardHeader className="pb-3 bg-[#FAFAF8] border-b border-[#E8E6DC]">
                 <CardTitle className="text-base font-normal text-[#2D2D2D] flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" strokeWidth={1.5} />
+                  <div className="p-2 bg-orange-100 rounded-[16px]">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" strokeWidth={1.5} />
+                  </div>
                   Ризиковані команди
                 </CardTitle>
               </CardHeader>
@@ -1422,12 +1424,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-3 border-[1.5px] border-red-200 rounded-[24px] bg-white space-y-2 hover:border-red-300 transition-colors">
-                        <div className="flex justify-between items-start">
+                      <div key={index} className="p-4 border-[1.5px] border-[#E8E6DC] rounded-[24px] bg-[#FAFAF8] space-y-3 hover:border-orange-200 transition-colors">
+                        <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" strokeWidth={1.5} />
-                              <span className="font-normal text-red-800">
+                              <span className="text-sm font-normal text-[#2D2D2D]">
                                 {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
                               </span>
                             </div>
@@ -1440,20 +1441,22 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeRiskyTeam(index)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-100 h-7 w-7 p-0 rounded-[20px]"
+                            className="text-[#6B6B6B] hover:text-[#2D2D2D] hover:bg-gray-100 h-7 w-7 p-0 rounded-[16px] flex-shrink-0"
                           >
-                            ✕
+                            <X className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
                         </div>
                         {riskyTeam.notes && (
-                          <p className="text-xs text-red-700 font-light whitespace-pre-wrap">{riskyTeam.notes}</p>
+                          <p className="text-xs text-[#6B6B6B] font-light leading-relaxed whitespace-pre-wrap pl-1">{riskyTeam.notes}</p>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <AlertTriangle className="h-12 w-12 text-[#B0B0B0] mx-auto mb-3" strokeWidth={1.5} />
+                    <div className="p-3 bg-[#FAFAF8] rounded-[20px] w-fit mx-auto mb-3">
+                      <AlertTriangle className="h-10 w-10 text-[#B0B0B0]" strokeWidth={1.5} />
+                    </div>
                     <p className="text-sm text-[#2D2D2D] font-normal mb-1">Ризикових команд не знайдено</p>
                     <p className="text-xs text-[#6B6B6B] font-light">
                       {formData.team1 || formData.team2 
