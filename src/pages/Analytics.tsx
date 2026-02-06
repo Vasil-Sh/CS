@@ -751,7 +751,7 @@ export default function Analytics() {
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Monthly Profit Chart and Scatter Chart remain the same */}
+                      {/* Monthly Profit Chart - ЛАКОНІЧНИЙ ДИЗАЙН */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -829,55 +829,34 @@ export default function Analytics() {
                             </AreaChart>
                           </ResponsiveContainer>
                           
-                          {/* Monthly Stats Summary - КОРИЧНЕВІ КОЛЬОРИ + ШТРИХУВАННЯ */}
-                          <div className="mt-6 grid grid-cols-3 gap-4">
-                            <div 
-                              className="text-center p-4 bg-[#F5EFE6] rounded-[20px] border-2 border-[#E8DCC8]"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-                              }}
-                            >
-                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Кращий місяць</p>
-                              <p className="text-2xl font-light text-[#8B6F47]">
+                          {/* Monthly Stats Summary - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                          <div className="mt-6 flex items-center justify-between gap-4 px-2">
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
+                              <span className="text-sm text-[#6B6B6B] font-light">Макс:</span>
+                              <span className="text-lg font-normal text-black">
                                 +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                              </p>
-                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
-                                {monthlyProfit.find(m => m.profit === Math.max(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
-                              </p>
+                              </span>
                             </div>
-                            <div 
-                              className="text-center p-4 bg-[#F5EFE6] rounded-[20px] border-2 border-[#E8DCC8]"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-                              }}
-                            >
-                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Гірший місяць</p>
-                              <p className="text-2xl font-light text-[#A0826D]">
+                            <div className="flex items-center gap-2">
+                              <TrendingDown className="h-4 w-4 text-[#D32F2F]" strokeWidth={1.5} />
+                              <span className="text-sm text-[#6B6B6B] font-light">Мін:</span>
+                              <span className="text-lg font-normal text-black">
                                 {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                              </p>
-                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
-                                {monthlyProfit.find(m => m.profit === Math.min(...monthlyProfit.map(m => m.profit)))?.totalBets || 0} ставок
-                              </p>
+                              </span>
                             </div>
-                            <div 
-                              className="text-center p-4 bg-[#F5EFE6] rounded-[20px] border-2 border-[#E8DCC8]"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-                              }}
-                            >
-                              <p className="text-xs text-[#6B6B6B] mb-2 font-normal uppercase tracking-wider">Середній</p>
-                              <p className="text-2xl font-light text-[#B8956A]">
+                            <div className="flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-[#8B6F47]" strokeWidth={1.5} />
+                              <span className="text-sm text-[#6B6B6B] font-light">Сер:</span>
+                              <span className="text-lg font-normal text-black">
                                 {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
-                              </p>
-                              <p className="text-xs text-[#8B8B8B] mt-2 font-light">
-                                {Math.round(monthlyProfit.reduce((sum, m) => sum + m.totalBets, 0) / monthlyProfit.length)} ставок
-                              </p>
+                              </span>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
 
-                      {/* Scatter Chart */}
+                      {/* Scatter Chart - ЛАКОНІЧНИЙ ДИЗАЙН */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -960,21 +939,17 @@ export default function Analytics() {
                             </ScatterChart>
                           </ResponsiveContainer>
                           
-                          {/* Scatter Stats */}
-                          <div className="mt-6 grid grid-cols-2 gap-4">
-                            <div className="flex items-center gap-4 p-4 bg-[#E8F5E9] rounded-[20px] border-2 border-[#C8E6C9]">
-                              <ArrowUpRight className="h-8 w-8 text-[#4CAF50]" strokeWidth={1.5} />
-                              <div>
-                                <p className="text-xs text-[#6B6B6B] font-normal uppercase tracking-wider">Виграшних ставок</p>
-                                <p className="text-2xl font-light text-[#4CAF50]">{winningBets.length}</p>
-                              </div>
+                          {/* Scatter Stats - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                          <div className="mt-6 flex items-center justify-center gap-8 px-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-[#4CAF50]"></div>
+                              <span className="text-sm text-[#6B6B6B] font-light">Виграш:</span>
+                              <span className="text-lg font-normal text-black">{winningBets.length}</span>
                             </div>
-                            <div className="flex items-center gap-4 p-4 bg-[#FFE8E8] rounded-[20px] border-2 border-[#FFCDD2]">
-                              <ArrowDownRight className="h-8 w-8 text-[#D32F2F]" strokeWidth={1.5} />
-                              <div>
-                                <p className="text-xs text-[#6B6B6B] font-normal uppercase tracking-wider">Програшних ставок</p>
-                                <p className="text-2xl font-light text-[#D32F2F]">{losingBets.length}</p>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-[#D32F2F]"></div>
+                              <span className="text-sm text-[#6B6B6B] font-light">Програш:</span>
+                              <span className="text-lg font-normal text-black">{losingBets.length}</span>
                             </div>
                           </div>
                         </CardContent>
