@@ -926,17 +926,17 @@ export default function Analytics() {
                               <XAxis 
                                 dataKey="odds" 
                                 name="Коефіцієнт"
-                                tick={{ fontSize: 12 }}
-                                stroke="#6b7280"
-                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6b7280' } }}
+                                tick={{ fontSize: 12, fill: '#000' }}
+                                stroke="#000"
+                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#000' } }}
                                 tickFormatter={(value) => Number(value).toFixed(2)}
                               />
                               <YAxis 
                                 dataKey="profit" 
                                 name="Прибуток"
-                                tick={{ fontSize: 12 }}
-                                stroke="#6b7280"
-                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                                tick={{ fontSize: 12, fill: '#000' }}
+                                stroke="#000"
+                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
                               />
                               <Tooltip content={<ScatterTooltip />} />
                               <Scatter 
@@ -1021,21 +1021,21 @@ export default function Analytics() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis 
                               dataKey="range" 
-                              tick={{ fontSize: 13, fontWeight: 500 }}
-                              stroke="#6b7280"
+                              tick={{ fontSize: 13, fontWeight: 500, fill: '#000' }}
+                              stroke="#000"
                             />
                             <YAxis 
                               yAxisId="left"
-                              tick={{ fontSize: 12 }}
-                              stroke="#6b7280"
-                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                              tick={{ fontSize: 12, fill: '#000' }}
+                              stroke="#000"
+                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
                             />
                             <YAxis 
                               yAxisId="right"
                               orientation="right"
-                              tick={{ fontSize: 12 }}
-                              stroke="#6b7280"
-                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6b7280' } }}
+                              tick={{ fontSize: 12, fill: '#000' }}
+                              stroke="#000"
+                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000' } }}
                             />
                             <Tooltip 
                               contentStyle={{ 

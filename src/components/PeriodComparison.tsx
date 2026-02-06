@@ -373,22 +373,22 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
                     dataKey="period" 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
+                    tick={{ fontSize: 12, fill: '#000' }}
+                    stroke="#000"
                   />
                   <YAxis 
                     yAxisId="profit" 
                     orientation="left"
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                    tick={{ fontSize: 12, fill: '#000' }}
+                    stroke="#000"
+                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
                   />
                   <YAxis 
                     yAxisId="bets" 
                     orientation="right"
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6b7280' } }}
+                    tick={{ fontSize: 12, fill: '#000' }}
+                    stroke="#000"
+                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000' } }}
                   />
                   <RechartsTooltip 
                     contentStyle={{ 
@@ -449,13 +449,13 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
                     dataKey="period"
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
+                    tick={{ fontSize: 12, fill: '#000' }}
+                    stroke="#000"
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="#6b7280"
-                    label={{ value: 'Відсоток (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6b7280' } }}
+                    tick={{ fontSize: 12, fill: '#000' }}
+                    stroke="#000"
+                    label={{ value: 'Відсоток (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
                   />
                   <RechartsTooltip 
                     contentStyle={{ 
@@ -507,18 +507,18 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
           <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
             <CardTitle className="text-3xl font-light text-black">Детальна статистика по періодах</CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-[#E8E6DC] bg-[#F5F5F3]">
-                    <th className="text-left p-4 text-sm font-medium text-black uppercase tracking-wider">Період</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Ставок</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Win Rate</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Прибуток</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">ROI</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Серія ↑</th>
-                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Серія ↓</th>
+                  <tr className="border-b-2 border-[#E8E6DC]">
+                    <th className="text-left py-6 px-8 text-lg font-medium text-black">Період</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Ставок</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Win Rate</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Прибуток</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">ROI</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Серія ↑</th>
+                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Серія ↓</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -527,21 +527,21 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                       key={period.period} 
                       className={`border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all ${index === selectedPeriods.length - 1 ? 'bg-[#FFF9E6]' : ''}`}
                     >
-                      <td className="p-4 font-medium text-black text-base">
-                        <div className="flex items-center gap-2">
-                          {formatPeriodName(period.period)}
+                      <td className="py-6 px-8">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-medium text-black">{formatPeriodName(period.period)}</span>
                           {index === selectedPeriods.length - 1 && (
-                            <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-normal px-3 py-1">Поточний</Badge>
+                            <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-medium px-3 py-1 text-sm">Поточний</Badge>
                           )}
                           {hasSmallSample(period.totalBets) && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button className="inline-flex items-center">
-                                  <AlertCircle className="h-4 w-4 text-[#8B6F47] cursor-help" strokeWidth={1.5} />
+                                  <AlertCircle className="h-5 w-5 text-[#8B6F47] cursor-help" strokeWidth={1.5} />
                                 </button>
                               </TooltipTrigger>
-                              <TooltipContent className="bg-[#FFF9E6] border-2 border-[#F4E157] rounded-[16px]">
-                                <p className="text-xs text-[#8B6F47] font-normal">
+                              <TooltipContent className="bg-[#FFF9E6] border-2 border-[#F4E157] rounded-[16px] p-3">
+                                <p className="text-sm text-[#8B6F47] font-normal">
                                   Мала вибірка ({period.totalBets} ставок). Дані можуть бути нестабільні.
                                 </p>
                               </TooltipContent>
@@ -549,16 +549,16 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                           )}
                         </div>
                       </td>
-                      <td className="text-right p-4 text-black font-medium text-base">{period.totalBets}</td>
-                      <td className="text-right p-4 text-black font-medium text-base">{period.winRate.toFixed(1)}%</td>
-                      <td className={`text-right p-4 font-semibold text-base ${period.totalProfit >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
+                      <td className="text-center py-6 px-8 text-lg font-medium text-black">{period.totalBets}</td>
+                      <td className="text-center py-6 px-8 text-lg font-medium text-black">{period.winRate.toFixed(1)}%</td>
+                      <td className={`text-center py-6 px-8 text-lg font-semibold ${period.totalProfit >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
                         {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
                       </td>
-                      <td className={`text-right p-4 font-semibold text-base ${period.averageROI >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
+                      <td className={`text-center py-6 px-8 text-lg font-semibold ${period.averageROI >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
                         {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
                       </td>
-                      <td className="text-right p-4 text-[#8B6F47] font-semibold text-base">+{period.bestStreak}</td>
-                      <td className="text-right p-4 text-[#A0826D] font-semibold text-base">-{period.worstStreak}</td>
+                      <td className="text-center py-6 px-8 text-lg font-semibold text-[#8B6F47]">+{period.bestStreak}</td>
+                      <td className="text-center py-6 px-8 text-lg font-semibold text-[#A0826D]">-{period.worstStreak}</td>
                     </tr>
                   ))}
                 </tbody>
