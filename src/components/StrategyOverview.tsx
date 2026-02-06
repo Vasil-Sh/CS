@@ -268,9 +268,9 @@ export default function StrategyOverview() {
 
   const getRiskBarColor = (risk: string) => {
     switch (risk) {
-      case 'Low': return '#4CAF50';
-      case 'Medium': return '#FF9800';
-      case 'High': return '#D32F2F';
+      case 'Low': return '#8B4513';
+      case 'Medium': return '#A0522D';
+      case 'High': return '#D2691E';
       default: return '#6b7280';
     }
   };
@@ -619,7 +619,9 @@ export default function StrategyOverview() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                }}
                 className={`
                   relative rounded-[24px] px-6 py-4 font-light text-base
                   transition-all duration-300 ease-in-out
@@ -937,8 +939,8 @@ export default function StrategyOverview() {
                       <ComposedChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                         <defs>
                           <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                            <stop offset="5%" stopColor="#8B4513" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#D2691E" stopOpacity={0.4}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -1020,25 +1022,25 @@ export default function StrategyOverview() {
                     
                     {/* Enhanced Legend */}
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex items-center justify-center gap-3 p-3 bg-[#C8E6C9]/30 rounded-[20px] border-[1.5px] border-[#C8E6C9]">
-                        <div className="w-4 h-4 rounded-full bg-[#4CAF50]"></div>
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#DEB887]/20 rounded-[20px] border-[1.5px] border-[#8B4513]/30">
+                        <div className="w-4 h-4 rounded-full bg-[#8B4513]"></div>
                         <div className="text-sm">
-                          <div className="font-normal text-[#2E7D32]">Низький ризик</div>
-                          <div className="text-xs text-[#2E7D32] font-light">Стабільний прибуток</div>
+                          <div className="font-normal text-[#8B4513]">Низький ризик</div>
+                          <div className="text-xs text-[#8B4513] font-light">Стабільний прибуток</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-center gap-3 p-3 bg-[#FFF9C4]/50 rounded-[20px] border-[1.5px] border-[#FFF9C4]">
-                        <div className="w-4 h-4 rounded-full bg-[#FF9800]"></div>
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#D2B48C]/20 rounded-[20px] border-[1.5px] border-[#A0522D]/30">
+                        <div className="w-4 h-4 rounded-full bg-[#A0522D]"></div>
                         <div className="text-sm">
-                          <div className="font-normal text-[#F57F17]">Середній ризик</div>
-                          <div className="text-xs text-[#F57F17] font-light">Збалансований підхід</div>
+                          <div className="font-normal text-[#A0522D]">Середній ризик</div>
+                          <div className="text-xs text-[#A0522D] font-light">Збалансований підхід</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-center gap-3 p-3 bg-[#FFCDD2]/30 rounded-[20px] border-[1.5px] border-[#FFCDD2]">
-                        <div className="w-4 h-4 rounded-full bg-[#D32F2F]"></div>
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#F5DEB3]/30 rounded-[20px] border-[1.5px] border-[#D2691E]/40">
+                        <div className="w-4 h-4 rounded-full bg-[#D2691E]"></div>
                         <div className="text-sm">
-                          <div className="font-normal text-[#C62828]">Високий ризик</div>
-                          <div className="text-xs text-[#C62828] font-light">Агресивна стратегія</div>
+                          <div className="font-normal text-[#D2691E]">Високий ризик</div>
+                          <div className="text-xs text-[#D2691E] font-light">Агресивна стратегія</div>
                         </div>
                       </div>
                     </div>

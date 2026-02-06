@@ -593,7 +593,7 @@ export default function MyBets() {
                               <td className="p-4 border-r border-[#E8E6DC]">
                                 {isExpress ? (
                                   <div className="flex items-center justify-center gap-2">
-                                    <Badge className="rounded-[16px] bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-normal text-sm px-3 py-1 whitespace-nowrap">
+                                    <Badge className="rounded-[16px] bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 font-normal text-sm px-3 py-1 whitespace-nowrap">
                                       Express {expressEventCount}×
                                     </Badge>
                                     <Button

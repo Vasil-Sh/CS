@@ -1117,7 +1117,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         type="button"
                         onClick={addExpressEvent}
                         disabled={expressEvents.length >= 10}
-                        className="w-full mt-4 bg-[#2D2D2D] hover:bg-[#1A1A1A] text-white rounded-[24px] font-normal py-6 text-base shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                        className="w-full mt-4 bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] rounded-[24px] font-normal py-6 text-base shadow-[0_2px_8px_rgba(244,225,87,0.3)]"
                       >
                         <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
                         Додати подію до експресу ({expressEvents.length}/10)
@@ -1186,7 +1186,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       Події експресу ({expressEvents.length}/10)
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-[#2D2D2D] text-white border-0 rounded-full text-sm px-3 py-1 font-light">
+                      <Badge className="bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 rounded-full text-sm px-3 py-1 font-light">
                         Коеф: {totalExpressOdds.toFixed(2)}
                       </Badge>
                       <Button
@@ -1319,7 +1319,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       <div className="p-4 bg-[#FAFAF8] rounded-[24px] border-[1.5px] border-[#E8E6DC]">
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-[#2D2D2D] font-light">Загальний коефіцієнт:</span>
-                          <Badge className="bg-[#2D2D2D] text-white border-0 rounded-full text-lg px-4 py-1 font-light">
+                          <Badge className="bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 rounded-full text-lg px-4 py-1 font-light">
                             {totalExpressOdds.toFixed(2)}
                           </Badge>
                         </div>

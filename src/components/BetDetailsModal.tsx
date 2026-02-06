@@ -44,10 +44,10 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
   }, [users]);
 
   useEffect(() => {
-    if (bet) {
+    if (bet && open) {
       setEditableText(generateTelegramText());
     }
-  }, [bet]);
+  }, [bet, open]);
 
   const fetchUsers = async () => {
     try {
@@ -71,7 +71,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
           return {
             telegram,
             username,
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes'
+            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes' || isAdminStr === 'так'
           };
         })
         .filter((user): user is User => user !== null);
@@ -83,8 +83,8 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
   };
 
   const checkAdminStatus = () => {
-    const currentUser = localStorage.getItem('currentUser') || '';
-    const user = users.find(u => u.username === currentUser);
+    const currentUser = localStorage.getItem('username') || '';
+    const user = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
     setIsAdmin(user?.isAdmin || false);
   };
 
@@ -221,31 +221,31 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50 border-0 shadow-2xl rounded-3xl">
-        <DialogHeader className="border-b border-gray-200 pb-5">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[1.5px] border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[40px] bg-white">
+        <DialogHeader className="border-b border-[#E8E6DC] pb-4 bg-[#FAFAF8] -mx-6 -mt-6 px-6 pt-6 rounded-t-[40px]">
           <DialogTitle>
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Текст для Telegram</h2>
+              <h2 className="text-xl font-normal text-[#2D2D2D]">Текст для Telegram</h2>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Формат тексту</h3>
+            <h3 className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wide">Формат тексту</h3>
             <Button
               onClick={handleCopyToClipboard}
               size="sm"
-              className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal shadow-[0_2px_8px_rgba(244,225,87,0.3)]"
             >
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 mr-2" />
+                  <Check className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Скопійовано
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4 mr-2" />
+                  <Copy className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Копіювати
                 </>
               )}
@@ -255,9 +255,9 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
             ref={textareaRef}
             value={editableText}
             onChange={(e) => setEditableText(e.target.value)}
-            className="min-h-[350px] font-mono text-sm bg-gray-50 border-2 border-gray-300 rounded-2xl p-4 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="min-h-[350px] font-mono text-sm bg-[#FAFAF8] border-[1.5px] border-[#E8E6DC] rounded-[24px] p-4 resize-none focus:ring-2 focus:ring-[#F4E157] focus:border-[#F4E157]"
           />
-          <p className="text-xs text-gray-500 italic">
+          <p className="text-xs text-[#6B6B6B] font-light italic">
             💡 Ви можете відредагувати текст перед копіюванням. {!isExpressBet && !bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
           </p>
         </div>
