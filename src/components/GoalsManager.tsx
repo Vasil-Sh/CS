@@ -105,7 +105,7 @@ interface OddsScenario {
 }
 
 export default function GoalsManager() {
-  const currentUser = localStorage.getItem('currentUser') || '';
+  const currentUser = localStorage.getItem('username') || '';
   const [goals, setGoals] = useState<Goal[]>(() => {
     const loadedGoals = UserDataService.getUserData(currentUser, 'goals', []);
     
@@ -151,6 +151,7 @@ export default function GoalsManager() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isHowToExpanded, setIsHowToExpanded] = useState(false);
   const [isStepsCalculationExpanded, setIsStepsCalculationExpanded] = useState(false);
+  const [isRulesExpanded, setIsRulesExpanded] = useState<Record<string, boolean>>({});
 
   const [newGoal, setNewGoal] = useState({
     name: '',
@@ -851,7 +852,7 @@ export default function GoalsManager() {
               ) : (
                 <div className="space-y-6">
                   {primaryGoal && (
-                    <Card className="border-2 border-[#F4E157] shadow-[0_12px_32px_rgba(244,225,87,0.25)] rounded-[32px] bg-gradient-to-br from-[#FFFEF5] via-white to-[#FFF9E6] overflow-hidden">
+                    <Card className="border-[3px] border-[#C4C2B8] shadow-[0_12px_32px_rgba(0,0,0,0.12)] rounded-[32px] bg-gradient-to-br from-[#FAFAF8] via-white to-[#F5F5F3] overflow-hidden">
                       <CardHeader className="pb-4 pt-7 px-7">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -902,65 +903,87 @@ export default function GoalsManager() {
                           <Progress value={Math.min(getGoalProgress(primaryGoal), 100)} className="h-3 rounded-[12px]" />
                         </div>
 
-                        <div className="p-5 bg-[#F5F5F3] rounded-[24px] border-2 border-[#E8E6DC]">
-                          <p className="text-sm font-normal text-black mb-3">📋 Правила цілі</p>
-                          <div className="grid grid-cols-2 gap-3 text-xs">
-                            {primaryGoal.type === 'ladder' && (
-                              <>
-                                <div>
-                                  <span className="text-[#6B6B6B] font-light">Коефіцієнти:</span>
-                                  <span className="ml-1 font-normal text-black">
-                                    {primaryGoal.minOdds} - {primaryGoal.maxOdds}
-                                  </span>
-                                </div>
-                                <div>
-                                  <span className="text-[#6B6B6B] font-light">Поточний банк:</span>
-                                  <span className="ml-1 font-normal text-black">
-                                    {(primaryGoal.currentBank || 0).toFixed(0)} грн
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                            <div>
-                              <span className="text-[#6B6B6B] font-light">Ставок/день:</span>
-                              <span className="ml-1 font-normal text-black">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className={`p-4 rounded-[24px] border-2 ${
-                          getDisciplineStatus(primaryGoal).status === 'good' 
-                            ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
-                            : 'bg-[#FFE8E8] border-[#FFCDD2]'
-                        }`}>
-                          <div className="flex items-center gap-2">
-                            <div className={
+                        {/* Collapsible Rules Block */}
+                        <Collapsible 
+                          open={isRulesExpanded[primaryGoal.id] || false} 
+                          onOpenChange={(open) => setIsRulesExpanded({...isRulesExpanded, [primaryGoal.id]: open})}
+                        >
+                          <CollapsibleTrigger className="w-full">
+                            <div className={`p-3 rounded-[20px] border-2 transition-all ${
                               getDisciplineStatus(primaryGoal).status === 'good' 
-                                ? 'text-[#4CAF50]' 
-                                : 'text-[#D32F2F]'
-                            }>
-                              {getDisciplineStatus(primaryGoal).icon}
-                            </div>
-                            <span className={`text-sm font-normal ${
-                              getDisciplineStatus(primaryGoal).status === 'good' 
-                                ? 'text-[#2E7D32]' 
-                                : 'text-[#B71C1C]'
+                                ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
+                                : 'bg-[#FFE8E8] border-[#FFCDD2]'
                             }`}>
-                              {getDisciplineStatus(primaryGoal).label}
-                            </span>
-                          </div>
-                        </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-normal text-black">📋 Правила</p>
+                                  <div className={
+                                    getDisciplineStatus(primaryGoal).status === 'good' 
+                                      ? 'text-[#4CAF50]' 
+                                      : 'text-[#D32F2F]'
+                                  }>
+                                    {getDisciplineStatus(primaryGoal).icon}
+                                  </div>
+                                  <span className={`text-xs font-normal ${
+                                    getDisciplineStatus(primaryGoal).status === 'good' 
+                                      ? 'text-[#2E7D32]' 
+                                      : 'text-[#B71C1C]'
+                                  }`}>
+                                    {getDisciplineStatus(primaryGoal).label}
+                                  </span>
+                                </div>
+                                {isRulesExpanded[primaryGoal.id] ? (
+                                  <ChevronUp className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
+                                )}
+                              </div>
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className={`mt-2 p-3 rounded-[20px] border-2 ${
+                              getDisciplineStatus(primaryGoal).status === 'good' 
+                                ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
+                                : 'bg-[#FFE8E8] border-[#FFCDD2]'
+                            }`}>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                {primaryGoal.type === 'ladder' && (
+                                  <>
+                                    <div>
+                                      <span className="text-[#6B6B6B] font-light">Коефіцієнти:</span>
+                                      <span className="ml-1 font-normal text-black">
+                                        {primaryGoal.minOdds} - {primaryGoal.maxOdds}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-[#6B6B6B] font-light">Банк:</span>
+                                      <span className="ml-1 font-normal text-black">
+                                        {(primaryGoal.currentBank || 0).toFixed(0)} грн
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
+                                <div>
+                                  <span className="text-[#6B6B6B] font-light">Ставок/день:</span>
+                                  <span className="ml-1 font-normal text-black">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
 
-                        <div className="flex gap-3 pt-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => openDetailsDialog(primaryGoal)}
-                            className="flex-1 rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] font-light h-12"
-                          >
-                            <Eye className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                            Деталі цілі
-                          </Button>
-                        </div>
+                        {/* Show Details button only for ladder goals */}
+                        {primaryGoal.type === 'ladder' && (
+                          <div className="flex gap-3 pt-2">
+                            <Button
+                              onClick={() => openDetailsDialog(primaryGoal)}
+                              className="flex-1 rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
+                            >
+                              <Eye className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                              Деталі цілі
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
@@ -1024,15 +1047,18 @@ export default function GoalsManager() {
                                     {discipline.icon}
                                     <span className="font-light">{discipline.label}</span>
                                   </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => openDetailsDialog(goal)}
-                                    className="h-8 text-xs rounded-[12px] hover:bg-[#F5F5F3] font-light"
-                                  >
-                                    <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                    Деталі
-                                  </Button>
+                                  {/* Show Details button only for ladder goals */}
+                                  {goal.type === 'ladder' && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => openDetailsDialog(goal)}
+                                      className="h-8 text-xs rounded-[12px] hover:bg-[#F5F5F3] font-light"
+                                    >
+                                      <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                                      Деталі
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             </CardContent>
@@ -1359,27 +1385,28 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog - UPDATED DESIGN */}
+      {/* Goal Details Dialog - Only shows for ladder goals */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
-          <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-[#F5F5F3] rounded-[24px]">
+        <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC] p-0">
+          {/* Header matching Analytics page style with proper padding */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-t-[32px] p-6 m-6 mb-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] flex-shrink-0">
                 <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <DialogTitle className="text-3xl font-normal text-black">
+                <h1 className="text-4xl font-light text-black tracking-tight">
                   {selectedGoal?.name}
-                </DialogTitle>
-                <DialogDescription className="text-[#6B6B6B] font-light mt-1 text-base">
+                </h1>
+                <p className="text-[#6B6B6B] mt-2 text-base font-light">
                   Детальна інформація про прогрес цілі
-                </DialogDescription>
+                </p>
               </div>
             </div>
-          </DialogHeader>
+          </div>
 
           {selectedGoal && (
-            <div className="space-y-5">
+            <div className="space-y-5 px-6">
               {/* Summary Card */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
@@ -1600,7 +1627,7 @@ export default function GoalsManager() {
             </div>
           )}
 
-          <DialogFooter className="pt-4 border-t-2 border-[#E8E6DC]">
+          <DialogFooter className="pt-4 px-6 pb-6 border-t-2 border-[#E8E6DC]">
             <Button 
               onClick={() => setShowDetailsDialog(false)} 
               className="rounded-[20px] bg-[#E8E6DC] hover:bg-[#D4D2C8] text-black font-normal h-12 px-6"

@@ -72,7 +72,7 @@ interface Goal {
 }
 
 export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
-  const currentUser = localStorage.getItem('currentUser') || '';
+  const currentUser = localStorage.getItem('username') || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>([]);
@@ -125,6 +125,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     const goals = UserDataService.getUserData(currentUser, 'goals', []);
     const active = goals.filter((g: Goal) => g.status === 'active');
     setActiveGoals(active);
+    console.log('📋 Loaded active goals:', active.length, active);
   };
 
   useEffect(() => {
