@@ -268,9 +268,9 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
 
   return (
     <div className="space-y-6">
-      {/* Header Card - У стилі GoalsManager */}
+      {/* Header Card - Білий фон замість сірого */}
       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+        <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
               <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_8px_20px_rgba(244,225,87,0.4)]">
@@ -346,7 +346,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
       {/* Forecast Chart */}
       {forecastData.length > 0 && (
         <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+          <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
             <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
               <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
                 <Target className="h-6 w-6 text-black" strokeWidth={1.5} />
@@ -416,7 +416,7 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
 
       {/* Recommendations */}
       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+        <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
           <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
             <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
               <Lightbulb className="h-6 w-6 text-black" strokeWidth={1.5} />
