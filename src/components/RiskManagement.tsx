@@ -19,7 +19,10 @@ import {
   Info,
   RefreshCw,
   Download,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Calendar
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
@@ -152,6 +155,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
@@ -628,91 +633,115 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </Card>
         </div>
 
-        {/* Add New Team */}
+        {/* Add New Team - Dropdown */}
         <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                <Plus className="h-6 w-6 text-black" strokeWidth={1.5} />
+          <CardHeader 
+            className="bg-white border-b-2 border-[#E8E6DC] p-8 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+            onClick={() => setIsAddTeamOpen(!isAddTeamOpen)}
+          >
+            <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                  <Plus className="h-6 w-6 text-black" strokeWidth={1.5} />
+                </div>
+                Додати нову команду
               </div>
-              Додати нову команду
+              {isAddTeamOpen ? (
+                <ChevronUp className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+              ) : (
+                <ChevronDown className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-normal text-[#6B6B6B]">Назва команди</label>
-                <Input
-                  value={newTeam.name}
-                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                  placeholder="Введіть назву команди"
-                  className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
-                />
+          {isAddTeamOpen && (
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-normal text-[#6B6B6B]">Назва команди</label>
+                  <Input
+                    value={newTeam.name}
+                    onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
+                    placeholder="Введіть назву команди"
+                    className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-normal text-[#6B6B6B]">Гра</label>
+                  <select
+                    value={newTeam.game}
+                    onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
+                    className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
+                  >
+                    <option value="CS">CS</option>
+                    <option value="Дота">Дота</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-normal text-[#6B6B6B]">Статус</label>
+                  <select
+                    value={newTeam.status}
+                    onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
+                    className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
+                  >
+                    <option value="БАН">БАН</option>
+                    <option value="Нестабільні">Нестабільні</option>
+                    <option value="Обережно">Обережно</option>
+                    <option value="Рідко">Рідко</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm font-normal text-[#6B6B6B]">Примітки</label>
+                  <Textarea
+                    value={newTeam.notes}
+                    onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
+                    placeholder="Додайте примітки про команду"
+                    className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                    rows={3}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-normal text-[#6B6B6B]">Гра</label>
-                <select
-                  value={newTeam.game}
-                  onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
-                  className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
-                >
-                  <option value="CS">CS</option>
-                  <option value="Дота">Дота</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-normal text-[#6B6B6B]">Статус</label>
-                <select
-                  value={newTeam.status}
-                  onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
-                  className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
-                >
-                  <option value="БАН">БАН</option>
-                  <option value="Нестабільні">Нестабільні</option>
-                  <option value="Обережно">Обережно</option>
-                  <option value="Рідко">Рідко</option>
-                </select>
-              </div>
-              <div className="md:col-span-2">
-                <label className="text-sm font-normal text-[#6B6B6B]">Примітки</label>
-                <Textarea
-                  value={newTeam.notes}
-                  onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
-                  placeholder="Додайте примітки про команду"
-                  className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <Button
-              onClick={addRiskyTeam}
-              className="mt-4 bg-[#F4E157] hover:bg-[#F0DD4D] text-black rounded-[20px] font-normal shadow-[0_4px_12px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_16px_rgba(244,225,87,0.4)] transition-all px-6 py-2.5"
-              disabled={!newTeam.name.trim()}
-            >
-              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
-              Додати команду
-            </Button>
-          </CardContent>
+              <Button
+                onClick={addRiskyTeam}
+                className="mt-4 bg-[#F4E157] hover:bg-[#F0DD4D] text-black rounded-[20px] font-normal shadow-[0_4px_12px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_16px_rgba(244,225,87,0.4)] transition-all px-6 py-2.5"
+                disabled={!newTeam.name.trim()}
+              >
+                <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                Додати команду
+              </Button>
+            </CardContent>
+          )}
         </Card>
 
-        {/* Search */}
+        {/* Search - Dropdown */}
         <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                <Search className="h-6 w-6 text-black" strokeWidth={1.5} />
+          <CardHeader 
+            className="bg-white border-b-2 border-[#E8E6DC] p-8 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+          >
+            <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                  <Search className="h-6 w-6 text-black" strokeWidth={1.5} />
+                </div>
+                Пошук команд
               </div>
-              Пошук команд
+              {isSearchOpen ? (
+                <ChevronUp className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+              ) : (
+                <ChevronDown className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Пошук за назвою, грою, статусом або примітками..."
-              className="w-full rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
-            />
-          </CardContent>
+          {isSearchOpen && (
+            <CardContent className="p-8">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Пошук за назвою, грою, статусом або примітками..."
+                className="w-full rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+              />
+            </CardContent>
+          )}
         </Card>
 
         {/* Teams by Game */}
@@ -901,7 +930,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
           <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="text-3xl font-light text-black">Періоди просадок</CardTitle>
+              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                  <Calendar className="h-6 w-6 text-black" strokeWidth={1.5} />
+                </div>
+                Періоди просадок
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               {drawdownPeriods.length > 0 ? (
