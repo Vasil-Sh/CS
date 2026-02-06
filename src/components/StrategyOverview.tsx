@@ -594,6 +594,12 @@ export default function StrategyOverview() {
   const roiChartData = getRoiChartData();
   const betTypeStats = calculateBetTypeStats();
 
+  const tabs = [
+    { id: 'overview', label: 'Огляд стратегій' },
+    { id: 'performance', label: 'Ефективність' },
+    { id: 'create', label: 'Створити нову' },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -606,667 +612,692 @@ export default function StrategyOverview() {
         <p className="text-[#6B6B6B] font-light mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-[#FAFAF8] p-1.5 rounded-[24px] border-[1.5px] border-[#E8E6DC]">
-          <TabsTrigger value="overview" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Огляд стратегій</TabsTrigger>
-          <TabsTrigger value="performance" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Ефективність</TabsTrigger>
-          <TabsTrigger value="create" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Створити нову</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {strategies.length === 0 ? (
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardContent className="p-12 text-center">
-                <Brain className="h-16 w-16 text-[#8B8B8B] mx-auto mb-4" strokeWidth={1.5} />
-                <h3 className="text-lg font-normal text-[#2D2D2D] mb-2">Немає стратегій</h3>
-                <p className="text-[#6B6B6B] mb-4 font-light">Створіть свою першу стратегію для ставок на CS2</p>
-                <Button 
-                  onClick={() => setActiveTab('create')} 
-                  className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal"
-                >
-                  <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Створити стратегію
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {/* Filters and Search */}
-              <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />
-                      <Input
-                        placeholder="Пошук стратегій..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 rounded-[24px] border-[#E8E6DC]"
-                      />
-                    </div>
-                    
-                    <Select value={riskFilter} onValueChange={setRiskFilter}>
-                      <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
-                        <Filter className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                        <SelectValue placeholder="Фільтр за ризиком" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Всі рівні ризику</SelectItem>
-                        <SelectItem value="Low">Низький ризик</SelectItem>
-                        <SelectItem value="Medium">Середній ризик</SelectItem>
-                        <SelectItem value="High">Високий ризик</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={sortBy} onValueChange={(value: 'roi' | 'profit' | 'name') => setSortBy(value)}>
-                      <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
-                        <ArrowUpDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                        <SelectValue placeholder="Сортування" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="roi">За ROI</SelectItem>
-                        <SelectItem value="profit">За прибутком</SelectItem>
-                        <SelectItem value="name">За назвою</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="rounded-[20px] border-[#E8E6DC]"
-                    >
-                      {sortOrder === 'desc' ? '↓' : '↑'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Strategy Cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredAndSortedStrategies.map((strategy, index) => {
-                  const stats = strategyStats[strategy.name] || {};
-                  const isPrimary = primaryStrategy === strategy.name;
-                  
-                  return (
-                    <Card key={index} className={`border-[1.5px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all ${isPrimary ? 'border-[#F4E157]' : 'border-[#E8E6DC]'}`}>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center justify-between text-base font-normal text-[#2D2D2D]">
-                          <span className="flex items-center gap-2">
-                            {getRiskIcon(strategy.riskLevel)}
-                            <span className="truncate max-w-[150px]" title={strategy.name}>{strategy.name}</span>
-                            {isPrimary && (
-                              <Badge className="bg-[#F4E157] text-[#2D2D2D] border-0 rounded-[12px] text-xs px-2 py-0.5">
-                                <Star className="h-2.5 w-2.5 mr-0.5 fill-[#2D2D2D]" strokeWidth={1.5} />
-                                Основна
-                              </Badge>
-                            )}
-                          </span>
-                          <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2 py-0.5 font-normal'}>
-                            {strategy.riskLevel}
-                          </Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-4">
-                        {/* Main Stats */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="text-center p-3 bg-[#C8E6C9]/30 rounded-[20px]">
-                            <div className={`text-2xl font-light ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                              {stats.roi >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
-                            </div>
-                            <div className="text-xs text-[#6B6B6B] font-normal mt-1">ROI</div>
-                            {getTrendIndicator(stats)}
-                          </div>
-                          <div className="text-center p-3 bg-[#BBDEFB]/30 rounded-[20px]">
-                            <div className={`text-2xl font-light ${stats.winRate >= 50 ? 'text-[#1976D2]' : 'text-[#6B6B6B]'}`}>
-                              {stats.winRate?.toFixed(0) || 0}%
-                            </div>
-                            <div className="text-xs text-[#6B6B6B] font-normal mt-1">Win Rate</div>
-                            <div className="text-xs text-[#8B8B8B] mt-1 font-light">{stats.totalBets || 0} ставок</div>
-                          </div>
-                        </div>
-
-                        {/* Sparkline */}
-                        {stats.totalBets > 0 && (
-                          <div className="p-3 bg-[#F5F5F3] rounded-[20px]">
-                            <div className="text-xs text-[#6B6B6B] font-normal mb-2">Тренд прибутку</div>
-                            {renderSparkline(stats.profitHistory)}
-                          </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => openDetailsDialog(strategy)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 rounded-[20px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal"
-                          >
-                            <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                            Деталі
-                          </Button>
-                          <Button
-                            onClick={() => togglePrimaryStrategy(strategy.name)}
-                            variant="outline"
-                            size="sm"
-                            className={`rounded-[20px] font-normal ${isPrimary ? 'border-[#F4E157] text-[#2D2D2D] bg-[#F4E157]/20 hover:bg-[#F4E157]/30' : 'border-[#E8E6DC] hover:bg-[#F5F5F3]'}`}
-                          >
-                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#2D2D2D]' : ''}`} strokeWidth={1.5} />
-                          </Button>
-                          <Button
-                            onClick={() => confirmDeleteStrategy(strategy.name)}
-                            variant="outline"
-                            size="sm"
-                            className="rounded-[20px] border-[#FFCDD2] text-[#D32F2F] hover:bg-[#FFCDD2]/30 font-normal"
-                          >
-                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="performance" className="space-y-6">
-          {/* Top Row - 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
-                  <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
-                  Загальна статистика
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-[#6B6B6B] font-light">Всього стратегій:</span>
-                    <span className="font-normal text-[#2D2D2D]">{strategies.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-[#6B6B6B] font-light">Всього ставок:</span>
-                    <span className="font-normal text-[#2D2D2D]">{bettingData.length}</span>
-                  </div>
-                  {Object.keys(strategyStats).length > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-[#6B6B6B] font-light">Найкраща стратегія:</span>
-                      <span className="font-normal text-[#4CAF50] truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
-                        (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
-                        Object.keys(strategyStats)[0] || 'Немає'
-                      )}>
-                        {Object.keys(strategyStats).reduce((best, current) => 
-                          (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
-                          Object.keys(strategyStats)[0] || 'Немає'
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {primaryStrategy && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-[#6B6B6B] font-light">Основна стратегія:</span>
-                      <span className="font-normal text-[#2D2D2D] flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
-                        <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />
-                        <span className="truncate">{primaryStrategy}</span>
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
-                  <Trophy className="h-4 w-4" strokeWidth={1.5} />
-                  Топ по ROI
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(strategyStats).length > 0 ? (
-                    Object.entries(strategyStats)
-                      .sort(([,a], [,b]) => (b as StrategyStats).roi - (a as StrategyStats).roi)
-                      .slice(0, 5)
-                      .map(([name, stats]: [string, StrategyStats], index) => (
-                        <div key={name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-sm font-normal text-[#6B6B6B] flex-shrink-0">#{index + 1}</span>
-                            <span className="text-sm truncate text-[#2D2D2D] flex items-center gap-1 font-light" title={name}>
-                              <span className="truncate">{name}</span>
-                              {primaryStrategy === name && <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />}
-                            </span>
-                          </div>
-                          <span className={`text-sm font-normal flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                            {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
-                          </span>
-                        </div>
-                      ))
-                  ) : (
-                    <p className="text-sm text-[#8B8B8B] text-center py-4 font-light">Немає даних для відображення</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
-                  <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
-                  Рекомендації
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  {generateDynamicRecommendations().map((rec, index) => (
-                    <div key={index} className={`p-3 rounded-[20px] ${
-                      rec.type === 'info' ? 'bg-[#BBDEFB]/30' :
-                      rec.type === 'warning' ? 'bg-[#FFF9C4]/50' :
-                      'bg-[#C8E6C9]/30'
-                    }`}>
-                      <div className={`font-normal ${
-                        rec.type === 'info' ? 'text-[#1976D2]' :
-                        rec.type === 'warning' ? 'text-[#F57F17]' :
-                        'text-[#2E7D32]'
-                      }`}>
-                        {rec.type === 'info' ? '💡 Порада' :
-                         rec.type === 'warning' ? '⚠️ Увага' :
-                         '✅ Успіх'}
-                      </div>
-                      <div className={`font-light ${
-                        rec.type === 'info' ? 'text-[#1976D2]' :
-                        rec.type === 'warning' ? 'text-[#F57F17]' :
-                        'text-[#2E7D32]'
-                      }`}>
-                        {rec.message}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      <div className="space-y-6">
+        {/* Custom Tabs Navigation - ІДЕНТИЧНИЙ ДО ANALYTICS */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-3 gap-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  relative rounded-[24px] px-6 py-4 font-light text-base
+                  transition-all duration-300 ease-in-out
+                  ${activeTab === tab.id 
+                    ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
+                    : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
+                  }
+                `}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  {tab.label}
+                </span>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* ROI Comparison Chart */}
-          {roiChartData.length > 0 && (
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader className="border-b border-[#E8E6DC] bg-[#FAFAF8]">
-                <CardTitle className="flex items-center gap-3 text-xl font-normal text-[#2D2D2D]">
-                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                    <BarChart3 className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
-                  </div>
-                  Порівняння ефективності стратегій
-                </CardTitle>
-                <p className="text-sm text-[#6B6B6B] mt-1 font-light">Детальний аналіз ROI, Win Rate та прибутку по кожній стратегії</p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <ResponsiveContainer width="100%" height={400}>
-                  <ComposedChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
-                    <defs>
-                      <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={100}
-                      tick={{ fontSize: 12, fill: '#6B6B6B', fontWeight: 400 }}
-                    />
-                    <YAxis 
-                      yAxisId="left"
-                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6B6B6B', fontWeight: 400 } }}
-                      tick={{ fontSize: 12, fill: '#6B6B6B' }}
-                    />
-                    <YAxis 
-                      yAxisId="right"
-                      orientation="right"
-                      label={{ value: 'Win Rate (%)', angle: 90, position: 'insideRight', style: { fill: '#6B6B6B', fontWeight: 400 } }}
-                      tick={{ fontSize: 12, fill: '#6B6B6B' }}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                        border: '1.5px solid #E8E6DC',
-                        borderRadius: '20px',
-                        padding: '12px 16px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                      }}
-                      formatter={(value: number, name: string) => {
-                        if (name === 'roi') return [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI'];
-                        if (name === 'winRate') return [`${value.toFixed(1)}%`, 'Win Rate'];
-                        if (name === 'profit') return [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток'];
-                        return [value, name];
-                      }}
-                      labelFormatter={(label, payload) => {
-                        if (payload && payload[0]) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="font-normal text-[#2D2D2D]">
-                              {data.fullName}
-                              <div className="text-xs text-[#6B6B6B] font-light mt-1">
-                                {data.totalBets} ставок • Ризик: {data.riskLevel}
-                              </div>
-                            </div>
-                          );
-                        }
-                        return label;
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{ paddingTop: '20px' }}
-                      iconType="circle"
-                      formatter={(value) => {
-                        const labels: Record<string, string> = {
-                          roi: 'ROI (%)',
-                          winRate: 'Win Rate (%)',
-                          profit: 'Прибуток (₴)'
-                        };
-                        return <span className="text-sm font-normal text-[#6B6B6B]">{labels[value] || value}</span>;
-                      }}
-                    />
-                    <Bar yAxisId="left" dataKey="roi" fill="url(#colorRoi)" radius={[12, 12, 0, 0]} barSize={60}>
-                      {roiChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} opacity={0.9} />
-                      ))}
-                    </Bar>
-                    <Line 
-                      yAxisId="right" 
-                      type="monotone" 
-                      dataKey="winRate" 
-                      stroke="#4CAF50" 
-                      strokeWidth={3}
-                      dot={{ fill: '#4CAF50', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                      activeDot={{ r: 8 }}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-                
-                {/* Enhanced Legend */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center justify-center gap-3 p-3 bg-[#C8E6C9]/30 rounded-[20px] border-[1.5px] border-[#C8E6C9]">
-                    <div className="w-4 h-4 rounded-full bg-[#4CAF50]"></div>
-                    <div className="text-sm">
-                      <div className="font-normal text-[#2E7D32]">Низький ризик</div>
-                      <div className="text-xs text-[#2E7D32] font-light">Стабільний прибуток</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-center gap-3 p-3 bg-[#FFF9C4]/50 rounded-[20px] border-[1.5px] border-[#FFF9C4]">
-                    <div className="w-4 h-4 rounded-full bg-[#FF9800]"></div>
-                    <div className="text-sm">
-                      <div className="font-normal text-[#F57F17]">Середній ризик</div>
-                      <div className="text-xs text-[#F57F17] font-light">Збалансований підхід</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-center gap-3 p-3 bg-[#FFCDD2]/30 rounded-[20px] border-[1.5px] border-[#FFCDD2]">
-                    <div className="w-4 h-4 rounded-full bg-[#D32F2F]"></div>
-                    <div className="text-sm">
-                      <div className="font-normal text-[#C62828]">Високий ризик</div>
-                      <div className="text-xs text-[#C62828] font-light">Агресивна стратегія</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        {/* Tab Content */}
+        <div>
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {strategies.length === 0 ? (
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardContent className="p-12 text-center">
+                    <Brain className="h-16 w-16 text-[#8B8B8B] mx-auto mb-4" strokeWidth={1.5} />
+                    <h3 className="text-lg font-normal text-[#2D2D2D] mb-2">Немає стратегій</h3>
+                    <p className="text-[#6B6B6B] mb-4 font-light">Створіть свою першу стратегію для ставок на CS2</p>
+                    <Button 
+                      onClick={() => setActiveTab('create')} 
+                      className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal"
+                    >
+                      <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                      Створити стратегію
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {/* Filters and Search */}
+                  <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1 relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />
+                          <Input
+                            placeholder="Пошук стратегій..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 rounded-[24px] border-[#E8E6DC]"
+                          />
+                        </div>
+                        
+                        <Select value={riskFilter} onValueChange={setRiskFilter}>
+                          <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
+                            <Filter className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                            <SelectValue placeholder="Фільтр за ризиком" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Всі рівні ризику</SelectItem>
+                            <SelectItem value="Low">Низький ризик</SelectItem>
+                            <SelectItem value="Medium">Середній ризик</SelectItem>
+                            <SelectItem value="High">Високий ризик</SelectItem>
+                          </SelectContent>
+                        </Select>
 
-          {/* Bottom Row - 2 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Bet Types Breakdown */}
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
-                  <PieChart className="h-5 w-5 text-[#1976D2]" strokeWidth={1.5} />
-                  Розбивка по типах ставок
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {betTypeStats.length > 0 ? (
-                  <div className="space-y-4">
-                    {betTypeStats.map((stat, index) => (
-                      <div key={index} className="p-4 bg-[#FAFAF8] rounded-[20px] border-[1.5px] border-[#E8E6DC]">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-normal text-[#2D2D2D]">{stat.type}</span>
-                          <Badge className="bg-[#BBDEFB] text-[#1976D2] border-0 rounded-[12px] font-normal">
-                            {stat.count} ставок
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-                          <div className="text-center">
-                            <div className={`font-normal ${stat.winRate >= 50 ? 'text-[#4CAF50]' : 'text-[#6B6B6B]'}`}>
-                              {stat.winRate.toFixed(0)}%
-                            </div>
-                            <div className="text-xs text-[#8B8B8B] font-light">Win Rate</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`font-normal ${stat.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                              {stat.roi >= 0 ? '+' : ''}{stat.roi.toFixed(1)}%
-                            </div>
-                            <div className="text-xs text-[#8B8B8B] font-light">ROI</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`font-normal ${stat.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                              {stat.profit >= 0 ? '+' : ''}{stat.profit.toFixed(0)}₴
-                            </div>
-                            <div className="text-xs text-[#8B8B8B] font-light">Прибуток</div>
-                          </div>
-                        </div>
+                        <Select value={sortBy} onValueChange={(value: 'roi' | 'profit' | 'name') => setSortBy(value)}>
+                          <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
+                            <ArrowUpDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                            <SelectValue placeholder="Сортування" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="roi">За ROI</SelectItem>
+                            <SelectItem value="profit">За прибутком</SelectItem>
+                            <SelectItem value="name">За назвою</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                          className="rounded-[20px] border-[#E8E6DC]"
+                        >
+                          {sortOrder === 'desc' ? '↓' : '↑'}
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Немає даних для відображення</p>
-                )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
 
-            {/* Expected vs Actual ROI */}
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
-                  <Target className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
-                  Очікуваний vs Реальний ROI
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {strategies.length > 0 ? (
-                  <div className="space-y-4">
-                    {strategies.slice(0, 5).map((strategy, index) => {
-                      const stats = strategyStats[strategy.name];
-                      const actualROI = stats?.roi || 0;
-                      const expectedROI = strategy.expectedROI || 0;
-                      const difference = actualROI - expectedROI;
-                      const isPositive = difference >= 0;
+                  {/* Strategy Cards */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredAndSortedStrategies.map((strategy, index) => {
+                      const stats = strategyStats[strategy.name] || {};
+                      const isPrimary = primaryStrategy === strategy.name;
                       
                       return (
-                        <div key={index} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-normal text-[#2D2D2D] truncate max-w-[150px]" title={strategy.name}>
-                              {strategy.name}
-                            </span>
-                            <span className={`text-sm font-normal ${isPositive ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                              {isPositive ? '+' : ''}{difference.toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-[#BBDEFB] rounded-full transition-all"
-                                  style={{ width: `${Math.min((expectedROI / 30) * 100, 100)}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-[#6B6B6B] w-12 text-right font-light">{expectedROI.toFixed(0)}%</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full rounded-full transition-all ${actualROI >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}
-                                  style={{ width: `${Math.min(Math.abs(actualROI) / 30 * 100, 100)}%` }}
-                                />
-                              </div>
-                              <span className={`text-xs font-normal w-12 text-right ${actualROI >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                                {actualROI >= 0 ? '+' : ''}{actualROI.toFixed(0)}%
+                        <Card key={index} className={`border-[1.5px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all ${isPrimary ? 'border-[#F4E157]' : 'border-[#E8E6DC]'}`}>
+                          <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center justify-between text-base font-normal text-[#2D2D2D]">
+                              <span className="flex items-center gap-2">
+                                {getRiskIcon(strategy.riskLevel)}
+                                <span className="truncate max-w-[150px]" title={strategy.name}>{strategy.name}</span>
+                                {isPrimary && (
+                                  <Badge className="bg-[#F4E157] text-[#2D2D2D] border-0 rounded-[12px] text-xs px-2 py-0.5">
+                                    <Star className="h-2.5 w-2.5 mr-0.5 fill-[#2D2D2D]" strokeWidth={1.5} />
+                                    Основна
+                                  </Badge>
+                                )}
                               </span>
+                              <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2 py-0.5 font-normal'}>
+                                {strategy.riskLevel}
+                              </Badge>
+                            </CardTitle>
+                          </CardHeader>
+                          
+                          <CardContent className="space-y-4">
+                            {/* Main Stats */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="text-center p-3 bg-[#C8E6C9]/30 rounded-[20px]">
+                                <div className={`text-2xl font-light ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                  {stats.roi >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
+                                </div>
+                                <div className="text-xs text-[#6B6B6B] font-normal mt-1">ROI</div>
+                                {getTrendIndicator(stats)}
+                              </div>
+                              <div className="text-center p-3 bg-[#BBDEFB]/30 rounded-[20px]">
+                                <div className={`text-2xl font-light ${stats.winRate >= 50 ? 'text-[#1976D2]' : 'text-[#6B6B6B]'}`}>
+                                  {stats.winRate?.toFixed(0) || 0}%
+                                </div>
+                                <div className="text-xs text-[#6B6B6B] font-normal mt-1">Win Rate</div>
+                                <div className="text-xs text-[#8B8B8B] mt-1 font-light">{stats.totalBets || 0} ставок</div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-[#8B8B8B] font-light">
-                            <span>Очікуваний</span>
-                            <span>Реальний</span>
-                          </div>
-                        </div>
+
+                            {/* Sparkline */}
+                            {stats.totalBets > 0 && (
+                              <div className="p-3 bg-[#F5F5F3] rounded-[20px]">
+                                <div className="text-xs text-[#6B6B6B] font-normal mb-2">Тренд прибутку</div>
+                                {renderSparkline(stats.profitHistory)}
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => openDetailsDialog(strategy)}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 rounded-[20px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal"
+                              >
+                                <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                                Деталі
+                              </Button>
+                              <Button
+                                onClick={() => togglePrimaryStrategy(strategy.name)}
+                                variant="outline"
+                                size="sm"
+                                className={`rounded-[20px] font-normal ${isPrimary ? 'border-[#F4E157] text-[#2D2D2D] bg-[#F4E157]/20 hover:bg-[#F4E157]/30' : 'border-[#E8E6DC] hover:bg-[#F5F5F3]'}`}
+                              >
+                                <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#2D2D2D]' : ''}`} strokeWidth={1.5} />
+                              </Button>
+                              <Button
+                                onClick={() => confirmDeleteStrategy(strategy.name)}
+                                variant="outline"
+                                size="sm"
+                                className="rounded-[20px] border-[#FFCDD2] text-[#D32F2F] hover:bg-[#FFCDD2]/30 font-normal"
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
                       );
                     })}
                   </div>
-                ) : (
-                  <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Створіть стратегії для аналізу</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+                </>
+              )}
+            </div>
+          )}
 
-        <TabsContent value="create" className="space-y-6">
-          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-lg font-normal text-[#2D2D2D]">
-                <div className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" strokeWidth={1.5} />
-                  Створити нову стратегію
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTemplateDialogOpen(true)}
-                  className="rounded-[20px] border-[#E8E6DC] font-normal"
-                >
-                  <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Використати шаблон
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 bg-[#BBDEFB]/30 rounded-[20px] border-[1.5px] border-[#BBDEFB]">
-                <h4 className="font-normal text-[#1976D2] mb-2 flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
-                  Як додати обмеження до стратегії:
-                </h4>
-                <div className="space-y-2 text-sm text-[#1976D2] font-light">
-                  <p>• <strong className="font-normal">Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5" або "Максимальний коефіцієнт 2.5"</p>
-                  <p>• <strong className="font-normal">Для обмеження форматів:</strong> напишіть "Формат тільки BO3" або "Формат BO1 та BO3"</p>
-                  <p>• <strong className="font-normal">Для обмеження типів ставок:</strong> напишіть "Тільки експреси", "Тільки ординари" або "Експреси та системи"</p>
-                  <p className="pt-2 text-xs text-[#1976D2]">Приклади критеріїв:</p>
-                  <ul className="list-disc list-inside text-xs text-[#1976D2] space-y-1 ml-2">
-                    <li>"Мінімальний коефіцієнт 1.3"</li>
-                    <li>"Максимальний коефіцієнт 2.0"</li>
-                    <li>"Формат тільки BO3"</li>
-                    <li>"Тільки експреси"</li>
-                    <li>"Аналіз останніх 10 матчів команд"</li>
-                  </ul>
-                </div>
+          {activeTab === 'performance' && (
+            <div className="space-y-6">
+              {/* Top Row - 3 Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                      <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
+                      Загальна статистика
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-[#6B6B6B] font-light">Всього стратегій:</span>
+                        <span className="font-normal text-[#2D2D2D]">{strategies.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-[#6B6B6B] font-light">Всього ставок:</span>
+                        <span className="font-normal text-[#2D2D2D]">{bettingData.length}</span>
+                      </div>
+                      {Object.keys(strategyStats).length > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-[#6B6B6B] font-light">Найкраща стратегія:</span>
+                          <span className="font-normal text-[#4CAF50] truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
+                            (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
+                            Object.keys(strategyStats)[0] || 'Немає'
+                          )}>
+                            {Object.keys(strategyStats).reduce((best, current) => 
+                              (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
+                              Object.keys(strategyStats)[0] || 'Немає'
+                            )}
+                          </span>
+                        </div>
+                      )}
+                      {primaryStrategy && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-[#6B6B6B] font-light">Основна стратегія:</span>
+                          <span className="font-normal text-[#2D2D2D] flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
+                            <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />
+                            <span className="truncate">{primaryStrategy}</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                      <Trophy className="h-4 w-4" strokeWidth={1.5} />
+                      Топ по ROI
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {Object.entries(strategyStats).length > 0 ? (
+                        Object.entries(strategyStats)
+                          .sort(([,a], [,b]) => (b as StrategyStats).roi - (a as StrategyStats).roi)
+                          .slice(0, 5)
+                          .map(([name, stats]: [string, StrategyStats], index) => (
+                            <div key={name} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-sm font-normal text-[#6B6B6B] flex-shrink-0">#{index + 1}</span>
+                                <span className="text-sm truncate text-[#2D2D2D] flex items-center gap-1 font-light" title={name}>
+                                  <span className="truncate">{name}</span>
+                                  {primaryStrategy === name && <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />}
+                                </span>
+                              </div>
+                              <span className={`text-sm font-normal flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
+                              </span>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-sm text-[#8B8B8B] text-center py-4 font-light">Немає даних для відображення</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                      <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
+                      Рекомендації
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 text-sm">
+                      {generateDynamicRecommendations().map((rec, index) => (
+                        <div key={index} className={`p-3 rounded-[20px] ${
+                          rec.type === 'info' ? 'bg-[#BBDEFB]/30' :
+                          rec.type === 'warning' ? 'bg-[#FFF9C4]/50' :
+                          'bg-[#C8E6C9]/30'
+                        }`}>
+                          <div className={`font-normal ${
+                            rec.type === 'info' ? 'text-[#1976D2]' :
+                            rec.type === 'warning' ? 'text-[#F57F17]' :
+                            'text-[#2E7D32]'
+                          }`}>
+                            {rec.type === 'info' ? '💡 Порада' :
+                             rec.type === 'warning' ? '⚠️ Увага' :
+                             '✅ Успіх'}
+                          </div>
+                          <div className={`font-light ${
+                            rec.type === 'info' ? 'text-[#1976D2]' :
+                            rec.type === 'warning' ? 'text-[#F57F17]' :
+                            'text-[#2E7D32]'
+                          }`}>
+                            {rec.message}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ROI Comparison Chart */}
+              {roiChartData.length > 0 && (
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader className="border-b border-[#E8E6DC] bg-[#FAFAF8]">
+                    <CardTitle className="flex items-center gap-3 text-xl font-normal text-[#2D2D2D]">
+                      <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                        <BarChart3 className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
+                      </div>
+                      Порівняння ефективності стратегій
+                    </CardTitle>
+                    <p className="text-sm text-[#6B6B6B] mt-1 font-light">Детальний аналіз ROI, Win Rate та прибутку по кожній стратегії</p>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <ResponsiveContainer width="100%" height={400}>
+                      <ComposedChart data={roiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <defs>
+                          <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={100}
+                          tick={{ fontSize: 12, fill: '#6B6B6B', fontWeight: 400 }}
+                        />
+                        <YAxis 
+                          yAxisId="left"
+                          label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6B6B6B', fontWeight: 400 } }}
+                          tick={{ fontSize: 12, fill: '#6B6B6B' }}
+                        />
+                        <YAxis 
+                          yAxisId="right"
+                          orientation="right"
+                          label={{ value: 'Win Rate (%)', angle: 90, position: 'insideRight', style: { fill: '#6B6B6B', fontWeight: 400 } }}
+                          tick={{ fontSize: 12, fill: '#6B6B6B' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                            border: '1.5px solid #E8E6DC',
+                            borderRadius: '20px',
+                            padding: '12px 16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                          }}
+                          formatter={(value: number, name: string) => {
+                            if (name === 'roi') return [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI'];
+                            if (name === 'winRate') return [`${value.toFixed(1)}%`, 'Win Rate'];
+                            if (name === 'profit') return [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток'];
+                            return [value, name];
+                          }}
+                          labelFormatter={(label, payload) => {
+                            if (payload && payload[0]) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="font-normal text-[#2D2D2D]">
+                                  {data.fullName}
+                                  <div className="text-xs text-[#6B6B6B] font-light mt-1">
+                                    {data.totalBets} ставок • Ризик: {data.riskLevel}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return label;
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          iconType="circle"
+                          formatter={(value) => {
+                            const labels: Record<string, string> = {
+                              roi: 'ROI (%)',
+                              winRate: 'Win Rate (%)',
+                              profit: 'Прибуток (₴)'
+                            };
+                            return <span className="text-sm font-normal text-[#6B6B6B]">{labels[value] || value}</span>;
+                          }}
+                        />
+                        <Bar yAxisId="left" dataKey="roi" fill="url(#colorRoi)" radius={[12, 12, 0, 0]} barSize={60}>
+                          {roiChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} opacity={0.9} />
+                          ))}
+                        </Bar>
+                        <Line 
+                          yAxisId="right" 
+                          type="monotone" 
+                          dataKey="winRate" 
+                          stroke="#4CAF50" 
+                          strokeWidth={3}
+                          dot={{ fill: '#4CAF50', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                          activeDot={{ r: 8 }}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                    
+                    {/* Enhanced Legend */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#C8E6C9]/30 rounded-[20px] border-[1.5px] border-[#C8E6C9]">
+                        <div className="w-4 h-4 rounded-full bg-[#4CAF50]"></div>
+                        <div className="text-sm">
+                          <div className="font-normal text-[#2E7D32]">Низький ризик</div>
+                          <div className="text-xs text-[#2E7D32] font-light">Стабільний прибуток</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#FFF9C4]/50 rounded-[20px] border-[1.5px] border-[#FFF9C4]">
+                        <div className="w-4 h-4 rounded-full bg-[#FF9800]"></div>
+                        <div className="text-sm">
+                          <div className="font-normal text-[#F57F17]">Середній ризик</div>
+                          <div className="text-xs text-[#F57F17] font-light">Збалансований підхід</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center gap-3 p-3 bg-[#FFCDD2]/30 rounded-[20px] border-[1.5px] border-[#FFCDD2]">
+                        <div className="w-4 h-4 rounded-full bg-[#D32F2F]"></div>
+                        <div className="text-sm">
+                          <div className="font-normal text-[#C62828]">Високий ризик</div>
+                          <div className="text-xs text-[#C62828] font-light">Агресивна стратегія</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Bottom Row - 2 Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Bet Types Breakdown */}
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                      <PieChart className="h-5 w-5 text-[#1976D2]" strokeWidth={1.5} />
+                      Розбивка по типах ставок
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {betTypeStats.length > 0 ? (
+                      <div className="space-y-4">
+                        {betTypeStats.map((stat, index) => (
+                          <div key={index} className="p-4 bg-[#FAFAF8] rounded-[20px] border-[1.5px] border-[#E8E6DC]">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-normal text-[#2D2D2D]">{stat.type}</span>
+                              <Badge className="bg-[#BBDEFB] text-[#1976D2] border-0 rounded-[12px] font-normal">
+                                {stat.count} ставок
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 text-sm">
+                              <div className="text-center">
+                                <div className={`font-normal ${stat.winRate >= 50 ? 'text-[#4CAF50]' : 'text-[#6B6B6B]'}`}>
+                                  {stat.winRate.toFixed(0)}%
+                                </div>
+                                <div className="text-xs text-[#8B8B8B] font-light">Win Rate</div>
+                              </div>
+                              <div className="text-center">
+                                <div className={`font-normal ${stat.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                  {stat.roi >= 0 ? '+' : ''}{stat.roi.toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-[#8B8B8B] font-light">ROI</div>
+                              </div>
+                              <div className="text-center">
+                                <div className={`font-normal ${stat.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                  {stat.profit >= 0 ? '+' : ''}{stat.profit.toFixed(0)}₴
+                                </div>
+                                <div className="text-xs text-[#8B8B8B] font-light">Прибуток</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Немає даних для відображення</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Expected vs Actual ROI */}
+                <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                      <Target className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
+                      Очікуваний vs Реальний ROI
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {strategies.length > 0 ? (
+                      <div className="space-y-4">
+                        {strategies.slice(0, 5).map((strategy, index) => {
+                          const stats = strategyStats[strategy.name];
+                          const actualROI = stats?.roi || 0;
+                          const expectedROI = strategy.expectedROI || 0;
+                          const difference = actualROI - expectedROI;
+                          const isPositive = difference >= 0;
+                          
+                          return (
+                            <div key={index} className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-normal text-[#2D2D2D] truncate max-w-[150px]" title={strategy.name}>
+                                  {strategy.name}
+                                </span>
+                                <span className={`text-sm font-normal ${isPositive ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                  {isPositive ? '+' : ''}{difference.toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
+                                    <div 
+                                      className="h-full bg-[#BBDEFB] rounded-full transition-all"
+                                      style={{ width: `${Math.min((expectedROI / 30) * 100, 100)}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-[#6B6B6B] w-12 text-right font-light">{expectedROI.toFixed(0)}%</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full transition-all ${actualROI >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}
+                                      style={{ width: `${Math.min(Math.abs(actualROI) / 30 * 100, 100)}%` }}
+                                    />
+                                  </div>
+                                  <span className={`text-xs font-normal w-12 text-right ${actualROI >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                                    {actualROI >= 0 ? '+' : ''}{actualROI.toFixed(0)}%
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between text-xs text-[#8B8B8B] font-light">
+                                <span>Очікуваний</span>
+                                <span>Реальний</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Створіть стратегії для аналізу</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'create' && (
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-lg font-normal text-[#2D2D2D]">
+                  <div className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" strokeWidth={1.5} />
+                    Створити нову стратегію
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTemplateDialogOpen(true)}
+                    className="rounded-[20px] border-[#E8E6DC] font-normal"
+                  >
+                    <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                    Використати шаблон
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-[#BBDEFB]/30 rounded-[20px] border-[1.5px] border-[#BBDEFB]">
+                  <h4 className="font-normal text-[#1976D2] mb-2 flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
+                    Як додати обмеження до стратегії:
+                  </h4>
+                  <div className="space-y-2 text-sm text-[#1976D2] font-light">
+                    <p>• <strong className="font-normal">Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5" або "Максимальний коефіцієнт 2.5"</p>
+                    <p>• <strong className="font-normal">Для обмеження форматів:</strong> напишіть "Формат тільки BO3" або "Формат BO1 та BO3"</p>
+                    <p>• <strong className="font-normal">Для обмеження типів ставок:</strong> напишіть "Тільки експреси", "Тільки ординари" або "Експреси та системи"</p>
+                    <p className="pt-2 text-xs text-[#1976D2]">Приклади критеріїв:</p>
+                    <ul className="list-disc list-inside text-xs text-[#1976D2] space-y-1 ml-2">
+                      <li>"Мінімальний коефіцієнт 1.3"</li>
+                      <li>"Максимальний коефіцієнт 2.0"</li>
+                      <li>"Формат тільки BO3"</li>
+                      <li>"Тільки експреси"</li>
+                      <li>"Аналіз останніх 10 матчів команд"</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="strategyName" className="text-[#2D2D2D] font-normal">Назва стратегії *</Label>
+                    <Input
+                      id="strategyName"
+                      value={newStrategy.name}
+                      onChange={(e) => setNewStrategy({...newStrategy, name: e.target.value})}
+                      placeholder="Наприклад: Консервативна стратегія"
+                      className="rounded-[24px] border-[#E8E6DC]"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="riskLevel" className="text-[#2D2D2D] font-normal">Рівень ризику *</Label>
+                    <Select value={newStrategy.riskLevel} onValueChange={(value: 'Low' | 'Medium' | 'High') => setNewStrategy({...newStrategy, riskLevel: value})}>
+                      <SelectTrigger className="rounded-[24px] border-[#E8E6DC]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Low">Низький</SelectItem>
+                        <SelectItem value="Medium">Середній</SelectItem>
+                        <SelectItem value="High">Високий</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="strategyName" className="text-[#2D2D2D] font-normal">Назва стратегії *</Label>
-                  <Input
-                    id="strategyName"
-                    value={newStrategy.name}
-                    onChange={(e) => setNewStrategy({...newStrategy, name: e.target.value})}
-                    placeholder="Наприклад: Консервативна стратегія"
+                  <Label htmlFor="description" className="text-[#2D2D2D] font-normal">Опис стратегії *</Label>
+                  <Textarea
+                    id="description"
+                    value={newStrategy.description}
+                    onChange={(e) => setNewStrategy({...newStrategy, description: e.target.value})}
+                    placeholder="Детальний опис стратегії, коли її використовувати..."
+                    rows={3}
                     className="rounded-[24px] border-[#E8E6DC]"
                   />
                 </div>
-                
+
                 <div>
-                  <Label htmlFor="riskLevel" className="text-[#2D2D2D] font-normal">Рівень ризику *</Label>
-                  <Select value={newStrategy.riskLevel} onValueChange={(value: 'Low' | 'Medium' | 'High') => setNewStrategy({...newStrategy, riskLevel: value})}>
-                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Low">Низький</SelectItem>
-                      <SelectItem value="Medium">Середній</SelectItem>
-                      <SelectItem value="High">Високий</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="expectedROI" className="text-[#2D2D2D] font-normal">Очікуваний ROI (%) *</Label>
+                  <Input
+                    id="expectedROI"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newStrategy.expectedROI}
+                    onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
+                    className="rounded-[24px] border-[#E8E6DC]"
+                  />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="description" className="text-[#2D2D2D] font-normal">Опис стратегії *</Label>
-                <Textarea
-                  id="description"
-                  value={newStrategy.description}
-                  onChange={(e) => setNewStrategy({...newStrategy, description: e.target.value})}
-                  placeholder="Детальний опис стратегії, коли її використовувати..."
-                  rows={3}
-                  className="rounded-[24px] border-[#E8E6DC]"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="expectedROI" className="text-[#2D2D2D] font-normal">Очікуваний ROI (%) *</Label>
-                <Input
-                  id="expectedROI"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={newStrategy.expectedROI}
-                  onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
-                  className="rounded-[24px] border-[#E8E6DC]"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label className="text-[#2D2D2D] font-normal">Критерії стратегії *</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-[20px] border-[#E8E6DC] font-normal">
-                    <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                    Додати критерій
-                  </Button>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-[#2D2D2D] font-normal">Критерії стратегії *</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-[20px] border-[#E8E6DC] font-normal">
+                      <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                      Додати критерій
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {newStrategy.criteria.map((criterion, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={criterion}
+                          onChange={(e) => updateCriterion(index, e.target.value)}
+                          placeholder={index === 0 ? "Наприклад: Мінімальний коефіцієнт 1.5" : `Критерій ${index + 1}`}
+                          className="rounded-[24px] border-[#E8E6DC]"
+                        />
+                        {newStrategy.criteria.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeCriterion(index)}
+                            className="rounded-[20px] border-[#E8E6DC]"
+                          >
+                            <X className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  {newStrategy.criteria.map((criterion, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        value={criterion}
-                        onChange={(e) => updateCriterion(index, e.target.value)}
-                        placeholder={index === 0 ? "Наприклад: Мінімальний коефіцієнт 1.5" : `Критерій ${index + 1}`}
-                        className="rounded-[24px] border-[#E8E6DC]"
-                      />
-                      {newStrategy.criteria.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeCriterion(index)}
-                          className="rounded-[20px] border-[#E8E6DC]"
-                        >
-                          <X className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              <Button onClick={saveStrategy} className="w-full rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal">
-                <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                Зберегти стратегію
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                <Button onClick={saveStrategy} className="w-full rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal">
+                  <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Зберегти стратегію
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
       {/* Details Dialog */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
