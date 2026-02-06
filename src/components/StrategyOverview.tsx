@@ -259,28 +259,28 @@ export default function StrategyOverview() {
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'Low': return 'bg-green-100 text-green-800 border-0 rounded-full';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-0 rounded-full';
-      case 'High': return 'bg-red-100 text-red-800 border-0 rounded-full';
-      default: return 'bg-gray-100 text-gray-800 border-0 rounded-full';
+      case 'Low': return 'bg-[#C8E6C9] text-[#2E7D32] border-0 rounded-[12px]';
+      case 'Medium': return 'bg-[#FFF9C4] text-[#F57F17] border-0 rounded-[12px]';
+      case 'High': return 'bg-[#FFCDD2] text-[#C62828] border-0 rounded-[12px]';
+      default: return 'bg-[#F5F5F3] text-[#6B6B6B] border-0 rounded-[12px]';
     }
   };
 
   const getRiskBarColor = (risk: string) => {
     switch (risk) {
-      case 'Low': return '#10b981';
-      case 'Medium': return '#f59e0b';
-      case 'High': return '#ef4444';
+      case 'Low': return '#4CAF50';
+      case 'Medium': return '#FF9800';
+      case 'High': return '#D32F2F';
       default: return '#6b7280';
     }
   };
 
   const getRiskIcon = (risk: string) => {
     switch (risk) {
-      case 'Low': return <Target className="h-4 w-4" />;
-      case 'Medium': return <TrendingUp className="h-4 w-4" />;
-      case 'High': return <AlertTriangle className="h-4 w-4" />;
-      default: return <Target className="h-4 w-4" />;
+      case 'Low': return <Target className="h-4 w-4" strokeWidth={1.5} />;
+      case 'Medium': return <TrendingUp className="h-4 w-4" strokeWidth={1.5} />;
+      case 'High': return <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />;
+      default: return <Target className="h-4 w-4" strokeWidth={1.5} />;
     }
   };
 
@@ -454,7 +454,7 @@ export default function StrategyOverview() {
 
   const renderSparkline = (profitHistory?: number[]) => {
     if (!profitHistory || profitHistory.length < 2) {
-      return <div className="h-8 flex items-center justify-center text-xs text-gray-400">Немає даних</div>;
+      return <div className="h-8 flex items-center justify-center text-xs text-[#8B8B8B]">Немає даних</div>;
     }
 
     const max = Math.max(...profitHistory);
@@ -477,7 +477,7 @@ export default function StrategyOverview() {
           <polyline
             points={points}
             fill="none"
-            stroke={trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#6b7280'}
+            stroke={trend === 'up' ? '#4CAF50' : trend === 'down' ? '#D32F2F' : '#6b7280'}
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
           />
@@ -496,8 +496,8 @@ export default function StrategyOverview() {
     if (Math.abs(change) < 1) return null;
 
     return (
-      <div className={`flex items-center gap-1 text-xs font-medium ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-        {change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+      <div className={`flex items-center gap-1 text-xs font-normal ${change > 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+        {change > 0 ? <TrendingUp className="h-3 w-3" strokeWidth={1.5} /> : <TrendingDown className="h-3 w-3" strokeWidth={1.5} />}
         {change > 0 ? '+' : ''}{change.toFixed(1)}%
       </div>
     );
@@ -583,9 +583,9 @@ export default function StrategyOverview() {
 
   if (loading) {
     return (
-      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+      <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
         <CardContent className="p-6">
-          <div className="text-center text-gray-600">Завантаження стратегій...</div>
+          <div className="text-center text-[#6B6B6B]">Завантаження стратегій...</div>
         </CardContent>
       </Card>
     );
@@ -597,34 +597,34 @@ export default function StrategyOverview() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 tracking-tight flex items-center gap-2">
-          <div className="p-2 bg-purple-50 rounded-2xl">
-            <Brain className="h-5 w-5 text-purple-600" />
+        <h2 className="text-2xl font-light text-[#2D2D2D] tracking-tight flex items-center gap-3">
+          <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+            <Brain className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
           </div>
           Мої стратегії
         </h2>
-        <p className="text-gray-500 font-medium mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
+        <p className="text-[#6B6B6B] font-light mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl border-0">
-          <TabsTrigger value="overview" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Огляд стратегій</TabsTrigger>
-          <TabsTrigger value="performance" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ефективність</TabsTrigger>
-          <TabsTrigger value="create" className="rounded-xl font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Створити нову</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-[#FAFAF8] p-1.5 rounded-[24px] border-[1.5px] border-[#E8E6DC]">
+          <TabsTrigger value="overview" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Огляд стратегій</TabsTrigger>
+          <TabsTrigger value="performance" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Ефективність</TabsTrigger>
+          <TabsTrigger value="create" className="rounded-[20px] font-normal data-[state=active]:bg-white data-[state=active]:shadow-sm">Створити нову</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {strategies.length === 0 ? (
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardContent className="p-12 text-center">
-                <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Немає стратегій</h3>
-                <p className="text-gray-600 mb-4">Створіть свою першу стратегію для ставок на CS2</p>
+                <Brain className="h-16 w-16 text-[#8B8B8B] mx-auto mb-4" strokeWidth={1.5} />
+                <h3 className="text-lg font-normal text-[#2D2D2D] mb-2">Немає стратегій</h3>
+                <p className="text-[#6B6B6B] mb-4 font-light">Створіть свою першу стратегію для ставок на CS2</p>
                 <Button 
                   onClick={() => setActiveTab('create')} 
-                  className="rounded-xl bg-blue-600 hover:bg-blue-700"
+                  className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Створити стратегію
                 </Button>
               </CardContent>
@@ -632,22 +632,22 @@ export default function StrategyOverview() {
           ) : (
             <>
               {/* Filters and Search */}
-              <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+              <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
                 <CardContent className="p-4">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />
                       <Input
                         placeholder="Пошук стратегій..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 rounded-xl"
+                        className="pl-10 rounded-[24px] border-[#E8E6DC]"
                       />
                     </div>
                     
                     <Select value={riskFilter} onValueChange={setRiskFilter}>
-                      <SelectTrigger className="w-full md:w-48 rounded-xl">
-                        <Filter className="h-4 w-4 mr-2" />
+                      <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
+                        <Filter className="h-4 w-4 mr-2" strokeWidth={1.5} />
                         <SelectValue placeholder="Фільтр за ризиком" />
                       </SelectTrigger>
                       <SelectContent>
@@ -659,8 +659,8 @@ export default function StrategyOverview() {
                     </Select>
 
                     <Select value={sortBy} onValueChange={(value: 'roi' | 'profit' | 'name') => setSortBy(value)}>
-                      <SelectTrigger className="w-full md:w-48 rounded-xl">
-                        <ArrowUpDown className="h-4 w-4 mr-2" />
+                      <SelectTrigger className="w-full md:w-48 rounded-[24px] border-[#E8E6DC]">
+                        <ArrowUpDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
                         <SelectValue placeholder="Сортування" />
                       </SelectTrigger>
                       <SelectContent>
@@ -674,7 +674,7 @@ export default function StrategyOverview() {
                       variant="outline"
                       size="icon"
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="rounded-xl"
+                      className="rounded-[20px] border-[#E8E6DC]"
                     >
                       {sortOrder === 'desc' ? '↓' : '↑'}
                     </Button>
@@ -682,27 +682,27 @@ export default function StrategyOverview() {
                 </CardContent>
               </Card>
 
-              {/* Strategy Cards - Simplified */}
+              {/* Strategy Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredAndSortedStrategies.map((strategy, index) => {
                   const stats = strategyStats[strategy.name] || {};
                   const isPrimary = primaryStrategy === strategy.name;
                   
                   return (
-                    <Card key={index} className={`border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden hover:shadow-xl transition-all ${isPrimary ? 'ring-2 ring-blue-500' : ''}`}>
+                    <Card key={index} className={`border-[1.5px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all ${isPrimary ? 'border-[#F4E157]' : 'border-[#E8E6DC]'}`}>
                       <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center justify-between text-base font-semibold text-gray-900">
+                        <CardTitle className="flex items-center justify-between text-base font-normal text-[#2D2D2D]">
                           <span className="flex items-center gap-2">
                             {getRiskIcon(strategy.riskLevel)}
                             <span className="truncate max-w-[150px]" title={strategy.name}>{strategy.name}</span>
                             {isPrimary && (
-                              <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full text-xs px-2 py-0.5">
-                                <Star className="h-2.5 w-2.5 mr-0.5 fill-blue-700" />
+                              <Badge className="bg-[#F4E157] text-[#2D2D2D] border-0 rounded-[12px] text-xs px-2 py-0.5">
+                                <Star className="h-2.5 w-2.5 mr-0.5 fill-[#2D2D2D]" strokeWidth={1.5} />
                                 Основна
                               </Badge>
                             )}
                           </span>
-                          <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2 py-0.5'}>
+                          <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2 py-0.5 font-normal'}>
                             {strategy.riskLevel}
                           </Badge>
                         </CardTitle>
@@ -711,26 +711,26 @@ export default function StrategyOverview() {
                       <CardContent className="space-y-4">
                         {/* Main Stats */}
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
-                            <div className={`text-2xl font-bold ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <div className="text-center p-3 bg-[#C8E6C9]/30 rounded-[20px]">
+                            <div className={`text-2xl font-light ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                               {stats.roi >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
                             </div>
-                            <div className="text-xs text-gray-600 font-medium mt-1">ROI</div>
+                            <div className="text-xs text-[#6B6B6B] font-normal mt-1">ROI</div>
                             {getTrendIndicator(stats)}
                           </div>
-                          <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
-                            <div className={`text-2xl font-bold ${stats.winRate >= 50 ? 'text-blue-600' : 'text-gray-600'}`}>
+                          <div className="text-center p-3 bg-[#BBDEFB]/30 rounded-[20px]">
+                            <div className={`text-2xl font-light ${stats.winRate >= 50 ? 'text-[#1976D2]' : 'text-[#6B6B6B]'}`}>
                               {stats.winRate?.toFixed(0) || 0}%
                             </div>
-                            <div className="text-xs text-gray-600 font-medium mt-1">Win Rate</div>
-                            <div className="text-xs text-gray-500 mt-1">{stats.totalBets || 0} ставок</div>
+                            <div className="text-xs text-[#6B6B6B] font-normal mt-1">Win Rate</div>
+                            <div className="text-xs text-[#8B8B8B] mt-1 font-light">{stats.totalBets || 0} ставок</div>
                           </div>
                         </div>
 
                         {/* Sparkline */}
                         {stats.totalBets > 0 && (
-                          <div className="p-3 bg-gray-50 rounded-2xl">
-                            <div className="text-xs text-gray-600 font-medium mb-2">Тренд прибутку</div>
+                          <div className="p-3 bg-[#F5F5F3] rounded-[20px]">
+                            <div className="text-xs text-[#6B6B6B] font-normal mb-2">Тренд прибутку</div>
                             {renderSparkline(stats.profitHistory)}
                           </div>
                         )}
@@ -741,26 +741,26 @@ export default function StrategyOverview() {
                             onClick={() => openDetailsDialog(strategy)}
                             variant="outline"
                             size="sm"
-                            className="flex-1 rounded-xl border-gray-200 hover:bg-gray-50"
+                            className="flex-1 rounded-[20px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                             Деталі
                           </Button>
                           <Button
                             onClick={() => togglePrimaryStrategy(strategy.name)}
                             variant="outline"
                             size="sm"
-                            className={`rounded-xl ${isPrimary ? 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100' : 'border-gray-200 hover:bg-gray-50'}`}
+                            className={`rounded-[20px] font-normal ${isPrimary ? 'border-[#F4E157] text-[#2D2D2D] bg-[#F4E157]/20 hover:bg-[#F4E157]/30' : 'border-[#E8E6DC] hover:bg-[#F5F5F3]'}`}
                           >
-                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-blue-700' : ''}`} />
+                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#2D2D2D]' : ''}`} strokeWidth={1.5} />
                           </Button>
                           <Button
                             onClick={() => confirmDeleteStrategy(strategy.name)}
                             variant="outline"
                             size="sm"
-                            className="rounded-xl border-red-200 text-red-600 hover:bg-red-50"
+                            className="rounded-[20px] border-[#FFCDD2] text-[#D32F2F] hover:bg-[#FFCDD2]/30 font-normal"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
                         </div>
                       </CardContent>
@@ -775,27 +775,27 @@ export default function StrategyOverview() {
         <TabsContent value="performance" className="space-y-6">
           {/* Top Row - 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <BarChart3 className="h-4 w-4" />
+                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                  <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
                   Загальна статистика
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Всього стратегій:</span>
-                    <span className="font-medium text-gray-900">{strategies.length}</span>
+                    <span className="text-sm text-[#6B6B6B] font-light">Всього стратегій:</span>
+                    <span className="font-normal text-[#2D2D2D]">{strategies.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Всього ставок:</span>
-                    <span className="font-medium text-gray-900">{bettingData.length}</span>
+                    <span className="text-sm text-[#6B6B6B] font-light">Всього ставок:</span>
+                    <span className="font-normal text-[#2D2D2D]">{bettingData.length}</span>
                   </div>
                   {Object.keys(strategyStats).length > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Найкраща стратегія:</span>
-                      <span className="font-medium text-green-600 truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
+                      <span className="text-sm text-[#6B6B6B] font-light">Найкраща стратегія:</span>
+                      <span className="font-normal text-[#4CAF50] truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
                         (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
                         Object.keys(strategyStats)[0] || 'Немає'
                       )}>
@@ -808,9 +808,9 @@ export default function StrategyOverview() {
                   )}
                   {primaryStrategy && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Основна стратегія:</span>
-                      <span className="font-medium text-blue-600 flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
-                        <Star className="h-3 w-3 fill-blue-600 flex-shrink-0" />
+                      <span className="text-sm text-[#6B6B6B] font-light">Основна стратегія:</span>
+                      <span className="font-normal text-[#2D2D2D] flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
+                        <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />
                         <span className="truncate">{primaryStrategy}</span>
                       </span>
                     </div>
@@ -819,10 +819,10 @@ export default function StrategyOverview() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <Trophy className="h-4 w-4" />
+                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                  <Trophy className="h-4 w-4" strokeWidth={1.5} />
                   Топ по ROI
                 </CardTitle>
               </CardHeader>
@@ -835,52 +835,52 @@ export default function StrategyOverview() {
                       .map(([name, stats]: [string, StrategyStats], index) => (
                         <div key={name} className="flex items-center justify-between">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-sm font-medium text-gray-600 flex-shrink-0">#{index + 1}</span>
-                            <span className="text-sm truncate text-gray-900 flex items-center gap-1" title={name}>
+                            <span className="text-sm font-normal text-[#6B6B6B] flex-shrink-0">#{index + 1}</span>
+                            <span className="text-sm truncate text-[#2D2D2D] flex items-center gap-1 font-light" title={name}>
                               <span className="truncate">{name}</span>
-                              {primaryStrategy === name && <Star className="h-3 w-3 fill-blue-600 text-blue-600 flex-shrink-0" />}
+                              {primaryStrategy === name && <Star className="h-3 w-3 fill-[#F4E157] text-[#F4E157] flex-shrink-0" strokeWidth={1.5} />}
                             </span>
                           </div>
-                          <span className={`text-sm font-medium flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`text-sm font-normal flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                             {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
                           </span>
                         </div>
                       ))
                   ) : (
-                    <p className="text-sm text-gray-500 text-center py-4">Немає даних для відображення</p>
+                    <p className="text-sm text-[#8B8B8B] text-center py-4 font-light">Немає даних для відображення</p>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <Lightbulb className="h-4 w-4" />
+                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                  <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
                   Рекомендації
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 text-sm">
                   {generateDynamicRecommendations().map((rec, index) => (
-                    <div key={index} className={`p-3 rounded-2xl ${
-                      rec.type === 'info' ? 'bg-blue-50' :
-                      rec.type === 'warning' ? 'bg-yellow-50' :
-                      'bg-green-50'
+                    <div key={index} className={`p-3 rounded-[20px] ${
+                      rec.type === 'info' ? 'bg-[#BBDEFB]/30' :
+                      rec.type === 'warning' ? 'bg-[#FFF9C4]/50' :
+                      'bg-[#C8E6C9]/30'
                     }`}>
-                      <div className={`font-medium ${
-                        rec.type === 'info' ? 'text-blue-800' :
-                        rec.type === 'warning' ? 'text-yellow-800' :
-                        'text-green-800'
+                      <div className={`font-normal ${
+                        rec.type === 'info' ? 'text-[#1976D2]' :
+                        rec.type === 'warning' ? 'text-[#F57F17]' :
+                        'text-[#2E7D32]'
                       }`}>
                         {rec.type === 'info' ? '💡 Порада' :
                          rec.type === 'warning' ? '⚠️ Увага' :
                          '✅ Успіх'}
                       </div>
-                      <div className={`${
-                        rec.type === 'info' ? 'text-blue-700' :
-                        rec.type === 'warning' ? 'text-yellow-700' :
-                        'text-green-700'
+                      <div className={`font-light ${
+                        rec.type === 'info' ? 'text-[#1976D2]' :
+                        rec.type === 'warning' ? 'text-[#F57F17]' :
+                        'text-[#2E7D32]'
                       }`}>
                         {rec.message}
                       </div>
@@ -891,17 +891,17 @@ export default function StrategyOverview() {
             </Card>
           </div>
 
-          {/* REDESIGNED: Enhanced ROI Comparison Chart */}
+          {/* ROI Comparison Chart */}
           {roiChartData.length > 0 && (
-            <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="border-b border-gray-100 bg-white/60">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
-                    <BarChart3 className="h-5 w-5 text-white" />
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+              <CardHeader className="border-b border-[#E8E6DC] bg-[#FAFAF8]">
+                <CardTitle className="flex items-center gap-3 text-xl font-normal text-[#2D2D2D]">
+                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                    <BarChart3 className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
                   </div>
                   Порівняння ефективності стратегій
                 </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">Детальний аналіз ROI, Win Rate та прибутку по кожній стратегії</p>
+                <p className="text-sm text-[#6B6B6B] mt-1 font-light">Детальний аналіз ROI, Win Rate та прибутку по кожній стратегії</p>
               </CardHeader>
               <CardContent className="p-6">
                 <ResponsiveContainer width="100%" height={400}>
@@ -918,26 +918,26 @@ export default function StrategyOverview() {
                       angle={-45} 
                       textAnchor="end" 
                       height={100}
-                      tick={{ fontSize: 12, fill: '#4b5563', fontWeight: 600 }}
+                      tick={{ fontSize: 12, fill: '#6B6B6B', fontWeight: 400 }}
                     />
                     <YAxis 
                       yAxisId="left"
-                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6b7280', fontWeight: 600 } }}
-                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fill: '#6B6B6B', fontWeight: 400 } }}
+                      tick={{ fontSize: 12, fill: '#6B6B6B' }}
                     />
                     <YAxis 
                       yAxisId="right"
                       orientation="right"
-                      label={{ value: 'Win Rate (%)', angle: 90, position: 'insideRight', style: { fill: '#6b7280', fontWeight: 600 } }}
-                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      label={{ value: 'Win Rate (%)', angle: 90, position: 'insideRight', style: { fill: '#6B6B6B', fontWeight: 400 } }}
+                      tick={{ fontSize: 12, fill: '#6B6B6B' }}
                     />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                        border: '2px solid #e5e7eb',
-                        borderRadius: '16px',
+                        border: '1.5px solid #E8E6DC',
+                        borderRadius: '20px',
                         padding: '12px 16px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
                       }}
                       formatter={(value: number, name: string) => {
                         if (name === 'roi') return [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI'];
@@ -949,9 +949,9 @@ export default function StrategyOverview() {
                         if (payload && payload[0]) {
                           const data = payload[0].payload;
                           return (
-                            <div className="font-bold text-gray-900">
+                            <div className="font-normal text-[#2D2D2D]">
                               {data.fullName}
-                              <div className="text-xs text-gray-500 font-normal mt-1">
+                              <div className="text-xs text-[#6B6B6B] font-light mt-1">
                                 {data.totalBets} ставок • Ризик: {data.riskLevel}
                               </div>
                             </div>
@@ -969,7 +969,7 @@ export default function StrategyOverview() {
                           winRate: 'Win Rate (%)',
                           profit: 'Прибуток (₴)'
                         };
-                        return <span className="text-sm font-medium text-gray-700">{labels[value] || value}</span>;
+                        return <span className="text-sm font-normal text-[#6B6B6B]">{labels[value] || value}</span>;
                       }}
                     />
                     <Bar yAxisId="left" dataKey="roi" fill="url(#colorRoi)" radius={[12, 12, 0, 0]} barSize={60}>
@@ -981,35 +981,35 @@ export default function StrategyOverview() {
                       yAxisId="right" 
                       type="monotone" 
                       dataKey="winRate" 
-                      stroke="#10b981" 
+                      stroke="#4CAF50" 
                       strokeWidth={3}
-                      dot={{ fill: '#10b981', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                      dot={{ fill: '#4CAF50', r: 6, strokeWidth: 2, stroke: '#fff' }}
                       activeDot={{ r: 8 }}
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
                 
-                {/* Enhanced Legend with Stats */}
+                {/* Enhanced Legend */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center justify-center gap-3 p-3 bg-green-50 rounded-2xl border border-green-200">
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  <div className="flex items-center justify-center gap-3 p-3 bg-[#C8E6C9]/30 rounded-[20px] border-[1.5px] border-[#C8E6C9]">
+                    <div className="w-4 h-4 rounded-full bg-[#4CAF50]"></div>
                     <div className="text-sm">
-                      <div className="font-bold text-green-900">Низький ризик</div>
-                      <div className="text-xs text-green-700">Стабільний прибуток</div>
+                      <div className="font-normal text-[#2E7D32]">Низький ризик</div>
+                      <div className="text-xs text-[#2E7D32] font-light">Стабільний прибуток</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-3 p-3 bg-yellow-50 rounded-2xl border border-yellow-200">
-                    <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                  <div className="flex items-center justify-center gap-3 p-3 bg-[#FFF9C4]/50 rounded-[20px] border-[1.5px] border-[#FFF9C4]">
+                    <div className="w-4 h-4 rounded-full bg-[#FF9800]"></div>
                     <div className="text-sm">
-                      <div className="font-bold text-yellow-900">Середній ризик</div>
-                      <div className="text-xs text-yellow-700">Збалансований підхід</div>
+                      <div className="font-normal text-[#F57F17]">Середній ризик</div>
+                      <div className="text-xs text-[#F57F17] font-light">Збалансований підхід</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-3 p-3 bg-red-50 rounded-2xl border border-red-200">
-                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                  <div className="flex items-center justify-center gap-3 p-3 bg-[#FFCDD2]/30 rounded-[20px] border-[1.5px] border-[#FFCDD2]">
+                    <div className="w-4 h-4 rounded-full bg-[#D32F2F]"></div>
                     <div className="text-sm">
-                      <div className="font-bold text-red-900">Високий ризик</div>
-                      <div className="text-xs text-red-700">Агресивна стратегія</div>
+                      <div className="font-normal text-[#C62828]">Високий ризик</div>
+                      <div className="text-xs text-[#C62828] font-light">Агресивна стратегія</div>
                     </div>
                   </div>
                 </div>
@@ -1020,10 +1020,10 @@ export default function StrategyOverview() {
           {/* Bottom Row - 2 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Bet Types Breakdown */}
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <PieChart className="h-5 w-5 text-blue-600" />
+                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                  <PieChart className="h-5 w-5 text-[#1976D2]" strokeWidth={1.5} />
                   Розбивка по типах ставок
                 </CardTitle>
               </CardHeader>
@@ -1031,47 +1031,47 @@ export default function StrategyOverview() {
                 {betTypeStats.length > 0 ? (
                   <div className="space-y-4">
                     {betTypeStats.map((stat, index) => (
-                      <div key={index} className="p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100">
+                      <div key={index} className="p-4 bg-[#FAFAF8] rounded-[20px] border-[1.5px] border-[#E8E6DC]">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-gray-900">{stat.type}</span>
-                          <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                          <span className="font-normal text-[#2D2D2D]">{stat.type}</span>
+                          <Badge className="bg-[#BBDEFB] text-[#1976D2] border-0 rounded-[12px] font-normal">
                             {stat.count} ставок
                           </Badge>
                         </div>
                         <div className="grid grid-cols-3 gap-3 text-sm">
                           <div className="text-center">
-                            <div className={`font-bold ${stat.winRate >= 50 ? 'text-green-600' : 'text-gray-600'}`}>
+                            <div className={`font-normal ${stat.winRate >= 50 ? 'text-[#4CAF50]' : 'text-[#6B6B6B]'}`}>
                               {stat.winRate.toFixed(0)}%
                             </div>
-                            <div className="text-xs text-gray-500">Win Rate</div>
+                            <div className="text-xs text-[#8B8B8B] font-light">Win Rate</div>
                           </div>
                           <div className="text-center">
-                            <div className={`font-bold ${stat.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className={`font-normal ${stat.roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                               {stat.roi >= 0 ? '+' : ''}{stat.roi.toFixed(1)}%
                             </div>
-                            <div className="text-xs text-gray-500">ROI</div>
+                            <div className="text-xs text-[#8B8B8B] font-light">ROI</div>
                           </div>
                           <div className="text-center">
-                            <div className={`font-bold ${stat.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className={`font-normal ${stat.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                               {stat.profit >= 0 ? '+' : ''}{stat.profit.toFixed(0)}₴
                             </div>
-                            <div className="text-xs text-gray-500">Прибуток</div>
+                            <div className="text-xs text-[#8B8B8B] font-light">Прибуток</div>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-8">Немає даних для відображення</p>
+                  <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Немає даних для відображення</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Expected vs Actual ROI */}
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <Target className="h-5 w-5 text-green-600" />
+                <CardTitle className="flex items-center gap-2 text-lg font-normal text-[#2D2D2D]">
+                  <Target className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
                   Очікуваний vs Реальний ROI
                 </CardTitle>
               </CardHeader>
@@ -1088,36 +1088,36 @@ export default function StrategyOverview() {
                       return (
                         <div key={index} className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={strategy.name}>
+                            <span className="text-sm font-normal text-[#2D2D2D] truncate max-w-[150px]" title={strategy.name}>
                               {strategy.name}
                             </span>
-                            <span className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`text-sm font-normal ${isPositive ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                               {isPositive ? '+' : ''}{difference.toFixed(1)}%
                             </span>
                           </div>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
                                 <div 
-                                  className="h-full bg-blue-400 rounded-full transition-all"
+                                  className="h-full bg-[#BBDEFB] rounded-full transition-all"
                                   style={{ width: `${Math.min((expectedROI / 30) * 100, 100)}%` }}
                                 />
                               </div>
-                              <span className="text-xs text-gray-600 w-12 text-right">{expectedROI.toFixed(0)}%</span>
+                              <span className="text-xs text-[#6B6B6B] w-12 text-right font-light">{expectedROI.toFixed(0)}%</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="flex-1 h-2 bg-[#E8E6DC] rounded-full overflow-hidden">
                                 <div 
-                                  className={`h-full rounded-full transition-all ${actualROI >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                  className={`h-full rounded-full transition-all ${actualROI >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}
                                   style={{ width: `${Math.min(Math.abs(actualROI) / 30 * 100, 100)}%` }}
                                 />
                               </div>
-                              <span className={`text-xs font-medium w-12 text-right ${actualROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`text-xs font-normal w-12 text-right ${actualROI >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                                 {actualROI >= 0 ? '+' : ''}{actualROI.toFixed(0)}%
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-gray-500">
+                          <div className="flex items-center justify-between text-xs text-[#8B8B8B] font-light">
                             <span>Очікуваний</span>
                             <span>Реальний</span>
                           </div>
@@ -1126,7 +1126,7 @@ export default function StrategyOverview() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-8">Створіть стратегії для аналізу</p>
+                  <p className="text-sm text-[#8B8B8B] text-center py-8 font-light">Створіть стратегії для аналізу</p>
                 )}
               </CardContent>
             </Card>
@@ -1134,36 +1134,36 @@ export default function StrategyOverview() {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-6">
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
+          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+              <CardTitle className="flex items-center justify-between text-lg font-normal text-[#2D2D2D]">
                 <div className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" strokeWidth={1.5} />
                   Створити нову стратегію
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setTemplateDialogOpen(true)}
-                  className="rounded-xl"
+                  className="rounded-[20px] border-[#E8E6DC] font-normal"
                 >
-                  <Zap className="h-4 w-4 mr-2" />
+                  <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Використати шаблон
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200">
-                <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4" />
+              <div className="p-4 bg-[#BBDEFB]/30 rounded-[20px] border-[1.5px] border-[#BBDEFB]">
+                <h4 className="font-normal text-[#1976D2] mb-2 flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
                   Як додати обмеження до стратегії:
                 </h4>
-                <div className="space-y-2 text-sm text-blue-800">
-                  <p>• <strong>Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5" або "Максимальний коефіцієнт 2.5"</p>
-                  <p>• <strong>Для обмеження форматів:</strong> напишіть "Формат тільки BO3" або "Формат BO1 та BO3"</p>
-                  <p>• <strong>Для обмеження типів ставок:</strong> напишіть "Тільки експреси", "Тільки ординари" або "Експреси та системи"</p>
-                  <p className="pt-2 text-xs text-blue-700">Приклади критеріїв:</p>
-                  <ul className="list-disc list-inside text-xs text-blue-700 space-y-1 ml-2">
+                <div className="space-y-2 text-sm text-[#1976D2] font-light">
+                  <p>• <strong className="font-normal">Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5" або "Максимальний коефіцієнт 2.5"</p>
+                  <p>• <strong className="font-normal">Для обмеження форматів:</strong> напишіть "Формат тільки BO3" або "Формат BO1 та BO3"</p>
+                  <p>• <strong className="font-normal">Для обмеження типів ставок:</strong> напишіть "Тільки експреси", "Тільки ординари" або "Експреси та системи"</p>
+                  <p className="pt-2 text-xs text-[#1976D2]">Приклади критеріїв:</p>
+                  <ul className="list-disc list-inside text-xs text-[#1976D2] space-y-1 ml-2">
                     <li>"Мінімальний коефіцієнт 1.3"</li>
                     <li>"Максимальний коефіцієнт 2.0"</li>
                     <li>"Формат тільки BO3"</li>
@@ -1175,20 +1175,20 @@ export default function StrategyOverview() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="strategyName" className="text-gray-700 font-medium">Назва стратегії *</Label>
+                  <Label htmlFor="strategyName" className="text-[#2D2D2D] font-normal">Назва стратегії *</Label>
                   <Input
                     id="strategyName"
                     value={newStrategy.name}
                     onChange={(e) => setNewStrategy({...newStrategy, name: e.target.value})}
                     placeholder="Наприклад: Консервативна стратегія"
-                    className="rounded-xl"
+                    className="rounded-[24px] border-[#E8E6DC]"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="riskLevel" className="text-gray-700 font-medium">Рівень ризику *</Label>
+                  <Label htmlFor="riskLevel" className="text-[#2D2D2D] font-normal">Рівень ризику *</Label>
                   <Select value={newStrategy.riskLevel} onValueChange={(value: 'Low' | 'Medium' | 'High') => setNewStrategy({...newStrategy, riskLevel: value})}>
-                    <SelectTrigger className="rounded-xl">
+                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1201,19 +1201,19 @@ export default function StrategyOverview() {
               </div>
 
               <div>
-                <Label htmlFor="description" className="text-gray-700 font-medium">Опис стратегії *</Label>
+                <Label htmlFor="description" className="text-[#2D2D2D] font-normal">Опис стратегії *</Label>
                 <Textarea
                   id="description"
                   value={newStrategy.description}
                   onChange={(e) => setNewStrategy({...newStrategy, description: e.target.value})}
                   placeholder="Детальний опис стратегії, коли її використовувати..."
                   rows={3}
-                  className="rounded-xl"
+                  className="rounded-[24px] border-[#E8E6DC]"
                 />
               </div>
 
               <div>
-                <Label htmlFor="expectedROI" className="text-gray-700 font-medium">Очікуваний ROI (%) *</Label>
+                <Label htmlFor="expectedROI" className="text-[#2D2D2D] font-normal">Очікуваний ROI (%) *</Label>
                 <Input
                   id="expectedROI"
                   type="number"
@@ -1221,15 +1221,15 @@ export default function StrategyOverview() {
                   max="100"
                   value={newStrategy.expectedROI}
                   onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
-                  className="rounded-xl"
+                  className="rounded-[24px] border-[#E8E6DC]"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-gray-700 font-medium">Критерії стратегії *</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-xl">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Label className="text-[#2D2D2D] font-normal">Критерії стратегії *</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-[20px] border-[#E8E6DC] font-normal">
+                    <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                     Додати критерій
                   </Button>
                 </div>
@@ -1241,7 +1241,7 @@ export default function StrategyOverview() {
                         value={criterion}
                         onChange={(e) => updateCriterion(index, e.target.value)}
                         placeholder={index === 0 ? "Наприклад: Мінімальний коефіцієнт 1.5" : `Критерій ${index + 1}`}
-                        className="rounded-xl"
+                        className="rounded-[24px] border-[#E8E6DC]"
                       />
                       {newStrategy.criteria.length > 1 && (
                         <Button
@@ -1249,9 +1249,9 @@ export default function StrategyOverview() {
                           variant="outline"
                           size="sm"
                           onClick={() => removeCriterion(index)}
-                          className="rounded-xl"
+                          className="rounded-[20px] border-[#E8E6DC]"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
                       )}
                     </div>
@@ -1259,8 +1259,8 @@ export default function StrategyOverview() {
                 </div>
               </div>
 
-              <Button onClick={saveStrategy} className="w-full rounded-2xl bg-blue-600 hover:bg-blue-700 font-medium">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button onClick={saveStrategy} className="w-full rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal">
+                <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Зберегти стратегію
               </Button>
             </CardContent>
@@ -1270,88 +1270,88 @@ export default function StrategyOverview() {
 
       {/* Details Dialog */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="rounded-[32px] max-w-2xl max-h-[80vh] overflow-y-auto border-[1.5px] border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-              <Info className="h-5 w-5 text-blue-600" />
+            <DialogTitle className="flex items-center gap-2 text-xl font-normal text-[#2D2D2D]">
+              <Info className="h-5 w-5 text-[#1976D2]" strokeWidth={1.5} />
               Деталі стратегії
             </DialogTitle>
           </DialogHeader>
           {selectedStrategy && (
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="font-normal text-[#2D2D2D] mb-2 flex items-center gap-2">
                   {getRiskIcon(selectedStrategy.riskLevel)}
                   {selectedStrategy.name}
-                  <Badge className={getRiskColor(selectedStrategy.riskLevel)}>
+                  <Badge className={getRiskColor(selectedStrategy.riskLevel) + ' font-normal'}>
                     {selectedStrategy.riskLevel} Risk
                   </Badge>
                 </h3>
-                <p className="text-gray-600">{selectedStrategy.description}</p>
+                <p className="text-[#6B6B6B] font-light">{selectedStrategy.description}</p>
               </div>
 
               {(selectedStrategy.maxOdds || selectedStrategy.minOdds || selectedStrategy.allowedFormats || selectedStrategy.allowedBetTypes) && (
-                <div className="p-4 bg-blue-50 rounded-2xl space-y-2">
-                  <p className="text-sm font-semibold text-blue-900 uppercase">Обмеження стратегії:</p>
+                <div className="p-4 bg-[#BBDEFB]/30 rounded-[20px] space-y-2">
+                  <p className="text-sm font-normal text-[#1976D2] uppercase">Обмеження стратегії:</p>
                   {selectedStrategy.minOdds && (
-                    <div className="text-sm text-blue-700">
-                      • Мінімальний коефіцієнт: <span className="font-bold">{selectedStrategy.minOdds}</span>
+                    <div className="text-sm text-[#1976D2] font-light">
+                      • Мінімальний коефіцієнт: <span className="font-normal">{selectedStrategy.minOdds}</span>
                     </div>
                   )}
                   {selectedStrategy.maxOdds && (
-                    <div className="text-sm text-blue-700">
-                      • Максимальний коефіцієнт: <span className="font-bold">{selectedStrategy.maxOdds}</span>
+                    <div className="text-sm text-[#1976D2] font-light">
+                      • Максимальний коефіцієнт: <span className="font-normal">{selectedStrategy.maxOdds}</span>
                     </div>
                   )}
                   {selectedStrategy.allowedFormats && selectedStrategy.allowedFormats.length > 0 && (
-                    <div className="text-sm text-blue-700">
-                      • Дозволені формати: <span className="font-bold">{selectedStrategy.allowedFormats.join(', ')}</span>
+                    <div className="text-sm text-[#1976D2] font-light">
+                      • Дозволені формати: <span className="font-normal">{selectedStrategy.allowedFormats.join(', ')}</span>
                     </div>
                   )}
                   {selectedStrategy.allowedBetTypes && selectedStrategy.allowedBetTypes.length > 0 && (
-                    <div className="text-sm text-blue-700">
-                      • Дозволені типи ставок: <span className="font-bold">{selectedStrategy.allowedBetTypes.join(', ')}</span>
+                    <div className="text-sm text-[#1976D2] font-light">
+                      • Дозволені типи ставок: <span className="font-normal">{selectedStrategy.allowedBetTypes.join(', ')}</span>
                     </div>
                   )}
                 </div>
               )}
 
               {strategyStats[selectedStrategy.name] && strategyStats[selectedStrategy.name].totalBets > 0 && (
-                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl">
+                <div className="grid grid-cols-2 gap-4 p-4 bg-[#F5F5F3] rounded-[20px]">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-gray-900">{strategyStats[selectedStrategy.name].totalBets}</div>
-                    <div className="text-xs text-gray-600 font-medium">Всього ставок</div>
+                    <div className="text-2xl font-light text-[#2D2D2D]">{strategyStats[selectedStrategy.name].totalBets}</div>
+                    <div className="text-xs text-[#6B6B6B] font-normal">Всього ставок</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`text-2xl font-light ${strategyStats[selectedStrategy.name].winRate >= 50 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                       {strategyStats[selectedStrategy.name].winRate.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-600 font-medium">Win Rate</div>
+                    <div className="text-xs text-[#6B6B6B] font-normal">Win Rate</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`text-2xl font-light ${strategyStats[selectedStrategy.name].totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                       {strategyStats[selectedStrategy.name].totalProfit >= 0 ? '+' : ''}{strategyStats[selectedStrategy.name].totalProfit.toFixed(0)} ₴
                     </div>
-                    <div className="text-xs text-gray-600 font-medium">Прибуток</div>
+                    <div className="text-xs text-[#6B6B6B] font-normal">Прибуток</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-semibold ${strategyStats[selectedStrategy.name].roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`text-2xl font-light ${strategyStats[selectedStrategy.name].roi >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                       {strategyStats[selectedStrategy.name].roi >= 0 ? '+' : ''}{strategyStats[selectedStrategy.name].roi.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-600 font-medium">ROI</div>
+                    <div className="text-xs text-[#6B6B6B] font-normal">ROI</div>
                   </div>
                 </div>
               )}
 
               <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
-                  <Lightbulb className="h-4 w-4" />
+                <h4 className="font-normal mb-2 flex items-center gap-2 text-[#2D2D2D]">
+                  <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
                   Критерії стратегії:
                 </h4>
                 <ul className="space-y-2">
                   {selectedStrategy.criteria.map((criterion, idx) => (
-                    <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <li key={idx} className="text-sm text-[#6B6B6B] flex items-start gap-2 font-light">
+                      <div className="w-1.5 h-1.5 bg-[#1976D2] rounded-full mt-1.5 flex-shrink-0"></div>
                       <span>{criterion}</span>
                     </li>
                   ))}
@@ -1360,7 +1360,7 @@ export default function StrategyOverview() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setDetailsDialogOpen(false)} className="rounded-xl">
+            <Button onClick={() => setDetailsDialogOpen(false)} className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal">
               Закрити
             </Button>
           </DialogFooter>
@@ -1369,51 +1369,51 @@ export default function StrategyOverview() {
 
       {/* Template Dialog */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="rounded-[32px] max-w-4xl max-h-[80vh] overflow-y-auto border-[1.5px] border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-              <Zap className="h-5 w-5 text-purple-600" />
+            <DialogTitle className="flex items-center gap-2 text-xl font-normal text-[#2D2D2D]">
+              <Zap className="h-5 w-5 text-[#7B1FA2]" strokeWidth={1.5} />
               Шаблони стратегій
             </DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogDescription className="text-[#6B6B6B] font-light">
               Виберіть готовий шаблон для швидкого створення стратегії
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {STRATEGY_TEMPLATES.map((template, index) => (
-              <Card key={index} className="border-2 border-gray-200 hover:border-blue-500 transition-all cursor-pointer" onClick={() => applyTemplate(template)}>
+              <Card key={index} className="border-[1.5px] border-[#E8E6DC] hover:border-[#F4E157] transition-all cursor-pointer rounded-[24px]" onClick={() => applyTemplate(template)}>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-base font-semibold text-gray-900">
+                  <CardTitle className="flex items-center justify-between text-base font-normal text-[#2D2D2D]">
                     <span className="flex items-center gap-2">
                       {getRiskIcon(template.riskLevel)}
                       {template.name}
                     </span>
-                    <Badge className={getRiskColor(template.riskLevel) + ' text-xs'}>
+                    <Badge className={getRiskColor(template.riskLevel) + ' text-xs font-normal'}>
                       {template.riskLevel}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-gray-600">{template.description}</p>
-                  <div className="p-2 bg-green-50 rounded-xl text-center">
-                    <div className="text-lg font-bold text-green-600">+{template.expectedROI}%</div>
-                    <div className="text-xs text-gray-600">Очікуваний ROI</div>
+                  <p className="text-sm text-[#6B6B6B] font-light">{template.description}</p>
+                  <div className="p-2 bg-[#C8E6C9]/30 rounded-[16px] text-center">
+                    <div className="text-lg font-normal text-[#4CAF50]">+{template.expectedROI}%</div>
+                    <div className="text-xs text-[#6B6B6B] font-light">Очікуваний ROI</div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-1">Критерії:</p>
+                    <p className="text-xs font-normal text-[#6B6B6B] mb-1">Критерії:</p>
                     <ul className="space-y-1">
                       {template.criteria.slice(0, 3).map((criterion, idx) => (
-                        <li key={idx} className="text-xs text-gray-600 flex items-center gap-1">
-                          <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                        <li key={idx} className="text-xs text-[#6B6B6B] flex items-center gap-1 font-light">
+                          <div className="w-1 h-1 bg-[#1976D2] rounded-full"></div>
                           {criterion}
                         </li>
                       ))}
                       {template.criteria.length > 3 && (
-                        <li className="text-xs text-gray-500">+ ще {template.criteria.length - 3}</li>
+                        <li className="text-xs text-[#8B8B8B] font-light">+ ще {template.criteria.length - 3}</li>
                       )}
                     </ul>
                   </div>
-                  <Button className="w-full rounded-xl bg-blue-600 hover:bg-blue-700" size="sm">
+                  <Button className="w-full rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal" size="sm">
                     Використати шаблон
                   </Button>
                 </CardContent>
@@ -1425,14 +1425,14 @@ export default function StrategyOverview() {
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="rounded-[32px] border-[1.5px] border-[#E8E6DC]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-700">
-              <AlertTriangle className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-[#D32F2F]">
+              <AlertTriangle className="h-5 w-5" strokeWidth={1.5} />
               Видалити стратегію?
             </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              Ви впевнені, що хочете видалити стратегію <span className="font-semibold text-gray-900">"{strategyToDelete}"</span>?
+            <DialogDescription className="text-[#6B6B6B] font-light">
+              Ви впевнені, що хочете видалити стратегію <span className="font-normal text-[#2D2D2D]">"{strategyToDelete}"</span>?
               <br />
               <br />
               Ця дія незворотна. Статистика ставок, пов'язаних з цією стратегією, залишиться незмінною.
@@ -1442,16 +1442,16 @@ export default function StrategyOverview() {
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="rounded-xl"
+              className="rounded-[20px] border-[#E8E6DC] font-normal"
             >
               Скасувати
             </Button>
             <Button
               variant="destructive"
               onClick={deleteStrategy}
-              className="rounded-xl bg-red-600 hover:bg-red-700"
+              className="rounded-[20px] bg-[#D32F2F] hover:bg-[#C62828] font-normal"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Видалити
             </Button>
           </DialogFooter>
