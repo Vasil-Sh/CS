@@ -150,6 +150,7 @@ export default function GoalsManager() {
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isHowToExpanded, setIsHowToExpanded] = useState(false);
+  const [isStepsCalculationExpanded, setIsStepsCalculationExpanded] = useState(false);
 
   const [newGoal, setNewGoal] = useState({
     name: '',
@@ -596,6 +597,7 @@ export default function GoalsManager() {
   const openDetailsDialog = (goal: Goal) => {
     setSelectedGoal(goal);
     setShowDetailsDialog(true);
+    setIsStepsCalculationExpanded(false);
   };
 
   const openCompletedGoalResult = (goal: Goal) => {
@@ -1255,7 +1257,7 @@ export default function GoalsManager() {
                 </div>
 
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
-                  <div className="p-4 bg-[#E3F2FD] rounded-[20px] border-2 border-[#BBDEFB]">
+                  <div className="p-4 bg-[#FFF9E6] rounded-[20px] border-2 border-[#F4E157]">
                     <p className="text-sm font-normal text-black mb-1">📊 Розрахунок кроків:</p>
                     <p className="text-sm text-[#6B6B6B] font-light">
                       Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
@@ -1365,19 +1367,19 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog - IMPROVED DESIGN FOR LADDER */}
+      {/* Goal Details Dialog - UPDATED DESIGN */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
           <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#8b5cf6] rounded-[20px] shadow-[0_2px_8px_rgba(139,92,246,0.3)]">
-                <TrendingUp className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)]">
+                <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-light text-black">
+                <DialogTitle className="text-3xl font-normal text-black">
                   {selectedGoal?.name}
                 </DialogTitle>
-                <DialogDescription className="text-[#6B6B6B] font-light mt-1">
+                <DialogDescription className="text-[#6B6B6B] font-light mt-1 text-base">
                   Детальна інформація про прогрес цілі
                 </DialogDescription>
               </div>
@@ -1390,7 +1392,7 @@ export default function GoalsManager() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
                   <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Тип цілі</p>
-                  <Badge className="bg-[#8b5cf6] text-white border-0 rounded-[12px] px-3 py-1 font-normal">
+                  <Badge className="bg-[#F4E157] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
                     {getGoalTypeLabel(selectedGoal.type)}
                   </Badge>
                 </div>
@@ -1402,7 +1404,7 @@ export default function GoalsManager() {
                 </div>
                 <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
                   <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Прогрес</p>
-                  <p className="text-base font-normal text-[#8b5cf6]">
+                  <p className="text-base font-normal text-black">
                     {getGoalProgress(selectedGoal).toFixed(1)}%
                   </p>
                 </div>
@@ -1412,30 +1414,67 @@ export default function GoalsManager() {
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
                 <div className="space-y-4">
                   {/* Ladder Overview */}
-                  <div className="p-5 bg-gradient-to-br from-[#E3F2FD] to-[#BBDEFB] rounded-[24px] border-2 border-[#90CAF9]">
+                  <div className="p-5 bg-gradient-to-br from-[#FFF9E6] to-[#FFFEF5] rounded-[24px] border-2 border-[#F4E157]">
                     <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+                      <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
                       Огляд лесенки
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-white/80 rounded-[16px]">
+                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                         <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
                         <p className="text-xl font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</p>
                       </div>
-                      <div className="p-3 bg-white/80 rounded-[16px]">
+                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                         <p className="text-xs text-[#6B6B6B] font-light mb-1">Цільова сума</p>
-                        <p className="text-xl font-normal text-[#2196F3]">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
+                        <p className="text-xl font-normal text-black">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
                       </div>
-                      <div className="p-3 bg-white/80 rounded-[16px]">
+                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                         <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон коефіцієнтів</p>
                         <p className="text-base font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</p>
                       </div>
-                      <div className="p-3 bg-white/80 rounded-[16px]">
+                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                         <p className="text-xs text-[#6B6B6B] font-light mb-1">Поточний банк</p>
                         <p className="text-xl font-normal text-[#4CAF50]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
                       </div>
                     </div>
                   </div>
+
+                  {/* Steps Calculation - Collapsible */}
+                  <Collapsible open={isStepsCalculationExpanded} onOpenChange={setIsStepsCalculationExpanded}>
+                    <Card className="border-2 border-[#F4E157] shadow-[0_2px_8px_rgba(244,225,87,0.2)] rounded-[24px] bg-white overflow-hidden">
+                      <CollapsibleTrigger className="w-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-[#FFF9E6] rounded-[16px]">
+                                <Info className="h-5 w-5 text-black" strokeWidth={1.5} />
+                              </div>
+                              <div className="text-left">
+                                <p className="text-base font-normal text-black">📊 Розрахунок кроків</p>
+                                <p className="text-xs text-[#6B6B6B] font-light mt-0.5">
+                                  Кількість кроків: {selectedGoal.totalSteps}
+                                </p>
+                              </div>
+                            </div>
+                            {isStepsCalculationExpanded ? (
+                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
+                            )}
+                          </div>
+                        </CardContent>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="px-5 pb-5 pt-0">
+                          <div className="p-4 bg-[#FFF9E6] rounded-[16px] border border-[#F4E157]">
+                            <p className="text-sm font-light text-[#6B6B6B] leading-relaxed">
+                              💡 Система прийматиме будь-який коефіцієнт в діапазоні <span className="font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</span>
+                            </p>
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
 
                   {/* Steps Timeline */}
                   <div>
@@ -1465,7 +1504,7 @@ export default function GoalsManager() {
                                 {step.step}
                               </div>
                               <div>
-                                <p className="font-normal text-black">Крок {step.step}</p>
+                                <p className="font-normal text-black text-base">Крок {step.step}</p>
                                 <p className="text-xs text-[#6B6B6B] font-light">
                                   {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний крок' : 'Заблоковано'}
                                 </p>
@@ -1489,8 +1528,10 @@ export default function GoalsManager() {
                               <p className="text-lg font-normal text-black">{step.startAmount.toFixed(0)} грн</p>
                             </div>
                             <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Мін. планова сума</p>
-                              <p className="text-lg font-normal text-[#2196F3]">{step.minPlannedAmount?.toFixed(0)} грн</p>
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон виграшу</p>
+                              <p className="text-sm font-normal text-black">
+                                {step.minPlannedAmount?.toFixed(0)} - {step.maxPlannedAmount?.toFixed(0)} грн
+                              </p>
                             </div>
                             
                             {step.actualAmount && (
@@ -1545,7 +1586,7 @@ export default function GoalsManager() {
           <DialogFooter className="pt-4 border-t-2 border-[#E8E6DC]">
             <Button 
               onClick={() => setShowDetailsDialog(false)} 
-              className="rounded-[20px] bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-normal h-12 px-6"
+              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6"
             >
               Закрити
             </Button>
