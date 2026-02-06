@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, Brain, Target, AlertCircle, Lightbulb, Star } from 'lucide-react';
+import { TrendingUp, Brain, Target, AlertCircle, Lightbulb, Star, HelpCircle } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
 interface PredictiveAnalyticsProps {
@@ -252,67 +252,78 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'bg-red-100 text-red-700 border-0';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-0';
-      default: return 'bg-blue-100 text-blue-700 border-0';
+      case 'high': return 'bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] border-2 border-[#FFCDD2]';
+      case 'medium': return 'bg-[#FFF4E6] text-[#F57C00] hover:bg-[#FFF4E6] border-2 border-[#FFE0B2]';
+      default: return 'bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB]';
     }
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />;
+      case 'up': return <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />;
+      case 'down': return <TrendingUp className="h-4 w-4 text-[#D32F2F] rotate-180" strokeWidth={1.5} />;
       default: return <div className="h-4 w-4" />;
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <div className="p-2.5 bg-purple-50 rounded-2xl">
-          <Brain className="h-5 w-5 text-purple-600" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Предиктивна аналітика</h2>
-          <p className="text-gray-500 font-medium">AI-прогнози та рекомендації стратегій</p>
-        </div>
-        <Badge className="ml-auto rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
-          Впевненість: {confidenceScore}%
-        </Badge>
-      </div>
+      {/* Header Card - У стилі GoalsManager */}
+      <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_8px_20px_rgba(244,225,87,0.4)]">
+                <Brain className="h-6 w-6 text-black" strokeWidth={1.5} />
+              </div>
+              Предиктивна аналітика
+              <button
+                className="p-2.5 bg-[#F4E157] rounded-[16px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] hover:shadow-[0_6px_16px_rgba(244,225,87,0.6)] transition-all ml-2"
+                title="AI-прогнози базуються на історичних даних та трендах ваших ставок"
+              >
+                <HelpCircle className="h-5 w-5 text-black" strokeWidth={2} />
+              </button>
+            </CardTitle>
+            <Badge className="bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] px-5 py-2 rounded-[20px] border-2 border-[#C8E6C9] font-normal text-base">
+              Впевненість: {confidenceScore}%
+            </Badge>
+          </div>
+        </CardHeader>
+      </Card>
 
       {confidenceScore < 50 && (
-        <Alert className="rounded-2xl border-0 bg-orange-50">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-700 font-medium">
-            Недостатньо даних для точних прогнозів. Рекомендується мінімум 20 завершених ставок.
+        <Alert className="rounded-[28px] border-2 border-[#FFE0B2] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <AlertCircle className="h-5 w-5 text-[#F57C00]" strokeWidth={1.5} />
+          <AlertDescription className="font-light text-black ml-2">
+            <strong className="font-normal">Недостатньо даних для точних прогнозів.</strong> Рекомендується мінімум 20 завершених ставок.
           </AlertDescription>
         </Alert>
       )}
 
+      {/* Prediction Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {predictions.map((prediction) => (
-          <Card key={prediction.metric} className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-900">
+          <Card key={prediction.metric} className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
+            <CardHeader className="pb-4 pt-7 px-7">
+              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
                 {getTrendIcon(prediction.trend)}
                 {prediction.metric}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Поточне:</span>
-                  <span className="font-medium text-gray-900">
+            <CardContent className="px-7 pb-7">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-[#6B6B6B] font-light">Поточне:</span>
+                  <span className="text-2xl font-light text-black">
                     {prediction.metric === 'Прибуток на прогноз' 
                       ? `${prediction.current.toFixed(2)} ₴`
                       : `${prediction.current.toFixed(1)}%`
                     }
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Прогноз:</span>
-                  <span className={`font-semibold ${prediction.predicted > prediction.current ? 'text-green-600' : 'text-red-600'}`}>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-[#6B6B6B] font-light">Прогноз:</span>
+                  <span className={`text-2xl font-normal ${prediction.predicted > prediction.current ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                     {prediction.metric === 'Прибуток на прогноз' 
                       ? `${prediction.predicted.toFixed(2)} ₴`
                       : `${prediction.predicted.toFixed(1)}%`
@@ -320,11 +331,11 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                   </span>
                 </div>
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Впевненість</span>
-                    <span className="text-gray-900 font-medium">{prediction.confidence.toFixed(0)}%</span>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-[#6B6B6B] font-light">Впевненість</span>
+                    <span className="text-black font-normal">{prediction.confidence.toFixed(0)}%</span>
                   </div>
-                  <Progress value={prediction.confidence} className="h-2" />
+                  <Progress value={prediction.confidence} className="h-2 bg-[#E8E6DC]" />
                 </div>
               </div>
             </CardContent>
@@ -332,23 +343,47 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         ))}
       </div>
 
+      {/* Forecast Chart */}
       {forecastData.length > 0 && (
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <Target className="h-6 w-6 text-blue-600" />
+        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+          <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                <Target className="h-6 w-6 text-black" strokeWidth={1.5} />
               </div>
               Прогноз тижневого прибутку
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-8">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={forecastData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" />
-                <YAxis />
+                <defs>
+                  <linearGradient id="colorHistorical" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#C4A57B" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#C4A57B" stopOpacity={0.1}/>
+                  </linearGradient>
+                  <linearGradient id="colorPredicted" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#D4B896" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#D4B896" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="week" 
+                  tick={{ fontSize: 12, fill: '#000' }}
+                  stroke="#000"
+                />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: '#000' }}
+                  stroke="#000"
+                />
                 <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    border: 'none', 
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
                   formatter={(value: number | string, name: string) => [
                     `${value} ₴`,
                     name === 'historical' ? 'Історичний' : 'Прогноз'
@@ -357,17 +392,19 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
                 <Area 
                   type="monotone" 
                   dataKey="historical" 
-                  stroke="#3b82f6" 
-                  fill="#3b82f6" 
-                  fillOpacity={0.3}
+                  stroke="#C4A57B" 
+                  strokeWidth={2}
+                  fill="url(#colorHistorical)" 
+                  fillOpacity={1}
                   name="historical"
                 />
                 <Area 
                   type="monotone" 
                   dataKey="predicted" 
-                  stroke="#8b5cf6" 
-                  fill="#8b5cf6" 
-                  fillOpacity={0.3}
+                  stroke="#D4B896" 
+                  strokeWidth={2}
+                  fill="url(#colorPredicted)" 
+                  fillOpacity={1}
                   strokeDasharray="5 5"
                   name="predicted"
                 />
@@ -377,30 +414,37 @@ export default function PredictiveAnalytics({ bets }: PredictiveAnalyticsProps) 
         </Card>
       )}
 
-      <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-          <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-            <div className="p-2 bg-yellow-100 rounded-xl">
-              <Lightbulb className="h-6 w-6 text-yellow-600" />
+      {/* Recommendations */}
+      <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+        <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
+          <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+              <Lightbulb className="h-6 w-6 text-black" strokeWidth={1.5} />
             </div>
             Рекомендації стратегій
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-8">
           <div className="space-y-4">
             {recommendations.map((rec, index) => (
-              <div key={index} className="p-4 border-2 border-gray-200 rounded-2xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300 transition-all">
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold flex items-center gap-2 text-gray-900">
-                    <Star className="h-4 w-4 text-yellow-500" />
+              <div 
+                key={index} 
+                className="p-6 border-2 border-[#E8E6DC] rounded-[24px] hover:bg-[#FAFAF8] hover:border-[#D4D2C8] transition-all duration-300"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.03) 4px, rgba(196,165,123,0.03) 5px)`
+                }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <h4 className="font-normal text-black text-lg flex items-center gap-2">
+                    <Star className="h-5 w-5 text-[#F4E157]" strokeWidth={1.5} fill="#F4E157" />
                     {rec.strategy}
                   </h4>
-                  <Badge className={`${getImpactColor(rec.impact)} rounded-full font-bold`}>
+                  <Badge className={`${getImpactColor(rec.impact)} rounded-[16px] font-normal px-4 py-2`}>
                     {rec.impact === 'high' ? 'Високий' : rec.impact === 'medium' ? 'Середній' : 'Низький'} вплив
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
-                <p className="text-sm font-medium text-blue-700">
+                <p className="text-sm text-[#6B6B6B] font-light mb-3">{rec.reason}</p>
+                <p className="text-sm font-normal text-black bg-[#F5F5F3] p-4 rounded-[16px] border-2 border-[#E8E6DC]">
                   💡 {rec.implementation}
                 </p>
               </div>
