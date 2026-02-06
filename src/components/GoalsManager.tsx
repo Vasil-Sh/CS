@@ -379,7 +379,7 @@ export default function GoalsManager() {
 
   const calculateOddsScenarios = (start: number, target: number, minOdds: number, maxOdds: number): OddsScenario[] => {
     const scenarios: OddsScenario[] = [];
-    const oddsRange = [minOdds, minOdds + 0.05, (minOdds + maxOdds) / 2, maxOdds - 0.05, maxOdds];
+    const oddsRange = [minOdds, (minOdds + maxOdds) / 2, maxOdds];
     
     oddsRange.forEach(odds => {
       const steps = calculateLadderSteps(start, target, odds, odds);
@@ -395,18 +395,10 @@ export default function GoalsManager() {
         speed = 'Швидко';
         emoji = '🚀';
         description = 'Найменше кроків, ризиковано';
-      } else if (Math.abs(odds - (minOdds + maxOdds) / 2) < 0.01) {
+      } else {
         speed = 'Оптимально';
         emoji = '⚡';
         description = 'Рекомендований баланс';
-      } else if (odds < (minOdds + maxOdds) / 2) {
-        speed = 'Помірно';
-        emoji = '🐇';
-        description = 'Збалансований підхід';
-      } else {
-        speed = 'Швидше';
-        emoji = '🏃';
-        description = 'Менше кроків, вищий ризик';
       }
       
       scenarios.push({
@@ -1257,7 +1249,7 @@ export default function GoalsManager() {
                 </div>
 
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
-                  <div className="p-4 bg-[#FFF9E6] rounded-[20px] border-2 border-[#F4E157]">
+                  <div className="p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
                     <p className="text-sm font-normal text-black mb-1">📊 Розрахунок кроків:</p>
                     <p className="text-sm text-[#6B6B6B] font-light">
                       Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
@@ -1372,7 +1364,7 @@ export default function GoalsManager() {
         <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
           <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)]">
+              <div className="p-3 bg-[#F5F5F3] rounded-[24px]">
                 <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
               </div>
               <div>
@@ -1392,7 +1384,7 @@ export default function GoalsManager() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
                   <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Тип цілі</p>
-                  <Badge className="bg-[#F4E157] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
+                  <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] px-3 py-1 font-normal">
                     {getGoalTypeLabel(selectedGoal.type)}
                   </Badge>
                 </div>
@@ -1414,7 +1406,7 @@ export default function GoalsManager() {
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
                 <div className="space-y-4">
                   {/* Ladder Overview */}
-                  <div className="p-5 bg-gradient-to-br from-[#FFF9E6] to-[#FFFEF5] rounded-[24px] border-2 border-[#F4E157]">
+                  <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
                     <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
                       Огляд лесенки
@@ -1439,20 +1431,20 @@ export default function GoalsManager() {
                     </div>
                   </div>
 
-                  {/* Steps Calculation - Collapsible */}
+                  {/* Steps Calculation - Collapsible with Scenarios */}
                   <Collapsible open={isStepsCalculationExpanded} onOpenChange={setIsStepsCalculationExpanded}>
-                    <Card className="border-2 border-[#F4E157] shadow-[0_2px_8px_rgba(244,225,87,0.2)] rounded-[24px] bg-white overflow-hidden">
+                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
                       <CollapsibleTrigger className="w-full">
                         <CardContent className="p-5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#FFF9E6] rounded-[16px]">
+                              <div className="p-2 bg-[#F5F5F3] rounded-[16px]">
                                 <Info className="h-5 w-5 text-black" strokeWidth={1.5} />
                               </div>
                               <div className="text-left">
-                                <p className="text-base font-normal text-black">📊 Розрахунок кроків</p>
+                                <p className="text-base font-normal text-black">📊 Сценарії розрахунку кроків</p>
                                 <p className="text-xs text-[#6B6B6B] font-light mt-0.5">
-                                  Кількість кроків: {selectedGoal.totalSteps}
+                                  Скільки кроків потрібно при різних коефіцієнтах
                                 </p>
                               </div>
                             </div>
@@ -1466,10 +1458,35 @@ export default function GoalsManager() {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <CardContent className="px-5 pb-5 pt-0">
-                          <div className="p-4 bg-[#FFF9E6] rounded-[16px] border border-[#F4E157]">
-                            <p className="text-sm font-light text-[#6B6B6B] leading-relaxed">
-                              💡 Система прийматиме будь-який коефіцієнт в діапазоні <span className="font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</span>
-                            </p>
+                          <div className="space-y-3">
+                            {calculateOddsScenarios(
+                              selectedGoal.startAmount || 100,
+                              selectedGoal.targetLadderAmount || 100000,
+                              selectedGoal.minOdds || 1.3,
+                              selectedGoal.maxOdds || 5
+                            ).map((scenario, index) => (
+                              <div 
+                                key={index}
+                                className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[16px] border border-[#E8E6DC]"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-2xl">{scenario.emoji}</span>
+                                    <div>
+                                      <p className="text-sm font-normal text-black">{scenario.speed}</p>
+                                      <p className="text-xs text-[#6B6B6B] font-light">{scenario.description}</p>
+                                    </div>
+                                  </div>
+                                  <Badge className="bg-[#E8E6DC] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
+                                    {scenario.steps} кроків
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-[#6B6B6B]">
+                                  <span className="font-light">При коефіцієнті:</span>
+                                  <span className="font-normal text-black">{scenario.odds}</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </CardContent>
                       </CollapsibleContent>
@@ -1586,7 +1603,7 @@ export default function GoalsManager() {
           <DialogFooter className="pt-4 border-t-2 border-[#E8E6DC]">
             <Button 
               onClick={() => setShowDetailsDialog(false)} 
-              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6"
+              className="rounded-[20px] bg-[#E8E6DC] hover:bg-[#D4D2C8] text-black font-normal h-12 px-6"
             >
               Закрити
             </Button>
