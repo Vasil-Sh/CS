@@ -405,9 +405,10 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px' }}
+                    contentStyle={{ color: '#1a1a1a' }}
                     formatter={(value) => {
-                      if (value === 'profit') return 'Прибуток (₴)';
-                      if (value === 'bets') return 'Кількість ставок';
+                      if (value === 'profit') return <span style={{ color: '#1a1a1a' }}>Прибуток (₴)</span>;
+                      if (value === 'bets') return <span style={{ color: '#1a1a1a' }}>Кількість ставок</span>;
                       return value;
                     }}
                   />
@@ -472,9 +473,10 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px' }}
+                    contentStyle={{ color: '#1a1a1a' }}
                     formatter={(value) => {
-                      if (value === 'winRate') return 'Win Rate (%)';
-                      if (value === 'roi') return 'ROI (%)';
+                      if (value === 'winRate') return <span style={{ color: '#1a1a1a' }}>Win Rate (%)</span>;
+                      if (value === 'roi') return <span style={{ color: '#1a1a1a' }}>ROI (%)</span>;
                       return value;
                     }}
                   />
