@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle, Table } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle, Table, Flag } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
 interface PeriodComparisonProps {
@@ -181,40 +181,53 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-light text-black tracking-tight">Порівняння періодів</h2>
-            <p className="text-[#6B6B6B] font-light text-base mt-2">Аналіз динаміки показників у часі</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-[20px] hover:bg-[#F5F5F3]">
-                  <Info className="h-5 w-5 text-[#F4E157]" strokeWidth={1.5} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs bg-white border-2 border-[#E8E6DC] rounded-[20px] p-4 shadow-lg">
-                <p className="text-base font-medium text-black mb-2">Як працює порівняння:</p>
-                <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                  Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
-                </p>
-              </TooltipContent>
-            </Tooltip>
+        {/* Header Card - matching GoalsManager style */}
+        <Card className="border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] flex-shrink-0">
+                  <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-light text-black tracking-tight">Порівняння періодів</h2>
+                  <p className="text-[#6B6B6B] mt-1 text-base font-light">Аналіз динаміки показників у часі</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-[20px] hover:bg-[#FFF9E6] bg-[#FFF9E6] border-2 border-[#F4E157] h-12 w-12 shadow-[0_2px_8px_rgba(244,225,87,0.2)]"
+                    >
+                      <Info className="h-6 w-6 text-[#8B6F47]" strokeWidth={2} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-white border-2 border-[#E8E6DC] rounded-[20px] p-4 shadow-lg">
+                    <p className="text-base font-medium text-black mb-2">Як працює порівняння:</p>
+                    <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
+                      Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
 
-            <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
-              <SelectTrigger className="w-48 rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-12 font-light">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="monthly">По місяцях</SelectItem>
-                <SelectItem value="quarterly">По кварталах</SelectItem>
-                <SelectItem value="yearly">По роках</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+                <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
+                  <SelectTrigger className="w-48 rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-12 font-light">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">По місяцях</SelectItem>
+                    <SelectItem value="quarterly">По кварталах</SelectItem>
+                    <SelectItem value="yearly">По роках</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Comparison Cards */}
         {currentPeriod && previousPeriod && (
