@@ -1080,7 +1080,7 @@ export default function Analytics() {
                           </BarChart>
                         </ResponsiveContainer>
                         
-                        {/* Summary cards - КОРИЧНЕВІ КОЛЬОРИ + ШТРИХУВАННЯ + КОНТРАСТНИЙ КОЛІР ДЛЯ НУЛЬОВИХ ЗНАЧЕНЬ */}
+                        {/* Summary cards - ЧОРНИЙ ТЕКСТ У BADGE */}
                         <div className="mt-8 grid grid-cols-3 gap-6">
                           {oddsData.map((range, index) => {
                             const hasZeroData = range.count === 0;
@@ -1096,13 +1096,13 @@ export default function Analytics() {
                                 <div className="space-y-3">
                                   <div className="flex justify-between items-center">
                                     <span className="text-sm text-[#6B6B6B] font-light">Ставок:</span>
-                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#6B5A3F]' : 'bg-[#E8DCC8] text-[#8B6F47]'} hover:bg-[#E8DCC8] px-4 py-2 rounded-[16px] border-2 border-[#D4C9B3] font-normal`}>
+                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#1a1a1a]' : 'bg-[#E8DCC8] text-[#1a1a1a]'} hover:bg-[#E8DCC8] px-4 py-2 rounded-[16px] border-2 border-[#D4C9B3] font-normal`}>
                                       {range.count}
                                     </Badge>
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-sm text-[#6B6B6B] font-light">Win Rate:</span>
-                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#6B5A3F]' : 'bg-[#F5EFE6] text-[#A0826D]'} hover:bg-[#F5EFE6] px-4 py-2 rounded-[16px] border-2 border-[#E8DCC8] font-normal`}>
+                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#1a1a1a]' : 'bg-[#F5EFE6] text-[#1a1a1a]'} hover:bg-[#F5EFE6] px-4 py-2 rounded-[16px] border-2 border-[#E8DCC8] font-normal`}>
                                       {range.winRate}%
                                     </Badge>
                                   </div>
@@ -1110,9 +1110,9 @@ export default function Analytics() {
                                     <span className="text-sm text-[#6B6B6B] font-light">Прибуток:</span>
                                     <Badge className={`border-2 font-normal px-4 py-2 rounded-[16px] ${
                                       hasZeroData 
-                                        ? 'bg-[#D4C9B3] text-[#6B5A3F] border-[#C4B9A3]'
+                                        ? 'bg-[#D4C9B3] text-[#1a1a1a] border-[#C4B9A3]'
                                         : range.profit >= 0 
-                                          ? 'bg-[#F5EFE6] text-[#8B6F47] border-[#E8DCC8]' 
+                                          ? 'bg-[#F5EFE6] text-[#1a1a1a] border-[#E8DCC8]' 
                                           : 'bg-[#FFE8E8] text-[#D32F2F] border-[#FFCDD2]'
                                     }`}>
                                       {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
