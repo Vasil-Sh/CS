@@ -174,13 +174,13 @@ export default function BettingHistory() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Filters Card with Basic/Advanced Split */}
-        <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+        {/* Filters Card - Updated Design */}
+        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <Filter className="h-6 w-6 text-blue-600" />
+              <CardTitle className="flex items-center gap-3 text-lg font-normal text-[#2D2D2D]">
+                <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                  <Filter className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
                 </div>
                 Фільтри
               </CardTitle>
@@ -188,16 +188,16 @@ export default function BettingHistory() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="rounded-xl"
+                className="rounded-[20px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal"
               >
                 {showAdvancedFilters ? (
                   <>
-                    <ChevronUp className="h-4 w-4 mr-2" />
+                    <ChevronUp className="h-4 w-4 mr-2" strokeWidth={1.5} />
                     Приховати розширені
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="h-4 w-4 mr-2" />
+                    <ChevronDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
                     Розширені фільтри
                   </>
                 )}
@@ -205,17 +205,17 @@ export default function BettingHistory() {
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            {/* Basic Filters - Always Visible */}
+            {/* Basic Filters */}
             <div>
-              <p className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-blue-600" />
+              <p className="text-sm font-normal text-[#2D2D2D] mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
                 Основні фільтри
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Результат:</label>
+                  <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Результат:</label>
                   <Select value={resultFilter} onValueChange={(value: 'all' | 'Win' | 'Loss' | 'Pending') => setResultFilter(value)}>
-                    <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -228,9 +228,9 @@ export default function BettingHistory() {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
+                  <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Період:</label>
                   <Select value={periodFilter} onValueChange={(value: 'all' | 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
-                    <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -244,18 +244,18 @@ export default function BettingHistory() {
               </div>
             </div>
 
-            {/* Advanced Filters - Collapsible */}
+            {/* Advanced Filters */}
             {showAdvancedFilters && (
-              <div className="pt-4 border-t-2 border-gray-200">
-                <p className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                  <Target className="h-4 w-4 text-purple-600" />
+              <div className="pt-4 border-t border-[#E8E6DC]">
+                <p className="text-sm font-normal text-[#2D2D2D] mb-3 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
                   Розширені фільтри
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Тип прогнозу:</label>
+                    <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Тип прогнозу:</label>
                     <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
-                      <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-purple-300 transition-colors">
+                      <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -268,9 +268,9 @@ export default function BettingHistory() {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Сортування:</label>
+                    <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Сортування:</label>
                     <Select value={sortBy} onValueChange={(value: 'date' | 'profit' | 'odds') => setSortBy(value)}>
-                      <SelectTrigger className="rounded-xl border-2 border-gray-200 hover:border-purple-300 transition-colors">
+                      <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -286,50 +286,50 @@ export default function BettingHistory() {
           </CardContent>
         </Card>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-            <CardContent className="pt-6">
+        {/* Stats Cards - Updated Design */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+            <CardContent className="pt-6 pb-6 px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Відфільтровано записів</p>
-                  <p className="text-3xl font-semibold text-gray-900 tracking-tight">{filteredBets.length}</p>
+                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Відфільтровано записів</p>
+                  <p className="text-4xl font-light text-[#2D2D2D] tracking-tight">{filteredBets.length}</p>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-2xl">
-                  <BarChart3 className="h-7 w-7 text-blue-600" />
+                <div className="p-3 bg-[#BBDEFB]/30 rounded-[20px]">
+                  <BarChart3 className="h-7 w-7 text-[#1976D2]" strokeWidth={1.5} />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-            <CardContent className="pt-6">
+          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+            <CardContent className="pt-6 pb-6 px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Win Rate</p>
-                  <p className="text-3xl font-semibold text-green-600 tracking-tight">{winRate}%</p>
+                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Win Rate</p>
+                  <p className="text-4xl font-light text-[#4CAF50] tracking-tight">{winRate}%</p>
                 </div>
-                <div className="p-3 bg-green-50 rounded-2xl">
-                  <Trophy className="h-7 w-7 text-green-600" />
+                <div className="p-3 bg-[#C8E6C9]/30 rounded-[20px]">
+                  <Trophy className="h-7 w-7 text-[#4CAF50]" strokeWidth={1.5} />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-            <CardContent className="pt-6">
+          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+            <CardContent className="pt-6 pb-6 px-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Профіт</p>
-                  <p className={`text-3xl font-semibold tracking-tight ${totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
+                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Профіт</p>
+                  <p className={`text-4xl font-light tracking-tight ${totalProfit >= 0 ? 'text-[#FF9800]' : 'text-[#D32F2F]'}`}>
                     {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
                   </p>
                 </div>
-                <div className={`p-3 rounded-2xl ${totalProfit >= 0 ? 'bg-orange-50' : 'bg-red-50'}`}>
+                <div className={`p-3 rounded-[20px] ${totalProfit >= 0 ? 'bg-[#FFE0B2]/30' : 'bg-[#FFCDD2]/30'}`}>
                   {totalProfit >= 0 ? (
-                    <TrendingUp className={`h-7 w-7 ${totalProfit >= 0 ? 'text-orange-600' : 'text-red-600'}`} />
+                    <TrendingUp className="h-7 w-7 text-[#FF9800]" strokeWidth={1.5} />
                   ) : (
-                    <TrendingDown className="h-7 w-7 text-red-600" />
+                    <TrendingDown className="h-7 w-7 text-[#D32F2F]" strokeWidth={1.5} />
                   )}
                 </div>
               </div>
@@ -337,17 +337,17 @@ export default function BettingHistory() {
           </Card>
         </div>
 
-        {/* Betting History Table - Bordered Style with White Rows */}
-        <Card className="border-0 shadow-xl rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-            <CardTitle className="flex items-center justify-between text-xl font-bold text-gray-900">
+        {/* Betting History Table - Updated Design */}
+        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
+          <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
+            <CardTitle className="flex items-center justify-between text-xl font-normal text-[#2D2D2D]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <Zap className="h-6 w-6 text-blue-600" />
+                <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                  <Zap className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
                 </div>
                 <span>Історія записів</span>
               </div>
-              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 text-base px-4 py-1 font-bold">
+              <Badge className="rounded-[20px] bg-[#F4E157] text-[#2D2D2D] border-0 text-base px-4 py-1 font-normal">
                 {sortedBets.length} записів
               </Badge>
             </CardTitle>
@@ -355,40 +355,40 @@ export default function BettingHistory() {
           <CardContent className="p-6">
             {loading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 font-medium">Завантаження...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F4E157] mx-auto mb-4"></div>
+                <p className="text-[#6B6B6B] font-normal">Завантаження...</p>
               </div>
             ) : sortedBets.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200" onClick={() => toggleSort('date')}>
-                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <tr className="border-b-2 border-[#E8E6DC]">
+                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('date')}>
+                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Дата
-                          <ArrowUpDown className="h-3 w-3" />
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-left p-4 min-w-[200px] border-r border-gray-200">
-                        <div className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      <th className="text-left p-4 min-w-[200px] border-r border-[#E8E6DC]">
+                        <div className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Матч
                         </div>
                       </th>
-                      <th className="text-left p-4 w-48 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Тип</th>
-                      <th className="text-left p-4 w-24 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Валюта</th>
-                      <th className="text-left p-4 w-28 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Сума</th>
-                      <th className="text-left p-4 w-24 cursor-pointer hover:bg-gray-100 transition-colors border-r border-gray-200" onClick={() => toggleSort('odds')}>
-                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      <th className="text-left p-4 w-48 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Тип</th>
+                      <th className="text-left p-4 w-24 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Валюта</th>
+                      <th className="text-left p-4 w-28 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Сума</th>
+                      <th className="text-left p-4 w-24 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('odds')}>
+                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Коеф.
-                          <ArrowUpDown className="h-3 w-3" />
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Ціль</th>
-                      <th className="text-left p-4 w-32 text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">Статус</th>
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => toggleSort('profit')}>
-                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      <th className="text-left p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Ціль</th>
+                      <th className="text-left p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Статус</th>
+                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors" onClick={() => toggleSort('profit')}>
+                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Профіт
-                          <ArrowUpDown className="h-3 w-3" />
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
                     </tr>
@@ -401,68 +401,68 @@ export default function BettingHistory() {
                       return (
                         <tr 
                           key={index} 
-                          className="bg-white border-b border-gray-200 shadow-sm hover:shadow-md transition-all hover:bg-gray-50"
+                          className="bg-white border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all"
                         >
-                          <td className="p-4 border-r border-gray-200">
-                            <span className="text-sm font-bold text-gray-900">{bet.date}</span>
+                          <td className="p-4 border-r border-[#E8E6DC]">
+                            <span className="text-sm font-normal text-[#2D2D2D]">{bet.date}</span>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r border-[#E8E6DC]">
                             <div className="space-y-2">
-                              <div className="font-bold text-base truncate text-gray-900" title={displayMatch}>{displayMatch}</div>
+                              <div className="font-normal text-base truncate text-[#2D2D2D]" title={displayMatch}>{displayMatch}</div>
                               {!isExpress && (
-                                <div className="text-xs truncate text-gray-600" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
+                                <div className="text-xs truncate text-[#6B6B6B] font-light" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
                               )}
-                              <Badge className="text-xs rounded-full bg-purple-100 text-purple-700 border-0 font-bold">
+                              <Badge className="text-xs rounded-[12px] bg-[#E1BEE7] text-[#7B1FA2] border-0 font-normal">
                                 {bet.format}
                               </Badge>
                             </div>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r border-[#E8E6DC]">
                             {isExpress ? (
                               <div className="flex items-center gap-2">
-                                <Badge className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-bold text-sm px-3 py-1 whitespace-nowrap">
+                                <Badge className="rounded-[16px] bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-normal text-sm px-3 py-1 whitespace-nowrap">
                                   Express {bet.format}
                                 </Badge>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleExpressDetailsClick(bet)}
-                                  className="rounded-xl border-2 border-purple-200 hover:bg-purple-50 hover:border-purple-300 font-bold text-purple-700 text-xs px-2 py-1 h-7 whitespace-nowrap"
+                                  className="rounded-[16px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal text-[#2D2D2D] text-xs px-2 py-1 h-7 whitespace-nowrap"
                                 >
-                                  <Eye className="h-3 w-3 mr-1" />
+                                  <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
                                   Показати
                                 </Button>
                               </div>
                             ) : (
-                              <Badge className="rounded-full bg-blue-100 text-blue-700 border-0 font-bold text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                              <Badge className="rounded-[12px] bg-[#BBDEFB] text-[#1976D2] border-0 font-normal text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                 {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <Badge className="rounded-full bg-cyan-100 text-cyan-700 border-0 font-bold text-sm px-3 py-1">
+                          <td className="p-4 border-r border-[#E8E6DC]">
+                            <Badge className="rounded-[12px] bg-[#B2EBF2] text-[#00838F] border-0 font-normal text-sm px-3 py-1">
                               {bet.currency || 'UAH'}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <span className="font-bold text-base text-gray-900">₴{bet.amount}</span>
+                          <td className="p-4 border-r border-[#E8E6DC]">
+                            <span className="font-normal text-base text-[#2D2D2D]">₴{bet.amount}</span>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <Badge className="rounded-full bg-orange-100 text-orange-700 border-0 font-bold text-base px-3 py-1">
+                          <td className="p-4 border-r border-[#E8E6DC]">
+                            <Badge className="rounded-[12px] bg-[#FFE0B2] text-[#E65100] border-0 font-normal text-base px-3 py-1">
                               {bet.odds.toFixed(2)}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
-                            <span className="font-medium text-xs text-gray-600 truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                          <td className="p-4 border-r border-[#E8E6DC]">
+                            <span className="font-light text-xs text-[#6B6B6B] truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
-                          <td className="p-4 border-r border-gray-200">
+                          <td className="p-4 border-r border-[#E8E6DC]">
                             <Badge 
-                              className={`rounded-full border-0 font-bold text-sm px-3 py-1 ${
+                              className={`rounded-[12px] border-0 font-normal text-sm px-3 py-1 ${
                                 bet.result === 'Win' 
-                                  ? 'bg-green-100 text-green-700' 
+                                  ? 'bg-[#C8E6C9] text-[#2E7D32]' 
                                   : bet.result === 'Loss' 
-                                  ? 'bg-red-100 text-red-700' 
-                                  : 'bg-amber-200 text-amber-800'
+                                  ? 'bg-[#FFCDD2] text-[#C62828]' 
+                                  : 'bg-[#FFF9C4] text-[#F57F17]'
                               }`}
                             >
                               {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
@@ -470,7 +470,7 @@ export default function BettingHistory() {
                           </td>
                           <td className="p-4">
                             {bet.profit !== undefined && (
-                              <span className={`font-black text-base ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`font-normal text-base ${bet.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                                 {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
                               </span>
                             )}
@@ -483,10 +483,10 @@ export default function BettingHistory() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
-                  <Calendar className="h-16 w-16 text-gray-400" />
+                <div className="p-6 bg-[#F5F5F3] rounded-[32px] inline-block mb-4">
+                  <Calendar className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
                 </div>
-                <p className="text-gray-600 font-bold text-lg">Немає записів за обраними фільтрами</p>
+                <p className="text-[#2D2D2D] font-normal text-lg">Немає записів за обраними фільтрами</p>
               </div>
             )}
           </CardContent>
