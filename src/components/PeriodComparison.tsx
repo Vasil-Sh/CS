@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle, Table } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
 interface PeriodComparisonProps {
@@ -373,22 +373,22 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
                     dataKey="period" 
-                    tick={{ fontSize: 12, fill: '#000' }}
-                    stroke="#000"
+                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                    stroke="#1a1a1a"
                   />
                   <YAxis 
                     yAxisId="profit" 
                     orientation="left"
-                    tick={{ fontSize: 12, fill: '#000' }}
-                    stroke="#000"
-                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
+                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                    stroke="#1a1a1a"
+                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
                   />
                   <YAxis 
                     yAxisId="bets" 
                     orientation="right"
-                    tick={{ fontSize: 12, fill: '#000' }}
-                    stroke="#000"
-                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000' } }}
+                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                    stroke="#1a1a1a"
+                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#1a1a1a' } }}
                   />
                   <RechartsTooltip 
                     contentStyle={{ 
@@ -449,13 +449,13 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
                     dataKey="period"
-                    tick={{ fontSize: 12, fill: '#000' }}
-                    stroke="#000"
+                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                    stroke="#1a1a1a"
                   />
                   <YAxis 
-                    tick={{ fontSize: 12, fill: '#000' }}
-                    stroke="#000"
-                    label={{ value: 'Відсоток (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
+                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                    stroke="#1a1a1a"
+                    label={{ value: 'Відсоток (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
                   />
                   <RechartsTooltip 
                     contentStyle={{ 
@@ -505,7 +505,12 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         {/* Detailed Table */}
         <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
           <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
-            <CardTitle className="text-3xl font-light text-black">Детальна статистика по періодах</CardTitle>
+            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
+              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                <Table className="h-6 w-6 text-black" strokeWidth={1.5} />
+              </div>
+              Детальна статистика по періодах
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
