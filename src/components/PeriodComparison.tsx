@@ -156,28 +156,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
     return period;
   };
 
-  const getComparisonIcon = (current: number, previous: number) => {
-    if (current > previous) return <ArrowUpRight className="h-4 w-4 text-[#8B6F47]" strokeWidth={1.5} />;
-    if (current < previous) return <ArrowDownRight className="h-4 w-4 text-[#A0826D]" strokeWidth={1.5} />;
-    return <Minus className="h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />;
-  };
-
-  const getComparisonColor = (current: number, previous: number) => {
-    if (current > previous) return 'text-[#8B6F47]';
-    if (current < previous) return 'text-[#A0826D]';
-    return 'text-[#8B8B8B]';
-  };
-
-  const calculateChange = (current: number, previous: number) => {
-    if (previous === 0) return current > 0 ? 100 : 0;
-    return ((current - previous) / Math.abs(previous)) * 100;
-  };
-
-  const hasSmallSample = (bets: number) => bets < 10;
-
-  const currentPeriod = selectedPeriods[selectedPeriods.length - 1];
-  const previousPeriod = selectedPeriods[selectedPeriods.length - 2];
-
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -228,145 +206,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             </div>
           </CardContent>
         </Card>
-
-        {/* Comparison Cards */}
-        {currentPeriod && previousPeriod && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1: Total Profit */}
-            <Card 
-              className="border-2 border-[#E8DCC8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-[#F5EFE6] overflow-hidden"
-              style={{
-                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-              }}
-            >
-              <CardHeader className="pb-2 pt-6 px-6">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Загальний прибуток</CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-3xl font-light text-black tracking-tight">
-                      {currentPeriod.totalProfit >= 0 ? '+' : ''}{currentPeriod.totalProfit.toFixed(2)} ₴
-                    </div>
-                    <div className="text-sm text-[#8B8B8B] mt-1 font-light">
-                      Попередній: {previousPeriod.totalProfit >= 0 ? '+' : ''}{previousPeriod.totalProfit.toFixed(2)} ₴
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {getComparisonIcon(currentPeriod.totalProfit, previousPeriod.totalProfit)}
-                    <span className={`text-sm font-normal ${getComparisonColor(currentPeriod.totalProfit, previousPeriod.totalProfit)}`}>
-                      {Math.abs(calculateChange(currentPeriod.totalProfit, previousPeriod.totalProfit)).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                {hasSmallSample(currentPeriod.totalBets) && (
-                  <div className="mt-3 flex items-center gap-2 p-2 bg-[#FFF9E6] rounded-[16px] border border-[#F4E157]">
-                    <AlertCircle className="h-4 w-4 text-[#8B6F47] flex-shrink-0" strokeWidth={1.5} />
-                    <span className="text-xs text-[#8B6F47] font-normal">Мала вибірка ({currentPeriod.totalBets} ставок)</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Card 2: Win Rate */}
-            <Card 
-              className="border-2 border-[#E8DCC8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-[#F5EFE6] overflow-hidden"
-              style={{
-                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-              }}
-            >
-              <CardHeader className="pb-2 pt-6 px-6">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Win Rate</CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-3xl font-light text-black tracking-tight">{currentPeriod.winRate.toFixed(1)}%</div>
-                    <div className="text-sm text-[#8B8B8B] mt-1 font-light">
-                      Попередній: {previousPeriod.winRate.toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {getComparisonIcon(currentPeriod.winRate, previousPeriod.winRate)}
-                    <span className={`text-sm font-normal ${getComparisonColor(currentPeriod.winRate, previousPeriod.winRate)}`}>
-                      {Math.abs(calculateChange(currentPeriod.winRate, previousPeriod.winRate)).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                {hasSmallSample(currentPeriod.totalBets) && (
-                  <div className="mt-3 flex items-center gap-2 p-2 bg-[#FFF9E6] rounded-[16px] border border-[#F4E157]">
-                    <AlertCircle className="h-4 w-4 text-[#8B6F47] flex-shrink-0" strokeWidth={1.5} />
-                    <span className="text-xs text-[#8B6F47] font-normal">Мала вибірка ({currentPeriod.totalBets} ставок)</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Total Bets */}
-            <Card 
-              className="border-2 border-[#E8DCC8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-[#F5EFE6] overflow-hidden"
-              style={{
-                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-              }}
-            >
-              <CardHeader className="pb-2 pt-6 px-6">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Кількість ставок</CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-3xl font-light text-black tracking-tight">{currentPeriod.totalBets}</div>
-                    <div className="text-sm text-[#8B8B8B] mt-1 font-light">
-                      Попередній: {previousPeriod.totalBets}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {getComparisonIcon(currentPeriod.totalBets, previousPeriod.totalBets)}
-                    <span className={`text-sm font-normal ${getComparisonColor(currentPeriod.totalBets, previousPeriod.totalBets)}`}>
-                      {Math.abs(calculateChange(currentPeriod.totalBets, previousPeriod.totalBets)).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card 4: Average ROI */}
-            <Card 
-              className="border-2 border-[#E8DCC8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-[#F5EFE6] overflow-hidden"
-              style={{
-                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-              }}
-            >
-              <CardHeader className="pb-2 pt-6 px-6">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Середній ROI</CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-3xl font-light text-black tracking-tight">
-                      {currentPeriod.averageROI >= 0 ? '+' : ''}{currentPeriod.averageROI.toFixed(1)}%
-                    </div>
-                    <div className="text-sm text-[#8B8B8B] mt-1 font-light">
-                      Попередній: {previousPeriod.averageROI >= 0 ? '+' : ''}{previousPeriod.averageROI.toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {getComparisonIcon(currentPeriod.averageROI, previousPeriod.averageROI)}
-                    <span className={`text-sm font-normal ${getComparisonColor(currentPeriod.averageROI, previousPeriod.averageROI)}`}>
-                      {Math.abs(calculateChange(currentPeriod.averageROI, previousPeriod.averageROI)).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                {hasSmallSample(currentPeriod.totalBets) && (
-                  <div className="mt-3 flex items-center gap-2 p-2 bg-[#FFF9E6] rounded-[16px] border border-[#F4E157]">
-                    <AlertCircle className="h-4 w-4 text-[#8B6F47] flex-shrink-0" strokeWidth={1.5} />
-                    <span className="text-xs text-[#8B6F47] font-normal">Мала вибірка ({currentPeriod.totalBets} ставок)</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -552,20 +391,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                           <span className="text-lg font-medium text-black">{formatPeriodName(period.period)}</span>
                           {index === selectedPeriods.length - 1 && (
                             <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-medium px-3 py-1 text-sm">Поточний</Badge>
-                          )}
-                          {hasSmallSample(period.totalBets) && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button className="inline-flex items-center">
-                                  <AlertCircle className="h-5 w-5 text-[#8B6F47] cursor-help" strokeWidth={1.5} />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-[#FFF9E6] border-2 border-[#F4E157] rounded-[16px] p-3">
-                                <p className="text-sm text-[#8B6F47] font-normal">
-                                  Мала вибірка ({period.totalBets} ставок). Дані можуть бути нестабільні.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
                           )}
                         </div>
                       </td>
