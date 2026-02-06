@@ -801,15 +801,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       {/* Strategy Card */}
       {primaryStrategy && (
-        <Card className="border-0 shadow-lg rounded-3xl bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
-          <CardContent className="p-4">
+        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-xl">
-                <Shield className="h-5 w-5 text-white" />
+              <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                <Shield className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">Активна стратегія: {primaryStrategy.name}</p>
-                <p className="text-xs text-gray-600">{primaryStrategy.description}</p>
+                <p className="text-sm font-normal text-[#2D2D2D]">Активна стратегія: <span className="font-medium">{primaryStrategy.name}</span></p>
+                <p className="text-xs text-[#6B6B6B] font-light mt-0.5">{primaryStrategy.description}</p>
               </div>
             </div>
           </CardContent>
@@ -818,42 +818,42 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
       {/* Strategy Deviations */}
       {strategyViolations.length > 0 && (
-        <Card className={`border-2 shadow-lg rounded-3xl overflow-hidden ${
+        <Card className={`border-[1.5px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] overflow-hidden ${
           strategyViolations.some(v => v.severity === 'serious') 
-            ? 'border-red-200 bg-red-50' 
-            : 'border-yellow-200 bg-yellow-50'
+            ? 'border-red-200 bg-red-50/50' 
+            : 'border-yellow-200 bg-yellow-50/50'
         }`}>
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="flex items-start gap-3">
               <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
                 strategyViolations.some(v => v.severity === 'serious') ? 'text-red-600' : 'text-yellow-600'
-              }`} />
+              }`} strokeWidth={1.5} />
               <div className="flex-1">
-                <p className={`text-sm font-semibold mb-2 ${
+                <p className={`text-sm font-medium mb-2 ${
                   strategyViolations.some(v => v.severity === 'serious') ? 'text-red-900' : 'text-yellow-900'
                 }`}>
                   {strategyViolations.some(v => v.severity === 'serious') ? '🔴' : '🟡'} Відхилення від стратегії "{primaryStrategy?.name}"
                 </p>
                 <div className="space-y-2">
                   {strategyViolations.map((violation, index) => (
-                    <div key={index} className={`p-2 rounded-xl ${
-                      violation.severity === 'serious' ? 'bg-red-100' : 'bg-yellow-100'
+                    <div key={index} className={`p-3 rounded-[20px] ${
+                      violation.severity === 'serious' ? 'bg-red-100/70' : 'bg-yellow-100/70'
                     }`}>
-                      <p className={`text-xs font-medium ${
+                      <p className={`text-xs font-normal ${
                         violation.severity === 'serious' ? 'text-red-800' : 'text-yellow-800'
                       }`}>
                         • {violation.message}
                       </p>
-                      <p className={`text-xs mt-1 ${
+                      <p className={`text-xs mt-1 font-light ${
                         violation.severity === 'serious' ? 'text-red-700' : 'text-yellow-700'
                       }`}>
-                        <Info className="h-3 w-3 inline mr-1" />
+                        <Info className="h-3 w-3 inline mr-1" strokeWidth={1.5} />
                         {violation.explanation}
                       </p>
                     </div>
                   ))}
                 </div>
-                <p className={`text-xs mt-2 font-medium ${
+                <p className={`text-xs mt-2 font-normal ${
                   strategyViolations.some(v => v.severity === 'serious') ? 'text-red-700' : 'text-yellow-700'
                 }`}>
                   {strategyViolations.some(v => v.severity === 'serious') 
@@ -870,11 +870,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form Card */}
-            <Card className="border-0 shadow-lg rounded-3xl bg-white/80 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-                  <div className="p-2 bg-gray-200 rounded-xl">
-                    <Plus className="h-6 w-6 text-gray-700" />
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[40px] bg-white/80 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-normal text-[#2D2D2D]">
+                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                    <Plus className="h-6 w-6 text-[#2D2D2D]" strokeWidth={1.5} />
                   </div>
                   Новий прогноз
                 </CardTitle>
@@ -883,29 +883,29 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <CardContent className="p-6 space-y-6">
                 {/* Basic Settings Section */}
                 <div className="space-y-4">
-                  <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
-                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                      <Calendar className="h-5 w-5 text-gray-600" />
+                  <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
+                    <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
+                      <Calendar className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
                       Основні налаштування
                     </h3>
                   
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="date" className="text-gray-700 font-medium">Дата матчу</Label>
+                        <Label htmlFor="date" className="text-[#2D2D2D] font-light text-sm">Дата матчу</Label>
                         <Input
                           id="date"
                           type="date"
                           value={formData.date}
                           onChange={(e) => setFormData({...formData, date: e.target.value})}
                           required
-                          className="rounded-xl mt-1"
+                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="game" className="text-gray-700 font-medium">Гра</Label>
+                        <Label htmlFor="game" className="text-[#2D2D2D] font-light text-sm">Гра</Label>
                         <Select value={formData.game} onValueChange={(value: 'CS2' | 'Dota2') => setFormData({...formData, game: value})}>
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -916,14 +916,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                       
                       <div>
-                        <Label htmlFor="betCategory" className="text-gray-700 font-medium">Категорія прогнозу</Label>
+                        <Label htmlFor="betCategory" className="text-[#2D2D2D] font-light text-sm">Категорія прогнозу</Label>
                         <Select value={formData.betCategory} onValueChange={(value) => {
                           setFormData({...formData, betCategory: value});
                           if (value === 'Ординар') {
                             setExpressEvents([]);
                           }
                         }}>
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -936,9 +936,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                     {formData.betCategory === 'Ординар' && (
                       <div className="mt-4">
-                        <Label htmlFor="format" className="text-gray-700 font-medium">Формат</Label>
+                        <Label htmlFor="format" className="text-[#2D2D2D] font-light text-sm">Формат</Label>
                         <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -953,8 +953,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     {/* Goals */}
                     {activeGoals.length > 0 && (
                       <div className="mt-4">
-                        <Label htmlFor="goalId" className="text-gray-700 font-medium flex items-center gap-2">
-                          <Flag className="h-4 w-4 text-gray-600" />
+                        <Label htmlFor="goalId" className="text-[#2D2D2D] font-light text-sm flex items-center gap-2">
+                          <Flag className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
                           Прив'язати до цілі (необов'язково)
                         </Label>
                         <Select 
@@ -963,7 +963,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             setFormData({...formData, goalId: value === 'all' ? '' : value});
                           }}
                         >
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
                           </SelectTrigger>
                           <SelectContent>
@@ -975,7 +975,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-[#6B6B6B] font-light mt-1.5">
                           Ця ставка буде враховуватись у прогресі обраної цілі
                         </p>
                       </div>
@@ -983,67 +983,48 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-[#E8E6DC]" />
 
                 {/* Match Information & Bet Details Combined Section */}
                 <div className="space-y-4">
-                  <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
-                    <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                      <Users className="h-5 w-5 text-gray-600" />
+                  <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
+                    <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
+                      <Users className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
                       Інформація про матч і деталі прогнозу
                     </h3>
                   
                     {/* Match URL */}
                     <div className="mb-4">
-                      <Label htmlFor="matchUrl" className="text-gray-700 font-medium flex items-center gap-2">
-                        <Link className="h-4 w-4 text-gray-600" />
+                      <Label htmlFor="matchUrl" className="text-[#2D2D2D] font-light text-sm flex items-center gap-2">
+                        <Link className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
                         {formData.game === 'CS2' ? 'HLTV URL матчу' : 'Dota 2 URL матчу'} (необов'язково)
                       </Label>
-                      <div className="flex gap-2 mt-1">
+                      <div className="flex gap-2 mt-1.5">
                         <Input
                           id="matchUrl"
                           value={formData.matchUrl}
                           onChange={(e) => handleUrlChange(e.target.value)}
                           placeholder={formData.game === 'CS2' ? 'https://www.hltv.org/matches/...' : 'https://...dota2/.../team1-vs-team2/...'}
-                          className="flex-1 rounded-xl"
+                          className="flex-1 rounded-[24px] border-[#E8E6DC] bg-white"
                         />
                         <Button 
                           type="button" 
                           variant="outline" 
                           onClick={() => parseMatchFromUrl(formData.matchUrl)}
                           disabled={isParsingMatch || !formData.matchUrl}
-                          className="rounded-xl px-4"
+                          className="rounded-[24px] px-5 border-[#E8E6DC] hover:bg-[#F4E157] hover:border-[#F4E157]"
                         >
                           {isParsingMatch ? 'Парсинг...' : 'Парсити'}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#6B6B6B] font-light mt-1.5">
                         {formData.game === 'CS2' ? 'Вставте посилання з HLTV для автозаповнення' : 'Вставте посилання на Dota 2 матч для автозаповнення'}
                       </p>
                     </div>
 
-                    {(formData.team1 || formData.team2 || formData.tournament) && (
-                      <div className="p-4 bg-white rounded-2xl border-2 border-gray-300 mb-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label className="text-gray-600 text-xs font-medium">Команда 1</Label>
-                            <div className="font-bold text-gray-800 text-lg">{formData.team1}</div>
-                          </div>
-                          <div>
-                            <Label className="text-gray-600 text-xs font-medium">Команда 2</Label>
-                            <div className="font-bold text-gray-800 text-lg">{formData.team2}</div>
-                          </div>
-                          <div>
-                            <Label className="text-gray-600 text-xs font-medium">Турнір</Label>
-                            <div className="font-bold text-gray-800 text-sm">{formData.tournament}</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <Label htmlFor="team1" className="text-gray-700 font-medium">
+                        <Label htmlFor="team1" className="text-[#2D2D2D] font-light text-sm">
                           Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Input
@@ -1052,12 +1033,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           onChange={(e) => setFormData({...formData, team1: e.target.value})}
                           placeholder={formData.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-xl mt-1"
+                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="team2" className="text-gray-700 font-medium">
+                        <Label htmlFor="team2" className="text-[#2D2D2D] font-light text-sm">
                           Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Input
@@ -1066,14 +1047,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           onChange={(e) => setFormData({...formData, team2: e.target.value})}
                           placeholder={formData.game === 'CS2' ? 'G2' : 'OG'}
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-xl mt-1"
+                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                         />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="betType" className="text-gray-700 font-medium">
+                        <Label htmlFor="betType" className="text-[#2D2D2D] font-light text-sm">
                           Тип прогнозу {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Select 
@@ -1081,7 +1062,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           onValueChange={(value) => setFormData({...formData, betType: value})} 
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
                         >
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue placeholder="Оберіть тип прогнозу" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1095,7 +1076,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                       
                       <div>
-                        <Label htmlFor="selection" className="text-gray-700 font-medium">
+                        <Label htmlFor="selection" className="text-[#2D2D2D] font-light text-sm">
                           Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Select 
@@ -1103,7 +1084,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           onValueChange={(value) => setFormData({...formData, selection: value})}
                           disabled={!formData.team1 || !formData.team2}
                         >
-                          <SelectTrigger className="rounded-xl mt-1">
+                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
                             <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
                           </SelectTrigger>
                           <SelectContent>
@@ -1114,7 +1095,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
 
                       <div>
-                        <Label htmlFor="odds" className="text-gray-700 font-medium">
+                        <Label htmlFor="odds" className="text-[#2D2D2D] font-light text-sm">
                           Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
                         </Label>
                         <Input
@@ -1126,7 +1107,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           onChange={(e) => setFormData({...formData, odds: e.target.value})}
                           placeholder="1.65"
                           required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-xl mt-1"
+                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                         />
                       </div>
                     </div>
@@ -1136,9 +1117,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         type="button"
                         onClick={addExpressEvent}
                         disabled={expressEvents.length >= 10}
-                        className="w-full mt-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-2xl font-semibold py-6 text-base shadow-lg"
+                        className="w-full mt-4 bg-[#2D2D2D] hover:bg-[#1A1A1A] text-white rounded-[24px] font-normal py-6 text-base shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                       >
-                        <Plus className="h-5 w-5 mr-2" />
+                        <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
                         Додати подію до експресу ({expressEvents.length}/10)
                       </Button>
                     )}
@@ -1148,18 +1129,18 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {/* Financial Details Section */}
                 {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
                   <>
-                    <Separator />
+                    <Separator className="bg-[#E8E6DC]" />
                     
                     <div className="space-y-4">
-                      <div className="p-4 bg-gray-50 rounded-2xl border-2 border-gray-200">
-                        <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-                          <DollarSign className="h-5 w-5 text-gray-600" />
+                      <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
+                        <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
+                          <DollarSign className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
                           Фінансові деталі
                         </h3>
                       
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="stake" className="text-gray-700 font-medium">Сума прогнозу (₴) <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="stake" className="text-[#2D2D2D] font-light text-sm">Сума прогнозу (₴) <span className="text-red-500">*</span></Label>
                             <Input
                               id="stake"
                               type="number"
@@ -1169,12 +1150,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               onChange={(e) => setFormData({...formData, stake: e.target.value})}
                               placeholder="100"
                               required
-                              className="rounded-xl mt-1"
+                              className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                             />
                           </div>
                           
                           <div>
-                            <Label htmlFor="confidence" className="text-gray-700 font-medium">Впевненість (%) <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="confidence" className="text-[#2D2D2D] font-light text-sm">Впевненість (%) <span className="text-red-500">*</span></Label>
                             <Input
                               id="confidence"
                               type="number"
@@ -1184,7 +1165,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               onChange={(e) => setFormData({...formData, confidence: e.target.value})}
                               placeholder="70"
                               required
-                              className="rounded-xl mt-1"
+                              className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
                             />
                           </div>
                         </div>
@@ -1197,15 +1178,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
             {/* Express Events Display */}
             {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-              <Card className="border-2 border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-lg">
+              <Card className="border-[1.5px] border-[#E8E6DC] bg-[#FAFAF8] rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                      <Trophy className="h-5 w-5" />
+                    <CardTitle className="text-base font-normal text-[#2D2D2D] flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
                       Події експресу ({expressEvents.length}/10)
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-gray-700 text-white border-0 rounded-full text-sm px-3 py-1">
+                      <Badge className="bg-[#2D2D2D] text-white border-0 rounded-full text-sm px-3 py-1 font-light">
                         Коеф: {totalExpressOdds.toFixed(2)}
                       </Badge>
                       <Button
@@ -1213,29 +1194,29 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         variant="ghost"
                         size="sm"
                         onClick={clearExpressEvents}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 rounded-xl"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 rounded-[20px]"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Express Risk Indicator */}
-                  <div className={`p-3 rounded-2xl border-2 ${
-                    expressRisk.color === 'green' ? 'bg-green-50 border-green-200' :
-                    expressRisk.color === 'orange' ? 'bg-orange-50 border-orange-200' :
-                    'bg-red-50 border-red-200'
+                  <div className={`p-3 rounded-[24px] border-[1.5px] ${
+                    expressRisk.color === 'green' ? 'bg-green-50/50 border-green-200' :
+                    expressRisk.color === 'orange' ? 'bg-orange-50/50 border-orange-200' :
+                    'bg-red-50/50 border-red-200'
                   }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-sm font-semibold ${
+                      <span className={`text-sm font-normal ${
                         expressRisk.color === 'green' ? 'text-green-800' :
                         expressRisk.color === 'orange' ? 'text-orange-800' :
                         'text-red-800'
                       }`}>
                         {expressRisk.color === 'green' ? '🟢' : expressRisk.color === 'orange' ? '🟠' : '🔴'} {expressRisk.text}
                       </span>
-                      <span className={`text-xs font-medium ${
+                      <span className={`text-xs font-light ${
                         expressRisk.color === 'green' ? 'text-green-700' :
                         expressRisk.color === 'orange' ? 'text-orange-700' :
                         'text-red-700'
@@ -1251,7 +1232,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         '[&>div]:bg-red-600'
                       }`}
                     />
-                    <p className={`text-xs mt-2 ${
+                    <p className={`text-xs mt-2 font-light ${
                       expressRisk.color === 'green' ? 'text-green-700' :
                       expressRisk.color === 'orange' ? 'text-orange-700' :
                       'text-red-700'
@@ -1264,18 +1245,18 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {expressEvents.map((event, index) => (
-                      <div key={index} className="p-3 bg-white rounded-xl border-2 border-gray-300 flex items-start justify-between gap-3 hover:border-gray-400 transition-colors">
+                      <div key={index} className="p-3 bg-white rounded-[24px] border-[1.5px] border-[#E8E6DC] flex items-start justify-between gap-3 hover:border-[#F4E157] transition-colors">
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <Badge className="bg-gray-200 text-gray-800 border-0 rounded-full text-xs font-bold">
+                            <Badge className="bg-[#F4E157] text-[#2D2D2D] border-0 rounded-full text-xs font-normal">
                               #{index + 1}
                             </Badge>
-                            <span className="font-semibold text-gray-900 text-sm">{event.match}</span>
+                            <span className="font-normal text-[#2D2D2D] text-sm">{event.match}</span>
                           </div>
-                          <div className="text-xs text-gray-600">
-                            {event.betType}: <span className="font-medium text-gray-800">{event.selection}</span>
+                          <div className="text-xs text-[#6B6B6B] font-light">
+                            {event.betType}: <span className="font-normal text-[#2D2D2D]">{event.selection}</span>
                           </div>
-                          <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs">
+                          <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs font-light">
                             Коеф {event.odds}
                           </Badge>
                         </div>
@@ -1284,9 +1265,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeExpressEvent(index)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-xl flex-shrink-0"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-[20px] flex-shrink-0"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
                       </div>
                     ))}
@@ -1300,7 +1281,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white rounded-3xl font-bold py-8 text-lg shadow-2xl transform hover:scale-[1.02] transition-all"
+                className="w-full bg-[#2D2D2D] hover:bg-[#1A1A1A] text-white rounded-[32px] font-normal py-8 text-lg shadow-[0_4px_16px_rgba(0,0,0,0.12)] transform hover:scale-[1.01] transition-all"
               >
                 {isSubmitting ? (
                   <>
@@ -1309,7 +1290,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                   </>
                 ) : (
                   <>
-                    <Plus className="h-6 w-6 mr-2" />
+                    <Plus className="h-6 w-6 mr-2" strokeWidth={1.5} />
                     Додати запис
                   </>
                 )}
@@ -1322,11 +1303,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         <div className="space-y-6 relative">
           <div className="sticky top-6 space-y-6">
             {/* Calculations Card */}
-            <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-3xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <div className="p-2 bg-gray-200 rounded-xl">
-                    <Calculator className="h-5 w-5 text-gray-700" />
+            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[40px] bg-white/80 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-normal text-[#2D2D2D]">
+                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
+                    <Calculator className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
                   </div>
                   Розрахунки
                 </CardTitle>
@@ -1335,32 +1316,32 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
                   <>
                     {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                      <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-300">
+                      <div className="p-4 bg-[#FAFAF8] rounded-[24px] border-[1.5px] border-[#E8E6DC]">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-700 font-semibold">Загальний коефіцієнт:</span>
-                          <Badge className="bg-gray-700 text-white border-0 rounded-full text-lg px-4 py-1">
+                          <span className="text-sm text-[#2D2D2D] font-light">Загальний коефіцієнт:</span>
+                          <Badge className="bg-[#2D2D2D] text-white border-0 rounded-full text-lg px-4 py-1 font-light">
                             {totalExpressOdds.toFixed(2)}
                           </Badge>
                         </div>
                       </div>
                     )}
                     
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
+                    <div className="p-4 bg-green-50/50 rounded-[24px] border-[1.5px] border-green-200">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-700 font-semibold">Потенційний прибуток:</span>
-                        <span className="font-bold text-green-600 text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
+                        <span className="text-sm text-[#2D2D2D] font-light">Потенційний прибуток:</span>
+                        <span className="font-normal text-green-600 text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
                     
                     {/* Simplified EV Display */}
-                    <div className={`p-4 rounded-2xl border-2 ${
-                      evVerdict.color === 'green' ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' :
-                      evVerdict.color === 'yellow' ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200' :
-                      'bg-gradient-to-r from-red-50 to-orange-50 border-red-200'
+                    <div className={`p-4 rounded-[24px] border-[1.5px] ${
+                      evVerdict.color === 'green' ? 'bg-green-50/50 border-green-200' :
+                      evVerdict.color === 'yellow' ? 'bg-yellow-50/50 border-yellow-200' :
+                      'bg-red-50/50 border-red-200'
                     }`}>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-semibold ${
+                          <span className={`text-sm font-normal ${
                             evVerdict.color === 'green' ? 'text-green-800' :
                             evVerdict.color === 'yellow' ? 'text-yellow-800' :
                             'text-red-800'
@@ -1374,10 +1355,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             onClick={() => setShowEVDetails(!showEVDetails)}
                             className="h-6 px-2 text-xs"
                           >
-                            {showEVDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            {showEVDetails ? <ChevronUp className="h-3 w-3" strokeWidth={1.5} /> : <ChevronDown className="h-3 w-3" strokeWidth={1.5} />}
                           </Button>
                         </div>
-                        <p className={`text-xs ${
+                        <p className={`text-xs font-light ${
                           evVerdict.color === 'green' ? 'text-green-700' :
                           evVerdict.color === 'yellow' ? 'text-yellow-700' :
                           'text-red-700'
@@ -1394,14 +1375,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                           }`}>
                             <div className="space-y-2">
                               <div className="flex justify-between text-xs">
-                                <span className="text-gray-600">Expected Value:</span>
-                                <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 ${
+                                <span className="text-[#6B6B6B] font-light">Expected Value:</span>
+                                <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 font-light ${
                                   isValuePositive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
                                 }`}>
                                   {isValuePositive ? '+' : ''}{expectedValue}%
                                 </Badge>
                               </div>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-[#6B6B6B] font-light">
                                 EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
                               </p>
                             </div>
@@ -1410,18 +1391,18 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                     </div>
                     
-                    <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border-2 border-red-200">
+                    <div className="p-4 bg-red-50/50 rounded-[24px] border-[1.5px] border-red-200">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-700 font-medium">Макс. програш:</span>
-                        <span className="font-bold text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
+                        <span className="text-sm text-[#2D2D2D] font-light">Макс. програш:</span>
+                        <span className="font-normal text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
                   </>
                 ) : (
                   <div className="text-center py-8">
-                    <Calculator className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-600 font-medium mb-1">Заповніть форму для розрахунків</p>
-                    <p className="text-xs text-gray-500">
+                    <Calculator className="h-12 w-12 text-[#B0B0B0] mx-auto mb-3" strokeWidth={1.5} />
+                    <p className="text-sm text-[#2D2D2D] font-normal mb-1">Заповніть форму для розрахунків</p>
+                    <p className="text-xs text-[#6B6B6B] font-light">
                       Введіть суму, впевненість та коефіцієнт
                     </p>
                   </div>
@@ -1430,10 +1411,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             </Card>
 
             {/* Risky Teams Card */}
-            <Card className="border-2 border-red-300 bg-gradient-to-br from-red-50 to-orange-50 rounded-3xl shadow-lg overflow-hidden">
+            <Card className="border-[1.5px] border-red-300 bg-red-50/50 rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                <CardTitle className="text-base font-normal text-[#2D2D2D] flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" strokeWidth={1.5} />
                   Ризиковані команди
                 </CardTitle>
               </CardHeader>
@@ -1441,12 +1422,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-3 border-2 border-red-200 rounded-2xl bg-white space-y-2 hover:border-red-300 transition-colors">
+                      <div key={index} className="p-3 border-[1.5px] border-red-200 rounded-[24px] bg-white space-y-2 hover:border-red-300 transition-colors">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                              <span className="font-bold text-red-800">
+                              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" strokeWidth={1.5} />
+                              <span className="font-normal text-red-800">
                                 {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
                               </span>
                             </div>
@@ -1459,22 +1440,22 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeRiskyTeam(index)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-100 h-7 w-7 p-0 rounded-xl"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-100 h-7 w-7 p-0 rounded-[20px]"
                           >
                             ✕
                           </Button>
                         </div>
                         {riskyTeam.notes && (
-                          <p className="text-xs text-red-700 font-medium whitespace-pre-wrap">{riskyTeam.notes}</p>
+                          <p className="text-xs text-red-700 font-light whitespace-pre-wrap">{riskyTeam.notes}</p>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-600 font-medium mb-1">Ризикових команд не знайдено</p>
-                    <p className="text-xs text-gray-500">
+                    <AlertTriangle className="h-12 w-12 text-[#B0B0B0] mx-auto mb-3" strokeWidth={1.5} />
+                    <p className="text-sm text-[#2D2D2D] font-normal mb-1">Ризикових команд не знайдено</p>
+                    <p className="text-xs text-[#6B6B6B] font-light">
                       {formData.team1 || formData.team2 
                         ? 'Обрані команди не в списку ризикових' 
                         : 'Додайте команди для перевірки'}
