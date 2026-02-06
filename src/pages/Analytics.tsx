@@ -1021,21 +1021,21 @@ export default function Analytics() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis 
                               dataKey="range" 
-                              tick={{ fontSize: 13, fontWeight: 500, fill: '#000' }}
-                              stroke="#000"
+                              tick={{ fontSize: 13, fontWeight: 500, fill: '#1a1a1a' }}
+                              stroke="#1a1a1a"
                             />
                             <YAxis 
                               yAxisId="left"
-                              tick={{ fontSize: 12, fill: '#000' }}
-                              stroke="#000"
-                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
+                              tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                              stroke="#1a1a1a"
+                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
                             />
                             <YAxis 
                               yAxisId="right"
                               orientation="right"
-                              tick={{ fontSize: 12, fill: '#000' }}
-                              stroke="#000"
-                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#000' } }}
+                              tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                              stroke="#1a1a1a"
+                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#1a1a1a' } }}
                             />
                             <Tooltip 
                               contentStyle={{ 
@@ -1054,9 +1054,10 @@ export default function Analytics() {
                             />
                             <Legend 
                               wrapperStyle={{ paddingTop: '20px' }}
+                              contentStyle={{ color: '#1a1a1a' }}
                               formatter={(value) => {
-                                if (value === 'winRate') return 'Win Rate (%)';
-                                if (value === 'roi') return 'ROI (%)';
+                                if (value === 'winRate') return <span style={{ color: '#1a1a1a' }}>Win Rate (%)</span>;
+                                if (value === 'roi') return <span style={{ color: '#1a1a1a' }}>ROI (%)</span>;
                                 return value;
                               }}
                             />
@@ -1079,35 +1080,48 @@ export default function Analytics() {
                           </BarChart>
                         </ResponsiveContainer>
                         
-                        {/* Summary cards - КОРИЧНЕВІ КОЛЬОРИ + ШТРИХУВАННЯ */}
+                        {/* Summary cards - КОРИЧНЕВІ КОЛЬОРИ + ШТРИХУВАННЯ + КОНТРАСТНИЙ КОЛІР ДЛЯ НУЛЬОВИХ ЗНАЧЕНЬ */}
                         <div className="mt-8 grid grid-cols-3 gap-6">
-                          {oddsData.map((range, index) => (
-                            <div 
-                              key={index} 
-                              className="p-6 bg-[#F5EFE6] rounded-[24px] border-2 border-[#E8DCC8]"
-                              style={{
-                                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
-                              }}
-                            >
-                              <h4 className="font-normal text-black mb-4 text-center text-lg">{range.range}</h4>
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-[#6B6B6B] font-light">Ставок:</span>
-                                  <Badge className="bg-[#E8DCC8] text-[#8B6F47] hover:bg-[#E8DCC8] px-4 py-2 rounded-[16px] border-2 border-[#D4C9B3] font-normal">{range.count}</Badge>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-[#6B6B6B] font-light">Win Rate:</span>
-                                  <Badge className="bg-[#F5EFE6] text-[#A0826D] hover:bg-[#F5EFE6] px-4 py-2 rounded-[16px] border-2 border-[#E8DCC8] font-normal">{range.winRate}%</Badge>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-[#6B6B6B] font-light">Прибуток:</span>
-                                  <Badge className={`border-2 font-normal px-4 py-2 rounded-[16px] ${range.profit >= 0 ? 'bg-[#F5EFE6] text-[#8B6F47] border-[#E8DCC8]' : 'bg-[#FFE8E8] text-[#D32F2F] border-[#FFCDD2]'}`}>
-                                    {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
-                                  </Badge>
+                          {oddsData.map((range, index) => {
+                            const hasZeroData = range.count === 0;
+                            return (
+                              <div 
+                                key={index} 
+                                className={`p-6 rounded-[24px] border-2 ${hasZeroData ? 'bg-[#E8DCC8] border-[#D4C9B3]' : 'bg-[#F5EFE6] border-[#E8DCC8]'}`}
+                                style={{
+                                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(196,165,123,0.08) 4px, rgba(196,165,123,0.08) 5px)`
+                                }}
+                              >
+                                <h4 className="font-normal text-black mb-4 text-center text-lg">{range.range}</h4>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-[#6B6B6B] font-light">Ставок:</span>
+                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#6B5A3F]' : 'bg-[#E8DCC8] text-[#8B6F47]'} hover:bg-[#E8DCC8] px-4 py-2 rounded-[16px] border-2 border-[#D4C9B3] font-normal`}>
+                                      {range.count}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-[#6B6B6B] font-light">Win Rate:</span>
+                                    <Badge className={`${hasZeroData ? 'bg-[#D4C9B3] text-[#6B5A3F]' : 'bg-[#F5EFE6] text-[#A0826D]'} hover:bg-[#F5EFE6] px-4 py-2 rounded-[16px] border-2 border-[#E8DCC8] font-normal`}>
+                                      {range.winRate}%
+                                    </Badge>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-[#6B6B6B] font-light">Прибуток:</span>
+                                    <Badge className={`border-2 font-normal px-4 py-2 rounded-[16px] ${
+                                      hasZeroData 
+                                        ? 'bg-[#D4C9B3] text-[#6B5A3F] border-[#C4B9A3]'
+                                        : range.profit >= 0 
+                                          ? 'bg-[#F5EFE6] text-[#8B6F47] border-[#E8DCC8]' 
+                                          : 'bg-[#FFE8E8] text-[#D32F2F] border-[#FFCDD2]'
+                                    }`}>
+                                      {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
+                                    </Badge>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </>
                     ) : (
