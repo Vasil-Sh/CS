@@ -476,15 +476,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'БАН':
-        return 'bg-red-100 text-red-700 hover:bg-red-100 border-0 rounded-full font-normal';
+        return 'bg-[#8B4513]/10 text-[#8B4513] hover:bg-[#8B4513]/10 border-0 rounded-full font-normal';
       case 'Нестабільні':
-        return 'bg-orange-100 text-orange-700 hover:bg-orange-100 border-0 rounded-full font-normal';
+        return 'bg-[#A0522D]/10 text-[#A0522D] hover:bg-[#A0522D]/10 border-0 rounded-full font-normal';
       case 'Обережно':
-        return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-0 rounded-full font-normal';
+        return 'bg-[#D2691E]/10 text-[#D2691E] hover:bg-[#D2691E]/10 border-0 rounded-full font-normal';
       case 'Рідко':
-        return 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-0 rounded-full font-normal';
+        return 'bg-[#CD853F]/10 text-[#CD853F] hover:bg-[#CD853F]/10 border-0 rounded-full font-normal';
       default:
-        return 'bg-gray-100 text-gray-700 hover:bg-gray-100 border-0 rounded-full font-normal';
+        return 'bg-[#6B6B6B]/10 text-[#6B6B6B] hover:bg-[#6B6B6B]/10 border-0 rounded-full font-normal';
     }
   };
 
@@ -1410,12 +1410,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               </CardContent>
             </Card>
 
-            {/* Risky Teams Card - SOFTER DESIGN */}
-            <Card className="border-[1.5px] border-[#E8E6DC] bg-white/80 backdrop-blur-sm rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-              <CardHeader className="pb-3 bg-[#FAFAF8] border-b border-[#E8E6DC]">
-                <CardTitle className="text-base font-normal text-[#2D2D2D] flex items-center gap-2">
-                  <div className="p-2 bg-orange-100 rounded-[16px]">
-                    <AlertTriangle className="h-4 w-4 text-orange-600" strokeWidth={1.5} />
+            {/* Risky Teams Card - BROWN TONES */}
+            <Card className="border-[1.5px] border-[#D2B48C]/30 bg-[#FFF8DC]/30 backdrop-blur-sm rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+              <CardHeader className="pb-3 bg-[#F5DEB3]/20 border-b border-[#D2B48C]/30">
+                <CardTitle className="text-base font-normal text-[#8B4513] flex items-center gap-2">
+                  <div className="p-2 bg-[#D2691E]/15 rounded-[16px]">
+                    <AlertTriangle className="h-4 w-4 text-[#8B4513]" strokeWidth={1.5} />
                   </div>
                   Ризиковані команди
                 </CardTitle>
@@ -1424,11 +1424,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-4 border-[1.5px] border-[#E8E6DC] rounded-[24px] bg-[#FAFAF8] space-y-3 hover:border-orange-200 transition-colors">
+                      <div key={index} className="p-4 border-[1.5px] border-[#D2B48C]/40 rounded-[24px] bg-[#FFF8DC]/50 space-y-3 hover:border-[#D2691E]/50 transition-colors">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-normal text-[#2D2D2D]">
+                              <span className="text-sm font-normal text-[#8B4513]">
                                 {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
                               </span>
                             </div>
@@ -1441,24 +1441,24 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeRiskyTeam(index)}
-                            className="text-[#6B6B6B] hover:text-[#2D2D2D] hover:bg-gray-100 h-7 w-7 p-0 rounded-[16px] flex-shrink-0"
+                            className="text-[#8B4513]/60 hover:text-[#8B4513] hover:bg-[#D2691E]/10 h-7 w-7 p-0 rounded-[16px] flex-shrink-0"
                           >
                             <X className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
                         </div>
                         {riskyTeam.notes && (
-                          <p className="text-xs text-[#6B6B6B] font-light leading-relaxed whitespace-pre-wrap pl-1">{riskyTeam.notes}</p>
+                          <p className="text-xs text-[#8B4513]/80 font-light leading-relaxed whitespace-pre-wrap pl-1">{riskyTeam.notes}</p>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="p-3 bg-[#FAFAF8] rounded-[20px] w-fit mx-auto mb-3">
-                      <AlertTriangle className="h-10 w-10 text-[#B0B0B0]" strokeWidth={1.5} />
+                    <div className="p-3 bg-[#F5DEB3]/20 rounded-[20px] w-fit mx-auto mb-3">
+                      <AlertTriangle className="h-10 w-10 text-[#D2B48C]" strokeWidth={1.5} />
                     </div>
-                    <p className="text-sm text-[#2D2D2D] font-normal mb-1">Ризикових команд не знайдено</p>
-                    <p className="text-xs text-[#6B6B6B] font-light">
+                    <p className="text-sm text-[#8B4513] font-normal mb-1">Ризикових команд не знайдено</p>
+                    <p className="text-xs text-[#8B4513]/70 font-light">
                       {formData.team1 || formData.team2 
                         ? 'Обрані команди не в списку ризикових' 
                         : 'Додайте команди для перевірки'}
