@@ -27,7 +27,9 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  Flag
+  Flag,
+  ArrowRight,
+  TrendingDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -1363,131 +1365,187 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog - Enhanced with ladder steps */}
+      {/* Goal Details Dialog - IMPROVED DESIGN FOR LADDER */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="rounded-[32px] max-w-3xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl font-light text-black">
-              <Eye className="h-5 w-5" strokeWidth={1.5} />
-              Деталі цілі: {selectedGoal?.name}
-            </DialogTitle>
+        <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
+          <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-[#8b5cf6] rounded-[20px] shadow-[0_2px_8px_rgba(139,92,246,0.3)]">
+                <TrendingUp className="h-5 w-5 text-white" strokeWidth={1.5} />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-light text-black">
+                  {selectedGoal?.name}
+                </DialogTitle>
+                <DialogDescription className="text-[#6B6B6B] font-light mt-1">
+                  Детальна інформація про прогрес цілі
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
           {selectedGoal && (
-            <div className="space-y-4">
-              <div className="p-5 bg-[#F5F5F3] rounded-[24px] border-2 border-[#E8E6DC] space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-[#6B6B6B] font-light">Тип цілі:</span>
-                  <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[16px] px-3 py-1 font-light">
+            <div className="space-y-5">
+              {/* Summary Card */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
+                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Тип цілі</p>
+                  <Badge className="bg-[#8b5cf6] text-white border-0 rounded-[12px] px-3 py-1 font-normal">
                     {getGoalTypeLabel(selectedGoal.type)}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-[#6B6B6B] font-light">Створено:</span>
-                  <span className="text-sm font-normal text-black">
+                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
+                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Створено</p>
+                  <p className="text-base font-normal text-black">
                     {new Date(selectedGoal.createdAt).toLocaleDateString('uk-UA')}
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-[#6B6B6B] font-light">Прогрес:</span>
-                  <span className="text-sm font-normal text-black">
+                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
+                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Прогрес</p>
+                  <p className="text-base font-normal text-[#8b5cf6]">
                     {getGoalProgress(selectedGoal).toFixed(1)}%
-                  </span>
+                  </p>
                 </div>
               </div>
 
               {/* Ladder Steps Details */}
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-normal text-black">📊 Кроки лесенки</h3>
-                  <div className="p-4 bg-[#E3F2FD] rounded-[20px] border-2 border-[#BBDEFB] space-y-2">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-[#6B6B6B] font-light">Початкова сума:</span>
-                        <span className="ml-2 font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</span>
+                <div className="space-y-4">
+                  {/* Ladder Overview */}
+                  <div className="p-5 bg-gradient-to-br from-[#E3F2FD] to-[#BBDEFB] rounded-[24px] border-2 border-[#90CAF9]">
+                    <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+                      Огляд лесенки
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-white/80 rounded-[16px]">
+                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
+                        <p className="text-xl font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</p>
                       </div>
-                      <div>
-                        <span className="text-[#6B6B6B] font-light">Цільова сума:</span>
-                        <span className="ml-2 font-normal text-black">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</span>
+                      <div className="p-3 bg-white/80 rounded-[16px]">
+                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Цільова сума</p>
+                        <p className="text-xl font-normal text-[#2196F3]">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
                       </div>
-                      <div>
-                        <span className="text-[#6B6B6B] font-light">Діапазон коефіцієнтів:</span>
-                        <span className="ml-2 font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</span>
+                      <div className="p-3 bg-white/80 rounded-[16px]">
+                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон коефіцієнтів</p>
+                        <p className="text-base font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</p>
                       </div>
-                      <div>
-                        <span className="text-[#6B6B6B] font-light">Поточний банк:</span>
-                        <span className="ml-2 font-normal text-black">{selectedGoal.currentBank?.toFixed(0)} грн</span>
+                      <div className="p-3 bg-white/80 rounded-[16px]">
+                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Поточний банк</p>
+                        <p className="text-xl font-normal text-[#4CAF50]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="max-h-[400px] overflow-y-auto space-y-2">
-                    {selectedGoal.steps.map((step, index) => (
-                      <div 
-                        key={index}
-                        className={`p-4 rounded-[20px] border-2 ${
-                          step.status === 'completed' 
-                            ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
-                            : step.status === 'current'
-                            ? 'bg-[#FFF9E6] border-[#F4E157]'
-                            : 'bg-[#F5F5F3] border-[#E8E6DC]'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-normal text-black">Крок {step.step}</span>
-                          <Badge className={`${
-                            step.status === 'completed'
-                              ? 'bg-[#4CAF50] text-white'
+                  {/* Steps Timeline */}
+                  <div>
+                    <h3 className="text-base font-normal text-black mb-3 px-1">📊 Кроки прогресії</h3>
+                    <div className="max-h-[450px] overflow-y-auto space-y-3 pr-2">
+                      {selectedGoal.steps.map((step, index) => (
+                        <div 
+                          key={index}
+                          className={`relative p-5 rounded-[24px] border-2 transition-all duration-300 ${
+                            step.status === 'completed' 
+                              ? 'bg-gradient-to-br from-[#E8F5E9] to-white border-[#C8E6C9] shadow-[0_2px_8px_rgba(76,175,80,0.15)]' 
                               : step.status === 'current'
-                              ? 'bg-[#F4E157] text-black'
-                              : 'bg-[#E8E6DC] text-[#6B6B6B]'
-                          } border-0 rounded-[12px] text-xs px-2.5 py-0.5 font-light`}>
-                            {step.status === 'completed' ? '✓ Завершено' : step.status === 'current' ? '→ Поточний' : '🔒 Заблоковано'}
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span className="text-[#6B6B6B] font-light">Початкова сума:</span>
-                            <span className="ml-1 font-normal text-black">{step.startAmount.toFixed(0)} грн</span>
-                          </div>
-                          <div>
-                            <span className="text-[#6B6B6B] font-light">Мін. планова:</span>
-                            <span className="ml-1 font-normal text-black">{step.minPlannedAmount?.toFixed(0)} грн</span>
-                          </div>
-                          {step.actualAmount && (
-                            <>
-                              <div>
-                                <span className="text-[#6B6B6B] font-light">Фактична сума:</span>
-                                <span className="ml-1 font-normal text-[#4CAF50]">{step.actualAmount.toFixed(0)} грн</span>
+                              ? 'bg-gradient-to-br from-[#FFF9E6] to-white border-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.3)]'
+                              : 'bg-gradient-to-br from-[#F5F5F3] to-white border-[#E8E6DC]'
+                          }`}
+                        >
+                          {/* Step Header */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-base ${
+                                step.status === 'completed'
+                                  ? 'bg-[#4CAF50] text-white'
+                                  : step.status === 'current'
+                                  ? 'bg-[#F4E157] text-black'
+                                  : 'bg-[#E8E6DC] text-[#6B6B6B]'
+                              }`}>
+                                {step.step}
                               </div>
                               <div>
-                                <span className="text-[#6B6B6B] font-light">Коефіцієнт:</span>
-                                <span className="ml-1 font-normal text-black">{step.actualOdds?.toFixed(2)}</span>
+                                <p className="font-normal text-black">Крок {step.step}</p>
+                                <p className="text-xs text-[#6B6B6B] font-light">
+                                  {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний крок' : 'Заблоковано'}
+                                </p>
                               </div>
-                            </>
+                            </div>
+                            <Badge className={`${
+                              step.status === 'completed'
+                                ? 'bg-[#4CAF50] text-white'
+                                : step.status === 'current'
+                                ? 'bg-[#F4E157] text-black'
+                                : 'bg-[#E8E6DC] text-[#6B6B6B]'
+                            } border-0 rounded-[12px] px-3 py-1 font-normal`}>
+                              {step.status === 'completed' ? '✓ Виконано' : step.status === 'current' ? '→ Активний' : '🔒 Очікує'}
+                            </Badge>
+                          </div>
+
+                          {/* Step Details */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
+                              <p className="text-lg font-normal text-black">{step.startAmount.toFixed(0)} грн</p>
+                            </div>
+                            <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Мін. планова сума</p>
+                              <p className="text-lg font-normal text-[#2196F3]">{step.minPlannedAmount?.toFixed(0)} грн</p>
+                            </div>
+                            
+                            {step.actualAmount && (
+                              <>
+                                <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
+                                  <p className="text-xs text-[#6B6B6B] font-light mb-1">Фактична сума</p>
+                                  <p className="text-lg font-normal text-[#4CAF50]">{step.actualAmount.toFixed(0)} грн</p>
+                                </div>
+                                <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
+                                  <p className="text-xs text-[#6B6B6B] font-light mb-1">Коефіцієнт</p>
+                                  <p className="text-lg font-normal text-[#4CAF50]">{step.actualOdds?.toFixed(2)}</p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Deviation Badge */}
+                          {step.deviation !== undefined && step.deviation > 0 && (
+                            <div className="mt-3 p-2 bg-[#E8F5E9] rounded-[12px] border border-[#C8E6C9] flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
+                              <p className="text-xs font-normal text-[#2E7D32]">
+                                +{step.deviation.toFixed(0)} грн більше мінімуму
+                              </p>
+                            </div>
                           )}
+
                           {step.completedAt && (
-                            <div className="col-span-2">
-                              <span className="text-[#6B6B6B] font-light">Завершено:</span>
-                              <span className="ml-1 font-normal text-black">
-                                {new Date(step.completedAt).toLocaleDateString('uk-UA')}
-                              </span>
+                            <div className="mt-3 pt-3 border-t border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light">
+                                Завершено: {new Date(step.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Arrow to next step */}
+                          {step.status === 'completed' && index < selectedGoal.steps.length - 1 && (
+                            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+                              <div className="w-8 h-8 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg">
+                                <ArrowRight className="h-4 w-4 text-white rotate-90" strokeWidth={2} />
+                              </div>
                             </div>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="pt-4 border-t-2 border-[#E8E6DC]">
             <Button 
               onClick={() => setShowDetailsDialog(false)} 
-              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6"
+              className="rounded-[20px] bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-normal h-12 px-6"
             >
               Закрити
             </Button>
