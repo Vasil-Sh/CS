@@ -79,8 +79,6 @@ interface Goal {
   
   // Goal rules
   betsPerDay?: number;
-  allowLive?: boolean;
-  allowCashout?: boolean;
 }
 
 interface LadderStep {
@@ -162,9 +160,7 @@ export default function GoalsManager() {
     ladderMode: 'soft' as LadderMode,
     targetROI: 50,
     targetWinRate: 65,
-    betsPerDay: 5,
-    allowLive: true,
-    allowCashout: false
+    betsPerDay: 5
   });
 
   useEffect(() => {
@@ -499,9 +495,7 @@ export default function GoalsManager() {
       status: 'active',
       createdAt: new Date().toISOString(),
       isPrimary: activeGoals.length === 0,
-      betsPerDay: newGoal.betsPerDay,
-      allowLive: newGoal.allowLive,
-      allowCashout: newGoal.allowCashout
+      betsPerDay: newGoal.betsPerDay
     };
 
     switch (newGoal.type) {
@@ -562,9 +556,7 @@ export default function GoalsManager() {
       ladderMode: 'soft',
       targetROI: 50,
       targetWinRate: 65,
-      betsPerDay: 5,
-      allowLive: true,
-      allowCashout: false
+      betsPerDay: 5
     });
 
     toast.success('Ціль успішно створена!', {
@@ -937,10 +929,6 @@ export default function GoalsManager() {
                               <span className="text-[#6B6B6B] font-light">Ставок/день:</span>
                               <span className="ml-1 font-normal text-black">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
                             </div>
-                            <div>
-                              <span className="text-[#6B6B6B] font-light">Live:</span>
-                              <span className="ml-1 font-normal text-black">{primaryGoal.allowLive ? 'Дозволено' : 'Заборонено'}</span>
-                            </div>
                           </div>
                         </div>
 
@@ -1308,47 +1296,21 @@ export default function GoalsManager() {
               </div>
             )}
 
-            {newGoal.type !== 'ladder' && (
-              <div className="pt-4 border-t-2 border-[#E8E6DC]">
-                <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
-                
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
-                    <Input
-                      id="betsPerDay"
-                      type="number"
-                      min="0"
-                      value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
-                      onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                    <Label htmlFor="allowLive" className="cursor-pointer text-sm font-normal text-black">Дозволити live-прогнози</Label>
-                    <input
-                      id="allowLive"
-                      type="checkbox"
-                      checked={newGoal.allowLive}
-                      onChange={(e) => setNewGoal({ ...newGoal, allowLive: e.target.checked })}
-                      className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                    <Label htmlFor="allowCashout" className="cursor-pointer text-sm font-normal text-black">Дозволити cashout</Label>
-                    <input
-                      id="allowCashout"
-                      type="checkbox"
-                      checked={newGoal.allowCashout}
-                      onChange={(e) => setNewGoal({ ...newGoal, allowCashout: e.target.checked })}
-                      className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
-                    />
-                  </div>
-                </div>
+            <div className="pt-4 border-t-2 border-[#E8E6DC]">
+              <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
+              
+              <div>
+                <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
+                <Input
+                  id="betsPerDay"
+                  type="number"
+                  min="0"
+                  value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
+                  onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
+                />
               </div>
-            )}
+            </div>
           </div>
 
           <DialogFooter className="gap-3 pt-4 border-t-2 border-[#E8E6DC]">
