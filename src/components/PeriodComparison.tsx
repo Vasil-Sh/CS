@@ -195,9 +195,9 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Info className="h-5 w-5 text-[#F4E157]" strokeWidth={1.5} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs bg-white/95 backdrop-blur-sm border-2 border-[#E8E6DC] rounded-[20px] p-4">
-                <p className="text-sm font-normal text-black mb-2">Як працює порівняння:</p>
-                <p className="text-xs text-[#6B6B6B] font-light">
+              <TooltipContent className="max-w-xs bg-white border-2 border-[#E8E6DC] rounded-[20px] p-4 shadow-lg">
+                <p className="text-base font-medium text-black mb-2">Як працює порівняння:</p>
+                <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
                   Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
                 </p>
               </TooltipContent>
@@ -414,7 +414,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Bar 
                     yAxisId="bets" 
                     dataKey="bets" 
-                    fill="#D4B896" 
+                    fill="#E8DCC8" 
                     name="bets"
                     radius={[8, 8, 0, 0]}
                   />
@@ -422,11 +422,11 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                     yAxisId="profit" 
                     type="monotone" 
                     dataKey="profit" 
-                    stroke="#C4A57B" 
+                    stroke="#8B6F47" 
                     strokeWidth={3} 
                     name="profit"
-                    dot={{ fill: '#C4A57B', r: 5 }}
-                    activeDot={{ r: 7 }}
+                    dot={{ fill: '#8B6F47', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8 }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -481,20 +481,20 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Line 
                     type="monotone" 
                     dataKey="winRate" 
-                    stroke="#C4A57B" 
-                    strokeWidth={2} 
+                    stroke="#8B6F47" 
+                    strokeWidth={3} 
                     name="winRate"
-                    dot={{ fill: '#C4A57B', r: 5 }}
-                    activeDot={{ r: 7 }}
+                    dot={{ fill: '#8B6F47', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="roi" 
-                    stroke="#D4B896" 
-                    strokeWidth={2} 
+                    stroke="#A0826D" 
+                    strokeWidth={3} 
                     name="roi"
-                    dot={{ fill: '#D4B896', r: 5 }}
-                    activeDot={{ r: 7 }}
+                    dot={{ fill: '#A0826D', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -512,13 +512,13 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b-2 border-[#E8E6DC] bg-[#F5F5F3]">
-                    <th className="text-left p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Період</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Ставок</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Win Rate</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Прибуток</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">ROI</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Серія ↑</th>
-                    <th className="text-right p-4 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Серія ↓</th>
+                    <th className="text-left p-4 text-sm font-medium text-black uppercase tracking-wider">Період</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Ставок</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Win Rate</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Прибуток</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">ROI</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Серія ↑</th>
+                    <th className="text-right p-4 text-sm font-medium text-black uppercase tracking-wider">Серія ↓</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -527,11 +527,11 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                       key={period.period} 
                       className={`border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all ${index === selectedPeriods.length - 1 ? 'bg-[#FFF9E6]' : ''}`}
                     >
-                      <td className="p-4 font-normal text-black">
+                      <td className="p-4 font-medium text-black text-base">
                         <div className="flex items-center gap-2">
                           {formatPeriodName(period.period)}
                           {index === selectedPeriods.length - 1 && (
-                            <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-normal">Поточний</Badge>
+                            <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-normal px-3 py-1">Поточний</Badge>
                           )}
                           {hasSmallSample(period.totalBets) && (
                             <Tooltip>
@@ -549,16 +549,16 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                           )}
                         </div>
                       </td>
-                      <td className="text-right p-4 text-black font-normal">{period.totalBets}</td>
-                      <td className="text-right p-4 text-black font-normal">{period.winRate.toFixed(1)}%</td>
-                      <td className={`text-right p-4 font-normal ${period.totalProfit >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
+                      <td className="text-right p-4 text-black font-medium text-base">{period.totalBets}</td>
+                      <td className="text-right p-4 text-black font-medium text-base">{period.winRate.toFixed(1)}%</td>
+                      <td className={`text-right p-4 font-semibold text-base ${period.totalProfit >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
                         {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
                       </td>
-                      <td className={`text-right p-4 font-normal ${period.averageROI >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
+                      <td className={`text-right p-4 font-semibold text-base ${period.averageROI >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
                         {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
                       </td>
-                      <td className="text-right p-4 text-[#8B6F47] font-normal">+{period.bestStreak}</td>
-                      <td className="text-right p-4 text-[#A0826D] font-normal">-{period.worstStreak}</td>
+                      <td className="text-right p-4 text-[#8B6F47] font-semibold text-base">+{period.bestStreak}</td>
+                      <td className="text-right p-4 text-[#A0826D] font-semibold text-base">-{period.worstStreak}</td>
                     </tr>
                   ))}
                 </tbody>
