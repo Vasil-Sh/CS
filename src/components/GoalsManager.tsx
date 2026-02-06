@@ -422,9 +422,67 @@ export default function GoalsManager() {
     return scenarios;
   };
 
+  const validateGoalFields = (): boolean => {
+    if (!newGoal.name.trim()) {
+      toast.error('Будь ласка, введіть назву цілі');
+      return false;
+    }
+
+    switch (newGoal.type) {
+      case 'amount':
+        if (!newGoal.targetAmount || newGoal.targetAmount <= 0) {
+          toast.error('Будь ласка, введіть цільову суму більше 0');
+          return false;
+        }
+        break;
+
+      case 'ladder':
+        if (!newGoal.startAmount || newGoal.startAmount <= 0) {
+          toast.error('Будь ласка, введіть початкову суму більше 0');
+          return false;
+        }
+        if (!newGoal.targetLadderAmount || newGoal.targetLadderAmount <= 0) {
+          toast.error('Будь ласка, введіть цільову суму більше 0');
+          return false;
+        }
+        if (newGoal.startAmount >= newGoal.targetLadderAmount) {
+          toast.error('Цільова сума повинна бути більше початкової');
+          return false;
+        }
+        if (!newGoal.minOdds || newGoal.minOdds < 1.01) {
+          toast.error('Будь ласка, введіть мінімальний коефіцієнт (мін. 1.01)');
+          return false;
+        }
+        if (!newGoal.maxOdds || newGoal.maxOdds < 1.01) {
+          toast.error('Будь ласка, введіть максимальний коефіцієнт (мін. 1.01)');
+          return false;
+        }
+        if (newGoal.minOdds >= newGoal.maxOdds) {
+          toast.error('Максимальний коефіцієнт повинен бути більше мінімального');
+          return false;
+        }
+        break;
+
+      case 'roi':
+        if (!newGoal.targetROI || newGoal.targetROI <= 0) {
+          toast.error('Будь ласка, введіть цільовий ROI більше 0');
+          return false;
+        }
+        break;
+
+      case 'winrate':
+        if (!newGoal.targetWinRate || newGoal.targetWinRate <= 0 || newGoal.targetWinRate > 100) {
+          toast.error('Будь ласка, введіть цільовий Win Rate від 1 до 100');
+          return false;
+        }
+        break;
+    }
+
+    return true;
+  };
+
   const createGoal = () => {
-    if (!newGoal.name) {
-      toast.error('Введіть назву цілі');
+    if (!validateGoalFields()) {
       return;
     }
 
@@ -1079,20 +1137,26 @@ export default function GoalsManager() {
         </div>
       </div>
 
-      {/* Dialogs - keeping existing implementation with updated styling */}
+      {/* Create Goal Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="rounded-[32px] max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl font-light text-black">
-              <Plus className="h-5 w-5" strokeWidth={1.5} />
-              Створити нову ціль
-            </DialogTitle>
-            <DialogDescription className="text-[#6B6B6B] font-light">
-              Оберіть тип цілі та встановіть параметри
-            </DialogDescription>
+          <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
+                <Plus className="h-5 w-5 text-black" strokeWidth={1.5} />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-light text-black">
+                  Створити нову ціль
+                </DialogTitle>
+                <DialogDescription className="text-[#6B6B6B] font-light mt-1">
+                  Оберіть тип цілі та встановіть параметри
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 pt-2">
             <div>
               <Label htmlFor="goalName" className="text-sm font-normal text-black">Назва цілі *</Label>
               <Input
@@ -1244,48 +1308,50 @@ export default function GoalsManager() {
               </div>
             )}
 
-            <div className="pt-4 border-t-2 border-[#E8E6DC]">
-              <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
-                  <Input
-                    id="betsPerDay"
-                    type="number"
-                    min="0"
-                    value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
-                    onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                    className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                  />
-                </div>
+            {newGoal.type !== 'ladder' && (
+              <div className="pt-4 border-t-2 border-[#E8E6DC]">
+                <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
+                
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
+                    <Input
+                      id="betsPerDay"
+                      type="number"
+                      min="0"
+                      value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
+                      onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
+                    />
+                  </div>
 
-                <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                  <Label htmlFor="allowLive" className="cursor-pointer text-sm font-normal text-black">Дозволити live-прогнози</Label>
-                  <input
-                    id="allowLive"
-                    type="checkbox"
-                    checked={newGoal.allowLive}
-                    onChange={(e) => setNewGoal({ ...newGoal, allowLive: e.target.checked })}
-                    className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
-                  />
-                </div>
+                  <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
+                    <Label htmlFor="allowLive" className="cursor-pointer text-sm font-normal text-black">Дозволити live-прогнози</Label>
+                    <input
+                      id="allowLive"
+                      type="checkbox"
+                      checked={newGoal.allowLive}
+                      onChange={(e) => setNewGoal({ ...newGoal, allowLive: e.target.checked })}
+                      className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
+                    />
+                  </div>
 
-                <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                  <Label htmlFor="allowCashout" className="cursor-pointer text-sm font-normal text-black">Дозволити cashout</Label>
-                  <input
-                    id="allowCashout"
-                    type="checkbox"
-                    checked={newGoal.allowCashout}
-                    onChange={(e) => setNewGoal({ ...newGoal, allowCashout: e.target.checked })}
-                    className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
-                  />
+                  <div className="flex items-center justify-between p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
+                    <Label htmlFor="allowCashout" className="cursor-pointer text-sm font-normal text-black">Дозволити cashout</Label>
+                    <input
+                      id="allowCashout"
+                      type="checkbox"
+                      checked={newGoal.allowCashout}
+                      onChange={(e) => setNewGoal({ ...newGoal, allowCashout: e.target.checked })}
+                      className="h-5 w-5 rounded-[8px] border-2 border-[#D4D2C8] text-[#F4E157] focus:ring-[#F4E157]"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <DialogFooter className="gap-3">
+          <DialogFooter className="gap-3 pt-4 border-t-2 border-[#E8E6DC]">
             <Button 
               variant="outline" 
               onClick={() => setShowCreateDialog(false)} 
