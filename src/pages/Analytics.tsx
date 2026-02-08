@@ -751,7 +751,7 @@ export default function Analytics() {
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Monthly Profit Chart - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                      {/* Monthly Profit Chart - ЗМІНЕНО НА ЛІНІЙНИЙ ГРАФІК З ТОЧКАМИ */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -768,26 +768,16 @@ export default function Analytics() {
                         </CardHeader>
                         <CardContent className="p-8">
                           <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={monthlyProfit}>
-                              <defs>
-                                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#C4A57B" stopOpacity={0.8}/>
-                                  <stop offset="95%" stopColor="#C4A57B" stopOpacity={0.1}/>
-                                </linearGradient>
-                                <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#D4B896" stopOpacity={0.8}/>
-                                  <stop offset="95%" stopColor="#D4B896" stopOpacity={0.1}/>
-                                </linearGradient>
-                              </defs>
+                            <LineChart data={monthlyProfit}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                               <XAxis 
                                 dataKey="month" 
-                                tick={{ fontSize: 12 }}
-                                stroke="#6b7280"
+                                tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                                stroke="#1a1a1a"
                               />
                               <YAxis 
-                                tick={{ fontSize: 12 }}
-                                stroke="#6b7280"
+                                tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                                stroke="#1a1a1a"
                               />
                               <Tooltip 
                                 contentStyle={{ 
@@ -810,26 +800,37 @@ export default function Analytics() {
                                   return label;
                                 }}
                               />
-                              <Area 
+                              <Legend 
+                                wrapperStyle={{ paddingTop: '20px' }}
+                                contentStyle={{ color: '#1a1a1a' }}
+                                formatter={(value) => {
+                                  if (value === 'profit') return <span style={{ color: '#1a1a1a' }}>Прибуток за місяць</span>;
+                                  if (value === 'cumulative') return <span style={{ color: '#1a1a1a' }}>Загальний прибуток</span>;
+                                  return value;
+                                }}
+                              />
+                              <Line 
                                 type="monotone" 
                                 dataKey="profit" 
                                 stroke="#C4A57B" 
-                                strokeWidth={2}
-                                fillOpacity={1} 
-                                fill="url(#colorProfit)" 
+                                strokeWidth={3}
+                                name="profit"
+                                dot={{ fill: '#C4A57B', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 7 }}
                               />
-                              <Area 
+                              <Line 
                                 type="monotone" 
                                 dataKey="cumulative" 
-                                stroke="#D4B896" 
-                                strokeWidth={2}
-                                fillOpacity={1} 
-                                fill="url(#colorCumulative)" 
+                                stroke="#8B6F47" 
+                                strokeWidth={3}
+                                name="cumulative"
+                                dot={{ fill: '#8B6F47', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 7 }}
                               />
-                            </AreaChart>
+                            </LineChart>
                           </ResponsiveContainer>
                           
-                          {/* Monthly Stats Summary - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                          {/* Monthly Stats Summary */}
                           <div className="mt-6 flex items-center justify-between gap-4 px-2">
                             <div className="flex items-center gap-2">
                               <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
@@ -856,7 +857,7 @@ export default function Analytics() {
                         </CardContent>
                       </Card>
 
-                      {/* Scatter Chart - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                      {/* Scatter Chart - ЗМІНЕНО НА ПРОСТІ ТОЧКИ БЕЗ ЗОН */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -883,12 +884,6 @@ export default function Analytics() {
                             <ScatterChart>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                               
-                              {/* Vertical zones for odds ranges */}
-                              <ReferenceArea x1={0} x2={1.5} fill="#dbeafe" fillOpacity={0.3} />
-                              <ReferenceArea x1={1.5} x2={2.0} fill="#bfdbfe" fillOpacity={0.3} />
-                              <ReferenceArea x1={2.0} x2={3.0} fill="#93c5fd" fillOpacity={0.3} />
-                              <ReferenceArea x1={3.0} x2={10} fill="#60a5fa" fillOpacity={0.3} />
-                              
                               {/* Zero profit line */}
                               <ReferenceLine 
                                 y={0} 
@@ -905,17 +900,17 @@ export default function Analytics() {
                               <XAxis 
                                 dataKey="odds" 
                                 name="Коефіцієнт"
-                                tick={{ fontSize: 12, fill: '#000' }}
-                                stroke="#000"
-                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#000' } }}
+                                tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                                stroke="#1a1a1a"
+                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#1a1a1a' } }}
                                 tickFormatter={(value) => Number(value).toFixed(2)}
                               />
                               <YAxis 
                                 dataKey="profit" 
                                 name="Прибуток"
-                                tick={{ fontSize: 12, fill: '#000' }}
-                                stroke="#000"
-                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#000' } }}
+                                tick={{ fontSize: 12, fill: '#1a1a1a' }}
+                                stroke="#1a1a1a"
+                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
                               />
                               <Tooltip content={<ScatterTooltip />} />
                               <Scatter 
@@ -927,11 +922,9 @@ export default function Analytics() {
                                     <circle 
                                       cx={cx} 
                                       cy={cy} 
-                                      r={6} 
+                                      r={5} 
                                       fill={fill}
-                                      opacity={0.7}
-                                      stroke="#fff"
-                                      strokeWidth={2}
+                                      opacity={0.8}
                                     />
                                   );
                                 }}
@@ -939,7 +932,7 @@ export default function Analytics() {
                             </ScatterChart>
                           </ResponsiveContainer>
                           
-                          {/* Scatter Stats - ЛАКОНІЧНИЙ ДИЗАЙН */}
+                          {/* Scatter Stats */}
                           <div className="mt-6 flex items-center justify-center gap-8 px-2">
                             <div className="flex items-center gap-2">
                               <div className="w-3 h-3 rounded-full bg-[#4CAF50]"></div>

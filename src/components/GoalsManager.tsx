@@ -29,7 +29,8 @@ import {
   ChevronUp,
   Flag,
   ArrowRight,
-  TrendingDown
+  TrendingDown,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -151,6 +152,8 @@ export default function GoalsManager() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isHowToExpanded, setIsHowToExpanded] = useState(false);
   const [isStepsCalculationExpanded, setIsStepsCalculationExpanded] = useState(false);
+  const [isLadderOverviewExpanded, setIsLadderOverviewExpanded] = useState(true);
+  const [isStepsProgressionExpanded, setIsStepsProgressionExpanded] = useState(true);
   const [isRulesExpanded, setIsRulesExpanded] = useState<Record<string, boolean>>({});
 
   const [newGoal, setNewGoal] = useState({
@@ -591,6 +594,8 @@ export default function GoalsManager() {
     setSelectedGoal(goal);
     setShowDetailsDialog(true);
     setIsStepsCalculationExpanded(false);
+    setIsLadderOverviewExpanded(true);
+    setIsStepsProgressionExpanded(true);
   };
 
   const openCompletedGoalResult = (goal: Goal) => {
@@ -916,7 +921,7 @@ export default function GoalsManager() {
                             }`}>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <p className="text-sm font-normal text-black">📋 Правила</p>
+                                  <p className="text-sm font-normal text-black">Правила</p>
                                   <div className={
                                     getDisciplineStatus(primaryGoal).status === 'good' 
                                       ? 'text-[#4CAF50]' 
@@ -1276,7 +1281,7 @@ export default function GoalsManager() {
 
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
                   <div className="p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                    <p className="text-sm font-normal text-black mb-1">📊 Розрахунок кроків:</p>
+                    <p className="text-sm font-normal text-black mb-1">Розрахунок кроків:</p>
                     <p className="text-sm text-[#6B6B6B] font-light">
                       Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
                     </p>
@@ -1319,7 +1324,7 @@ export default function GoalsManager() {
             )}
 
             <div className="pt-4 border-t-2 border-[#E8E6DC]">
-              <h4 className="text-sm font-normal text-black mb-3">📋 Правила цілі</h4>
+              <h4 className="text-sm font-normal text-black mb-3">Правила цілі</h4>
               
               <div>
                 <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
@@ -1388,17 +1393,17 @@ export default function GoalsManager() {
       {/* Goal Details Dialog - Only shows for ladder goals */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC] p-0">
-          {/* Header matching Analytics page style with proper padding */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-t-[32px] p-6 m-6 mb-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          {/* Header */}
+          <div className="p-6 border-b-2 border-[#E8E6DC]">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] flex-shrink-0">
                 <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
               </div>
               <div>
-                <h1 className="text-4xl font-light text-black tracking-tight">
+                <h1 className="text-3xl font-normal text-black tracking-tight">
                   {selectedGoal?.name}
                 </h1>
-                <p className="text-[#6B6B6B] mt-2 text-base font-light">
+                <p className="text-[#6B6B6B] mt-1 text-sm font-light">
                   Детальна інформація про прогрес цілі
                 </p>
               </div>
@@ -1406,7 +1411,7 @@ export default function GoalsManager() {
           </div>
 
           {selectedGoal && (
-            <div className="space-y-5 px-6">
+            <div className="space-y-5 px-6 pb-6">
               {/* Summary Card */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
@@ -1432,31 +1437,50 @@ export default function GoalsManager() {
               {/* Ladder Steps Details */}
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
                 <div className="space-y-4">
-                  {/* Ladder Overview */}
-                  <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
-                    <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
-                      Огляд лесенки
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
-                        <p className="text-xl font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</p>
-                      </div>
-                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Цільова сума</p>
-                        <p className="text-xl font-normal text-black">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
-                      </div>
-                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон коефіцієнтів</p>
-                        <p className="text-base font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</p>
-                      </div>
-                      <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Поточний банк</p>
-                        <p className="text-xl font-normal text-[#4CAF50]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Ladder Overview - Collapsible */}
+                  <Collapsible open={isLadderOverviewExpanded} onOpenChange={setIsLadderOverviewExpanded}>
+                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
+                      <CollapsibleTrigger className="w-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                                <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                              </div>
+                              <h3 className="text-lg font-normal text-black">Огляд лесенки</h3>
+                            </div>
+                            {isLadderOverviewExpanded ? (
+                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
+                            )}
+                          </div>
+                        </CardContent>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="px-5 pb-5 pt-0">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
+                              <p className="text-xl font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Цільова сума</p>
+                              <p className="text-xl font-normal text-black">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон коефіцієнтів</p>
+                              <p className="text-base font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
+                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Поточний банк</p>
+                              <p className="text-xl font-normal text-[#4CAF50]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
 
                   {/* Steps Calculation - Collapsible with Scenarios */}
                   <Collapsible open={isStepsCalculationExpanded} onOpenChange={setIsStepsCalculationExpanded}>
@@ -1465,11 +1489,11 @@ export default function GoalsManager() {
                         <CardContent className="p-5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#F5F5F3] rounded-[16px]">
+                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
                                 <Info className="h-5 w-5 text-black" strokeWidth={1.5} />
                               </div>
                               <div className="text-left">
-                                <p className="text-base font-normal text-black">📊 Сценарії розрахунку кроків</p>
+                                <p className="text-base font-normal text-black">Сценарії розрахунку кроків</p>
                                 <p className="text-xs text-[#6B6B6B] font-light mt-0.5">
                                   Скільки кроків потрібно при різних коефіцієнтах
                                 </p>
@@ -1520,108 +1544,130 @@ export default function GoalsManager() {
                     </Card>
                   </Collapsible>
 
-                  {/* Steps Timeline */}
-                  <div>
-                    <h3 className="text-base font-normal text-black mb-3 px-1">📊 Кроки прогресії</h3>
-                    <div className="max-h-[450px] overflow-y-auto space-y-3 pr-2">
-                      {selectedGoal.steps.map((step, index) => (
-                        <div 
-                          key={index}
-                          className={`relative p-5 rounded-[24px] border-2 transition-all duration-300 ${
-                            step.status === 'completed' 
-                              ? 'bg-gradient-to-br from-[#E8F5E9] to-white border-[#C8E6C9] shadow-[0_2px_8px_rgba(76,175,80,0.15)]' 
-                              : step.status === 'current'
-                              ? 'bg-gradient-to-br from-[#FFF9E6] to-white border-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.3)]'
-                              : 'bg-gradient-to-br from-[#F5F5F3] to-white border-[#E8E6DC]'
-                          }`}
-                        >
-                          {/* Step Header */}
-                          <div className="flex items-center justify-between mb-4">
+                  {/* Steps Progression - Collapsible */}
+                  <Collapsible open={isStepsProgressionExpanded} onOpenChange={setIsStepsProgressionExpanded}>
+                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
+                      <CollapsibleTrigger className="w-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-base ${
-                                step.status === 'completed'
-                                  ? 'bg-[#4CAF50] text-white'
-                                  : step.status === 'current'
-                                  ? 'bg-[#F4E157] text-black'
-                                  : 'bg-[#E8E6DC] text-[#6B6B6B]'
-                              }`}>
-                                {step.step}
+                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                                <BarChart3 className="h-5 w-5 text-black" strokeWidth={1.5} />
                               </div>
-                              <div>
-                                <p className="font-normal text-black text-base">Крок {step.step}</p>
-                                <p className="text-xs text-[#6B6B6B] font-light">
-                                  {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний крок' : 'Заблоковано'}
-                                </p>
-                              </div>
+                              <h3 className="text-lg font-normal text-black">Кроки прогресії</h3>
                             </div>
-                            <Badge className={`${
-                              step.status === 'completed'
-                                ? 'bg-[#4CAF50] text-white'
-                                : step.status === 'current'
-                                ? 'bg-[#F4E157] text-black'
-                                : 'bg-[#E8E6DC] text-[#6B6B6B]'
-                            } border-0 rounded-[12px] px-3 py-1 font-normal`}>
-                              {step.status === 'completed' ? '✓ Виконано' : step.status === 'current' ? '→ Активний' : '🔒 Очікує'}
-                            </Badge>
-                          </div>
-
-                          {/* Step Details */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
-                              <p className="text-lg font-normal text-black">{step.startAmount.toFixed(0)} грн</p>
-                            </div>
-                            <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон виграшу</p>
-                              <p className="text-sm font-normal text-black">
-                                {step.minPlannedAmount?.toFixed(0)} - {step.maxPlannedAmount?.toFixed(0)} грн
-                              </p>
-                            </div>
-                            
-                            {step.actualAmount && (
-                              <>
-                                <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
-                                  <p className="text-xs text-[#6B6B6B] font-light mb-1">Фактична сума</p>
-                                  <p className="text-lg font-normal text-[#4CAF50]">{step.actualAmount.toFixed(0)} грн</p>
-                                </div>
-                                <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
-                                  <p className="text-xs text-[#6B6B6B] font-light mb-1">Коефіцієнт</p>
-                                  <p className="text-lg font-normal text-[#4CAF50]">{step.actualOdds?.toFixed(2)}</p>
-                                </div>
-                              </>
+                            {isStepsProgressionExpanded ? (
+                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
                             )}
                           </div>
+                        </CardContent>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="px-5 pb-5 pt-0">
+                          <div className="max-h-[450px] overflow-y-auto space-y-3 pr-2">
+                            {selectedGoal.steps.map((step, index) => (
+                              <div 
+                                key={index}
+                                className={`relative p-5 rounded-[24px] border-2 transition-all duration-300 ${
+                                  step.status === 'completed' 
+                                    ? 'bg-gradient-to-br from-[#E8F5E9] to-white border-[#C8E6C9] shadow-[0_2px_8px_rgba(76,175,80,0.15)]' 
+                                    : step.status === 'current'
+                                    ? 'bg-gradient-to-br from-[#FFF9E6] to-white border-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.3)]'
+                                    : 'bg-gradient-to-br from-[#F5F5F3] to-white border-[#E8E6DC]'
+                                }`}
+                              >
+                                {/* Step Header */}
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-base ${
+                                      step.status === 'completed'
+                                        ? 'bg-[#4CAF50] text-white'
+                                        : step.status === 'current'
+                                        ? 'bg-[#F4E157] text-black'
+                                        : 'bg-[#E8E6DC] text-[#6B6B6B]'
+                                    }`}>
+                                      {step.step}
+                                    </div>
+                                    <div>
+                                      <p className="font-normal text-black text-base">Крок {step.step}</p>
+                                      <p className="text-xs text-[#6B6B6B] font-light">
+                                        {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний крок' : 'Заблоковано'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Badge className={`${
+                                    step.status === 'completed'
+                                      ? 'bg-[#4CAF50] text-white'
+                                      : step.status === 'current'
+                                      ? 'bg-[#F4E157] text-black'
+                                      : 'bg-[#E8E6DC] text-[#6B6B6B]'
+                                  } border-0 rounded-[12px] px-3 py-1 font-normal`}>
+                                    {step.status === 'completed' ? '✓ Виконано' : step.status === 'current' ? '→ Активний' : '🔒 Очікує'}
+                                  </Badge>
+                                </div>
 
-                          {/* Deviation Badge */}
-                          {step.deviation !== undefined && step.deviation > 0 && (
-                            <div className="mt-3 p-2 bg-[#E8F5E9] rounded-[12px] border border-[#C8E6C9] flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
-                              <p className="text-xs font-normal text-[#2E7D32]">
-                                +{step.deviation.toFixed(0)} грн більше мінімуму
-                              </p>
-                            </div>
-                          )}
+                                {/* Step Details */}
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
+                                    <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
+                                    <p className="text-lg font-normal text-black">{step.startAmount.toFixed(0)} грн</p>
+                                  </div>
+                                  <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
+                                    <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон виграшу</p>
+                                    <p className="text-sm font-normal text-black">
+                                      {step.minPlannedAmount?.toFixed(0)} - {step.maxPlannedAmount?.toFixed(0)} грн
+                                    </p>
+                                  </div>
+                                  
+                                  {step.actualAmount && (
+                                    <>
+                                      <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
+                                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Фактична сума</p>
+                                        <p className="text-lg font-normal text-[#4CAF50]">{step.actualAmount.toFixed(0)} грн</p>
+                                      </div>
+                                      <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
+                                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Коефіцієнт</p>
+                                        <p className="text-lg font-normal text-[#4CAF50]">{step.actualOdds?.toFixed(2)}</p>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
 
-                          {step.completedAt && (
-                            <div className="mt-3 pt-3 border-t border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light">
-                                Завершено: {new Date(step.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}
-                              </p>
-                            </div>
-                          )}
+                                {/* Deviation Badge */}
+                                {step.deviation !== undefined && step.deviation > 0 && (
+                                  <div className="mt-3 p-2 bg-[#E8F5E9] rounded-[12px] border border-[#C8E6C9] flex items-center gap-2">
+                                    <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
+                                    <p className="text-xs font-normal text-[#2E7D32]">
+                                      +{step.deviation.toFixed(0)} грн більше мінімуму
+                                    </p>
+                                  </div>
+                                )}
 
-                          {/* Arrow to next step */}
-                          {step.status === 'completed' && index < selectedGoal.steps.length - 1 && (
-                            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-                              <div className="w-8 h-8 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg">
-                                <ArrowRight className="h-4 w-4 text-white rotate-90" strokeWidth={2} />
+                                {step.completedAt && (
+                                  <div className="mt-3 pt-3 border-t border-[#E8E6DC]">
+                                    <p className="text-xs text-[#6B6B6B] font-light">
+                                      Завершено: {new Date(step.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Arrow to next step */}
+                                {step.status === 'completed' && index < selectedGoal.steps.length - 1 && (
+                                  <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+                                    <div className="w-8 h-8 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg">
+                                      <ArrowRight className="h-4 w-4 text-white rotate-90" strokeWidth={2} />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
                 </div>
               )}
             </div>
