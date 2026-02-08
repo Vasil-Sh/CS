@@ -110,17 +110,17 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC] p-0">
-        {/* Header matching Analytics page style with proper padding */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-t-[32px] p-6 m-6 mb-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        {/* Header */}
+        <div className="p-6 border-b-2 border-[#E8E6DC]">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] flex-shrink-0">
               <Trophy className="h-6 w-6 text-black" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-4xl font-light text-black tracking-tight">
+              <h1 className="text-3xl font-normal text-black tracking-tight">
                 Ціль досягнута!
               </h1>
-              <p className="text-[#6B6B6B] mt-2 text-base font-light">
+              <p className="text-[#6B6B6B] mt-1 text-sm font-light">
                 {goal.name}
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
         </div>
 
         <div className="space-y-5 px-6 pb-6">
-          {/* Summary Card - matching goal details */}
+          {/* Summary Card */}
           <div className="grid grid-cols-3 gap-4">
             <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
               <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Тип цілі</p>
@@ -190,7 +190,9 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           {goal.type === 'amount' && (
             <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
               <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                  <DollarSign className="h-5 w-5 text-black" strokeWidth={1.5} />
+                </div>
                 Результат за сумою
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -209,7 +211,9 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           {goal.type === 'ladder' && (
             <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
               <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                  <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
+                </div>
                 Результат лесенки
               </h3>
               <div className="grid grid-cols-3 gap-4">
@@ -238,7 +242,9 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           {goal.type === 'roi' && (
             <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
               <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                <Percent className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                  <Percent className="h-5 w-5 text-black" strokeWidth={1.5} />
+                </div>
                 Результат ROI
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -257,7 +263,9 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           {goal.type === 'winrate' && (
             <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
               <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-                <Target className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                  <Target className="h-5 w-5 text-black" strokeWidth={1.5} />
+                </div>
                 Результат Win Rate
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -276,7 +284,9 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           {/* Financial Summary */}
           <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC]">
             <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
-              <Award className="h-5 w-5 text-black" strokeWidth={1.5} />
+              <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                <Award className="h-5 w-5 text-black" strokeWidth={1.5} />
+              </div>
               Фінансовий підсумок
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -310,8 +320,10 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Calendar className="h-5 w-5 text-black" strokeWidth={1.5} />
-                      <h3 className="text-base font-normal text-black">Часова лінія</h3>
+                      <div className="p-2 bg-[#F4E157] rounded-[16px]">
+                        <Calendar className="h-5 w-5 text-black" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-lg font-normal text-black">Часова лінія</h3>
                     </div>
                     {isTimelineExpanded ? (
                       <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -324,19 +336,19 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
               <CollapsibleContent>
                 <CardContent className="px-5 pb-5 pt-0">
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-[#F5F5F3] rounded-[16px]">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                       <span className="text-sm text-[#6B6B6B] font-light">Початок цілі</span>
                       <Badge className="bg-[#BBDEFB] text-[#2196F3] border-0 rounded-[12px] px-3 py-1 font-normal">
                         {new Date(goal.createdAt).toLocaleDateString('uk-UA')}
                       </Badge>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-[#F5F5F3] rounded-[16px]">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                       <span className="text-sm text-[#6B6B6B] font-light">Завершення</span>
                       <Badge className="bg-[#C8E6C9] text-[#4CAF50] border-0 rounded-[12px] px-3 py-1 font-normal">
                         {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
                       </Badge>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-[#F5F5F3] rounded-[16px]">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
                       <span className="text-sm text-[#6B6B6B] font-light">Тривалість</span>
                       <Badge className="bg-[#E1BEE7] text-[#9C27B0] border-0 rounded-[12px] px-3 py-1 font-normal">
                         {durationDays} {durationDays === 1 ? 'день' : durationDays < 5 ? 'дні' : 'днів'}
@@ -352,7 +364,7 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
           <div className="pt-4 border-t-2 border-[#E8E6DC]">
             <Button 
               onClick={onClose} 
-              className="w-full rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6 shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)]"
+              className="w-full rounded-[20px] bg-[#E8E6DC] hover:bg-[#D4D2C8] text-black font-normal h-12 px-6"
             >
               Закрити
             </Button>
