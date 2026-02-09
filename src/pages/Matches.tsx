@@ -31,7 +31,8 @@ import {
   Brain,
   Sparkles,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  BarChart3
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -627,71 +628,141 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-            <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-              <CardHeader className="pb-4 pt-7 px-7">
-                <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <Trophy className="h-5 w-5" strokeWidth={1.5} />
+          {/* Quick Stats - КОМПАКТНИЙ ДИЗАЙН ЯК В ANALYTICS */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {/* 1. Всього матчів */}
+            <Card 
+              className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+              style={{
+                background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
+              }}
+            >
+              <div className="absolute inset-0 opacity-5" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(33,150,243,0.3) 8px, rgba(33,150,243,0.3) 10px)`
+                }}
+              />
+              
+              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                  <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
+                    <Trophy className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
                   Всього матчів
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-7 pb-7">
-                <div className="text-6xl font-light text-black tracking-tight">{sortedMatches.length}</div>
+              <CardContent className="px-6 pb-5 relative z-10">
+                <div className="text-4xl font-light text-black tracking-tight">{sortedMatches.length}</div>
               </CardContent>
             </Card>
             
-            <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
-              <CardHeader className="pb-4 pt-7 px-7">
-                <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <Shield className="h-5 w-5" strokeWidth={1.5} />
+            {/* 2. Безпечні матчі */}
+            <Card 
+              className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+              style={{
+                background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
+              }}
+            >
+              <div className="absolute inset-0 opacity-5" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
+                }}
+              />
+              
+              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                  <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
+                    <Shield className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
                   Безпечні матчі
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-7 pb-7">
-                <div className="text-6xl font-light text-[#4CAF50] tracking-tight">
+              <CardContent className="px-6 pb-5 relative z-10">
+                <div className="text-4xl font-light text-[#4CAF50] tracking-tight">
                   {sortedMatches.filter(m => m.risk <= 30).length}
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="border-2 border-[#FFAB91] shadow-[0_8px_24px_rgba(255,87,34,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(255,87,34,0.25)] hover:border-[#FF8A65] transition-all duration-300">
-              <CardHeader className="pb-4 pt-7 px-7">
-                <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <Flame className="h-5 w-5" strokeWidth={1.5} />
+            {/* 3. Hot Matches */}
+            <Card 
+              className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+              style={{
+                background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
+              }}
+            >
+              <div className="absolute inset-0 opacity-5" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
+                }}
+              />
+              
+              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                  <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                    <Flame className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
                   Hot Matches
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-7 pb-7">
-                <div className="text-6xl font-light text-[#FF5722] tracking-tight">
+              <CardContent className="px-6 pb-5 relative z-10">
+                <div className="text-4xl font-light text-[#FF9800] tracking-tight">
                   {sortedMatches.filter(m => m.aiConfidence > 70 && m.upsetProbability < 20).length}
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
-              <CardHeader className="pb-4 pt-7 px-7">
-                <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5" strokeWidth={1.5} />
+            {/* 4. Safe Picks */}
+            <Card 
+              className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+              style={{
+                background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
+              }}
+            >
+              <div className="absolute inset-0 opacity-5" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
+                }}
+              />
+              
+              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                  <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
+                    <CheckCircle className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
                   Safe Picks
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-7 pb-7">
-                <div className="text-6xl font-light text-[#4CAF50] tracking-tight">
+              <CardContent className="px-6 pb-5 relative z-10">
+                <div className="text-4xl font-light text-[#4CAF50] tracking-tight">
                   {safePicksCount}
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-              <CardHeader className="pb-4 pt-7 px-7">
-                <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <Target className="h-5 w-5" strokeWidth={1.5} />
+            {/* 5. Середній AI % */}
+            <Card 
+              className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+              style={{
+                background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
+              }}
+            >
+              <div className="absolute inset-0 opacity-5" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
+                }}
+              />
+              
+              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                  <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                    <Target className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
                   Середній AI %
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-7 pb-7">
-                <div className="text-6xl font-light text-black tracking-tight">
+              <CardContent className="px-6 pb-5 relative z-10">
+                <div className="text-4xl font-light text-[#FF9800] tracking-tight">
                   {sortedMatches.length > 0 ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length) : 0}%
                 </div>
               </CardContent>
