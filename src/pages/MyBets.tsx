@@ -86,12 +86,18 @@ const StatCard = ({ title, value, icon: Icon, colorClass, bgClass }: StatCardPro
 export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
   
+  // ДІАГНОСТИКА: Логування при ініціалізації
+  console.log('🔍 MyBets: Component initializing');
+  console.log('🔍 MyBets: currentUser =', currentUser);
+  
   const [stats, setStats] = useState<BetStats>(() => 
     UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)
   );
-  const [recentBets, setRecentBets] = useState<Bet[]>(() => 
-    UserDataService.getUserData(currentUser, 'mybets_data', [])
-  );
+  const [recentBets, setRecentBets] = useState<Bet[]>(() => {
+    const bets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    console.log('🔍 MyBets: Initial recentBets loaded from localStorage:', bets.length, 'bets');
+    return bets;
+  });
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -107,31 +113,79 @@ export default function MyBets() {
   const [activeTab, setActiveTab] = useState('add');
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
 
+  // ДІАГНОСТИКА: Перевірка даних в localStorage при ініціалізації
+  useEffect(() => {
+    console.log('🔍 MyBets: Checking localStorage data on mount');
+    console.log('🔍 MyBets: currentUser =', currentUser);
+    
+    // Перевірка всіх ключів для поточного користувача
+    const allKeys = Object.keys(localStorage);
+    const userKeys = allKeys.filter(k => k.includes(currentUser));
+    console.log('🔍 MyBets: All localStorage keys for user:', userKeys);
+    
+    userKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      console.log(`🔍 MyBets: ${key} =`, value?.substring(0, 100));
+    });
+    
+    // Перевірка bankroll data
+    const bankrollData = BankrollService.getBankrollData(currentUser);
+    console.log('🔍 MyBets: BankrollService.getBankrollData() =', bankrollData);
+    
+    const isInit = BankrollService.isInitialized(currentUser);
+    console.log('🔍 MyBets: BankrollService.isInitialized() =', isInit);
+  }, [currentUser]);
+
   // ВИПРАВЛЕННЯ: Використовуємо state замість useMemo для bankrollStats
-  const [bankrollStats, setBankrollStats] = useState(() => 
-    BankrollService.getBankrollStats(currentUser, recentBets)
-  );
+  const [bankrollStats, setBankrollStats] = useState(() => {
+    const stats = BankrollService.getBankrollStats(currentUser, recentBets);
+    console.log('🔍 MyBets: Initial bankrollStats =', stats);
+    return stats;
+  });
   
-  const isBankrollInitialized = useMemo(() => 
-    BankrollService.isInitialized(currentUser),
-    [currentUser, bankrollRefreshKey]
-  );
+  const isBankrollInitialized = useMemo(() => {
+    const isInit = BankrollService.isInitialized(currentUser);
+    console.log('🔍 MyBets: isBankrollInitialized =', isInit);
+    return isInit;
+  }, [currentUser, bankrollRefreshKey]);
 
   // ВИПРАВЛЕННЯ: Оновлюємо bankrollStats при зміні recentBets або bankrollRefreshKey
-  // Додано recentBets як залежність, щоб статистика оновлювалася при завантаженні даних з localStorage
   useEffect(() => {
+    console.log('🔍 MyBets: useEffect triggered for bankrollStats update');
+    console.log('🔍 MyBets: currentUser =', currentUser);
+    console.log('🔍 MyBets: recentBets.length =', recentBets.length);
+    console.log('🔍 MyBets: bankrollRefreshKey =', bankrollRefreshKey);
+    
     const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
     console.log('💰 MyBets: Updating bankroll stats:', newStats);
-    console.log('💰 MyBets: Current recentBets length:', recentBets.length);
-    console.log('💰 MyBets: bankrollRefreshKey:', bankrollRefreshKey);
+    
+    // ДІАГНОСТИКА: Детальна інформація про розрахунок
+    const bankrollData = BankrollService.getBankrollData(currentUser);
+    console.log('💰 MyBets: Raw bankroll data from localStorage:', bankrollData);
+    
+    const totalProfit = BankrollService.calculateTotalProfit(recentBets);
+    console.log('💰 MyBets: Calculated total profit from bets:', totalProfit);
+    
+    if (bankrollData) {
+      const calculatedCurrentBank = bankrollData.initialBank + totalProfit + bankrollData.manualAdjustments;
+      console.log('💰 MyBets: Calculated current bank:', {
+        initialBank: bankrollData.initialBank,
+        totalProfit: totalProfit,
+        manualAdjustments: bankrollData.manualAdjustments,
+        currentBank: calculatedCurrentBank
+      });
+    }
+    
     setBankrollStats(newStats);
   }, [currentUser, recentBets, bankrollRefreshKey]);
 
   // ВИПРАВЛЕННЯ: Слухаємо зміни в localStorage для синхронізації між сторінками
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
+      console.log('🔍 MyBets: Storage event detected:', e.key);
       if (e.key && e.key.includes('bankroll_') && e.key.includes(currentUser)) {
         console.log('💰 MyBets: Detected bankroll change in localStorage:', e.key);
+        console.log('💰 MyBets: New value:', e.newValue);
         // Примусово оновлюємо bankroll stats
         setBankrollRefreshKey(prev => prev + 1);
       }

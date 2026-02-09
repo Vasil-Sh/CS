@@ -14,7 +14,8 @@ interface InitialBankModalProps {
 }
 
 export default function InitialBankModal({ open, onClose, mode = 'setup' }: InitialBankModalProps) {
-  const currentUser = localStorage.getItem('currentUser') || '';
+  // ВИПРАВЛЕННЯ: Використовуємо той самий ключ 'username', що й Analytics та MyBets
+  const currentUser = localStorage.getItem('username') || '';
   const existingBank = BankrollService.getBankrollData(currentUser);
   const [amount, setAmount] = useState<string>(existingBank?.initialBank.toString() || '1000');
 

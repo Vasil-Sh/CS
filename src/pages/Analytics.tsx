@@ -64,7 +64,11 @@ interface MonthlyData {
 }
 
 export default function Analytics() {
-  const currentUser = localStorage.getItem('currentUser') || '';
+  // ВИПРАВЛЕННЯ: Використовуємо той самий ключ 'username', що й MyBets
+  const currentUser = localStorage.getItem('username') || '';
+  
+  console.log('🔍 Analytics: Component initializing');
+  console.log('🔍 Analytics: currentUser =', currentUser);
   
   const [stats, setStats] = useState<BettingStats>({
     totalBets: 0,
