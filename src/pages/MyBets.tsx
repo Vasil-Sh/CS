@@ -118,9 +118,12 @@ export default function MyBets() {
   );
 
   // ВИПРАВЛЕННЯ: Оновлюємо bankrollStats при зміні recentBets або bankrollRefreshKey
+  // Додано recentBets як залежність, щоб статистика оновлювалася при завантаженні даних з localStorage
   useEffect(() => {
     const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
     console.log('💰 MyBets: Updating bankroll stats:', newStats);
+    console.log('💰 MyBets: Current recentBets length:', recentBets.length);
+    console.log('💰 MyBets: bankrollRefreshKey:', bankrollRefreshKey);
     setBankrollStats(newStats);
   }, [currentUser, recentBets, bankrollRefreshKey]);
 
