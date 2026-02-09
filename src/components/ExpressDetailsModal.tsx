@@ -73,9 +73,9 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
           </div>
 
           {/* Events Grid - Collapsible */}
-          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen}>
+          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] overflow-hidden">
             <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors cursor-pointer">
+              <div className="flex items-center justify-between px-5 py-3 hover:bg-[#F4E157]/10 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-[#F4E157] rounded-[16px]">
                     <Zap className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -89,12 +89,12 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
               </div>
             </CollapsibleTrigger>
             
-            <CollapsibleContent className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CollapsibleContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 pt-2">
                 {parsedEvents.map((event, index) => (
                   <div 
                     key={index}
-                    className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:border-[#F4E157] transition-all"
+                    className="p-5 bg-white rounded-[24px] border-2 border-[#E8E6DC] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:border-[#F4E157] transition-all"
                   >
                     <div className="space-y-3">
                       {/* Header with number and odds */}
@@ -111,7 +111,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                       <h4 className="font-normal text-lg text-black leading-tight">{event.match}</h4>
                       
                       {/* Bet details */}
-                      <div className="space-y-2 bg-white rounded-[20px] p-4 border border-[#E8E6DC]">
+                      <div className="space-y-2 bg-[#F5F5F3] rounded-[20px] p-4 border border-[#E8E6DC]">
                         <p className="text-base text-black">
                           <span className="font-light text-[#6B6B6B]">Тип:</span> <span className="font-normal ml-1">{event.betType}</span>
                         </p>
