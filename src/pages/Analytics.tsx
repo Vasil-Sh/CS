@@ -178,6 +178,15 @@ export default function Analytics() {
 
   const clearAllData = () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.')) {
+      // Clear MyBets data (primary source)
+      UserDataService.clearUserData(currentUser, 'mybets_data');
+      UserDataService.clearUserData(currentUser, 'mybets_stats');
+      
+      // Clear old analytics data (if any)
+      UserDataService.clearUserData(currentUser, 'analytics_bets');
+      UserDataService.clearUserData(currentUser, 'analytics_stats');
+      
+      // Reset state
       setBets([]);
       setStats({
         totalBets: 0,
@@ -188,9 +197,14 @@ export default function Analytics() {
         profitByStrategy: []
       });
       
-      // Clear user-specific data
-      UserDataService.clearUserData(currentUser, 'analytics_bets');
-      UserDataService.clearUserData(currentUser, 'analytics_stats');
+      // Reset bankroll to 0
+      BankrollService.setInitialBank(currentUser, 0);
+      setBankrollStats({
+        initialBank: 0,
+        currentBank: 0,
+        totalProfit: 0,
+        roi: 0
+      });
       
       console.log('🗑️ All analytics data cleared for user:', currentUser);
     }
@@ -352,9 +366,9 @@ export default function Analytics() {
       });
   };
 
-  // Balance over time with enhanced data
+  // Balance over time with enhanced data - STARTS FROM 0
   const balanceOverTime = (): BalanceData[] => {
-    const initialBalance = bankrollStats.initialBank || 1000;
+    const initialBalance = 0; // Always start from 0
     let runningBalance = initialBalance;
     
     const sortedBets = [...completedBets].sort((a: Bet, b: Bet) => 
@@ -534,7 +548,7 @@ export default function Analytics() {
 
         {/* Quick Stats - ПОКРАЩЕНІ КАРТКИ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* 1. Поточний банк - GRADIENT YELLOW */}
+          {/* 1. Поточний банк - GRADIENT YELLOW - STARTS FROM 0 */}
           <Card 
             className="border-2 border-[#F4E157] shadow-[0_12px_32px_rgba(244,225,87,0.3)] rounded-[32px] overflow-hidden cursor-pointer hover:shadow-[0_16px_40px_rgba(244,225,87,0.4)] hover:border-[#E8D54A] transition-all duration-300 group relative"
             onClick={() => setBankModalOpen(true)}
@@ -563,26 +577,22 @@ export default function Analytics() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-7 pb-7 relative z-10">
-              {BankrollService.isInitialized(currentUser) ? (
-                <div className="space-y-3">
-                  <div className="text-6xl font-light text-black tracking-tight">
-                    {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-                  </div>
-                  {/* Trend indicator */}
-                  <div className="flex items-center gap-2">
-                    {bankrollStats.totalProfit >= 0 ? (
-                      <ArrowUpRight className="h-5 w-5 text-[#4CAF50]" strokeWidth={2.5} />
-                    ) : (
-                      <ArrowDownRight className="h-5 w-5 text-[#D32F2F]" strokeWidth={2.5} />
-                    )}
-                    <span className={`text-base font-normal ${bankrollStats.totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                      {bankrollStats.totalProfit >= 0 ? '+' : ''}{bankrollStats.totalProfit.toFixed(2)} ₴
-                    </span>
-                  </div>
+              <div className="space-y-3">
+                <div className="text-6xl font-light text-black tracking-tight">
+                  {stats.totalProfit.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
                 </div>
-              ) : (
-                <div className="text-2xl font-light text-[#8B8B8B]">Не встановлено</div>
-              )}
+                {/* Trend indicator */}
+                <div className="flex items-center gap-2">
+                  {stats.totalProfit >= 0 ? (
+                    <ArrowUpRight className="h-5 w-5 text-[#4CAF50]" strokeWidth={2.5} />
+                  ) : (
+                    <ArrowDownRight className="h-5 w-5 text-[#D32F2F]" strokeWidth={2.5} />
+                  )}
+                  <span className={`text-base font-normal ${stats.totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                    {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(2)} ₴
+                  </span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
