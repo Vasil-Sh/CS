@@ -222,11 +222,25 @@ export default function MyBets() {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані? Це видалить всі записи, статистику та історію. Ця дія незворотна.')) {
       try {
         await realGoogleSheetsService.clearAllData();
+        
+        // Clear MyBets data
         UserDataService.clearUserData(currentUser, 'mybets_data');
         UserDataService.clearUserData(currentUser, 'mybets_stats');
+        
+        // Clear Analytics data (to sync with Analytics page)
+        UserDataService.clearUserData(currentUser, 'analytics_bets');
+        UserDataService.clearUserData(currentUser, 'analytics_stats');
+        
+        // Reset bankroll to 0
+        BankrollService.setInitialBank(currentUser, 0);
+        
+        // Reset state
         setRecentBets([]);
         setStats(DEFAULT_STATS);
+        
         toast.success('Всі дані очищено');
+        console.log('🗑️ All data cleared for user:', currentUser);
+        
         setTimeout(() => {
           loadStats();
           loadRecentBets();
