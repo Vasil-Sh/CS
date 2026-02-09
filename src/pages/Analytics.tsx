@@ -582,28 +582,53 @@ export default function Analytics() {
           </Alert>
         )}
 
-        {/* Quick Stats - Поточний банк ПЕРШИЙ */}
+        {/* Quick Stats - ПОКРАЩЕНІ КАРТКИ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* 1. Поточний банк - ПЕРША КАРТКА з ЖОВТОЮ іконкою Edit */}
+          {/* 1. Поточний банк - GRADIENT YELLOW */}
           <Card 
-            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300 group"
+            className="border-2 border-[#F4E157] shadow-[0_12px_32px_rgba(244,225,87,0.3)] rounded-[32px] overflow-hidden cursor-pointer hover:shadow-[0_16px_40px_rgba(244,225,87,0.4)] hover:border-[#E8D54A] transition-all duration-300 group relative"
             onClick={() => setBankModalOpen(true)}
+            style={{
+              background: 'linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%)'
+            }}
           >
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" strokeWidth={1.5} />
+            {/* Decorative pattern */}
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(244,225,87,0.3) 8px, rgba(244,225,87,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-4 pt-7 px-7 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_4px_12px_rgba(244,225,87,0.4)]">
+                    <Wallet className="h-6 w-6 text-black" strokeWidth={2} />
+                  </div>
                   Поточний банк
                 </div>
-                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] group-hover:shadow-[0_4px_12px_rgba(244,225,87,0.5)] transition-all">
-                  <Edit className="h-5 w-5 text-black" strokeWidth={2} />
+                <div className="p-2.5 bg-[#F4E157] rounded-[18px] shadow-[0_3px_10px_rgba(244,225,87,0.4)] group-hover:shadow-[0_5px_15px_rgba(244,225,87,0.6)] group-hover:scale-110 transition-all">
+                  <Edit className="h-5 w-5 text-black" strokeWidth={2.5} />
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-7 pb-7">
+            <CardContent className="px-7 pb-7 relative z-10">
               {BankrollService.isInitialized(currentUser) ? (
-                <div className="text-6xl font-light text-black tracking-tight">
-                  {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+                <div className="space-y-3">
+                  <div className="text-6xl font-light text-black tracking-tight">
+                    {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+                  </div>
+                  {/* Trend indicator */}
+                  <div className="flex items-center gap-2">
+                    {bankrollStats.totalProfit >= 0 ? (
+                      <ArrowUpRight className="h-5 w-5 text-[#4CAF50]" strokeWidth={2.5} />
+                    ) : (
+                      <ArrowDownRight className="h-5 w-5 text-[#D32F2F]" strokeWidth={2.5} />
+                    )}
+                    <span className={`text-base font-normal ${bankrollStats.totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                      {bankrollStats.totalProfit >= 0 ? '+' : ''}{bankrollStats.totalProfit.toFixed(2)} ₴
+                    </span>
+                  </div>
                 </div>
               ) : (
                 <div className="text-2xl font-light text-[#8B8B8B]">Не встановлено</div>
@@ -611,44 +636,134 @@ export default function Analytics() {
             </CardContent>
           </Card>
 
-          {/* 2. Всього ставок */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" strokeWidth={1.5} />
+          {/* 2. Всього ставок - GRADIENT BLUE */}
+          <Card 
+            className="border-2 border-[#90CAF9] shadow-[0_12px_32px_rgba(33,150,243,0.2)] rounded-[32px] overflow-hidden hover:shadow-[0_16px_40px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
+            }}
+          >
+            {/* Decorative pattern */}
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(33,150,243,0.3) 8px, rgba(33,150,243,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-4 pt-7 px-7 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2.5">
+                <div className="p-2.5 bg-[#2196F3] rounded-[20px] shadow-[0_4px_12px_rgba(33,150,243,0.4)]">
+                  <BarChart3 className="h-6 w-6 text-white" strokeWidth={2} />
+                </div>
                 Всього ставок
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-6xl font-light text-black tracking-tight">{stats.totalBets || 0}</div>
+            <CardContent className="px-7 pb-7 relative z-10">
+              <div className="space-y-3">
+                <div className="text-6xl font-light text-black tracking-tight">{stats.totalBets || 0}</div>
+                {/* Additional info */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle className="h-4 w-4 text-[#4CAF50]" strokeWidth={2} />
+                    <span className="text-sm text-[#6B6B6B] font-light">{winningBets.length} виграшів</span>
+                  </div>
+                  <span className="text-[#D4D2C8]">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4 text-[#D32F2F]" strokeWidth={2} />
+                    <span className="text-sm text-[#6B6B6B] font-light">{losingBets.length} програшів</span>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
           
-          {/* 3. Профіт */}
-          <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <DollarSign className="h-5 w-5" strokeWidth={1.5} />
+          {/* 3. Профіт - GRADIENT GREEN */}
+          <Card 
+            className="border-2 border-[#A5D6A7] shadow-[0_12px_32px_rgba(76,175,80,0.25)] rounded-[32px] overflow-hidden hover:shadow-[0_16px_40px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+            style={{
+              background: (stats.totalProfit || 0) >= 0 
+                ? 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
+                : 'linear-gradient(135deg, #FFEBEE 0%, #FFF5F5 100%)'
+            }}
+          >
+            {/* Decorative pattern */}
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: (stats.totalProfit || 0) >= 0
+                  ? `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
+                  : `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(211,47,47,0.3) 8px, rgba(211,47,47,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-4 pt-7 px-7 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2.5">
+                <div className={`p-2.5 rounded-[20px] shadow-[0_4px_12px_rgba(76,175,80,0.4)] ${(stats.totalProfit || 0) >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}>
+                  <DollarSign className="h-6 w-6 text-white" strokeWidth={2} />
+                </div>
                 Загальний профіт
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className={`text-6xl font-light tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
-                {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+            <CardContent className="px-7 pb-7 relative z-10">
+              <div className="space-y-3">
+                <div className={`text-6xl font-light tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                  {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+                </div>
+                {/* Trend indicator with arrow */}
+                <div className="flex items-center gap-2">
+                  {(stats.totalProfit || 0) >= 0 ? (
+                    <TrendingUp className="h-5 w-5 text-[#4CAF50]" strokeWidth={2.5} />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-[#D32F2F]" strokeWidth={2.5} />
+                  )}
+                  <span className="text-sm text-[#6B6B6B] font-light">
+                    {(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 4. Win Rate */}
-          <Card className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] hover:border-[#81C784] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <Target className="h-5 w-5" strokeWidth={1.5} />
+          {/* 4. Win Rate - GRADIENT ORANGE */}
+          <Card 
+            className="border-2 border-[#FFCC80] shadow-[0_12px_32px_rgba(255,152,0,0.2)] rounded-[32px] overflow-hidden hover:shadow-[0_16px_40px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
+            }}
+          >
+            {/* Decorative pattern */}
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-4 pt-7 px-7 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2.5">
+                <div className="p-2.5 bg-[#FF9800] rounded-[20px] shadow-[0_4px_12px_rgba(255,152,0,0.4)]">
+                  <Target className="h-6 w-6 text-white" strokeWidth={2} />
+                </div>
                 Win Rate
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-6xl font-light text-[#4CAF50] tracking-tight">{stats.winRate || 0}%</div>
+            <CardContent className="px-7 pb-7 relative z-10">
+              <div className="space-y-3">
+                <div className="text-6xl font-light text-[#FF9800] tracking-tight">{stats.winRate || 0}%</div>
+                {/* Progress bar */}
+                <div className="space-y-2">
+                  <Progress 
+                    value={stats.winRate || 0} 
+                    className="h-3 bg-[#FFE0B2]"
+                    style={{
+                      ['--progress-background' as string]: '#FF9800'
+                    }}
+                  />
+                  <div className="flex items-center justify-between text-xs text-[#6B6B6B] font-light">
+                    <span>0%</span>
+                    <span className="font-normal text-black">{stats.winRate || 0}%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
