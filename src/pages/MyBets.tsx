@@ -52,14 +52,6 @@ interface BetStats {
   profitByStrategy: { strategy: string; profit: number }[];
 }
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: LucideIcon;
-  colorClass: string;
-  bgClass: string;
-}
-
 const DEFAULT_STATS: BetStats = {
   totalBets: 0,
   winRate: 0,
@@ -68,20 +60,6 @@ const DEFAULT_STATS: BetStats = {
   profitByMonth: [],
   profitByStrategy: []
 };
-
-const StatCard = ({ title, value, icon: Icon, colorClass, bgClass }: StatCardProps) => (
-  <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-    <CardHeader className="pb-4 pt-7 px-7">
-      <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-        <Icon className="h-5 w-5" strokeWidth={1.5} />
-        {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="px-7 pb-7">
-      <div className={`text-6xl font-light tracking-tight ${colorClass}`}>{value}</div>
-    </CardContent>
-  </Card>
-);
 
 export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
@@ -528,9 +506,9 @@ export default function MyBets() {
           </div>
         </div>
 
-        {/* Quick Stats - Поточний банк ПЕРШИЙ - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* 1. Поточний банк - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ (без onClick, без іконки Edit) */}
+        {/* Quick Stats - КОМПАКТНИЙ ДИЗАЙН ЯК В ANALYTICS */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* 1. Поточний банк - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ */}
           <Card 
             className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(244,225,87,0.35)] hover:border-[#E8D54A] transition-all duration-300 relative"
             style={{
@@ -544,13 +522,11 @@ export default function MyBets() {
             />
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_3px_8px_rgba(244,225,87,0.4)]">
-                    <Wallet className="h-5 w-5 text-black" strokeWidth={2} />
-                  </div>
-                  Поточний банк
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_3px_8px_rgba(244,225,87,0.4)]">
+                  <Wallet className="h-5 w-5 text-black" strokeWidth={2} />
                 </div>
+                Поточний банк
               </CardTitle>
             </CardHeader>
             <CardContent className="px-6 pb-5 relative z-10">
@@ -572,29 +548,198 @@ export default function MyBets() {
             </CardContent>
           </Card>
 
-          <StatCard title="Всього записів" value={stats.totalBets} icon={BarChart3} colorClass="text-black" bgClass="bg-blue-50" />
-          <StatCard 
-            title="Профіт" 
-            value={`${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(2)} ₴`} 
-            icon={DollarSign} 
-            colorClass={stats.totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'} 
-            bgClass="bg-green-50" 
-          />
-          <StatCard title="Win Rate" value={`${stats.winRate}%`} icon={Target} colorClass="text-[#4CAF50]" bgClass="bg-purple-50" />
+          {/* 2. Всього записів */}
+          <Card 
+            className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(33,150,243,0.3) 8px, rgba(33,150,243,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
+                  <BarChart3 className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Всього записів
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="text-4xl font-light text-black tracking-tight">{stats.totalBets}</div>
+            </CardContent>
+          </Card>
+
+          {/* 3. Профіт */}
+          <Card 
+            className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+            style={{
+              background: (stats.totalProfit || 0) >= 0 
+                ? 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
+                : 'linear-gradient(135deg, #FFEBEE 0%, #FFF5F5 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: (stats.totalProfit || 0) >= 0
+                  ? `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
+                  : `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(211,47,47,0.3) 8px, rgba(211,47,47,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className={`p-2 rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)] ${(stats.totalProfit || 0) >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}>
+                  <DollarSign className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Профіт
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className={`text-4xl font-light tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 4. Win Rate */}
+          <Card 
+            className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                  <Target className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Win Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="text-4xl font-light text-[#FF9800] tracking-tight">{stats.winRate}%</div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Secondary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <StatCard title="Активні" value={activeBets.length} icon={Clock} colorClass="text-[#2196F3]" bgClass="bg-blue-50" />
-          <StatCard title="Виграші" value={winningBets.length} icon={Trophy} colorClass="text-[#4CAF50]" bgClass="bg-green-50" />
-          <StatCard title="Програші" value={losingBets.length} icon={AlertTriangle} colorClass="text-[#D32F2F]" bgClass="bg-red-50" />
-          <StatCard 
-            title="Середній ROI" 
-            value={`${stats.averageROI >= 0 ? '+' : ''}${stats.averageROI}%`} 
-            icon={TrendingUp} 
-            colorClass={stats.averageROI >= 0 ? 'text-[#FF9800]' : 'text-[#D32F2F]'} 
-            bgClass="bg-orange-50" 
-          />
+        {/* Secondary Stats - КОМПАКТНИЙ ДИЗАЙН */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* 5. Активні */}
+          <Card 
+            className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(33,150,243,0.3) 8px, rgba(33,150,243,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
+                  <Clock className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Активні
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="text-4xl font-light text-[#2196F3] tracking-tight">{activeBets.length}</div>
+            </CardContent>
+          </Card>
+
+          {/* 6. Виграші */}
+          <Card 
+            className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
+                  <Trophy className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Виграші
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="text-4xl font-light text-[#4CAF50] tracking-tight">{winningBets.length}</div>
+            </CardContent>
+          </Card>
+
+          {/* 7. Програші */}
+          <Card 
+            className="border-2 border-[#FFCDD2] shadow-[0_8px_24px_rgba(211,47,47,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(211,47,47,0.3)] hover:border-[#EF9A9A] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #FFEBEE 0%, #FFF5F5 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(211,47,47,0.3) 8px, rgba(211,47,47,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#D32F2F] rounded-[16px] shadow-[0_3px_8px_rgba(211,47,47,0.4)]">
+                  <AlertTriangle className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Програші
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="text-4xl font-light text-[#D32F2F] tracking-tight">{losingBets.length}</div>
+            </CardContent>
+          </Card>
+
+          {/* 8. Середній ROI */}
+          <Card 
+            className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
+                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                  <TrendingUp className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+                Середній ROI
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className={`text-4xl font-light tracking-tight ${stats.averageROI >= 0 ? 'text-[#FF9800]' : 'text-[#D32F2F]'}`}>
+                {stats.averageROI >= 0 ? '+' : ''}{stats.averageROI}%
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Bets Table - Collapsible */}
