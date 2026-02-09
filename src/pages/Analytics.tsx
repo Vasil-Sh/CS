@@ -715,7 +715,7 @@ export default function Analytics() {
             </CardContent>
           </Card>
 
-          {/* 4. Win Rate - ВИПРАВЛЕНИЙ ПРОГРЕС-БАР */}
+          {/* 4. Win Rate - КОМПАКТНИЙ */}
           <Card 
             className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
             style={{
@@ -743,7 +743,9 @@ export default function Analytics() {
                   <Progress 
                     value={stats.winRate || 0} 
                     className="h-2 bg-[#FFE0B2]"
-                    indicatorClassName="bg-[#FF9800]"
+                    style={{
+                      ['--progress-background' as string]: '#FF9800'
+                    }}
                   />
                   <div className="flex items-center justify-between text-[10px] text-[#6B6B6B] font-light">
                     <span>0%</span>
@@ -756,7 +758,7 @@ export default function Analytics() {
           </Card>
         </div>
 
-        {/* Custom Tabs Navigation - КОРИЧНЕВІ ВІДТІНКИ */}
+        {/* Custom Tabs Navigation */}
         <div className="space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="grid grid-cols-6 gap-3">
@@ -770,17 +772,10 @@ export default function Analytics() {
                       relative rounded-[24px] px-6 py-4 font-light text-base
                       transition-all duration-300 ease-in-out
                       ${activeTab === tab.id 
-                        ? 'bg-gradient-to-br from-[#C4A57B] to-[#8B6F47] text-white font-normal shadow-[0_4px_16px_rgba(139,111,71,0.4)]' 
-                        : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5EFE6]'
+                        ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
+                        : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
                       }
                     `}
-                    style={
-                      activeTab === tab.id
-                        ? {
-                            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.1) 4px, rgba(255,255,255,0.1) 5px)`
-                          }
-                        : undefined
-                    }
                   >
                     <span className="flex items-center justify-center gap-2">
                       {Icon && <Icon className="h-4 w-4" strokeWidth={1.5} />}
