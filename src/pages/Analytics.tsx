@@ -101,6 +101,7 @@ export default function Analytics() {
     const allBets = realGoogleSheetsService.getAllRecords();
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
     setBankrollStats(bankStats);
+    console.log('💰 Bankroll stats updated:', bankStats);
   };
 
   const updateConnectionStatus = () => {
@@ -213,7 +214,9 @@ export default function Analytics() {
   const handleBankModalClose = (success: boolean) => {
     setBankModalOpen(false);
     if (success) {
+      // ВИПРАВЛЕННЯ: Оновлюємо статистику банку після збереження
       updateBankrollStats();
+      console.log('✅ Bank modal closed with success, stats updated');
     }
   };
 
@@ -578,7 +581,7 @@ export default function Analytics() {
             <CardContent className="px-6 pb-5 relative z-10">
               <div className="space-y-2">
                 <div className="text-4xl font-light text-black tracking-tight">
-                  {stats.totalProfit.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+                  {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
                 </div>
                 <div className="flex items-center gap-1.5">
                   {stats.totalProfit >= 0 ? (

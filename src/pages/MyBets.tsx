@@ -294,7 +294,16 @@ export default function MyBets() {
 
   const handleBankModalClose = useCallback((success: boolean) => {
     setBankModalOpen(false);
-  }, []);
+    if (success) {
+      // ВИПРАВЛЕННЯ: Оновлюємо статистику банку після збереження
+      const allBets = realGoogleSheetsService.getAllRecords();
+      const updatedBankStats = BankrollService.getBankrollStats(currentUser, allBets);
+      console.log('💰 MyBets: Bank modal closed with success, stats updated:', updatedBankStats);
+      
+      // Примусово оновлюємо стан, щоб React перерендерив компонент
+      setRecentBets([...recentBets]);
+    }
+  }, [currentUser, recentBets]);
 
   const sortedBets = useMemo(() => 
     [...recentBets].sort((a: Bet, b: Bet) => {
