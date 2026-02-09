@@ -97,6 +97,30 @@ export default function Analytics() {
     updateBankrollStats();
   }, []);
 
+  // ВИПРАВЛЕННЯ: Слухаємо зміни в localStorage для синхронізації між сторінками
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.includes('bankroll_') && e.key.includes(currentUser)) {
+        console.log('💰 Analytics: Detected bankroll change in localStorage:', e.key);
+        updateBankrollStats();
+      }
+    };
+
+    // Також слухаємо custom event для внутрішньосторінкових змін
+    const handleBankrollUpdate = () => {
+      console.log('💰 Analytics: Detected bankroll update event');
+      updateBankrollStats();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('bankrollUpdated', handleBankrollUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('bankrollUpdated', handleBankrollUpdate);
+    };
+  }, [currentUser]);
+
   const updateBankrollStats = () => {
     const allBets = realGoogleSheetsService.getAllRecords();
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
@@ -211,12 +235,19 @@ export default function Analytics() {
     }
   };
 
+  const handleBankCardClick = () => {
+    setBankModalOpen(true);
+  };
+
   const handleBankModalClose = (success: boolean) => {
     setBankModalOpen(false);
     if (success) {
       // ВИПРАВЛЕННЯ: Оновлюємо статистику банку після збереження
       updateBankrollStats();
       console.log('✅ Bank modal closed with success, stats updated');
+      
+      // Відправляємо custom event для синхронізації з іншими сторінками
+      window.dispatchEvent(new Event('bankrollUpdated'));
     }
   };
 
@@ -551,10 +582,10 @@ export default function Analytics() {
 
         {/* Quick Stats - КОМПАКТНИЙ ДИЗАЙН */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* 1. Поточний банк - КОМПАКТНИЙ */}
+          {/* 1. Поточний банк - З МОЖЛИВІСТЮ РЕДАГУВАННЯ (з onClick та іконкою Edit) */}
           <Card 
             className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.25)] rounded-[28px] overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.35)] hover:border-[#E8D54A] transition-all duration-300 group relative"
-            onClick={() => setBankModalOpen(true)}
+            onClick={handleBankCardClick}
             style={{
               background: 'linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%)'
             }}
@@ -821,7 +852,7 @@ export default function Analytics() {
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Monthly Profit Chart - ЗМІНЕНО НА ЛІНІЙНИЙ ГРАФІК З ТОЧКАМИ */}
+                      {/* Monthly Profit Chart */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -927,7 +958,7 @@ export default function Analytics() {
                         </CardContent>
                       </Card>
 
-                      {/* Scatter Chart - ЗМІНЕНО НА ПРОСТІ ТОЧКИ БЕЗ ЗОН */}
+                      {/* Scatter Chart */}
                       <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                         <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                           <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
@@ -1041,7 +1072,6 @@ export default function Analytics() {
 
             {activeTab === 'odds' && (
               <div className="grid grid-cols-1 gap-6">
-                {/* Odds analysis - ЖОВТІ ІКОНКИ */}
                 <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
                   <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
                     <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
@@ -1118,7 +1148,6 @@ export default function Analytics() {
                           </BarChart>
                         </ResponsiveContainer>
                         
-                        {/* Summary cards - ЧОРНИЙ ТЕКСТ У BADGE */}
                         <div className="mt-8 grid grid-cols-3 gap-6">
                           {oddsData.map((range, index) => {
                             const hasZeroData = range.count === 0;
@@ -1172,11 +1201,6 @@ export default function Analytics() {
                     )}
                   </CardContent>
                 </Card>
-
-                {/* Bet Type Distribution Card - ПРИБРАНО (закоментовано) */}
-                {/* <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-                  ... блок "Розподіл типів ставок" ...
-                </Card> */}
               </div>
             )}
 

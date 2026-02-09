@@ -17,7 +17,7 @@ import {
   TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
   Flag, Wallet, Edit, Zap, LucideIcon, Eye, ChevronDown, ChevronUp,
-  Plus, History, LineChart
+  Plus, History, LineChart, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -105,16 +105,49 @@ export default function MyBets() {
   const [isStatsExpanded, setIsStatsExpanded] = useState(true);
   const [isTableExpanded, setIsTableExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState('add');
+  const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
 
-  const bankrollStats = useMemo(() => 
-    BankrollService.getBankrollStats(currentUser, recentBets),
-    [currentUser, recentBets]
+  // ВИПРАВЛЕННЯ: Використовуємо state замість useMemo для bankrollStats
+  const [bankrollStats, setBankrollStats] = useState(() => 
+    BankrollService.getBankrollStats(currentUser, recentBets)
   );
   
   const isBankrollInitialized = useMemo(() => 
     BankrollService.isInitialized(currentUser),
-    [currentUser]
+    [currentUser, bankrollRefreshKey]
   );
+
+  // ВИПРАВЛЕННЯ: Оновлюємо bankrollStats при зміні recentBets або bankrollRefreshKey
+  useEffect(() => {
+    const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
+    console.log('💰 MyBets: Updating bankroll stats:', newStats);
+    setBankrollStats(newStats);
+  }, [currentUser, recentBets, bankrollRefreshKey]);
+
+  // ВИПРАВЛЕННЯ: Слухаємо зміни в localStorage для синхронізації між сторінками
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.includes('bankroll_') && e.key.includes(currentUser)) {
+        console.log('💰 MyBets: Detected bankroll change in localStorage:', e.key);
+        // Примусово оновлюємо bankroll stats
+        setBankrollRefreshKey(prev => prev + 1);
+      }
+    };
+
+    // Також слухаємо custom event для внутрішньосторінкових змін
+    const handleBankrollUpdate = () => {
+      console.log('💰 MyBets: Detected bankroll update event');
+      setBankrollRefreshKey(prev => prev + 1);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('bankrollUpdated', handleBankrollUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('bankrollUpdated', handleBankrollUpdate);
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     fetchUsers();
@@ -237,6 +270,7 @@ export default function MyBets() {
         // Reset state
         setRecentBets([]);
         setStats(DEFAULT_STATS);
+        setBankrollRefreshKey(prev => prev + 1);
         
         toast.success('Всі дані очищено');
         console.log('🗑️ All data cleared for user:', currentUser);
@@ -288,22 +322,17 @@ export default function MyBets() {
     setShareModalOpen(true);
   }, []);
 
-  const handleBankCardClick = useCallback(() => {
-    setBankModalOpen(true);
-  }, []);
-
   const handleBankModalClose = useCallback((success: boolean) => {
     setBankModalOpen(false);
     if (success) {
       // ВИПРАВЛЕННЯ: Оновлюємо статистику банку після збереження
-      const allBets = realGoogleSheetsService.getAllRecords();
-      const updatedBankStats = BankrollService.getBankrollStats(currentUser, allBets);
-      console.log('💰 MyBets: Bank modal closed with success, stats updated:', updatedBankStats);
+      console.log('💰 MyBets: Bank modal closed with success, refreshing bankroll stats');
+      setBankrollRefreshKey(prev => prev + 1);
       
-      // Примусово оновлюємо стан, щоб React перерендерив компонент
-      setRecentBets([...recentBets]);
+      // Відправляємо custom event для синхронізації з іншими сторінками
+      window.dispatchEvent(new Event('bankrollUpdated'));
     }
-  }, [currentUser, recentBets]);
+  }, []);
 
   const sortedBets = useMemo(() => 
     [...recentBets].sort((a: Bet, b: Bet) => {
@@ -442,32 +471,47 @@ export default function MyBets() {
           </div>
         </div>
 
-        {/* Quick Stats - Поточний банк ПЕРШИЙ */}
+        {/* Quick Stats - Поточний банк ПЕРШИЙ - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* 1. Поточний банк - ПЕРША КАРТКА з ЖОВТОЮ іконкою Edit */}
+          {/* 1. Поточний банк - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ (без onClick, без іконки Edit) */}
           <Card 
-            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.2)] rounded-[32px] bg-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(244,225,87,0.3)] hover:border-[#E8D54A] transition-all duration-300 group"
-            onClick={handleBankCardClick}
+            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(244,225,87,0.35)] hover:border-[#E8D54A] transition-all duration-300 relative"
+            style={{
+              background: 'linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%)'
+            }}
           >
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
+            <div className="absolute inset-0 opacity-5" 
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(244,225,87,0.3) 8px, rgba(244,225,87,0.3) 10px)`
+              }}
+            />
+            
+            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
+              <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" strokeWidth={1.5} />
-                  Бюджет аналізу
-                </div>
-                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] group-hover:shadow-[0_4px_12px_rgba(244,225,87,0.5)] transition-all">
-                  <Edit className="h-5 w-5 text-black" strokeWidth={2} />
+                  <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_3px_8px_rgba(244,225,87,0.4)]">
+                    <Wallet className="h-5 w-5 text-black" strokeWidth={2} />
+                  </div>
+                  Поточний банк
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-7 pb-7">
-              {isBankrollInitialized ? (
-                <div className="text-6xl font-light text-black tracking-tight">
+            <CardContent className="px-6 pb-5 relative z-10">
+              <div className="space-y-2">
+                <div className="text-4xl font-light text-black tracking-tight">
                   {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
                 </div>
-              ) : (
-                <div className="text-2xl font-light text-[#8B8B8B]">Не встановлено</div>
-              )}
+                <div className="flex items-center gap-1.5">
+                  {stats.totalProfit >= 0 ? (
+                    <ArrowUpRight className="h-4 w-4 text-[#4CAF50]" strokeWidth={2.5} />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 text-[#D32F2F]" strokeWidth={2.5} />
+                  )}
+                  <span className={`text-sm font-normal ${stats.totalProfit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                    {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(2)} ₴
+                  </span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
