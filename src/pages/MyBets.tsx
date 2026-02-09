@@ -485,7 +485,7 @@ export default function MyBets() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-6xl font-light text-black tracking-tight flex items-center gap-5">
-                <div className="p-4 bg-[#F4E157] rounded-[36px] shadow-[0_12px_32px_rgba(244,225,87,0.4)]">
+                <div className="p-4 bg-[#F4E157] rounded-[36px] shadow-[0_8px_24px_rgba(244,225,87,0.25)]">
                   <Zap className="h-10 w-10 text-black" strokeWidth={1.5} />
                 </div>
                 Журнал прогнозів
@@ -506,11 +506,11 @@ export default function MyBets() {
           </div>
         </div>
 
-        {/* Quick Stats - КОМПАКТНИЙ ДИЗАЙН ЯК В ANALYTICS */}
+        {/* Quick Stats - М'ЯКШІ ТІНІ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* 1. Поточний банк - БЕЗ МОЖЛИВОСТІ РЕДАГУВАННЯ */}
+          {/* 1. Поточний банк */}
           <Card 
-            className="border-2 border-[#F4E157] shadow-[0_8px_24px_rgba(244,225,87,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(244,225,87,0.35)] hover:border-[#E8D54A] transition-all duration-300 relative"
+            className="border-2 border-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.15)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(244,225,87,0.2)] hover:border-[#E8D54A] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%)'
             }}
@@ -523,7 +523,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_3px_8px_rgba(244,225,87,0.4)]">
+                <div className="p-2 bg-[#F4E157] rounded-[16px] shadow-[0_2px_6px_rgba(244,225,87,0.25)]">
                   <Wallet className="h-5 w-5 text-black" strokeWidth={2} />
                 </div>
                 Поточний банк
@@ -550,7 +550,7 @@ export default function MyBets() {
 
           {/* 2. Всього записів */}
           <Card 
-            className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+            className="border-2 border-[#90CAF9] shadow-[0_4px_12px_rgba(33,150,243,0.12)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(33,150,243,0.18)] hover:border-[#64B5F6] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
             }}
@@ -563,7 +563,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
+                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_2px_6px_rgba(33,150,243,0.25)]">
                   <BarChart3 className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Всього записів
@@ -576,7 +576,7 @@ export default function MyBets() {
 
           {/* 3. Профіт */}
           <Card 
-            className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+            className="border-2 border-[#A5D6A7] shadow-[0_4px_12px_rgba(76,175,80,0.15)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(76,175,80,0.2)] hover:border-[#81C784] transition-all duration-300 relative"
             style={{
               background: (stats.totalProfit || 0) >= 0 
                 ? 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
@@ -593,7 +593,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className={`p-2 rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)] ${(stats.totalProfit || 0) >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}>
+                <div className={`p-2 rounded-[16px] shadow-[0_2px_6px_rgba(76,175,80,0.25)] ${(stats.totalProfit || 0) >= 0 ? 'bg-[#4CAF50]' : 'bg-[#D32F2F]'}`}>
                   <DollarSign className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Профіт
@@ -608,7 +608,7 @@ export default function MyBets() {
 
           {/* 4. Win Rate */}
           <Card 
-            className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+            className="border-2 border-[#FFCC80] shadow-[0_4px_12px_rgba(255,152,0,0.12)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(255,152,0,0.18)] hover:border-[#FFB74D] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
             }}
@@ -621,7 +621,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_2px_6px_rgba(255,152,0,0.25)]">
                   <Target className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Win Rate
@@ -633,11 +633,11 @@ export default function MyBets() {
           </Card>
         </div>
 
-        {/* Secondary Stats - КОМПАКТНИЙ ДИЗАЙН */}
+        {/* Secondary Stats - М'ЯКШІ ТІНІ */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* 5. Активні */}
           <Card 
-            className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
+            className="border-2 border-[#90CAF9] shadow-[0_4px_12px_rgba(33,150,243,0.12)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(33,150,243,0.18)] hover:border-[#64B5F6] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
             }}
@@ -650,7 +650,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
+                <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_2px_6px_rgba(33,150,243,0.25)]">
                   <Clock className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Активні
@@ -663,7 +663,7 @@ export default function MyBets() {
 
           {/* 6. Виграші */}
           <Card 
-            className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
+            className="border-2 border-[#A5D6A7] shadow-[0_4px_12px_rgba(76,175,80,0.15)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(76,175,80,0.2)] hover:border-[#81C784] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
             }}
@@ -676,7 +676,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
+                <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_2px_6px_rgba(76,175,80,0.25)]">
                   <Trophy className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Виграші
@@ -689,7 +689,7 @@ export default function MyBets() {
 
           {/* 7. Програші */}
           <Card 
-            className="border-2 border-[#FFCDD2] shadow-[0_8px_24px_rgba(211,47,47,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(211,47,47,0.3)] hover:border-[#EF9A9A] transition-all duration-300 relative"
+            className="border-2 border-[#FFCDD2] shadow-[0_4px_12px_rgba(211,47,47,0.12)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(211,47,47,0.18)] hover:border-[#EF9A9A] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #FFEBEE 0%, #FFF5F5 100%)'
             }}
@@ -702,7 +702,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#D32F2F] rounded-[16px] shadow-[0_3px_8px_rgba(211,47,47,0.4)]">
+                <div className="p-2 bg-[#D32F2F] rounded-[16px] shadow-[0_2px_6px_rgba(211,47,47,0.25)]">
                   <AlertTriangle className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Програші
@@ -715,7 +715,7 @@ export default function MyBets() {
 
           {/* 8. Середній ROI */}
           <Card 
-            className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
+            className="border-2 border-[#FFCC80] shadow-[0_4px_12px_rgba(255,152,0,0.12)] rounded-[28px] overflow-hidden hover:shadow-[0_6px_16px_rgba(255,152,0,0.18)] hover:border-[#FFB74D] transition-all duration-300 relative"
             style={{
               background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
             }}
@@ -728,7 +728,7 @@ export default function MyBets() {
             
             <CardHeader className="pb-3 pt-5 px-6 relative z-10">
               <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
+                <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_2px_6px_rgba(255,152,0,0.25)]">
                   <TrendingUp className="h-5 w-5 text-white" strokeWidth={2} />
                 </div>
                 Середній ROI
