@@ -66,20 +66,16 @@ interface MonthlyData {
 export default function Analytics() {
   const currentUser = localStorage.getItem('currentUser') || '';
   
-  const [stats, setStats] = useState<BettingStats>(() => 
-    UserDataService.getUserData(currentUser, 'analytics_stats', {
-      totalBets: 0,
-      winRate: 0,
-      totalProfit: 0,
-      averageROI: 0,
-      profitByMonth: [],
-      profitByStrategy: []
-    })
-  );
+  const [stats, setStats] = useState<BettingStats>({
+    totalBets: 0,
+    winRate: 0,
+    totalProfit: 0,
+    averageROI: 0,
+    profitByMonth: [],
+    profitByStrategy: []
+  });
   
-  const [bets, setBets] = useState<Bet[]>(() => 
-    UserDataService.getUserData(currentUser, 'analytics_bets', [])
-  );
+  const [bets, setBets] = useState<Bet[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
@@ -94,19 +90,12 @@ export default function Analytics() {
   });
   const [activeTab, setActiveTab] = useState('profit');
 
+  // Load data from MyBets on mount and whenever it changes
   useEffect(() => {
     loadAnalyticsData();
     updateConnectionStatus();
     updateBankrollStats();
   }, []);
-
-  // Save data whenever it changes
-  useEffect(() => {
-    if (currentUser) {
-      UserDataService.setUserData(currentUser, 'analytics_stats', stats);
-      UserDataService.setUserData(currentUser, 'analytics_bets', bets);
-    }
-  }, [stats, bets, currentUser]);
 
   const updateBankrollStats = () => {
     const allBets = realGoogleSheetsService.getAllRecords();
@@ -123,92 +112,56 @@ export default function Analytics() {
     try {
       setLoading(true);
       
-      // Try to load from MyBets user-specific data first
+      // ALWAYS load from MyBets user-specific data as primary source
       const myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
       const myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
       
-      if (myBetsData.length > 0 || myBetsStats) {
-        // Use MyBets data if available
-        setBets(myBetsData);
+      console.log('📊 Loading Analytics data from MyBets:', { 
+        betsCount: myBetsData.length, 
+        stats: myBetsStats 
+      });
+      
+      // Set bets data
+      setBets(myBetsData);
+      
+      // Calculate stats from actual bets data
+      if (myBetsData.length > 0) {
+        const completedBets = myBetsData.filter((bet: Bet) => bet.result !== 'Pending');
+        const winningBets = completedBets.filter((bet: Bet) => bet.result === 'Win');
         
-        if (myBetsStats) {
-          setStats({
-            totalBets: myBetsStats.totalBets || 0,
-            winRate: myBetsStats.winRate || 0,
-            totalProfit: myBetsStats.totalProfit || 0,
-            averageROI: myBetsStats.averageROI || 0,
-            profitByMonth: myBetsStats.profitByMonth || [],
-            profitByStrategy: myBetsStats.profitByStrategy || []
-          });
-        }
+        const totalBets = completedBets.length;
+        const winRate = totalBets > 0 ? Math.round((winningBets.length / totalBets) * 100) : 0;
+        const totalProfit = completedBets.reduce((sum: number, bet: Bet) => sum + (bet.profit || 0), 0);
+        const averageROI = totalBets > 0 ? Math.round((totalProfit / completedBets.reduce((sum: number, bet: Bet) => sum + bet.amount, 0)) * 100) : 0;
         
-        console.log('✅ Data loaded from MyBets user-specific storage:', { 
-          bets: myBetsData.length, 
-          totalProfit: myBetsStats?.totalProfit || 0
+        setStats({
+          totalBets,
+          winRate,
+          totalProfit,
+          averageROI,
+          profitByMonth: myBetsStats?.profitByMonth || [],
+          profitByStrategy: myBetsStats?.profitByStrategy || []
         });
+        
+        console.log('✅ Analytics stats calculated:', { totalBets, winRate, totalProfit, averageROI });
       } else {
-        // Try C# backend as fallback
-        try {
-          const [betsData, analyticsData] = await Promise.all([
-            csharpDataService.getBettingData(),
-            csharpDataService.getAnalyticsData()
-          ]);
-          
-          if (betsData.length > 0) {
-            setBets(betsData as Bet[]);
-            setStats({
-              totalBets: analyticsData.totalBets,
-              winRate: analyticsData.winRate,
-              totalProfit: analyticsData.totalProfit,
-              averageROI: analyticsData.roi,
-              profitByMonth: [],
-              profitByStrategy: []
-            });
-            
-            console.log('✅ Data loaded from C# backend:', { 
-              bets: betsData.length, 
-              totalProfit: analyticsData.totalProfit 
-            });
-          } else {
-            // Use analytics-specific localStorage as last resort
-            const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
-            const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
-              totalBets: 0,
-              winRate: 0,
-              totalProfit: 0,
-              averageROI: 0,
-              profitByMonth: [],
-              profitByStrategy: []
-            });
-            
-            setBets(savedBets);
-            setStats(savedStats);
-          }
-        } catch (error) {
-          console.error('❌ Error loading from C# backend:', error);
-          
-          // Use analytics-specific localStorage
-          const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
-          const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
-            totalBets: 0,
-            winRate: 0,
-            totalProfit: 0,
-            averageROI: 0,
-            profitByMonth: [],
-            profitByStrategy: []
-          });
-          
-          setBets(savedBets);
-          setStats(savedStats);
-        }
+        // No bets, set default stats
+        setStats({
+          totalBets: 0,
+          winRate: 0,
+          totalProfit: 0,
+          averageROI: 0,
+          profitByMonth: [],
+          profitByStrategy: []
+        });
       }
       
     } catch (error) {
       console.error('❌ Error loading analytics:', error);
       
-      // Load from user-specific localStorage
-      const savedBets = UserDataService.getUserData(currentUser, 'analytics_bets', []);
-      const savedStats = UserDataService.getUserData(currentUser, 'analytics_stats', {
+      // Fallback to empty data
+      setBets([]);
+      setStats({
         totalBets: 0,
         winRate: 0,
         totalProfit: 0,
@@ -216,9 +169,6 @@ export default function Analytics() {
         profitByMonth: [],
         profitByStrategy: []
       });
-      
-      setBets(savedBets);
-      setStats(savedStats);
     } finally {
       setLoading(false);
       updateConnectionStatus();
