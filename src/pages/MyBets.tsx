@@ -945,19 +945,19 @@ export default function MyBets() {
                                         size="sm"
                                         variant="outline"
                                         onClick={() => updateBetResult(bet, 'Win')}
-                                        className="h-10 w-10 p-0 rounded-[16px] border-2 border-[#A5D6A7] text-[#4CAF50] hover:bg-[#E8F5E9] hover:text-[#2E7D32]"
+                                        className="h-11 w-11 p-0 rounded-[20px] border-2 border-[#A5D6A7] bg-white text-[#4CAF50] hover:bg-[#E8F5E9] hover:text-[#2E7D32] hover:border-[#81C784] transition-all duration-300 shadow-[0_2px_6px_rgba(76,175,80,0.15)] hover:shadow-[0_4px_10px_rgba(76,175,80,0.25)]"
                                         title="Виграш"
                                       >
-                                        <CheckCircle className="h-5 w-5" strokeWidth={1.5} />
+                                        <CheckCircle className="h-5 w-5" strokeWidth={2} />
                                       </Button>
                                       <Button
                                         size="sm"
                                         variant="outline"
                                         onClick={() => updateBetResult(bet, 'Loss')}
-                                        className="h-10 w-10 p-0 rounded-[16px] border-2 border-[#FFCDD2] text-[#D32F2F] hover:bg-[#FFE8E8] hover:text-[#C62828]"
+                                        className="h-11 w-11 p-0 rounded-[20px] border-2 border-[#FFCDD2] bg-white text-[#D32F2F] hover:bg-[#FFE8E8] hover:text-[#C62828] hover:border-[#EF9A9A] transition-all duration-300 shadow-[0_2px_6px_rgba(211,47,47,0.15)] hover:shadow-[0_4px_10px_rgba(211,47,47,0.25)]"
                                         title="Програш"
                                       >
-                                        <XCircle className="h-5 w-5" strokeWidth={1.5} />
+                                        <XCircle className="h-5 w-5" strokeWidth={2} />
                                       </Button>
                                     </>
                                   )}
@@ -965,20 +965,20 @@ export default function MyBets() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleShareBet(bet)}
-                                    className="h-10 w-10 p-0 rounded-[16px] border-2 border-[#90CAF9] text-[#1976D2] hover:bg-[#E3F2FD] hover:text-[#0D47A1]"
+                                    className="h-11 w-11 p-0 rounded-[20px] border-2 border-[#90CAF9] bg-white text-[#1976D2] hover:bg-[#E3F2FD] hover:text-[#0D47A1] hover:border-[#64B5F6] transition-all duration-300 shadow-[0_2px_6px_rgba(33,150,243,0.15)] hover:shadow-[0_4px_10px_rgba(33,150,243,0.25)]"
                                     title="Поділитися"
                                   >
-                                    <Share2 className="h-5 w-5" strokeWidth={1.5} />
+                                    <Share2 className="h-5 w-5" strokeWidth={2} />
                                   </Button>
                                   {isAdmin && (
                                     <Button
                                       size="sm"
                                       variant="outline"
                                       onClick={() => handleBetDetailsClick(bet)}
-                                      className="h-10 w-10 p-0 rounded-[16px] border-2 border-[#B39DDB] text-[#5E35B1] hover:bg-[#EDE7F6] hover:text-[#4527A0]"
+                                      className="h-11 w-11 p-0 rounded-[20px] border-2 border-[#B39DDB] bg-white text-[#5E35B1] hover:bg-[#EDE7F6] hover:text-[#4527A0] hover:border-[#9575CD] transition-all duration-300 shadow-[0_2px_6px_rgba(94,53,177,0.15)] hover:shadow-[0_4px_10px_rgba(94,53,177,0.25)]"
                                       title="Деталі для Telegram (тільки для адмінів)"
                                     >
-                                      <Eye className="h-5 w-5" strokeWidth={1.5} />
+                                      <Eye className="h-5 w-5" strokeWidth={2} />
                                     </Button>
                                   )}
                                 </div>

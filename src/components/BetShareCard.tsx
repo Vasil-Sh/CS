@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Trophy, TrendingDown, Target, Calendar, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, TrendingDown, Target, Calendar, CheckCircle2 } from 'lucide-react';
 
 interface BetShareCardProps {
   bet: {
@@ -23,44 +21,6 @@ interface BetShareCardProps {
   };
 }
 
-// Translation map for bet types
-const betTypeTranslations: Record<string, string> = {
-  'Handicap': 'Фора',
-  'Total': 'Тотал',
-  'Winner': 'Переможець',
-  'Both Teams to Score': 'Обидві команди заб\'ють',
-  'Double Chance': 'Подвійний шанс',
-  'Draw No Bet': 'Повернення при нічиї',
-  'Correct Score': 'Точний рахунок',
-  'Half Time/Full Time': 'Перший тайм/Матч',
-  'Asian Handicap': 'Азіатська фора',
-  'Over': 'Більше',
-  'Under': 'Менше',
-  '1X2': '1X2',
-  'Home': 'Господарі',
-  'Away': 'Гості',
-  'Draw': 'Нічия',
-  'Yes': 'Так',
-  'No': 'Ні',
-};
-
-// Function to translate bet type
-const translateBetType = (betType: string): string => {
-  // Check if exact match exists
-  if (betTypeTranslations[betType]) {
-    return betTypeTranslations[betType];
-  }
-  
-  // Check for partial matches (e.g., "Handicap +1.5" -> "Фора +1.5")
-  for (const [english, ukrainian] of Object.entries(betTypeTranslations)) {
-    if (betType.startsWith(english)) {
-      return betType.replace(english, ukrainian);
-    }
-  }
-  
-  return betType;
-};
-
 export default function BetShareCard({ bet }: BetShareCardProps) {
   const isWin = bet.result === 'Win';
   const isLoss = bet.result === 'Loss';
@@ -74,9 +34,6 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   // Перевірка чи це експрес
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
   
-  // State for expanded express events
-  const [isExpanded, setIsExpanded] = useState(false);
-  
   // Для експресу витягуємо інформацію та парсимо події
   interface ParsedEvent {
     number: string;
@@ -89,22 +46,26 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   let parsedEvents: ParsedEvent[] = [];
   
   if (isExpress && bet.betType.includes('|')) {
+    // Формат: "Експрес 2x | 1. TEAM1 vs TEAM2 | Type: Selection @odds • 2. ..."
     const fullString = bet.betType.split('|').slice(1).join('|').trim();
     const eventStrings = fullString.split('•').map(e => e.trim());
     
     parsedEvents = eventStrings.map(eventStr => {
+      // Парсимо: "1. INNER CIRCLE vs FURIA | Match Winner: FURIA @1.22"
       const parts = eventStr.split('|').map(p => p.trim());
       
       if (parts.length >= 2) {
-        const matchPart = parts[0];
-        const betPart = parts[1];
+        const matchPart = parts[0]; // "1. INNER CIRCLE vs FURIA"
+        const betPart = parts[1]; // "Match Winner: FURIA @1.22"
         
+        // Витягуємо номер та матч
         const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
         const number = numberMatch ? numberMatch[1] : '';
         const match = numberMatch ? numberMatch[2] : matchPart;
         
+        // Витягуємо тип ставки, вибір та коефіцієнт
         const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
-        const betType = betMatch ? translateBetType(betMatch[1]) : '';
+        const betType = betMatch ? betMatch[1] : '';
         const selection = betMatch ? betMatch[2] : '';
         const odds = betMatch ? betMatch[3] : '';
         
@@ -117,25 +78,28 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   // Extract selection from betType for regular bets
   const betTypeParts = bet.betType.split(' - ');
-  const betCategory = translateBetType(betTypeParts[0] || bet.betType);
+  const betCategory = betTypeParts[0] || bet.betType;
   const selection = betTypeParts[1] || '';
 
-  // Show first 3 events or all if expanded
-  const visibleEvents = isExpanded ? parsedEvents : parsedEvents.slice(0, 3);
-  const hasMoreEvents = parsedEvents.length > 3;
+  // Calculate total amount (only for Win and Pending)
+  const totalAmount = isPending 
+    ? displayAmount * bet.odds 
+    : isWin 
+    ? displayAmount + (displayProfit || 0)
+    : 0;
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-b from-gray-50 to-white">
-      <Card className="border-0 shadow-xl rounded-3xl overflow-hidden bg-white">
-        {/* Clean Header */}
-        <div className={`p-6 shadow-sm ${
-          isWin ? 'bg-green-500' :
-          isLoss ? 'bg-red-500' :
-          'bg-blue-500'
+      <Card className="border-0 shadow-2xl rounded-3xl overflow-hidden bg-white/80 backdrop-blur-xl">
+        {/* Header with iOS-style blur */}
+        <div className={`p-6 backdrop-blur-xl ${
+          isWin ? 'bg-gradient-to-br from-green-500/90 to-emerald-500/90' :
+          isLoss ? 'bg-gradient-to-br from-red-500/90 to-rose-500/90' :
+          'bg-gradient-to-br from-blue-500/90 to-cyan-500/90'
         }`}>
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-white/20 rounded-2xl shadow-sm">
+              <div className="p-2.5 bg-white/20 rounded-2xl backdrop-blur-sm">
                 {isWin ? (
                   <Trophy className="h-6 w-6" />
                 ) : isLoss ? (
@@ -144,11 +108,11 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                   <Target className="h-6 w-6" />
                 )}
               </div>
-              <span className="font-semibold text-xl">
+              <span className="font-semibold text-xl tracking-tight">
                 {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm font-medium bg-white/20 px-3 py-1.5 rounded-full shadow-sm">
+            <div className="flex items-center gap-1.5 text-sm font-medium bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
               <Calendar className="h-3.5 w-3.5" />
               <span>{bet.date}</span>
             </div>
@@ -156,129 +120,102 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         </div>
 
         <CardContent className="p-6 space-y-5">
-          {/* Match Info */}
+          {/* Match - iOS style */}
           <div className="text-center space-y-3">
-            <h3 className="text-2xl font-semibold text-gray-900">
+            <h3 className="text-2xl font-semibold text-gray-900 tracking-tight">
               {bet.match || `${bet.team1} vs ${bet.team2}`}
             </h3>
-            <Badge className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 border-0 shadow-sm">
+            <Badge variant="secondary" className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
               {bet.format}
             </Badge>
           </div>
 
           {/* Express Events or Regular Selection */}
           {isExpress && parsedEvents.length > 0 ? (
-            <div className={`rounded-2xl border overflow-hidden shadow-md ${
+            <div className={`rounded-2xl backdrop-blur-sm border overflow-hidden ${
               isWin 
-                ? 'bg-green-50/50 border-green-200' 
+                ? 'bg-green-50/80 border-green-200' 
                 : isLoss
-                ? 'bg-red-50/50 border-red-200'
-                : 'bg-blue-50/50 border-blue-200'
+                ? 'bg-red-50/80 border-red-200'
+                : 'bg-purple-50/80 border-purple-200'
             }`}>
-              <div className={`flex items-center justify-center gap-2 py-3 px-4 shadow-sm ${
+              <div className={`flex items-center justify-center gap-2 py-3 px-4 ${
                 isWin 
                   ? 'bg-green-100/50' 
                   : isLoss
                   ? 'bg-red-100/50'
-                  : 'bg-blue-100/50'
+                  : 'bg-purple-100/50'
               }`}>
                 {isWin && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-                <p className="text-xs font-semibold text-gray-600 uppercase">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                   Експрес {bet.format}
                 </p>
               </div>
               
-              <div className="p-4 space-y-2">
-                {visibleEvents.map((event, index) => (
-                  <div key={index} className={`p-2.5 rounded-xl border bg-white shadow-sm ${
+              <div className="p-4 space-y-3">
+                {parsedEvents.map((event, index) => (
+                  <div key={index} className={`p-3 rounded-xl border ${
                     isWin 
-                      ? 'border-green-200' 
+                      ? 'bg-white/60 border-green-200' 
                       : isLoss
-                      ? 'border-red-200'
-                      : 'border-blue-200'
+                      ? 'bg-white/60 border-red-200'
+                      : 'bg-white/60 border-purple-200'
                   }`}>
-                    <div className="flex items-start gap-2 mb-1.5">
-                      <Badge className={`rounded-full text-xs font-bold px-1.5 py-0.5 h-5 min-w-[20px] flex items-center justify-center shadow-sm ${
+                    <div className="flex items-start gap-2 mb-2">
+                      <Badge className={`rounded-full text-xs font-bold ${
                         isWin 
                           ? 'bg-green-600 text-white' 
                           : isLoss
                           ? 'bg-red-600 text-white'
-                          : 'bg-blue-600 text-white'
+                          : 'bg-purple-600 text-white'
                       } border-0`}>
-                        {event.number}
+                        #{event.number}
                       </Badge>
-                      <p className="text-xs font-semibold text-gray-900 leading-tight flex-1">
+                      <p className="text-sm font-semibold text-gray-900 leading-tight flex-1">
                         {event.match}
                       </p>
                     </div>
                     
-                    <div className="space-y-0.5 ml-7">
-                      <p className="text-[10px] text-gray-500 font-medium uppercase">
+                    <div className="space-y-1 ml-8">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
                         {event.betType}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className={`text-xs font-bold ${
-                          isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-blue-700'
+                        <p className={`text-sm font-bold ${
+                          isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-purple-700'
                         }`}>
                           {event.selection}
                         </p>
-                        <Badge className={`text-[10px] font-semibold rounded-full px-1.5 py-0.5 shadow-sm ${
+                        <Badge className={`text-xs font-semibold rounded-full ${
                           isWin 
                             ? 'bg-green-100 text-green-700' 
                             : isLoss
                             ? 'bg-red-100 text-red-700'
-                            : 'bg-blue-100 text-blue-700'
+                            : 'bg-purple-100 text-purple-700'
                         } border-0`}>
-                          @{parseFloat(event.odds).toFixed(2)}
+                          @{event.odds}
                         </Badge>
                       </div>
                     </div>
                   </div>
                 ))}
-                
-                {hasMoreEvents && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className={`w-full h-8 text-xs font-medium rounded-lg mt-2 ${
-                      isWin 
-                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
-                        : isLoss
-                        ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                        : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
-                    }`}
-                  >
-                    {isExpanded ? (
-                      <>
-                        <ChevronUp className="h-3 w-3 mr-1" />
-                        Сховати {parsedEvents.length - 3} подій
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="h-3 w-3 mr-1" />
-                        Показати ще {parsedEvents.length - 3} подій
-                      </>
-                    )}
-                  </Button>
-                )}
               </div>
             </div>
           ) : selection && (
-            <div className={`p-4 rounded-2xl border shadow-md ${
+            <div className={`p-4 rounded-2xl backdrop-blur-sm border ${
               isWin 
-                ? 'bg-green-50/50 border-green-200' 
+                ? 'bg-green-50/80 border-green-200' 
                 : isLoss
-                ? 'bg-red-50/50 border-red-200'
-                : 'bg-blue-50/50 border-blue-200'
+                ? 'bg-red-50/80 border-red-200'
+                : 'bg-blue-50/80 border-blue-200'
             }`}>
               <div className="flex items-center justify-center gap-2 mb-2">
                 {isWin && <CheckCircle2 className="h-5 w-5 text-green-600" />}
-                <p className="text-xs font-medium text-gray-500 uppercase">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                   {betCategory}
                 </p>
               </div>
-              <p className={`text-2xl font-bold text-center ${
+              <p className={`text-2xl font-bold text-center tracking-tight ${
                 isWin ? 'text-green-700' : isLoss ? 'text-red-700' : 'text-blue-700'
               }`}>
                 {selection}
@@ -286,31 +223,31 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             </div>
           )}
 
-          {/* Bet Info */}
+          {/* Bet Info - iOS cards style */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
-              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Прогноз</p>
+            <div className="text-center p-4 bg-gray-50/80 rounded-2xl backdrop-blur-sm border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Прогноз</p>
               <p className="text-xl font-semibold text-gray-900">
                 {currencySymbol}{displayAmount}
               </p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
-              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase">Коефіцієнт</p>
+            <div className="text-center p-4 bg-gray-50/80 rounded-2xl backdrop-blur-sm border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Коефіцієнт</p>
               <p className="text-xl font-semibold text-gray-900">
                 {bet.odds.toFixed(2)}
               </p>
             </div>
           </div>
 
-          {/* Profit */}
+          {/* Profit - iOS style with subtle shadow */}
           {!isPending && displayProfit !== undefined && displayProfit !== null && (
-            <div className={`p-5 rounded-2xl border shadow-md ${
+            <div className={`p-5 rounded-2xl backdrop-blur-sm border ${
               isWin 
-                ? 'bg-green-50/50 border-green-100' 
-                : 'bg-red-50/50 border-red-100'
+                ? 'bg-green-50/80 border-green-100' 
+                : 'bg-red-50/80 border-red-100'
             }`}>
-              <p className="text-xs font-medium text-gray-500 mb-2 uppercase text-center">Профіт</p>
-              <p className={`text-3xl font-semibold text-center ${
+              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide text-center">Профіт</p>
+              <p className={`text-3xl font-semibold text-center tracking-tight ${
                 isWin ? 'text-green-600' : 'text-red-600'
               }`}>
                 {displayProfit > 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
@@ -319,10 +256,20 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           )}
 
           {isPending && (
-            <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 shadow-md">
-              <p className="text-xs font-medium text-gray-500 mb-2 uppercase text-center">Можливий виграш</p>
-              <p className="text-3xl font-semibold text-blue-600 text-center">
+            <div className="p-5 bg-blue-50/80 rounded-2xl backdrop-blur-sm border border-blue-100">
+              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide text-center">Можливий виграш</p>
+              <p className="text-3xl font-semibold text-blue-600 text-center tracking-tight">
                 +{((bet.odds - 1) * displayAmount).toFixed(2)} {currencySymbol}
+              </p>
+            </div>
+          )}
+
+          {/* Total Amount - only for Win and Pending */}
+          {!isLoss && (
+            <div className="p-5 bg-gray-50/80 rounded-2xl backdrop-blur-sm border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide text-center">Загальна сума</p>
+              <p className="text-3xl font-semibold text-gray-900 text-center tracking-tight">
+                {totalAmount.toFixed(2)} {currencySymbol}
               </p>
             </div>
           )}
