@@ -22,7 +22,10 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  Calendar
+  Calendar,
+  Pencil,
+  Check,
+  X
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
@@ -157,6 +160,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
+  // Edit state: stores the global index of the team being edited, and temp values
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [editStatus, setEditStatus] = useState('');
 
   useEffect(() => {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
@@ -239,7 +248,43 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const deleteRiskyTeam = (index: number) => {
+    // If we're editing this team, cancel edit first
+    if (editingIndex === index) {
+      setEditingIndex(null);
+    }
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
+  };
+
+  const startEditing = (globalIndex: number, team: RiskyTeam) => {
+    setEditingIndex(globalIndex);
+    setEditName(team.name);
+    setEditNotes(team.notes);
+    setEditStatus(team.status);
+  };
+
+  const cancelEditing = () => {
+    setEditingIndex(null);
+    setEditName('');
+    setEditNotes('');
+    setEditStatus('');
+  };
+
+  const saveEditing = () => {
+    if (editingIndex === null || !editName.trim()) return;
+    
+    const updatedTeams = [...riskyTeams];
+    updatedTeams[editingIndex] = {
+      ...updatedTeams[editingIndex],
+      name: editName.trim(),
+      notes: editNotes,
+      status: editStatus
+    };
+    setRiskyTeams(updatedTeams);
+    setEditingIndex(null);
+    setEditName('');
+    setEditNotes('');
+    setEditStatus('');
+    toast.success('Команду оновлено');
   };
 
   const getStatusBadge = (status: string) => {
@@ -420,8 +465,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         if (!drawdownStart) {
           drawdownStart = bet.date;
         }
-        const currentDrawdown = (peak - runningBalance) / peak * 100;
-        maxDrawdownInPeriod = Math.max(maxDrawdownInPeriod, currentDrawdown);
+        const currentDD = (peak - runningBalance) / peak * 100;
+        maxDrawdownInPeriod = Math.max(maxDrawdownInPeriod, currentDD);
       }
     });
 
@@ -463,6 +508,112 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     Нестабільні: filteredTeams.filter(t => t.status === 'Нестабільні'),
     Обережно: filteredTeams.filter(t => t.status === 'Обережно'),
     Рідко: filteredTeams.filter(t => t.status === 'Рідко')
+  };
+
+  // Helper to render a team card (used for both CS and Dota sections)
+  const renderTeamCard = (team: RiskyTeam, globalIndex: number) => {
+    const isEditing = editingIndex === globalIndex;
+
+    if (isEditing) {
+      return (
+        <div key={globalIndex} className="p-4 border-2 border-[#F4E157] rounded-[24px] bg-[#FFFDE7] transition-all">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Назва команди</label>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                  placeholder="Назва команди"
+                />
+              </div>
+              <div className="w-40">
+                <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Статус</label>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value)}
+                  className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[16px] font-light text-sm"
+                >
+                  <option value="БАН">БАН</option>
+                  <option value="Нестабільні">Нестабільні</option>
+                  <option value="Обережно">Обережно</option>
+                  <option value="Рідко">Рідко</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Коментар</label>
+              <Textarea
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                placeholder="Додайте коментар..."
+                rows={2}
+              />
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={cancelEditing}
+                className="text-[#6B6B6B] hover:text-black hover:bg-[#F5F5F3] rounded-[16px]"
+              >
+                <X className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                Скасувати
+              </Button>
+              <Button
+                size="sm"
+                onClick={saveEditing}
+                disabled={!editName.trim()}
+                className="bg-[#4CAF50] hover:bg-[#45A049] text-white rounded-[16px] font-normal shadow-[0_2px_8px_rgba(76,175,80,0.3)]"
+              >
+                <Check className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                Зберегти
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div key={globalIndex} className="p-4 border-2 border-[#E8E6DC] rounded-[24px] hover:bg-[#FAFAF8] hover:border-[#D4D2C8] transition-all">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-normal text-lg text-black">
+                {getGameEmoji(team.game)} {team.name}
+              </h3>
+              <Badge className={getStatusBadge(team.status)}>
+                {team.status}
+              </Badge>
+            </div>
+            {team.notes && (
+              <p className="text-sm text-[#6B6B6B] font-light">{team.notes}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => startEditing(globalIndex, team)}
+              className="text-[#1976D2] hover:text-[#1565C0] hover:bg-[#E3F2FD] rounded-[16px]"
+            >
+              <Pencil className="h-4 w-4" strokeWidth={1.5} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => deleteRiskyTeam(globalIndex)}
+              className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] rounded-[16px]"
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -779,33 +930,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 {teamsByGame.CS.length === 0 ? (
                   <p className="text-center text-[#6B6B6B] py-8 font-light">Немає команд CS</p>
                 ) : (
-                  teamsByGame.CS.map((team, index) => (
-                    <div key={index} className="p-4 border-2 border-[#E8E6DC] rounded-[24px] hover:bg-[#FAFAF8] hover:border-[#D4D2C8] transition-all">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-normal text-lg text-black">
-                              {getGameEmoji(team.game)} {team.name}
-                            </h3>
-                            <Badge className={getStatusBadge(team.status)}>
-                              {team.status}
-                            </Badge>
-                          </div>
-                          {team.notes && (
-                            <p className="text-sm text-[#6B6B6B] font-light">{team.notes}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteRiskyTeam(riskyTeams.findIndex(t => t === team))}
-                          className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] rounded-[16px]"
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
+                  teamsByGame.CS.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })
                 )}
               </div>
             </CardContent>
@@ -824,33 +952,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 {teamsByGame.Дота.length === 0 ? (
                   <p className="text-center text-[#6B6B6B] py-8 font-light">Немає команд Dota 2</p>
                 ) : (
-                  teamsByGame.Дота.map((team, index) => (
-                    <div key={index} className="p-4 border-2 border-[#E8E6DC] rounded-[24px] hover:bg-[#FAFAF8] hover:border-[#D4D2C8] transition-all">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-normal text-lg text-black">
-                              {getGameEmoji(team.game)} {team.name}
-                            </h3>
-                            <Badge className={getStatusBadge(team.status)}>
-                              {team.status}
-                            </Badge>
-                          </div>
-                          {team.notes && (
-                            <p className="text-sm text-[#6B6B6B] font-light">{team.notes}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteRiskyTeam(riskyTeams.findIndex(t => t === team))}
-                          className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] rounded-[16px]"
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
+                  teamsByGame.Дота.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })
                 )}
               </div>
             </CardContent>
