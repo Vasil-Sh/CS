@@ -21,6 +21,52 @@ interface BetShareCardProps {
   };
 }
 
+// Функція для перекладу типів ставок на українську
+function translateBetType(betType: string): string {
+  const translations: Record<string, string> = {
+    'Match Winner': 'Переможець матчу',
+    'Map Winner': 'Переможець карти',
+    'Handicap': 'Фора',
+    'Map Handicap': 'Фора на карту',
+    'Round Handicap': 'Фора раундів',
+    'Total': 'Тотал',
+    'Total Maps': 'Тотал карт',
+    'Total Rounds': 'Тотал раундів',
+    'Over': 'Більше',
+    'Under': 'Менше',
+    'Winner': 'Переможець',
+    'First Map Winner': 'Переможець 1-ї карти',
+    'Second Map Winner': 'Переможець 2-ї карти',
+    'Third Map Winner': 'Переможець 3-ї карти',
+    'First Map': '1-а карта',
+    'Second Map': '2-а карта',
+    'Third Map': '3-я карта',
+    'Correct Score': 'Точний рахунок',
+    'Map 1': 'Карта 1',
+    'Map 2': 'Карта 2',
+    'Map 3': 'Карта 3',
+    'Kill Handicap': 'Фора по кілам',
+    'Kill Total': 'Тотал кілів',
+    'Moneyline': 'Переможець',
+    'Spread': 'Фора',
+    'Draw': 'Нічія',
+    'Yes': 'Так',
+    'No': 'Ні',
+  };
+
+  let result = betType;
+  
+  // Сортуємо ключі за довжиною (довші першими) щоб уникнути часткових замін
+  const sortedKeys = Object.keys(translations).sort((a, b) => b.length - a.length);
+  
+  for (const key of sortedKeys) {
+    const regex = new RegExp(key, 'gi');
+    result = result.replace(regex, translations[key]);
+  }
+  
+  return result;
+}
+
 export default function BetShareCard({ bet }: BetShareCardProps) {
   const isWin = bet.result === 'Win';
   const isLoss = bet.result === 'Loss';
@@ -65,7 +111,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         
         // Витягуємо тип ставки, вибір та коефіцієнт
         const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
-        const betType = betMatch ? betMatch[1] : '';
+        const betType = betMatch ? translateBetType(betMatch[1]) : '';
         const selection = betMatch ? betMatch[2] : '';
         const odds = betMatch ? betMatch[3] : '';
         
@@ -78,7 +124,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   // Extract selection from betType for regular bets
   const betTypeParts = bet.betType.split(' - ');
-  const betCategory = betTypeParts[0] || bet.betType;
+  const betCategory = translateBetType(betTypeParts[0] || bet.betType);
   const selection = betTypeParts[1] || '';
 
   // Calculate total amount (only for Win and Pending)
@@ -87,6 +133,10 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
     : isWin 
     ? displayAmount + (displayProfit || 0)
     : 0;
+
+  // Назва матчу
+  const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
+  const formatDisplay = bet.format;
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-b from-gray-50 to-white">
@@ -120,14 +170,28 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         </div>
 
         <CardContent className="p-6 space-y-5">
-          {/* Match - iOS style */}
-          <div className="text-center space-y-3">
-            <h3 className="text-2xl font-semibold text-gray-900 tracking-tight">
-              {bet.match || `${bet.team1} vs ${bet.team2}`}
+          {/* Match Info Block - команди + формат в одному блоці */}
+          <div className={`p-5 rounded-2xl border text-center ${
+            isWin 
+              ? 'bg-green-50/50 border-green-200/60' 
+              : isLoss 
+              ? 'bg-red-50/50 border-red-200/60' 
+              : 'bg-blue-50/50 border-blue-200/60'
+          }`}>
+            <h3 className="text-2xl font-semibold text-gray-900 tracking-tight mb-2">
+              {matchName}
             </h3>
-            <Badge variant="secondary" className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 border-0">
-              {bet.format}
-            </Badge>
+            {formatDisplay && (
+              <Badge variant="secondary" className={`text-xs font-semibold px-4 py-1.5 rounded-full border-0 ${
+                isWin 
+                  ? 'bg-green-100 text-green-700' 
+                  : isLoss 
+                  ? 'bg-red-100 text-red-700' 
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                📋 {formatDisplay}
+              </Badge>
+            )}
           </div>
 
           {/* Express Events or Regular Selection */}
@@ -226,7 +290,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           {/* Bet Info - iOS cards style */}
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-4 bg-gray-50/80 rounded-2xl backdrop-blur-sm border border-gray-100">
-              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Прогноз</p>
+              <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Стартова сума</p>
               <p className="text-xl font-semibold text-gray-900">
                 {currencySymbol}{displayAmount}
               </p>

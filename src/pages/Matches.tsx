@@ -83,6 +83,15 @@ interface Match {
   url?: string;
 }
 
+interface TeamDto {
+  id: number;
+  position: number;
+  name: string;
+  points: number;
+  hltvId: number;
+  comment: string | null;
+}
+
 // Mock data for demonstration - updated to current date 2026-02-05
 const mockMatches: Match[] = [
   {
@@ -363,6 +372,12 @@ export default function Matches() {
   // Load risky teams from admin_risky_teams (global storage)
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   
+  // Top Teams API Test State
+  const [topTeams, setTopTeams] = useState<TeamDto[]>([]);
+  const [topTeamsLoading, setTopTeamsLoading] = useState(false);
+  const [numberOfTeams, setNumberOfTeams] = useState('10');
+  const [apiError, setApiError] = useState<string>('');
+  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -451,6 +466,60 @@ export default function Matches() {
   const handleShowComment = (match: Match) => {
     setSelectedCommentMatch(match);
     setCommentModalOpen(true);
+  };
+
+  // Fetch Top Teams from HTTPS API with detailed error logging
+  const fetchTopTeams = async () => {
+    setTopTeamsLoading(true);
+    setApiError('');
+    try {
+      const count = parseInt(numberOfTeams) || 10;
+      console.log(`🔄 Fetching top ${count} teams from API...`);
+      
+      const response = await fetch(`https://api.cstest.pp.ua/api/Teams/top/${count}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+      });
+      
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: TeamDto[] = await response.json();
+      console.log('✅ Data received:', data);
+      setTopTeams(data);
+      
+      toast({
+        title: '✅ Успіх!',
+        description: `Завантажено ${data.length} команд з API`,
+      });
+    } catch (error) {
+      console.error('❌ Error fetching top teams:', error);
+      
+      let errorMessage = 'Невідома помилка';
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        errorMessage = 'CORS Policy: API сервер не дозволяє запити з цього домену. Можливі причини:\n1. Відсутні CORS headers на сервері\n2. API сервер недоступний\n3. Проблеми з мережею';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      setApiError(errorMessage);
+      
+      toast({
+        title: '❌ Помилка',
+        description: `Не вдалося завантажити дані: ${errorMessage}`,
+        variant: 'destructive'
+      });
+    } finally {
+      setTopTeamsLoading(false);
+    }
   };
 
   // Apply filters
@@ -580,16 +649,6 @@ export default function Matches() {
             backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px)`
           }}
         />
-        
-        {/* Subtle grid pattern overlay */}
-        <svg className="absolute top-0 left-0 w-full h-full opacity-[0.015] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" patternUnits="userSpaceOnUse" width="40" height="40">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000000" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
 
         <div className="relative z-10 space-y-10 p-8">
           {/* Enhanced Header with background */}
@@ -628,153 +687,216 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* Quick Stats - КОМПАКТНИЙ ДИЗАЙН ЯК В ANALYTICS */}
+          {/* API Top Teams - HTTPS Version with Error Display */}
+          <Card className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[32px] bg-white overflow-hidden">
+            <CardHeader className="border-b-2 border-[#E3F2FD] p-6">
+              <CardTitle className="text-2xl font-light text-black tracking-tight flex items-center gap-3">
+                <div className="p-2.5 bg-[#2196F3] rounded-[20px] shadow-[0_6px_16px_rgba(33,150,243,0.3)]">
+                  <BarChart3 className="h-6 w-6 text-white" strokeWidth={1.5} />
+                </div>
+                🔒 API Топ Команд (HTTPS)
+                <Badge className={`ml-2 border-0 rounded-[12px] px-3 py-1 font-normal ${apiError ? 'bg-[#D32F2F] text-white' : 'bg-[#FF9800] text-white'}`}>
+                  {apiError ? 'Помилка' : 'Тестування'}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Input and Button */}
+                <div className="flex items-end gap-4">
+                  <div className="flex-1">
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">
+                      Кількість команд:
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={numberOfTeams}
+                      onChange={(e) => setNumberOfTeams(e.target.value)}
+                      placeholder="10"
+                      className="rounded-[16px] border-2 border-[#90CAF9] hover:border-[#64B5F6] transition-colors font-light h-11"
+                    />
+                  </div>
+                  <Button
+                    onClick={fetchTopTeams}
+                    disabled={topTeamsLoading}
+                    className="group relative rounded-[16px] bg-[#2196F3] hover:bg-[#1976D2] text-white font-normal h-11 px-6 transition-all duration-300 overflow-hidden shadow-[0_4px_12px_rgba(33,150,243,0.3)]"
+                  >
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    {topTeamsLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin relative z-10" strokeWidth={1.5} />
+                        <span className="relative z-10">Завантаження...</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 relative z-10" strokeWidth={1.5} />
+                        <span className="relative z-10">Завантажити</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Error Display */}
+                {apiError && (
+                  <div className="p-4 bg-[#FFEBEE] rounded-[16px] border border-[#EF5350]">
+                    <p className="text-sm text-[#C62828] font-normal flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                      <span>
+                        <strong>Помилка CORS:</strong><br />
+                        {apiError}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Results */}
+                {topTeams.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-normal text-black mb-4 flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
+                      Результати ({topTeams.length} команд):
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#E3F2FD] border-b-2 border-[#90CAF9]">
+                            <th className="text-left py-3 px-4 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Позиція</th>
+                            <th className="text-left py-3 px-4 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Назва</th>
+                            <th className="text-left py-3 px-4 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Очки</th>
+                            <th className="text-left py-3 px-4 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">HLTV ID</th>
+                            <th className="text-left py-3 px-4 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коментар</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {topTeams.map((team) => (
+                            <tr 
+                              key={team.id} 
+                              className="border-b border-[#E3F2FD] hover:bg-[#F0F8FF] transition-colors"
+                            >
+                              <td className="py-3 px-4">
+                                <Badge className="bg-[#2196F3] text-white border-0 rounded-[12px] px-3 py-1 font-normal">
+                                  #{team.position}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-4 font-normal text-black">{team.name}</td>
+                              <td className="py-3 px-4 text-[#6B6B6B] font-light">{team.points}</td>
+                              <td className="py-3 px-4 text-[#6B6B6B] font-light">{team.hltvId}</td>
+                              <td className="py-3 px-4 text-[#6B6B6B] font-light">{team.comment || '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* API Info */}
+                <div className="mt-4 space-y-3">
+                  <div className="p-4 bg-[#FFF3E0] rounded-[16px] border border-[#FFB74D]">
+                    <p className="text-sm text-[#E65100] font-normal flex items-start gap-2">
+                      <Info className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                      <span>
+                        <strong>Діагностика:</strong> Перевірте консоль браузера (F12) для детальної інформації про помилку. Якщо бачите "CORS policy" помилку, це означає що API сервер не налаштований для прийому запитів з браузера.
+                      </span>
+                    </p>
+                  </div>
+                  <div className="p-4 bg-[#E3F2FD] rounded-[16px] border border-[#90CAF9]">
+                    <p className="text-sm text-[#6B6B6B] font-light">
+                      <strong className="text-black">API Endpoint:</strong> GET https://api.cstest.pp.ua/api/Teams/top/{'{numberOfTeams}'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            {/* 1. Всього матчів */}
-            <Card 
-              className="border-2 border-[#90CAF9] shadow-[0_8px_24px_rgba(33,150,243,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(33,150,243,0.3)] hover:border-[#64B5F6] transition-all duration-300 relative"
-              style={{
-                background: 'linear-gradient(135deg, #E3F2FD 0%, #F0F8FF 100%)'
-              }}
-            >
-              <div className="absolute inset-0 opacity-5" 
-                style={{
-                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(33,150,243,0.3) 8px, rgba(33,150,243,0.3) 10px)`
-                }}
-              />
-              
-              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-2 bg-[#2196F3] rounded-[16px] shadow-[0_3px_8px_rgba(33,150,243,0.4)]">
-                    <Trophy className="h-5 w-5 text-white" strokeWidth={2} />
+            {/* Total Matches */}
+            <Card className="border-2 border-[#E8E6DC] shadow-[0_6px_20px_rgba(0,0,0,0.06)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(0,0,0,0.1)] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Всього матчів</p>
+                    <p className="text-4xl font-light text-black">{sortedMatches.length}</p>
                   </div>
-                  Всього матчів
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-5 relative z-10">
-                <div className="text-4xl font-light text-black tracking-tight">{sortedMatches.length}</div>
-              </CardContent>
-            </Card>
-            
-            {/* 2. Безпечні матчі */}
-            <Card 
-              className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
-              style={{
-                background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
-              }}
-            >
-              <div className="absolute inset-0 opacity-5" 
-                style={{
-                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
-                }}
-              />
-              
-              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
-                    <Shield className="h-5 w-5 text-white" strokeWidth={2} />
+                  <div className="p-3 bg-[#F4E157] rounded-[20px] shadow-[0_6px_16px_rgba(244,225,87,0.3)]">
+                    <Trophy className="h-7 w-7 text-black" strokeWidth={1.5} />
                   </div>
-                  Безпечні матчі
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-5 relative z-10">
-                <div className="text-4xl font-light text-[#4CAF50] tracking-tight">
-                  {sortedMatches.filter(m => m.risk <= 30).length}
                 </div>
               </CardContent>
             </Card>
-            
-            {/* 3. Hot Matches */}
-            <Card 
-              className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
-              style={{
-                background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
-              }}
-            >
-              <div className="absolute inset-0 opacity-5" 
-                style={{
-                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
-                }}
-              />
-              
-              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
-                    <Flame className="h-5 w-5 text-white" strokeWidth={2} />
+
+            {/* Safe Matches */}
+            <Card className="border-2 border-[#C8E6C9] shadow-[0_6px_20px_rgba(76,175,80,0.15)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(76,175,80,0.25)] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Безпечні матчі</p>
+                    <p className="text-4xl font-light text-[#4CAF50]">{sortedMatches.filter(m => m.risk <= 30).length}</p>
                   </div>
-                  Hot Matches
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-5 relative z-10">
-                <div className="text-4xl font-light text-[#FF9800] tracking-tight">
-                  {sortedMatches.filter(m => m.aiConfidence > 70 && m.upsetProbability < 20).length}
+                  <div className="p-3 bg-[#4CAF50] rounded-[20px] shadow-[0_6px_16px_rgba(76,175,80,0.3)]">
+                    <Shield className="h-7 w-7 text-white" strokeWidth={1.5} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            
-            {/* 4. Safe Picks */}
-            <Card 
-              className="border-2 border-[#A5D6A7] shadow-[0_8px_24px_rgba(76,175,80,0.25)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(76,175,80,0.35)] hover:border-[#81C784] transition-all duration-300 relative"
-              style={{
-                background: 'linear-gradient(135deg, #E8F5E9 0%, #F1F8F4 100%)'
-              }}
-            >
-              <div className="absolute inset-0 opacity-5" 
-                style={{
-                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(76,175,80,0.3) 8px, rgba(76,175,80,0.3) 10px)`
-                }}
-              />
-              
-              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-2 bg-[#4CAF50] rounded-[16px] shadow-[0_3px_8px_rgba(76,175,80,0.4)]">
-                    <CheckCircle className="h-5 w-5 text-white" strokeWidth={2} />
+
+            {/* Hot Matches */}
+            <Card className="border-2 border-[#FFCCBC] shadow-[0_6px_20px_rgba(255,87,34,0.15)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(255,87,34,0.25)] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Hot Matches</p>
+                    <p className="text-4xl font-light text-[#FF5722]">{sortedMatches.filter(m => m.aiConfidence >= 70 && m.upsetProbability < 20).length}</p>
                   </div>
-                  Safe Picks
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-5 relative z-10">
-                <div className="text-4xl font-light text-[#4CAF50] tracking-tight">
-                  {safePicksCount}
+                  <div className="p-3 bg-[#FF5722] rounded-[20px] shadow-[0_6px_16px_rgba(255,87,34,0.3)]">
+                    <Flame className="h-7 w-7 text-white" strokeWidth={1.5} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            
-            {/* 5. Середній AI % */}
-            <Card 
-              className="border-2 border-[#FFCC80] shadow-[0_8px_24px_rgba(255,152,0,0.2)] rounded-[28px] overflow-hidden hover:shadow-[0_12px_32px_rgba(255,152,0,0.3)] hover:border-[#FFB74D] transition-all duration-300 relative"
-              style={{
-                background: 'linear-gradient(135deg, #FFF3E0 0%, #FFF9F0 100%)'
-              }}
-            >
-              <div className="absolute inset-0 opacity-5" 
-                style={{
-                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,152,0,0.3) 8px, rgba(255,152,0,0.3) 10px)`
-                }}
-              />
-              
-              <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-                <CardTitle className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-2 bg-[#FF9800] rounded-[16px] shadow-[0_3px_8px_rgba(255,152,0,0.4)]">
-                    <Target className="h-5 w-5 text-white" strokeWidth={2} />
+
+            {/* Safe Picks */}
+            <Card className="border-2 border-[#B2DFDB] shadow-[0_6px_20px_rgba(0,150,136,0.15)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(0,150,136,0.25)] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Safe Picks</p>
+                    <p className="text-4xl font-light text-[#009688]">{safePicksCount}</p>
                   </div>
-                  Середній AI %
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-5 relative z-10">
-                <div className="text-4xl font-light text-[#FF9800] tracking-tight">
-                  {sortedMatches.length > 0 ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length) : 0}%
+                  <div className="p-3 bg-[#009688] rounded-[20px] shadow-[0_6px_16px_rgba(0,150,136,0.3)]">
+                    <CheckCircle className="h-7 w-7 text-white" strokeWidth={1.5} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Average AI Confidence */}
+            <Card className="border-2 border-[#BBDEFB] shadow-[0_6px_20px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(33,150,243,0.25)] transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Середній AI %</p>
+                    <p className="text-4xl font-light text-[#2196F3]">
+                      {sortedMatches.length > 0 
+                        ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length)
+                        : 0}%
+                    </p>
+                  </div>
+                  <div className="p-3 bg-[#2196F3] rounded-[20px] shadow-[0_6px_16px_rgba(33,150,243,0.3)]">
+                    <Brain className="h-7 w-7 text-white" strokeWidth={1.5} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Collapsible Filters */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader 
-              className="border-b-2 border-[#E8E6DC] p-6 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
-              onClick={() => setFiltersExpanded(!filtersExpanded)}
-            >
+          {/* Filters and Search */}
+          <Card className="border-2 border-[#E8E6DC] shadow-[0_6px_20px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
+            <CardHeader className="border-b-2 border-[#E8E6DC] p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl font-light text-black tracking-tight flex items-center gap-3">
                   <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_6px_16px_rgba(244,225,87,0.3)]">
@@ -789,8 +911,8 @@ export default function Matches() {
                 </CardTitle>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="rounded-[16px] hover:bg-[#F5F5F3] text-black"
+                  onClick={() => setFiltersExpanded(!filtersExpanded)}
+                  className="rounded-[16px] hover:bg-[#F4E157]/20 font-light"
                 >
                   {filtersExpanded ? (
                     <>
@@ -806,14 +928,26 @@ export default function Matches() {
                 </Button>
               </div>
             </CardHeader>
-            
             {filtersExpanded && (
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5">
+              <CardContent className="p-6 space-y-6">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
+                  <Input
+                    placeholder="Пошук команд..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-12"
+                  />
+                </div>
+
+                {/* Filters Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Tier Filter */}
                   <div>
                     <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Tier:</label>
                     <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-11">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -824,41 +958,44 @@ export default function Matches() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
+                  {/* Confidence Filter */}
                   <div>
-                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">AI Confidence:</label>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">AI Впевненість:</label>
                     <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-11">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Всі</SelectItem>
-                        <SelectItem value="high">&gt;80%</SelectItem>
-                        <SelectItem value="medium">60-80%</SelectItem>
-                        <SelectItem value="low">&lt;60%</SelectItem>
+                        <SelectItem value="high">Висока (&gt;80%)</SelectItem>
+                        <SelectItem value="medium">Середня (60-80%)</SelectItem>
+                        <SelectItem value="low">Низька (&lt;60%)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
+                  {/* Risk Filter */}
                   <div>
                     <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Ризик:</label>
                     <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-11">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Всі</SelectItem>
-                        <SelectItem value="safe">Низький</SelectItem>
-                        <SelectItem value="moderate">Помірний</SelectItem>
-                        <SelectItem value="high">Високий</SelectItem>
+                        <SelectItem value="safe">Низький (≤30%)</SelectItem>
+                        <SelectItem value="moderate">Помірний (30-50%)</SelectItem>
+                        <SelectItem value="high">Високий (&gt;50%)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
+                  {/* Match Type Filter */}
                   <div>
-                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Тип матчу:</label>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Формат:</label>
                     <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                      <SelectTrigger className="rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11">
+                      <SelectTrigger className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-11">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -869,263 +1006,232 @@ export default function Matches() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <div>
-                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Пошук:</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-5 w-5 text-[#8B8B8B]" strokeWidth={1.5} />
-                      <Input
-                        placeholder="Команда..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 rounded-[16px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors font-light h-11"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Hot Match:</label>
-                    <Button
-                      variant={showHotMatches ? 'default' : 'outline'}
-                      className={`w-full rounded-[16px] font-normal h-11 transition-all duration-300 ${
-                        showHotMatches 
-                          ? 'bg-[#F4E157] hover:bg-[#E8D54A] text-black shadow-[0_4px_12px_rgba(244,225,87,0.3)] border-0' 
-                          : 'border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white text-black'
-                      }`}
-                      onClick={() => setShowHotMatches(!showHotMatches)}
-                    >
-                      {showHotMatches ? 'Увімкнено' : 'Вимкнено'}
-                    </Button>
-                  </div>
+                </div>
+
+                {/* Hot Matches Toggle */}
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant={showHotMatches ? "default" : "outline"}
+                    onClick={() => setShowHotMatches(!showHotMatches)}
+                    className={`rounded-[16px] font-normal h-11 px-6 transition-all duration-300 ${
+                      showHotMatches 
+                        ? 'bg-[#FF5722] hover:bg-[#E64A19] text-white border-0 shadow-[0_4px_12px_rgba(255,87,34,0.3)]' 
+                        : 'border-2 border-[#E8E6DC] hover:border-[#FF5722] hover:bg-[#FF5722]/10'
+                    }`}
+                  >
+                    <Flame className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                    {showHotMatches ? 'Показати всі' : 'Тільки Hot Matches'}
+                  </Button>
                 </div>
               </CardContent>
             )}
           </Card>
 
-          {/* Matches Table */}
-          {sortedMatches.length > 0 ? (
-            <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-              <CardHeader className="border-b-2 border-[#E8E6DC] p-8">
-                <CardTitle className="text-3xl font-light text-black tracking-tight flex items-center gap-4">
-                  <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_8px_20px_rgba(244,225,87,0.3)]">
-                    <Calendar className="h-7 w-7 text-black" strokeWidth={1.5} />
+          {/* Matches Table - VERSION 691 with Refresh Button */}
+          <Card className="border-2 border-[#E8E6DC] shadow-[0_6px_20px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
+            <CardHeader className="border-b-2 border-[#E8E6DC] p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl font-light text-black tracking-tight flex items-center gap-3">
+                  <div className="p-2.5 bg-[#2196F3] rounded-[20px] shadow-[0_6px_16px_rgba(33,150,243,0.3)]">
+                    <Calendar className="h-6 w-6 text-white" strokeWidth={1.5} />
                   </div>
-                  <span>{currentDate}</span>
+                  {currentDate}
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC]">
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Матч</th>
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Фаворит</th>
-                        <th 
-                          className="text-center py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#FAFAF8] transition-colors"
-                          onClick={() => toggleSort('confidence')}
-                        >
-                          <div className="flex items-center justify-center gap-1">
-                            AI %
-                            <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
-                          </div>
-                        </th>
-                        <th 
-                          className="text-center py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#FAFAF8] transition-colors"
-                          onClick={() => toggleSort('risk')}
-                        >
-                          <div className="flex items-center justify-center gap-1">
-                            Ризик
-                            <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
-                          </div>
-                        </th>
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коефіцієнти</th>
-                        <th className="text-center py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Win Rate</th>
-                        <th className="text-center py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Info</th>
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Турнір</th>
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">AI Рекомендація</th>
-                        <th className="text-left py-5 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коментар</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sortedMatches.map((match) => {
-                        const formInfo = getFormStabilityInfo(match.formStability);
-                        const riskInfo = getRiskBadge(match.risk);
-                        const safePick = isSafePick(match);
-                        const riskComments = getMatchRiskComments(match.team1, match.team2);
-                        const aiExplanation = getAIExplanation(match);
-                        
-                        return (
-                          <tr 
-                            key={match.id} 
-                            className="border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-colors"
-                          >
-                            <td className="py-5 px-6">
-                              <div className="flex items-center gap-2">
-                                <div>
-                                  <div className="font-normal text-black text-[15px]">
-                                    {match.team1} <span className="text-[#8B8B8B] font-light">vs</span> {match.team2}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Badge variant="secondary" className="text-xs px-3 py-1.5 rounded-[12px] bg-[#F5F5F3] text-black border-0 font-light">
-                                      {match.matchType}
-                                    </Badge>
-                                    <Badge variant="secondary" className="text-xs px-3 py-1.5 rounded-[12px] bg-[#F5F5F3] text-black border-0 font-light">
-                                      {match.tier.toUpperCase()}
-                                    </Badge>
-                                    {match.url && (
-                                      <a 
-                                        href={match.url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="text-black hover:text-[#6B6B6B] transition-colors p-1 hover:bg-[#F5F5F3] rounded-lg inline-block"
-                                      >
-                                        <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
-                                      </a>
-                                    )}
-                                  </div>
-                                </div>
+                
+                {/* Refresh Button next to Date */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={refreshMatches}
+                      disabled={isLoading}
+                      size="sm"
+                      className="group relative rounded-[16px] bg-[#2196F3] hover:bg-[#1976D2] text-white font-normal h-10 px-5 transition-all duration-300 overflow-hidden shadow-[0_4px_12px_rgba(33,150,243,0.25)]"
+                    >
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin relative z-10" strokeWidth={1.5} />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 relative z-10" strokeWidth={1.5} />
+                      )}
+                      <span className="ml-2 relative z-10">Оновити</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black text-white p-2 rounded-[8px]">
+                    <p className="text-xs font-light">Оновити матчі з HLTV</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#FAFAF8] border-b-2 border-[#E8E6DC]">
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Матч</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Фаворит</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('confidence')}>
+                        <div className="flex items-center gap-2">
+                          AI %
+                          <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
+                        </div>
+                      </th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('risk')}>
+                        <div className="flex items-center gap-2">
+                          Ризик
+                          <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
+                        </div>
+                      </th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коефіцієнти</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Win Rate</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Info</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Турнір</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">AI Коментар</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">AI Рекомендація</th>
+                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коментар</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedMatches.map((match) => {
+                      const riskBadge = getRiskBadge(match.risk);
+                      const formInfo = getFormStabilityInfo(match.formStability);
+                      const isSafe = isSafePick(match);
+                      const riskComments = getMatchRiskComments(match.team1, match.team2);
+
+                      return (
+                        <tr key={match.id} className="border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-colors">
+                          {/* Match */}
+                          <td className="py-5 px-6">
+                            <div className="space-y-1.5">
+                              <div className="font-normal text-black text-base">
+                                {match.team1} vs {match.team2}
                               </div>
-                            </td>
-                            <td className="py-5 px-6">
-                              <div className="font-normal text-black text-[15px]">{match.favorite}</div>
-                            </td>
-                            <td className="py-5 px-6 text-center">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-[#E8E6DC] text-[#2A2A2A] border-0 rounded-[10px] px-2.5 py-0.5 text-xs font-normal">
+                                  {match.matchType}
+                                </Badge>
+                                <Badge className="bg-[#2196F3] text-white border-0 rounded-[10px] px-2.5 py-0.5 text-xs font-normal uppercase">
+                                  {match.tier}
+                                </Badge>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Favorite */}
+                          <td className="py-5 px-6">
+                            <div className="font-normal text-black">{match.favorite}</div>
+                          </td>
+
+                          {/* AI Confidence */}
+                          <td className="py-5 px-6">
+                            <div className="flex items-center gap-2">
+                              <div className="text-2xl font-light text-[#2196F3]">{match.aiConfidence}%</div>
+                            </div>
+                          </td>
+
+                          {/* Risk */}
+                          <td className="py-5 px-6">
+                            <div className="space-y-2">
+                              <div className="text-2xl font-light text-[#6B6B6B]">{match.risk}%</div>
+                              <Badge className={`${riskBadge.color} border rounded-[10px] px-2.5 py-0.5 text-xs font-normal flex items-center gap-1.5 w-fit`}>
+                                <div className={`w-1.5 h-1.5 rounded-full ${riskBadge.dotColor}`} />
+                                {riskBadge.label}
+                              </Badge>
+                            </div>
+                          </td>
+
+                          {/* Odds */}
+                          <td className="py-5 px-6">
+                            <div className="space-y-1">
+                              <div className="text-sm text-[#6B6B6B] font-light">
+                                {match.team1}: <span className="font-normal text-black">{match.odds.team1}</span>
+                              </div>
+                              <div className="text-sm text-[#6B6B6B] font-light">
+                                {match.team2}: <span className="font-normal text-black">{match.odds.team2}</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Win Rate */}
+                          <td className="py-5 px-6">
+                            <div className="text-lg font-normal text-black">{match.winRate}%</div>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge className={`${formInfo.color} mt-1.5 px-2.5 py-0.5 text-xs font-normal flex items-center gap-1.5 w-fit`}>
+                                  {formInfo.icon}
+                                  {formInfo.label}
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-black text-white p-3 rounded-[12px]">
+                                <p className="text-sm font-light">{formInfo.tooltip}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </td>
+
+                          {/* Info */}
+                          <td className="py-5 px-6">
+                            {isSafe && (
                               <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge 
-                                    className={`font-normal px-4 py-2 rounded-[16px] border-0 text-sm cursor-help hover:scale-105 transition-transform ${
-                                      match.aiConfidence >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-[0_4px_12px_rgba(76,175,80,0.3)]' :
-                                      match.aiConfidence >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-[0_4px_12px_rgba(33,150,243,0.3)]' : 
-                                      'bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-[0_4px_12px_rgba(158,158,158,0.3)]'
-                                    }`}
-                                  >
-                                    <Info className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
-                                    {match.aiConfidence}%
+                                <TooltipTrigger>
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 rounded-[10px] px-2.5 py-1 text-xs font-normal flex items-center gap-1.5 w-fit">
+                                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.5} />
+                                    Safe Pick
                                   </Badge>
                                 </TooltipTrigger>
-                                <TooltipContent side="right" className="max-w-md p-5 bg-white border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[20px]">
-                                  <div className="space-y-3">
-                                    <div className="flex items-center gap-2 mb-3 pb-3 border-b-2 border-[#E8E6DC]">
-                                      <Info className="h-5 w-5 text-black" strokeWidth={1.5} />
-                                      <p className="font-normal text-base text-black">Пояснення AI прогнозу</p>
-                                    </div>
-                                    <div className="text-sm text-[#6B6B6B] whitespace-pre-line leading-relaxed font-light">
-                                      {aiExplanation}
-                                    </div>
-                                    <div className="mt-4 pt-3 border-t-2 border-[#E8E6DC]">
-                                      <p className="text-sm text-[#8B8B8B] italic font-light">
-                                        💡 AI аналізує форму команд, історію матчів, коефіцієнти та інші фактори
-                                      </p>
-                                    </div>
+                                <TooltipContent className="max-w-md bg-black text-white p-4 rounded-[12px]">
+                                  <div className="space-y-2">
+                                    <p className="font-normal text-sm">✅ Безпечний вибір</p>
+                                    <p className="text-xs font-light whitespace-pre-line">{getAIExplanation(match)}</p>
                                   </div>
                                 </TooltipContent>
                               </Tooltip>
-                            </td>
-                            <td className="py-5 px-6 text-center">
-                              <div className="flex items-center justify-center gap-2 cursor-pointer hover:scale-105 transition-transform" title="Клікніть для сортування">
-                                <div className={`w-2.5 h-2.5 rounded-full ${riskInfo.dotColor} shadow-md`} />
-                                <span className="text-[15px] font-normal text-black">{match.risk}%</span>
-                              </div>
-                              <div className="text-xs text-[#6B6B6B] mt-1.5 font-light">{riskInfo.label}</div>
-                            </td>
-                            <td className="py-5 px-6">
-                              <div className="text-[15px] space-y-1">
-                                <div className="text-[#6B6B6B] font-light">{match.team1}: <span className="font-normal text-black">{match.odds.team1}</span></div>
-                                <div className="text-[#6B6B6B] font-light">{match.team2}: <span className="font-normal text-black">{match.odds.team2}</span></div>
-                              </div>
-                            </td>
-                            <td className="py-5 px-6 text-center">
-                              <div className="flex items-center justify-center gap-2">
-                                {match.winRate >= 70 ? (
-                                  <TrendingUp className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
-                                ) : (
-                                  <TrendingDown className="h-5 w-5 text-[#D32F2F]" strokeWidth={1.5} />
-                                )}
-                                <span className="font-normal text-black text-[15px]">{match.winRate}%</span>
-                              </div>
-                            </td>
-                            <td className="py-5 px-6 text-center">
-                              <div className="flex flex-col items-center gap-2">
-                                {safePick && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-3 py-1.5 rounded-[16px] border-0 font-normal shadow-[0_4px_12px_rgba(76,175,80,0.3)] flex items-center gap-1.5 cursor-help">
-                                        <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />
-                                        Safe Pick
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="bg-white border-2 border-[#A5D6A7] shadow-[0_8px_32px_rgba(76,175,80,0.2)] rounded-[20px] p-4">
-                                      <p className="text-sm text-[#6B6B6B] max-w-xs font-light">
-                                        🛡️ <strong>Safe Pick</strong> - Матч з високою впевненістю AI (&gt;80%), низьким ризиком (&lt;30%) та стабільною формою команди. Рекомендується для надійних ставок.
-                                      </p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Badge className={`${formInfo.color} flex items-center gap-1.5 justify-center px-3 py-1.5 rounded-[16px] font-normal text-xs shadow-lg cursor-help`}>
-                                      {formInfo.icon}
-                                      {formInfo.label}
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="bg-white border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[20px] p-4">
-                                    <p className="text-sm text-[#6B6B6B] max-w-xs font-light">
-                                      {formInfo.tooltip}
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </div>
-                            </td>
-                            <td className="py-5 px-6">
-                              <div className="text-[15px] text-[#6B6B6B] font-light">{match.context}</div>
-                            </td>
-                            <td className="py-5 px-6">
+                            )}
+                          </td>
+
+                          {/* Tournament */}
+                          <td className="py-5 px-6">
+                            <div className="text-sm text-[#6B6B6B] font-light">{match.context}</div>
+                          </td>
+
+                          {/* AI Comment (aiSummary) */}
+                          <td className="py-5 px-6">
+                            <div className="text-sm text-[#6B6B6B] font-light max-w-xs">{match.aiSummary}</div>
+                          </td>
+
+                          {/* AI Recommendation */}
+                          <td className="py-5 px-6">
+                            <Button
+                              onClick={() => handleGetAIRecommendation(match)}
+                              className="group relative rounded-[12px] bg-[#2196F3] hover:bg-[#1976D2] text-white font-normal h-9 px-4 text-xs transition-all duration-300 overflow-hidden shadow-[0_4px_12px_rgba(33,150,243,0.25)]"
+                            >
+                              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              <Brain className="mr-1.5 h-4 w-4 relative z-10" strokeWidth={1.5} />
+                              <span className="relative z-10">Отримати прогноз</span>
+                            </Button>
+                          </td>
+
+                          {/* Comment */}
+                          <td className="py-5 px-6">
+                            {riskComments ? (
                               <Button
-                                onClick={() => handleGetAIRecommendation(match)}
-                                className="group relative rounded-[16px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal shadow-[0_4px_12px_rgba(244,225,87,0.3)] transition-all hover:scale-105 flex items-center gap-2 overflow-hidden h-11 px-5"
-                                size="sm"
+                                onClick={() => handleShowComment(match)}
+                                variant="outline"
+                                className="rounded-[12px] border-2 border-[#FF9800] text-[#FF9800] hover:bg-[#FF9800] hover:text-white font-normal h-9 px-4 text-xs transition-all duration-300"
                               >
-                                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                                <Brain className="h-4 w-4 relative z-10" strokeWidth={1.5} />
-                                <span className="relative z-10">Отримати прогноз</span>
+                                <Eye className="mr-1.5 h-4 w-4" strokeWidth={1.5} />
+                                Переглянути
                               </Button>
-                            </td>
-                            <td className="py-5 px-6">
-                              {riskComments ? (
-                                <Button
-                                  onClick={() => handleShowComment(match)}
-                                  className="group relative rounded-[16px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal shadow-[0_4px_12px_rgba(244,225,87,0.3)] transition-all hover:scale-105 flex items-center gap-2 overflow-hidden h-11 px-5"
-                                  size="sm"
-                                >
-                                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                                  <Eye className="h-4 w-4 relative z-10" strokeWidth={1.5} />
-                                  <span className="relative z-10">Показати</span>
-                                </Button>
-                              ) : (
-                                <div className="text-sm text-[#8B8B8B] font-light">—</div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-              <CardContent className="py-24">
-                <div className="text-center">
-                  <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
-                    <AlertTriangle className="h-20 w-20 text-[#8B8B8B]" strokeWidth={1.5} />
-                  </div>
-                  <p className="text-black font-normal text-xl">Немає матчів за обраними фільтрами</p>
-                  <p className="text-base text-[#6B6B6B] mt-3 font-light">Спробуйте змінити фільтри або оновити дані</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                            ) : (
+                              <span className="text-[#6B6B6B] text-sm font-light">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* AI Recommendation Modal */}
           <AIRecommendationModal

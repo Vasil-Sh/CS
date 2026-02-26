@@ -357,7 +357,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
     const largestLoss = Math.abs(Math.min(...returns.map(r => r * (stakes.reduce((a, b) => a + b, 0) / stakes.length || 0))));
 
-    const winStreaks = [];
+    const winStreaks: number[] = [];
     let currentWinStreak = 0;
     completedBets.forEach(bet => {
       if (bet.result === 'Win') {
@@ -507,13 +507,33 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </CardHeader>
         </Card>
 
-        {/* Legal Disclaimer */}
-        <Alert className="rounded-[28px] border-2 border-[#BBDEFB] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
-          <Info className="h-5 w-5 text-[#1976D2]" strokeWidth={1.5} />
-          <AlertDescription className="font-light text-black ml-2">
-            <strong className="font-normal">Важливо:</strong> Аналітика носить рекомендаційний характер і не є фінансовою порадою. Всі рішення щодо ставок приймаються користувачем самостійно на власний ризик.
-          </AlertDescription>
-        </Alert>
+        {/* Legal Disclaimer - PROMINENT VERSION */}
+        <Card className="border-3 border-[#FF9800] shadow-[0_8px_32px_rgba(255,152,0,0.25)] rounded-[32px] bg-gradient-to-r from-[#FFF3E0] via-[#FFF8E1] to-[#FFF3E0] overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              {/* Left accent bar */}
+              <div className="w-2 bg-gradient-to-b from-[#FF9800] to-[#F57C00] flex-shrink-0 rounded-l-[32px]" />
+              
+              <div className="flex items-center gap-5 p-7 flex-1">
+                {/* Icon container */}
+                <div className="p-4 bg-[#FF9800] rounded-[24px] shadow-[0_6px_20px_rgba(255,152,0,0.4)] flex-shrink-0">
+                  <AlertTriangle className="h-7 w-7 text-white" strokeWidth={2} />
+                </div>
+                
+                {/* Text content */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-[#E65100] mb-1.5 tracking-tight">
+                    ⚠️ Важливо
+                  </h3>
+                  <p className="text-base font-normal text-[#BF360C] leading-relaxed">
+                    Аналітика носить <strong className="font-bold text-[#D84315]">рекомендаційний характер</strong> і не є фінансовою порадою. 
+                    Всі рішення щодо ставок приймаються користувачем <strong className="font-bold text-[#D84315]">самостійно на власний ризик</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Risk Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
