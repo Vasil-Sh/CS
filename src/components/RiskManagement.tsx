@@ -861,7 +861,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="text-3xl font-light text-black">Детальні ризик-метрики</CardTitle>
+              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black"><div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]"><BarChart3 className="h-6 w-6 text-black" strokeWidth={1.5} /></div>Детальні ризик-метрики</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-8">
               <div className="flex justify-between items-center">
