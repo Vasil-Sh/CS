@@ -258,7 +258,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const getGameEmoji = (game: string) => {
-    return game === 'CS' ? '🎯 CS:' : '🛡️ Дота:';
+    return game === 'CS' ? 'CS:' : 'Дота:';
   };
 
   const filteredTeams = riskyTeams.filter(team => 
@@ -770,7 +770,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
               <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-                <span>🎯 CS команди</span>
+                <span className="flex items-center gap-2"><Target className="h-6 w-6 text-[#F4E157]" strokeWidth={1.5} />CS команди</span>
                 <Badge className="rounded-[20px] bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB] font-normal px-4 py-2">{teamsByGame.CS.length}</Badge>
               </CardTitle>
             </CardHeader>
@@ -815,7 +815,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
               <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-                <span>🛡️ Dota 2 команди</span>
+                <span className="flex items-center gap-2"><Shield className="h-6 w-6 text-[#F4E157]" strokeWidth={1.5} />Dota 2 команди</span>
                 <Badge className="rounded-[20px] bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB] font-normal px-4 py-2">{teamsByGame.Дота.length}</Badge>
               </CardTitle>
             </CardHeader>
