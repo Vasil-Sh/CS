@@ -7,32 +7,25 @@ import { Input } from '@/components/ui/input';
 import { 
   Calendar, 
   Trophy, 
-  Clock, 
   Filter,
   RefreshCw,
   TrendingUp,
   TrendingDown,
   AlertTriangle,
   Target,
-  Users,
   Zap,
   ArrowUpDown,
   Search,
   Loader2,
-  ExternalLink,
   Flame,
   Shield,
   AlertCircle,
   Eye,
-  EyeOff,
-  MousePointerClick,
-  CheckCircle,
-  Info,
   Brain,
-  Sparkles,
   ChevronDown,
   ChevronUp,
-  BarChart3
+  BarChart3,
+  Info
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat, type MatchData } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -253,97 +246,15 @@ const getFormStabilityInfo = (form: FormStability) => {
   }
 };
 
-const getRiskBadge = (risk: number) => {
+// Get risk color based on percentage
+const getRiskColor = (risk: number): string => {
   if (risk <= 30) {
-    return {
-      label: 'Низький',
-      color: 'bg-[#E8F5E9] text-[#4CAF50] border-[#C8E6C9]',
-      dotColor: 'bg-[#4CAF50]'
-    };
+    return 'bg-[#E8F5E9] text-[#2E7D32]'; // light green bg, dark green text
   }
   if (risk <= 50) {
-    return {
-      label: 'Помірний',
-      color: 'bg-[#FFF3E0] text-[#FF9800] border-[#FFCC80]',
-      dotColor: 'bg-[#FF9800]'
-    };
+    return 'bg-[#FFF3E0] text-[#E65100]'; // light orange bg, dark orange text
   }
-  return {
-    label: 'Високий',
-    color: 'bg-[#FFE8E8] text-[#D32F2F] border-[#FFCDD2]',
-    dotColor: 'bg-[#D32F2F]'
-  };
-};
-
-// Check if match is Safe Pick
-const isSafePick = (match: Match): boolean => {
-  return (
-    match.aiConfidence >= 80 &&
-    match.risk <= 30 &&
-    match.upsetProbability <= 15 &&
-    match.formStability !== 'falling' &&
-    match.formStability !== 'slump' &&
-    match.formStability !== 'inconsistent'
-  );
-};
-
-// Generate AI Explanation
-const getAIExplanation = (match: Match): string => {
-  const factors: string[] = [];
-  
-  // Form Analysis
-  const formLabels: Record<FormStability, string> = {
-    hot_streak: '🔥 Команда у топ-формі (серія перемог)',
-    stable: '🛡️ Стабільна форма (передбачувані результати)',
-    momentum: '📈 Набирає темп (покращення результатів)',
-    falling: '📉 Втрачає форму (погіршення результатів)',
-    slump: '⚠️ У кризі (серія поразок)',
-    inconsistent: '⚡ Непередбачувана форма (змінні результати)'
-  };
-  factors.push(`Форма: ${formLabels[match.formStability]}`);
-  
-  // Win Rate
-  if (match.winRate >= 70) {
-    factors.push(`✅ Високий Win Rate: ${match.winRate}% (сильна історія перемог)`);
-  } else if (match.winRate >= 60) {
-    factors.push(`➖ Середній Win Rate: ${match.winRate}% (стабільні результати)`);
-  } else {
-    factors.push(`⚠️ Низький Win Rate: ${match.winRate}% (слабка історія)`);
-  }
-  
-  // Odds Analysis
-  const oddsDiff = Math.abs(match.odds.team1 - match.odds.team2);
-  if (oddsDiff > 1.0) {
-    factors.push(`💰 Великий розрив в коефіцієнтах (${match.odds.team1} vs ${match.odds.team2})`);
-  } else {
-    factors.push(`⚖️ Рівні коефіцієнти (${match.odds.team1} vs ${match.odds.team2})`);
-  }
-  
-  // Match Type
-  const matchTypeLabels = {
-    Bo1: '⚡ Bo1 - висока непередбачуваність',
-    Bo3: '🎯 Bo3 - збалансований формат',
-    Bo5: '🏆 Bo5 - максимальна надійність'
-  };
-  factors.push(`Формат: ${matchTypeLabels[match.matchType]}`);
-  
-  // Player Form
-  if (match.playerForm.length > 0) {
-    const avgRating = match.playerForm.reduce((sum, p) => sum + p.rating, 0) / match.playerForm.length;
-    if (avgRating >= 1.2) {
-      factors.push(`⭐ Топ-гравці у формі (середній рейтинг: ${avgRating.toFixed(2)})`);
-    }
-  }
-  
-  // Tier Analysis
-  const tierLabels = {
-    tier1: '🏆 Tier 1 - топові команди',
-    tier2: '🥈 Tier 2 - середній рівень',
-    tier3: '🥉 Tier 3 - нижчий рівень'
-  };
-  factors.push(`Рівень: ${tierLabels[match.tier]}`);
-  
-  return factors.join('\n');
+  return 'bg-[#FFEBEE] text-[#C62828]'; // light red bg, dark red text
 };
 
 export default function Matches() {
@@ -562,7 +473,14 @@ export default function Matches() {
   const currentDate = sortedMatches.length > 0 ? sortedMatches[0].date : new Date().toISOString().split('T')[0];
 
   // Count Safe Picks
-  const safePicksCount = sortedMatches.filter(m => isSafePick(m)).length;
+  const safePicksCount = sortedMatches.filter(m => 
+    m.aiConfidence >= 80 &&
+    m.risk <= 30 &&
+    m.upsetProbability <= 15 &&
+    m.formStability !== 'falling' &&
+    m.formStability !== 'slump' &&
+    m.formStability !== 'inconsistent'
+  ).length;
 
   const toggleSort = (column: 'date' | 'confidence' | 'risk' | 'upset') => {
     if (sortBy === column) {
@@ -662,7 +580,7 @@ export default function Matches() {
                   Матчі
                 </h1>
                 <p className="text-[#6B6B6B] mt-4 text-xl font-light ml-[88px]">
-                  Аналітична система з AI прогнозами та Form Stability
+                  Аналітична система з прогнозами та Form Stability
                 </p>
               </div>
               
@@ -868,18 +786,18 @@ export default function Matches() {
                     <p className="text-4xl font-light text-[#009688]">{safePicksCount}</p>
                   </div>
                   <div className="p-3 bg-[#009688] rounded-[20px] shadow-[0_6px_16px_rgba(0,150,136,0.3)]">
-                    <CheckCircle className="h-7 w-7 text-white" strokeWidth={1.5} />
+                    <Target className="h-7 w-7 text-white" strokeWidth={1.5} />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Average AI Confidence */}
+            {/* Average Confidence */}
             <Card className="border-2 border-[#BBDEFB] shadow-[0_6px_20px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_28px_rgba(33,150,243,0.25)] transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Середній AI %</p>
+                    <p className="text-sm font-light text-[#6B6B6B] mb-1">Середній Прогноз</p>
                     <p className="text-4xl font-light text-[#2196F3]">
                       {sortedMatches.length > 0 
                         ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length)
@@ -961,7 +879,7 @@ export default function Matches() {
 
                   {/* Confidence Filter */}
                   <div>
-                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">AI Впевненість:</label>
+                    <label className="text-sm font-normal text-[#6B6B6B] mb-2 block">Впевненість:</label>
                     <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
                       <SelectTrigger className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#F4E157] transition-colors font-light h-11">
                         <SelectValue />
@@ -1027,7 +945,7 @@ export default function Matches() {
             )}
           </Card>
 
-          {/* Matches Table - VERSION 691 with Refresh Button */}
+          {/* Matches Table */}
           <Card className="border-2 border-[#E8E6DC] shadow-[0_6px_20px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="border-b-2 border-[#E8E6DC] p-6">
               <div className="flex items-center justify-between">
@@ -1068,34 +986,31 @@ export default function Matches() {
                   <thead>
                     <tr className="bg-[#FAFAF8] border-b-2 border-[#E8E6DC]">
                       <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Матч</th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Фаворит</th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('confidence')}>
-                        <div className="flex items-center gap-2">
-                          AI %
+                      <th className="text-center py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Фаворит</th>
+                      <th className="text-center py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('confidence')}>
+                        <div className="flex items-center justify-center gap-2">
+                          Прогноз %
                           <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('risk')}>
-                        <div className="flex items-center gap-2">
+                      <th className="text-center py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider cursor-pointer hover:bg-[#F4E157]/10 transition-colors" onClick={() => toggleSort('risk')}>
+                        <div className="flex items-center justify-center gap-2">
                           Ризик
                           <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
                         </div>
                       </th>
                       <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коефіцієнти</th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Win Rate</th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Info</th>
+                      <th className="text-center py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Win Rate</th>
                       <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Турнір</th>
-                      <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">AI Коментар</th>
                       <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">AI Рекомендація</th>
                       <th className="text-left py-4 px-6 text-sm font-normal text-[#2A2A2A] uppercase tracking-wider">Коментар</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sortedMatches.map((match) => {
-                      const riskBadge = getRiskBadge(match.risk);
                       const formInfo = getFormStabilityInfo(match.formStability);
-                      const isSafe = isSafePick(match);
                       const riskComments = getMatchRiskComments(match.team1, match.team2);
+                      const riskColorClass = getRiskColor(match.risk);
 
                       return (
                         <tr key={match.id} className="border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-colors">
@@ -1116,27 +1031,21 @@ export default function Matches() {
                             </div>
                           </td>
 
-                          {/* Favorite */}
-                          <td className="py-5 px-6">
+                          {/* Favorite - centered */}
+                          <td className="py-5 px-6 text-center">
                             <div className="font-normal text-black">{match.favorite}</div>
                           </td>
 
-                          {/* AI Confidence */}
-                          <td className="py-5 px-6">
-                            <div className="flex items-center gap-2">
-                              <div className="text-2xl font-light text-[#2196F3]">{match.aiConfidence}%</div>
-                            </div>
+                          {/* Прогноз % (was AI %) - centered */}
+                          <td className="py-5 px-6 text-center">
+                            <div className="text-2xl font-light text-[#2196F3]">{match.aiConfidence}%</div>
                           </td>
 
-                          {/* Risk */}
-                          <td className="py-5 px-6">
-                            <div className="space-y-2">
-                              <div className="text-2xl font-light text-[#6B6B6B]">{match.risk}%</div>
-                              <Badge className={`${riskBadge.color} border rounded-[10px] px-2.5 py-0.5 text-xs font-normal flex items-center gap-1.5 w-fit`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${riskBadge.dotColor}`} />
-                                {riskBadge.label}
-                              </Badge>
-                            </div>
+                          {/* Risk - centered, no badge label, just colored % */}
+                          <td className="py-5 px-6 text-center">
+                            <span className={`inline-block text-2xl font-light px-3 py-1 rounded-[12px] ${riskColorClass}`}>
+                              {match.risk}%
+                            </span>
                           </td>
 
                           {/* Odds */}
@@ -1151,12 +1060,12 @@ export default function Matches() {
                             </div>
                           </td>
 
-                          {/* Win Rate */}
-                          <td className="py-5 px-6">
+                          {/* Win Rate - centered */}
+                          <td className="py-5 px-6 text-center">
                             <div className="text-lg font-normal text-black">{match.winRate}%</div>
                             <Tooltip>
                               <TooltipTrigger>
-                                <Badge className={`${formInfo.color} mt-1.5 px-2.5 py-0.5 text-xs font-normal flex items-center gap-1.5 w-fit`}>
+                                <Badge className={`${formInfo.color} mt-1.5 px-2.5 py-0.5 text-xs font-normal inline-flex items-center gap-1.5`}>
                                   {formInfo.icon}
                                   {formInfo.label}
                                 </Badge>
@@ -1167,34 +1076,9 @@ export default function Matches() {
                             </Tooltip>
                           </td>
 
-                          {/* Info */}
-                          <td className="py-5 px-6">
-                            {isSafe && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 rounded-[10px] px-2.5 py-1 text-xs font-normal flex items-center gap-1.5 w-fit">
-                                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.5} />
-                                    Safe Pick
-                                  </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-md bg-black text-white p-4 rounded-[12px]">
-                                  <div className="space-y-2">
-                                    <p className="font-normal text-sm">✅ Безпечний вибір</p>
-                                    <p className="text-xs font-light whitespace-pre-line">{getAIExplanation(match)}</p>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                          </td>
-
                           {/* Tournament */}
                           <td className="py-5 px-6">
                             <div className="text-sm text-[#6B6B6B] font-light">{match.context}</div>
-                          </td>
-
-                          {/* AI Comment (aiSummary) */}
-                          <td className="py-5 px-6">
-                            <div className="text-sm text-[#6B6B6B] font-light max-w-xs">{match.aiSummary}</div>
                           </td>
 
                           {/* AI Recommendation */}
