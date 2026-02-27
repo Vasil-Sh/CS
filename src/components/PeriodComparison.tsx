@@ -187,23 +187,21 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header with filter */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
-                  <Info className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                <p className="text-sm font-medium text-[#111827] mb-1">Як працює порівняння:</p>
-                <p className="text-sm text-[#6B7280] leading-relaxed">
-                  Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+        {/* Header with filter — info button moved to the right, before the select */}
+        <div className="flex items-center justify-end gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
+                <Info className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+              <p className="text-sm font-medium text-[#111827] mb-1">Як працює порівняння:</p>
+              <p className="text-sm text-[#6B7280] leading-relaxed">
+                Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
+              </p>
+            </TooltipContent>
+          </Tooltip>
 
           <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
             <SelectTrigger className="w-48 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 text-sm font-medium text-[#374151]">
