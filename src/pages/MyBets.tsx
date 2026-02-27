@@ -1017,7 +1017,7 @@ export default function MyBets() {
                       relative rounded-[24px] px-6 py-4 font-light text-base
                       transition-all duration-300 ease-in-out
                       ${activeTab === tab.id 
-                        ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
+                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
                         : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
                       }
                     `}

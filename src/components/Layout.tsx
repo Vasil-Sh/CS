@@ -58,8 +58,8 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#f2f8ff] text-[#2A5BD7] shadow-[0_4px_16px_rgba(42,91,215,0.1)]'
-                : 'text-[#8B8B9A] hover:text-[#2A5BD7] hover:bg-[#f2f8ff]'
+                ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
+                : 'text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />

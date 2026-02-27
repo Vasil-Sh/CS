@@ -37,9 +37,10 @@ import {
   User,
   Sun,
   Moon,
-  MoreHorizontal
+  MoreHorizontal,
+  Pencil
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine, PieChart, Pie, Cell } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 interface TooltipPayload {
@@ -59,6 +60,51 @@ interface MonthlyData {
   losses: number;
   totalBets: number;
   winRate: number;
+}
+
+// Mini Donut Chart component — centered, with white gap between segments
+function MiniDonut({ 
+  value, 
+  total, 
+  colors, 
+  size = 140 
+}: { 
+  value: number; 
+  total: number; 
+  colors: { main: string; sub1: string; sub2: string }; 
+  size?: number;
+}) {
+  const percentage = total > 0 ? (value / total) * 100 : 0;
+  const remaining = 100 - percentage;
+  
+  const data = [
+    { name: 'value', val: percentage || 0.01 },
+    { name: 'remaining', val: remaining || 0.01 },
+  ];
+
+  return (
+    <div className="flex items-center justify-center" style={{ width: size, height: size }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={size * 0.30}
+            outerRadius={size * 0.46}
+            startAngle={90}
+            endAngle={-270}
+            dataKey="val"
+            stroke="#ffffff"
+            strokeWidth={4}
+          >
+            <Cell fill={colors.main} />
+            <Cell fill={colors.sub2} />
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
 
 export default function Analytics() {
@@ -118,7 +164,6 @@ export default function Analytics() {
     };
   }, [currentUser]);
 
-  // Close actions menu on outside click
   useEffect(() => {
     const handleClickOutside = () => setShowActionsMenu(false);
     if (showActionsMenu) {
@@ -241,7 +286,6 @@ export default function Analytics() {
   const winningBets = completedBets.filter((bet: Bet) => bet.result === 'Win');
   const losingBets = completedBets.filter((bet: Bet) => bet.result === 'Loss');
   
-  // Streak analysis
   const calculateStreaks = () => {
     let currentWinStreak = 0;
     let currentLossStreak = 0;
@@ -269,7 +313,6 @@ export default function Analytics() {
 
   const streaks = calculateStreaks();
 
-  // Odds analysis
   const oddsAnalysis = (): OddsRange[] => {
     const lowOdds = completedBets.filter((bet: Bet) => bet.odds < 2.0);
     const midOdds = completedBets.filter((bet: Bet) => bet.odds >= 2.0 && bet.odds < 3.0);
@@ -297,7 +340,6 @@ export default function Analytics() {
     ];
   };
 
-  // Helper function to shorten express bet names
   const shortenBetTypeName = (betType: string): string => {
     if (betType.includes('Експрес') || betType.includes('|')) {
       const formatMatch = betType.match(/(\d+)x/);
@@ -312,7 +354,6 @@ export default function Analytics() {
     return betType;
   };
 
-  // Bet type distribution with profit data
   const betTypeDistribution = () => {
     const distribution: { [key: string]: { count: number; profit: number; wins: number; originalName: string } } = {};
     bets.forEach((bet: Bet) => {
@@ -340,7 +381,6 @@ export default function Analytics() {
     }));
   };
 
-  // Monthly profit data with cumulative
   const monthlyProfitData = (): MonthlyData[] => {
     const monthlyData: { [key: string]: { profit: number; wins: number; losses: number } } = {};
     
@@ -380,7 +420,6 @@ export default function Analytics() {
       });
   };
 
-  // Balance over time with enhanced data - STARTS FROM 0
   const balanceOverTime = (): BalanceData[] => {
     const initialBalance = 0;
     let runningBalance = initialBalance;
@@ -409,7 +448,6 @@ export default function Analytics() {
     return balanceData;
   };
 
-  // Enhanced odds vs profit with color coding
   const oddsVsProfitData = (): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
       odds: Math.round(Number(bet.odds) * 100) / 100,
@@ -427,7 +465,6 @@ export default function Analytics() {
   const balanceData = balanceOverTime();
   const scatterData = oddsVsProfitData();
 
-  // Enhanced odds data for combined chart
   const oddsChartData = oddsData.map(range => ({
     range: range.range.replace(/\s*\(.*?\)\s*/g, ''),
     winRate: parseFloat(range.winRate),
@@ -435,7 +472,6 @@ export default function Analytics() {
     bets: range.count
   }));
 
-  // Custom tooltip for scatter chart
   const ScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -445,7 +481,7 @@ export default function Analytics() {
           {data.match && (
             <p className="text-sm text-gray-700 mb-1">Ставка: {data.match}</p>
           )}
-          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
             Профіт: {data.profit >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
           </p>
           {data.betType && (
@@ -457,6 +493,35 @@ export default function Analytics() {
     return null;
   };
 
+  // Custom bar shape for monthly profit — green for positive, coral for negative
+  interface MonthlyBarProps {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    payload?: MonthlyData;
+  }
+
+  const MonthlyProfitBar = (props: MonthlyBarProps) => {
+    const { x = 0, y = 0, width = 0, height = 0, payload } = props;
+    const isPositive = (payload?.profit || 0) >= 0;
+    const fillColor = isPositive ? '#10B981' : '#F87171';
+    const fillOpacity = isPositive ? 0.85 : 0.75;
+    
+    return (
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={fillColor}
+        opacity={fillOpacity}
+        rx={4}
+        ry={4}
+      />
+    );
+  };
+
   const tabs = [
     { id: 'profit', label: 'Прибуток', icon: null },
     { id: 'goals', label: 'Цілі', icon: Flag },
@@ -466,8 +531,21 @@ export default function Analytics() {
     { id: 'risks', label: 'Ризики', icon: null },
   ];
 
-  // Count active filters
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
+
+  // Shared card style for hover shadow effect
+  const cardBaseStyle = {
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  };
+
+  const cardHoverStyle = {
+    transform: 'scale(1.03)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+  };
+
+  // Enhanced card shadow for chart cards — subtle depth like header
+  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
@@ -477,17 +555,14 @@ export default function Analytics() {
         mode={BankrollService.isInitialized(currentUser) ? 'edit' : 'setup'}
       />
 
-      {/* ===== HEADER: Transparent, no bg, no shadow ===== */}
+      {/* ===== HEADER ===== */}
       <div className="px-6 lg:px-8 pt-6 pb-2">
         <div className="flex items-center justify-between">
-          {/* Left: Title in Ukrainian, larger */}
           <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
             Аналітика
           </h1>
 
-          {/* Right: Actions + Theme + User */}
           <div className="flex items-center gap-3">
-            {/* Actions Menu (Refresh + Clear) */}
             <div className="relative">
               <button
                 onClick={(e) => {
@@ -531,7 +606,6 @@ export default function Analytics() {
               )}
             </div>
 
-            {/* Theme Switcher */}
             <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
               <button
                 onClick={() => { if (isDarkTheme) toggleTheme(); }}
@@ -553,10 +627,8 @@ export default function Analytics() {
               </button>
             </div>
 
-            {/* Divider */}
             <div className="w-px h-8 bg-[#D1D5DB]" />
 
-            {/* User Info — black icon bg, no crown */}
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
                 <User className="h-4 w-4 text-white" strokeWidth={2} />
@@ -577,7 +649,6 @@ export default function Analytics() {
       {/* Main Content */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
 
-        {/* No Data Warning */}
         {bets.length === 0 && (
           <Alert className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5">
             <AlertTriangle className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
@@ -587,169 +658,168 @@ export default function Analytics() {
           </Alert>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {/* 1. Поточний банк */}
-          <Card 
-            className="border border-[#F4E157]/40 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group relative"
-            onClick={handleBankCardClick}
-            style={{
-              background: 'linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(244,225,87,0.15)'
-            }}
-          >
-            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-              <CardTitle className="text-xs font-medium text-[#6B7280] uppercase tracking-wider flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-[#F4E157] rounded-xl">
-                    <Wallet className="h-4 w-4 text-[#111827]" strokeWidth={2} />
-                  </div>
-                  Поточний банк
-                </div>
-                <div className="p-1.5 bg-[#F4E157]/60 rounded-lg group-hover:bg-[#F4E157] group-hover:scale-110 transition-all">
-                  <Edit className="h-3.5 w-3.5 text-[#111827]" strokeWidth={2.5} />
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-5 relative z-10">
-              <div className="space-y-2">
-                <div className="text-3xl font-semibold text-[#111827] tracking-tight">
-                  {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {stats.totalProfit >= 0 ? (
-                    <ArrowUpRight className="h-4 w-4 text-[#16A34A]" strokeWidth={2.5} />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4 text-[#DC2626]" strokeWidth={2.5} />
-                  )}
-                  <span className={`text-sm font-medium ${stats.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                    {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(2)} ₴
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 2. Всього ставок */}
-          <Card 
-            className="border border-[#93C5FD]/40 rounded-2xl overflow-hidden transition-all duration-300 relative"
-            style={{
-              background: 'linear-gradient(135deg, #EFF6FF 0%, #F8FAFF 100%)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(59,130,246,0.1)'
-            }}
-          >
-            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-              <CardTitle className="text-xs font-medium text-[#6B7280] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#3B82F6] rounded-xl">
-                  <BarChart3 className="h-4 w-4 text-white" strokeWidth={2} />
-                </div>
-                Всього ставок
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-5 relative z-10">
-              <div className="space-y-2">
-                <div className="text-3xl font-semibold text-[#111827] tracking-tight">{stats.totalBets || 0}</div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="h-3.5 w-3.5 text-[#16A34A]" strokeWidth={2} />
-                    <span className="text-[#6B7280]">{winningBets.length} виграшів</span>
-                  </div>
-                  <span className="text-[#D1D5DB]">•</span>
-                  <div className="flex items-center gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5 text-[#DC2626]" strokeWidth={2} />
-                    <span className="text-[#6B7280]">{losingBets.length} програшів</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* ===== QUICK STATS ===== */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           
-          {/* 3. Профіт */}
-          <Card 
-            className="border border-[#86EFAC]/40 rounded-2xl overflow-hidden transition-all duration-300 relative"
-            style={{
-              background: (stats.totalProfit || 0) >= 0 
-                ? 'linear-gradient(135deg, #F0FDF4 0%, #F8FFF8 100%)'
-                : 'linear-gradient(135deg, #FEF2F2 0%, #FFF5F5 100%)',
-              boxShadow: (stats.totalProfit || 0) >= 0
-                ? '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(22,163,74,0.1)'
-                : '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(220,38,38,0.1)'
+          {/* 1. Поточний банк */}
+          <div 
+            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
+            onClick={handleBankCardClick}
+            style={cardBaseStyle}
+            onMouseEnter={(e) => {
+              Object.assign(e.currentTarget.style, cardHoverStyle);
+            }}
+            onMouseLeave={(e) => {
+              Object.assign(e.currentTarget.style, cardBaseStyle);
             }}
           >
-            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-              <CardTitle className="text-xs font-medium text-[#6B7280] uppercase tracking-wider flex items-center gap-2">
-                <div className={`p-2 rounded-xl ${(stats.totalProfit || 0) >= 0 ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}`}>
-                  <DollarSign className="h-4 w-4 text-white" strokeWidth={2} />
-                </div>
-                Загальний профіт
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-5 relative z-10">
-              <div className="space-y-2">
-                <div className={`text-3xl font-semibold tracking-tight ${(stats.totalProfit || 0) >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                  {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {(stats.totalProfit || 0) >= 0 ? (
-                    <TrendingUp className="h-4 w-4 text-[#16A34A]" strokeWidth={2.5} />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-[#DC2626]" strokeWidth={2.5} />
-                  )}
-                  <span className="text-xs text-[#6B7280]">
-                    {(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-[#F3F4F6] group-hover:bg-[#111827] px-3 py-1.5 rounded-full transition-all duration-300">
+              <Pencil className="h-3.5 w-3.5 text-[#6B7280] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+              <span className="text-xs font-medium text-[#6B7280] group-hover:text-white transition-colors duration-300">Редагувати</span>
+            </div>
 
-          {/* 4. Win Rate */}
-          <Card 
-            className="border border-[#FDBA74]/40 rounded-2xl overflow-hidden transition-all duration-300 relative"
-            style={{
-              background: 'linear-gradient(135deg, #FFF7ED 0%, #FFFBF5 100%)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(249,115,22,0.1)'
+            <div className="flex items-center gap-2 mb-3">
+              <Wallet className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
+            </div>
+            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+              {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+            </div>
+            <div className="flex items-center gap-2">
+              {stats.totalProfit >= 0 ? (
+                <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+              ) : (
+                <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+              )}
+              <span className={`text-base font-normal ${stats.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(2)} ₴
+              </span>
+              <span className="text-sm text-[#9CA3AF]">за весь час</span>
+            </div>
+          </div>
+
+          {/* 2. Загальний профіт */}
+          <div 
+            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => {
+              Object.assign(e.currentTarget.style, cardHoverStyle);
+            }}
+            onMouseLeave={(e) => {
+              Object.assign(e.currentTarget.style, cardBaseStyle);
             }}
           >
-            <CardHeader className="pb-3 pt-5 px-6 relative z-10">
-              <CardTitle className="text-xs font-medium text-[#6B7280] uppercase tracking-wider flex items-center gap-2">
-                <div className="p-2 bg-[#F97316] rounded-xl">
-                  <Target className="h-4 w-4 text-white" strokeWidth={2} />
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
+            </div>
+            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+              {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+            </div>
+            <div className="flex items-center gap-2">
+              {(stats.totalProfit || 0) >= 0 ? (
+                <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+              ) : (
+                <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+              )}
+              <span className={`text-base font-normal ${(stats.totalProfit || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                {(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
+              </span>
+              <span className="text-sm text-[#9CA3AF]">за весь час</span>
+            </div>
+          </div>
+
+          {/* 3. Всього ставок — GREEN donut */}
+          <div 
+            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => {
+              Object.assign(e.currentTarget.style, cardHoverStyle);
+            }}
+            onMouseLeave={(e) => {
+              Object.assign(e.currentTarget.style, cardBaseStyle);
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Всього ставок</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col justify-center">
+                <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                  {stats.totalBets || 0}
                 </div>
-                Win Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pb-5 relative z-10">
-              <div className="space-y-2">
-                <div className="text-3xl font-semibold text-[#F97316] tracking-tight">{stats.winRate || 0}%</div>
-                <div className="space-y-1.5">
-                  <Progress 
-                    value={stats.winRate || 0} 
-                    className="h-2 bg-[#FED7AA]"
-                    style={{
-                      ['--progress-background' as string]: '#F97316'
-                    }}
-                  />
-                  <div className="flex items-center justify-between text-[10px] text-[#9CA3AF]">
-                    <span>0%</span>
-                    <span className="font-medium text-[#111827]">{stats.winRate || 0}%</span>
-                    <span>100%</span>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#10B981' }} />
+                    <span className="text-base font-semibold text-[#111827]">{winningBets.length}</span>
+                    <span className="text-sm text-[#9CA3AF]">виграшів</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#FCA5A5' }} />
+                    <span className="text-base font-semibold text-[#111827]">{losingBets.length}</span>
+                    <span className="text-sm text-[#9CA3AF]">програшів</span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex items-center justify-center flex-shrink-0">
+                <MiniDonut 
+                  value={winningBets.length} 
+                  total={stats.totalBets || 1} 
+                  colors={{ main: '#10B981', sub1: '#6EE7B7', sub2: '#FCA5A5' }}
+                  size={140}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Win Rate — GREEN donut */}
+          <div 
+            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => {
+              Object.assign(e.currentTarget.style, cardHoverStyle);
+            }}
+            onMouseLeave={(e) => {
+              Object.assign(e.currentTarget.style, cardBaseStyle);
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Win Rate</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col justify-center">
+                <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                  {stats.winRate || 0}%
+                </div>
+                <div className="flex items-center gap-2">
+                  {(stats.winRate || 0) >= 50 ? (
+                    <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                  )}
+                  <span className={`text-sm font-semibold ${(stats.winRate || 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                    {(stats.winRate || 0) >= 50 ? 'Вище середнього' : 'Нижче середнього'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-center flex-shrink-0">
+                <MiniDonut 
+                  value={stats.winRate || 0} 
+                  total={100} 
+                  colors={{ main: '#10B981', sub1: '#6EE7B7', sub2: '#ECFDF5' }}
+                  size={140}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Custom Tabs Navigation */}
         <div className="space-y-6">
-          <div 
-            className="bg-white rounded-2xl p-1.5 border border-[#E5E7EB]"
-            style={{
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-            }}
-          >
-            <div className="grid grid-cols-6 gap-1">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="grid grid-cols-6 gap-3">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -757,11 +827,11 @@ export default function Analytics() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
-                      relative rounded-xl px-4 py-3 text-sm font-medium
-                      transition-all duration-200 ease-in-out
+                      relative rounded-[24px] px-6 py-4 font-light text-base
+                      transition-all duration-300 ease-in-out
                       ${activeTab === tab.id 
-                        ? 'bg-[#111827] text-white shadow-sm' 
-                        : 'bg-transparent text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#374151]'
+                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                        : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
                       }
                     `}
                   >
@@ -783,30 +853,40 @@ export default function Analytics() {
                   <>
                     <BalanceChart data={balanceData} />
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Monthly Profit Chart */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* ===== MONTHLY PROFIT — BAR CHART ===== */}
                       <Card 
                         className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                        style={{
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)'
-                        }}
+                        style={{ boxShadow: chartCardShadow }}
                       >
-                        <CardHeader className="bg-[#F9FAFB] border-b border-[#E5E7EB] p-6">
+                        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
                           <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                             <span className="flex items-center gap-3">
-                              <div className="p-2.5 bg-[#F4E157] rounded-xl">
+                              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                                 <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                               </div>
                               Прибуток по місяцях
                             </span>
-                            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                              Кумулятивний
-                            </Badge>
+                            <div className="flex gap-2">
+                              <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                                Прибуток
+                              </Badge>
+                              <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                                Кумулятивний
+                              </Badge>
+                            </div>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                           <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={monthlyProfit}>
+                            <BarChart data={monthlyProfit} barCategoryGap="20%">
+                              <defs>
+                                <linearGradient id="cumulativeLineGrad" x1="0" y1="0" x2="1" y2="0">
+                                  <stop offset="0%" stopColor="#111827" stopOpacity={0.5} />
+                                  <stop offset="50%" stopColor="#111827" stopOpacity={1} />
+                                  <stop offset="100%" stopColor="#111827" stopOpacity={0.7} />
+                                </linearGradient>
+                              </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                               <XAxis 
                                 dataKey="month" 
@@ -818,6 +898,7 @@ export default function Analytics() {
                                 stroke="#E5E7EB"
                               />
                               <Tooltip 
+                                cursor={{ fill: 'transparent' }}
                                 contentStyle={{ 
                                   backgroundColor: 'rgba(255, 255, 255, 0.98)', 
                                   border: '1px solid #E5E7EB', 
@@ -827,7 +908,6 @@ export default function Analytics() {
                                 formatter={(value: number | string, name: string) => {
                                   if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
                                   if (name === 'cumulative') return [`${value} ₴`, 'Загальний прибуток'];
-                                  if (name === 'winRate') return [`${value}%`, 'Win Rate'];
                                   return [value, name];
                                 }}
                                 labelFormatter={(label: string) => {
@@ -846,38 +926,35 @@ export default function Analytics() {
                                   return value;
                                 }}
                               />
-                              <Line 
-                                type="monotone" 
+                              <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
+                              <Bar 
                                 dataKey="profit" 
-                                stroke="#F59E0B" 
-                                strokeWidth={2.5}
                                 name="profit"
-                                dot={{ fill: '#F59E0B', r: 4, strokeWidth: 2, stroke: '#fff' }}
-                                activeDot={{ r: 6 }}
+                                maxBarSize={48}
+                                shape={<MonthlyProfitBar />}
                               />
                               <Line 
                                 type="monotone" 
                                 dataKey="cumulative" 
-                                stroke="#111827" 
+                                stroke="url(#cumulativeLineGrad)" 
                                 strokeWidth={2.5}
                                 name="cumulative"
                                 dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
                                 activeDot={{ r: 6 }}
                               />
-                            </LineChart>
+                            </BarChart>
                           </ResponsiveContainer>
                           
-                          {/* Monthly Stats Summary */}
                           <div className="mt-5 flex items-center justify-between gap-4 px-2">
                             <div className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-[#16A34A]" strokeWidth={1.5} />
+                              <TrendingUp className="h-4 w-4 text-[#10B981]" strokeWidth={1.5} />
                               <span className="text-sm text-[#9CA3AF]">Макс:</span>
                               <span className="text-sm font-semibold text-[#111827]">
                                 +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
+                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
                               <span className="text-sm text-[#9CA3AF]">Мін:</span>
                               <span className="text-sm font-semibold text-[#111827]">
                                 {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
@@ -894,17 +971,15 @@ export default function Analytics() {
                         </CardContent>
                       </Card>
 
-                      {/* Scatter Chart */}
+                      {/* ===== SCATTER CHART — ODDS vs PROFIT ===== */}
                       <Card 
                         className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                        style={{
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)'
-                        }}
+                        style={{ boxShadow: chartCardShadow }}
                       >
-                        <CardHeader className="bg-[#F9FAFB] border-b border-[#E5E7EB] p-6">
+                        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
                           <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                             <span className="flex items-center gap-3">
-                              <div className="p-2.5 bg-[#F4E157] rounded-xl">
+                              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                                 <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                               </div>
                               Коефіцієнти vs Прибуток
@@ -926,15 +1001,16 @@ export default function Analytics() {
                             <ScatterChart>
                               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                               
+                              {/* Zero reference line — darker, more prominent */}
                               <ReferenceLine 
                                 y={0} 
-                                stroke="#9CA3AF" 
-                                strokeWidth={1.5}
-                                strokeDasharray="5 5"
+                                stroke="#6B7280" 
+                                strokeWidth={2}
+                                strokeDasharray="8 4"
                                 label={{ 
                                   value: 'Нульова лінія', 
                                   position: 'insideTopRight',
-                                  style: { fontSize: 11, fill: '#9CA3AF', fontWeight: 500 }
+                                  style: { fontSize: 11, fill: '#6B7280', fontWeight: 600 }
                                 }}
                               />
                               
@@ -963,9 +1039,12 @@ export default function Analytics() {
                                     <circle 
                                       cx={cx} 
                                       cy={cy} 
-                                      r={5} 
+                                      r={6} 
                                       fill={fill}
-                                      opacity={0.8}
+                                      opacity={0.7}
+                                      stroke={fill}
+                                      strokeWidth={1}
+                                      strokeOpacity={0.3}
                                     />
                                   );
                                 }}
@@ -973,15 +1052,14 @@ export default function Analytics() {
                             </ScatterChart>
                           </ResponsiveContainer>
                           
-                          {/* Scatter Stats */}
                           <div className="mt-5 flex items-center justify-center gap-8 px-2">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#16A34A]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
                               <span className="text-sm text-[#9CA3AF]">Виграш:</span>
                               <span className="text-sm font-semibold text-[#111827]">{winningBets.length}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#DC2626]"></div>
+                              <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
                               <span className="text-sm text-[#9CA3AF]">Програш:</span>
                               <span className="text-sm font-semibold text-[#111827]">{losingBets.length}</span>
                             </div>
@@ -993,9 +1071,7 @@ export default function Analytics() {
                 ) : (
                   <Card 
                     className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                    style={{
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)'
-                    }}
+                    style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -1019,13 +1095,11 @@ export default function Analytics() {
               <div className="grid grid-cols-1 gap-6">
                 <Card 
                   className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                  style={{
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)'
-                  }}
+                  style={{ boxShadow: chartCardShadow }}
                 >
-                  <CardHeader className="bg-[#F9FAFB] border-b border-[#E5E7EB] p-6">
+                  <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
                     <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                      <div className="p-2.5 bg-[#F4E157] rounded-xl">
+                      <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                         <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                       </div>
                       Win Rate & ROI по категоріях коефіцієнтів
