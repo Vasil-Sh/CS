@@ -59,7 +59,7 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#2A5BD7] text-white shadow-[0_4px_16px_rgba(42,91,215,0.3)]'
+                ? 'bg-[#f2f8ff] text-[#2A5BD7] shadow-[0_4px_16px_rgba(42,91,215,0.1)]'
                 : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
             )}
           >
@@ -79,7 +79,7 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#febc11] text-[#1a1a2e] shadow-[0_4px_16px_rgba(254,188,17,0.3)]'
+                ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
                 : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
             )}
           >
@@ -92,7 +92,7 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0]">
+    <div className="min-h-screen bg-[#ffffff]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
         <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/97 backdrop-blur-xl px-8 py-8 border-r-2 border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
@@ -158,7 +158,7 @@ export default function Layout() {
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#F5F5F0] w-12 h-12">
+              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#F0F0ED] w-12 h-12">
                 <Menu className="h-6 w-6" strokeWidth={1.5} />
               </Button>
             </SheetTrigger>
