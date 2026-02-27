@@ -9,7 +9,6 @@ import csharpDataService from '@/services/csharp-data-service';
 import BalanceChart from '@/components/BalanceChart';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
-import PredictiveAnalytics from '@/components/PredictiveAnalytics';
 import GoalsManager from '@/components/GoalsManager';
 import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
@@ -527,7 +526,6 @@ export default function Analytics() {
     { id: 'goals', label: 'Цілі', icon: Flag },
     { id: 'odds', label: 'Коефіцієнти', icon: null },
     { id: 'comparison', label: 'Періоди', icon: null },
-    { id: 'prediction', label: 'Прогнози', icon: null },
     { id: 'risks', label: 'Ризики', icon: null },
   ];
 
@@ -827,7 +825,7 @@ export default function Analytics() {
         {/* Custom Tabs Navigation */}
         <div className="space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-5 gap-3">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -1294,7 +1292,6 @@ export default function Analytics() {
             )}
 
             {activeTab === 'comparison' && <PeriodComparison bets={bets} />}
-            {activeTab === 'prediction' && <PredictiveAnalytics bets={bets} />}
             {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
         </div>
