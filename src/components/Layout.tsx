@@ -59,7 +59,7 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#3e75ff] text-white shadow-[0_4px_16px_rgba(62,117,255,0.3)]'
+                ? 'bg-[#2A5BD7] text-white shadow-[0_4px_16px_rgba(42,91,215,0.3)]'
                 : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
             )}
           >
@@ -132,14 +132,13 @@ export default function Layout() {
                 </ul>
               </li>
               <li className="mt-auto">
-                <Button
+                <button
                   onClick={handleLogout}
-                  variant="outline"
-                  className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border-2 border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300 !bg-transparent !hover:bg-[#D32F2F]"
+                  className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
                   <span>Вийти</span>
-                </Button>
+                </button>
               </li>
             </ul>
           </nav>
@@ -196,14 +195,13 @@ export default function Layout() {
                   <NavItems />
                 </ul>
                 <div className="mt-8">
-                  <Button
+                  <button
                     onClick={handleLogout}
-                    variant="outline"
-                    className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border-2 border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300 !bg-transparent"
+                    className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                   >
                     <LogOut className="h-5 w-5" strokeWidth={1.5} />
                     <span>Вийти</span>
-                  </Button>
+                  </button>
                 </div>
               </nav>
             </SheetContent>
