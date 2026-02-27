@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle, Table, Flag } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, Legend, ReferenceLine } from 'recharts';
+import { TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Minus, Info, AlertCircle, Table, BarChart3 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
 interface PeriodComparisonProps {
@@ -156,98 +156,122 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
     return period;
   };
 
+  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
+
+  // Custom bar shape for profit — green for positive, red for negative
+  interface ProfitBarProps {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    payload?: TrendDataPoint;
+  }
+
+  const ProfitBar = (props: ProfitBarProps) => {
+    const { x = 0, y = 0, width = 0, height = 0, payload } = props;
+    const isPositive = (payload?.profit || 0) >= 0;
+    return (
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={isPositive ? '#10B981' : '#F87171'}
+        opacity={isPositive ? 0.85 : 0.75}
+        rx={4}
+        ry={4}
+      />
+    );
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header Card - matching GoalsManager style */}
-        <Card className="border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] flex-shrink-0">
-                  <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-light text-black tracking-tight">Порівняння періодів</h2>
-                  <p className="text-[#6B6B6B] mt-1 text-base font-light">Аналіз динаміки показників у часі</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-[20px] hover:bg-[#FFF9E6] bg-[#FFF9E6] border-2 border-[#F4E157] h-12 w-12 shadow-[0_2px_8px_rgba(244,225,87,0.2)]"
-                    >
-                      <Info className="h-6 w-6 text-[#8B6F47]" strokeWidth={2} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs bg-white border-2 border-[#E8E6DC] rounded-[20px] p-4 shadow-lg">
-                    <p className="text-base font-medium text-black mb-2">Як працює порівняння:</p>
-                    <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                      Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
+        {/* Header with filter */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
+                  <Info className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                <p className="text-sm font-medium text-[#111827] mb-1">Як працює порівняння:</p>
+                <p className="text-sm text-[#6B7280] leading-relaxed">
+                  Порівнюється поточний період з попереднім аналогічним. Наприклад, грудень 2024 з листопадом 2024, або Q4 2024 з Q3 2024.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
-                <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
-                  <SelectTrigger className="w-48 rounded-[20px] border-2 border-[#D4D2C8] hover:border-[#C4C2B8] transition-colors h-12 font-light">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">По місяцях</SelectItem>
-                    <SelectItem value="quarterly">По кварталах</SelectItem>
-                    <SelectItem value="yearly">По роках</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <Select value={comparisonType} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly') => setComparisonType(value)}>
+            <SelectTrigger className="w-48 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 text-sm font-medium text-[#374151]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border border-[#E5E7EB]">
+              <SelectItem value="monthly">По місяцях</SelectItem>
+              <SelectItem value="quarterly">По кварталах</SelectItem>
+              <SelectItem value="yearly">По роках</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Chart 1: Profit + Bets */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                  <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                    <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  </div>
+                  Прибуток та активність
+                </span>
+                <div className="flex gap-2">
+                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                    Прибуток
+                  </Badge>
+                  <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                    Ставки
+                  </Badge>
                 </div>
-                Прибуток та активність
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis 
                     dataKey="period" 
-                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
-                    stroke="#1a1a1a"
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    stroke="#E5E7EB"
                   />
                   <YAxis 
                     yAxisId="profit" 
                     orientation="left"
-                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
-                    stroke="#1a1a1a"
-                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    stroke="#E5E7EB"
+                    label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B7280' } }}
                   />
                   <YAxis 
                     yAxisId="bets" 
                     orientation="right"
-                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
-                    stroke="#1a1a1a"
-                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#1a1a1a' } }}
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    stroke="#E5E7EB"
+                    label={{ value: 'Кількість ставок', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6B7280' } }}
                   />
                   <RechartsTooltip 
+                    cursor={{ fill: 'transparent' }}
                     contentStyle={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                      border: 'none', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                      border: '1px solid #E5E7EB', 
                       borderRadius: '12px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
                     }}
                     formatter={(value: number | string, name: string) => {
                       if (name === 'profit') return [`${value} ₴`, 'Прибуток'];
@@ -257,29 +281,30 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px' }}
-                    contentStyle={{ color: '#1a1a1a' }}
                     formatter={(value) => {
-                      if (value === 'profit') return <span style={{ color: '#1a1a1a' }}>Прибуток (₴)</span>;
-                      if (value === 'bets') return <span style={{ color: '#1a1a1a' }}>Кількість ставок</span>;
+                      if (value === 'profit') return <span style={{ color: '#374151', fontSize: '13px' }}>Прибуток (₴)</span>;
+                      if (value === 'bets') return <span style={{ color: '#374151', fontSize: '13px' }}>Кількість ставок</span>;
                       return value;
                     }}
                   />
+                  <ReferenceLine yAxisId="profit" y={0} stroke="#D1D5DB" strokeWidth={1} />
                   <Bar 
                     yAxisId="bets" 
                     dataKey="bets" 
-                    fill="#E8DCC8" 
+                    fill="#E5E7EB" 
                     name="bets"
-                    radius={[8, 8, 0, 0]}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={48}
                   />
                   <Line 
                     yAxisId="profit" 
                     type="monotone" 
                     dataKey="profit" 
-                    stroke="#8B6F47" 
-                    strokeWidth={3} 
+                    stroke="#111827" 
+                    strokeWidth={2.5} 
                     name="profit"
-                    dot={{ fill: '#8B6F47', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8 }}
+                    dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6 }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -287,35 +312,51 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
           </Card>
 
           {/* Chart 2: Win Rate + ROI */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                  <Calendar className="h-6 w-6 text-black" strokeWidth={1.5} />
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                    <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  </div>
+                  Win Rate та ROI тренди
+                </span>
+                <div className="flex gap-2">
+                  <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#111827] mr-1.5" />
+                    Win Rate
+                  </Badge>
+                  <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#D1D5DB] mr-1.5" />
+                    ROI
+                  </Badge>
                 </div>
-                Win Rate та ROI тренди
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis 
                     dataKey="period"
-                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
-                    stroke="#1a1a1a"
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    stroke="#E5E7EB"
                   />
                   <YAxis 
-                    tick={{ fontSize: 12, fill: '#1a1a1a' }}
-                    stroke="#1a1a1a"
-                    label={{ value: 'Відсоток (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#1a1a1a' } }}
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    stroke="#E5E7EB"
+                    label={{ value: '%', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B7280' } }}
                   />
                   <RechartsTooltip 
+                    cursor={{ fill: 'transparent' }}
                     contentStyle={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                      border: 'none', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                      border: '1px solid #E5E7EB', 
                       borderRadius: '12px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
                     }}
                     formatter={(value: number | string, name: string) => {
                       if (name === 'winRate') return [`${value}%`, 'Win Rate'];
@@ -325,30 +366,30 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '20px' }}
-                    contentStyle={{ color: '#1a1a1a' }}
                     formatter={(value) => {
-                      if (value === 'winRate') return <span style={{ color: '#1a1a1a' }}>Win Rate (%)</span>;
-                      if (value === 'roi') return <span style={{ color: '#1a1a1a' }}>ROI (%)</span>;
+                      if (value === 'winRate') return <span style={{ color: '#374151', fontSize: '13px' }}>Win Rate (%)</span>;
+                      if (value === 'roi') return <span style={{ color: '#374151', fontSize: '13px' }}>ROI (%)</span>;
                       return value;
                     }}
                   />
+                  <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
                   <Line 
                     type="monotone" 
                     dataKey="winRate" 
-                    stroke="#8B6F47" 
-                    strokeWidth={3} 
+                    stroke="#111827" 
+                    strokeWidth={2.5} 
                     name="winRate"
-                    dot={{ fill: '#8B6F47', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8 }}
+                    dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="roi" 
-                    stroke="#A0826D" 
-                    strokeWidth={3} 
+                    stroke="#D1D5DB" 
+                    strokeWidth={2.5} 
                     name="roi"
-                    dot={{ fill: '#A0826D', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8 }}
+                    dot={{ fill: '#D1D5DB', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -357,11 +398,14 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </div>
 
         {/* Detailed Table */}
-        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-[#F5F5F3] border-b-2 border-[#E8E6DC] p-8">
-            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                <Table className="h-6 w-6 text-black" strokeWidth={1.5} />
+        <Card 
+          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+          style={{ boxShadow: chartCardShadow }}
+        >
+          <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                <Table className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
               </div>
               Детальна статистика по періодах
             </CardTitle>
@@ -370,40 +414,46 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-[#E8E6DC]">
-                    <th className="text-left py-6 px-8 text-lg font-medium text-black">Період</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Ставок</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Win Rate</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Прибуток</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">ROI</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Серія ↑</th>
-                    <th className="text-center py-6 px-8 text-lg font-medium text-black">Серія ↓</th>
+                  <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
+                    <th className="text-left py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Період</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Ставок</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Win Rate</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Прибуток</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">ROI</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Серія ↑</th>
+                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Серія ↓</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedPeriods.map((period, index) => (
                     <tr 
                       key={period.period} 
-                      className={`border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all ${index === selectedPeriods.length - 1 ? 'bg-[#FFF9E6]' : ''}`}
+                      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${index === selectedPeriods.length - 1 ? 'bg-[#F9FAFB]' : ''}`}
                     >
-                      <td className="py-6 px-8">
+                      <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-medium text-black">{formatPeriodName(period.period)}</span>
+                          <span className="text-sm font-medium text-[#111827]">{formatPeriodName(period.period)}</span>
                           {index === selectedPeriods.length - 1 && (
-                            <Badge className="rounded-[12px] bg-[#F4E157] text-black border-0 font-medium px-3 py-1 text-sm">Поточний</Badge>
+                            <Badge className="rounded-lg bg-[#111827] text-white border-0 font-medium px-2.5 py-0.5 text-xs">
+                              Поточний
+                            </Badge>
                           )}
                         </div>
                       </td>
-                      <td className="text-center py-6 px-8 text-lg font-medium text-black">{period.totalBets}</td>
-                      <td className="text-center py-6 px-8 text-lg font-medium text-black">{period.winRate.toFixed(1)}%</td>
-                      <td className={`text-center py-6 px-8 text-lg font-semibold ${period.totalProfit >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
-                        {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
+                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#111827]">{period.totalBets}</td>
+                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#111827]">{period.winRate.toFixed(1)}%</td>
+                      <td className="text-center py-4 px-6">
+                        <span className={`text-sm font-semibold ${period.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                          {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
+                        </span>
                       </td>
-                      <td className={`text-center py-6 px-8 text-lg font-semibold ${period.averageROI >= 0 ? 'text-[#8B6F47]' : 'text-[#A0826D]'}`}>
-                        {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
+                      <td className="text-center py-4 px-6">
+                        <span className={`text-sm font-semibold ${period.averageROI >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                          {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
+                        </span>
                       </td>
-                      <td className="text-center py-6 px-8 text-lg font-semibold text-[#8B6F47]">+{period.bestStreak}</td>
-                      <td className="text-center py-6 px-8 text-lg font-semibold text-[#A0826D]">-{period.worstStreak}</td>
+                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#22C55E]">+{period.bestStreak}</td>
+                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#EF4444]">-{period.worstStreak}</td>
                     </tr>
                   ))}
                 </tbody>
