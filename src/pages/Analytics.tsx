@@ -548,6 +548,13 @@ export default function Analytics() {
   // Enhanced card shadow for chart cards — subtle depth like header
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
+  // Odds category labels
+  const oddsCategoryLabels = [
+    { label: 'Низькі', sublabel: '< 2.0' },
+    { label: 'Середні', sublabel: '2.0 – 3.0' },
+    { label: 'Високі', sublabel: '> 3.0' }
+  ];
+
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
       <InitialBankModal 
@@ -1002,7 +1009,6 @@ export default function Analytics() {
                             <ScatterChart>
                               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                               
-                              {/* Zero reference line — darker, more prominent */}
                               <ReferenceLine 
                                 y={0} 
                                 stroke="#6B7280" 
@@ -1092,25 +1098,39 @@ export default function Analytics() {
 
             {activeTab === 'goals' && <GoalsManager />}
 
+            {/* ===== КОЕФІЦІЄНТИ TAB — REDESIGNED ===== */}
             {activeTab === 'odds' && (
-              <div className="grid grid-cols-1 gap-6">
-                <Card 
-                  className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                  style={{ boxShadow: chartCardShadow }}
-                >
-                  <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                    <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                      <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                        <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                      </div>
-                      Win Rate & ROI по категоріях коефіцієнтів
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {bets.length > 0 ? (
-                      <>
-                        <ResponsiveContainer width="100%" height={350}>
-                          <BarChart data={oddsChartData}>
+              <div className="space-y-6">
+                {bets.length > 0 ? (
+                  <>
+                    {/* ===== CHART — monochrome, single Y axis, no hover background ===== */}
+                    <Card 
+                      className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                      style={{ boxShadow: chartCardShadow }}
+                    >
+                      <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+                        <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                          <span className="flex items-center gap-3">
+                            <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                            </div>
+                            Win Rate & ROI по категоріях коефіцієнтів
+                          </span>
+                          <div className="flex gap-2">
+                            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                              <div className="w-2.5 h-2.5 rounded-sm bg-[#111827] mr-1.5" />
+                              Win Rate
+                            </Badge>
+                            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                              <div className="w-2.5 h-2.5 rounded-sm bg-[#D1D5DB] mr-1.5" />
+                              ROI
+                            </Badge>
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <ResponsiveContainer width="100%" height={320}>
+                          <BarChart data={oddsChartData} barCategoryGap="25%">
                             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                             <XAxis 
                               dataKey="range" 
@@ -1118,19 +1138,12 @@ export default function Analytics() {
                               stroke="#E5E7EB"
                             />
                             <YAxis 
-                              yAxisId="left"
                               tick={{ fontSize: 12, fill: '#6B7280' }}
                               stroke="#E5E7EB"
-                              label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B7280' } }}
-                            />
-                            <YAxis 
-                              yAxisId="right"
-                              orientation="right"
-                              tick={{ fontSize: 12, fill: '#6B7280' }}
-                              stroke="#E5E7EB"
-                              label={{ value: 'ROI (%)', angle: 90, position: 'insideRight', style: { fontSize: 12, fill: '#6B7280' } }}
+                              label={{ value: '%', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B7280' } }}
                             />
                             <Tooltip 
+                              cursor={{ fill: 'transparent' }}
                               contentStyle={{ 
                                 backgroundColor: 'rgba(255, 255, 255, 0.98)', 
                                 border: '1px solid #E5E7EB', 
@@ -1141,7 +1154,6 @@ export default function Analytics() {
                               formatter={(value: number | string, name: string) => {
                                 if (name === 'winRate') return [`${value}%`, 'Win Rate'];
                                 if (name === 'roi') return [`${value}%`, 'ROI'];
-                                if (name === 'bets') return [value, 'Кількість ставок'];
                                 return [value, name];
                               }}
                             />
@@ -1153,75 +1165,131 @@ export default function Analytics() {
                                 return value;
                               }}
                             />
+                            <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
                             <Bar 
-                              yAxisId="left"
                               dataKey="winRate" 
-                              fill="#F59E0B" 
+                              fill="#111827" 
                               name="winRate"
                               radius={[6, 6, 0, 0]}
                               maxBarSize={80}
+                              opacity={0.85}
                             />
                             <Bar 
-                              yAxisId="right"
                               dataKey="roi" 
-                              fill="#111827" 
+                              fill="#D1D5DB" 
                               name="roi"
                               radius={[6, 6, 0, 0]}
                               maxBarSize={80}
                             />
                           </BarChart>
                         </ResponsiveContainer>
-                        
-                        <div className="mt-8 grid grid-cols-3 gap-5">
-                          {oddsData.map((range, index) => {
-                            const hasZeroData = range.count === 0;
-                            return (
-                              <div 
-                                key={index} 
-                                className={`p-5 rounded-xl border ${hasZeroData ? 'bg-[#F3F4F6] border-[#E5E7EB]' : 'bg-[#F9FAFB] border-[#E5E7EB]'}`}
-                              >
-                                <h4 className="font-semibold text-[#111827] mb-4 text-center text-base">{range.range}</h4>
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">Ставок:</span>
-                                    <Badge className={`${hasZeroData ? 'bg-[#E5E7EB] text-[#6B7280]' : 'bg-[#F3F4F6] text-[#111827]'} hover:bg-[#E5E7EB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium`}>
-                                      {range.count}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">Win Rate:</span>
-                                    <Badge className={`${hasZeroData ? 'bg-[#E5E7EB] text-[#6B7280]' : 'bg-[#F9FAFB] text-[#111827]'} hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium`}>
-                                      {range.winRate}%
-                                    </Badge>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">Прибуток:</span>
-                                    <Badge className={`border font-medium px-3 py-1.5 rounded-lg ${
-                                      hasZeroData 
-                                        ? 'bg-[#E5E7EB] text-[#6B7280] border-[#D1D5DB]'
-                                        : range.profit >= 0 
-                                          ? 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]' 
-                                          : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'
-                                    }`}>
-                                      {range.profit >= 0 ? '+' : ''}{Math.round(range.profit)} ₴
-                                    </Badge>
-                                  </div>
-                                </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* ===== CATEGORY CARDS — clean white design ===== */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {oddsData.map((range, index) => {
+                        const catLabel = oddsCategoryLabels[index];
+                        const hasData = range.count > 0;
+                        const winRateNum = parseFloat(range.winRate);
+                        const roi = range.count > 0 ? Math.round((range.profit / (range.count * 100)) * 100) : 0;
+
+                        return (
+                          <div 
+                            key={index}
+                            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+                            style={cardBaseStyle}
+                            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                          >
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-5">
+                              <div>
+                                <h4 className="text-lg font-semibold text-[#111827]">{catLabel.label}</h4>
+                                <span className="text-sm text-[#9CA3AF]">Коеф. {catLabel.sublabel}</span>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-16">
-                        <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                          <Target className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-                        </div>
-                        <p className="text-[#6B7280] text-sm">Немає даних для аналізу коефіцієнтів</p>
+                              <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
+                                {range.count}
+                              </Badge>
+                            </div>
+
+                            {/* Win Rate with progress bar */}
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-[#6B7280]">Win Rate</span>
+                                <span className={`text-base font-bold ${hasData ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>
+                                  {range.winRate}%
+                                </span>
+                              </div>
+                              <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ 
+                                    width: `${Math.min(winRateNum, 100)}%`,
+                                    backgroundColor: hasData ? '#111827' : '#D1D5DB'
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* ROI */}
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-sm text-[#6B7280]">ROI</span>
+                              <span className={`text-base font-bold ${
+                                !hasData ? 'text-[#9CA3AF]' : roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'
+                              }`}>
+                                {roi >= 0 ? '+' : ''}{roi}%
+                              </span>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-[#F3F4F6] mb-4" />
+
+                            {/* Profit */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-[#6B7280]">Прибуток</span>
+                              <div className="flex items-center gap-2">
+                                {hasData && (
+                                  range.profit >= 0 ? (
+                                    <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                                  ) : (
+                                    <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                                  )
+                                )}
+                                <span className={`text-xl font-bold ${
+                                  !hasData 
+                                    ? 'text-[#9CA3AF]'
+                                    : range.profit >= 0 
+                                      ? 'text-[#22C55E]' 
+                                      : 'text-[#EF4444]'
+                                }`}>
+                                  {range.profit >= 0 ? '+' : ''}{Math.round(range.profit).toLocaleString('uk-UA')} ₴
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <Card 
+                    className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                    style={{ boxShadow: chartCardShadow }}
+                  >
+                    <CardContent className="py-16 text-center">
+                      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                        <Target className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                        Немає даних для аналізу коефіцієнтів
+                      </h3>
+                      <p className="text-[#6B7280] text-sm">
+                        Додайте ставки для перегляду аналізу по категоріях коефіцієнтів
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
 
