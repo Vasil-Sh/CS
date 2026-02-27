@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserDataService } from '@/lib/userDataService';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { 
@@ -22,15 +23,14 @@ import {
   AlertCircle,
   RefreshCw,
   Info,
-  Eye,
+
   Star,
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  Flag,
   ArrowRight,
-  TrendingDown,
-  BarChart3
+  BarChart3,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -55,12 +55,8 @@ interface Goal {
   createdAt: string;
   completedAt?: string;
   isPrimary?: boolean;
-  
-  // Amount goal
   targetAmount?: number;
   currentAmount?: number;
-  
-  // Ladder goal
   startAmount?: number;
   targetLadderAmount?: number;
   minOdds?: number;
@@ -71,16 +67,10 @@ interface Goal {
   steps?: LadderStep[];
   avgOdds?: number;
   currentBank?: number;
-  
-  // ROI goal
   targetROI?: number;
   currentROI?: number;
-  
-  // Win Rate goal
   targetWinRate?: number;
   currentWinRate?: number;
-  
-  // Goal rules
   betsPerDay?: number;
 }
 
@@ -105,43 +95,39 @@ interface OddsScenario {
   description: string;
 }
 
+// Card hover styles matching Analytics page
+const cardBaseStyle = {
+  transform: 'scale(1)',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+};
+
+const cardHoverStyle = {
+  transform: 'scale(1.03)',
+  boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+};
+
 export default function GoalsManager() {
   const currentUser = localStorage.getItem('username') || '';
   const [goals, setGoals] = useState<Goal[]>(() => {
     const loadedGoals = UserDataService.getUserData(currentUser, 'goals', []);
-    
     return loadedGoals.map((goal: Goal) => {
       if (goal.type === 'ladder') {
         if (goal.steps && goal.minOdds && goal.maxOdds) {
           const migratedSteps = goal.steps.map(step => {
             if (!step.minPlannedAmount || !step.maxPlannedAmount) {
-              return {
-                ...step,
-                minPlannedAmount: step.startAmount * (goal.minOdds || 1.3),
-                maxPlannedAmount: step.startAmount * (goal.maxOdds || 5)
-              };
+              return { ...step, minPlannedAmount: step.startAmount * (goal.minOdds || 1.3), maxPlannedAmount: step.startAmount * (goal.maxOdds || 5) };
             }
             return step;
           });
-          
-          return {
-            ...goal,
-            steps: migratedSteps,
-            avgOdds: goal.avgOdds || goal.minOdds
-          };
+          return { ...goal, steps: migratedSteps, avgOdds: goal.avgOdds || goal.minOdds };
         }
-        
-        if (!goal.avgOdds && goal.minOdds && goal.maxOdds) {
-          return {
-            ...goal,
-            avgOdds: goal.minOdds
-          };
-        }
+        if (!goal.avgOdds && goal.minOdds && goal.maxOdds) return { ...goal, avgOdds: goal.minOdds };
       }
       return goal;
     });
   });
-  
+
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -150,471 +136,164 @@ export default function GoalsManager() {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isHowToExpanded, setIsHowToExpanded] = useState(false);
   const [isStepsCalculationExpanded, setIsStepsCalculationExpanded] = useState(false);
   const [isLadderOverviewExpanded, setIsLadderOverviewExpanded] = useState(true);
   const [isStepsProgressionExpanded, setIsStepsProgressionExpanded] = useState(true);
   const [isRulesExpanded, setIsRulesExpanded] = useState<Record<string, boolean>>({});
 
   const [newGoal, setNewGoal] = useState({
-    name: '',
-    type: 'amount' as GoalType,
-    targetAmount: 100000,
-    startAmount: 100,
-    targetLadderAmount: 100000,
-    minOdds: 1.3,
-    maxOdds: 5,
-    ladderMode: 'soft' as LadderMode,
-    targetROI: 50,
-    targetWinRate: 65,
-    betsPerDay: 5
+    name: '', type: 'amount' as GoalType, targetAmount: 100000, startAmount: 100,
+    targetLadderAmount: 100000, minOdds: 1.3, maxOdds: 5, ladderMode: 'soft' as LadderMode,
+    targetROI: 50, targetWinRate: 65, betsPerDay: 5
   });
 
-  useEffect(() => {
-    if (currentUser) {
-      UserDataService.setUserData(currentUser, 'goals', goals);
-      console.log('✅ Goals saved to localStorage:', goals.length, 'goals');
-    }
-  }, [goals, currentUser]);
+  useEffect(() => { if (currentUser) UserDataService.setUserData(currentUser, 'goals', goals); }, [goals, currentUser]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
-    let steps = 0;
-    let amount = currentBank;
-    
-    while (amount < targetAmount && steps < 100) {
-      amount = amount * minOdds;
-      steps++;
-    }
-    
+    let steps = 0, amount = currentBank;
+    while (amount < targetAmount && steps < 100) { amount *= minOdds; steps++; }
     return steps;
   };
 
   const updateGoalsProgress = () => {
     const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
-    
     if (!betsData.length) return;
-
     const updatedGoals = goals.map(goal => {
       if (goal.status !== 'active') return goal;
-
       switch (goal.type) {
         case 'amount': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id);
-          
           const totalProfit = goalBets.reduce((sum: number, bet: Bet) => {
-            if (bet.result === 'Win') {
-              const profit = bet.profit || ((bet.odds - 1) * (bet.amount || 100));
-              return sum + profit;
-            } else if (bet.result === 'Loss') {
-              const loss = bet.amount || 100;
-              return sum - loss;
-            }
+            if (bet.result === 'Win') return sum + (bet.profit || ((bet.odds - 1) * (bet.amount || 100)));
+            if (bet.result === 'Loss') return sum - (bet.amount || 100);
             return sum;
           }, 0);
-          
           const isCompleted = totalProfit >= (goal.targetAmount || 0);
-          
-          return {
-            ...goal,
-            currentAmount: totalProfit,
-            status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
-            completedAt: isCompleted ? new Date().toISOString() : undefined
-          };
+          return { ...goal, currentAmount: totalProfit, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
-
         case 'ladder': {
-          const goalBets = betsData.filter((bet: Bet) => 
-            bet.goalId === goal.id &&
-            bet.odds >= (goal.minOdds || 1.3) && 
-            bet.odds <= (goal.maxOdds || 5) && 
-            bet.result === 'Win'
-          );
-
+          const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.odds >= (goal.minOdds || 1.3) && bet.odds <= (goal.maxOdds || 5) && bet.result === 'Win');
           let currentStepIndex = goal.currentStep || 0;
           const steps = [...(goal.steps || [])];
-          const minOdds = goal.minOdds || 1.3;
-          const maxOdds = goal.maxOdds || 5;
-
-          const sortedBets = goalBets.sort((a: Bet, b: Bet) => 
-            new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-
+          const minOdds = goal.minOdds || 1.3, maxOdds = goal.maxOdds || 5;
+          const sortedBets = goalBets.sort((a: Bet, b: Bet) => new Date(a.date).getTime() - new Date(b.date).getTime());
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
-            
-            const currentStep = steps[currentStepIndex];
-            if (currentStep.status !== 'current') return;
-
-            const betAmount = bet.amount || 0;
-            const actualWinAmount = betAmount * bet.odds;
-            
-            const tolerance = 0.20;
-            const expectedBetAmount = currentStep.startAmount;
-            const betAmountMatches = Math.abs(betAmount - expectedBetAmount) / expectedBetAmount <= tolerance;
-            
+            const cs = steps[currentStepIndex];
+            if (cs.status !== 'current') return;
+            const betAmount = bet.amount || 0, actualWinAmount = betAmount * bet.odds;
+            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.20;
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
-              const minPlanned = currentStep.minPlannedAmount || currentStep.startAmount * minOdds;
-              
-              steps[currentStepIndex].status = 'completed';
-              steps[currentStepIndex].completedAt = bet.date;
-              steps[currentStepIndex].actualAmount = actualWinAmount;
-              steps[currentStepIndex].actualOdds = bet.odds;
-              steps[currentStepIndex].deviation = actualWinAmount - minPlanned;
-              
+              const minPlanned = cs.minPlannedAmount || cs.startAmount * minOdds;
+              steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
               currentStepIndex++;
-              
-              if (currentStepIndex < steps.length) {
-                steps[currentStepIndex].startAmount = actualWinAmount;
-                steps[currentStepIndex].minPlannedAmount = actualWinAmount * minOdds;
-                steps[currentStepIndex].maxPlannedAmount = actualWinAmount * maxOdds;
-                steps[currentStepIndex].status = 'current';
-              }
+              if (currentStepIndex < steps.length) steps[currentStepIndex] = { ...steps[currentStepIndex], startAmount: actualWinAmount, minPlannedAmount: actualWinAmount * minOdds, maxPlannedAmount: actualWinAmount * maxOdds, status: 'current' };
             }
           });
-
-          const currentBank = currentStepIndex > 0 && steps[currentStepIndex - 1]?.actualAmount 
-            ? steps[currentStepIndex - 1].actualAmount 
-            : goal.startAmount || 0;
-
-          const remainingSteps = calculateRemainingSteps(
-            currentBank,
-            goal.targetLadderAmount || 100000,
-            minOdds
-          );
-          const dynamicTotalSteps = currentStepIndex + remainingSteps;
-
+          const currentBank = currentStepIndex > 0 && steps[currentStepIndex - 1]?.actualAmount ? steps[currentStepIndex - 1].actualAmount : goal.startAmount || 0;
+          const remainingSteps = calculateRemainingSteps(currentBank, goal.targetLadderAmount || 100000, minOdds);
           const isCompleted = currentBank >= (goal.targetLadderAmount || 100000);
-
-          return {
-            ...goal,
-            avgOdds: minOdds,
-            currentStep: currentStepIndex,
-            totalSteps: dynamicTotalSteps,
-            currentBank,
-            steps,
-            status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
-            completedAt: isCompleted ? new Date().toISOString() : undefined
-          };
+          return { ...goal, avgOdds: minOdds, currentStep: currentStepIndex, totalSteps: currentStepIndex + remainingSteps, currentBank, steps, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
-
         case 'roi': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result !== 'Pending');
-          
-          if (goalBets.length === 0) return goal;
-          
-          const totalStake = goalBets.reduce((sum: number, bet: Bet) => sum + (bet.amount || 100), 0);
-          const totalProfit = goalBets.reduce((sum: number, bet: Bet) => {
-            if (bet.result === 'Win') {
-              return sum + (bet.profit || ((bet.odds - 1) * (bet.amount || 100)));
-            } else if (bet.result === 'Loss') {
-              return sum - (bet.amount || 100);
-            }
-            return sum;
-          }, 0);
-          
+          if (!goalBets.length) return goal;
+          const totalStake = goalBets.reduce((s: number, b: Bet) => s + (b.amount || 100), 0);
+          const totalProfit = goalBets.reduce((s: number, b: Bet) => { if (b.result === 'Win') return s + (b.profit || ((b.odds - 1) * (b.amount || 100))); if (b.result === 'Loss') return s - (b.amount || 100); return s; }, 0);
           const currentROI = (totalProfit / totalStake) * 100;
-          
           const isCompleted = currentROI >= (goal.targetROI || 0);
-          
-          return {
-            ...goal,
-            currentROI,
-            status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
-            completedAt: isCompleted ? new Date().toISOString() : undefined
-          };
+          return { ...goal, currentROI, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
-
         case 'winrate': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result !== 'Pending');
-          
-          if (goalBets.length === 0) return goal;
-          
-          const wins = goalBets.filter((bet: Bet) => bet.result === 'Win').length;
+          if (!goalBets.length) return goal;
+          const wins = goalBets.filter((b: Bet) => b.result === 'Win').length;
           const currentWinRate = (wins / goalBets.length) * 100;
-          
           const isCompleted = currentWinRate >= (goal.targetWinRate || 0);
-          
-          return {
-            ...goal,
-            currentWinRate,
-            status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus,
-            completedAt: isCompleted ? new Date().toISOString() : undefined
-          };
+          return { ...goal, currentWinRate, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
-
-        default:
-          return goal;
+        default: return goal;
       }
     });
-
     setGoals(updatedGoals);
   };
 
-  const handleManualUpdate = () => {
-    setIsUpdating(true);
-    updateGoalsProgress();
-    toast.success('Прогрес цілей оновлено!');
-    setTimeout(() => setIsUpdating(false), 500);
-  };
+  const handleManualUpdate = () => { setIsUpdating(true); updateGoalsProgress(); toast.success('Прогрес цілей оновлено!'); setTimeout(() => setIsUpdating(false), 500); };
 
   const calculateLadderSteps = (start: number, target: number, minOdds: number, maxOdds: number): LadderStep[] => {
     const steps: LadderStep[] = [];
-    let currentAmount = start;
-    let stepNumber = 1;
-
-    while (currentAmount < target) {
-      const minNextAmount = currentAmount * minOdds;
-      const maxNextAmount = currentAmount * maxOdds;
-      
-      steps.push({
-        step: stepNumber,
-        startAmount: currentAmount,
-        minPlannedAmount: minNextAmount,
-        maxPlannedAmount: maxNextAmount,
-        status: stepNumber === 1 ? 'current' : 'locked'
-      });
-      
-      currentAmount = minNextAmount;
-      stepNumber++;
-    }
-
+    let cur = start, n = 1;
+    while (cur < target) { steps.push({ step: n, startAmount: cur, minPlannedAmount: cur * minOdds, maxPlannedAmount: cur * maxOdds, status: n === 1 ? 'current' : 'locked' }); cur *= minOdds; n++; }
     return steps;
   };
 
   const calculateOddsScenarios = (start: number, target: number, minOdds: number, maxOdds: number): OddsScenario[] => {
     const scenarios: OddsScenario[] = [];
-    const oddsRange = [minOdds, (minOdds + maxOdds) / 2, maxOdds];
-    
-    oddsRange.forEach(odds => {
+    [minOdds, (minOdds + maxOdds) / 2, maxOdds].forEach(odds => {
       const steps = calculateLadderSteps(start, target, odds, odds);
-      let speed = '';
-      let emoji = '';
-      let description = '';
-      
-      if (odds === minOdds) {
-        speed = 'Повільно';
-        emoji = '🐢';
-        description = 'Найбільше кроків, найбезпечніше';
-      } else if (odds === maxOdds) {
-        speed = 'Швидко';
-        emoji = '🚀';
-        description = 'Найменше кроків, ризиковано';
-      } else {
-        speed = 'Оптимально';
-        emoji = '⚡';
-        description = 'Рекомендований баланс';
-      }
-      
-      scenarios.push({
-        odds: parseFloat(odds.toFixed(2)),
-        steps: steps.length,
-        speed,
-        emoji,
-        description
-      });
+      let speed = '', emoji = '', description = '';
+      if (odds === minOdds) { speed = 'Повільно'; emoji = '🐢'; description = 'Найбезпечніше'; }
+      else if (odds === maxOdds) { speed = 'Швидко'; emoji = '🚀'; description = 'Ризиковано'; }
+      else { speed = 'Оптимально'; emoji = '⚡'; description = 'Баланс'; }
+      scenarios.push({ odds: parseFloat(odds.toFixed(2)), steps: steps.length, speed, emoji, description });
     });
-    
     return scenarios;
   };
 
   const validateGoalFields = (): boolean => {
-    if (!newGoal.name.trim()) {
-      toast.error('Будь ласка, введіть назву цілі');
-      return false;
-    }
-
+    if (!newGoal.name.trim()) { toast.error('Введіть назву цілі'); return false; }
     switch (newGoal.type) {
-      case 'amount':
-        if (!newGoal.targetAmount || newGoal.targetAmount <= 0) {
-          toast.error('Будь ласка, введіть цільову суму більше 0');
-          return false;
-        }
-        break;
-
+      case 'amount': if (!newGoal.targetAmount || newGoal.targetAmount <= 0) { toast.error('Цільова сума > 0'); return false; } break;
       case 'ladder':
-        if (!newGoal.startAmount || newGoal.startAmount <= 0) {
-          toast.error('Будь ласка, введіть початкову суму більше 0');
-          return false;
-        }
-        if (!newGoal.targetLadderAmount || newGoal.targetLadderAmount <= 0) {
-          toast.error('Будь ласка, введіть цільову суму більше 0');
-          return false;
-        }
-        if (newGoal.startAmount >= newGoal.targetLadderAmount) {
-          toast.error('Цільова сума повинна бути більше початкової');
-          return false;
-        }
-        if (!newGoal.minOdds || newGoal.minOdds < 1.01) {
-          toast.error('Будь ласка, введіть мінімальний коефіцієнт (мін. 1.01)');
-          return false;
-        }
-        if (!newGoal.maxOdds || newGoal.maxOdds < 1.01) {
-          toast.error('Будь ласка, введіть максимальний коефіцієнт (мін. 1.01)');
-          return false;
-        }
-        if (newGoal.minOdds >= newGoal.maxOdds) {
-          toast.error('Максимальний коефіцієнт повинен бути більше мінімального');
-          return false;
-        }
+        if (!newGoal.startAmount || newGoal.startAmount <= 0) { toast.error('Початкова сума > 0'); return false; }
+        if (!newGoal.targetLadderAmount || newGoal.targetLadderAmount <= 0) { toast.error('Цільова сума > 0'); return false; }
+        if (newGoal.startAmount >= newGoal.targetLadderAmount) { toast.error('Ціль > початкової суми'); return false; }
+        if (!newGoal.minOdds || newGoal.minOdds < 1.01) { toast.error('Мін. коеф. ≥ 1.01'); return false; }
+        if (!newGoal.maxOdds || newGoal.maxOdds < 1.01) { toast.error('Макс. коеф. ≥ 1.01'); return false; }
+        if (newGoal.minOdds >= newGoal.maxOdds) { toast.error('Макс > Мін'); return false; }
         break;
-
-      case 'roi':
-        if (!newGoal.targetROI || newGoal.targetROI <= 0) {
-          toast.error('Будь ласка, введіть цільовий ROI більше 0');
-          return false;
-        }
-        break;
-
-      case 'winrate':
-        if (!newGoal.targetWinRate || newGoal.targetWinRate <= 0 || newGoal.targetWinRate > 100) {
-          toast.error('Будь ласка, введіть цільовий Win Rate від 1 до 100');
-          return false;
-        }
-        break;
+      case 'roi': if (!newGoal.targetROI || newGoal.targetROI <= 0) { toast.error('ROI > 0'); return false; } break;
+      case 'winrate': if (!newGoal.targetWinRate || newGoal.targetWinRate <= 0 || newGoal.targetWinRate > 100) { toast.error('Win Rate 1–100'); return false; } break;
     }
-
     return true;
   };
 
   const createGoal = () => {
-    if (!validateGoalFields()) {
-      return;
-    }
-
-    const activeGoals = goals.filter(g => g.status === 'active');
-    if (activeGoals.length >= 3) {
-      toast.error('Максимум 3 активні цілі одночасно');
-      return;
-    }
-
-    const goal: Goal = {
-      id: Date.now().toString(),
-      name: newGoal.name,
-      type: newGoal.type,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      isPrimary: activeGoals.length === 0,
-      betsPerDay: newGoal.betsPerDay
-    };
-
+    if (!validateGoalFields()) return;
+    const active = goals.filter(g => g.status === 'active');
+    if (active.length >= 3) { toast.error('Максимум 3 активні цілі'); return; }
+    const goal: Goal = { id: Date.now().toString(), name: newGoal.name, type: newGoal.type, status: 'active', createdAt: new Date().toISOString(), isPrimary: active.length === 0, betsPerDay: newGoal.betsPerDay };
     switch (newGoal.type) {
-      case 'amount': {
-        goal.targetAmount = newGoal.targetAmount;
-        goal.currentAmount = 0;
-        break;
-      }
-
+      case 'amount': goal.targetAmount = newGoal.targetAmount; goal.currentAmount = 0; break;
       case 'ladder': {
-        const steps = calculateLadderSteps(
-          newGoal.startAmount,
-          newGoal.targetLadderAmount,
-          newGoal.minOdds,
-          newGoal.maxOdds
-        );
-        goal.startAmount = newGoal.startAmount;
-        goal.targetLadderAmount = newGoal.targetLadderAmount;
-        goal.minOdds = newGoal.minOdds;
-        goal.maxOdds = newGoal.maxOdds;
-        goal.avgOdds = newGoal.minOdds;
-        goal.currentStep = 0;
-        goal.totalSteps = steps.length;
-        goal.ladderMode = newGoal.ladderMode;
-        goal.steps = steps;
-        goal.currentBank = newGoal.startAmount;
+        const steps = calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds);
+        Object.assign(goal, { startAmount: newGoal.startAmount, targetLadderAmount: newGoal.targetLadderAmount, minOdds: newGoal.minOdds, maxOdds: newGoal.maxOdds, avgOdds: newGoal.minOdds, currentStep: 0, totalSteps: steps.length, ladderMode: newGoal.ladderMode, steps, currentBank: newGoal.startAmount });
         break;
       }
-
-      case 'roi': {
-        goal.targetROI = newGoal.targetROI;
-        goal.currentROI = 0;
-        break;
-      }
-
-      case 'winrate': {
-        goal.targetWinRate = newGoal.targetWinRate;
-        goal.currentWinRate = 0;
-        break;
-      }
+      case 'roi': goal.targetROI = newGoal.targetROI; goal.currentROI = 0; break;
+      case 'winrate': goal.targetWinRate = newGoal.targetWinRate; goal.currentWinRate = 0; break;
     }
-
-    const updatedGoals = [...goals, goal];
-    setGoals(updatedGoals);
-    
-    UserDataService.setUserData(currentUser, 'goals', updatedGoals);
-    console.log('✅ Goal created and saved:', goal.name, 'Total goals:', updatedGoals.length);
-    
+    const updated = [...goals, goal];
+    setGoals(updated);
+    UserDataService.setUserData(currentUser, 'goals', updated);
     setShowCreateDialog(false);
-    setNewGoal({
-      name: '',
-      type: 'amount',
-      targetAmount: 100000,
-      startAmount: 100,
-      targetLadderAmount: 100000,
-      minOdds: 1.3,
-      maxOdds: 5,
-      ladderMode: 'soft',
-      targetROI: 50,
-      targetWinRate: 65,
-      betsPerDay: 5
-    });
-
-    toast.success('Ціль успішно створена!', {
-      description: '💡 Не забудьте прив\'язати ставки до цієї цілі!'
-    });
+    setNewGoal({ name: '', type: 'amount', targetAmount: 100000, startAmount: 100, targetLadderAmount: 100000, minOdds: 1.3, maxOdds: 5, ladderMode: 'soft', targetROI: 50, targetWinRate: 65, betsPerDay: 5 });
+    toast.success('Ціль створена!', { description: '💡 Прив\'яжіть ставки до цієї цілі' });
   };
 
-  const confirmDeleteGoal = (goalId: string) => {
-    setGoalToDelete(goalId);
-    setShowDeleteDialog(true);
-  };
-
-  const deleteGoal = () => {
-    if (!goalToDelete) return;
-
-    const updatedGoals = goals.filter(g => g.id !== goalToDelete);
-    setGoals(updatedGoals);
-    
-    UserDataService.setUserData(currentUser, 'goals', updatedGoals);
-    console.log('✅ Goal deleted, remaining:', updatedGoals.length);
-    
-    setShowDeleteDialog(false);
-    setGoalToDelete(null);
-    toast.success('Ціль видалена');
-  };
-
-  const setPrimaryGoal = (goalId: string) => {
-    setGoals(goals.map(g => ({
-      ...g,
-      isPrimary: g.id === goalId
-    })));
-    toast.success('Головна ціль змінена');
-  };
-
-  const openDetailsDialog = (goal: Goal) => {
-    setSelectedGoal(goal);
-    setShowDetailsDialog(true);
-    setIsStepsCalculationExpanded(false);
-    setIsLadderOverviewExpanded(true);
-    setIsStepsProgressionExpanded(true);
-  };
-
-  const openCompletedGoalResult = (goal: Goal) => {
-    setSelectedGoal(goal);
-    setShowCompletedResultModal(true);
-  };
+  const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
+  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserData(currentUser, 'goals', u); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
+  const setPrimaryGoal = (goalId: string) => { setGoals(goals.map(g => ({ ...g, isPrimary: g.id === goalId }))); toast.success('Головна ціль змінена'); };
+  const openDetailsDialog = (goal: Goal) => { setSelectedGoal(goal); setShowDetailsDialog(true); setIsStepsCalculationExpanded(false); setIsLadderOverviewExpanded(true); setIsStepsProgressionExpanded(true); };
+  const openCompletedGoalResult = (goal: Goal) => { setSelectedGoal(goal); setShowCompletedResultModal(true); };
 
   const getGoalProgress = (goal: Goal): number => {
     switch (goal.type) {
-      case 'amount':
-        return ((goal.currentAmount || 0) / (goal.targetAmount || 1)) * 100;
-      case 'ladder':
-        return ((goal.currentStep || 0) / (goal.totalSteps || 1)) * 100;
-      case 'roi':
-        return ((goal.currentROI || 0) / (goal.targetROI || 1)) * 100;
-      case 'winrate':
-        return ((goal.currentWinRate || 0) / (goal.targetWinRate || 1)) * 100;
-      default:
-        return 0;
+      case 'amount': return ((goal.currentAmount || 0) / (goal.targetAmount || 1)) * 100;
+      case 'ladder': return ((goal.currentStep || 0) / (goal.totalSteps || 1)) * 100;
+      case 'roi': return ((goal.currentROI || 0) / (goal.targetROI || 1)) * 100;
+      case 'winrate': return ((goal.currentWinRate || 0) / (goal.targetWinRate || 1)) * 100;
+      default: return 0;
     }
   };
 
@@ -628,81 +307,38 @@ export default function GoalsManager() {
   };
 
   const getGoalTypeLabel = (type: GoalType): string => {
-    switch (type) {
-      case 'amount': return 'Сума';
-      case 'ladder': return 'Лесенка';
-      case 'roi': return 'ROI';
-      case 'winrate': return 'Win Rate';
-    }
+    switch (type) { case 'amount': return 'Сума'; case 'ladder': return 'Лесенка'; case 'roi': return 'ROI'; case 'winrate': return 'Win Rate'; }
   };
 
   const getKeyMetric = (goal: Goal): { label: string; value: string; color: string } => {
     switch (goal.type) {
-      case 'amount':
-        return {
-          label: 'Залишилось заробити',
-          value: `${((goal.targetAmount || 0) - (goal.currentAmount || 0)).toFixed(0)} грн`,
-          color: 'text-[#2196F3]'
-        };
-      case 'ladder':
-        return {
-          label: 'Поточний крок',
-          value: `${goal.currentStep} / ${goal.totalSteps}`,
-          color: 'text-[#8b5cf6]'
-        };
-      case 'roi':
-        return {
-          label: 'Поточний ROI',
-          value: `${(goal.currentROI || 0).toFixed(1)}%`,
-          color: 'text-[#4CAF50]'
-        };
-      case 'winrate':
-        return {
-          label: 'Поточний Win Rate',
-          value: `${(goal.currentWinRate || 0).toFixed(1)}%`,
-          color: 'text-[#FF9800]'
-        };
+      case 'amount': return { label: 'Залишилось', value: `${((goal.targetAmount || 0) - (goal.currentAmount || 0)).toFixed(0)} грн`, color: 'text-[#3B82F6]' };
+      case 'ladder': return { label: 'Поточний крок', value: `${goal.currentStep} / ${goal.totalSteps}`, color: 'text-[#8B5CF6]' };
+      case 'roi': return { label: 'ROI', value: `${(goal.currentROI || 0).toFixed(1)}%`, color: 'text-[#22C55E]' };
+      case 'winrate': return { label: 'Win Rate', value: `${(goal.currentWinRate || 0).toFixed(1)}%`, color: 'text-[#F59E0B]' };
     }
+  };
+
+  const getNextBetHint = (goal: Goal): string | null => {
+    if (goal.type === 'ladder' && goal.steps) {
+      const cs = goal.steps.find(s => s.status === 'current');
+      if (cs) return `Ставка: ${cs.startAmount.toFixed(0)} ₴ (${goal.minOdds}–${goal.maxOdds})`;
+    }
+    if (goal.type === 'amount') { const r = (goal.targetAmount || 0) - (goal.currentAmount || 0); if (r > 0) return `До цілі: ${r.toFixed(0)} ₴`; }
+    return null;
   };
 
   const getDisciplineStatus = (goal: Goal): { status: 'good' | 'warning'; label: string; icon: JSX.Element } => {
     const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
     const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id);
-    
-    if (goalBets.length === 0) {
-      return {
-        status: 'good',
-        label: 'Правила дотримані',
-        icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} />
-      };
-    }
-
-    const hasViolations = goalBets.some((bet: Bet) => {
-      if (goal.type === 'ladder') {
-        return bet.odds < (goal.minOdds || 0) || bet.odds > (goal.maxOdds || 999);
-      }
-      return false;
-    });
-
-    if (hasViolations) {
-      return {
-        status: 'warning',
-        label: 'Є відхилення',
-        icon: <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
-      };
-    }
-
-    return {
-      status: 'good',
-      label: 'Правила дотримані',
-      icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} />
-    };
+    if (!goalBets.length) return { status: 'good', label: 'Дотримані', icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} /> };
+    const hasV = goalBets.some((bet: Bet) => { if (goal.type === 'ladder') return bet.odds < (goal.minOdds || 0) || bet.odds > (goal.maxOdds || 999); return false; });
+    if (hasV) return { status: 'warning', label: 'Відхилення', icon: <AlertTriangle className="h-4 w-4" strokeWidth={1.5} /> };
+    return { status: 'good', label: 'Дотримані', icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} /> };
   };
 
   const activeGoals = goals.filter(g => g.status === 'active');
   const completedGoals = goals.filter(g => g.status === 'completed');
-  const primaryGoal = activeGoals.find(g => g.isPrimary) || activeGoals[0];
-  const secondaryGoals = activeGoals.filter(g => !g.isPrimary);
 
   const tabs = [
     { id: 'active', label: 'Активні цілі', icon: Target },
@@ -710,117 +346,65 @@ export default function GoalsManager() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <Card className="border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)] flex-shrink-0">
-                <Flag className="h-6 w-6 text-black" strokeWidth={1.5} />
-              </div>
-              <div>
-                <h2 className="text-3xl font-light text-black tracking-tight">Мої цілі</h2>
-                <p className="text-[#6B6B6B] mt-1 text-base font-light">Фокус на дисципліні та прогресі</p>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button 
-                onClick={handleManualUpdate}
-                disabled={isUpdating}
-                variant="outline"
-                className="rounded-[24px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] hover:border-[#C4C2B8] bg-white font-normal h-14 px-6 text-black transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-              >
-                <RefreshCw className={`h-5 w-5 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
-                Оновити прогрес
-              </Button>
-              <Button 
-                onClick={() => setShowCreateDialog(true)}
-                disabled={activeGoals.length >= 3}
-                className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-14 px-6 transition-all duration-300 shadow-[0_4px_16px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_20px_rgba(244,225,87,0.4)]"
-              >
-                <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                Створити ціль
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* How to Work with Goals - Collapsible */}
-      {activeGoals.length > 0 && (
-        <Collapsible open={isHowToExpanded} onOpenChange={setIsHowToExpanded}>
-          <Card className="border-2 border-[#BBDEFB] shadow-[0_4px_16px_rgba(33,150,243,0.15)] rounded-[28px] bg-white overflow-hidden">
-            <CollapsibleTrigger className="w-full">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Info className="h-5 w-5 text-[#2196F3] flex-shrink-0" strokeWidth={1.5} />
-                    <p className="text-base font-normal text-black">💡 Як працювати з цілями</p>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-[#111827]">Мої цілі</h2>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="text-[#447afc] hover:text-[#3366e6] transition-colors">
+                    <Info className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="start" className="max-w-xs rounded-2xl px-4 py-3 bg-white border border-[#E5E7EB] shadow-lg">
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium text-[#111827]">Як працювати з цілями</p>
+                    <p className="text-sm text-[#6B7280]">1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"</p>
+                    <p className="text-sm text-[#6B7280]">2. Після розрахунку ставки (Win/Loss) поверніться сюди</p>
+                    <p className="text-sm text-[#6B7280]">3. Натисніть "Оновити" — прогрес оновиться автоматично</p>
+                    <p className="text-xs text-[#9CA3AF] mt-1 pt-1 border-t border-[#F3F4F6]">⚠️ Максимум 3 активні цілі одночасно</p>
                   </div>
-                  {isHowToExpanded ? (
-                    <ChevronUp className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-[#2196F3]" strokeWidth={1.5} />
-                  )}
-                </div>
-              </CardContent>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="px-6 pb-6 pt-0">
-                <div className="pl-8 space-y-3">
-                  <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                    1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"
-                  </p>
-                  <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                    2. Після того, як ставка буде розрахована (Win/Loss), поверніться сюди
-                  </p>
-                  <p className="text-sm text-[#6B6B6B] font-light leading-relaxed">
-                    3. Натисніть "Оновити прогрес" - прогрес цілі автоматично оновиться
-                  </p>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
-      )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="text-lg text-[#6B7280]">Фокус на дисципліні та прогресі</p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleManualUpdate} disabled={isUpdating} variant="outline"
+            className="rounded-3xl border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base text-[#374151]">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
+            Оновити
+          </Button>
+          <Button onClick={() => setShowCreateDialog(true)} disabled={activeGoals.length >= 3}
+            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+            <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+            Створити ціль
+          </Button>
+        </div>
+      </div>
 
-      {activeGoals.length >= 3 && (
-        <Card className="border-2 border-[#FFCC80] shadow-[0_4px_16px_rgba(255,152,0,0.15)] rounded-[28px] bg-white overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-[#FF9800] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-              <div>
-                <p className="text-sm font-normal text-black">Досягнуто ліміт активних цілей</p>
-                <p className="text-xs text-[#6B6B6B] mt-1 font-light">
-                  Ви можете мати максимум 3 активні цілі одночасно. Видаліть або завершіть існуючу ціль, щоб створити нову.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Custom Tabs Navigation - matching Analytics page style */}
-      <div className="space-y-6">
+
+      {/* Tabs — matching Analytics navigation style with rounded-[32px] */}
+      <div className="space-y-5">
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-2 gap-3">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
+                <button key={tab.id} onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
                   className={`
                     relative rounded-[24px] px-6 py-4 font-light text-base
                     transition-all duration-300 ease-in-out
                     ${activeTab === tab.id 
-                      ? 'bg-[#F4E157] text-black font-normal shadow-[0_4px_16px_rgba(244,225,87,0.4)]' 
-                      : 'bg-transparent text-[#6B6B6B] hover:bg-[#F5F5F3]'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
                     }
-                  `}
-                >
+                  `}>
                   <span className="flex items-center justify-center gap-2">
                     <Icon className="h-4 w-4" strokeWidth={1.5} />
                     {tab.label}
@@ -831,364 +415,231 @@ export default function GoalsManager() {
           </div>
         </div>
 
-        {/* Tab Content */}
-        <div>
-          {activeTab === 'active' && (
-            <div className="space-y-6">
-              {activeGoals.length === 0 ? (
-                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-                  <CardContent className="py-16 text-center">
-                    <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
-                      <Target className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-2xl font-light text-black mb-3">
-                      Немає активних цілей
-                    </h3>
-                    <p className="text-[#6B6B6B] font-light mb-6">Створіть свою першу ціль для відстеження прогресу</p>
-                    <Button 
-                      onClick={() => setShowCreateDialog(true)} 
-                      className="rounded-[24px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
+        {/* Active Tab — 3 cards in a row with hover scale effect */}
+        {activeTab === 'active' && (
+          <div>
+            {activeGoals.length === 0 ? (
+              <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
+                <CardContent className="py-12 text-center">
+                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                    <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає активних цілей</h3>
+                  <p className="text-base text-[#6B7280] mb-4">Створіть першу ціль для відстеження прогресу</p>
+                  <Button onClick={() => setShowCreateDialog(true)} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                    <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                    Створити ціль
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {activeGoals.map(goal => {
+                  const progress = getGoalProgress(goal);
+                  const keyMetric = getKeyMetric(goal);
+                  const discipline = getDisciplineStatus(goal);
+                  const hint = getNextBetHint(goal);
+
+                  return (
+                    <Card key={goal.id}
+                      className="border border-[#E5E7EB] rounded-3xl bg-white"
+                      style={cardBaseStyle}
+                      onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                      onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
                     >
-                      <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                      Створити ціль
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-6">
-                  {primaryGoal && (
-                    <Card className="border-[3px] border-[#C4C2B8] shadow-[0_12px_32px_rgba(0,0,0,0.12)] rounded-[32px] bg-gradient-to-br from-[#FAFAF8] via-white to-[#F5F5F3] overflow-hidden">
-                      <CardHeader className="pb-4 pt-7 px-7">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)]">
-                              {getGoalIcon(primaryGoal.type)}
+                      <CardContent className="p-5 flex flex-col h-full">
+                        {/* Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div className={`p-2 rounded-2xl flex-shrink-0 ${
+                              goal.type === 'ladder' ? 'bg-[#EDE9FE]' :
+                              goal.type === 'amount' ? 'bg-[#DBEAFE]' :
+                              goal.type === 'roi' ? 'bg-[#D1FAE5]' : 'bg-[#FEF3C7]'
+                            }`}>
+                              {getGoalIcon(goal.type)}
                             </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <CardTitle className="text-2xl font-light text-black">
-                                  {primaryGoal.name}
-                                </CardTitle>
-                                <Badge className="bg-[#F4E157] text-black border-0 rounded-[16px] px-3 py-1 font-normal shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                                  <Star className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                  Головна
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-[#111827] text-base truncate">{goal.name}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">
+                                  {getGoalTypeLabel(goal.type)}
                                 </Badge>
+                                {goal.isPrimary && (
+                                  <Badge className="bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] rounded-xl text-xs px-1.5 py-0 font-medium">
+                                    <Star className="h-3 w-3" strokeWidth={1.5} />
+                                  </Badge>
+                                )}
                               </div>
-                              <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[16px] mt-2 px-3 py-1 font-light">
-                                {getGoalTypeLabel(primaryGoal.type)}
-                              </Badge>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => confirmDeleteGoal(primaryGoal.id)}
-                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-10 w-10 p-0 rounded-[20px] transition-all"
-                          >
-                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                          </Button>
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
+                            {!goal.isPrimary && (
+                              <Button variant="ghost" size="sm" onClick={() => setPrimaryGoal(goal.id)} className="h-7 w-7 p-0 rounded-xl hover:bg-[#F3F4F6]" title="Зробити головною">
+                                <Star className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" onClick={() => confirmDeleteGoal(goal.id)} className="text-[#D1D5DB] hover:text-[#EF4444] hover:bg-[#FEF2F2] h-7 w-7 p-0 rounded-xl">
+                              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            </Button>
+                          </div>
                         </div>
-                      </CardHeader>
 
-                      <CardContent className="space-y-5 px-7 pb-7">
-                        <div className="p-5 bg-white rounded-[24px] border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                          <p className="text-sm text-[#6B6B6B] mb-2 font-light uppercase tracking-wider">{getKeyMetric(primaryGoal).label}</p>
-                          <p className={`text-4xl font-light ${getKeyMetric(primaryGoal).color} tracking-tight`}>
-                            {getKeyMetric(primaryGoal).value}
+                        {/* Key metric */}
+                        <div className="bg-[#F9FAFB] rounded-2xl px-4 py-3 border border-[#F3F4F6] mb-3">
+                          <p className="text-sm text-[#6B7280] leading-tight">{keyMetric.label}</p>
+                          <p className={`text-2xl font-bold tracking-tight leading-tight ${keyMetric.color}`}>
+                            {keyMetric.value}
                           </p>
                         </div>
 
-                        <div>
-                          <div className="flex justify-between items-center mb-3">
-                            <span className="text-sm text-[#6B6B6B] font-light">Прогрес</span>
-                            <span className="text-sm font-normal text-black">
-                              {getGoalProgress(primaryGoal).toFixed(1)}%
-                            </span>
+                        {/* Hint */}
+                        {hint && (
+                          <div className="flex items-center gap-1.5 px-3 py-2 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl mb-3">
+                            <Zap className="h-3.5 w-3.5 text-[#F59E0B] flex-shrink-0" strokeWidth={1.5} />
+                            <p className="text-sm text-[#92400E] font-medium">{hint}</p>
                           </div>
-                          <Progress value={Math.min(getGoalProgress(primaryGoal), 100)} className="h-3 rounded-[12px]" />
+                        )}
+
+                        {/* Progress */}
+                        <div className="mb-3">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className="text-sm text-[#6B7280]">Прогрес</span>
+                            <span className="text-sm font-semibold text-[#111827]">{progress.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={Math.min(progress, 100)} className="h-2 rounded-xl" />
                         </div>
 
-                        {/* Collapsible Rules Block */}
-                        <Collapsible 
-                          open={isRulesExpanded[primaryGoal.id] || false} 
-                          onOpenChange={(open) => setIsRulesExpanded({...isRulesExpanded, [primaryGoal.id]: open})}
-                        >
+                        {/* Discipline */}
+                        <Collapsible open={isRulesExpanded[goal.id] || false} onOpenChange={(open) => setIsRulesExpanded({...isRulesExpanded, [goal.id]: open})}>
                           <CollapsibleTrigger className="w-full">
-                            <div className={`p-3 rounded-[20px] border-2 transition-all ${
-                              getDisciplineStatus(primaryGoal).status === 'good' 
-                                ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
-                                : 'bg-[#FFE8E8] border-[#FFCDD2]'
+                            <div className={`px-3 py-2 rounded-2xl border transition-all ${
+                              discipline.status === 'good' ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'
                             }`}>
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-normal text-black">Правила</p>
-                                  <div className={
-                                    getDisciplineStatus(primaryGoal).status === 'good' 
-                                      ? 'text-[#4CAF50]' 
-                                      : 'text-[#D32F2F]'
-                                  }>
-                                    {getDisciplineStatus(primaryGoal).icon}
-                                  </div>
-                                  <span className={`text-xs font-normal ${
-                                    getDisciplineStatus(primaryGoal).status === 'good' 
-                                      ? 'text-[#2E7D32]' 
-                                      : 'text-[#B71C1C]'
-                                  }`}>
-                                    {getDisciplineStatus(primaryGoal).label}
-                                  </span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-medium text-[#111827]">Правила</span>
+                                  <div className={discipline.status === 'good' ? 'text-[#22C55E]' : 'text-[#EF4444]'}>{discipline.icon}</div>
+                                  <span className={`text-xs font-medium ${discipline.status === 'good' ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>{discipline.label}</span>
                                 </div>
-                                {isRulesExpanded[primaryGoal.id] ? (
-                                  <ChevronUp className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
-                                )}
+                                {isRulesExpanded[goal.id] ? <ChevronUp className="h-3.5 w-3.5 text-[#6B7280]" /> : <ChevronDown className="h-3.5 w-3.5 text-[#6B7280]" />}
                               </div>
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
-                            <div className={`mt-2 p-3 rounded-[20px] border-2 ${
-                              getDisciplineStatus(primaryGoal).status === 'good' 
-                                ? 'bg-[#E8F5E9] border-[#C8E6C9]' 
-                                : 'bg-[#FFE8E8] border-[#FFCDD2]'
+                            <div className={`mt-1.5 px-3 py-2 rounded-2xl border text-sm ${
+                              discipline.status === 'good' ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'
                             }`}>
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                {primaryGoal.type === 'ladder' && (
-                                  <>
-                                    <div>
-                                      <span className="text-[#6B6B6B] font-light">Коефіцієнти:</span>
-                                      <span className="ml-1 font-normal text-black">
-                                        {primaryGoal.minOdds} - {primaryGoal.maxOdds}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-[#6B6B6B] font-light">Банк:</span>
-                                      <span className="ml-1 font-normal text-black">
-                                        {(primaryGoal.currentBank || 0).toFixed(0)} грн
-                                      </span>
-                                    </div>
-                                  </>
-                                )}
-                                <div>
-                                  <span className="text-[#6B6B6B] font-light">Ставок/день:</span>
-                                  <span className="ml-1 font-normal text-black">{primaryGoal.betsPerDay || 'Не обмежено'}</span>
+                              {goal.type === 'ladder' && (
+                                <div className="space-y-1">
+                                  <div><span className="text-[#6B7280]">Коеф.: </span><span className="font-medium text-[#111827]">{goal.minOdds} – {goal.maxOdds}</span></div>
+                                  <div><span className="text-[#6B7280]">Банк: </span><span className="font-medium text-[#111827]">{(goal.currentBank || 0).toFixed(0)} грн</span></div>
                                 </div>
-                              </div>
+                              )}
+                              <div><span className="text-[#6B7280]">Ставок/день: </span><span className="font-medium text-[#111827]">{goal.betsPerDay || 'Без обмежень'}</span></div>
                             </div>
                           </CollapsibleContent>
                         </Collapsible>
 
-                        {/* Show Details button only for ladder goals */}
-                        {primaryGoal.type === 'ladder' && (
-                          <div className="flex gap-3 pt-2">
-                            <Button
-                              onClick={() => openDetailsDialog(primaryGoal)}
-                              className="flex-1 rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
-                            >
-                              <Eye className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                              Деталі цілі
-                            </Button>
-                          </div>
+                        {/* Details button for ladder — BLUE color with shadow */}
+                        {goal.type === 'ladder' && (
+                          <Button onClick={() => openDetailsDialog(goal)}
+                            className="w-full !h-auto rounded-[24px] bg-[#447afc] hover:bg-[#5b8ffd] text-white font-normal px-5 py-4 text-base mt-3 shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                            Деталі цілі
+                          </Button>
                         )}
                       </CardContent>
                     </Card>
-                  )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
-                  {secondaryGoals.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-normal text-[#6B6B6B] px-1 uppercase tracking-wider">Інші активні цілі</h3>
-                      {secondaryGoals.map(goal => {
-                        const progress = getGoalProgress(goal);
-                        const keyMetric = getKeyMetric(goal);
-                        const discipline = getDisciplineStatus(goal);
-
-                        return (
-                          <Card key={goal.id} className="border-2 border-[#D4D2C8] shadow-[0_4px_16px_rgba(0,0,0,0.06)] rounded-[28px] bg-white overflow-hidden hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] transition-all duration-300">
-                            <CardContent className="p-5">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3 flex-1">
-                                  <div className="p-2.5 bg-[#F5F5F3] rounded-[20px]">
-                                    {getGoalIcon(goal.type)}
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="font-normal text-black text-base">{goal.name}</p>
-                                    <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] text-xs mt-1 px-2.5 py-0.5 font-light">
-                                      {getGoalTypeLabel(goal.type)}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setPrimaryGoal(goal.id)}
-                                    className="h-9 w-9 p-0 rounded-[16px] hover:bg-[#F5F5F3]"
-                                    title="Зробити головною"
-                                  >
-                                    <Star className="h-4 w-4 text-[#8B8B8B]" strokeWidth={1.5} />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => confirmDeleteGoal(goal.id)}
-                                    className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-9 w-9 p-0 rounded-[16px]"
-                                  >
-                                    <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-xs text-[#6B6B6B] font-light">{keyMetric.label}</span>
-                                  <span className={`text-sm font-normal ${keyMetric.color}`}>{keyMetric.value}</span>
-                                </div>
-                                
-                                <Progress value={Math.min(progress, 100)} className="h-2 rounded-[8px]" />
-                                
-                                <div className="flex items-center justify-between">
-                                  <div className={`flex items-center gap-1 text-xs ${
-                                    discipline.status === 'good' ? 'text-[#4CAF50]' : 'text-[#FF9800]'
-                                  }`}>
-                                    {discipline.icon}
-                                    <span className="font-light">{discipline.label}</span>
-                                  </div>
-                                  {/* Show Details button only for ladder goals */}
-                                  {goal.type === 'ladder' && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => openDetailsDialog(goal)}
-                                      className="h-8 text-xs rounded-[12px] hover:bg-[#F5F5F3] font-light"
-                                    >
-                                      <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                      Деталі
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'completed' && (
-            <div className="space-y-6">
-              {completedGoals.length === 0 ? (
-                <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-                  <CardContent className="py-16 text-center">
-                    <div className="p-8 bg-[#F5F5F3] rounded-[32px] inline-block mb-6">
-                      <Trophy className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-2xl font-light text-black mb-3">Немає завершених цілей</h3>
-                    <p className="text-[#6B6B6B] font-light">Завершені цілі з'являться тут</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-3 gap-5">
-                  {completedGoals.map(goal => (
-                    <Card 
-                      key={goal.id} 
-                      className="border-2 border-[#C8E6C9] shadow-[0_8px_24px_rgba(76,175,80,0.15)] rounded-[28px] bg-gradient-to-br from-[#E8F5E9] to-white overflow-hidden cursor-pointer hover:shadow-[0_12px_32px_rgba(76,175,80,0.25)] transition-all duration-300"
-                      onClick={() => openCompletedGoalResult(goal)}
-                    >
-                      <CardHeader className="pb-3 pt-6 px-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="p-2.5 bg-[#C8E6C9] rounded-[20px]">
-                            <Trophy className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} />
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmDeleteGoal(goal.id);
-                            }}
-                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] h-8 w-8 p-0 rounded-[16px]"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                          </Button>
+        {/* Completed Tab — with hover scale effect */}
+        {activeTab === 'completed' && (
+          <div>
+            {completedGoals.length === 0 ? (
+              <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
+                <CardContent className="py-12 text-center">
+                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                    <Trophy className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає завершених цілей</h3>
+                  <p className="text-base text-[#6B7280]">Завершені цілі з'являться тут</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {completedGoals.map(goal => (
+                  <Card key={goal.id}
+                    className="border border-[#BBF7D0] rounded-3xl bg-white cursor-pointer"
+                    style={cardBaseStyle}
+                    onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                    onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                    onClick={() => openCompletedGoalResult(goal)}
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-[#F0FDF4] rounded-2xl">
+                          <Trophy className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
                         </div>
-                        <CardTitle className="text-lg font-normal text-black line-clamp-2">
-                          {goal.name}
-                        </CardTitle>
-                      </CardHeader>
-
-                      <CardContent className="space-y-3 pt-0 px-6 pb-6">
-                        <Badge className="bg-[#4CAF50] text-white border-0 rounded-[16px] text-xs px-3 py-1 font-normal shadow-[0_2px_8px_rgba(76,175,80,0.3)]">
-                          <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                          Завершено
-                        </Badge>
-                        
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#6B6B6B] font-light">Тип цілі:</span>
-                          <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] text-xs px-2.5 py-0.5 font-light">
-                            {getGoalTypeLabel(goal.type)}
-                          </Badge>
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); confirmDeleteGoal(goal.id); }}
+                          className="text-[#D1D5DB] hover:text-[#EF4444] hover:bg-[#FEF2F2] h-7 w-7 p-0 rounded-xl">
+                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        </Button>
+                      </div>
+                      <h4 className="text-base font-semibold text-[#111827] line-clamp-2 mb-2">{goal.name}</h4>
+                      <Badge className="bg-[#22C55E] text-white border-0 rounded-xl text-xs px-2.5 py-0.5 font-medium mb-3">
+                        <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                        Завершено
+                      </Badge>
+                      <div className="space-y-1.5 text-base">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#6B7280]">Тип:</span>
+                          <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">{getGoalTypeLabel(goal.type)}</Badge>
                         </div>
-                        
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#6B6B6B] font-light">Завершено:</span>
-                          <span className="font-normal text-[#4CAF50]">
-                            {goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#6B7280]">Дата:</span>
+                          <span className="font-medium text-[#22C55E]">{goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}</span>
                         </div>
-                        
-                        <div className="mt-3 p-3 bg-[#C8E6C9] rounded-[20px] text-center">
-                          <p className="text-xs text-[#2E7D32] font-normal">👆 Клікніть, щоб переглянути детальний результат</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                      </div>
+                      <div className="mt-3 px-5 py-4 bg-[#22C55E] rounded-[24px] border border-[#22C55E] text-center shadow-[0_4px_16px_rgba(34,197,94,0.3)]">
+                        <p className="text-base text-white font-normal">Детальний результат</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Create Goal Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="rounded-[32px] max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC]">
-          <DialogHeader className="pb-4 border-b-2 border-[#E8E6DC]">
+        <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB]">
+          <DialogHeader className="pb-3 border-b border-[#E5E7EB]">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#F4E157] rounded-[20px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                <Plus className="h-5 w-5 text-black" strokeWidth={1.5} />
+              <div className="p-2 bg-[#EFF6FF] rounded-2xl">
+                <Plus className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-light text-black">
-                  Створити нову ціль
-                </DialogTitle>
-                <DialogDescription className="text-[#6B6B6B] font-light mt-1">
-                  Оберіть тип цілі та встановіть параметри
-                </DialogDescription>
+                <DialogTitle className="text-xl font-semibold text-[#111827]">Створити нову ціль</DialogTitle>
+                <DialogDescription className="text-base text-[#6B7280] mt-0.5">Оберіть тип цілі та встановіть параметри</DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div>
-              <Label htmlFor="goalName" className="text-sm font-normal text-black">Назва цілі *</Label>
-              <Input
-                id="goalName"
-                value={newGoal.name}
-                onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
-                placeholder="Наприклад: Досягти 100,000 грн"
-                className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-              />
+              <Label htmlFor="goalName" className="text-base font-medium text-[#111827]">Назва цілі *</Label>
+              <Input id="goalName" value={newGoal.name} onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })} placeholder="Наприклад: Досягти 100,000 грн" className="rounded-2xl border border-[#E5E7EB] focus:border-[#447afc] mt-1.5 h-11 text-base" />
             </div>
-
             <div>
-              <Label htmlFor="goalType" className="text-sm font-normal text-black">Тип цілі *</Label>
-              <Select value={newGoal.type} onValueChange={(value: GoalType) => setNewGoal({ ...newGoal, type: value })}>
-                <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] mt-2 h-12 font-light">
-                  <SelectValue />
-                </SelectTrigger>
+              <Label htmlFor="goalType" className="text-base font-medium text-[#111827]">Тип цілі *</Label>
+              <Select value={newGoal.type} onValueChange={(v: GoalType) => setNewGoal({ ...newGoal, type: v })}>
+                <SelectTrigger className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="amount">💰 Досягти суми</SelectItem>
                   <SelectItem value="ladder">📈 Лесенка (прогресія)</SelectItem>
@@ -1200,94 +651,47 @@ export default function GoalsManager() {
 
             {newGoal.type === 'amount' && (
               <div>
-                <Label htmlFor="targetAmount" className="text-sm font-normal text-black">Цільова сума (грн) *</Label>
-                <Input
-                  id="targetAmount"
-                  type="number"
-                  min="1"
-                  value={newGoal.targetAmount === 0 ? '' : newGoal.targetAmount}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                />
+                <Label htmlFor="targetAmount" className="text-base font-medium text-[#111827]">Цільова сума (грн) *</Label>
+                <Input id="targetAmount" type="number" min="1" value={newGoal.targetAmount === 0 ? '' : newGoal.targetAmount} onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] focus:border-[#447afc] mt-1.5 h-11 text-base" />
               </div>
             )}
 
             {newGoal.type === 'ladder' && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="startAmount" className="text-sm font-normal text-black">Початкова сума (грн) *</Label>
-                    <Input
-                      id="startAmount"
-                      type="number"
-                      min="1"
-                      value={newGoal.startAmount === 0 ? '' : newGoal.startAmount}
-                      onChange={(e) => setNewGoal({ ...newGoal, startAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                    />
+                    <Label className="text-base font-medium text-[#111827]">Початкова сума *</Label>
+                    <Input type="number" min="1" value={newGoal.startAmount === 0 ? '' : newGoal.startAmount} onChange={(e) => setNewGoal({ ...newGoal, startAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
-                    <Label htmlFor="targetLadderAmount" className="text-sm font-normal text-black">Цільова сума (грн) *</Label>
-                    <Input
-                      id="targetLadderAmount"
-                      type="number"
-                      min="1"
-                      value={newGoal.targetLadderAmount === 0 ? '' : newGoal.targetLadderAmount}
-                      onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                    />
+                    <Label className="text-base font-medium text-[#111827]">Цільова сума *</Label>
+                    <Input type="number" min="1" value={newGoal.targetLadderAmount === 0 ? '' : newGoal.targetLadderAmount} onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="minOdds" className="text-sm font-normal text-black">Мінімальний коефіцієнт *</Label>
-                    <Input
-                      id="minOdds"
-                      type="number"
-                      min="1.01"
-                      step="0.01"
-                      value={newGoal.minOdds === 0 ? '' : newGoal.minOdds}
-                      onChange={(e) => setNewGoal({ ...newGoal, minOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                    />
+                    <Label className="text-base font-medium text-[#111827]">Мін. коефіцієнт *</Label>
+                    <Input type="number" min="1.01" step="0.01" value={newGoal.minOdds === 0 ? '' : newGoal.minOdds} onChange={(e) => setNewGoal({ ...newGoal, minOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
-                    <Label htmlFor="maxOdds" className="text-sm font-normal text-black">Максимальний коефіцієнт *</Label>
-                    <Input
-                      id="maxOdds"
-                      type="number"
-                      min="1.01"
-                      step="0.01"
-                      value={newGoal.maxOdds === 0 ? '' : newGoal.maxOdds}
-                      onChange={(e) => setNewGoal({ ...newGoal, maxOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                      className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                    />
+                    <Label className="text-base font-medium text-[#111827]">Макс. коефіцієнт *</Label>
+                    <Input type="number" min="1.01" step="0.01" value={newGoal.maxOdds === 0 ? '' : newGoal.maxOdds} onChange={(e) => setNewGoal({ ...newGoal, maxOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                 </div>
-
                 <div>
-                  <Label htmlFor="ladderMode" className="text-sm font-normal text-black">Режим при програші *</Label>
-                  <Select value={newGoal.ladderMode} onValueChange={(value: LadderMode) => setNewGoal({ ...newGoal, ladderMode: value })}>
-                    <SelectTrigger className="rounded-[20px] border-2 border-[#D4D2C8] mt-2 h-12 font-light">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Label className="text-base font-medium text-[#111827]">Режим при програші *</Label>
+                  <Select value={newGoal.ladderMode} onValueChange={(v: LadderMode) => setNewGoal({ ...newGoal, ladderMode: v })}>
+                    <SelectTrigger className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="soft">М'який - продовжити з поточної суми</SelectItem>
-                      <SelectItem value="strict">Жорсткий - почати заново</SelectItem>
+                      <SelectItem value="soft">М'який — продовжити з поточної</SelectItem>
+                      <SelectItem value="strict">Жорсткий — почати заново</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
                 {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
-                  <div className="p-4 bg-[#F5F5F3] rounded-[20px] border-2 border-[#E8E6DC]">
-                    <p className="text-sm font-normal text-black mb-1">Розрахунок кроків:</p>
-                    <p className="text-sm text-[#6B6B6B] font-light">
-                      Кількість кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}
-                    </p>
-                    <p className="text-xs text-[#6B6B6B] mt-1 font-light">
-                      💡 Система прийматиме будь-який коефіцієнт в діапазоні {newGoal.minOdds} - {newGoal.maxOdds}
-                    </p>
+                  <div className="p-3 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <p className="text-base font-medium text-[#111827]">Кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}</p>
+                    <p className="text-sm text-[#9CA3AF] mt-0.5">💡 Коефіцієнт {newGoal.minOdds} – {newGoal.maxOdds}</p>
                   </div>
                 )}
               </>
@@ -1295,94 +699,50 @@ export default function GoalsManager() {
 
             {newGoal.type === 'roi' && (
               <div>
-                <Label htmlFor="targetROI" className="text-sm font-normal text-black">Цільовий ROI (%) *</Label>
-                <Input
-                  id="targetROI"
-                  type="number"
-                  min="0"
-                  max="1000"
-                  value={newGoal.targetROI === 0 ? '' : newGoal.targetROI}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetROI: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                />
+                <Label className="text-base font-medium text-[#111827]">Цільовий ROI (%) *</Label>
+                <Input type="number" min="0" max="1000" value={newGoal.targetROI === 0 ? '' : newGoal.targetROI} onChange={(e) => setNewGoal({ ...newGoal, targetROI: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             )}
 
             {newGoal.type === 'winrate' && (
               <div>
-                <Label htmlFor="targetWinRate" className="text-sm font-normal text-black">Цільовий Win Rate (%) *</Label>
-                <Input
-                  id="targetWinRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={newGoal.targetWinRate === 0 ? '' : newGoal.targetWinRate}
-                  onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                />
+                <Label className="text-base font-medium text-[#111827]">Цільовий Win Rate (%) *</Label>
+                <Input type="number" min="0" max="100" value={newGoal.targetWinRate === 0 ? '' : newGoal.targetWinRate} onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             )}
 
-            <div className="pt-4 border-t-2 border-[#E8E6DC]">
-              <h4 className="text-sm font-normal text-black mb-3">Правила цілі</h4>
-              
+            <div className="pt-3 border-t border-[#E5E7EB]">
+              <h4 className="text-base font-medium text-[#111827] mb-2">Правила цілі</h4>
               <div>
-                <Label htmlFor="betsPerDay" className="text-sm font-normal text-black">Ставок на день (0 = без обмежень)</Label>
-                <Input
-                  id="betsPerDay"
-                  type="number"
-                  min="0"
-                  value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay}
-                  onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                  className="rounded-[20px] border-2 border-[#D4D2C8] focus:border-[#F4E157] mt-2 h-12 font-light"
-                />
+                <Label className="text-base font-medium text-[#111827]">Ставок на день (0 = без обмежень)</Label>
+                <Input type="number" min="0" value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay} onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-3 pt-4 border-t-2 border-[#E8E6DC]">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCreateDialog(false)} 
-              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] font-light h-12 px-6"
-            >
-              Скасувати
-            </Button>
-            <Button 
-              onClick={createGoal} 
-              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-black font-normal h-12 px-6 shadow-[0_4px_16px_rgba(244,225,87,0.3)]"
-            >
+          <DialogFooter className="gap-2 pt-3 border-t border-[#E5E7EB]">
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base">Скасувати</Button>
+            <Button onClick={createGoal} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
               <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Створити ціль
+              Створити
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Goal Dialog */}
+      {/* Delete Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="rounded-[32px] border-2 border-[#E8E6DC]">
+        <DialogContent className="rounded-3xl border border-[#E5E7EB]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-normal text-[#D32F2F]">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-[#EF4444]">
               <AlertCircle className="h-5 w-5" strokeWidth={1.5} />
               Видалити ціль?
             </DialogTitle>
-            <DialogDescription className="text-[#6B6B6B] font-light">
-              Ця дія незворотна. Всі дані про прогрес цілі будуть втрачені.
-            </DialogDescription>
+            <DialogDescription className="text-base text-[#6B7280]">Ця дія незворотна. Всі дані про прогрес будуть втрачені.</DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDeleteDialog(false)} 
-              className="rounded-[20px] border-2 border-[#D4D2C8] hover:bg-[#FAFAF8] font-light h-12 px-6"
-            >
-              Скасувати
-            </Button>
-            <Button 
-              onClick={deleteGoal} 
-              className="rounded-[20px] bg-[#D32F2F] hover:bg-[#B71C1C] text-white font-normal h-12 px-6 shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
-            >
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base">Скасувати</Button>
+            <Button onClick={deleteGoal} className="rounded-3xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-medium h-11 px-5 text-base">
               <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Видалити
             </Button>
@@ -1390,281 +750,218 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Goal Details Dialog - Only shows for ladder goals */}
+      {/* Details Dialog — ladder — BIGGER cards with shadow */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="rounded-[32px] max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC] p-0">
-          {/* Header */}
-          <div className="p-6 border-b-2 border-[#E8E6DC]">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] flex-shrink-0">
-                <TrendingUp className="h-6 w-6 text-black" strokeWidth={1.5} />
+        <DialogContent className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0"
+          style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.15), 0 12px 24px rgba(0,0,0,0.1)' }}>
+          <div className="px-6 py-5 border-b border-[#E5E7EB]">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-[#EFF6FF] rounded-2xl flex-shrink-0">
+                <TrendingUp className="h-6 w-6 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <div>
-                <h1 className="text-3xl font-normal text-black tracking-tight">
-                  {selectedGoal?.name}
-                </h1>
-                <p className="text-[#6B6B6B] mt-1 text-sm font-light">
-                  Детальна інформація про прогрес цілі
-                </p>
+                <h1 className="text-2xl font-bold text-[#111827]">{selectedGoal?.name}</h1>
+                <p className="text-base text-[#6B7280]">Детальна інформація про прогрес</p>
               </div>
             </div>
           </div>
 
           {selectedGoal && (
-            <div className="space-y-5 px-6 pb-6">
-              {/* Summary Card */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
-                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Тип цілі</p>
-                  <Badge className="bg-[#E8E6DC] text-[#3D3D3D] border-0 rounded-[12px] px-3 py-1 font-normal">
-                    {getGoalTypeLabel(selectedGoal.type)}
-                  </Badge>
+            <div className="space-y-5 px-6 pb-6 pt-5">
+              {/* Summary — BIGGER cards with hover */}
+              <div className="grid grid-cols-3 gap-6">
+                <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]"
+                  style={cardBaseStyle}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                >
+                  <p className="text-sm text-[#6B7280] uppercase tracking-wider mb-1.5">Тип</p>
+                  <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl px-3 py-1 font-semibold text-lg">{getGoalTypeLabel(selectedGoal.type)}</Badge>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
-                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Створено</p>
-                  <p className="text-base font-normal text-black">
-                    {new Date(selectedGoal.createdAt).toLocaleDateString('uk-UA')}
-                  </p>
+                <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]"
+                  style={cardBaseStyle}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                >
+                  <p className="text-sm text-[#6B7280] uppercase tracking-wider mb-1.5">Створено</p>
+                  <p className="text-lg font-semibold text-[#111827]">{new Date(selectedGoal.createdAt).toLocaleDateString('uk-UA')}</p>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
-                  <p className="text-xs text-[#6B6B6B] font-light uppercase tracking-wider mb-1">Прогрес</p>
-                  <p className="text-base font-normal text-black">
-                    {getGoalProgress(selectedGoal).toFixed(1)}%
-                  </p>
+                <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]"
+                  style={cardBaseStyle}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                >
+                  <p className="text-sm text-[#6B7280] uppercase tracking-wider mb-1.5">Прогрес</p>
+                  <p className="text-lg font-semibold text-[#111827]">{getGoalProgress(selectedGoal).toFixed(1)}%</p>
                 </div>
               </div>
 
-              {/* Ladder Steps Details */}
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
                 <div className="space-y-4">
-                  {/* Ladder Overview - Collapsible */}
+                  {/* Ladder Overview — BIGGER */}
                   <Collapsible open={isLadderOverviewExpanded} onOpenChange={setIsLadderOverviewExpanded}>
-                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
+                    <Card className="border border-[#E5E7EB] rounded-3xl bg-white"
+                      style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                       <CollapsibleTrigger className="w-full">
-                        <CardContent className="p-5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
-                                <TrendingUp className="h-5 w-5 text-black" strokeWidth={1.5} />
-                              </div>
-                              <h3 className="text-lg font-normal text-black">Огляд лесенки</h3>
-                            </div>
-                            {isLadderOverviewExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            )}
+                        <div className="px-6 py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-[#EFF6FF] rounded-xl"><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                            <h3 className="text-lg font-semibold text-[#111827]">Огляд лесенки</h3>
                           </div>
-                        </CardContent>
+                          {isLadderOverviewExpanded ? <ChevronUp className="h-5 w-5 text-[#6B7280]" /> : <ChevronDown className="h-5 w-5 text-[#6B7280]" />}
+                        </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <CardContent className="px-5 pb-5 pt-0">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
-                              <p className="text-xl font-normal text-black">{selectedGoal.startAmount?.toFixed(0)} грн</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Цільова сума</p>
-                              <p className="text-xl font-normal text-black">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон коефіцієнтів</p>
-                              <p className="text-base font-normal text-black">{selectedGoal.minOdds} - {selectedGoal.maxOdds}</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-[16px] border border-[#E8E6DC]">
-                              <p className="text-xs text-[#6B6B6B] font-light mb-1">Поточний банк</p>
-                              <p className="text-xl font-normal text-[#4CAF50]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
-                            </div>
+                        <div className="px-6 pb-5 grid grid-cols-2 gap-4">
+                          <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]">
+                            <p className="text-sm text-[#6B7280] mb-1">Початкова сума</p>
+                            <p className="text-2xl font-bold text-[#111827]">{selectedGoal.startAmount?.toFixed(0)} грн</p>
                           </div>
-                        </CardContent>
+                          <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]">
+                            <p className="text-sm text-[#6B7280] mb-1">Цільова сума</p>
+                            <p className="text-2xl font-bold text-[#111827]">{selectedGoal.targetLadderAmount?.toFixed(0)} грн</p>
+                          </div>
+                          <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]">
+                            <p className="text-sm text-[#6B7280] mb-1">Коефіцієнти</p>
+                            <p className="text-xl font-bold text-[#111827]">{selectedGoal.minOdds} – {selectedGoal.maxOdds}</p>
+                          </div>
+                          <div className="p-5 bg-[#F0FDF4] rounded-3xl border border-[#BBF7D0]">
+                            <p className="text-sm text-[#6B7280] mb-1">Поточний банк</p>
+                            <p className="text-2xl font-bold text-[#22C55E]">{selectedGoal.currentBank?.toFixed(0)} грн</p>
+                          </div>
+                        </div>
                       </CollapsibleContent>
                     </Card>
                   </Collapsible>
 
-                  {/* Steps Calculation - Collapsible with Scenarios */}
+                  {/* Scenarios */}
                   <Collapsible open={isStepsCalculationExpanded} onOpenChange={setIsStepsCalculationExpanded}>
-                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
+                    <Card className="border border-[#E5E7EB] rounded-3xl bg-white"
+                      style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                       <CollapsibleTrigger className="w-full">
-                        <CardContent className="p-5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
-                                <Info className="h-5 w-5 text-black" strokeWidth={1.5} />
-                              </div>
-                              <div className="text-left">
-                                <p className="text-base font-normal text-black">Сценарії розрахунку кроків</p>
-                                <p className="text-xs text-[#6B6B6B] font-light mt-0.5">
-                                  Скільки кроків потрібно при різних коефіцієнтах
-                                </p>
-                              </div>
+                        <div className="px-6 py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-[#EFF6FF] rounded-xl"><Info className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                            <div className="text-left">
+                              <p className="text-lg font-semibold text-[#111827]">Сценарії кроків</p>
+                              <p className="text-sm text-[#6B7280]">При різних коефіцієнтах</p>
                             </div>
-                            {isStepsCalculationExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            )}
                           </div>
-                        </CardContent>
+                          {isStepsCalculationExpanded ? <ChevronUp className="h-5 w-5 text-[#6B7280]" /> : <ChevronDown className="h-5 w-5 text-[#6B7280]" />}
+                        </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <CardContent className="px-5 pb-5 pt-0">
-                          <div className="space-y-3">
-                            {calculateOddsScenarios(
-                              selectedGoal.startAmount || 100,
-                              selectedGoal.targetLadderAmount || 100000,
-                              selectedGoal.minOdds || 1.3,
-                              selectedGoal.maxOdds || 5
-                            ).map((scenario, index) => (
-                              <div 
-                                key={index}
-                                className="p-4 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[16px] border border-[#E8E6DC]"
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-2xl">{scenario.emoji}</span>
-                                    <div>
-                                      <p className="text-sm font-normal text-black">{scenario.speed}</p>
-                                      <p className="text-xs text-[#6B6B6B] font-light">{scenario.description}</p>
-                                    </div>
+                        <div className="px-6 pb-5 space-y-3">
+                          {calculateOddsScenarios(selectedGoal.startAmount || 100, selectedGoal.targetLadderAmount || 100000, selectedGoal.minOdds || 1.3, selectedGoal.maxOdds || 5).map((sc, i) => (
+                            <div key={i} className="p-4 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{sc.emoji}</span>
+                                  <div>
+                                    <p className="text-base font-semibold text-[#111827]">{sc.speed}</p>
+                                    <p className="text-sm text-[#6B7280]">{sc.description}</p>
                                   </div>
-                                  <Badge className="bg-[#E8E6DC] text-black border-0 rounded-[12px] px-3 py-1 font-normal">
-                                    {scenario.steps} кроків
-                                  </Badge>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-[#6B6B6B]">
-                                  <span className="font-light">При коефіцієнті:</span>
-                                  <span className="font-normal text-black">{scenario.odds}</span>
-                                </div>
+                                <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-xl px-3 py-1 font-semibold text-lg">{sc.steps} кроків</Badge>
                               </div>
-                            ))}
-                          </div>
-                        </CardContent>
+                              <div className="flex items-center gap-2 text-base text-[#6B7280] mt-1">
+                                <span>Коефіцієнт:</span>
+                                <span className="font-semibold text-[#111827]">{sc.odds}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </CollapsibleContent>
                     </Card>
                   </Collapsible>
 
-                  {/* Steps Progression - Collapsible */}
+                  {/* Steps */}
                   <Collapsible open={isStepsProgressionExpanded} onOpenChange={setIsStepsProgressionExpanded}>
-                    <Card className="border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-[24px] bg-white overflow-hidden">
+                    <Card className="border border-[#E5E7EB] rounded-3xl bg-white"
+                      style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                       <CollapsibleTrigger className="w-full">
-                        <CardContent className="p-5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#F4E157] rounded-[16px]">
-                                <BarChart3 className="h-5 w-5 text-black" strokeWidth={1.5} />
-                              </div>
-                              <h3 className="text-lg font-normal text-black">Кроки прогресії</h3>
-                            </div>
-                            {isStepsProgressionExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-black" strokeWidth={1.5} />
-                            )}
+                        <div className="px-6 py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-[#EFF6FF] rounded-xl"><BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                            <h3 className="text-lg font-semibold text-[#111827]">Кроки прогресії</h3>
                           </div>
-                        </CardContent>
+                          {isStepsProgressionExpanded ? <ChevronUp className="h-5 w-5 text-[#6B7280]" /> : <ChevronDown className="h-5 w-5 text-[#6B7280]" />}
+                        </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <CardContent className="px-5 pb-5 pt-0">
-                          <div className="max-h-[450px] overflow-y-auto space-y-3 pr-2">
+                        <div className="px-6 pb-5">
+                          <div className="max-h-[400px] overflow-y-auto space-y-3 pr-1">
                             {selectedGoal.steps.map((step, index) => (
-                              <div 
-                                key={index}
-                                className={`relative p-5 rounded-[24px] border-2 transition-all duration-300 ${
-                                  step.status === 'completed' 
-                                    ? 'bg-gradient-to-br from-[#E8F5E9] to-white border-[#C8E6C9] shadow-[0_2px_8px_rgba(76,175,80,0.15)]' 
-                                    : step.status === 'current'
-                                    ? 'bg-gradient-to-br from-[#FFF9E6] to-white border-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.3)]'
-                                    : 'bg-gradient-to-br from-[#F5F5F3] to-white border-[#E8E6DC]'
-                                }`}
-                              >
-                                {/* Step Header */}
-                                <div className="flex items-center justify-between mb-4">
+                              <div key={index}
+                                className={`relative p-5 rounded-3xl border transition-all ${
+                                  step.status === 'completed' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
+                                  step.status === 'current' ? 'bg-[#FFFBEB] border-[#FDE68A] shadow-sm' :
+                                  'bg-[#F9FAFB] border-[#E5E7EB]'
+                                }`}>
+                                <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-normal text-base ${
-                                      step.status === 'completed'
-                                        ? 'bg-[#4CAF50] text-white'
-                                        : step.status === 'current'
-                                        ? 'bg-[#F4E157] text-black'
-                                        : 'bg-[#E8E6DC] text-[#6B6B6B]'
-                                    }`}>
-                                      {step.step}
-                                    </div>
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base ${
+                                      step.status === 'completed' ? 'bg-[#22C55E] text-white' :
+                                      step.status === 'current' ? 'bg-[#F59E0B] text-white' :
+                                      'bg-[#E5E7EB] text-[#6B7280]'
+                                    }`}>{step.step}</div>
                                     <div>
-                                      <p className="font-normal text-black text-base">Крок {step.step}</p>
-                                      <p className="text-xs text-[#6B6B6B] font-light">
-                                        {step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний крок' : 'Заблоковано'}
-                                      </p>
+                                      <p className="font-semibold text-[#111827] text-lg">Крок {step.step}</p>
+                                      <p className="text-sm text-[#6B7280]">{step.status === 'completed' ? 'Завершено' : step.status === 'current' ? 'Поточний' : 'Заблоковано'}</p>
                                     </div>
                                   </div>
                                   <Badge className={`${
-                                    step.status === 'completed'
-                                      ? 'bg-[#4CAF50] text-white'
-                                      : step.status === 'current'
-                                      ? 'bg-[#F4E157] text-black'
-                                      : 'bg-[#E8E6DC] text-[#6B6B6B]'
-                                  } border-0 rounded-[12px] px-3 py-1 font-normal`}>
+                                    step.status === 'completed' ? 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]' :
+                                    step.status === 'current' ? 'bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A]' :
+                                    'bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB]'
+                                  } rounded-xl px-3 py-1 font-medium text-sm`}>
                                     {step.status === 'completed' ? '✓ Виконано' : step.status === 'current' ? '→ Активний' : '🔒 Очікує'}
                                   </Badge>
                                 </div>
-
-                                {/* Step Details */}
                                 <div className="grid grid-cols-2 gap-3">
-                                  <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
-                                    <p className="text-xs text-[#6B6B6B] font-light mb-1">Початкова сума</p>
-                                    <p className="text-lg font-normal text-black">{step.startAmount.toFixed(0)} грн</p>
+                                  <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB]">
+                                    <p className="text-sm text-[#6B7280]">Ставка</p>
+                                    <p className="text-lg font-bold text-[#111827]">{step.startAmount.toFixed(0)} грн</p>
                                   </div>
-                                  <div className="p-3 bg-white/60 rounded-[16px] border border-[#E8E6DC]">
-                                    <p className="text-xs text-[#6B6B6B] font-light mb-1">Діапазон виграшу</p>
-                                    <p className="text-sm font-normal text-black">
-                                      {step.minPlannedAmount?.toFixed(0)} - {step.maxPlannedAmount?.toFixed(0)} грн
-                                    </p>
+                                  <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB]">
+                                    <p className="text-sm text-[#6B7280]">Діапазон</p>
+                                    <p className="text-base font-semibold text-[#111827]">{step.minPlannedAmount?.toFixed(0)} – {step.maxPlannedAmount?.toFixed(0)} грн</p>
                                   </div>
-                                  
                                   {step.actualAmount && (
                                     <>
-                                      <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
-                                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Фактична сума</p>
-                                        <p className="text-lg font-normal text-[#4CAF50]">{step.actualAmount.toFixed(0)} грн</p>
+                                      <div className="p-3 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
+                                        <p className="text-sm text-[#6B7280]">Факт</p>
+                                        <p className="text-lg font-bold text-[#22C55E]">{step.actualAmount.toFixed(0)} грн</p>
                                       </div>
-                                      <div className="p-3 bg-[#E8F5E9] rounded-[16px] border border-[#C8E6C9]">
-                                        <p className="text-xs text-[#6B6B6B] font-light mb-1">Коефіцієнт</p>
-                                        <p className="text-lg font-normal text-[#4CAF50]">{step.actualOdds?.toFixed(2)}</p>
+                                      <div className="p-3 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
+                                        <p className="text-sm text-[#6B7280]">Коеф.</p>
+                                        <p className="text-lg font-bold text-[#22C55E]">{step.actualOdds?.toFixed(2)}</p>
                                       </div>
                                     </>
                                   )}
                                 </div>
-
-                                {/* Deviation Badge */}
                                 {step.deviation !== undefined && step.deviation > 0 && (
-                                  <div className="mt-3 p-2 bg-[#E8F5E9] rounded-[12px] border border-[#C8E6C9] flex items-center gap-2">
-                                    <TrendingUp className="h-4 w-4 text-[#4CAF50]" strokeWidth={1.5} />
-                                    <p className="text-xs font-normal text-[#2E7D32]">
-                                      +{step.deviation.toFixed(0)} грн більше мінімуму
-                                    </p>
+                                  <div className="mt-3 p-2.5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0] flex items-center gap-2">
+                                    <TrendingUp className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                                    <p className="text-sm font-medium text-[#16A34A]">+{step.deviation.toFixed(0)} грн більше мінімуму</p>
                                   </div>
                                 )}
-
                                 {step.completedAt && (
-                                  <div className="mt-3 pt-3 border-t border-[#E8E6DC]">
-                                    <p className="text-xs text-[#6B6B6B] font-light">
-                                      Завершено: {new Date(step.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                    </p>
+                                  <div className="mt-3 pt-3 border-t border-[#E5E7EB]">
+                                    <p className="text-sm text-[#6B7280]">Завершено: {new Date(step.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                                   </div>
                                 )}
-
-                                {/* Arrow to next step */}
                                 {step.status === 'completed' && index < selectedGoal.steps.length - 1 && (
-                                  <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-                                    <div className="w-8 h-8 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg">
-                                      <ArrowRight className="h-4 w-4 text-white rotate-90" strokeWidth={2} />
+                                  <div className="absolute -bottom-3.5 left-1/2 transform -translate-x-1/2 z-10">
+                                    <div className="w-7 h-7 bg-[#22C55E] rounded-full flex items-center justify-center shadow-md">
+                                      <ArrowRight className="h-3.5 w-3.5 text-white rotate-90" strokeWidth={2} />
                                     </div>
                                   </div>
                                 )}
                               </div>
                             ))}
                           </div>
-                        </CardContent>
+                        </div>
                       </CollapsibleContent>
                     </Card>
                   </Collapsible>
@@ -1673,13 +970,8 @@ export default function GoalsManager() {
             </div>
           )}
 
-          <DialogFooter className="pt-4 px-6 pb-6 border-t-2 border-[#E8E6DC]">
-            <Button 
-              onClick={() => setShowDetailsDialog(false)} 
-              className="rounded-[20px] bg-[#E8E6DC] hover:bg-[#D4D2C8] text-black font-normal h-12 px-6"
-            >
-              Закрити
-            </Button>
+          <DialogFooter className="pt-4 px-6 pb-6 border-t border-[#E5E7EB]">
+            <Button onClick={() => setShowDetailsDialog(false)} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">Закрити</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1688,10 +980,7 @@ export default function GoalsManager() {
       <CompletedGoalResultModal
         goal={selectedGoal}
         isOpen={showCompletedResultModal}
-        onClose={() => {
-          setShowCompletedResultModal(false);
-          setSelectedGoal(null);
-        }}
+        onClose={() => { setShowCompletedResultModal(false); setSelectedGoal(null); }}
       />
     </div>
   );
