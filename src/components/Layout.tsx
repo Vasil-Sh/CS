@@ -32,7 +32,6 @@ export default function Layout() {
   const isAdmin = userRole === 'admin';
 
   useEffect(() => {
-    // Check if user is authenticated
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
       navigate('/login');
@@ -60,7 +59,7 @@ export default function Layout() {
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
                 ? 'bg-[#f2f8ff] text-[#2A5BD7] shadow-[0_4px_16px_rgba(42,91,215,0.1)]'
-                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
+                : 'text-[#8B8B9A] hover:text-[#2A5BD7] hover:bg-[#f2f8ff]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -80,7 +79,7 @@ export default function Layout() {
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
                 ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
-                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
+                : 'text-[#8B8B9A] hover:text-[#447afc] hover:bg-[#f2f8ff]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -105,24 +104,9 @@ export default function Layout() {
               MatchIQ
             </h1>
           </div>
-          
-          {/* User Info Card */}
-          <div className="relative">
-            <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
-                <User className="h-7 w-7 text-white" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-normal text-[#1a1a2e] truncate">
-                  @{username || 'User'}
-                  {isAdmin && <span className="ml-1">👑</span>}
-                </p>
-                <p className="text-sm text-[#8B8B9A] font-light">
-                  {isAdmin ? 'Адміністратор' : 'Користувач'}
-                </p>
-              </div>
-            </div>
-          </div>
+
+          {/* Divider line under MatchIQ */}
+          <div className="border-t-2 border-[#E8E6DC]" />
 
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-8">
@@ -156,56 +140,75 @@ export default function Layout() {
               MatchIQ
             </h1>
           </div>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#F0F0ED] w-12 h-12">
-                <Menu className="h-6 w-6" strokeWidth={1.5} />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]">
-              <div className="flex h-20 items-center gap-4">
-                <div className="w-14 h-14 bg-[#1a1a2e] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
-                  <TrendingUp className="w-7 h-7 text-white" strokeWidth={1.5} />
-                </div>
-                <h1 className="text-2xl font-semibold text-[#1a1a2e] tracking-tight">
-                  MatchIQ
-                </h1>
+          {/* User Info Mobile - top right */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 bg-[#f2f8ff] rounded-[16px]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#447afc]">
+                <User className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
-              
-              {/* User Info Mobile */}
-              <div className="relative mt-6">
-                <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
-                    <User className="h-7 w-7 text-white" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-normal text-[#1a1a2e] truncate">
-                      @{username || 'User'}
-                      {isAdmin && <span className="ml-1">👑</span>}
-                    </p>
-                    <p className="text-sm text-[#8B8B9A] font-light">
-                      {isAdmin ? 'Адміністратор' : 'Користувач'}
-                    </p>
-                  </div>
-                </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-medium text-[#1a1a2e] truncate max-w-[120px]">
+                  @{username || 'User'}
+                  {isAdmin && <span className="ml-1">👑</span>}
+                </p>
               </div>
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12">
+                  <Menu className="h-6 w-6" strokeWidth={1.5} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]">
+                <div className="flex h-20 items-center gap-4">
+                  <div className="w-14 h-14 bg-[#1a1a2e] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+                    <TrendingUp className="w-7 h-7 text-white" strokeWidth={1.5} />
+                  </div>
+                  <h1 className="text-2xl font-semibold text-[#1a1a2e] tracking-tight">
+                    MatchIQ
+                  </h1>
+                </div>
 
-              <nav className="mt-8">
-                <ul className="space-y-2">
-                  <NavItems />
-                </ul>
-                <div className="mt-8">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
-                  >
-                    <LogOut className="h-5 w-5" strokeWidth={1.5} />
-                    <span>Вийти</span>
-                  </button>
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+                {/* Divider line under MatchIQ mobile */}
+                <div className="border-t-2 border-[#E8E6DC] mt-2" />
+
+                <nav className="mt-8">
+                  <ul className="space-y-2">
+                    <NavItems />
+                  </ul>
+                  <div className="mt-8">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
+                    >
+                      <LogOut className="h-5 w-5" strokeWidth={1.5} />
+                      <span>Вийти</span>
+                    </button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Header Bar - Desktop */}
+      <div className="hidden lg:block lg:pl-80">
+        <div className="flex items-center justify-end bg-white px-10 py-4 border-b border-[#E8E6DC]">
+          <div className="flex items-center gap-3 px-4 py-2 bg-[#f2f8ff] rounded-[20px]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#447afc] shadow-[0_2px_8px_rgba(68,122,252,0.25)]">
+              <User className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[#1a1a2e]">
+                @{username || 'User'}
+                {isAdmin && <span className="ml-1">👑</span>}
+              </p>
+              <p className="text-xs text-[#8B8B9A]">
+                {isAdmin ? 'Адміністратор' : 'Користувач'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
