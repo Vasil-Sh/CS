@@ -1,6 +1,4 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
 import BetShareCard from './BetShareCard';
 import type { Bet } from '@/types/betting';
 
@@ -13,18 +11,10 @@ interface BetShareModalProps {
 export default function BetShareModal({ bet, open, onClose }: BetShareModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 gap-0 bg-[#FAFAF8] border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[32px]">
-        {/* RonDesignLab-style header */}
-        <div className="flex items-center justify-between p-6 border-b-2 border-[#E8E6DC] bg-white/60 backdrop-blur-sm">
-          <h2 className="text-2xl font-light text-black tracking-tight">Поділитися</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-10 w-10 rounded-[20px] hover:bg-[#F5F5F3] transition-all duration-300"
-          >
-            <X className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
-          </Button>
+      <DialogContent className="max-w-2xl p-0 gap-0 bg-white border border-[#E5E7EB] shadow-[0_20px_60px_rgba(0,0,0,0.15)] rounded-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB] bg-[#F9FAFB] rounded-t-2xl">
+          <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Поділитися</h2>
         </div>
 
         {/* Card preview */}
