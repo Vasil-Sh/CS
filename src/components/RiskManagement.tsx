@@ -625,9 +625,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header row with actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Header row: disclaimer text (left) + info icon & Google Sheets button (right) — all on one line */}
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-[#92400E] leading-relaxed flex-1 min-w-0">
+            <span className="text-[#D97706] mr-1.5">⚠</span>
+            Аналітика носить <strong className="font-semibold">рекомендаційний характер</strong> і не є фінансовою порадою. 
+            Всі рішення приймаються <strong className="font-semibold">самостійно на власний ризик</strong>.
+          </p>
+
+          <div className="flex items-center gap-3 flex-shrink-0">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
@@ -637,40 +643,31 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
                 <p className="text-sm font-medium text-[#111827] mb-1">Управління ризиками</p>
                 <p className="text-sm text-[#6B7280] leading-relaxed">
-                  Аналіз ризиків та контроль банкролу. Аналітика носить рекомендаційний характер і не є фінансовою порадою.
+                  Аналіз ризиків та контроль банкролу. Список ризикових команд, метрики просадок, волатильності та рекомендації.
                 </p>
               </TooltipContent>
             </Tooltip>
+
+            <Button
+              onClick={updateFromGoogleSheets}
+              disabled={isUpdating}
+              variant="outline"
+              className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-10 px-4"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" strokeWidth={1.5} />
+                  Оновлення...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Оновити з Google Sheets
+                </>
+              )}
+            </Button>
           </div>
-
-          <Button
-            onClick={updateFromGoogleSheets}
-            disabled={isUpdating}
-            variant="outline"
-            className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-10 px-4"
-          >
-            {isUpdating ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" strokeWidth={1.5} />
-                Оновлення...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                Оновити з Google Sheets
-              </>
-            )}
-          </Button>
         </div>
-
-        {/* Disclaimer */}
-        <Alert className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-4">
-          <AlertTriangle className="h-4 w-4 text-[#D97706]" strokeWidth={1.5} />
-          <AlertDescription className="text-sm text-[#92400E] ml-2">
-            Аналітика носить <strong className="font-semibold">рекомендаційний характер</strong> і не є фінансовою порадою. 
-            Всі рішення приймаються <strong className="font-semibold">самостійно на власний ризик</strong>.
-          </AlertDescription>
-        </Alert>
 
         {/* Risk Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -684,7 +681,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
               <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
             </div>
-            <div className={`text-2xl font-bold text-[#111827] tracking-tight mb-2`}>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
               {riskLevel.level === 'high' ? 'Високий' : riskLevel.level === 'medium' ? 'Середній' : 'Низький'}
             </div>
             <Badge className={`${riskLevel.bgColor} ${riskLevel.color} hover:${riskLevel.bgColor} px-3 py-1.5 rounded-lg border ${riskLevel.level === 'high' ? 'border-[#FECACA]' : riskLevel.level === 'medium' ? 'border-[#FDE68A]' : 'border-[#BBF7D0]'} font-medium text-xs`}>
