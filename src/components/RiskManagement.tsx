@@ -19,13 +19,14 @@ import {
   Info,
   RefreshCw,
   Download,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   Calendar,
   Pencil,
   Check,
-  X
+  X,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
@@ -161,7 +162,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
-  // Edit state: stores the global index of the team being edited, and temp values
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
   const [editNotes, setEditNotes] = useState('');
@@ -171,7 +171,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
-  // Normalize team name for comparison
   const normalizeTeamName = (name: string): string => {
     return name
       .toLowerCase()
@@ -190,14 +189,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return;
       }
 
-      // Merge logic: Add only NEW teams from Google Sheets
       const existingTeams = riskyTeams;
       const newTeamsToAdd: RiskyTeam[] = [];
       
       teamsFromSheet.forEach(sheetTeam => {
         const normalizedSheetTeam = normalizeTeamName(sheetTeam.name);
         
-        // Check if this team already exists (by normalized name and game)
         const exists = existingTeams.some(existingTeam => 
           normalizeTeamName(existingTeam.name) === normalizedSheetTeam && 
           existingTeam.game === sheetTeam.game
@@ -215,11 +212,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return;
       }
 
-      // Merge: existing teams + new teams from Google Sheets
       const mergedTeams = [...existingTeams, ...newTeamsToAdd];
       setRiskyTeams(mergedTeams);
       
-      // Also update the service's storage
       localStorage.setItem('admin_risky_teams', JSON.stringify(mergedTeams));
       
       toast.success(`Успішно додано ${newTeamsToAdd.length} нових команд з Google Sheets!`, {
@@ -248,7 +243,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const deleteRiskyTeam = (index: number) => {
-    // If we're editing this team, cancel edit first
     if (editingIndex === index) {
       setEditingIndex(null);
     }
@@ -290,15 +284,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'БАН':
-        return 'bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] border-2 border-[#FFCDD2] rounded-[20px] font-normal';
+        return 'bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs';
       case 'Нестабільні':
-        return 'bg-[#FFF4E6] text-[#F57C00] hover:bg-[#FFF4E6] border-2 border-[#FFE0B2] rounded-[20px] font-normal';
+        return 'bg-[#FFF7ED] text-[#EA580C] hover:bg-[#FFF7ED] border border-[#FED7AA] rounded-lg font-medium text-xs';
       case 'Обережно':
-        return 'bg-[#FFFDE7] text-[#F9A825] hover:bg-[#FFFDE7] border-2 border-[#FFF9C4] rounded-[20px] font-normal';
+        return 'bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] rounded-lg font-medium text-xs';
       case 'Рідко':
-        return 'bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB] rounded-[20px] font-normal';
+        return 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg font-medium text-xs';
       default:
-        return 'bg-[#F5F5F3] text-[#6B6B6B] hover:bg-[#F5F5F3] border-2 border-[#E8E6DC] rounded-[20px] font-normal';
+        return 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs';
     }
   };
 
@@ -487,11 +481,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     const { maxDrawdown, volatility, riskOfRuin } = riskMetrics;
     
     if (maxDrawdown > 20 || volatility > 30 || riskOfRuin > 10) {
-      return { level: 'high', color: 'text-[#D32F2F]', bgColor: 'bg-[#FFE8E8]' };
+      return { level: 'high', color: 'text-[#EF4444]', bgColor: 'bg-[#FEF2F2]' };
     } else if (maxDrawdown > 10 || volatility > 20 || riskOfRuin > 5) {
-      return { level: 'medium', color: 'text-[#F57C00]', bgColor: 'bg-[#FFF4E6]' };
+      return { level: 'medium', color: 'text-[#F59E0B]', bgColor: 'bg-[#FFFBEB]' };
     } else {
-      return { level: 'low', color: 'text-[#4CAF50]', bgColor: 'bg-[#E8F5E9]' };
+      return { level: 'low', color: 'text-[#22C55E]', bgColor: 'bg-[#F0FDF4]' };
     }
   };
 
@@ -510,30 +504,42 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     Рідко: filteredTeams.filter(t => t.status === 'Рідко')
   };
 
-  // Helper to render a team card (used for both CS and Dota sections)
+  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
+
+  const cardBaseStyle = {
+    transform: 'scale(1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  };
+
+  const cardHoverStyle = {
+    transform: 'scale(1.03)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+  };
+
   const renderTeamCard = (team: RiskyTeam, globalIndex: number) => {
     const isEditing = editingIndex === globalIndex;
 
     if (isEditing) {
       return (
-        <div key={globalIndex} className="p-4 border-2 border-[#F4E157] rounded-[24px] bg-[#FFFDE7] transition-all">
+        <div key={globalIndex} className="p-4 border border-[#BFDBFE] rounded-2xl bg-[#EFF6FF] transition-all">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Назва команди</label>
+                <label className="text-xs font-medium text-[#6B7280] mb-1 block">Назва команди</label>
                 <Input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                  className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                   placeholder="Назва команди"
                 />
               </div>
               <div className="w-40">
-                <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Статус</label>
+                <label className="text-xs font-medium text-[#6B7280] mb-1 block">Статус</label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[16px] font-light text-sm"
+                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
                 >
                   <option value="БАН">БАН</option>
                   <option value="Нестабільні">Нестабільні</option>
@@ -543,11 +549,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </div>
             <div>
-              <label className="text-xs font-normal text-[#6B6B6B] mb-1 block">Коментар</label>
+              <label className="text-xs font-medium text-[#6B7280] mb-1 block">Коментар</label>
               <Textarea
                 value={editNotes}
                 onChange={(e) => setEditNotes(e.target.value)}
-                className="rounded-[16px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                 placeholder="Додайте коментар..."
                 rows={2}
               />
@@ -557,7 +563,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 variant="ghost"
                 size="sm"
                 onClick={cancelEditing}
-                className="text-[#6B6B6B] hover:text-black hover:bg-[#F5F5F3] rounded-[16px]"
+                className="text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-xl text-sm"
               >
                 <X className="h-4 w-4 mr-1" strokeWidth={1.5} />
                 Скасувати
@@ -566,7 +572,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 size="sm"
                 onClick={saveEditing}
                 disabled={!editName.trim()}
-                className="bg-[#4CAF50] hover:bg-[#45A049] text-white rounded-[16px] font-normal shadow-[0_2px_8px_rgba(76,175,80,0.3)]"
+                className="bg-[#111827] hover:bg-[#1F2937] text-white rounded-xl text-sm"
               >
                 <Check className="h-4 w-4 mr-1" strokeWidth={1.5} />
                 Зберегти
@@ -578,11 +584,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     }
 
     return (
-      <div key={globalIndex} className="p-4 border-2 border-[#E8E6DC] rounded-[24px] hover:bg-[#FAFAF8] hover:border-[#D4D2C8] transition-all">
+      <div key={globalIndex} className="p-4 border border-[#F3F4F6] rounded-2xl hover:bg-[#F9FAFB] hover:border-[#E5E7EB] transition-all">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-normal text-lg text-black">
+              <h3 className="font-medium text-base text-[#111827]">
                 {getGameEmoji(team.game)} {team.name}
               </h3>
               <Badge className={getStatusBadge(team.status)}>
@@ -590,7 +596,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </Badge>
             </div>
             {team.notes && (
-              <p className="text-sm text-[#6B6B6B] font-light">{team.notes}</p>
+              <p className="text-sm text-[#6B7280]">{team.notes}</p>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -598,7 +604,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => startEditing(globalIndex, team)}
-              className="text-[#1976D2] hover:text-[#1565C0] hover:bg-[#E3F2FD] rounded-[16px]"
+              className="text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-xl"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -606,7 +612,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => deleteRiskyTeam(globalIndex)}
-              className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFE8E8] rounded-[16px]"
+              className="text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] rounded-xl"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -619,240 +625,232 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header Card */}
-        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_8px_20px_rgba(244,225,87,0.4)]">
-                  <Shield className="h-6 w-6 text-black" strokeWidth={1.5} />
-                </div>
-                Управління ризиками
-                <button
-                  className="p-2.5 bg-[#F4E157] rounded-[16px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] hover:shadow-[0_6px_16px_rgba(244,225,87,0.6)] transition-all ml-2"
-                  title="Аналіз ризиків та контроль банкролу"
-                >
-                  <HelpCircle className="h-5 w-5 text-black" strokeWidth={2} />
+        {/* Header row with actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
+                  <Info className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
                 </button>
-              </CardTitle>
-              
-              {/* Admin: Update from Google Sheets Button */}
-              <Button
-                onClick={updateFromGoogleSheets}
-                disabled={isUpdating}
-                className="rounded-[20px] bg-[#4CAF50] hover:bg-[#45A049] font-normal shadow-[0_4px_12px_rgba(76,175,80,0.3)] hover:shadow-[0_6px_16px_rgba(76,175,80,0.4)] transition-all px-6 py-2.5"
-              >
-                {isUpdating ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" strokeWidth={1.5} />
-                    Оновлення...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                    Оновити з Google Sheets
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                <p className="text-sm font-medium text-[#111827] mb-1">Управління ризиками</p>
+                <p className="text-sm text-[#6B7280] leading-relaxed">
+                  Аналіз ризиків та контроль банкролу. Аналітика носить рекомендаційний характер і не є фінансовою порадою.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
-        {/* Legal Disclaimer - PROMINENT VERSION */}
-        <Card className="border-3 border-[#FF9800] shadow-[0_8px_32px_rgba(255,152,0,0.25)] rounded-[32px] bg-gradient-to-r from-[#FFF3E0] via-[#FFF8E1] to-[#FFF3E0] overflow-hidden">
-          <CardContent className="p-0">
-            <div className="flex items-stretch">
-              {/* Left accent bar */}
-              <div className="w-2 bg-gradient-to-b from-[#FF9800] to-[#F57C00] flex-shrink-0 rounded-l-[32px]" />
-              
-              <div className="flex items-center gap-5 p-7 flex-1">
-                {/* Icon container */}
-                <div className="p-4 bg-[#FF9800] rounded-[24px] shadow-[0_6px_20px_rgba(255,152,0,0.4)] flex-shrink-0">
-                  <AlertTriangle className="h-7 w-7 text-white" strokeWidth={2} />
-                </div>
-                
-                {/* Text content */}
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[#E65100] mb-1.5 tracking-tight">
-                    ⚠️ Важливо
-                  </h3>
-                  <p className="text-base font-normal text-[#BF360C] leading-relaxed">
-                    Аналітика носить <strong className="font-bold text-[#D84315]">рекомендаційний характер</strong> і не є фінансовою порадою. 
-                    Всі рішення щодо ставок приймаються користувачем <strong className="font-bold text-[#D84315]">самостійно на власний ризик</strong>.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <Button
+            onClick={updateFromGoogleSheets}
+            disabled={isUpdating}
+            variant="outline"
+            className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-10 px-4"
+          >
+            {isUpdating ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" strokeWidth={1.5} />
+                Оновлення...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                Оновити з Google Sheets
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* Disclaimer */}
+        <Alert className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-4">
+          <AlertTriangle className="h-4 w-4 text-[#D97706]" strokeWidth={1.5} />
+          <AlertDescription className="text-sm text-[#92400E] ml-2">
+            Аналітика носить <strong className="font-semibold">рекомендаційний характер</strong> і не є фінансовою порадою. 
+            Всі рішення приймаються <strong className="font-semibold">самостійно на власний ризик</strong>.
+          </AlertDescription>
+        </Alert>
 
         {/* Risk Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <Shield className="h-4 w-4 text-[#F4E157]" strokeWidth={1.5} />
-                Рівень ризику
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className={`text-2xl font-light tracking-tight ${riskLevel.color}`}>
-                {riskLevel.level === 'high' ? 'Високий' : riskLevel.level === 'medium' ? 'Середній' : 'Низький'}
-              </div>
-              <div className={`text-xs px-3 py-1.5 rounded-[16px] mt-2 inline-block ${riskLevel.bgColor} ${riskLevel.color} font-normal border-2 ${riskLevel.level === 'high' ? 'border-[#FFCDD2]' : riskLevel.level === 'medium' ? 'border-[#FFE0B2]' : 'border-[#C8E6C9]'}`}>
-                Поточна оцінка
-              </div>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
+            </div>
+            <div className={`text-2xl font-bold text-[#111827] tracking-tight mb-2`}>
+              {riskLevel.level === 'high' ? 'Високий' : riskLevel.level === 'medium' ? 'Середній' : 'Низький'}
+            </div>
+            <Badge className={`${riskLevel.bgColor} ${riskLevel.color} hover:${riskLevel.bgColor} px-3 py-1.5 rounded-lg border ${riskLevel.level === 'high' ? 'border-[#FECACA]' : riskLevel.level === 'medium' ? 'border-[#FDE68A]' : 'border-[#BBF7D0]'} font-medium text-xs`}>
+              Поточна оцінка
+            </Badge>
+          </div>
 
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-[#D32F2F]" strokeWidth={1.5} />
-                Макс. просадка
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-2xl font-light text-[#D32F2F] tracking-tight">
-                {riskMetrics.maxDrawdown}%
-              </div>
-              <p className="text-xs text-[#6B6B6B] mt-1 font-light">
-                Максимальне падіння від піку
-              </p>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingDown className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Макс. просадка</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {riskMetrics.maxDrawdown}%
+            </div>
+            <span className="text-sm text-[#9CA3AF]">Максимальне падіння від піку</span>
+          </div>
 
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-[#1976D2]" strokeWidth={1.5} />
-                Коефіцієнт Шарпа
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-2xl font-light text-black tracking-tight">{riskMetrics.sharpeRatio}</div>
-              <p className="text-xs text-[#6B6B6B] mt-1 font-light">
-                {riskMetrics.sharpeRatio > 1 ? 'Відмінно' : 
-                 riskMetrics.sharpeRatio > 0.5 ? 'Добре' : 
-                 riskMetrics.sharpeRatio > 0 ? 'Задовільно' : 'Погано'}
-              </p>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Коефіцієнт Шарпа</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">{riskMetrics.sharpeRatio}</div>
+            <span className="text-sm text-[#9CA3AF]">
+              {riskMetrics.sharpeRatio > 1 ? 'Відмінно' : 
+               riskMetrics.sharpeRatio > 0.5 ? 'Добре' : 
+               riskMetrics.sharpeRatio > 0 ? 'Задовільно' : 'Погано'}
+            </span>
+          </div>
 
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:border-[#C4C2B8] transition-all duration-300">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[#F57C00]" strokeWidth={1.5} />
-                Волатильність
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-2xl font-light text-black tracking-tight">{riskMetrics.volatility}%</div>
-              <Badge className={`mt-2 rounded-[16px] font-normal px-4 py-2 border-2 ${volatilityLevel === 'low' ? 'bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] border-[#C8E6C9]' : volatilityLevel === 'medium' ? 'bg-[#FFF4E6] text-[#F57C00] hover:bg-[#FFF4E6] border-[#FFE0B2]' : 'bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] border-[#FFCDD2]'}`}>
-                {volatilityLevel === 'low' ? 'Стабільно' : 
-                 volatilityLevel === 'medium' ? 'Помірно' : 'Нестабільно'}
-              </Badge>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Волатильність</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">{riskMetrics.volatility}%</div>
+            <Badge className={`px-3 py-1.5 rounded-lg font-medium text-xs border ${volatilityLevel === 'low' ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : volatilityLevel === 'medium' ? 'bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border-[#FDE68A]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
+              {volatilityLevel === 'low' ? 'Стабільно' : 
+               volatilityLevel === 'medium' ? 'Помірно' : 'Нестабільно'}
+            </Badge>
+          </div>
         </div>
 
         {/* Stats Cards for Teams */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wider flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-[#F4E157]" strokeWidth={1.5} />
-                Всього команд
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-3xl font-light text-black tracking-tight">{riskyTeams.length}</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280]">Всього команд</span>
+            </div>
+            <div className="text-4xl font-bold text-[#111827] tracking-tight">{riskyTeams.length}</div>
+          </div>
 
-          <Card className="border-2 border-[#FFCDD2] shadow-[0_8px_24px_rgba(211,47,47,0.15)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#D32F2F] uppercase tracking-wider">
-                БАН
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-3xl font-light text-[#D32F2F] tracking-tight">{teamsByStatus.БАН.length}</div>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+              <span className="text-sm font-medium text-[#6B7280]">БАН</span>
+            </div>
+            <div className="text-4xl font-bold text-[#EF4444] tracking-tight">{teamsByStatus.БАН.length}</div>
+          </div>
 
-          <Card className="border-2 border-[#FFE0B2] shadow-[0_8px_24px_rgba(245,124,0,0.15)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#F57C00] uppercase tracking-wider">
-                Нестабільні
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-3xl font-light text-[#F57C00] tracking-tight">{teamsByStatus.Нестабільні.length}</div>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+              <span className="text-sm font-medium text-[#6B7280]">Нестабільні</span>
+            </div>
+            <div className="text-4xl font-bold text-[#F59E0B] tracking-tight">{teamsByStatus.Нестабільні.length}</div>
+          </div>
 
-          <Card className="border-2 border-[#FFF9C4] shadow-[0_8px_24px_rgba(249,168,37,0.15)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="pb-4 pt-7 px-7">
-              <CardTitle className="text-sm font-normal text-[#F9A825] uppercase tracking-wider">
-                Обережно
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-7 pb-7">
-              <div className="text-3xl font-light text-[#F9A825] tracking-tight">{teamsByStatus.Обережно.length}</div>
-            </CardContent>
-          </Card>
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
+              <span className="text-sm font-medium text-[#6B7280]">Обережно</span>
+            </div>
+            <div className="text-4xl font-bold text-[#D97706] tracking-tight">{teamsByStatus.Обережно.length}</div>
+          </div>
         </div>
 
-        {/* Add New Team - Dropdown */}
-        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+        {/* Add New Team - Collapsible */}
+        <Card 
+          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+          style={{ boxShadow: chartCardShadow }}
+        >
           <CardHeader 
-            className="bg-white border-b-2 border-[#E8E6DC] p-8 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+            className="bg-white border-b border-[#E5E7EB] p-6 cursor-pointer hover:bg-[#F9FAFB] transition-colors"
             onClick={() => setIsAddTeamOpen(!isAddTeamOpen)}
           >
-            <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                  <Plus className="h-6 w-6 text-black" strokeWidth={1.5} />
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+              <span className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                  <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
                 Додати нову команду
-              </div>
+              </span>
               {isAddTeamOpen ? (
-                <ChevronUp className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+                <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
               ) : (
-                <ChevronDown className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+                <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
               )}
             </CardTitle>
           </CardHeader>
           {isAddTeamOpen && (
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-normal text-[#6B6B6B]">Назва команди</label>
+                  <label className="text-sm font-medium text-[#6B7280]">Назва команди</label>
                   <Input
                     value={newTeam.name}
                     onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
                     placeholder="Введіть назву команди"
-                    className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                    className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-[#6B6B6B]">Гра</label>
+                  <label className="text-sm font-medium text-[#6B7280]">Гра</label>
                   <select
                     value={newTeam.game}
                     onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
-                    className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
+                    className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
                   >
                     <option value="CS">CS</option>
                     <option value="Дота">Дота</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-[#6B6B6B]">Статус</label>
+                  <label className="text-sm font-medium text-[#6B7280]">Статус</label>
                   <select
                     value={newTeam.status}
                     onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
-                    className="w-full p-2 border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors rounded-[20px] mt-1 font-light"
+                    className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
                   >
                     <option value="БАН">БАН</option>
                     <option value="Нестабільні">Нестабільні</option>
@@ -861,19 +859,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm font-normal text-[#6B6B6B]">Примітки</label>
+                  <label className="text-sm font-medium text-[#6B7280]">Примітки</label>
                   <Textarea
                     value={newTeam.notes}
                     onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
                     placeholder="Додайте примітки про команду"
-                    className="mt-1 rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                    className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                     rows={3}
                   />
                 </div>
               </div>
               <Button
                 onClick={addRiskyTeam}
-                className="mt-4 bg-[#F4E157] hover:bg-[#F0DD4D] text-black rounded-[20px] font-normal shadow-[0_4px_12px_rgba(244,225,87,0.3)] hover:shadow-[0_6px_16px_rgba(244,225,87,0.4)] transition-all px-6 py-2.5"
+                className="mt-4 bg-[#111827] hover:bg-[#1F2937] text-white rounded-xl text-sm px-6"
                 disabled={!newTeam.name.trim()}
               >
                 <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
@@ -883,52 +881,65 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           )}
         </Card>
 
-        {/* Search - Dropdown */}
-        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
+        {/* Search - Collapsible */}
+        <Card 
+          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+          style={{ boxShadow: chartCardShadow }}
+        >
           <CardHeader 
-            className="bg-white border-b-2 border-[#E8E6DC] p-8 cursor-pointer hover:bg-[#FAFAF8] transition-colors"
+            className="bg-white border-b border-[#E5E7EB] p-6 cursor-pointer hover:bg-[#F9FAFB] transition-colors"
             onClick={() => setIsSearchOpen(!isSearchOpen)}
           >
-            <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                  <Search className="h-6 w-6 text-black" strokeWidth={1.5} />
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+              <span className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                  <Search className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
                 Пошук команд
-              </div>
+              </span>
               {isSearchOpen ? (
-                <ChevronUp className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+                <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
               ) : (
-                <ChevronDown className="h-6 w-6 text-[#6B6B6B]" strokeWidth={1.5} />
+                <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
               )}
             </CardTitle>
           </CardHeader>
           {isSearchOpen && (
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Пошук за назвою, грою, статусом або примітками..."
-                className="w-full rounded-[20px] border-2 border-[#E8E6DC] hover:border-[#D4D2C8] focus:border-[#F4E157] transition-colors font-light"
+                className="w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
               />
             </CardContent>
           )}
         </Card>
 
         {/* Teams by Game */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* CS Teams */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-                <span className="flex items-center gap-3"><div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]"><Target className="h-6 w-6 text-black" strokeWidth={1.5} /></div>CS команди</span>
-                <Badge className="rounded-[20px] bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB] font-normal px-4 py-2">{teamsByGame.CS.length}</Badge>
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                    <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  </div>
+                  CS команди
+                </span>
+                <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
+                  {teamsByGame.CS.length}
+                </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {teamsByGame.CS.length === 0 ? (
-                  <p className="text-center text-[#6B6B6B] py-8 font-light">Немає команд CS</p>
+                  <p className="text-center text-[#9CA3AF] py-8 text-sm">Немає команд CS</p>
                 ) : (
                   teamsByGame.CS.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
@@ -940,17 +951,27 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </Card>
 
           {/* Dota Teams */}
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center justify-between text-3xl font-light text-black">
-                <span className="flex items-center gap-3"><div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]"><Shield className="h-6 w-6 text-black" strokeWidth={1.5} /></div>Dota 2 команди</span>
-                <Badge className="rounded-[20px] bg-[#E3F2FD] text-[#1976D2] hover:bg-[#E3F2FD] border-2 border-[#BBDEFB] font-normal px-4 py-2">{teamsByGame.Дота.length}</Badge>
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                    <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  </div>
+                  Dota 2 команди
+                </span>
+                <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
+                  {teamsByGame.Дота.length}
+                </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {teamsByGame.Дота.length === 0 ? (
-                  <p className="text-center text-[#6B6B6B] py-8 font-light">Немає команд Dota 2</p>
+                  <p className="text-center text-[#9CA3AF] py-8 text-sm">Немає команд Dota 2</p>
                 ) : (
                   teamsByGame.Дота.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
@@ -963,49 +984,57 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </div>
 
         {/* Detailed Risk Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black"><div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]"><BarChart3 className="h-6 w-6 text-black" strokeWidth={1.5} /></div>Детальні ризик-метрики</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                  <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                </div>
+                Детальні ризик-метрики
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 p-8">
+            <CardContent className="space-y-4 p-6">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-normal text-[#6B6B6B]">Поточна просадка:</span>
-                <span className="font-normal text-black">{riskMetrics.currentDrawdown}%</span>
+                <span className="text-sm text-[#6B7280]">Поточна просадка:</span>
+                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm font-normal text-[#6B6B6B]">Послідовні програші:</span>
-                <span className="font-normal text-black">{riskMetrics.consecutiveLosses}</span>
+                <span className="text-sm text-[#6B7280]">Послідовні програші:</span>
+                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm font-normal text-[#6B6B6B]">Середня ставка:</span>
-                <span className="font-normal text-black">{riskMetrics.averageStake} ₴</span>
+                <span className="text-sm text-[#6B7280]">Середня ставка:</span>
+                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.averageStake} ₴</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm font-normal text-[#6B6B6B]">Найбільший програш:</span>
-                <span className="font-normal text-[#D32F2F]">{riskMetrics.largestLoss} ₴</span>
+                <span className="text-sm text-[#6B7280]">Найбільший програш:</span>
+                <span className="text-sm font-semibold text-[#EF4444]">{riskMetrics.largestLoss} ₴</span>
               </div>
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-normal text-[#6B6B6B]">Келлі %:</span>
+                  <span className="text-sm text-[#6B7280]">Келлі %:</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button className="inline-flex items-center">
-                        <Info className="h-4 w-4 text-[#1976D2] cursor-help" strokeWidth={1.5} />
+                        <Info className="h-4 w-4 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-xs bg-white border-2 border-[#FFF9C4] rounded-[20px] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-                      <p className="text-sm font-normal text-black mb-2">Kelly Criterion — агресивна стратегія</p>
-                      <p className="text-xs text-[#6B6B6B] font-light mb-2">
+                    <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                      <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
+                      <p className="text-xs text-[#6B7280] mb-2">
                         Розраховано на основі win rate та середніх коефіцієнтів.
                       </p>
-                      <div className="flex items-start gap-2 p-2 bg-[#FFFDE7] rounded-[16px] border-2 border-[#FFF9C4]">
-                        <AlertTriangle className="h-4 w-4 text-[#F9A825] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                        <p className="text-xs text-[#F9A825] font-normal">
+                      <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
+                        <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                        <p className="text-xs text-[#92400E]">
                           Рекомендовано використовувати 25–50% від Kelly для зниження ризику
                         </p>
                       </div>
@@ -1013,11 +1042,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </Tooltip>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`font-normal ${riskMetrics.kellyPercentage > 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                  <span className={`text-sm font-semibold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                     {riskMetrics.kellyPercentage}%
                   </span>
                   {riskMetrics.kellyPercentage > 5 && (
-                    <Badge className="rounded-[16px] bg-[#FFF4E6] text-[#F57C00] hover:bg-[#FFF4E6] border-2 border-[#FFE0B2] font-normal text-xs px-3 py-1">
+                    <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">
                       Aggressive
                     </Badge>
                   )}
@@ -1026,142 +1055,148 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-normal text-[#6B6B6B]">Risk of Ruin:</span>
+                  <span className="text-sm text-[#6B7280]">Risk of Ruin:</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button className="inline-flex items-center">
-                        <Info className="h-4 w-4 text-[#1976D2] cursor-help" strokeWidth={1.5} />
+                        <Info className="h-4 w-4 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-xs bg-white border-2 border-[#BBDEFB] rounded-[20px] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-                      <p className="text-sm font-normal text-black mb-2">Як розраховується:</p>
-                      <p className="text-xs text-[#6B6B6B] font-light">
+                    <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                      <p className="text-sm font-medium text-[#111827] mb-2">Як розраховується:</p>
+                      <p className="text-xs text-[#6B7280]">
                         Ймовірність втрати всього банкролу. Розраховано на основі win rate, середнього коефіцієнта та розміру ставок відносно банкролу.
                       </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <span className={`font-normal ${riskMetrics.riskOfRuin > 10 ? 'text-[#D32F2F]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F57C00]' : 'text-[#4CAF50]'}`}>
+                <span className={`text-sm font-semibold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
                   {riskMetrics.riskOfRuin}%
                 </span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-sm font-normal text-[#6B6B6B]">Ризик виграшних серій:</span>
-                <span className="font-normal text-black">{riskMetrics.winStreakRisk}%</span>
+                <span className="text-sm text-[#6B7280]">Ризик виграшних серій:</span>
+                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-            <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-              <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-                <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                  <Calendar className="h-6 w-6 text-black" strokeWidth={1.5} />
+          <Card 
+            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                  <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
                 Періоди просадок
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6">
               {drawdownPeriods.length > 0 ? (
                 <div className="space-y-3">
                   {drawdownPeriods.map((period, index) => (
-                    <div key={index} className="p-3 border-2 border-[#E8E6DC] rounded-[24px] hover:border-[#D4D2C8] transition-colors">
+                    <div key={index} className="p-4 border border-[#F3F4F6] rounded-2xl hover:border-[#E5E7EB] transition-colors">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-normal text-black">
+                        <span className="text-sm font-medium text-[#111827]">
                           {new Date(period.start).toLocaleDateString('uk-UA')} - {new Date(period.end).toLocaleDateString('uk-UA')}
                         </span>
-                        <Badge className={`rounded-[16px] border-2 font-normal ${period.recovery ? 'bg-[#E8F5E9] text-[#4CAF50] hover:bg-[#E8F5E9] border-[#C8E6C9]' : 'bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFE8E8] border-[#FFCDD2]'}`}>
+                        <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
                           {period.recovery ? 'Відновлено' : 'Поточна'}
                         </Badge>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#6B6B6B] font-light">Тривалість: {period.duration} днів</span>
-                        <span className="font-normal text-[#D32F2F]">-{period.maxDrawdown.toFixed(1)}%</span>
+                        <span className="text-[#9CA3AF]">Тривалість: {period.duration} днів</span>
+                        <span className="font-semibold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-[#6B6B6B] text-center py-4 font-light">Немає значних періодів просадок</p>
+                <p className="text-[#9CA3AF] text-center py-4 text-sm">Немає значних періодів просадок</p>
               )}
             </CardContent>
           </Card>
         </div>
 
         {/* Risk Recommendations */}
-        <Card className="border-2 border-[#D4D2C8] shadow-[0_8px_24px_rgba(0,0,0,0.08)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-white border-b-2 border-[#E8E6DC] p-8">
-            <CardTitle className="flex items-center gap-3 text-3xl font-light text-black">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_2px_8px_rgba(244,225,87,0.3)]">
-                <Target className="h-6 w-6 text-black" strokeWidth={1.5} />
+        <Card 
+          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+          style={{ boxShadow: chartCardShadow }}
+        >
+          <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
               </div>
               Рекомендації з управління ризиками
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-normal mb-3 text-[#4CAF50]">Позитивні аспекти</h4>
+                <h4 className="font-semibold text-sm mb-3 text-[#22C55E]">Позитивні аспекти</h4>
                 <div className="space-y-2">
                   {riskMetrics.maxDrawdown < 15 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#4CAF50] text-xs mt-1">✓</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Низька максимальна просадка ({riskMetrics.maxDrawdown}%)</span>
+                      <ArrowUpRight className="h-4 w-4 text-[#22C55E] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Низька максимальна просадка ({riskMetrics.maxDrawdown}%)</span>
                     </div>
                   )}
                   {riskMetrics.sharpeRatio > 0.5 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#4CAF50] text-xs mt-1">✓</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Хороший коефіцієнт Шарпа ({riskMetrics.sharpeRatio})</span>
+                      <ArrowUpRight className="h-4 w-4 text-[#22C55E] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Хороший коефіцієнт Шарпа ({riskMetrics.sharpeRatio})</span>
                     </div>
                   )}
                   {riskMetrics.riskOfRuin < 10 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#4CAF50] text-xs mt-1">✓</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Низький ризик краху ({riskMetrics.riskOfRuin}%)</span>
+                      <ArrowUpRight className="h-4 w-4 text-[#22C55E] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Низький ризик краху ({riskMetrics.riskOfRuin}%)</span>
                     </div>
                   )}
                   {riskMetrics.consecutiveLosses < 5 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#4CAF50] text-xs mt-1">✓</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Контрольовані послідовні програші</span>
+                      <ArrowUpRight className="h-4 w-4 text-[#22C55E] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Контрольовані послідовні програші</span>
                     </div>
                   )}
                 </div>
               </div>
 
               <div>
-                <h4 className="font-normal mb-3 text-[#D32F2F]">Області для покращення</h4>
+                <h4 className="font-semibold text-sm mb-3 text-[#EF4444]">Області для покращення</h4>
                 <div className="space-y-2">
                   {riskMetrics.maxDrawdown > 25 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#D32F2F] text-xs mt-1">⚠</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Висока максимальна просадка - зменшіть розміри ставок</span>
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Висока максимальна просадка - зменшіть розміри ставок</span>
                     </div>
                   )}
                   {riskMetrics.volatility > 30 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#D32F2F] text-xs mt-1">⚠</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Висока волатильність - диверсифікуйте стратегії</span>
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Висока волатильність - диверсифікуйте стратегії</span>
                     </div>
                   )}
                   {riskMetrics.riskOfRuin > 15 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#D32F2F] text-xs mt-1">⚠</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Високий ризик краху - перегляньте управління капіталом</span>
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Високий ризик краху - перегляньте управління капіталом</span>
                     </div>
                   )}
                   {riskMetrics.consecutiveLosses > 7 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#D32F2F] text-xs mt-1">⚠</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Довгі серії програшів - встановіть стоп-лосси</span>
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Довгі серії програшів - встановіть стоп-лосси</span>
                     </div>
                   )}
                   {riskMetrics.kellyPercentage < 0 && (
                     <div className="flex items-start gap-2">
-                      <span className="text-[#D32F2F] text-xs mt-1">⚠</span>
-                      <span className="text-sm text-[#6B6B6B] font-light">Негативний Келлі % - перегляньте стратегію</span>
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      <span className="text-sm text-[#6B7280]">Негативний Келлі % - перегляньте стратегію</span>
                     </div>
                   )}
                 </div>
@@ -1172,10 +1207,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Risk Alerts */}
         {(riskMetrics.currentDrawdown > 15 || riskMetrics.consecutiveLosses > 5) && (
-          <Alert className="rounded-[28px] border-2 border-[#FFCDD2] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
-            <AlertTriangle className="h-5 w-5 text-[#D32F2F]" strokeWidth={1.5} />
-            <AlertDescription className="text-[#D32F2F] font-light ml-2">
-              <strong className="font-normal">Попередження про ризик:</strong>
+          <Alert className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4">
+            <AlertTriangle className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+            <AlertDescription className="text-sm text-[#991B1B] ml-2">
+              <strong className="font-semibold">Попередження про ризик:</strong>
               {riskMetrics.currentDrawdown > 15 && ` Поточна просадка ${riskMetrics.currentDrawdown}% перевищує рекомендований поріг.`}
               {riskMetrics.consecutiveLosses > 5 && ` ${riskMetrics.consecutiveLosses} послідовних програшів вказують на необхідність перегляду стратегії.`}
             </AlertDescription>
