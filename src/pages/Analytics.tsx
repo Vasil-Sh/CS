@@ -559,21 +559,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Backend Connection Status */}
-        <Alert className={`rounded-[28px] border-2 ${connectionStatus.connected ? 'border-[#C8E6C9] bg-white' : 'border-[#FFCC80] bg-white'} shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6`}>
-          <div className="flex items-center gap-2">
-            {connectionStatus.connected ? <Wifi className="h-5 w-5 text-[#4CAF50]" strokeWidth={1.5} /> : <WifiOff className="h-5 w-5 text-[#FF9800]" strokeWidth={1.5} />}
-            <Database className="h-5 w-5" strokeWidth={1.5} />
-          </div>
-          <AlertDescription className="font-light text-black ml-2">
-            <strong className="font-normal">Backend Status:</strong> {connectionStatus.environment} 
-            {connectionStatus.connected ? 
-              ' - З\'єднано з C# SQLite базою даних' : 
-              ' - Використовується user-specific localStorage'
-            }
-          </AlertDescription>
-        </Alert>
-
         {/* No Data Warning */}
         {bets.length === 0 && (
           <Alert className="rounded-[28px] border-2 border-[#BBDEFB] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">

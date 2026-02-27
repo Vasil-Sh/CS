@@ -59,8 +59,8 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#F4E157] text-black shadow-[0_4px_16px_rgba(244,225,87,0.25)]'
-                : 'text-[#6B6B6B] hover:text-black hover:bg-[#FAFAF8]'
+                ? 'bg-[#3e75ff] text-white shadow-[0_4px_16px_rgba(62,117,255,0.3)]'
+                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -79,8 +79,8 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#F4E157] text-black shadow-[0_4px_16px_rgba(244,225,87,0.25)]'
-                : 'text-[#6B6B6B] hover:text-black hover:bg-[#FAFAF8]'
+                ? 'bg-[#febc11] text-[#1a1a2e] shadow-[0_4px_16px_rgba(254,188,17,0.3)]'
+                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -92,32 +92,32 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen bg-[#F5F5F0]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
-        <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/95 backdrop-blur-xl px-8 py-8 border-r border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
+        <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/97 backdrop-blur-xl px-8 py-8 border-r-2 border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
           {/* Logo Header */}
           <div className="flex h-24 shrink-0 items-center gap-4">
-            <div className="w-16 h-16 bg-[#F4E157] rounded-[28px] flex items-center justify-center shadow-[0_4px_16px_rgba(244,225,87,0.25)]">
-              <TrendingUp className="w-8 h-8 text-black" strokeWidth={1.5} />
+            <div className="w-16 h-16 bg-[#1a1a2e] rounded-[28px] flex items-center justify-center shadow-[0_8px_24px_rgba(26,26,46,0.3)]">
+              <TrendingUp className="w-8 h-8 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-3xl font-light text-black tracking-tight">
+            <h1 className="text-3xl font-semibold text-[#1a1a2e] tracking-tight">
               MatchIQ
             </h1>
           </div>
           
           {/* User Info Card */}
           <div className="relative">
-            <div className="flex items-center gap-4 px-5 py-4 bg-[#FAFAF8] rounded-[28px] border border-[#E8E6DC]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
-                <User className="h-7 w-7 text-black" strokeWidth={1.5} />
+            <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+                <User className="h-7 w-7 text-white" strokeWidth={1.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-base font-normal text-black truncate">
+                <p className="text-base font-normal text-[#1a1a2e] truncate">
                   @{username || 'User'}
                   {isAdmin && <span className="ml-1">👑</span>}
                 </p>
-                <p className="text-sm text-[#8B8B8B] font-light">
+                <p className="text-sm text-[#8B8B9A] font-light">
                   {isAdmin ? 'Адміністратор' : 'Користувач'}
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function Layout() {
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300"
+                  className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border-2 border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300 !bg-transparent !hover:bg-[#D32F2F]"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
                   <span>Вийти</span>
@@ -148,43 +148,43 @@ export default function Layout() {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-white/95 backdrop-blur-xl px-6 py-5 border-b border-[#E8E6DC] shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div className="flex items-center justify-between bg-white/97 backdrop-blur-xl px-6 py-5 border-b-2 border-[#E8E6DC] shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#F4E157] rounded-[20px] flex items-center justify-center shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
-              <TrendingUp className="w-6 h-6 text-black" strokeWidth={1.5} />
+            <div className="w-12 h-12 bg-[#1a1a2e] rounded-[20px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+              <TrendingUp className="w-6 h-6 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-2xl font-light text-black tracking-tight">
+            <h1 className="text-2xl font-semibold text-[#1a1a2e] tracking-tight">
               MatchIQ
             </h1>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-[20px] border border-[#E8E6DC] hover:bg-[#FAFAF8] w-12 h-12">
+              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#F5F5F0] w-12 h-12">
                 <Menu className="h-6 w-6" strokeWidth={1.5} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80 bg-white/95 backdrop-blur-xl border-r border-[#E8E6DC]">
+            <SheetContent side="left" className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]">
               <div className="flex h-20 items-center gap-4">
-                <div className="w-14 h-14 bg-[#F4E157] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
-                  <TrendingUp className="w-7 h-7 text-black" strokeWidth={1.5} />
+                <div className="w-14 h-14 bg-[#1a1a2e] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+                  <TrendingUp className="w-7 h-7 text-white" strokeWidth={1.5} />
                 </div>
-                <h1 className="text-2xl font-light text-black tracking-tight">
+                <h1 className="text-2xl font-semibold text-[#1a1a2e] tracking-tight">
                   MatchIQ
                 </h1>
               </div>
               
               {/* User Info Mobile */}
               <div className="relative mt-6">
-                <div className="flex items-center gap-4 px-5 py-4 bg-[#FAFAF8] rounded-[28px] border border-[#E8E6DC]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#F4E157] shadow-[0_4px_12px_rgba(244,225,87,0.2)]">
-                    <User className="h-7 w-7 text-black" strokeWidth={1.5} />
+                <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+                    <User className="h-7 w-7 text-white" strokeWidth={1.5} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-normal text-black truncate">
+                    <p className="text-base font-normal text-[#1a1a2e] truncate">
                       @{username || 'User'}
                       {isAdmin && <span className="ml-1">👑</span>}
                     </p>
-                    <p className="text-sm text-[#8B8B8B] font-light">
+                    <p className="text-sm text-[#8B8B9A] font-light">
                       {isAdmin ? 'Адміністратор' : 'Користувач'}
                     </p>
                   </div>
@@ -199,7 +199,7 @@ export default function Layout() {
                   <Button
                     onClick={handleLogout}
                     variant="outline"
-                    className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300"
+                    className="w-full justify-start gap-3 text-[#D32F2F] hover:text-white hover:bg-[#D32F2F] border-2 border-[#D32F2F] rounded-[24px] font-normal h-14 text-base transition-all duration-300 !bg-transparent"
                   >
                     <LogOut className="h-5 w-5" strokeWidth={1.5} />
                     <span>Вийти</span>
