@@ -363,30 +363,30 @@ export default function BettingHistory() {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b-2 border-[#E8E6DC]">
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('date')}>
-                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="text-center p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('date')}>
+                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Дата
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-left p-4 min-w-[200px] border-r border-[#E8E6DC]">
+                      <th className="text-center p-4 min-w-[200px] border-r border-[#E8E6DC]">
                         <div className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Матч
                         </div>
                       </th>
-                      <th className="text-left p-4 w-48 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Тип</th>
-                      <th className="text-left p-4 w-24 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Валюта</th>
-                      <th className="text-left p-4 w-28 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Сума</th>
-                      <th className="text-left p-4 w-24 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('odds')}>
-                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="text-center p-4 w-48 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Тип</th>
+                      <th className="text-center p-4 w-24 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Валюта</th>
+                      <th className="text-center p-4 w-28 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Сума</th>
+                      <th className="text-center p-4 w-24 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('odds')}>
+                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Коеф.
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-left p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Ціль</th>
-                      <th className="text-left p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Статус</th>
-                      <th className="text-left p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors" onClick={() => toggleSort('profit')}>
-                        <div className="flex items-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="text-center p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Ціль</th>
+                      <th className="text-center p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Статус</th>
+                      <th className="text-center p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors" onClick={() => toggleSort('profit')}>
+                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
                           Профіт
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
@@ -403,10 +403,10 @@ export default function BettingHistory() {
                           key={index} 
                           className="bg-white border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all"
                         >
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <span className="text-sm font-normal text-[#2D2D2D]">{bet.date}</span>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <div className="space-y-2">
                               <div className="font-normal text-base truncate text-[#2D2D2D]" title={displayMatch}>{displayMatch}</div>
                               {!isExpress && (
@@ -417,9 +417,9 @@ export default function BettingHistory() {
                               </Badge>
                             </div>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             {isExpress ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <Badge className="rounded-[16px] bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-normal text-sm px-3 py-1 whitespace-nowrap">
                                   Express {bet.format}
                                 </Badge>
@@ -439,23 +439,23 @@ export default function BettingHistory() {
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <Badge className="rounded-[12px] bg-[#B2EBF2] text-[#00838F] border-0 font-normal text-sm px-3 py-1">
                               {bet.currency || 'UAH'}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <span className="font-normal text-base text-[#2D2D2D]">₴{bet.amount}</span>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <Badge className="rounded-[12px] bg-[#FFE0B2] text-[#E65100] border-0 font-normal text-base px-3 py-1">
                               {bet.odds.toFixed(2)}
                             </Badge>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
-                            <span className="font-light text-xs text-[#6B6B6B] truncate max-w-[120px] block" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
+                            <span className="font-light text-xs text-[#6B6B6B] truncate max-w-[120px] block mx-auto" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
-                          <td className="p-4 border-r border-[#E8E6DC]">
+                          <td className="p-4 text-center border-r border-[#E8E6DC]">
                             <Badge 
                               className={`rounded-[12px] border-0 font-normal text-sm px-3 py-1 ${
                                 bet.result === 'Win' 
@@ -468,7 +468,7 @@ export default function BettingHistory() {
                               {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
                             </Badge>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 text-center">
                             {bet.profit !== undefined && (
                               <span className={`font-normal text-base ${bet.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
                                 {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴

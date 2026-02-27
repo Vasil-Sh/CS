@@ -791,10 +791,10 @@ export default function MyBets() {
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="border-b-2 border-[#E8E6DC]">
-                          <th className="text-left p-4 w-28 border-r border-[#E8E6DC]">
+                          <th className="text-center p-4 w-28 border-r border-[#E8E6DC]">
                             <div className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Дата</div>
                           </th>
-                          <th className="text-left p-4 min-w-[200px] border-r border-[#E8E6DC]">
+                          <th className="text-center p-4 min-w-[200px] border-r border-[#E8E6DC]">
                             <div className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">Матч</div>
                           </th>
                           <th className="text-center p-4 w-40 border-r border-[#E8E6DC]">
@@ -843,10 +843,10 @@ export default function MyBets() {
                               key={betKey}
                               className="bg-white border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all duration-200"
                             >
-                              <td className="p-4 border-r border-[#E8E6DC]">
+                              <td className="p-4 text-center border-r border-[#E8E6DC]">
                                 <span className="text-sm font-normal text-black">{bet.date}</span>
                               </td>
-                              <td className="p-4 border-r border-[#E8E6DC]">
+                              <td className="p-4 text-center border-r border-[#E8E6DC]">
                                 <div className="min-w-0">
                                   <div className="font-normal text-base truncate text-black" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
                                     {bet.match || `${bet.team1} vs ${bet.team2}`}
