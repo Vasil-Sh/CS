@@ -659,7 +659,7 @@ export default function MyBets() {
               <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
               <span className="text-lg font-semibold text-[#111827]">Останні записи</span>
               {activeBets.length > 0 && (
-                <Badge className="rounded-full bg-[#FEF3C7] text-[#D97706] border-0 text-xs font-medium px-2.5 py-0.5 hover:bg-[#FEF3C7]">
+                <Badge className="rounded-full bg-[#FEF3C7] text-[#D97706] border-0 text-sm font-medium px-3 py-0.5 hover:bg-[#FEF3C7]">
                   {activeBets.length} активних
                 </Badge>
               )}
@@ -680,22 +680,22 @@ export default function MyBets() {
           </div>
           
           {isTableExpanded && (
-            <div className="p-6">
+            <div className="px-0 pb-6">
               {sortedBets.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-[#F3F4F6]">
-                        <th className="text-left p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Дата</th>
-                        <th className="text-left p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider min-w-[200px]">Матч</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Тип</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Валюта</th>
-                        <th className="text-right p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Сума</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Коеф.</th>
-                        <th className="text-right p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Профіт</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Ціль</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Статус</th>
-                        <th className="text-center p-3 text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">Дії</th>
+                      <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Дата</th>
+                        <th className="text-left px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider min-w-[220px] border-l border-[#E5E7EB]">Матч</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Тип</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Валюта</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Сума</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Коеф.</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Профіт</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Ціль</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Статус</th>
+                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Дії</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -716,86 +716,86 @@ export default function MyBets() {
                         return (
                           <tr 
                             key={betKey}
-                            className="border-b border-[#F9FAFB] hover:bg-[#FAFAFA] transition-colors duration-150"
+                            className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors duration-150"
                           >
-                            <td className="p-3">
-                              <span className="text-sm text-[#374151]">{bet.date}</span>
+                            <td className="px-4 py-4 text-center">
+                              <span className="text-base text-[#374151] font-medium">{bet.date}</span>
                             </td>
-                            <td className="p-3">
+                            <td className="px-4 py-4 border-l border-[#F3F4F6]">
                               <div className="min-w-0">
-                                <div className="font-medium text-sm text-[#111827] truncate" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
+                                <div className="font-semibold text-base text-[#111827] truncate" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
                                   {bet.match || `${bet.team1} vs ${bet.team2}`}
                                 </div>
                                 {!isExpress && (
-                                  <div className="text-xs text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>
+                                  <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>
                                 )}
-                                <Badge className="text-[10px] rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1 hover:bg-[#F3F4F6]">
+                                <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
                                   {bet.format}
                                 </Badge>
                               </div>
                             </td>
-                            <td className="p-3 text-center">
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                               {isExpress ? (
-                                <div className="flex items-center justify-center gap-1.5">
-                                  <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-medium text-xs px-2 py-0.5 hover:bg-[#FEF3C7]">
+                                <div className="flex flex-col items-center gap-1.5">
+                                  <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">
                                     Express {expressEventCount}×
                                   </Badge>
                                   <button
                                     onClick={() => handleExpressDetailsClick(bet)}
-                                    className="text-xs text-[#3B82F6] hover:text-[#2563EB] font-medium hover:underline"
+                                    className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200"
                                   >
                                     Деталі
                                   </button>
                                 </div>
                               ) : (
-                                <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-xs px-2 py-0.5 max-w-[140px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                                <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                   {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                                 </Badge>
                               )}
                             </td>
-                            <td className="p-3 text-center">
-                              <span className="text-sm text-[#6B7280] font-medium">{currency}</span>
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                              <span className="text-base text-[#6B7280] font-medium">{currency}</span>
                             </td>
-                            <td className="p-3 text-right">
-                              <span className="text-sm font-medium text-[#111827]">{currencySymbol}{displayAmount}</span>
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                              <span className="text-base font-semibold text-[#111827]">{currencySymbol}{displayAmount}</span>
                               {currency === 'USD' && bet.exchangeRate && (
-                                <div className="text-xs text-[#9CA3AF] mt-0.5">
+                                <div className="text-sm text-[#9CA3AF] mt-0.5">
                                   ≈ ₴{(displayAmount * bet.exchangeRate).toFixed(2)}
                                 </div>
                               )}
                             </td>
-                            <td className="p-3 text-center">
-                              <span className="text-sm font-semibold text-[#111827]">{bet.odds.toFixed(2)}</span>
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                              <span className="text-base font-bold text-[#111827]">{bet.odds.toFixed(2)}</span>
                             </td>
-                            <td className="p-3 text-right">
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                               {displayProfit !== undefined && displayProfit !== null ? (
                                 <div>
-                                  <span className={`text-sm font-semibold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                                  <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                                     {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
                                   </span>
                                   {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
-                                    <div className="text-xs text-[#9CA3AF] mt-0.5">
+                                    <div className="text-sm text-[#9CA3AF] mt-0.5">
                                       ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-[#D1D5DB]">—</span>
+                                <span className="text-[#D1D5DB] text-base">—</span>
                               )}
                             </td>
-                            <td className="p-3 text-center">
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                               {goalName ? (
-                                <Badge className="font-medium px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-xs max-w-[120px] truncate hover:bg-[#EFF6FF]" title={goalName}>
-                                  <Flag className="h-3 w-3 mr-1 flex-shrink-0" strokeWidth={1.5} />
+                                <Badge className="font-medium px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-sm max-w-[130px] truncate hover:bg-[#EFF6FF]" title={goalName}>
+                                  <Flag className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" strokeWidth={1.5} />
                                   <span className="truncate">{goalName}</span>
                                 </Badge>
                               ) : (
-                                <span className="text-[#D1D5DB] text-xs">—</span>
+                                <span className="text-[#D1D5DB] text-sm">—</span>
                               )}
                             </td>
-                            <td className="p-3 text-center">
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                               <Badge 
-                                className={`rounded-full border-0 font-medium text-xs px-3 py-1 ${
+                                className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${
                                   isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' :
                                   isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' :
                                   'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'
@@ -804,20 +804,20 @@ export default function MyBets() {
                                 {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
                               </Badge>
                             </td>
-                            <td className="p-3 text-center">
-                              <div className="flex gap-1.5 justify-center">
+                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                              <div className="flex gap-2 justify-center">
                                 {isPending && (
                                   <>
                                     <button
                                       onClick={() => updateBetResult(bet, 'Win')}
-                                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#6B7280] hover:text-[#16A34A] transition-all duration-200"
+                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#6B7280] hover:text-[#16A34A] transition-all duration-200"
                                       title="Виграш"
                                     >
                                       <CheckCircle className="h-4 w-4" strokeWidth={2} />
                                     </button>
                                     <button
                                       onClick={() => updateBetResult(bet, 'Loss')}
-                                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#6B7280] hover:text-[#DC2626] transition-all duration-200"
+                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#6B7280] hover:text-[#DC2626] transition-all duration-200"
                                       title="Програш"
                                     >
                                       <XCircle className="h-4 w-4" strokeWidth={2} />
@@ -826,7 +826,7 @@ export default function MyBets() {
                                 )}
                                 <button
                                   onClick={() => handleShareBet(bet)}
-                                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#6B7280] hover:text-[#3B82F6] transition-all duration-200"
+                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#6B7280] hover:text-[#3B82F6] transition-all duration-200"
                                   title="Поділитися"
                                 >
                                   <Share2 className="h-4 w-4" strokeWidth={2} />
@@ -834,7 +834,7 @@ export default function MyBets() {
                                 {isAdmin && (
                                   <button
                                     onClick={() => handleBetDetailsClick(bet)}
-                                    className="flex items-center justify-center w-8 h-8 rounded-lg border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#6B7280] hover:text-[#7C3AED] transition-all duration-200"
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#6B7280] hover:text-[#7C3AED] transition-all duration-200"
                                     title="Деталі"
                                   >
                                     <Eye className="h-4 w-4" strokeWidth={2} />
@@ -854,40 +854,40 @@ export default function MyBets() {
                     <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
                   </div>
                   <p className="text-[#111827] font-semibold text-lg">Поки що немає записів</p>
-                  <p className="text-sm text-[#9CA3AF] mt-1">Додайте свій перший запис, щоб почати відстеження</p>
+                  <p className="text-base text-[#9CA3AF] mt-1">Додайте свій перший запис, щоб почати відстеження</p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* ===== TABS NAVIGATION ===== */}
+        {/* ===== TABS NAVIGATION (Analytics style) ===== */}
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-1 p-1.5 rounded-2xl bg-white border border-[#F3F4F6]"
-            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-          >
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    relative rounded-xl px-5 py-2.5 text-sm font-medium
-                    transition-all duration-200 ease-in-out
-                    ${activeTab === tab.id 
-                      ? 'bg-[#111827] text-white shadow-sm' 
-                      : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]'
-                    }
-                  `}
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" strokeWidth={1.5} />
-                    {tab.label}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="grid grid-cols-3 gap-3">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      relative rounded-[24px] px-6 py-4 font-light text-base
+                      transition-all duration-300 ease-in-out
+                      ${activeTab === tab.id 
+                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                        : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
+                      }
+                    `}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <Icon className="h-4 w-4" strokeWidth={1.5} />
+                      {tab.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Tab Content */}

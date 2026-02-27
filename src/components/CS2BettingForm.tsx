@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, Target, TrendingUp, X, Trash2, Shield, Flag, Users, MapPin, Gamepad2, Zap, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
@@ -248,7 +245,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
       const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
       
-      // Exact match or risky team name is contained in input (but not vice versa to avoid false positives)
       if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
           normalizedTeam1.includes(normalizedRiskyTeam) || normalizedTeam2.includes(normalizedRiskyTeam)) {
         riskyTeamsFound.push({
@@ -476,15 +472,15 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'БАН':
-        return 'bg-[#8B4513]/15 text-[#8B4513] hover:bg-[#8B4513]/15 border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-full font-medium text-sm px-3 py-1';
       case 'Нестабільні':
-        return 'bg-[#A0522D]/15 text-[#A0522D] hover:bg-[#A0522D]/15 border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-full font-medium text-sm px-3 py-1';
       case 'Обережно':
-        return 'bg-[#D2691E]/15 text-[#D2691E] hover:bg-[#D2691E]/15 border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#FFEDD5] text-[#EA580C] hover:bg-[#FFEDD5] border-0 rounded-full font-medium text-sm px-3 py-1';
       case 'Рідко':
-        return 'bg-[#CD853F]/15 text-[#CD853F] hover:bg-[#CD853F]/15 border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
       default:
-        return 'bg-[#6B6B6B]/15 text-[#6B6B6B] hover:bg-[#6B6B6B]/15 border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
     }
   };
 
@@ -556,7 +552,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     const confidence = parseFloat(formData.confidence);
     
     if (odds && confidence) {
-      const impliedProbability = (1 / odds) * 100;
       const expectedValue = ((confidence / 100) * (odds - 1)) - ((1 - confidence / 100) * 1);
       return (expectedValue * 100).toFixed(2);
     }
@@ -788,6 +783,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     }
   };
 
+  // Shared input styles
+  const inputClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";
+  const selectTriggerClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] focus:border-[#111827] focus:ring-0 transition-colors";
+  const labelClass = "text-sm font-medium text-[#374151]";
+  const sectionTitleClass = "text-base font-semibold text-[#111827] flex items-center gap-2.5";
+
   return (
     <div className="space-y-6">
       <StrategyViolationDialog
@@ -799,443 +800,430 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         onCancel={handleViolationCancel}
       />
 
-      {/* Strategy Card */}
+      {/* Strategy Banner */}
       {primaryStrategy && (
-        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white/80 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                <Shield className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-normal text-[#2D2D2D]">Активна стратегія: <span className="font-medium">{primaryStrategy.name}</span></p>
-                <p className="text-xs text-[#6B6B6B] font-light mt-0.5">{primaryStrategy.description}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 flex items-center gap-4"
+          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        >
+          <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
+            <Shield className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-[#6B7280]">
+              Активна стратегія: <span className="font-semibold text-[#111827]">{primaryStrategy.name}</span>
+            </p>
+            <p className="text-sm text-[#9CA3AF] mt-0.5 truncate">{primaryStrategy.description}</p>
+          </div>
+        </div>
       )}
 
-      {/* Strategy Deviations */}
+      {/* Strategy Violations */}
       {strategyViolations.length > 0 && (
-        <Card className={`border-[1.5px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] overflow-hidden ${
+        <div className={`rounded-3xl px-6 py-5 border ${
           strategyViolations.some(v => v.severity === 'serious') 
-            ? 'border-red-200 bg-red-50/50' 
-            : 'border-yellow-200 bg-yellow-50/50'
-        }`}>
-          <CardContent className="p-5">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-                strategyViolations.some(v => v.severity === 'serious') ? 'text-red-600' : 'text-yellow-600'
-              }`} strokeWidth={1.5} />
-              <div className="flex-1">
-                <p className={`text-sm font-medium mb-2 ${
-                  strategyViolations.some(v => v.severity === 'serious') ? 'text-red-900' : 'text-yellow-900'
-                }`}>
-                  {strategyViolations.some(v => v.severity === 'serious') ? '🔴' : '🟡'} Відхилення від стратегії "{primaryStrategy?.name}"
-                </p>
-                <div className="space-y-2">
-                  {strategyViolations.map((violation, index) => (
-                    <div key={index} className={`p-3 rounded-[20px] ${
-                      violation.severity === 'serious' ? 'bg-red-100/70' : 'bg-yellow-100/70'
+            ? 'border-[#FCA5A5] bg-[#FEF2F2]' 
+            : 'border-[#FDE68A] bg-[#FFFBEB]'
+        }`} style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+          <div className="flex items-start gap-3">
+            <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+              strategyViolations.some(v => v.severity === 'serious') ? 'text-[#EF4444]' : 'text-[#F59E0B]'
+            }`} strokeWidth={1.5} />
+            <div className="flex-1">
+              <p className={`text-sm font-semibold mb-2 ${
+                strategyViolations.some(v => v.severity === 'serious') ? 'text-[#991B1B]' : 'text-[#92400E]'
+              }`}>
+                Відхилення від стратегії &ldquo;{primaryStrategy?.name}&rdquo;
+              </p>
+              <div className="space-y-2">
+                {strategyViolations.map((violation, index) => (
+                  <div key={index} className={`p-3 rounded-2xl ${
+                    violation.severity === 'serious' ? 'bg-[#FEE2E2]' : 'bg-[#FEF3C7]'
+                  }`}>
+                    <p className={`text-sm ${
+                      violation.severity === 'serious' ? 'text-[#991B1B]' : 'text-[#92400E]'
                     }`}>
-                      <p className={`text-xs font-normal ${
-                        violation.severity === 'serious' ? 'text-red-800' : 'text-yellow-800'
-                      }`}>
-                        • {violation.message}
-                      </p>
-                      <p className={`text-xs mt-1 font-light ${
-                        violation.severity === 'serious' ? 'text-red-700' : 'text-yellow-700'
-                      }`}>
-                        <Info className="h-3 w-3 inline mr-1" strokeWidth={1.5} />
-                        {violation.explanation}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <p className={`text-xs mt-2 font-normal ${
-                  strategyViolations.some(v => v.severity === 'serious') ? 'text-red-700' : 'text-yellow-700'
-                }`}>
-                  {strategyViolations.some(v => v.severity === 'serious') 
-                    ? '⚠️ Рекомендуємо переглянути ваш запис перед підтвердженням.'
-                    : '💡 Ви можете продовжити, але врахуйте рекомендації стратегії.'}
-                </p>
+                      • {violation.message}
+                    </p>
+                    <p className={`text-xs mt-1 flex items-center gap-1 ${
+                      violation.severity === 'serious' ? 'text-[#B91C1C]' : 'text-[#B45309]'
+                    }`}>
+                      <Info className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
+                      {violation.explanation}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Main Form Card */}
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[40px] bg-white/80 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
-                <CardTitle className="flex items-center gap-3 text-xl font-normal text-[#2D2D2D]">
-                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                    <Plus className="h-6 w-6 text-[#2D2D2D]" strokeWidth={1.5} />
-                  </div>
-                  Новий прогноз
-                </CardTitle>
-              </CardHeader>
+            {/* Main Form */}
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+            >
+              {/* Form Header */}
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                  <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                </div>
+                <span className="text-lg font-semibold text-[#111827]">Новий прогноз</span>
+              </div>
               
-              <CardContent className="p-6 space-y-6">
-                {/* Basic Settings Section */}
+              <div className="p-6 space-y-8">
+                {/* === Section: Basic Settings === */}
                 <div className="space-y-4">
-                  <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
-                    <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
-                      <Calendar className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
-                      Основні налаштування
-                    </h3>
-                  
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="date" className="text-[#2D2D2D] font-light text-sm">Дата матчу</Label>
-                        <Input
-                          id="date"
-                          type="date"
-                          value={formData.date}
-                          onChange={(e) => setFormData({...formData, date: e.target.value})}
-                          required
-                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="game" className="text-[#2D2D2D] font-light text-sm">Гра</Label>
-                        <Select value={formData.game} onValueChange={(value: 'CS2' | 'Dota2') => setFormData({...formData, game: value})}>
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="CS2">🎯 CS2</SelectItem>
-                            <SelectItem value="Dota2">🛡️ Dota 2</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="betCategory" className="text-[#2D2D2D] font-light text-sm">Категорія прогнозу</Label>
-                        <Select value={formData.betCategory} onValueChange={(value) => {
-                          setFormData({...formData, betCategory: value});
-                          if (value === 'Ординар') {
-                            setExpressEvents([]);
-                          }
-                        }}>
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Ординар">Ординар</SelectItem>
-                            <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <h3 className={sectionTitleClass}>
+                    <Calendar className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
+                    Основні налаштування
+                  </h3>
+                
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="date" className={labelClass}>Дата матчу</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        required
+                        className={inputClass}
+                      />
                     </div>
 
-                    {formData.betCategory === 'Ординар' && (
-                      <div className="mt-4">
-                        <Label htmlFor="format" className="text-[#2D2D2D] font-light text-sm">Формат</Label>
-                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="BO1">BO1</SelectItem>
-                            <SelectItem value="BO3">BO3</SelectItem>
-                            <SelectItem value="BO5">BO5</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {/* Goals */}
-                    {activeGoals.length > 0 && (
-                      <div className="mt-4">
-                        <Label htmlFor="goalId" className="text-[#2D2D2D] font-light text-sm flex items-center gap-2">
-                          <Flag className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
-                          Прив'язати до цілі (необов'язково)
-                        </Label>
-                        <Select 
-                          value={formData.goalId || 'all'} 
-                          onValueChange={(value) => {
-                            setFormData({...formData, goalId: value === 'all' ? '' : value});
-                          }}
-                        >
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Без цілі</SelectItem>
-                            {activeGoals.map((goal) => (
-                              <SelectItem key={goal.id} value={goal.id}>
-                                {goal.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-[#6B6B6B] font-light mt-1.5">
-                          Ця ставка буде враховуватись у прогресі обраної цілі
-                        </p>
-                      </div>
-                    )}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="game" className={labelClass}>Гра</Label>
+                      <Select value={formData.game} onValueChange={(value: 'CS2' | 'Dota2') => setFormData({...formData, game: value})}>
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CS2">🎯 CS2</SelectItem>
+                          <SelectItem value="Dota2">🛡️ Dota 2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="betCategory" className={labelClass}>Категорія прогнозу</Label>
+                      <Select value={formData.betCategory} onValueChange={(value) => {
+                        setFormData({...formData, betCategory: value});
+                        if (value === 'Ординар') {
+                          setExpressEvents([]);
+                        }
+                      }}>
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Ординар">Ординар</SelectItem>
+                          <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
 
-                <Separator className="bg-[#E8E6DC]" />
+                  {formData.betCategory === 'Ординар' && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="format" className={labelClass}>Формат</Label>
+                      <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="BO1">BO1</SelectItem>
+                          <SelectItem value="BO3">BO3</SelectItem>
+                          <SelectItem value="BO5">BO5</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
-                {/* Match Information & Bet Details Combined Section */}
-                <div className="space-y-4">
-                  <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
-                    <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
-                      <Users className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
-                      Інформація про матч і деталі прогнозу
-                    </h3>
-                  
-                    {/* Match URL */}
-                    <div className="mb-4">
-                      <Label htmlFor="matchUrl" className="text-[#2D2D2D] font-light text-sm flex items-center gap-2">
-                        <Link className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
-                        {formData.game === 'CS2' ? 'HLTV URL матчу' : 'Dota 2 URL матчу'} (необов'язково)
+                  {/* Goals */}
+                  {activeGoals.length > 0 && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-2`}>
+                        <Flag className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
+                        Прив&apos;язати до цілі (необов&apos;язково)
                       </Label>
-                      <div className="flex gap-2 mt-1.5">
-                        <Input
-                          id="matchUrl"
-                          value={formData.matchUrl}
-                          onChange={(e) => handleUrlChange(e.target.value)}
-                          placeholder={formData.game === 'CS2' ? 'https://www.hltv.org/matches/...' : 'https://...dota2/.../team1-vs-team2/...'}
-                          className="flex-1 rounded-[24px] border-[#E8E6DC] bg-white"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => parseMatchFromUrl(formData.matchUrl)}
-                          disabled={isParsingMatch || !formData.matchUrl}
-                          className="rounded-[24px] px-5 border-[#E8E6DC] hover:bg-[#F4E157] hover:border-[#F4E157]"
-                        >
-                          {isParsingMatch ? 'Парсинг...' : 'Парсити'}
-                        </Button>
-                      </div>
-                      <p className="text-xs text-[#6B6B6B] font-light mt-1.5">
-                        {formData.game === 'CS2' ? 'Вставте посилання з HLTV для автозаповнення' : 'Вставте посилання на Dota 2 матч для автозаповнення'}
+                      <Select 
+                        value={formData.goalId || 'all'} 
+                        onValueChange={(value) => {
+                          setFormData({...formData, goalId: value === 'all' ? '' : value});
+                        }}
+                      >
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Без цілі</SelectItem>
+                          {activeGoals.map((goal) => (
+                            <SelectItem key={goal.id} value={goal.id}>
+                              {goal.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-[#9CA3AF] mt-1">
+                        Ця ставка буде враховуватись у прогресі обраної цілі
                       </p>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <Label htmlFor="team1" className="text-[#2D2D2D] font-light text-sm">
-                          Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                          id="team1"
-                          value={formData.team1}
-                          onChange={(e) => setFormData({...formData, team1: e.target.value})}
-                          placeholder={formData.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="team2" className="text-[#2D2D2D] font-light text-sm">
-                          Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                          id="team2"
-                          value={formData.team2}
-                          onChange={(e) => setFormData({...formData, team2: e.target.value})}
-                          placeholder={formData.game === 'CS2' ? 'G2' : 'OG'}
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="betType" className="text-[#2D2D2D] font-light text-sm">
-                          Тип прогнозу {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Select 
-                          value={formData.betType} 
-                          onValueChange={(value) => setFormData({...formData, betType: value})} 
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        >
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue placeholder="Оберіть тип прогнозу" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getBetTypeOptions().map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="selection" className="text-[#2D2D2D] font-light text-sm">
-                          Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Select 
-                          value={formData.selection} 
-                          onValueChange={(value) => setFormData({...formData, selection: value})}
-                          disabled={!formData.team1 || !formData.team2}
-                        >
-                          <SelectTrigger className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white">
-                            <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
-                            {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="odds" className="text-[#2D2D2D] font-light text-sm">
-                          Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                          id="odds"
-                          type="number"
-                          step="0.01"
-                          min="1.01"
-                          value={formData.odds}
-                          onChange={(e) => setFormData({...formData, odds: e.target.value})}
-                          placeholder="1.65"
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                        />
-                      </div>
-                    </div>
-
-                    {formData.betCategory === 'Експрес' && (
-                      <Button
-                        type="button"
-                        onClick={addExpressEvent}
-                        disabled={expressEvents.length >= 10}
-                        className="w-full mt-4 bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] rounded-[24px] font-normal py-6 text-base shadow-[0_2px_8px_rgba(244,225,87,0.3)]"
-                      >
-                        <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                        Додати подію до експресу ({expressEvents.length}/10)
-                      </Button>
-                    )}
-                  </div>
+                  )}
                 </div>
 
-                {/* Financial Details Section */}
+                {/* Divider */}
+                <div className="border-t border-[#F3F4F6]" />
+
+                {/* === Section: Match Info & Bet Details === */}
+                <div className="space-y-4">
+                  <h3 className={sectionTitleClass}>
+                    <Users className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
+                    Інформація про матч і деталі прогнозу
+                  </h3>
+                
+                  {/* Match URL */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="matchUrl" className={`${labelClass} flex items-center gap-2`}>
+                      <Link className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
+                      {formData.game === 'CS2' ? 'HLTV URL матчу' : 'Dota 2 URL матчу'} (необов&apos;язково)
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="matchUrl"
+                        value={formData.matchUrl}
+                        onChange={(e) => handleUrlChange(e.target.value)}
+                        placeholder={formData.game === 'CS2' ? 'https://www.hltv.org/matches/...' : 'https://...dota2/.../team1-vs-team2/...'}
+                        className={`flex-1 ${inputClass}`}
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => parseMatchFromUrl(formData.matchUrl)}
+                        disabled={isParsingMatch || !formData.matchUrl}
+                        className="rounded-2xl px-5 border-[#E5E7EB] hover:bg-[#F3F4F6] hover:border-[#D1D5DB] h-11 text-sm font-medium"
+                      >
+                        {isParsingMatch ? 'Парсинг...' : 'Парсити'}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-[#9CA3AF]">
+                      {formData.game === 'CS2' ? 'Вставте посилання з HLTV для автозаповнення' : 'Вставте посилання на Dota 2 матч для автозаповнення'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="team1" className={labelClass}>
+                        Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
+                      </Label>
+                      <Input
+                        id="team1"
+                        value={formData.team1}
+                        onChange={(e) => setFormData({...formData, team1: e.target.value})}
+                        placeholder={formData.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
+                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                        className={inputClass}
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="team2" className={labelClass}>
+                        Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
+                      </Label>
+                      <Input
+                        id="team2"
+                        value={formData.team2}
+                        onChange={(e) => setFormData({...formData, team2: e.target.value})}
+                        placeholder={formData.game === 'CS2' ? 'G2' : 'OG'}
+                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="betType" className={labelClass}>
+                        Тип прогнозу {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
+                      </Label>
+                      <Select 
+                        value={formData.betType} 
+                        onValueChange={(value) => setFormData({...formData, betType: value})} 
+                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                      >
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue placeholder="Оберіть тип прогнозу" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getBetTypeOptions().map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="selection" className={labelClass}>
+                        Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
+                      </Label>
+                      <Select 
+                        value={formData.selection} 
+                        onValueChange={(value) => setFormData({...formData, selection: value})}
+                        disabled={!formData.team1 || !formData.team2}
+                      >
+                        <SelectTrigger className={selectTriggerClass}>
+                          <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
+                          {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="odds" className={labelClass}>
+                        Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
+                      </Label>
+                      <Input
+                        id="odds"
+                        type="number"
+                        step="0.01"
+                        min="1.01"
+                        value={formData.odds}
+                        onChange={(e) => setFormData({...formData, odds: e.target.value})}
+                        placeholder="1.65"
+                        required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  {formData.betCategory === 'Експрес' && (
+                    <Button
+                      type="button"
+                      onClick={addExpressEvent}
+                      disabled={expressEvents.length >= 10}
+                      className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-6 text-base transition-all"
+                    >
+                      <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
+                      Додати подію до експресу ({expressEvents.length}/10)
+                    </Button>
+                  )}
+                </div>
+
+                {/* Financial Details */}
                 {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
                   <>
-                    <Separator className="bg-[#E8E6DC]" />
+                    <div className="border-t border-[#F3F4F6]" />
                     
                     <div className="space-y-4">
-                      <div className="p-5 bg-[#FAFAF8] rounded-[32px] border-[1.5px] border-[#E8E6DC]">
-                        <h3 className="text-base font-normal text-[#2D2D2D] flex items-center gap-2 mb-4">
-                          <DollarSign className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
-                          Фінансові деталі
-                        </h3>
-                      
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="stake" className="text-[#2D2D2D] font-light text-sm">Сума прогнозу (₴) <span className="text-red-500">*</span></Label>
-                            <Input
-                              id="stake"
-                              type="number"
-                              min="1"
-                              step="0.01"
-                              value={formData.stake}
-                              onChange={(e) => setFormData({...formData, stake: e.target.value})}
-                              placeholder="100"
-                              required
-                              className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="confidence" className="text-[#2D2D2D] font-light text-sm">Впевненість (%) <span className="text-red-500">*</span></Label>
-                            <Input
-                              id="confidence"
-                              type="number"
-                              min="1"
-                              max="100"
-                              value={formData.confidence}
-                              onChange={(e) => setFormData({...formData, confidence: e.target.value})}
-                              placeholder="70"
-                              required
-                              className="rounded-[24px] mt-1.5 border-[#E8E6DC] bg-white"
-                            />
-                          </div>
+                      <h3 className={sectionTitleClass}>
+                        <DollarSign className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
+                        Фінансові деталі
+                      </h3>
+                    
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="stake" className={labelClass}>Сума прогнозу (₴) <span className="text-[#EF4444]">*</span></Label>
+                          <Input
+                            id="stake"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={formData.stake}
+                            onChange={(e) => setFormData({...formData, stake: e.target.value})}
+                            placeholder="100"
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                        
+                        <div className="space-y-1.5">
+                          <Label htmlFor="confidence" className={labelClass}>Впевненість (%) <span className="text-[#EF4444]">*</span></Label>
+                          <Input
+                            id="confidence"
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={formData.confidence}
+                            onChange={(e) => setFormData({...formData, confidence: e.target.value})}
+                            placeholder="70"
+                            required
+                            className={inputClass}
+                          />
                         </div>
                       </div>
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Express Events Display */}
             {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-              <Card className="border-[1.5px] border-[#E8E6DC] bg-[#FAFAF8] rounded-[32px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-normal text-[#2D2D2D] flex items-center gap-2">
-                      <Trophy className="h-5 w-5 text-[#6B6B6B]" strokeWidth={1.5} />
+              <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+                style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+              >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                    <span className="text-base font-semibold text-[#111827]">
                       Події експресу ({expressEvents.length}/10)
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 rounded-full text-sm px-3 py-1 font-light">
-                        Коеф: {totalExpressOdds.toFixed(2)}
-                      </Badge>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearExpressEvents}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 rounded-[20px]"
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                      </Button>
-                    </div>
+                    </span>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Express Risk Indicator */}
-                  <div className={`p-3 rounded-[24px] border-[1.5px] ${
-                    expressRisk.color === 'green' ? 'bg-green-50/50 border-green-200' :
-                    expressRisk.color === 'orange' ? 'bg-orange-50/50 border-orange-200' :
-                    'bg-red-50/50 border-red-200'
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-[#111827] text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-[#111827]">
+                      Коеф: {totalExpressOdds.toFixed(2)}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={clearExpressEvents}
+                      className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-6 space-y-3">
+                  {/* Express Risk */}
+                  <div className={`p-4 rounded-2xl border ${
+                    expressRisk.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
+                    expressRisk.color === 'orange' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
+                    'bg-[#FEF2F2] border-[#FECACA]'
                   }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-sm font-normal ${
-                        expressRisk.color === 'green' ? 'text-green-800' :
-                        expressRisk.color === 'orange' ? 'text-orange-800' :
-                        'text-red-800'
+                      <span className={`text-sm font-medium ${
+                        expressRisk.color === 'green' ? 'text-[#166534]' :
+                        expressRisk.color === 'orange' ? 'text-[#92400E]' :
+                        'text-[#991B1B]'
                       }`}>
                         {expressRisk.color === 'green' ? '🟢' : expressRisk.color === 'orange' ? '🟠' : '🔴'} {expressRisk.text}
                       </span>
-                      <span className={`text-xs font-light ${
-                        expressRisk.color === 'green' ? 'text-green-700' :
-                        expressRisk.color === 'orange' ? 'text-orange-700' :
-                        'text-red-700'
+                      <span className={`text-xs ${
+                        expressRisk.color === 'green' ? 'text-[#15803D]' :
+                        expressRisk.color === 'orange' ? 'text-[#B45309]' :
+                        'text-[#B91C1C]'
                       }`}>
                         {expressEvents.length} {expressEvents.length === 1 ? 'подія' : expressEvents.length < 5 ? 'події' : 'подій'}
                       </span>
                     </div>
                     <Progress 
                       value={expressRisk.progress} 
-                      className={`h-2 ${
-                        expressRisk.color === 'green' ? '[&>div]:bg-green-600' :
-                        expressRisk.color === 'orange' ? '[&>div]:bg-orange-600' :
-                        '[&>div]:bg-red-600'
+                      className={`h-1.5 rounded-full ${
+                        expressRisk.color === 'green' ? '[&>div]:bg-[#22C55E]' :
+                        expressRisk.color === 'orange' ? '[&>div]:bg-[#F59E0B]' :
+                        '[&>div]:bg-[#EF4444]'
                       }`}
                     />
-                    <p className={`text-xs mt-2 font-light ${
-                      expressRisk.color === 'green' ? 'text-green-700' :
-                      expressRisk.color === 'orange' ? 'text-orange-700' :
-                      'text-red-700'
+                    <p className={`text-xs mt-2 ${
+                      expressRisk.color === 'green' ? 'text-[#15803D]' :
+                      expressRisk.color === 'orange' ? 'text-[#B45309]' :
+                      'text-[#B91C1C]'
                     }`}>
                       {expressRisk.color === 'green' && 'Оптимальна кількість подій для контролю ризику'}
                       {expressRisk.color === 'orange' && 'Збільшений ризик через кількість подій. Рекомендуємо обережність.'}
@@ -1245,52 +1233,50 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {expressEvents.map((event, index) => (
-                      <div key={index} className="p-3 bg-white rounded-[24px] border-[1.5px] border-[#E8E6DC] flex items-start justify-between gap-3 hover:border-[#F4E157] transition-colors">
-                        <div className="flex-1 space-y-1">
+                      <div key={index} className="p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6] flex items-start justify-between gap-3 hover:border-[#E5E7EB] transition-colors">
+                        <div className="flex-1 space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <Badge className="bg-[#F4E157] text-[#2D2D2D] border-0 rounded-full text-xs font-normal">
+                            <Badge className="bg-[#111827] text-white border-0 rounded-full text-xs font-medium px-2 py-0.5 hover:bg-[#111827]">
                               #{index + 1}
                             </Badge>
-                            <span className="font-normal text-[#2D2D2D] text-sm">{event.match}</span>
+                            <span className="font-medium text-[#111827] text-sm">{event.match}</span>
                           </div>
-                          <div className="text-xs text-[#6B6B6B] font-light">
-                            {event.betType}: <span className="font-normal text-[#2D2D2D]">{event.selection}</span>
+                          <div className="text-xs text-[#6B7280]">
+                            {event.betType}: <span className="font-medium text-[#111827]">{event.selection}</span>
                           </div>
-                          <Badge className="bg-green-100 text-green-700 border-0 rounded-full text-xs font-light">
+                          <Badge className="bg-[#F0FDF4] text-[#16A34A] border-0 rounded-full text-xs font-medium hover:bg-[#F0FDF4]">
                             Коеф {event.odds}
                           </Badge>
                         </div>
-                        <Button
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="sm"
                           onClick={() => removeExpressEvent(index)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-[20px] flex-shrink-0"
+                          className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors flex-shrink-0"
                         >
                           <X className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
+                        </button>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
-            {/* Submit Button - YELLOW */}
+            {/* Submit Button */}
             {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="w-full bg-[#F4E157] hover:bg-[#E5D24E] text-[#2D2D2D] rounded-[32px] font-normal py-8 text-lg shadow-[0_4px_16px_rgba(244,225,87,0.3)] transform hover:scale-[1.01] transition-all"
+                className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-7 text-base transition-all"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#2D2D2D] mr-3"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
                     Додавання...
                   </>
                 ) : (
                   <>
-                    <Plus className="h-6 w-6 mr-2" strokeWidth={1.5} />
+                    <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
                     Додати запис
                   </>
                 )}
@@ -1299,90 +1285,87 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           </form>
         </div>
 
-        {/* Right Sidebar - Calculations & Risky Teams */}
+        {/* Right Sidebar */}
         <div className="space-y-6 relative">
           <div className="sticky top-6 space-y-6">
             {/* Calculations Card */}
-            <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[40px] bg-white/80 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
-                <CardTitle className="flex items-center gap-3 text-lg font-normal text-[#2D2D2D]">
-                  <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                    <Calculator className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
-                  </div>
-                  Розрахунки
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+            >
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                  <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                </div>
+                <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
+              </div>
+              <div className="p-6 space-y-4">
                 {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
                   <>
                     {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                      <div className="p-4 bg-[#FAFAF8] rounded-[24px] border-[1.5px] border-[#E8E6DC]">
+                      <div className="p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#2D2D2D] font-light">Загальний коефіцієнт:</span>
-                          <Badge className="bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 rounded-full text-lg px-4 py-1 font-light">
+                          <span className="text-sm text-[#6B7280]">Загальний коефіцієнт:</span>
+                          <Badge className="bg-[#111827] text-white border-0 rounded-full text-base px-4 py-1 font-semibold hover:bg-[#111827]">
                             {totalExpressOdds.toFixed(2)}
                           </Badge>
                         </div>
                       </div>
                     )}
                     
-                    <div className="p-4 bg-green-50/50 rounded-[24px] border-[1.5px] border-green-200">
+                    <div className="p-4 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#2D2D2D] font-light">Потенційний прибуток:</span>
-                        <span className="font-normal text-green-600 text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
+                        <span className="text-sm text-[#374151]">Потенційний прибуток:</span>
+                        <span className="font-semibold text-[#16A34A] text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
                     
-                    {/* Simplified EV Display */}
-                    <div className={`p-4 rounded-[24px] border-[1.5px] ${
-                      evVerdict.color === 'green' ? 'bg-green-50/50 border-green-200' :
-                      evVerdict.color === 'yellow' ? 'bg-yellow-50/50 border-yellow-200' :
-                      'bg-red-50/50 border-red-200'
+                    {/* EV Display */}
+                    <div className={`p-4 rounded-2xl border ${
+                      evVerdict.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
+                      evVerdict.color === 'yellow' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
+                      'bg-[#FEF2F2] border-[#FECACA]'
                     }`}>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-normal ${
-                            evVerdict.color === 'green' ? 'text-green-800' :
-                            evVerdict.color === 'yellow' ? 'text-yellow-800' :
-                            'text-red-800'
+                          <span className={`text-sm font-medium ${
+                            evVerdict.color === 'green' ? 'text-[#166534]' :
+                            evVerdict.color === 'yellow' ? 'text-[#92400E]' :
+                            'text-[#991B1B]'
                           }`}>
                             {evVerdict.icon} {evVerdict.text}
                           </span>
-                          <Button
+                          <button
                             type="button"
-                            variant="ghost"
-                            size="sm"
                             onClick={() => setShowEVDetails(!showEVDetails)}
-                            className="h-6 px-2 text-xs"
+                            className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-black/5 transition-colors"
                           >
-                            {showEVDetails ? <ChevronUp className="h-3 w-3" strokeWidth={1.5} /> : <ChevronDown className="h-3 w-3" strokeWidth={1.5} />}
-                          </Button>
+                            {showEVDetails ? <ChevronUp className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />}
+                          </button>
                         </div>
-                        <p className={`text-xs font-light ${
-                          evVerdict.color === 'green' ? 'text-green-700' :
-                          evVerdict.color === 'yellow' ? 'text-yellow-700' :
-                          'text-red-700'
+                        <p className={`text-xs ${
+                          evVerdict.color === 'green' ? 'text-[#15803D]' :
+                          evVerdict.color === 'yellow' ? 'text-[#B45309]' :
+                          'text-[#B91C1C]'
                         }`}>
                           {evVerdict.description}
                         </p>
                         
-                        {/* EV Details - Collapsible */}
                         {showEVDetails && (
                           <div className={`mt-3 pt-3 border-t ${
-                            evVerdict.color === 'green' ? 'border-green-200' :
-                            evVerdict.color === 'yellow' ? 'border-yellow-200' :
-                            'border-red-200'
+                            evVerdict.color === 'green' ? 'border-[#BBF7D0]' :
+                            evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
+                            'border-[#FECACA]'
                           }`}>
                             <div className="space-y-2">
                               <div className="flex justify-between text-xs">
-                                <span className="text-[#6B6B6B] font-light">Expected Value:</span>
-                                <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 font-light ${
-                                  isValuePositive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                                <span className="text-[#6B7280]">Expected Value:</span>
+                                <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 font-medium ${
+                                  isValuePositive ? 'bg-[#22C55E] text-white hover:bg-[#22C55E]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
                                 }`}>
                                   {isValuePositive ? '+' : ''}{expectedValue}%
                                 </Badge>
                               </div>
-                              <p className="text-xs text-[#6B6B6B] font-light">
+                              <p className="text-xs text-[#6B7280]">
                                 EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
                               </p>
                             </div>
@@ -1391,44 +1374,46 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                     </div>
                     
-                    <div className="p-4 bg-red-50/50 rounded-[24px] border-[1.5px] border-red-200">
+                    <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#2D2D2D] font-light">Макс. програш:</span>
-                        <span className="font-normal text-red-600 text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
+                        <span className="text-sm text-[#374151]">Макс. програш:</span>
+                        <span className="font-semibold text-[#EF4444] text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-8">
-                    <Calculator className="h-12 w-12 text-[#B0B0B0] mx-auto mb-3" strokeWidth={1.5} />
-                    <p className="text-sm text-[#2D2D2D] font-normal mb-1">Заповніть форму для розрахунків</p>
-                    <p className="text-xs text-[#6B6B6B] font-light">
+                  <div className="text-center py-10">
+                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
+                      <Calculator className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <p className="text-sm font-semibold text-[#111827] mb-1">Заповніть форму для розрахунків</p>
+                    <p className="text-xs text-[#9CA3AF]">
                       Введіть суму, впевненість та коефіцієнт
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Risky Teams Card - MORE ACCENT & LARGER TEXT */}
-            <Card className="border-[2px] border-[#D2691E]/40 bg-gradient-to-br from-[#FFF8DC]/40 to-[#F5DEB3]/30 backdrop-blur-sm rounded-[32px] shadow-[0_4px_12px_rgba(210,105,30,0.15)] overflow-hidden">
-              <CardHeader className="pb-3 bg-[#D2691E]/10 border-b-[2px] border-[#D2691E]/30">
-                <CardTitle className="text-lg font-medium text-[#8B4513] flex items-center gap-2.5">
-                  <div className="p-2.5 bg-[#D2691E]/20 rounded-[18px]">
-                    <AlertTriangle className="h-5 w-5 text-[#8B4513]" strokeWidth={2} />
-                  </div>
-                  Ризиковані команди
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
+            {/* Risky Teams Card */}
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+            >
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#fbf3df]">
+                  <AlertTriangle className="h-5 w-5 text-[#febc11]" strokeWidth={1.5} />
+                </div>
+                <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
+              </div>
+              <div className="p-6">
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-5 border-[2px] border-[#D2691E]/50 rounded-[24px] bg-white/80 space-y-3 hover:border-[#D2691E]/70 hover:shadow-[0_2px_8px_rgba(210,105,30,0.2)] transition-all">
+                      <div key={index} className="p-4 border border-[#feda79] rounded-2xl bg-white space-y-2.5 hover:border-[#febc11] transition-colors">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2.5">
-                              <span className="text-base font-medium text-[#8B4513]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-base font-semibold text-[#111827]">
                                 {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
                               </span>
                             </div>
@@ -1436,37 +1421,35 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                               {riskyTeam.status}
                             </Badge>
                           </div>
-                          <Button
+                          <button
                             type="button"
-                            variant="ghost"
-                            size="sm"
                             onClick={() => removeRiskyTeam(index)}
-                            className="text-[#8B4513]/70 hover:text-[#8B4513] hover:bg-[#D2691E]/15 h-8 w-8 p-0 rounded-[18px] flex-shrink-0"
+                            className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors flex-shrink-0"
                           >
-                            <X className="h-4 w-4" strokeWidth={2} />
-                          </Button>
+                            <X className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
                         </div>
                         {riskyTeam.notes && (
-                          <p className="text-sm text-[#8B4513] font-normal leading-relaxed whitespace-pre-wrap pl-1 bg-[#FFF8DC]/50 p-3 rounded-[16px]">{riskyTeam.notes}</p>
+                          <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap bg-white/60 p-3 rounded-xl">{riskyTeam.notes}</p>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <div className="p-4 bg-[#D2691E]/10 rounded-[24px] w-fit mx-auto mb-3">
-                      <AlertTriangle className="h-12 w-12 text-[#D2B48C]" strokeWidth={1.5} />
+                  <div className="text-center py-10">
+                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#fbf3df] mx-auto mb-3">
+                      <AlertTriangle className="h-7 w-7 text-[#febc11]" strokeWidth={1.5} />
                     </div>
-                    <p className="text-base text-[#8B4513] font-medium mb-1">Ризикових команд не знайдено</p>
-                    <p className="text-sm text-[#8B4513]/70 font-normal">
+                    <p className="text-sm font-semibold text-[#111827] mb-1">Ризикових команд не знайдено</p>
+                    <p className="text-xs text-[#9CA3AF]">
                       {formData.team1 || formData.team2 
                         ? 'Обрані команди не в списку ризикових' 
                         : 'Додайте команди для перевірки'}
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

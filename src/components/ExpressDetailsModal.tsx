@@ -32,17 +32,19 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto border-2 border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[32px] bg-white p-0">
-        <DialogHeader className="border-b-2 border-[#E8E6DC] p-6">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto border border-[#F3F4F6] rounded-3xl bg-white p-0"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+      >
+        <DialogHeader className="border-b border-[#F3F4F6] px-8 py-6">
           <DialogTitle>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#F4E157] rounded-[24px] shadow-[0_4px_12px_rgba(244,225,87,0.4)] flex-shrink-0">
-                <Trophy className="h-6 w-6 text-black" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3F4F6] flex-shrink-0">
+                <Trophy className="h-6 w-6 text-[#111827]" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-3xl font-normal text-black">Деталі експрес-ставки</h2>
-                <div className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[20px] border-2 border-[#E8E6DC]">
-                  <p className="text-base text-black font-normal">
+                <h2 className="text-2xl font-semibold text-[#111827]">Деталі експрес-ставки</h2>
+                <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 bg-[#F9FAFB] rounded-xl border border-[#F3F4F6]">
+                  <p className="text-sm text-[#6B7280] font-medium">
                     {parsedEvents.length} {parsedEvents.length === 1 ? 'подія' : parsedEvents.length < 5 ? 'події' : 'подій'} • Коефіцієнт {totalOdds.toFixed(2)}
                   </p>
                 </div>
@@ -51,72 +53,73 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-8">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] text-center">
-              <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider mb-2">Кількість подій</p>
-              <p className="text-3xl font-normal text-black">{parsedEvents.length}</p>
+            <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
+              <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Кількість подій</p>
+              <p className="text-3xl font-semibold text-[#111827]">{parsedEvents.length}</p>
             </div>
-            <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] text-center">
-              <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider mb-2">Загальний коефіцієнт</p>
-              <p className="text-3xl font-normal text-[#FF9800]">{totalOdds.toFixed(2)}</p>
+            <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
+              <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Загальний коефіцієнт</p>
+              <p className="text-3xl font-semibold text-[#111827]">{totalOdds.toFixed(2)}</p>
             </div>
-            <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] text-center">
-              <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider mb-2">Сума ставки</p>
-              <p className="text-3xl font-normal text-black">{amount}{currencySymbol}</p>
+            <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
+              <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Сума ставки</p>
+              <p className="text-3xl font-semibold text-[#111827]">{amount}{currencySymbol}</p>
             </div>
-            <div className="p-5 bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] text-center">
-              <p className="text-xs font-light text-[#6B6B6B] uppercase tracking-wider mb-2">Можливий виграш</p>
-              <p className="text-3xl font-normal text-[#4CAF50]">{potentialWin}{currencySymbol}</p>
+            <div className="p-5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0] text-center">
+              <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Можливий виграш</p>
+              <p className="text-3xl font-semibold text-[#16A34A]">{potentialWin}{currencySymbol}</p>
             </div>
           </div>
 
           {/* Events Grid - Collapsible */}
-          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-gradient-to-br from-[#F5F5F3] to-white rounded-[24px] border-2 border-[#E8E6DC] overflow-hidden">
+          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
             <CollapsibleTrigger className="w-full">
-              <div className="flex items-center justify-between px-5 py-3 hover:bg-[#F4E157]/10 transition-colors cursor-pointer">
+              <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[#F4E157] rounded-[16px]">
-                    <Zap className="h-5 w-5 text-black" strokeWidth={1.5} />
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
+                    <Zap className="h-4.5 w-4.5 text-[#111827]" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-lg font-normal text-black">Події в експресі</h3>
+                  <h3 className="text-base font-semibold text-[#111827]">Події в експресі</h3>
                 </div>
                 <ChevronDown 
-                  className={`h-5 w-5 text-black transition-transform duration-200 ${isEventsOpen ? 'rotate-180' : ''}`}
+                  className={`h-5 w-5 text-[#6B7280] transition-transform duration-200 ${isEventsOpen ? 'rotate-180' : ''}`}
                   strokeWidth={1.5}
                 />
               </div>
             </CollapsibleTrigger>
             
             <CollapsibleContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 pt-2">
                 {parsedEvents.map((event, index) => (
                   <div 
                     key={index}
-                    className="p-5 bg-white rounded-[24px] border-2 border-[#E8E6DC] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:border-[#F4E157] transition-all"
+                    className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#E5E7EB] transition-all"
+                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                   >
                     <div className="space-y-3">
                       {/* Header with number and odds */}
                       <div className="flex items-center justify-between gap-2">
-                        <Badge className="rounded-[16px] bg-[#F4E157] text-black border-0 font-normal text-base px-3 py-1.5">
+                        <Badge className="rounded-xl bg-[#111827] text-white border-0 font-medium text-sm px-3 py-1 hover:bg-[#111827]">
                           #{event.number}
                         </Badge>
-                        <Badge className="rounded-[16px] bg-gradient-to-r from-[#FF9800] to-[#FF5722] text-white border-0 font-normal text-xl px-4 py-1.5">
+                        <Badge className="rounded-xl bg-[#F9FAFB] text-[#111827] border border-[#E5E7EB] font-semibold text-lg px-4 py-1 hover:bg-[#F9FAFB]">
                           {parseFloat(event.odds).toFixed(2)}
                         </Badge>
                       </div>
                       
                       {/* Match name */}
-                      <h4 className="font-normal text-lg text-black leading-tight">{event.match}</h4>
+                      <h4 className="font-semibold text-base text-[#111827] leading-tight">{event.match}</h4>
                       
                       {/* Bet details */}
-                      <div className="space-y-2 bg-[#F5F5F3] rounded-[20px] p-4 border border-[#E8E6DC]">
-                        <p className="text-base text-black">
-                          <span className="font-light text-[#6B6B6B]">Тип:</span> <span className="font-normal ml-1">{event.betType}</span>
+                      <div className="space-y-2 bg-[#F9FAFB] rounded-xl p-4 border border-[#F3F4F6]">
+                        <p className="text-sm text-[#111827]">
+                          <span className="text-[#9CA3AF]">Тип:</span> <span className="font-medium ml-1">{event.betType}</span>
                         </p>
-                        <p className="text-base text-black">
-                          <span className="font-light text-[#6B6B6B]">Вибір:</span> <span className="font-normal text-[#FF9800] ml-1">{event.selection}</span>
+                        <p className="text-sm text-[#111827]">
+                          <span className="text-[#9CA3AF]">Вибір:</span> <span className="font-semibold ml-1">{event.selection}</span>
                         </p>
                       </div>
                     </div>
