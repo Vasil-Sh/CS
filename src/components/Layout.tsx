@@ -79,7 +79,7 @@ export default function Layout() {
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
                 ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
-                : 'text-[#8B8B9A] hover:text-[#447afc] hover:bg-[#f2f8ff]'
+                : 'text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -140,7 +140,6 @@ export default function Layout() {
               MatchIQ
             </h1>
           </div>
-          {/* User Info Mobile - top right */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-2 bg-[#f2f8ff] rounded-[16px]">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#447afc]">
@@ -192,31 +191,9 @@ export default function Layout() {
         </div>
       </div>
 
-      {/* Top Header Bar - Desktop */}
-      <div className="hidden lg:block lg:pl-80">
-        <div className="flex items-center justify-end bg-white px-10 py-4 border-b border-[#E8E6DC]">
-          <div className="flex items-center gap-3 px-4 py-2 bg-[#f2f8ff] rounded-[20px]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#447afc] shadow-[0_2px_8px_rgba(68,122,252,0.25)]">
-              <User className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-[#1a1a2e]">
-                @{username || 'User'}
-                {isAdmin && <span className="ml-1">👑</span>}
-              </p>
-              <p className="text-xs text-[#8B8B9A]">
-                {isAdmin ? 'Адміністратор' : 'Користувач'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
+      {/* Main Content - no padding, each page handles its own padding */}
       <main className="lg:pl-80">
-        <div className="px-6 py-8 sm:px-8 lg:px-10">
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
     </div>
   );
