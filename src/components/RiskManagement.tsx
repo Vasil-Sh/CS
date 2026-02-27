@@ -625,15 +625,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header row: disclaimer text (left) + info icon & Google Sheets button (right) — all on one line */}
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-sm text-[#92400E] leading-relaxed flex-1 min-w-0">
-            <span className="text-[#D97706] mr-1.5">⚠</span>
-            Аналітика носить <strong className="font-semibold">рекомендаційний характер</strong> і не є фінансовою порадою. 
-            Всі рішення приймаються <strong className="font-semibold">самостійно на власний ризик</strong>.
-          </p>
-
-          <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Header row: info icon & Google Sheets button (right) */}
+        <div className="flex items-center justify-end gap-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
@@ -666,7 +659,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 </>
               )}
             </Button>
-          </div>
         </div>
 
         {/* Risk Overview Cards */}
