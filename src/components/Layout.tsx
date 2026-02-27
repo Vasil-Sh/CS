@@ -32,7 +32,6 @@ export default function Layout() {
   const isAdmin = userRole === 'admin';
 
   useEffect(() => {
-    // Check if user is authenticated
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
       navigate('/login');
@@ -59,8 +58,8 @@ export default function Layout() {
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
-                ? 'bg-[#2A5BD7] text-white shadow-[0_4px_16px_rgba(42,91,215,0.3)]'
-                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
+                ? 'bg-[#3e75ff] text-white shadow-[0_4px_16px_rgba(62,117,255,0.25)]'
+                : 'text-[#8B8B9A] hover:text-[#3e75ff] hover:bg-[#f0f8fe]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -80,7 +79,7 @@ export default function Layout() {
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
               isActive
                 ? 'bg-[#febc11] text-[#1a1a2e] shadow-[0_4px_16px_rgba(254,188,17,0.3)]'
-                : 'text-[#8B8B9A] hover:text-[#2A2A3A] hover:bg-[#F0F0ED]'
+                : 'text-[#8B8B9A] hover:text-[#febc11] hover:bg-[#fbf3df]'
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -108,8 +107,8 @@ export default function Layout() {
           
           {/* User Info Card */}
           <div className="relative">
-            <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+            <div className="flex items-center gap-4 px-5 py-4 bg-[#f0f8fe] rounded-[28px] border-2 border-[#E8E6DC]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#3e75ff] shadow-[0_4px_12px_rgba(62,117,255,0.25)]">
                 <User className="h-7 w-7 text-white" strokeWidth={1.5} />
               </div>
               <div className="flex-1 min-w-0">
@@ -158,7 +157,7 @@ export default function Layout() {
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#F5F5F0] w-12 h-12">
+              <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f0f8fe] w-12 h-12">
                 <Menu className="h-6 w-6" strokeWidth={1.5} />
               </Button>
             </SheetTrigger>
@@ -174,8 +173,8 @@ export default function Layout() {
               
               {/* User Info Mobile */}
               <div className="relative mt-6">
-                <div className="flex items-center gap-4 px-5 py-4 bg-[#F5F5F0] rounded-[28px] border-2 border-[#E8E6DC]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#1a1a2e] shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
+                <div className="flex items-center gap-4 px-5 py-4 bg-[#f0f8fe] rounded-[28px] border-2 border-[#E8E6DC]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-[24px] bg-[#3e75ff] shadow-[0_4px_12px_rgba(62,117,255,0.25)]">
                     <User className="h-7 w-7 text-white" strokeWidth={1.5} />
                   </div>
                   <div className="flex-1 min-w-0">
