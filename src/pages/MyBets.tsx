@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import CS2BettingForm from '@/components/CS2BettingForm';
 import BettingHistory from '@/components/BettingHistory';
@@ -101,6 +101,16 @@ function getTodayStr(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+/** Format YYYY-MM-DD → DD.MM.YYYY */
+function formatDateDisplay(dateStr: string): string {
+  try {
+    const [y, m, d] = dateStr.split('-');
+    return `${d}.${m}.${y}`;
+  } catch {
+    return dateStr;
+  }
+}
+
 type TableFilterMode = 'today' | 'date' | 'all';
 
 export default function MyBets() {
@@ -134,6 +144,7 @@ export default function MyBets() {
   // Filter state for the table
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('today');
   const [filterDate, setFilterDate] = useState<string>(getTodayStr());
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [bankrollStats, setBankrollStats] = useState(() => {
     return BankrollService.getBankrollStats(currentUser, recentBets);
@@ -449,12 +460,7 @@ export default function MyBets() {
   const formatFilterDateLabel = useCallback((dateStr: string): string => {
     const today = getTodayStr();
     if (dateStr === today) return 'Сьогодні';
-    try {
-      const [y, m, d] = dateStr.split('-');
-      return `${d}.${m}.${y}`;
-    } catch {
-      return dateStr;
-    }
+    return formatDateDisplay(dateStr);
   }, []);
 
   const tabs = [
@@ -798,31 +804,39 @@ export default function MyBets() {
                 Сьогодні
               </button>
 
-              {/* Date picker */}
+              {/* Date picker - custom button with hidden input */}
               <div className="relative flex items-center">
                 <input
+                  ref={dateInputRef}
                   type="date"
-                  value={tableFilter === 'date' ? filterDate : ''}
+                  value={filterDate}
                   onChange={(e) => {
                     if (e.target.value) {
                       setFilterDate(e.target.value);
                       setTableFilter('date');
                     }
                   }}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 outline-none cursor-pointer ${
-                    tableFilter === 'date'
-                      ? 'bg-[#111827] text-white shadow-sm'
-                      : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
-                  }`}
-                  style={{ colorScheme: tableFilter === 'date' ? 'dark' : 'light' }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  style={{ colorScheme: 'light' }}
                 />
+                <button
+                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 pointer-events-none ${
+                    tableFilter === 'date'
+                      ? 'bg-white text-[#111827] border-2 border-[#111827] shadow-sm'
+                      : 'bg-white text-[#374151] border border-[#E5E7EB]'
+                  }`}
+                >
+                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  {tableFilter === 'date' ? formatDateDisplay(filterDate) : 'Обрати дату'}
+                </button>
                 {tableFilter === 'date' && (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setTableFilter('today');
                       setFilterDate(getTodayStr());
                     }}
-                    className="ml-1.5 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/10 transition-colors"
+                    className="relative z-20 ml-1.5 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/10 transition-colors"
                     title="Скинути"
                   >
                     <X className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={2} />
