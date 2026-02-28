@@ -630,7 +630,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
-                  <Info className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <Info className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
