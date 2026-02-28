@@ -460,10 +460,10 @@ export default function BettingHistory() {
                             <Badge 
                               className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${
                                 isWin 
-                                  ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' 
+                                  ? 'bg-[#BBF7D0] text-[#15803D] hover:bg-[#BBF7D0]' 
                                   : isLoss 
-                                  ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' 
-                                  : 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'
+                                  ? 'bg-[#FECACA] text-[#B91C1C] hover:bg-[#FECACA]' 
+                                  : 'bg-[#FDE68A] text-[#92400E] hover:bg-[#FDE68A]'
                               }`}
                             >
                               {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
