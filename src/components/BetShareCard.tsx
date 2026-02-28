@@ -180,19 +180,20 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   return (
     <div 
-      className="w-full rounded-2xl overflow-hidden bg-white"
+      className="w-full overflow-hidden bg-white"
       style={{ 
+        borderRadius: '32px',
         border: '1px solid #E5E7EB',
         boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)'
       }}
     >
       {/* Status Banner — gradient colored bar at the top */}
       <div 
-        className="flex items-center justify-between px-5 py-4 text-white"
+        className="flex items-center justify-between px-6 py-5 text-white"
         style={{ background: theme.gradient }}
       >
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm">
+          <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm">
             {isWin ? (
               <Trophy className="h-5 w-5 text-white" strokeWidth={1.5} />
             ) : isLoss ? (
@@ -206,14 +207,14 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             <p className="text-xs text-white/70 font-medium">{bet.date}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-sm font-medium text-white/80 bg-white/15 px-3 py-1.5 rounded-full backdrop-blur-sm">
+        <div className="flex items-center gap-1.5 text-sm font-medium text-white/80 bg-white/15 px-3.5 py-2 rounded-2xl backdrop-blur-sm">
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
           <span>{bet.format}</span>
         </div>
       </div>
 
       {/* Card body — all content inside the container */}
-      <div className="p-5 space-y-4">
+      <div className="p-6 space-y-4">
         {/* Match Name */}
         <div className="text-center py-2">
           <h3 className="text-lg font-bold text-[#111827] tracking-tight">
@@ -249,8 +250,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                 {parsedEvents.map((event, index) => (
                   <div 
                     key={index} 
-                    className="p-3.5 rounded-xl"
-                    style={{ backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}` }}
+                    className="p-3.5"
+                    style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}` }}
                   >
                     <div className="flex items-start gap-2 mb-2">
                       <span 
@@ -305,8 +306,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Amount & Odds — compact row */}
         <div className="grid grid-cols-2 gap-3">
           <div 
-            className="text-center p-3.5 rounded-xl"
-            style={{ backgroundColor: '#F9FAFB' }}
+            className="text-center p-4"
+            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
           >
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <DollarSign className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -317,8 +318,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             </p>
           </div>
           <div 
-            className="text-center p-3.5 rounded-xl"
-            style={{ backgroundColor: '#F9FAFB' }}
+            className="text-center p-4"
+            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
           >
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Percent className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -333,8 +334,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Profit — colored background block */}
         {!isPending && displayProfit !== undefined && displayProfit !== null && (
           <div 
-            className="p-4 rounded-xl text-center"
-            style={{ backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            className="p-5 text-center"
+            style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
           >
             <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider" style={{ color: theme.accent }}>
               Профіт
@@ -348,8 +349,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Pending — possible win */}
         {isPending && (
           <div 
-            className="p-4 rounded-xl text-center"
-            style={{ backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            className="p-5 text-center"
+            style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
           >
             <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider" style={{ color: theme.accent }}>
               Можливий виграш
@@ -365,8 +366,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Total Amount */}
         {!isLoss && (
           <div 
-            className="p-4 rounded-xl text-center"
-            style={{ backgroundColor: '#F9FAFB' }}
+            className="p-5 text-center"
+            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
           >
             <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider text-[#9CA3AF]">
               Загальна сума
