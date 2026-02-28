@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   Trophy, TrendingDown, Target, Calendar, CheckCircle2,
-  ChevronDown, ChevronUp, DollarSign, Percent, Crosshair
+  ChevronDown, ChevronUp, DollarSign, Percent
 } from 'lucide-react';
 
 interface BetShareCardProps {
@@ -377,19 +377,6 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           </p>
         </div>
       )}
-
-      {/* MatchIQ Branding Footer */}
-      <div className="flex items-center justify-center gap-2 pt-1 pb-0.5">
-        <div 
-          className="flex items-center justify-center w-5 h-5 rounded-md"
-          style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)' }}
-        >
-          <Crosshair className="h-3 w-3 text-white" strokeWidth={2} />
-        </div>
-        <span className="text-xs font-semibold text-[#9CA3AF] tracking-wide">
-          MatchIQ
-        </span>
-      </div>
     </div>
   );
 }
