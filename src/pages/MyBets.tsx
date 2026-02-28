@@ -858,14 +858,14 @@ export default function MyBets() {
                                   <>
                                     <button
                                       onClick={() => updateBetResult(bet, 'Win')}
-                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#6B7280] hover:text-[#16A34A] transition-all duration-200"
+                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#16A34A] transition-all duration-200"
                                       title="Виграш"
                                     >
                                       <CheckCircle className="h-4 w-4" strokeWidth={2} />
                                     </button>
                                     <button
                                       onClick={() => updateBetResult(bet, 'Loss')}
-                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#6B7280] hover:text-[#DC2626] transition-all duration-200"
+                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#DC2626] transition-all duration-200"
                                       title="Програш"
                                     >
                                       <XCircle className="h-4 w-4" strokeWidth={2} />
@@ -874,7 +874,7 @@ export default function MyBets() {
                                 )}
                                 <button
                                   onClick={() => handleShareBet(bet)}
-                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#6B7280] hover:text-[#3B82F6] transition-all duration-200"
+                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#3B82F6] transition-all duration-200"
                                   title="Поділитися"
                                 >
                                   <Share2 className="h-4 w-4" strokeWidth={2} />
@@ -882,7 +882,7 @@ export default function MyBets() {
                                 {isAdmin && (
                                   <button
                                     onClick={() => handleBetDetailsClick(bet)}
-                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#6B7280] hover:text-[#7C3AED] transition-all duration-200"
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#7C3AED] transition-all duration-200"
                                     title="Деталі"
                                   >
                                     <Eye className="h-4 w-4" strokeWidth={2} />
