@@ -15,7 +15,7 @@ import {
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
   Flag, Wallet, Eye, ChevronDown, ChevronUp,
   Plus, History, LineChart, ArrowUpRight, ArrowDownRight,
-  MoreHorizontal, Pencil,
+  MoreHorizontal, Pencil, Filter, X,
   Sun, Moon, User
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -71,6 +71,38 @@ const cardHoverStyle: React.CSSProperties = {
   transform: 'translateY(-2px)',
 };
 
+/** Normalize a bet.date string (DD.MM.YYYY or YYYY-MM-DD) → YYYY-MM-DD */
+function normalizeDateStr(dateStr: string): string {
+  if (!dateStr) return '';
+  // DD.MM.YYYY
+  const dotMatch = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (dotMatch) {
+    const dd = dotMatch[1].padStart(2, '0');
+    const mm = dotMatch[2].padStart(2, '0');
+    return `${dotMatch[3]}-${mm}-${dd}`;
+  }
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // DD/MM/YYYY
+  const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashMatch) {
+    const dd = slashMatch[1].padStart(2, '0');
+    const mm = slashMatch[2].padStart(2, '0');
+    return `${slashMatch[3]}-${mm}-${dd}`;
+  }
+  return dateStr;
+}
+
+function getTodayStr(): string {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+type TableFilterMode = 'today' | 'date' | 'all';
+
 export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
   const userRole = localStorage.getItem('userRole');
@@ -98,6 +130,10 @@ export default function MyBets() {
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+  // Filter state for the table
+  const [tableFilter, setTableFilter] = useState<TableFilterMode>('today');
+  const [filterDate, setFilterDate] = useState<string>(getTodayStr());
 
   const [bankrollStats, setBankrollStats] = useState(() => {
     return BankrollService.getBankrollStats(currentUser, recentBets);
@@ -319,6 +355,18 @@ export default function MyBets() {
     [recentBets]
   );
 
+  // Filtered bets based on tableFilter
+  const filteredBets = useMemo(() => {
+    if (tableFilter === 'all') return sortedBets;
+    
+    const targetDate = tableFilter === 'today' ? getTodayStr() : filterDate;
+    
+    return sortedBets.filter((bet: Bet) => {
+      const normalizedBetDate = normalizeDateStr(bet.date);
+      return normalizedBetDate === targetDate;
+    });
+  }, [sortedBets, tableFilter, filterDate]);
+
   const { activeBets, winningBets, losingBets } = useMemo(() => ({
     activeBets: recentBets.filter((bet: Bet) => bet.result === 'Pending'),
     winningBets: recentBets.filter((bet: Bet) => bet.result === 'Win'),
@@ -396,6 +444,18 @@ export default function MyBets() {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [showActionsMenu]);
+
+  // Format filter date for display
+  const formatFilterDateLabel = useCallback((dateStr: string): string => {
+    const today = getTodayStr();
+    if (dateStr === today) return 'Сьогодні';
+    try {
+      const [y, m, d] = dateStr.split('-');
+      return `${d}.${m}.${y}`;
+    } catch {
+      return dateStr;
+    }
+  }, []);
 
   const tabs = [
     { id: 'add', label: 'Додати запис', icon: Plus },
@@ -716,10 +776,85 @@ export default function MyBets() {
               )}
             </button>
           </div>
+
+          {/* Filter Bar */}
+          {isTableExpanded && (
+            <div className="flex items-center gap-3 px-6 py-3.5 border-b border-[#F3F4F6] bg-[#FAFAFA]">
+              <Filter className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+              <span className="text-sm text-[#6B7280] font-medium mr-1">Фільтр:</span>
+              
+              {/* Today button */}
+              <button
+                onClick={() => {
+                  setTableFilter('today');
+                  setFilterDate(getTodayStr());
+                }}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  tableFilter === 'today'
+                    ? 'bg-[#111827] text-white shadow-sm'
+                    : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
+                }`}
+              >
+                Сьогодні
+              </button>
+
+              {/* Date picker */}
+              <div className="relative flex items-center">
+                <input
+                  type="date"
+                  value={tableFilter === 'date' ? filterDate : ''}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setFilterDate(e.target.value);
+                      setTableFilter('date');
+                    }
+                  }}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 outline-none cursor-pointer ${
+                    tableFilter === 'date'
+                      ? 'bg-[#111827] text-white shadow-sm'
+                      : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
+                  }`}
+                  style={{ colorScheme: tableFilter === 'date' ? 'dark' : 'light' }}
+                />
+                {tableFilter === 'date' && (
+                  <button
+                    onClick={() => {
+                      setTableFilter('today');
+                      setFilterDate(getTodayStr());
+                    }}
+                    className="ml-1.5 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/10 transition-colors"
+                    title="Скинути"
+                  >
+                    <X className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+
+              {/* All bets button */}
+              <button
+                onClick={() => setTableFilter('all')}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  tableFilter === 'all'
+                    ? 'bg-[#111827] text-white shadow-sm'
+                    : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
+                }`}
+              >
+                Всі матчі
+              </button>
+
+              {/* Count indicator */}
+              <div className="ml-auto">
+                <span className="text-sm text-[#9CA3AF]">
+                  {filteredBets.length} {filteredBets.length === 1 ? 'запис' : filteredBets.length >= 2 && filteredBets.length <= 4 ? 'записи' : 'записів'}
+                  {tableFilter !== 'all' && ` з ${sortedBets.length}`}
+                </span>
+              </div>
+            </div>
+          )}
           
           {isTableExpanded && (
             <div className="px-0 pb-6">
-              {sortedBets.length > 0 ? (
+              {filteredBets.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
@@ -737,7 +872,7 @@ export default function MyBets() {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedBets.map((bet: Bet) => {
+                      {filteredBets.map((bet: Bet) => {
                         const isPending = bet.result === 'Pending';
                         const isWin = bet.result === 'Win';
                         const isLoss = bet.result === 'Loss';
@@ -891,8 +1026,34 @@ export default function MyBets() {
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#F3F4F6] mx-auto mb-4">
                     <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
                   </div>
-                  <p className="text-[#111827] font-semibold text-lg">Поки що немає записів</p>
-                  <p className="text-base text-[#9CA3AF] mt-1">Додайте свій перший запис, щоб почати відстеження</p>
+                  {tableFilter === 'today' ? (
+                    <>
+                      <p className="text-[#111827] font-semibold text-lg">Немає записів за сьогодні</p>
+                      <p className="text-base text-[#9CA3AF] mt-1">Додайте новий запис або перегляньте всі матчі</p>
+                      <button
+                        onClick={() => setTableFilter('all')}
+                        className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors"
+                      >
+                        Показати всі матчі
+                      </button>
+                    </>
+                  ) : tableFilter === 'date' ? (
+                    <>
+                      <p className="text-[#111827] font-semibold text-lg">Немає записів за {formatFilterDateLabel(filterDate)}</p>
+                      <p className="text-base text-[#9CA3AF] mt-1">Оберіть іншу дату або перегляньте всі матчі</p>
+                      <button
+                        onClick={() => setTableFilter('all')}
+                        className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors"
+                      >
+                        Показати всі матчі
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[#111827] font-semibold text-lg">Поки що немає записів</p>
+                      <p className="text-base text-[#9CA3AF] mt-1">Додайте свій перший запис, щоб почати відстеження</p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
