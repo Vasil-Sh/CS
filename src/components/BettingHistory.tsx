@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -174,48 +173,47 @@ export default function BettingHistory() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Filters Card - Updated Design */}
-        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white/80 backdrop-blur-sm overflow-hidden">
-          <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-3 text-lg font-normal text-[#2D2D2D]">
-                <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                  <Filter className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
-                </div>
-                Фільтри
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="rounded-[20px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal"
-              >
-                {showAdvancedFilters ? (
-                  <>
-                    <ChevronUp className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                    Приховати розширені
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                    Розширені фільтри
-                  </>
-                )}
-              </Button>
+        {/* Filters */}
+        <div
+          className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        >
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
+            <div className="flex items-center gap-3">
+              <Filter className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Фільтри</span>
             </div>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-9 px-4"
+            >
+              {showAdvancedFilters ? (
+                <>
+                  <ChevronUp className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Приховати
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Розширені
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="p-6 space-y-5">
             {/* Basic Filters */}
             <div>
-              <p className="text-sm font-normal text-[#2D2D2D] mb-3 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
+              <p className="text-sm font-semibold text-[#6B7280] uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
                 Основні фільтри
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Результат:</label>
+                  <label className="text-sm font-medium text-[#374151] mb-2 block">Результат:</label>
                   <Select value={resultFilter} onValueChange={(value: 'all' | 'Win' | 'Loss' | 'Pending') => setResultFilter(value)}>
-                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
+                    <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white h-10">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -228,9 +226,9 @@ export default function BettingHistory() {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Період:</label>
+                  <label className="text-sm font-medium text-[#374151] mb-2 block">Період:</label>
                   <Select value={periodFilter} onValueChange={(value: 'all' | 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
-                    <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
+                    <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white h-10">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -246,16 +244,16 @@ export default function BettingHistory() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-              <div className="pt-4 border-t border-[#E8E6DC]">
-                <p className="text-sm font-normal text-[#2D2D2D] mb-3 flex items-center gap-2">
-                  <Target className="h-4 w-4 text-[#6B6B6B]" strokeWidth={1.5} />
+              <div className="pt-5 border-t border-[#F3F4F6]">
+                <p className="text-sm font-semibold text-[#6B7280] uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
                   Розширені фільтри
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Тип прогнозу:</label>
+                    <label className="text-sm font-medium text-[#374151] mb-2 block">Тип прогнозу:</label>
                     <Select value={betTypeFilter} onValueChange={setBetTypeFilter}>
-                      <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
+                      <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -268,9 +266,9 @@ export default function BettingHistory() {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-light text-[#2D2D2D] mb-2 block">Сортування:</label>
+                    <label className="text-sm font-medium text-[#374151] mb-2 block">Сортування:</label>
                     <Select value={sortBy} onValueChange={(value: 'date' | 'profit' | 'odds') => setSortBy(value)}>
-                      <SelectTrigger className="rounded-[24px] border-[#E8E6DC] bg-white">
+                      <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white h-10">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -283,110 +281,117 @@ export default function BettingHistory() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Stats Cards - Updated Design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Відфільтровано записів</p>
-                  <p className="text-4xl font-light text-[#2D2D2D] tracking-tight">{filteredBets.length}</p>
-                </div>
-                <div className="p-3 bg-[#BBDEFB]/30 rounded-[20px]">
-                  <BarChart3 className="h-7 w-7 text-[#1976D2]" strokeWidth={1.5} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Win Rate</p>
-                  <p className="text-4xl font-light text-[#4CAF50] tracking-tight">{winRate}%</p>
-                </div>
-                <div className="p-3 bg-[#C8E6C9]/30 rounded-[20px]">
-                  <Trophy className="h-7 w-7 text-[#4CAF50]" strokeWidth={1.5} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-            <CardContent className="pt-6 pb-6 px-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider mb-2">Профіт</p>
-                  <p className={`text-4xl font-light tracking-tight ${totalProfit >= 0 ? 'text-[#FF9800]' : 'text-[#D32F2F]'}`}>
-                    {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
-                  </p>
-                </div>
-                <div className={`p-3 rounded-[20px] ${totalProfit >= 0 ? 'bg-[#FFE0B2]/30' : 'bg-[#FFCDD2]/30'}`}>
-                  {totalProfit >= 0 ? (
-                    <TrendingUp className="h-7 w-7 text-[#FF9800]" strokeWidth={1.5} />
-                  ) : (
-                    <TrendingDown className="h-7 w-7 text-[#D32F2F]" strokeWidth={1.5} />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
-        {/* Betting History Table - Updated Design */}
-        <Card className="border-[1.5px] border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[32px] bg-white overflow-hidden">
-          <CardHeader className="bg-[#FAFAF8] border-b border-[#E8E6DC] pb-4">
-            <CardTitle className="flex items-center justify-between text-xl font-normal text-[#2D2D2D]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#F4E157] rounded-[20px]">
-                  <Zap className="h-5 w-5 text-[#2D2D2D]" strokeWidth={1.5} />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  <span className="text-lg font-semibold text-[#111827]">Записів</span>
                 </div>
-                <span>Історія записів</span>
+                <p className="text-4xl font-bold text-[#111827] tracking-tight">{filteredBets.length}</p>
               </div>
-              <Badge className="rounded-[20px] bg-[#F4E157] text-[#2D2D2D] border-0 text-base px-4 py-1 font-normal">
-                {sortedBets.length} записів
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
+            </div>
+          </div>
+          
+          <div
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  <span className="text-lg font-semibold text-[#111827]">Win Rate</span>
+                </div>
+                <p className="text-4xl font-bold text-[#22C55E] tracking-tight">{winRate}%</p>
+              </div>
+            </div>
+          </div>
+          
+          <div
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  {totalProfit >= 0 ? (
+                    <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  ) : (
+                    <TrendingDown className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  )}
+                  <span className="text-lg font-semibold text-[#111827]">Профіт</span>
+                </div>
+                <p className={`text-4xl font-bold tracking-tight ${totalProfit >= 0 ? 'text-[#111827]' : 'text-[#EF4444]'}`}>
+                  {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} ₴
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {totalProfit >= 0 ? (
+                  <TrendingUp className="h-5 w-5 text-[#22C55E]" strokeWidth={2} />
+                ) : (
+                  <TrendingDown className="h-5 w-5 text-[#EF4444]" strokeWidth={2} />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Betting History Table */}
+        <div
+          className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        >
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Історія записів</span>
+            </div>
+            <Badge className="rounded-full bg-[#F3F4F6] text-[#6B7280] border-0 text-sm font-medium px-3 py-0.5 hover:bg-[#F3F4F6]">
+              {sortedBets.length} записів
+            </Badge>
+          </div>
+          <div className="px-0 pb-6">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F4E157] mx-auto mb-4"></div>
-                <p className="text-[#6B6B6B] font-normal">Завантаження...</p>
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#111827] mx-auto mb-4"></div>
+                <p className="text-[#6B7280] font-medium">Завантаження...</p>
               </div>
             ) : sortedBets.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-[#E8E6DC]">
-                      <th className="text-center p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('date')}>
-                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                    <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors" onClick={() => toggleSort('date')}>
+                        <div className="flex items-center justify-center gap-2">
                           Дата
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-center p-4 min-w-[200px] border-r border-[#E8E6DC]">
-                        <div className="text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
-                          Матч
-                        </div>
+                      <th className="text-left px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider min-w-[200px] border-l border-[#E5E7EB]">
+                        Матч
                       </th>
-                      <th className="text-center p-4 w-48 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Тип</th>
-                      <th className="text-center p-4 w-24 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Валюта</th>
-                      <th className="text-center p-4 w-28 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Сума</th>
-                      <th className="text-center p-4 w-24 cursor-pointer hover:bg-[#FAFAF8] transition-colors border-r border-[#E8E6DC]" onClick={() => toggleSort('odds')}>
-                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Тип</th>
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Валюта</th>
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Сума</th>
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors border-l border-[#E5E7EB]" onClick={() => toggleSort('odds')}>
+                        <div className="flex items-center justify-center gap-2">
                           Коеф.
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
                       </th>
-                      <th className="text-center p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Ціль</th>
-                      <th className="text-center p-4 w-32 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider border-r border-[#E8E6DC]">Статус</th>
-                      <th className="text-center p-4 w-32 cursor-pointer hover:bg-[#FAFAF8] transition-colors" onClick={() => toggleSort('profit')}>
-                        <div className="flex items-center justify-center gap-2 text-xs font-normal text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Ціль</th>
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Статус</th>
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors border-l border-[#E5E7EB]" onClick={() => toggleSort('profit')}>
+                        <div className="flex items-center justify-center gap-2">
                           Профіт
                           <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
                         </div>
@@ -397,80 +402,76 @@ export default function BettingHistory() {
                     {sortedBets.map((bet, index) => {
                       const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
                       const displayMatch = bet.match || `${bet.team1} vs ${bet.team2}`;
+                      const isWin = bet.result === 'Win';
+                      const isLoss = bet.result === 'Loss';
                       
                       return (
                         <tr 
                           key={index} 
-                          className="bg-white border-b border-[#E8E6DC] hover:bg-[#FAFAF8] transition-all"
+                          className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors duration-150"
                         >
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <span className="text-sm font-normal text-[#2D2D2D]">{bet.date}</span>
+                          <td className="px-4 py-4 text-center">
+                            <span className="text-base text-[#374151] font-medium">{bet.date}</span>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <div className="space-y-2">
-                              <div className="font-normal text-base truncate text-[#2D2D2D]" title={displayMatch}>{displayMatch}</div>
+                          <td className="px-4 py-4 border-l border-[#F3F4F6]">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-base text-[#111827] truncate" title={displayMatch}>{displayMatch}</div>
                               {!isExpress && (
-                                <div className="text-xs truncate text-[#6B6B6B] font-light" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
+                                <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType.split(' - ')[0]}>{bet.betType.split(' - ')[0]}</div>
                               )}
-                              <Badge className="text-xs rounded-[12px] bg-[#E1BEE7] text-[#7B1FA2] border-0 font-normal">
+                              <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
                                 {bet.format}
                               </Badge>
                             </div>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                             {isExpress ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <Badge className="rounded-[16px] bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 font-normal text-sm px-3 py-1 whitespace-nowrap">
+                              <div className="flex flex-col items-center gap-1.5">
+                                <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">
                                   Express {bet.format}
                                 </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
+                                <button
                                   onClick={() => handleExpressDetailsClick(bet)}
-                                  className="rounded-[16px] border-[#E8E6DC] hover:bg-[#F5F5F3] font-normal text-[#2D2D2D] text-xs px-2 py-1 h-7 whitespace-nowrap"
+                                  className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200"
                                 >
-                                  <Eye className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                  Показати
-                                </Button>
+                                  <Eye className="h-3 w-3 mr-1 inline" strokeWidth={1.5} />
+                                  Деталі
+                                </button>
                               </div>
                             ) : (
-                              <Badge className="rounded-[12px] bg-[#BBDEFB] text-[#1976D2] border-0 font-normal text-xs px-2 py-1 max-w-[180px] truncate" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                              <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                                 {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <Badge className="rounded-[12px] bg-[#B2EBF2] text-[#00838F] border-0 font-normal text-sm px-3 py-1">
-                              {bet.currency || 'UAH'}
-                            </Badge>
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                            <span className="text-base text-[#6B7280] font-medium">{bet.currency || 'UAH'}</span>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <span className="font-normal text-base text-[#2D2D2D]">₴{bet.amount}</span>
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                            <span className="text-base font-semibold text-[#111827]">₴{bet.amount}</span>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <Badge className="rounded-[12px] bg-[#FFE0B2] text-[#E65100] border-0 font-normal text-base px-3 py-1">
-                              {bet.odds.toFixed(2)}
-                            </Badge>
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                            <span className="text-base font-bold text-[#111827]">{bet.odds.toFixed(2)}</span>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
-                            <span className="font-light text-xs text-[#6B6B6B] truncate max-w-[120px] block mx-auto" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                            <span className="text-sm text-[#9CA3AF] truncate max-w-[120px] block mx-auto" title={bet.goalId || '—'}>{bet.goalId || '—'}</span>
                           </td>
-                          <td className="p-4 text-center border-r border-[#E8E6DC]">
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                             <Badge 
-                              className={`rounded-[12px] border-0 font-normal text-sm px-3 py-1 ${
-                                bet.result === 'Win' 
-                                  ? 'bg-[#C8E6C9] text-[#2E7D32]' 
-                                  : bet.result === 'Loss' 
-                                  ? 'bg-[#FFCDD2] text-[#C62828]' 
-                                  : 'bg-[#FFF9C4] text-[#F57F17]'
+                              className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${
+                                isWin 
+                                  ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' 
+                                  : isLoss 
+                                  ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' 
+                                  : 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'
                               }`}
                             >
-                              {bet.result === 'Win' ? 'Виграш' : bet.result === 'Loss' ? 'Програш' : 'Очікується'}
+                              {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
                             </Badge>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                             {bet.profit !== undefined && (
-                              <span className={`font-normal text-base ${bet.profit >= 0 ? 'text-[#4CAF50]' : 'text-[#D32F2F]'}`}>
+                              <span className={`text-base font-bold ${bet.profit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                                 {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
                               </span>
                             )}
@@ -482,15 +483,16 @@ export default function BettingHistory() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="p-6 bg-[#F5F5F3] rounded-[32px] inline-block mb-4">
-                  <Calendar className="h-16 w-16 text-[#8B8B8B]" strokeWidth={1.5} />
+              <div className="text-center py-16">
+                <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#F3F4F6] mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
                 </div>
-                <p className="text-[#2D2D2D] font-normal text-lg">Немає записів за обраними фільтрами</p>
+                <p className="text-[#111827] font-semibold text-lg">Немає записів за обраними фільтрами</p>
+                <p className="text-base text-[#9CA3AF] mt-1">Спробуйте змінити параметри фільтрації</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {selectedExpressBet && (
           <ExpressDetailsModal
