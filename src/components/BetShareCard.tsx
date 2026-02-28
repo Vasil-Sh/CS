@@ -150,41 +150,64 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
 
   const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
 
-  // More vibrant, saturated colors for better visibility
-  const statusColor = isWin ? '#16A34A' : isLoss ? '#DC2626' : '#2563EB';
-  const statusBg = isWin ? '#BBF7D0' : isLoss ? '#FECACA' : '#BFDBFE';
-  const statusBorder = isWin ? '#86EFAC' : isLoss ? '#FCA5A5' : '#93C5FD';
+  // "Soft Emerald" palette for Win, keep Loss/Pending distinct
+  const statusColor = isWin ? '#10B981' : isLoss ? '#DC2626' : '#2563EB';
   const statusText = isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується';
+
+  // Loss and Pending keep colored backgrounds; Win uses outline style
+  const lossBg = '#FECACA';
+  const lossBorder = '#FCA5A5';
+  const pendingBg = '#BFDBFE';
+  const pendingBorder = '#93C5FD';
 
   return (
     <div className="w-full">
-      {/* Status Header */}
-      <div 
-        className="flex items-center justify-between px-5 py-4 rounded-2xl mb-4"
-        style={{ backgroundColor: statusBg, border: `1.5px solid ${statusBorder}` }}
-      >
-        <div className="flex items-center gap-3">
-          <div 
-            className="flex items-center justify-center w-10 h-10 rounded-xl"
-            style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
-          >
-            {isWin ? (
-              <Trophy className="h-5 w-5" style={{ color: statusColor }} strokeWidth={1.5} />
-            ) : isLoss ? (
-              <TrendingDown className="h-5 w-5" style={{ color: statusColor }} strokeWidth={1.5} />
-            ) : (
-              <Target className="h-5 w-5" style={{ color: statusColor }} strokeWidth={1.5} />
-            )}
+      {/* Status Header - Win: outline style; Loss/Pending: filled */}
+      {isWin ? (
+        <div 
+          className="flex items-center justify-between px-5 py-3 rounded-2xl mb-4"
+          style={{ backgroundColor: '#FFFFFF', border: '1.5px solid #10B981' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#ECFDF5]">
+              <Trophy className="h-4.5 w-4.5" style={{ color: '#10B981' }} strokeWidth={1.5} />
+            </div>
+            <span className="font-semibold text-base" style={{ color: '#10B981' }}>{statusText}</span>
           </div>
-          <span className="font-bold text-lg" style={{ color: statusColor }}>{statusText}</span>
+          <div className="flex items-center gap-1.5 text-sm font-medium text-[#6B7280] bg-[#F9FAFB] px-3 py-1.5 rounded-full border border-[#E5E7EB]">
+            <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <span>{bet.date}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-sm font-medium text-[#6B7280] bg-white px-3 py-1.5 rounded-full border border-[#E5E7EB]">
-          <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          <span>{bet.date}</span>
+      ) : (
+        <div 
+          className="flex items-center justify-between px-5 py-4 rounded-2xl mb-4"
+          style={{ 
+            backgroundColor: isLoss ? lossBg : pendingBg, 
+            border: `1.5px solid ${isLoss ? lossBorder : pendingBorder}` 
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="flex items-center justify-center w-10 h-10 rounded-xl"
+              style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}
+            >
+              {isLoss ? (
+                <TrendingDown className="h-5 w-5" style={{ color: statusColor }} strokeWidth={1.5} />
+              ) : (
+                <Target className="h-5 w-5" style={{ color: statusColor }} strokeWidth={1.5} />
+              )}
+            </div>
+            <span className="font-bold text-lg" style={{ color: statusColor }}>{statusText}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm font-medium text-[#6B7280] bg-white px-3 py-1.5 rounded-full border border-[#E5E7EB]">
+            <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <span>{bet.date}</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Match Name */}
+      {/* Match Name - ALWAYS neutral gray, never colored */}
       <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-2xl px-5 py-4 mb-4 text-center">
         <h3 className="text-xl font-semibold text-[#111827] tracking-tight">
           {matchName}
@@ -202,7 +225,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             className="w-full flex items-center justify-between py-3.5 px-5 bg-[#F9FAFB] hover:bg-[#F3F4F6] transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              {isWin && <CheckCircle2 className="h-4 w-4 text-[#16A34A]" strokeWidth={1.5} />}
+              {isWin && <CheckCircle2 className="h-4 w-4 text-[#10B981]" strokeWidth={1.5} />}
               <p className="text-sm font-semibold text-[#374151] uppercase tracking-wide">
                 Експрес {bet.format}
               </p>
@@ -239,8 +262,12 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                         <BlurReveal isPending={isPending}>{event.selection}</BlurReveal>
                       </p>
                       <Badge 
-                        className="text-xs font-semibold rounded-full border-0 hover:opacity-100"
-                        style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}
+                        className="text-xs font-semibold rounded-full hover:opacity-100"
+                        style={{ 
+                          backgroundColor: isWin ? '#ECFDF5' : isLoss ? lossBg : pendingBg, 
+                          color: statusColor,
+                          border: `1px solid ${isWin ? '#A7F3D0' : isLoss ? lossBorder : pendingBorder}`
+                        }}
                       >
                         {event.odds}
                       </Badge>
@@ -254,11 +281,14 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
       ) : selection && (
         <div 
           className="px-5 py-4 rounded-2xl mb-4 text-center"
-          style={{ backgroundColor: statusBg, border: `1.5px solid ${statusBorder}` }}
+          style={{ 
+            backgroundColor: isWin ? '#ECFDF5' : isLoss ? lossBg : pendingBg, 
+            border: `1.5px solid ${isWin ? '#A7F3D0' : isLoss ? lossBorder : pendingBorder}` 
+          }}
         >
           <div className="flex items-center justify-center gap-2 mb-1.5">
-            {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: statusColor }} strokeWidth={1.5} />}
-            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: statusColor + 'BB' }}>
+            {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: '#10B981' }} strokeWidth={1.5} />}
+            <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wide">
               {betCategory}
             </p>
           </div>
@@ -268,7 +298,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         </div>
       )}
 
-      {/* Amount & Odds Grid */}
+      {/* Amount & Odds Grid - always neutral */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="text-center p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
           <div className="flex items-center justify-center gap-1.5 mb-1.5">
@@ -290,14 +320,17 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         </div>
       </div>
 
-      {/* Profit */}
+      {/* Profit - THE BIGGEST element for Win, uses light mint bg */}
       {!isPending && displayProfit !== undefined && displayProfit !== null && (
         <div 
-          className="p-5 rounded-2xl mb-4 text-center"
-          style={{ backgroundColor: statusBg, border: `1.5px solid ${statusBorder}` }}
+          className="p-6 rounded-2xl mb-4 text-center"
+          style={{ 
+            backgroundColor: isWin ? '#ECFDF5' : lossBg, 
+            border: `1.5px solid ${isWin ? '#A7F3D0' : lossBorder}` 
+          }}
         >
-          <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: statusColor + 'BB' }}>Профіт</p>
-          <p className="text-3xl font-bold tracking-tight" style={{ color: statusColor }}>
+          <p className="text-xs font-medium mb-2 uppercase tracking-wide text-[#9CA3AF]">Профіт</p>
+          <p className="text-4xl font-extrabold tracking-tight" style={{ color: statusColor }}>
             {displayProfit > 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
           </p>
         </div>
@@ -306,11 +339,11 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
       {/* Pending - Possible Win */}
       {isPending && (
         <div 
-          className="p-5 rounded-2xl mb-4 text-center"
-          style={{ backgroundColor: statusBg, border: `1.5px solid ${statusBorder}` }}
+          className="p-6 rounded-2xl mb-4 text-center"
+          style={{ backgroundColor: pendingBg, border: `1.5px solid ${pendingBorder}` }}
         >
-          <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: statusColor + 'BB' }}>Можливий виграш</p>
-          <p className="text-3xl font-bold tracking-tight" style={{ color: statusColor }}>
+          <p className="text-xs font-medium mb-2 uppercase tracking-wide text-[#9CA3AF]">Можливий виграш</p>
+          <p className="text-4xl font-extrabold tracking-tight" style={{ color: statusColor }}>
             <BlurReveal isPending={isPending}>
               +{((bet.odds - 1) * displayAmount).toFixed(2)} {currencySymbol}
             </BlurReveal>
@@ -318,11 +351,11 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         </div>
       )}
 
-      {/* Total Amount - only for Win and Pending */}
+      {/* Total Amount - secondary, smaller, gray tones */}
       {!isLoss && (
-        <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
-          <p className="text-xs font-medium text-[#9CA3AF] mb-1.5 uppercase tracking-wide">Загальна сума</p>
-          <p className="text-3xl font-bold text-[#111827] tracking-tight">
+        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
+          <p className="text-xs font-medium text-[#9CA3AF] mb-1 uppercase tracking-wide">Загальна сума</p>
+          <p className="text-xl font-semibold text-[#6B7280] tracking-tight">
             {isPending ? (
               <BlurReveal isPending={isPending}>
                 {totalAmount.toFixed(2)} {currencySymbol}
