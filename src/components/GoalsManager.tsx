@@ -23,7 +23,7 @@ import {
   AlertCircle,
   RefreshCw,
   Info,
-
+  Eye,
   Star,
   AlertTriangle,
   ChevronDown,
@@ -283,7 +283,15 @@ export default function GoalsManager() {
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
   const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserData(currentUser, 'goals', u); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
-  const setPrimaryGoal = (goalId: string) => { setGoals(goals.map(g => ({ ...g, isPrimary: g.id === goalId }))); toast.success('Головна ціль змінена'); };
+  const setPrimaryGoal = (goalId: string) => {
+    if (goals.find(g => g.id === goalId)?.isPrimary) {
+      setGoals(goals.map(g => ({ ...g, isPrimary: g.id === goalId ? false : g.isPrimary })));
+      toast.success('Головну ціль скасовано');
+    } else {
+      setGoals(goals.map(g => ({ ...g, isPrimary: g.id === goalId })));
+      toast.success('Головна ціль змінена');
+    }
+  };
   const openDetailsDialog = (goal: Goal) => { setSelectedGoal(goal); setShowDetailsDialog(true); setIsStepsCalculationExpanded(false); setIsLadderOverviewExpanded(true); setIsStepsProgressionExpanded(true); };
   const openCompletedGoalResult = (goal: Goal) => { setSelectedGoal(goal); setShowCompletedResultModal(true); };
 
@@ -387,9 +395,7 @@ export default function GoalsManager() {
         </div>
       </div>
 
-
-
-      {/* Tabs — matching Analytics navigation style with rounded-[32px] */}
+      {/* Tabs */}
       <div className="space-y-5">
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-2 gap-3">
@@ -415,7 +421,7 @@ export default function GoalsManager() {
           </div>
         </div>
 
-        {/* Active Tab — 3 cards in a row with hover scale effect */}
+        {/* Active Tab */}
         {activeTab === 'active' && (
           <div>
             {activeGoals.length === 0 ? (
@@ -439,10 +445,11 @@ export default function GoalsManager() {
                   const keyMetric = getKeyMetric(goal);
                   const discipline = getDisciplineStatus(goal);
                   const hint = getNextBetHint(goal);
+                  const isPrimary = goal.isPrimary;
 
                   return (
                     <Card key={goal.id}
-                      className="border border-[#E5E7EB] rounded-3xl bg-white"
+                      className={`rounded-3xl bg-white transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E5E7EB]'}`}
                       style={cardBaseStyle}
                       onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -464,23 +471,14 @@ export default function GoalsManager() {
                                 <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">
                                   {getGoalTypeLabel(goal.type)}
                                 </Badge>
-                                {goal.isPrimary && (
-                                  <Badge className="bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] rounded-xl text-xs px-1.5 py-0 font-medium">
-                                    <Star className="h-3 w-3" strokeWidth={1.5} />
+                                {isPrimary && (
+                                  <Badge className="bg-[#EFF6FF] text-[#3B82F6] border-0 rounded-xl text-xs px-1.5 py-0 font-medium">
+                                    <Star className="h-3 w-3 fill-[#3B82F6]" strokeWidth={1.5} />
+                                    <span className="ml-0.5">Основна</span>
                                   </Badge>
                                 )}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-0.5 flex-shrink-0">
-                            {!goal.isPrimary && (
-                              <Button variant="ghost" size="sm" onClick={() => setPrimaryGoal(goal.id)} className="h-7 w-7 p-0 rounded-xl hover:bg-[#F3F4F6]" title="Зробити головною">
-                                <Star className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="sm" onClick={() => confirmDeleteGoal(goal.id)} className="text-[#D1D5DB] hover:text-[#EF4444] hover:bg-[#FEF2F2] h-7 w-7 p-0 rounded-xl">
-                              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                            </Button>
                           </div>
                         </div>
 
@@ -540,13 +538,35 @@ export default function GoalsManager() {
                           </CollapsibleContent>
                         </Collapsible>
 
-                        {/* Details button for ladder — BLUE color with shadow */}
-                        {goal.type === 'ladder' && (
-                          <Button onClick={() => openDetailsDialog(goal)}
-                            className="w-full !h-auto rounded-[24px] bg-[#447afc] hover:bg-[#5b8ffd] text-white font-normal px-5 py-4 text-base mt-3 shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
-                            Деталі цілі
+                        {/* Action Buttons — row with Details + Star + Trash (like StrategyOverview) */}
+                        <div className="flex gap-2 mt-3">
+                          {goal.type === 'ladder' ? (
+                            <Button onClick={() => openDetailsDialog(goal)}
+                              variant="outline"
+                              className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]">
+                              <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                              Деталі
+                            </Button>
+                          ) : (
+                            <div className="flex-1" />
+                          )}
+                          <Button
+                            onClick={() => setPrimaryGoal(goal.id)}
+                            variant="outline"
+                            size="sm"
+                            className={`rounded-xl font-medium ${isPrimary ? 'border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF] hover:bg-[#DBEAFE]' : 'border-[#E5E7EB] hover:bg-[#F9FAFB]'}`}
+                          >
+                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#3B82F6]' : ''}`} strokeWidth={1.5} />
                           </Button>
-                        )}
+                          <Button
+                            onClick={() => confirmDeleteGoal(goal.id)}
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
@@ -556,7 +576,7 @@ export default function GoalsManager() {
           </div>
         )}
 
-        {/* Completed Tab — with hover scale effect */}
+        {/* Completed Tab */}
         {activeTab === 'completed' && (
           <div>
             {completedGoals.length === 0 ? (
@@ -573,28 +593,23 @@ export default function GoalsManager() {
               <div className="grid grid-cols-3 gap-6">
                 {completedGoals.map(goal => (
                   <Card key={goal.id}
-                    className="border border-[#BBF7D0] rounded-3xl bg-white cursor-pointer"
+                    className="border border-[#BBF7D0] rounded-3xl bg-white"
                     style={cardBaseStyle}
                     onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                     onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-                    onClick={() => openCompletedGoalResult(goal)}
                   >
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between mb-3">
                         <div className="p-2 bg-[#F0FDF4] rounded-2xl">
                           <Trophy className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
                         </div>
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); confirmDeleteGoal(goal.id); }}
-                          className="text-[#D1D5DB] hover:text-[#EF4444] hover:bg-[#FEF2F2] h-7 w-7 p-0 rounded-xl">
-                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                        </Button>
+                        <Badge className="bg-[#22C55E] text-white border-0 rounded-xl text-xs px-2.5 py-0.5 font-medium">
+                          <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                          Завершено
+                        </Badge>
                       </div>
                       <h4 className="text-base font-semibold text-[#111827] line-clamp-2 mb-2">{goal.name}</h4>
-                      <Badge className="bg-[#22C55E] text-white border-0 rounded-xl text-xs px-2.5 py-0.5 font-medium mb-3">
-                        <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                        Завершено
-                      </Badge>
-                      <div className="space-y-1.5 text-base">
+                      <div className="space-y-1.5 text-base mb-3">
                         <div className="flex items-center justify-between">
                           <span className="text-[#6B7280]">Тип:</span>
                           <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">{getGoalTypeLabel(goal.type)}</Badge>
@@ -604,8 +619,24 @@ export default function GoalsManager() {
                           <span className="font-medium text-[#22C55E]">{goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}</span>
                         </div>
                       </div>
-                      <div className="mt-3 px-5 py-4 bg-[#22C55E] rounded-[24px] border border-[#22C55E] text-center shadow-[0_4px_16px_rgba(34,197,94,0.3)]">
-                        <p className="text-base text-white font-normal">Детальний результат</p>
+                      {/* Action Buttons — same style as Active tab */}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => openCompletedGoalResult(goal)}
+                          variant="outline"
+                          className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]"
+                        >
+                          <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                          Деталі
+                        </Button>
+                        <Button
+                          onClick={() => confirmDeleteGoal(goal.id)}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
+                        >
+                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -750,7 +781,7 @@ export default function GoalsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Details Dialog — ladder — BIGGER cards with shadow */}
+      {/* Details Dialog — ladder */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0"
           style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.15), 0 12px 24px rgba(0,0,0,0.1)' }}>
@@ -768,7 +799,7 @@ export default function GoalsManager() {
 
           {selectedGoal && (
             <div className="space-y-5 px-6 pb-6 pt-5">
-              {/* Summary — BIGGER cards with hover */}
+              {/* Summary */}
               <div className="grid grid-cols-3 gap-6">
                 <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]"
                   style={cardBaseStyle}
@@ -798,7 +829,7 @@ export default function GoalsManager() {
 
               {selectedGoal.type === 'ladder' && selectedGoal.steps && selectedGoal.steps.length > 0 && (
                 <div className="space-y-4">
-                  {/* Ladder Overview — BIGGER */}
+                  {/* Ladder Overview */}
                   <Collapsible open={isLadderOverviewExpanded} onOpenChange={setIsLadderOverviewExpanded}>
                     <Card className="border border-[#E5E7EB] rounded-3xl bg-white"
                       style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>

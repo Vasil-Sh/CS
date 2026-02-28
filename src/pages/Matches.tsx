@@ -23,7 +23,10 @@ import {
   Brain,
   Info,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Sun,
+  Moon,
+  User
 } from 'lucide-react';
 import { fetchAndParseMatches, convertToMatchFormat } from '@/lib/parser/hltvParser';
 import { useToast } from '@/hooks/use-toast';
@@ -255,6 +258,10 @@ const cardHoverStyle = {
 const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
 export default function Matches() {
+  const currentUser = localStorage.getItem('username') || '';
+  const userRole = localStorage.getItem('userRole');
+  const isAdmin = userRole === 'admin';
+
   const [matches, setMatches] = useState<Match[]>(mockMatches);
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'confidence' | 'risk' | 'upset'>('confidence');
@@ -265,6 +272,7 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<'all' | 'Bo1' | 'Bo3' | 'Bo5'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
   
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -277,6 +285,10 @@ export default function Matches() {
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   
   const { toast } = useToast();
+
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+  };
 
   useEffect(() => {
     loadRiskyTeams();
@@ -428,9 +440,53 @@ export default function Matches() {
       <div className="min-h-screen bg-[#f3f3f3] relative">
         {/* ===== HEADER ===== */}
         <div className="px-6 lg:px-8 pt-6 pb-2">
-          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Матчі
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
+              Матчі
+            </h1>
+
+            <div className="flex items-center gap-3">
+              {/* Theme Switcher */}
+              <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
+                <button
+                  onClick={() => { if (isDarkTheme) toggleTheme(); }}
+                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
+                    !isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                  }`}
+                  title="Світла тема"
+                >
+                  <Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+                </button>
+                <button
+                  onClick={() => { if (!isDarkTheme) toggleTheme(); }}
+                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
+                    isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                  }`}
+                  title="Темна тема"
+                >
+                  <Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-8 bg-[#D1D5DB]" />
+
+              {/* User Info */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
+                  <User className="h-4 w-4 text-white" strokeWidth={2} />
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium text-[#111827] leading-tight">
+                    {currentUser || 'User'}
+                  </p>
+                  <p className="text-xs text-[#6B7280] leading-tight">
+                    {isAdmin ? 'Адміністратор' : 'Користувач'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">

@@ -16,7 +16,8 @@ import {
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
   Flag, Wallet, Eye, ChevronDown, ChevronUp,
   Plus, History, LineChart, ArrowUpRight, ArrowDownRight,
-  MoreHorizontal, Pencil, RefreshCw
+  MoreHorizontal, Pencil, RefreshCw,
+  Sun, Moon, User
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -28,7 +29,7 @@ interface Goal {
   status: 'active' | 'completed' | 'failed';
 }
 
-interface User {
+interface UserRecord {
   telegram: string;
   username: string;
   isAdmin?: boolean;
@@ -73,6 +74,8 @@ const cardHoverStyle: React.CSSProperties = {
 
 export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
+  const userRole = localStorage.getItem('userRole');
+  const isAdminRole = userRole === 'admin';
   
   const [stats, setStats] = useState<BetStats>(() => 
     UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)
@@ -90,11 +93,12 @@ export default function MyBets() {
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [isTableExpanded, setIsTableExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState('add');
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const [bankrollStats, setBankrollStats] = useState(() => {
     return BankrollService.getBankrollStats(currentUser, recentBets);
@@ -103,6 +107,10 @@ export default function MyBets() {
   const isBankrollInitialized = useMemo(() => {
     return BankrollService.isInitialized(currentUser);
   }, [currentUser, bankrollRefreshKey]);
+
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+  };
 
   useEffect(() => {
     const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
@@ -148,7 +156,7 @@ export default function MyBets() {
       const text = await response.text();
       
       const rows = text.split('\n').slice(1);
-      const parsedUsers: User[] = rows
+      const parsedUsers: UserRecord[] = rows
         .filter(row => row.trim())
         .map(row => {
           const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
@@ -164,7 +172,7 @@ export default function MyBets() {
             isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes' || isAdminStr === 'так'
           };
         })
-        .filter((user): user is User => user !== null);
+        .filter((user): user is UserRecord => user !== null);
       
       setUsers(parsedUsers);
     } catch (err) {
@@ -446,6 +454,46 @@ export default function MyBets() {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Theme Switcher */}
+            <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
+              <button
+                onClick={() => { if (isDarkTheme) toggleTheme(); }}
+                className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
+                  !isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                }`}
+                title="Світла тема"
+              >
+                <Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+              </button>
+              <button
+                onClick={() => { if (!isDarkTheme) toggleTheme(); }}
+                className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
+                  isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                }`}
+                title="Темна тема"
+              >
+                <Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-8 bg-[#D1D5DB]" />
+
+            {/* User Info */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
+                <User className="h-4 w-4 text-white" strokeWidth={2} />
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-sm font-medium text-[#111827] leading-tight">
+                  {currentUser || 'User'}
+                </p>
+                <p className="text-xs text-[#6B7280] leading-tight">
+                  {isAdminRole ? 'Адміністратор' : 'Користувач'}
+                </p>
+              </div>
             </div>
           </div>
         </div>

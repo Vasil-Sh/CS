@@ -105,8 +105,8 @@ export default function Layout() {
             </h1>
           </div>
 
-          {/* Divider line under MatchIQ */}
-          <div className="border-t-2 border-[#E8E6DC]" />
+          {/* Divider line under MatchIQ — full width */}
+          <div className="-mx-8 border-t-2 border-[#E8E6DC]" />
 
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-8">
@@ -168,8 +168,8 @@ export default function Layout() {
                   </h1>
                 </div>
 
-                {/* Divider line under MatchIQ mobile */}
-                <div className="border-t-2 border-[#E8E6DC] mt-2" />
+                {/* Divider line under MatchIQ mobile — full width */}
+                <div className="-mx-6 border-t-2 border-[#E8E6DC] mt-2" />
 
                 <nav className="mt-8">
                   <ul className="space-y-2">
