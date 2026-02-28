@@ -11,14 +11,16 @@ interface BetShareModalProps {
 export default function BetShareModal({ bet, open, onClose }: BetShareModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 gap-0 bg-white border border-[#E5E7EB] shadow-[0_20px_60px_rgba(0,0,0,0.15)] rounded-2xl">
+      <DialogContent className="max-w-lg p-0 gap-0 bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB] bg-[#F9FAFB] rounded-t-2xl">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6] bg-[#F9FAFB]">
           <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Поділитися</h2>
         </div>
 
         {/* Card preview */}
-        <div className="p-8" id="bet-share-card">
+        <div className="p-6" id="bet-share-card">
           <BetShareCard bet={bet} />
         </div>
       </DialogContent>

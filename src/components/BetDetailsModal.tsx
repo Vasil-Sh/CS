@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import type { Bet } from '@/types/betting';
@@ -221,26 +221,36 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-[1.5px] border-[#E8E6DC] shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[40px] bg-white">
-        <DialogHeader className="border-b border-[#E8E6DC] pb-4 bg-[#FAFAF8] -mx-6 -mt-6 px-6 pt-6 rounded-t-[40px]">
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl bg-white p-0"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12)' }}
+      >
+        <DialogHeader className="border-b border-[#F3F4F6] px-6 py-5 bg-[#F9FAFB] rounded-t-3xl">
           <DialogTitle>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-normal text-[#2D2D2D]">Текст для Telegram</h2>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <FileText className="h-4.5 w-4.5 text-[#3B82F6]" strokeWidth={1.5} />
+              </div>
+              <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Текст для Telegram</h2>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 pt-2">
+        <div className="px-6 py-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-normal text-[#6B6B6B] uppercase tracking-wide">Формат тексту</h3>
+            <span className="text-sm font-medium text-[#9CA3AF] uppercase tracking-wide">Формат тексту</span>
             <Button
               onClick={handleCopyToClipboard}
               size="sm"
-              className="rounded-[20px] bg-[#F4E157] hover:bg-[#E8D54A] text-[#2D2D2D] font-normal shadow-[0_2px_8px_rgba(244,225,87,0.3)]"
+              className={`rounded-xl text-sm font-medium h-9 px-4 transition-all duration-200 ${
+                copied 
+                  ? 'bg-[#DCFCE7] hover:bg-[#DCFCE7] text-[#16A34A] border border-[#86EFAC]' 
+                  : 'bg-[#111827] hover:bg-[#1F2937] text-white'
+              }`}
             >
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  <Check className="h-4 w-4 mr-2" strokeWidth={2} />
                   Скопійовано
                 </>
               ) : (
@@ -255,10 +265,11 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
             ref={textareaRef}
             value={editableText}
             onChange={(e) => setEditableText(e.target.value)}
-            className="min-h-[350px] font-mono text-sm bg-[#FAFAF8] border-[1.5px] border-[#E8E6DC] rounded-[24px] p-4 resize-none focus:ring-2 focus:ring-[#F4E157] focus:border-[#F4E157]"
+            className="min-h-[320px] font-mono text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-4 resize-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all duration-200 text-[#374151]"
           />
-          <p className="text-xs text-[#6B6B6B] font-light italic">
-            💡 Ви можете відредагувати текст перед копіюванням. {!isExpressBet && !bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
+          <p className="text-xs text-[#9CA3AF] font-normal">
+            💡 Ви можете відредагувати текст перед копіюванням.{' '}
+            {!isExpressBet && !bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
           </p>
         </div>
       </DialogContent>
