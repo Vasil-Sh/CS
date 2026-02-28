@@ -972,7 +972,7 @@ export default function StrategyOverview() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
+                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
                           <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={30}>
                             {roiChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} opacity={0.9} />
@@ -1001,7 +1001,7 @@ export default function StrategyOverview() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Win Rate']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
+                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Win Rate']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
                           <Bar dataKey="value" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={30} opacity={0.9} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1026,7 +1026,7 @@ export default function StrategyOverview() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
+                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
                           <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={30}>
                             {profitChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.value >= 0 ? '#22C55E' : '#EF4444'} opacity={0.9} />
