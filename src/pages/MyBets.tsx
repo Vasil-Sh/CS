@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CS2BettingForm from '@/components/CS2BettingForm';
 import BettingHistory from '@/components/BettingHistory';
@@ -16,7 +15,7 @@ import {
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
   Flag, Wallet, Eye, ChevronDown, ChevronUp,
   Plus, History, LineChart, ArrowUpRight, ArrowDownRight,
-  MoreHorizontal, Pencil, RefreshCw,
+  MoreHorizontal, Pencil,
   Sun, Moon, User
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -414,15 +413,6 @@ export default function MyBets() {
           </h1>
 
           <div className="flex items-center gap-3">
-            <Button
-              onClick={() => { loadStats(); loadRecentBets(); }}
-              variant="outline"
-              className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-10 px-4"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Оновити
-            </Button>
-
             <div className="relative">
               <button
                 onClick={(e) => {
