@@ -222,27 +222,30 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           </h3>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-[#F3F4F6]" />
+        {/* Divider — full width with negative margins */}
+        <div className="-mx-6 border-t border-[#F3F4F6]" />
 
         {/* Express Events or Regular Selection */}
         {isExpress && parsedEvents.length > 0 ? (
           <div>
+            {/* Express header — centered text with chevron on the right */}
             <button
               onClick={() => setIsEventsOpen(!isEventsOpen)}
-              className="w-full flex items-center justify-between py-2 hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-full relative flex items-center justify-center py-2 hover:opacity-80 transition-opacity cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
-                <p className="text-sm font-semibold text-[#374151] uppercase tracking-wide">
+                {isWin && <CheckCircle2 className="h-5 w-5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                <p className="text-lg font-bold text-[#111827] tracking-tight">
                   Експрес {bet.format}
                 </p>
               </div>
-              {isEventsOpen ? (
-                <ChevronUp className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-              )}
+              <span className="absolute right-0 top-1/2 -translate-y-1/2">
+                {isEventsOpen ? (
+                  <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                )}
+              </span>
             </button>
             
             {isEventsOpen && (
@@ -300,8 +303,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
           </div>
         )}
 
-        {/* Divider */}
-        <div className="border-t border-[#F3F4F6]" />
+        {/* Divider — full width with negative margins */}
+        <div className="-mx-6 border-t border-[#F3F4F6]" />
 
         {/* Amount & Odds — compact row */}
         <div className="grid grid-cols-2 gap-3">

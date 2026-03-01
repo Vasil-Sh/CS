@@ -1439,7 +1439,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-[#6B7280] text-center py-4">Ризикових команд не знайдено</p>
+                  <p className="text-sm text-[#6B7280] text-center py-4 flex items-center justify-center gap-2"><Shield className="h-4 w-4 text-[#93C5FD]" strokeWidth={1.5} />Ризикових команд не знайдено</p>
                 )}
               </div>
             </div>

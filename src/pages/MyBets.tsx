@@ -142,7 +142,7 @@ export default function MyBets() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   // Filter state for the table
-  const [tableFilter, setTableFilter] = useState<TableFilterMode>('today');
+  const [tableFilter, setTableFilter] = useState<TableFilterMode>('all');
   const [filterDate, setFilterDate] = useState<string>(getTodayStr());
 
   const [bankrollStats, setBankrollStats] = useState(() => {
