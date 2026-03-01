@@ -792,7 +792,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2 mb-2">
               <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-lg font-semibold text-[#111827]">Win Rate</span>
+              <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">
@@ -1112,12 +1112,12 @@ export default function Analytics() {
                             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                               <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                             </div>
-                            Win Rate & ROI по категоріях коефіцієнтів
+                            Вінрейт & ROI по категоріях коефіцієнтів
                           </span>
                           <div className="flex gap-2">
                             <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
                               <div className="w-2.5 h-2.5 rounded-sm bg-[#111827] mr-1.5" />
-                              Win Rate
+                              Вінрейт
                             </Badge>
                             <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
                               <div className="w-2.5 h-2.5 rounded-sm bg-[#D1D5DB] mr-1.5" />
@@ -1150,7 +1150,7 @@ export default function Analytics() {
                                 padding: '12px'
                               }}
                               formatter={(value: number | string, name: string) => {
-                                if (name === 'winRate') return [`${value}%`, 'Win Rate'];
+                                if (name === 'winRate') return [`${value}%`, 'Вінрейт'];
                                 if (name === 'roi') return [`${value}%`, 'ROI'];
                                 return [value, name];
                               }}
@@ -1158,7 +1158,7 @@ export default function Analytics() {
                             <Legend 
                               wrapperStyle={{ paddingTop: '20px' }}
                               formatter={(value) => {
-                                if (value === 'winRate') return <span style={{ color: '#374151', fontSize: '13px' }}>Win Rate (%)</span>;
+                                if (value === 'winRate') return <span style={{ color: '#374151', fontSize: '13px' }}>Вінрейт (%)</span>;
                                 if (value === 'roi') return <span style={{ color: '#374151', fontSize: '13px' }}>ROI (%)</span>;
                                 return value;
                               }}
@@ -1214,7 +1214,7 @@ export default function Analytics() {
                             {/* Win Rate with progress bar */}
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-[#6B7280]">Win Rate</span>
+                                <span className="text-sm text-[#6B7280]">Вінрейт</span>
                                 <span className={`text-base font-bold ${hasData ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>
                                   {range.winRate}%
                                 </span>

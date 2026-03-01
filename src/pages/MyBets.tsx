@@ -144,7 +144,6 @@ export default function MyBets() {
   // Filter state for the table
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('today');
   const [filterDate, setFilterDate] = useState<string>(getTodayStr());
-  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [bankrollStats, setBankrollStats] = useState(() => {
     return BankrollService.getBankrollStats(currentUser, recentBets);
@@ -650,7 +649,7 @@ export default function MyBets() {
           >
             <div className="flex items-center gap-2 mb-3">
               <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-lg font-semibold text-[#111827]">Win Rate</span>
+              <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
               {stats.winRate}%
@@ -804,31 +803,32 @@ export default function MyBets() {
                 Сьогодні
               </button>
 
-              {/* Date picker - custom button with hidden input */}
+              {/* Date picker - native input styled as button overlay */}
               <div className="relative flex items-center">
-                <input
-                  ref={dateInputRef}
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setFilterDate(e.target.value);
-                      setTableFilter('date');
-                    }
-                  }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  style={{ colorScheme: 'light' }}
-                />
-                <button
-                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 pointer-events-none ${
+                <label
+                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer select-none ${
                     tableFilter === 'date'
                       ? 'bg-white text-[#111827] border-2 border-[#111827] shadow-sm'
-                      : 'bg-white text-[#374151] border border-[#E5E7EB]'
+                      : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
                   }`}
                 >
-                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  {tableFilter === 'date' ? formatDateDisplay(filterDate) : 'Обрати дату'}
-                </button>
+                  <Calendar className="h-3.5 w-3.5 pointer-events-none" strokeWidth={1.5} />
+                  <span className="pointer-events-none">
+                    {tableFilter === 'date' ? formatDateDisplay(filterDate) : 'Обрати дату'}
+                  </span>
+                  <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setFilterDate(e.target.value);
+                        setTableFilter('date');
+                      }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    style={{ colorScheme: 'light' }}
+                  />
+                </label>
                 {tableFilter === 'date' && (
                   <button
                     onClick={(e) => {

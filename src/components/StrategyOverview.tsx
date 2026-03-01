@@ -107,6 +107,18 @@ export default function StrategyOverview() {
   const [sortBy, setSortBy] = useState<'roi' | 'profit' | 'name'>('roi');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Helper to get primary strategy name from id
+  const getPrimaryStrategyName = (): string | null => {
+    if (!primaryStrategy) return null;
+    const found = strategies.find(s => (s.id || s.name) === primaryStrategy);
+    return found ? found.name : primaryStrategy;
+  };
+
+  // Helper to check if a template name already exists in strategies
+  const isTemplateAlreadyCreated = (templateName: string): boolean => {
+    return strategies.some(s => s.name.toLowerCase() === templateName.toLowerCase());
+  };
+
   const [newStrategy, setNewStrategy] = useState({
     name: '',
     description: '',
@@ -144,7 +156,19 @@ export default function StrategyOverview() {
     try {
       const saved = localStorage.getItem('customStrategies');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        let needsSave = false;
+        const migrated = parsed.map((s: CS2Strategy) => {
+          if (!s.id) {
+            needsSave = true;
+            return { ...s, id: crypto.randomUUID() };
+          }
+          return s;
+        });
+        if (needsSave) {
+          localStorage.setItem('customStrategies', JSON.stringify(migrated));
+        }
+        return migrated;
       }
     } catch (error) {
       console.error('Error loading custom strategies:', error);
@@ -374,9 +398,17 @@ export default function StrategyOverview() {
       return;
     }
 
+    // Prevent duplicate strategy names
+    const existingNames = strategies.map(s => s.name.toLowerCase());
+    if (existingNames.includes(newStrategy.name.toLowerCase().trim())) {
+      toast.error('Стратегія з такою назвою вже існує. Оберіть іншу назву.');
+      return;
+    }
+
     const validationRules = parseCriteriaForValidation(validCriteria);
 
     const strategy: CS2Strategy = {
+      id: crypto.randomUUID(),
       name: newStrategy.name,
       description: newStrategy.description,
       criteria: validCriteria,
@@ -405,6 +437,9 @@ export default function StrategyOverview() {
   };
 
   const applyTemplate = (template: StrategyTemplate) => {
+    // Don't apply if already created
+    if (isTemplateAlreadyCreated(template.name)) return;
+    
     setNewStrategy({
       name: template.name,
       description: template.description,
@@ -416,8 +451,8 @@ export default function StrategyOverview() {
     toast.success(`Шаблон "${template.name}" застосовано!`);
   };
 
-  const confirmDeleteStrategy = (strategyName: string) => {
-    setStrategyToDelete(strategyName);
+  const confirmDeleteStrategy = (strategyId: string) => {
+    setStrategyToDelete(strategyId);
     setDeleteDialogOpen(true);
   };
 
@@ -425,7 +460,7 @@ export default function StrategyOverview() {
     if (!strategyToDelete) return;
 
     const customStrategies = loadCustomStrategiesFromStorage();
-    const updatedStrategies = customStrategies.filter(s => s.name !== strategyToDelete);
+    const updatedStrategies = customStrategies.filter(s => (s.id || s.name) !== strategyToDelete);
     saveCustomStrategiesToStorage(updatedStrategies);
 
     setStrategies(updatedStrategies);
@@ -440,15 +475,16 @@ export default function StrategyOverview() {
     setStrategyToDelete(null);
   };
 
-  const togglePrimaryStrategy = (strategyName: string) => {
-    if (primaryStrategy === strategyName) {
+  const togglePrimaryStrategy = (strategy: CS2Strategy) => {
+    const strategyId = strategy.id || strategy.name;
+    if (primaryStrategy === strategyId) {
       setPrimaryStrategy(null);
       localStorage.removeItem('primaryStrategy');
       toast.success('Основну стратегію скасовано');
     } else {
-      setPrimaryStrategy(strategyName);
-      localStorage.setItem('primaryStrategy', strategyName);
-      toast.success(`"${strategyName}" встановлено як основну стратегію!`);
+      setPrimaryStrategy(strategyId);
+      localStorage.setItem('primaryStrategy', strategyId);
+      toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
   };
 
@@ -531,17 +567,18 @@ export default function StrategyOverview() {
       if (stats.winRate < 40 && stats.totalBets > 5) {
         recommendations.push({
           type: 'warning',
-          message: `Win Rate стратегії "${name}" становить ${stats.winRate.toFixed(1)}%. Можливо, варто знизити ризик.`
+          message: `Вінрейт стратегії "${name}" становить ${stats.winRate.toFixed(1)}%. Можливо, варто знизити ризик.`
         });
       }
     });
 
     if (primaryStrategy) {
-      const primaryStats = strategyStats[primaryStrategy];
+      const primaryName = getPrimaryStrategyName();
+      const primaryStats = primaryName ? strategyStats[primaryName] : undefined;
       if (primaryStats && primaryStats.totalBets === 0) {
         recommendations.push({
           type: 'info',
-          message: `Ви встановили "${primaryStrategy}" як основну, але ще не використовували її. Спробуйте зробити першу ставку!`
+          message: `Ви встановили "${getPrimaryStrategyName()}" як основну, але ще не використовували її. Спробуйте зробити першу ставку!`
         });
       }
     }
@@ -734,7 +771,7 @@ export default function StrategyOverview() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredAndSortedStrategies.map((strategy, index) => {
                       const stats = strategyStats[strategy.name] || {} as StrategyStats;
-                      const isPrimary = primaryStrategy === strategy.name;
+                      const isPrimary = primaryStrategy === (strategy.id || strategy.name);
                       
                       return (
                         <div
@@ -773,7 +810,7 @@ export default function StrategyOverview() {
                                 <div className={`text-2xl font-bold ${(stats.winRate || 0) >= 50 ? 'text-[#3B82F6]' : 'text-[#6B7280]'}`}>
                                   {stats.winRate?.toFixed(0) || 0}%
                                 </div>
-                                <div className="text-xs text-[#6B7280] font-medium mt-1">Win Rate</div>
+                                <div className="text-xs text-[#6B7280] font-medium mt-1">Вінрейт</div>
                                 <div className="text-xs text-[#9CA3AF] mt-1">{stats.totalBets || 0} ставок</div>
                               </div>
                             </div>
@@ -798,7 +835,7 @@ export default function StrategyOverview() {
                                 Деталі
                               </Button>
                               <Button
-                                onClick={() => togglePrimaryStrategy(strategy.name)}
+                                onClick={() => togglePrimaryStrategy(strategy)}
                                 variant="outline"
                                 size="sm"
                                 className={`rounded-xl font-medium ${isPrimary ? 'border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF] hover:bg-[#DBEAFE]' : 'border-[#E5E7EB] hover:bg-[#F9FAFB]'}`}
@@ -806,7 +843,7 @@ export default function StrategyOverview() {
                                 <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#3B82F6]' : ''}`} strokeWidth={1.5} />
                               </Button>
                               <Button
-                                onClick={() => confirmDeleteStrategy(strategy.name)}
+                                onClick={() => confirmDeleteStrategy(strategy.id || strategy.name)}
                                 variant="outline"
                                 size="sm"
                                 className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
@@ -865,9 +902,9 @@ export default function StrategyOverview() {
                       {primaryStrategy && (
                         <div className="flex justify-between">
                           <span className="text-sm text-[#6B7280]">Основна стратегія:</span>
-                          <span className="font-semibold text-[#111827] flex items-center gap-1 truncate max-w-[150px]" title={primaryStrategy}>
+                          <span className="font-semibold text-[#111827] flex items-center gap-1 truncate max-w-[150px]" title={getPrimaryStrategyName() || ''}>
                             <Star className="h-3 w-3 fill-[#3B82F6] text-[#3B82F6] flex-shrink-0" strokeWidth={1.5} />
-                            <span className="truncate">{primaryStrategy}</span>
+                            <span className="truncate">{getPrimaryStrategyName()}</span>
                           </span>
                         </div>
                       )}
@@ -897,7 +934,7 @@ export default function StrategyOverview() {
                                 <span className="text-sm font-semibold text-[#9CA3AF] flex-shrink-0">#{index + 1}</span>
                                 <span className="text-sm truncate text-[#111827] flex items-center gap-1 font-medium" title={name}>
                                   <span className="truncate">{name}</span>
-                                  {primaryStrategy === name && <Star className="h-3 w-3 fill-[#3B82F6] text-[#3B82F6] flex-shrink-0" strokeWidth={1.5} />}
+                                  {getPrimaryStrategyName() === name && <Star className="h-3 w-3 fill-[#3B82F6] text-[#3B82F6] flex-shrink-0" strokeWidth={1.5} />}
                                 </span>
                               </div>
                               <span className={`text-sm font-bold flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
@@ -992,7 +1029,7 @@ export default function StrategyOverview() {
                     <div className="px-6 py-5 border-b border-[#F3F4F6]">
                       <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                        <span className="text-base font-semibold text-[#111827]">Win Rate стратегій</span>
+                        <span className="text-base font-semibold text-[#111827]">Вінрейт стратегій</span>
                       </div>
                     </div>
                     <div className="p-4">
@@ -1000,8 +1037,8 @@ export default function StrategyOverview() {
                         <BarChart data={winRateChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
-                          <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Win Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Win Rate']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
+                          <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Вінрейт (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
+                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Вінрейт']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
                           <Bar dataKey="value" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={30} opacity={0.9} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1316,7 +1353,7 @@ export default function StrategyOverview() {
                     <div className="flex items-center gap-3 mb-2">
                       {getRiskIcon(selectedStrategy.riskLevel)}
                       <h3 className="text-xl font-semibold text-[#111827]">{selectedStrategy.name}</h3>
-                      {primaryStrategy === selectedStrategy.name && (
+                      {primaryStrategy === (selectedStrategy.id || selectedStrategy.name) && (
                         <Badge className="bg-[#EFF6FF] text-[#3B82F6] border-0 rounded-full text-xs px-2.5 py-0.5 font-medium hover:bg-[#EFF6FF]">
                           <Star className="h-3 w-3 mr-1 fill-[#3B82F6]" strokeWidth={1.5} />
                           Основна
@@ -1342,7 +1379,7 @@ export default function StrategyOverview() {
                       <p className="text-3xl font-semibold text-[#111827]">{hasStats ? stats.totalBets : 0}</p>
                     </div>
                     <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
-                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Win Rate</p>
+                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Вінрейт</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? stats.winRate.toFixed(1) : 0}%
                       </p>
@@ -1525,45 +1562,60 @@ export default function StrategyOverview() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {STRATEGY_TEMPLATES.map((template, index) => (
-              <div
-                key={index}
-                className="bg-white border border-[#E5E7EB] hover:border-[#3B82F6] transition-all cursor-pointer rounded-2xl p-5"
-                onClick={() => applyTemplate(template)}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="flex items-center gap-2 font-semibold text-[#111827]">
-                    {getRiskIcon(template.riskLevel)}
-                    <span className="text-sm">{template.name}</span>
-                  </span>
-                  <Badge className={getRiskColor(template.riskLevel) + ' text-xs font-medium hover:opacity-100'}>
-                    {template.riskLevel}
-                  </Badge>
+            {STRATEGY_TEMPLATES.map((template, index) => {
+              const alreadyExists = isTemplateAlreadyCreated(template.name);
+              return (
+                <div
+                  key={index}
+                  className={`border transition-all rounded-2xl p-5 ${
+                    alreadyExists
+                      ? 'bg-[#F9FAFB] border-[#E5E7EB] opacity-60 cursor-not-allowed'
+                      : 'bg-white border-[#E5E7EB] hover:border-[#3B82F6] cursor-pointer'
+                  }`}
+                  onClick={() => !alreadyExists && applyTemplate(template)}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="flex items-center gap-2 font-semibold text-[#111827]">
+                      {getRiskIcon(template.riskLevel)}
+                      <span className="text-sm">{template.name}</span>
+                    </span>
+                    <Badge className={getRiskColor(template.riskLevel) + ' text-xs font-medium hover:opacity-100'}>
+                      {template.riskLevel}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-[#6B7280] mb-3">{template.description}</p>
+                  <div className="p-2 bg-[#DCFCE7] rounded-xl text-center mb-3">
+                    <div className="text-lg font-bold text-[#16A34A]">+{template.expectedROI}%</div>
+                    <div className="text-xs text-[#6B7280]">Очікуваний ROI</div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-[#6B7280] mb-1">Критерії:</p>
+                    <ul className="space-y-1">
+                      {template.criteria.slice(0, 3).map((criterion, idx) => (
+                        <li key={idx} className="text-xs text-[#6B7280] flex items-center gap-1">
+                          <div className="w-1 h-1 bg-[#3B82F6] rounded-full"></div>
+                          {criterion}
+                        </li>
+                      ))}
+                      {template.criteria.length > 3 && (
+                        <li className="text-xs text-[#9CA3AF]">+ ще {template.criteria.length - 3}</li>
+                      )}
+                    </ul>
+                  </div>
+                  <Button
+                    className={`w-full rounded-xl font-medium mt-3 ${
+                      alreadyExists
+                        ? 'bg-[#D1D5DB] text-[#9CA3AF] cursor-not-allowed hover:bg-[#D1D5DB]'
+                        : 'bg-[#111827] hover:bg-[#1F2937] text-white'
+                    }`}
+                    size="sm"
+                    disabled={alreadyExists}
+                  >
+                    {alreadyExists ? 'Вже створено' : 'Використати шаблон'}
+                  </Button>
                 </div>
-                <p className="text-sm text-[#6B7280] mb-3">{template.description}</p>
-                <div className="p-2 bg-[#DCFCE7] rounded-xl text-center mb-3">
-                  <div className="text-lg font-bold text-[#16A34A]">+{template.expectedROI}%</div>
-                  <div className="text-xs text-[#6B7280]">Очікуваний ROI</div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-[#6B7280] mb-1">Критерії:</p>
-                  <ul className="space-y-1">
-                    {template.criteria.slice(0, 3).map((criterion, idx) => (
-                      <li key={idx} className="text-xs text-[#6B7280] flex items-center gap-1">
-                        <div className="w-1 h-1 bg-[#3B82F6] rounded-full"></div>
-                        {criterion}
-                      </li>
-                    ))}
-                    {template.criteria.length > 3 && (
-                      <li className="text-xs text-[#9CA3AF]">+ ще {template.criteria.length - 3}</li>
-                    )}
-                  </ul>
-                </div>
-                <Button className="w-full rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium mt-3" size="sm">
-                  Використати шаблон
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>

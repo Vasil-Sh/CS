@@ -476,7 +476,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       case 'Нестабільні':
         return 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-full font-medium text-sm px-3 py-1';
       case 'Обережно':
-        return 'bg-[#FFEDD5] text-[#EA580C] hover:bg-[#FFEDD5] border-0 rounded-full font-medium text-sm px-3 py-1';
+        return 'bg-[#DBEAFE] text-[#2563EB] hover:bg-[#DBEAFE] border-0 rounded-full font-medium text-sm px-3 py-1';
       case 'Рідко':
         return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
       default:
@@ -1396,20 +1396,23 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             </div>
 
             {/* Risky Teams Card */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#DBEAFE] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#fbf3df]">
-                  <AlertTriangle className="h-5 w-5 text-[#febc11]" strokeWidth={1.5} />
+              <div 
+                className="flex items-center gap-3 px-6 py-5 border-b border-[#BFDBFE]"
+                style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
+              >
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <AlertTriangle className="h-5 w-5 text-white" strokeWidth={1.5} />
                 </div>
-                <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
+                <span className="text-lg font-semibold text-white">Ризиковані команди</span>
               </div>
               <div className="p-6">
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-4 border border-[#feda79] rounded-2xl bg-white space-y-2.5 hover:border-[#febc11] transition-colors">
+                      <div key={index} className="p-4 border border-[#BFDBFE] rounded-2xl bg-white space-y-2.5 hover:border-[#3B82F6] transition-colors">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -1436,17 +1439,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#fbf3df] mx-auto mb-3">
-                      <AlertTriangle className="h-7 w-7 text-[#febc11]" strokeWidth={1.5} />
-                    </div>
-                    <p className="text-sm font-semibold text-[#111827] mb-1">Ризикових команд не знайдено</p>
-                    <p className="text-xs text-[#9CA3AF]">
-                      {formData.team1 || formData.team2 
-                        ? 'Обрані команди не в списку ризикових' 
-                        : 'Додайте команди для перевірки'}
-                    </p>
-                  </div>
+                  <p className="text-sm text-[#6B7280] text-center py-4">Ризикових команд не знайдено</p>
                 )}
               </div>
             </div>

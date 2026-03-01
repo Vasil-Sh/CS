@@ -539,7 +539,7 @@ export default function Matches() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <Flame className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                <span className="text-lg font-semibold text-[#111827]">Hot Matches</span>
+                <span className="text-lg font-semibold text-[#111827]">Гарячі матчі</span>
               </div>
               <div className="text-4xl font-bold text-[#F97316] tracking-tight mb-2">{sortedMatches.filter(m => m.aiConfidence >= 70 && m.upsetProbability < 20).length}</div>
               <div className="flex items-center gap-2">
@@ -556,7 +556,7 @@ export default function Matches() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                <span className="text-lg font-semibold text-[#111827]">Safe Picks</span>
+                <span className="text-lg font-semibold text-[#111827]">Надійні вибори</span>
               </div>
               <div className="text-4xl font-bold text-[#0EA5E9] tracking-tight mb-2">{safePicksCount}</div>
               <div className="flex items-center gap-2">
@@ -702,7 +702,7 @@ export default function Matches() {
                   }`}
                 >
                   <Flame className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Hot
+                  Гарячі
                 </Button>
               </div>
             </CardHeader>
@@ -727,7 +727,7 @@ export default function Matches() {
                         </div>
                       </th>
                       <th className="text-left py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Коефіцієнти</th>
-                      <th className="text-center py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Win Rate</th>
+                      <th className="text-center py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Вінрейт</th>
                       <th className="text-left py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Турнір</th>
                       <th className="text-center py-4 px-4 text-sm font-medium text-[#6B7280] uppercase tracking-wider">AI</th>
                       <th className="text-center py-4 px-4 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Нотатки</th>

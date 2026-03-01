@@ -69,6 +69,7 @@ export interface PsychologicalTriggers {
 }
 
 export interface CS2Strategy {
+  id?: string;
   name: string;
   description: string;
   riskLevel: 'Low' | 'Medium' | 'High';
