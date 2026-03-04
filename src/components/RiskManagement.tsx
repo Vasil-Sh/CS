@@ -596,7 +596,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </Badge>
             </div>
             {team.notes && (
-              <p className="text-sm text-[#6B7280]">{team.notes}</p>
+              <p className="text-sm text-[#6B7280] whitespace-pre-wrap">{team.notes}</p>
             )}
           </div>
           <div className="flex items-center gap-1">

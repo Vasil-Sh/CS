@@ -1,0 +1,163 @@
+// CS Test API Service
+// Fetches match data from https://api.cstest.pp.ua
+
+const API_BASE_URL = 'https://api.cstest.pp.ua';
+
+export interface ApiMatch {
+  id: number;
+  date: string;
+  link: string;
+  type: string;
+  score1: number;
+  score2: number;
+  stars: number;
+  nameTeam1: string;
+  nameTeam2: string;
+  lastChangeDateTeam1: string | null;
+  lastChangeDateTeam2: string | null;
+  positionTeam1: number | null;
+  positionTeam2: number | null;
+}
+
+export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
+  const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  }
+
+  const data: ApiMatch[] = await response.json();
+  return data;
+}
+
+/**
+ * Determine match format from the API type field
+ * e.g. "bo3", "bo3 (Online)", "bo3 (LAN)", "def" -> Bo3, Bo1, etc.
+ */
+export function parseMatchType(type: string): 'Bo1' | 'Bo3' | 'Bo5' {
+  const lower = type.toLowerCase();
+  if (lower.includes('bo5')) return 'Bo5';
+  if (lower.includes('bo3')) return 'Bo3';
+  if (lower.includes('bo1')) return 'Bo1';
+  if (lower === 'def') return 'Bo1';
+  return 'Bo3';
+}
+
+/**
+ * Extract context info (Online/LAN) from type field
+ */
+export function parseMatchContext(type: string, link: string): string {
+  // Extract tournament name from link
+  // e.g. "/matches/2391036/3dmax-vs-astralis-esl-pro-league-season-23-stage-1"
+  const parts = link.split('/');
+  const slug = parts[parts.length - 1] || '';
+  
+  // Find the part after team names (after second team name)
+  // Format: team1-vs-team2-tournament-name
+  const vsIndex = slug.indexOf('-vs-');
+  let tournamentSlug = '';
+  if (vsIndex !== -1) {
+    const afterVs = slug.substring(vsIndex + 4);
+    // Skip team2 name - find the first segment that looks like a tournament
+    const segments = afterVs.split('-');
+    // Skip first few segments (team2 name), find where tournament starts
+    // Heuristic: tournament names usually have keywords like "esl", "blast", "iem", "cct", etc.
+    const tournamentKeywords = ['esl', 'blast', 'iem', 'cct', 'betboom', 'nodwin', 'izi', 'stake', 'exort', 'european'];
+    let startIdx = 0;
+    for (let i = 0; i < segments.length; i++) {
+      if (tournamentKeywords.some(kw => segments[i].toLowerCase().includes(kw))) {
+        startIdx = i;
+        break;
+      }
+      // If we've gone past 3 segments without finding a keyword, assume the rest is tournament
+      if (i >= 2) {
+        startIdx = i;
+        break;
+      }
+    }
+    tournamentSlug = segments.slice(startIdx).join(' ');
+  }
+
+  // Capitalize first letters
+  const tournament = tournamentSlug
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+  // Add Online/LAN tag
+  const lower = type.toLowerCase();
+  let mode = '';
+  if (lower.includes('lan')) mode = 'LAN';
+  else if (lower.includes('online')) mode = 'Online';
+
+  if (tournament && mode) return `${tournament} — ${mode}`;
+  if (tournament) return tournament;
+  if (mode) return mode;
+  return type;
+}
+
+/**
+ * Determine tier based on team positions
+ */
+export function determineTier(pos1: number | null, pos2: number | null): 'tier1' | 'tier2' | 'tier3' {
+  const bestPos = Math.min(pos1 ?? 999, pos2 ?? 999);
+  if (bestPos <= 20) return 'tier1';
+  if (bestPos <= 50) return 'tier2';
+  return 'tier3';
+}
+
+/**
+ * Determine which team is the favorite based on positions (lower = better)
+ */
+export function determineFavorite(
+  team1: string, team2: string,
+  pos1: number | null, pos2: number | null
+): string {
+  const p1 = pos1 ?? 999;
+  const p2 = pos2 ?? 999;
+  return p1 <= p2 ? team1 : team2;
+}
+
+/**
+ * Check if a match is live (has started but not finished based on current time and scores)
+ */
+export function isMatchLive(match: ApiMatch): boolean {
+  const matchDate = new Date(match.date);
+  const now = new Date();
+  // Match has started (date is in the past) but might still be ongoing
+  // If both scores are 0 and match time has passed, it could be live
+  // If scores exist, the match might be finished or in progress
+  return matchDate <= now && (match.score1 + match.score2) < getTotalMapsNeeded(match.type);
+}
+
+/**
+ * Check if match is finished
+ */
+export function isMatchFinished(match: ApiMatch): boolean {
+  const totalNeeded = getTotalMapsNeeded(match.type);
+  const winsNeeded = Math.ceil(totalNeeded / 2);
+  return match.score1 >= winsNeeded || match.score2 >= winsNeeded;
+}
+
+function getTotalMapsNeeded(type: string): number {
+  const lower = type.toLowerCase();
+  if (lower.includes('bo5')) return 5;
+  if (lower.includes('bo3')) return 3;
+  return 1;
+}
+
+/**
+ * Get match status
+ */
+export function getMatchStatus(match: ApiMatch): 'upcoming' | 'live' | 'finished' {
+  if (isMatchFinished(match)) return 'finished';
+  const matchDate = new Date(match.date);
+  const now = new Date();
+  if (matchDate <= now) return 'live';
+  return 'upcoming';
+}
