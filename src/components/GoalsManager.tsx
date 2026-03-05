@@ -95,6 +95,9 @@ interface OddsScenario {
   description: string;
 }
 
+// Maximum steps limit to prevent browser crashes
+const MAX_LADDER_STEPS = 500;
+
 // Card hover styles matching Analytics page
 const cardBaseStyle = {
   transform: 'scale(1)',
@@ -141,17 +144,29 @@ export default function GoalsManager() {
   const [isStepsProgressionExpanded, setIsStepsProgressionExpanded] = useState(true);
   const [isRulesExpanded, setIsRulesExpanded] = useState<Record<string, boolean>>({});
 
+  // Use string values for numeric inputs to avoid intermediate parse issues
   const [newGoal, setNewGoal] = useState({
     name: '', type: 'amount' as GoalType, targetAmount: 100000, startAmount: 100,
     targetLadderAmount: 100000, minOdds: 1.3, maxOdds: 5, ladderMode: 'soft' as LadderMode,
     targetROI: 50, targetWinRate: 65, betsPerDay: 5
   });
 
+  // String state for coefficient inputs to handle typing gracefully
+  const [minOddsStr, setMinOddsStr] = useState('1.3');
+  const [maxOddsStr, setMaxOddsStr] = useState('5');
+  const [startAmountStr, setStartAmountStr] = useState('100');
+  const [targetLadderAmountStr, setTargetLadderAmountStr] = useState('100000');
+  const [targetAmountStr, setTargetAmountStr] = useState('100000');
+  const [targetROIStr, setTargetROIStr] = useState('50');
+  const [targetWinRateStr, setTargetWinRateStr] = useState('65');
+  const [betsPerDayStr, setBetsPerDayStr] = useState('5');
+
   useEffect(() => { if (currentUser) UserDataService.setUserData(currentUser, 'goals', goals); }, [goals, currentUser]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
+    if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0) return 0;
     let steps = 0, amount = currentBank;
-    while (amount < targetAmount && steps < 100) { amount *= minOdds; steps++; }
+    while (amount < targetAmount && steps < MAX_LADDER_STEPS) { amount *= minOdds; steps++; }
     return steps;
   };
 
@@ -221,15 +236,28 @@ export default function GoalsManager() {
   const handleManualUpdate = () => { setIsUpdating(true); updateGoalsProgress(); toast.success('Прогрес цілей оновлено!'); setTimeout(() => setIsUpdating(false), 500); };
 
   const calculateLadderSteps = (start: number, target: number, minOdds: number, maxOdds: number): LadderStep[] => {
+    // Guard against invalid values that would cause infinite loops
+    if (!start || start <= 0 || !target || target <= 0 || !minOdds || minOdds <= 1 || !maxOdds || maxOdds <= 1 || !isFinite(minOdds) || !isFinite(maxOdds) || start >= target) {
+      return [];
+    }
     const steps: LadderStep[] = [];
     let cur = start, n = 1;
-    while (cur < target) { steps.push({ step: n, startAmount: cur, minPlannedAmount: cur * minOdds, maxPlannedAmount: cur * maxOdds, status: n === 1 ? 'current' : 'locked' }); cur *= minOdds; n++; }
+    while (cur < target && n <= MAX_LADDER_STEPS) {
+      steps.push({ step: n, startAmount: cur, minPlannedAmount: cur * minOdds, maxPlannedAmount: cur * maxOdds, status: n === 1 ? 'current' : 'locked' });
+      cur *= minOdds;
+      n++;
+    }
     return steps;
   };
 
   const calculateOddsScenarios = (start: number, target: number, minOdds: number, maxOdds: number): OddsScenario[] => {
+    // Guard against invalid values
+    if (!start || start <= 0 || !target || target <= 0 || !minOdds || minOdds <= 1 || !maxOdds || maxOdds <= 1 || !isFinite(minOdds) || !isFinite(maxOdds) || start >= target) {
+      return [];
+    }
     const scenarios: OddsScenario[] = [];
     [minOdds, (minOdds + maxOdds) / 2, maxOdds].forEach(odds => {
+      if (odds <= 1 || !isFinite(odds)) return;
       const steps = calculateLadderSteps(start, target, odds, odds);
       let speed = '', emoji = '', description = '';
       if (odds === minOdds) { speed = 'Повільно'; emoji = '🐢'; description = 'Найбезпечніше'; }
@@ -238,6 +266,26 @@ export default function GoalsManager() {
       scenarios.push({ odds: parseFloat(odds.toFixed(2)), steps: steps.length, speed, emoji, description });
     });
     return scenarios;
+  };
+
+  // Safe parse helpers
+  const safeParseFloat = (val: string): number => {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  const safeParseInt = (val: string): number => {
+    const parsed = parseInt(val, 10);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  // Check if ladder preview values are valid for computation
+  const isLadderPreviewValid = (): boolean => {
+    const start = safeParseFloat(startAmountStr);
+    const target = safeParseFloat(targetLadderAmountStr);
+    const min = safeParseFloat(minOddsStr);
+    const max = safeParseFloat(maxOddsStr);
+    return start > 0 && target > 0 && min > 1 && max > 1 && start < target && isFinite(min) && isFinite(max);
   };
 
   const validateGoalFields = (): boolean => {
@@ -258,27 +306,82 @@ export default function GoalsManager() {
     return true;
   };
 
+  const syncNewGoalFromStrings = () => {
+    return {
+      ...newGoal,
+      startAmount: safeParseFloat(startAmountStr),
+      targetLadderAmount: safeParseFloat(targetLadderAmountStr),
+      minOdds: safeParseFloat(minOddsStr),
+      maxOdds: safeParseFloat(maxOddsStr),
+      targetAmount: safeParseFloat(targetAmountStr),
+      targetROI: safeParseFloat(targetROIStr),
+      targetWinRate: safeParseFloat(targetWinRateStr),
+      betsPerDay: safeParseInt(betsPerDayStr),
+    };
+  };
+
   const createGoal = () => {
-    if (!validateGoalFields()) return;
+    // Sync string inputs to newGoal before validation
+    const synced = syncNewGoalFromStrings();
+    const goalData = { ...synced };
+
+    // Temporarily set for validation
+    const prevGoal = { ...newGoal };
+    setNewGoal(goalData);
+
+    if (!goalData.name.trim()) { toast.error('Введіть назву цілі'); setNewGoal(prevGoal); return; }
+
+    switch (goalData.type) {
+      case 'amount':
+        if (!goalData.targetAmount || goalData.targetAmount <= 0) { toast.error('Цільова сума > 0'); return; }
+        break;
+      case 'ladder':
+        if (!goalData.startAmount || goalData.startAmount <= 0) { toast.error('Початкова сума > 0'); return; }
+        if (!goalData.targetLadderAmount || goalData.targetLadderAmount <= 0) { toast.error('Цільова сума > 0'); return; }
+        if (goalData.startAmount >= goalData.targetLadderAmount) { toast.error('Ціль > початкової суми'); return; }
+        if (!goalData.minOdds || goalData.minOdds < 1.01) { toast.error('Мін. коеф. ≥ 1.01'); return; }
+        if (!goalData.maxOdds || goalData.maxOdds < 1.01) { toast.error('Макс. коеф. ≥ 1.01'); return; }
+        if (goalData.minOdds >= goalData.maxOdds) { toast.error('Макс > Мін'); return; }
+        break;
+      case 'roi':
+        if (!goalData.targetROI || goalData.targetROI <= 0) { toast.error('ROI > 0'); return; }
+        break;
+      case 'winrate':
+        if (!goalData.targetWinRate || goalData.targetWinRate <= 0 || goalData.targetWinRate > 100) { toast.error('Win Rate 1–100'); return; }
+        break;
+    }
+
     const active = goals.filter(g => g.status === 'active');
     if (active.length >= 3) { toast.error('Максимум 3 активні цілі'); return; }
-    const goal: Goal = { id: Date.now().toString(), name: newGoal.name, type: newGoal.type, status: 'active', createdAt: new Date().toISOString(), isPrimary: active.length === 0, betsPerDay: newGoal.betsPerDay };
-    switch (newGoal.type) {
-      case 'amount': goal.targetAmount = newGoal.targetAmount; goal.currentAmount = 0; break;
+    const goal: Goal = { id: Date.now().toString(), name: goalData.name, type: goalData.type, status: 'active', createdAt: new Date().toISOString(), isPrimary: active.length === 0, betsPerDay: goalData.betsPerDay };
+    switch (goalData.type) {
+      case 'amount': goal.targetAmount = goalData.targetAmount; goal.currentAmount = 0; break;
       case 'ladder': {
-        const steps = calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds);
-        Object.assign(goal, { startAmount: newGoal.startAmount, targetLadderAmount: newGoal.targetLadderAmount, minOdds: newGoal.minOdds, maxOdds: newGoal.maxOdds, avgOdds: newGoal.minOdds, currentStep: 0, totalSteps: steps.length, ladderMode: newGoal.ladderMode, steps, currentBank: newGoal.startAmount });
+        const steps = calculateLadderSteps(goalData.startAmount, goalData.targetLadderAmount, goalData.minOdds, goalData.maxOdds);
+        Object.assign(goal, { startAmount: goalData.startAmount, targetLadderAmount: goalData.targetLadderAmount, minOdds: goalData.minOdds, maxOdds: goalData.maxOdds, avgOdds: goalData.minOdds, currentStep: 0, totalSteps: steps.length, ladderMode: goalData.ladderMode, steps, currentBank: goalData.startAmount });
         break;
       }
-      case 'roi': goal.targetROI = newGoal.targetROI; goal.currentROI = 0; break;
-      case 'winrate': goal.targetWinRate = newGoal.targetWinRate; goal.currentWinRate = 0; break;
+      case 'roi': goal.targetROI = goalData.targetROI; goal.currentROI = 0; break;
+      case 'winrate': goal.targetWinRate = goalData.targetWinRate; goal.currentWinRate = 0; break;
     }
     const updated = [...goals, goal];
     setGoals(updated);
     UserDataService.setUserData(currentUser, 'goals', updated);
     setShowCreateDialog(false);
-    setNewGoal({ name: '', type: 'amount', targetAmount: 100000, startAmount: 100, targetLadderAmount: 100000, minOdds: 1.3, maxOdds: 5, ladderMode: 'soft', targetROI: 50, targetWinRate: 65, betsPerDay: 5 });
+    resetNewGoalForm();
     toast.success('Ціль створена!', { description: '💡 Прив\'яжіть ставки до цієї цілі' });
+  };
+
+  const resetNewGoalForm = () => {
+    setNewGoal({ name: '', type: 'amount', targetAmount: 100000, startAmount: 100, targetLadderAmount: 100000, minOdds: 1.3, maxOdds: 5, ladderMode: 'soft', targetROI: 50, targetWinRate: 65, betsPerDay: 5 });
+    setMinOddsStr('1.3');
+    setMaxOddsStr('5');
+    setStartAmountStr('100');
+    setTargetLadderAmountStr('100000');
+    setTargetAmountStr('100000');
+    setTargetROIStr('50');
+    setTargetWinRateStr('65');
+    setBetsPerDayStr('5');
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
@@ -648,7 +751,10 @@ export default function GoalsManager() {
       </div>
 
       {/* Create Goal Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={(open) => {
+        setShowCreateDialog(open);
+        if (!open) resetNewGoalForm();
+      }}>
         <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB]">
           <DialogHeader className="pb-3 border-b border-[#E5E7EB]">
             <div className="flex items-center gap-3">
@@ -683,7 +789,11 @@ export default function GoalsManager() {
             {newGoal.type === 'amount' && (
               <div>
                 <Label htmlFor="targetAmount" className="text-base font-medium text-[#111827]">Цільова сума (грн) *</Label>
-                <Input id="targetAmount" type="number" min="1" value={newGoal.targetAmount === 0 ? '' : newGoal.targetAmount} onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] focus:border-[#447afc] mt-1.5 h-11 text-base" />
+                <Input id="targetAmount" type="number" min="1" value={targetAmountStr} onChange={(e) => {
+                  setTargetAmountStr(e.target.value);
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val)) setNewGoal({ ...newGoal, targetAmount: val });
+                }} className="rounded-2xl border border-[#E5E7EB] focus:border-[#447afc] mt-1.5 h-11 text-base" />
               </div>
             )}
 
@@ -692,21 +802,37 @@ export default function GoalsManager() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-base font-medium text-[#111827]">Початкова сума *</Label>
-                    <Input type="number" min="1" value={newGoal.startAmount === 0 ? '' : newGoal.startAmount} onChange={(e) => setNewGoal({ ...newGoal, startAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                    <Input type="number" min="1" value={startAmountStr} onChange={(e) => {
+                      setStartAmountStr(e.target.value);
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setNewGoal({ ...newGoal, startAmount: val });
+                    }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
                     <Label className="text-base font-medium text-[#111827]">Цільова сума *</Label>
-                    <Input type="number" min="1" value={newGoal.targetLadderAmount === 0 ? '' : newGoal.targetLadderAmount} onChange={(e) => setNewGoal({ ...newGoal, targetLadderAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                    <Input type="number" min="1" value={targetLadderAmountStr} onChange={(e) => {
+                      setTargetLadderAmountStr(e.target.value);
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setNewGoal({ ...newGoal, targetLadderAmount: val });
+                    }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-base font-medium text-[#111827]">Мін. коефіцієнт *</Label>
-                    <Input type="number" min="1.01" step="0.01" value={newGoal.minOdds === 0 ? '' : newGoal.minOdds} onChange={(e) => setNewGoal({ ...newGoal, minOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                    <Input type="number" min="1.01" step="0.01" value={minOddsStr} onChange={(e) => {
+                      setMinOddsStr(e.target.value);
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setNewGoal({ ...newGoal, minOdds: val });
+                    }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
                     <Label className="text-base font-medium text-[#111827]">Макс. коефіцієнт *</Label>
-                    <Input type="number" min="1.01" step="0.01" value={newGoal.maxOdds === 0 ? '' : newGoal.maxOdds} onChange={(e) => setNewGoal({ ...newGoal, maxOdds: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                    <Input type="number" min="1.01" step="0.01" value={maxOddsStr} onChange={(e) => {
+                      setMaxOddsStr(e.target.value);
+                      const val = parseFloat(e.target.value);
+                      if (!isNaN(val)) setNewGoal({ ...newGoal, maxOdds: val });
+                    }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                 </div>
                 <div>
@@ -719,10 +845,10 @@ export default function GoalsManager() {
                     </SelectContent>
                   </Select>
                 </div>
-                {newGoal.startAmount > 0 && newGoal.targetLadderAmount > 0 && newGoal.minOdds > 0 && newGoal.maxOdds > 0 && (
+                {isLadderPreviewValid() && (
                   <div className="p-3 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
-                    <p className="text-base font-medium text-[#111827]">Кроків: {calculateLadderSteps(newGoal.startAmount, newGoal.targetLadderAmount, newGoal.minOdds, newGoal.maxOdds).length}</p>
-                    <p className="text-sm text-[#9CA3AF] mt-0.5">💡 Коефіцієнт {newGoal.minOdds} – {newGoal.maxOdds}</p>
+                    <p className="text-base font-medium text-[#111827]">Кроків: {calculateLadderSteps(safeParseFloat(startAmountStr), safeParseFloat(targetLadderAmountStr), safeParseFloat(minOddsStr), safeParseFloat(maxOddsStr)).length}</p>
+                    <p className="text-sm text-[#9CA3AF] mt-0.5">💡 Коефіцієнт {minOddsStr} – {maxOddsStr}</p>
                   </div>
                 )}
               </>
@@ -731,14 +857,22 @@ export default function GoalsManager() {
             {newGoal.type === 'roi' && (
               <div>
                 <Label className="text-base font-medium text-[#111827]">Цільовий ROI (%) *</Label>
-                <Input type="number" min="0" max="1000" value={newGoal.targetROI === 0 ? '' : newGoal.targetROI} onChange={(e) => setNewGoal({ ...newGoal, targetROI: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                <Input type="number" min="0" max="1000" value={targetROIStr} onChange={(e) => {
+                  setTargetROIStr(e.target.value);
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val)) setNewGoal({ ...newGoal, targetROI: val });
+                }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             )}
 
             {newGoal.type === 'winrate' && (
               <div>
                 <Label className="text-base font-medium text-[#111827]">Цільовий Win Rate (%) *</Label>
-                <Input type="number" min="0" max="100" value={newGoal.targetWinRate === 0 ? '' : newGoal.targetWinRate} onChange={(e) => setNewGoal({ ...newGoal, targetWinRate: e.target.value === '' ? 0 : parseFloat(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                <Input type="number" min="0" max="100" value={targetWinRateStr} onChange={(e) => {
+                  setTargetWinRateStr(e.target.value);
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val)) setNewGoal({ ...newGoal, targetWinRate: val });
+                }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             )}
 
@@ -746,7 +880,11 @@ export default function GoalsManager() {
               <h4 className="text-base font-medium text-[#111827] mb-2">Правила цілі</h4>
               <div>
                 <Label className="text-base font-medium text-[#111827]">Ставок на день (0 = без обмежень)</Label>
-                <Input type="number" min="0" value={newGoal.betsPerDay === 0 ? '' : newGoal.betsPerDay} onChange={(e) => setNewGoal({ ...newGoal, betsPerDay: e.target.value === '' ? 0 : parseInt(e.target.value) })} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
+                <Input type="number" min="0" value={betsPerDayStr} onChange={(e) => {
+                  setBetsPerDayStr(e.target.value);
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val)) setNewGoal({ ...newGoal, betsPerDay: val });
+                }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
               </div>
             </div>
           </div>
