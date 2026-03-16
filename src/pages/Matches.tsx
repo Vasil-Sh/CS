@@ -88,12 +88,18 @@ interface Match {
   matchType: 'Bo1' | 'Bo3' | 'Bo5';
   upsetProbability: number;
   url?: string;
-  // New fields from API
+  // Fields from API
   score1?: number;
   score2?: number;
   matchStatus?: 'upcoming' | 'live' | 'finished';
   positionTeam1?: number | null;
   positionTeam2?: number | null;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
+  predictionPercentTeam1?: number | null;
+  predictionPercentTeam2?: number | null;
+  bettingCoefficientTeam1?: number | null;
+  bettingCoefficientTeam2?: number | null;
 }
 
 /**
@@ -113,14 +119,27 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const pos1 = apiMatch.positionTeam1 ?? 150;
   const pos2 = apiMatch.positionTeam2 ?? 150;
   const posDiff = Math.abs(pos1 - pos2);
-  // More position difference = higher confidence for the favorite
-  const baseConfidence = Math.min(85, 55 + Math.floor(posDiff * 0.3));
+
+  // Use API prediction percentage if available, otherwise fallback to position-based calculation
+  const pred1 = apiMatch.predictionPercentTeam1;
+  const pred2 = apiMatch.predictionPercentTeam2;
+  const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+  const baseConfidence = hasPrediction
+    ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
+    : Math.min(85, 55 + Math.floor(posDiff * 0.3));
   
   // Risk is inversely related to confidence
   const risk = Math.max(10, 100 - baseConfidence - Math.floor(Math.random() * 10));
 
   // Win rate based on positions
-  const winRate = Math.min(80, Math.max(50, 50 + Math.floor(posDiff * 0.25)));
+  const winRate = hasPrediction
+    ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
+    : Math.min(80, Math.max(50, 50 + Math.floor(posDiff * 0.25)));
+
+  // Use betting coefficients for odds if available
+  const coeff1 = apiMatch.bettingCoefficientTeam1;
+  const coeff2 = apiMatch.bettingCoefficientTeam2;
+  const hasCoeffs = coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
 
   // Determine form stability based on lastChangeDate
   let formStability: FormStability = 'stable';
@@ -151,7 +170,10 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     risk,
     comment: '',
     aiSummary: '',
-    odds: { team1: 0, team2: 0 },
+    odds: {
+      team1: hasCoeffs ? (coeff1 ?? 0) : 0,
+      team2: hasCoeffs ? (coeff2 ?? 0) : 0,
+    },
     winRate,
     formStability,
     playerForm: [],
@@ -165,6 +187,12 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     matchStatus: status,
     positionTeam1: apiMatch.positionTeam1,
     positionTeam2: apiMatch.positionTeam2,
+    logoTeam1: apiMatch.logoTeam1,
+    logoTeam2: apiMatch.logoTeam2,
+    predictionPercentTeam1: apiMatch.predictionPercentTeam1,
+    predictionPercentTeam2: apiMatch.predictionPercentTeam2,
+    bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
+    bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
   };
 }
 
@@ -260,6 +288,67 @@ const getStatusPriority = (status?: 'upcoming' | 'live' | 'finished'): number =>
     case 'finished': return 2;
     default: return 3;
   }
+};
+
+/** Team logo component with fallback */
+const TeamLogo = ({ src, teamName, size = 20 }: { src?: string | null; teamName: string; size?: number }) => {
+  if (!src) {
+    return (
+      <div 
+        className="flex items-center justify-center rounded-full bg-[#F3F4F6] text-[#6B7280] font-semibold text-[10px] flex-shrink-0"
+        style={{ width: size, height: size }}
+      >
+        {teamName.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={teamName}
+      className="rounded-full object-cover flex-shrink-0 bg-[#F3F4F6]"
+      style={{ width: size, height: size }}
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        const fallback = document.createElement('div');
+        fallback.className = 'flex items-center justify-center rounded-full bg-[#F3F4F6] text-[#6B7280] font-semibold text-[10px] flex-shrink-0';
+        fallback.style.width = `${size}px`;
+        fallback.style.height = `${size}px`;
+        fallback.textContent = teamName.charAt(0).toUpperCase();
+        target.parentNode?.insertBefore(fallback, target);
+      }}
+    />
+  );
+};
+
+/** Prediction bar component */
+const PredictionBar = ({ percent1, percent2, team1, team2 }: { percent1: number; percent2: number; team1: string; team2: string }) => {
+  const total = percent1 + percent2;
+  if (total === 0) return <span className="text-[#D1D5DB] text-sm">—</span>;
+  
+  const w1 = Math.round((percent1 / total) * 100);
+  const w2 = 100 - w1;
+  const isTeam1Favored = percent1 >= percent2;
+
+  return (
+    <div className="space-y-1 min-w-[120px]">
+      <div className="flex items-center justify-between text-[10px] text-[#6B7280]">
+        <span className={isTeam1Favored ? 'font-bold text-[#111827]' : ''}>{percent1}%</span>
+        <span className={!isTeam1Favored ? 'font-bold text-[#111827]' : ''}>{percent2}%</span>
+      </div>
+      <div className="flex h-1.5 rounded-full overflow-hidden bg-[#F3F4F6]">
+        <div 
+          className={`transition-all duration-300 ${isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
+          style={{ width: `${w1}%` }}
+        />
+        <div 
+          className={`transition-all duration-300 ${!isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
+          style={{ width: `${w2}%` }}
+        />
+      </div>
+    </div>
+  );
 };
 
 const cardBaseStyle = {
@@ -506,6 +595,12 @@ export default function Matches() {
         : <ArrowDown className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={2} />;
     }
     return <ArrowUpDown className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />;
+  };
+
+  /** Format coefficient for display */
+  const formatCoeff = (coeff: number | null | undefined): string => {
+    if (coeff == null || coeff === 0) return '—';
+    return coeff.toFixed(2);
   };
 
   return (
@@ -846,7 +941,26 @@ export default function Matches() {
                             </TooltipContent>
                           </Tooltip>
                         </th>
-                        <th className="text-center py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Фаворит</th>
+                        <th className="text-center py-4 px-4 text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help">Прогноз</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                              <p className="text-sm">Відсоток прогнозу перемоги кожної команди</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </th>
+                        <th className="text-center py-4 px-4 text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help">Коеф.</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                              <p className="text-sm">Букмекерські коефіцієнти на перемогу</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </th>
                         <th className="text-center py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Позиції</th>
                         <th className="text-left py-4 px-5 text-sm font-medium text-[#6B7280] uppercase tracking-wider">Турнір</th>
                         <th className="text-center py-4 px-4 text-sm font-medium text-[#6B7280] uppercase tracking-wider">AI</th>
@@ -860,6 +974,11 @@ export default function Matches() {
                         const isFinished = match.matchStatus === 'finished';
                         const isLive = match.matchStatus === 'live';
 
+                        const hasPrediction = (match.predictionPercentTeam1 != null && match.predictionPercentTeam2 != null) &&
+                          ((match.predictionPercentTeam1 ?? 0) > 0 || (match.predictionPercentTeam2 ?? 0) > 0);
+                        const hasCoeffs = (match.bettingCoefficientTeam1 != null && match.bettingCoefficientTeam2 != null) &&
+                          ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
+
                         return (
                           <tr 
                             key={match.id} 
@@ -867,11 +986,19 @@ export default function Matches() {
                               isFinished ? 'opacity-60' : ''
                             } ${isLive ? 'bg-red-50/30' : ''}`}
                           >
-                            {/* Match */}
+                            {/* Match with logos */}
                             <td className="py-4 px-5">
                               <div className="space-y-1.5">
-                                <div className="font-medium text-[#111827] text-sm">
-                                  {match.team1} <span className="text-[#9CA3AF]">vs</span> {match.team2}
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={20} />
+                                    <span className="font-medium text-[#111827] text-sm">{match.team1}</span>
+                                  </div>
+                                  <span className="text-[#9CA3AF] text-xs">vs</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={20} />
+                                    <span className="font-medium text-[#111827] text-sm">{match.team2}</span>
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-lg px-2 py-0.5 text-xs font-medium">
@@ -931,9 +1058,46 @@ export default function Matches() {
                               {getStatusBadge(match.matchStatus)}
                             </td>
 
-                            {/* Favorite */}
-                            <td className="py-4 px-5 text-center">
-                              <span className="font-medium text-[#111827] text-sm">{match.favorite}</span>
+                            {/* Prediction % */}
+                            <td className="py-4 px-4 text-center">
+                              {hasPrediction ? (
+                                <PredictionBar
+                                  percent1={match.predictionPercentTeam1 ?? 0}
+                                  percent2={match.predictionPercentTeam2 ?? 0}
+                                  team1={match.team1}
+                                  team2={match.team2}
+                                />
+                              ) : (
+                                <span className="text-[#D1D5DB] text-sm">—</span>
+                              )}
+                            </td>
+
+                            {/* Betting Coefficients */}
+                            <td className="py-4 px-4 text-center">
+                              {hasCoeffs ? (
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center justify-center gap-1.5 text-xs">
+                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={14} />
+                                    <span className={`font-bold ${
+                                      (match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0)
+                                        ? 'text-[#22C55E]' : 'text-[#111827]'
+                                    }`}>
+                                      {formatCoeff(match.bettingCoefficientTeam1)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-center gap-1.5 text-xs">
+                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={14} />
+                                    <span className={`font-bold ${
+                                      (match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0)
+                                        ? 'text-[#22C55E]' : 'text-[#111827]'
+                                    }`}>
+                                      {formatCoeff(match.bettingCoefficientTeam2)}
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-[#D1D5DB] text-sm">—</span>
+                              )}
                             </td>
 
                             {/* Positions */}

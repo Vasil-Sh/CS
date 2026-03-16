@@ -17,6 +17,12 @@ export interface ApiMatch {
   lastChangeDateTeam2: string | null;
   positionTeam1: number | null;
   positionTeam2: number | null;
+  logoTeam1: string | null;
+  logoTeam2: string | null;
+  predictionPercentTeam1: number | null;
+  predictionPercentTeam2: number | null;
+  bettingCoefficientTeam1: number | null;
+  bettingCoefficientTeam2: number | null;
 }
 
 export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
