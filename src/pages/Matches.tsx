@@ -11,7 +11,6 @@ import {
   TrendingUp,
   TrendingDown,
   AlertTriangle,
-  Target,
   ArrowUpDown,
   Search,
   Loader2,
@@ -21,7 +20,6 @@ import {
   Eye,
   Lightbulb,
   Brain,
-  Info,
   ArrowUpRight,
   ArrowDownRight,
   Sun,
@@ -88,7 +86,6 @@ interface Match {
   matchType: 'Bo1' | 'Bo3' | 'Bo5';
   upsetProbability: number;
   url?: string;
-  // Fields from API
   score1?: number;
   score2?: number;
   matchStatus?: 'upcoming' | 'live' | 'finished';
@@ -102,9 +99,6 @@ interface Match {
   bettingCoefficientTeam2?: number | null;
 }
 
-/**
- * Convert API match to internal Match format
- */
 function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const matchType = parseMatchType(apiMatch.type);
   const context = parseMatchContext(apiMatch.type, apiMatch.link);
@@ -115,12 +109,10 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
   );
   const status = getMatchStatus(apiMatch);
 
-  // Calculate a rough confidence based on position difference
   const pos1 = apiMatch.positionTeam1 ?? 150;
   const pos2 = apiMatch.positionTeam2 ?? 150;
   const posDiff = Math.abs(pos1 - pos2);
 
-  // Use API prediction percentage if available, otherwise fallback to position-based calculation
   const pred1 = apiMatch.predictionPercentTeam1;
   const pred2 = apiMatch.predictionPercentTeam2;
   const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
@@ -128,26 +120,21 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
     : Math.min(85, 55 + Math.floor(posDiff * 0.3));
   
-  // Risk is inversely related to confidence
   const risk = Math.max(10, 100 - baseConfidence - Math.floor(Math.random() * 10));
 
-  // Win rate based on positions
   const winRate = hasPrediction
     ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
     : Math.min(80, Math.max(50, 50 + Math.floor(posDiff * 0.25)));
 
-  // Use betting coefficients for odds if available
   const coeff1 = apiMatch.bettingCoefficientTeam1;
   const coeff2 = apiMatch.bettingCoefficientTeam2;
   const hasCoeffs = coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
 
-  // Determine form stability based on lastChangeDate
   let formStability: FormStability = 'stable';
   const now = new Date();
   const team1Change = apiMatch.lastChangeDateTeam1 ? new Date(apiMatch.lastChangeDateTeam1) : null;
   const team2Change = apiMatch.lastChangeDateTeam2 ? new Date(apiMatch.lastChangeDateTeam2) : null;
   
-  // If favorite team had recent roster change, mark as inconsistent
   const favChange = favorite === apiMatch.nameTeam1 ? team1Change : team2Change;
   if (favChange) {
     const daysSinceChange = Math.floor((now.getTime() - favChange.getTime()) / (1000 * 60 * 60 * 24));
@@ -155,7 +142,6 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     else if (daysSinceChange <= 30) formStability = 'momentum';
   }
 
-  // If both teams are very close in ranking, it's riskier
   if (posDiff <= 10) {
     formStability = 'inconsistent';
   }
@@ -243,12 +229,6 @@ const getFormStabilityInfo = (form: FormStability) => {
   }
 };
 
-const getRiskColor = (risk: number): string => {
-  if (risk <= 30) return 'bg-[#F0FDF4] text-[#16A34A]';
-  if (risk <= 50) return 'bg-[#FFFBEB] text-[#D97706]';
-  return 'bg-[#FEF2F2] text-[#DC2626]';
-};
-
 const getStatusBadge = (status?: 'upcoming' | 'live' | 'finished') => {
   switch (status) {
     case 'live':
@@ -277,10 +257,6 @@ const getStatusBadge = (status?: 'upcoming' | 'live' | 'finished') => {
   }
 };
 
-/**
- * Get numeric priority for match status (lower = higher priority / shown first)
- * live = 0 (top), upcoming = 1, finished = 2 (bottom)
- */
 const getStatusPriority = (status?: 'upcoming' | 'live' | 'finished'): number => {
   switch (status) {
     case 'live': return 0;
@@ -291,34 +267,36 @@ const getStatusPriority = (status?: 'upcoming' | 'live' | 'finished'): number =>
 };
 
 /** Team logo component with fallback */
-const TeamLogo = ({ src, teamName, size = 22 }: { src?: string | null; teamName: string; size?: number }) => {
+const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName: string; size?: number }) => {
   if (!src) {
     return (
       <div 
-        className="flex items-center justify-center rounded-full bg-[#E5E7EB] text-[#374151] font-bold text-xs flex-shrink-0"
-        style={{ width: size, height: size }}
+        className="flex items-center justify-center rounded-lg bg-[#E5E7EB] text-[#374151] font-bold text-xs flex-shrink-0"
+        style={{ width: size, height: size, minWidth: size }}
       >
         {teamName.charAt(0).toUpperCase()}
       </div>
     );
   }
   return (
-    <img
-      src={src}
-      alt={teamName}
-      className="rounded-full object-cover flex-shrink-0 bg-[#E5E7EB]"
-      style={{ width: size, height: size }}
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-        const fallback = document.createElement('div');
-        fallback.className = 'flex items-center justify-center rounded-full bg-[#E5E7EB] text-[#374151] font-bold text-xs flex-shrink-0';
-        fallback.style.width = `${size}px`;
-        fallback.style.height = `${size}px`;
-        fallback.textContent = teamName.charAt(0).toUpperCase();
-        target.parentNode?.insertBefore(fallback, target);
-      }}
-    />
+    <div
+      className="flex items-center justify-center flex-shrink-0 rounded-lg bg-[#F3F4F6] overflow-hidden"
+      style={{ width: size, height: size, minWidth: size, padding: 2 }}
+    >
+      <img
+        src={src}
+        alt={teamName}
+        className="w-full h-full object-contain"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          const fallback = document.createElement('div');
+          fallback.className = 'flex items-center justify-center w-full h-full text-[#374151] font-bold text-xs';
+          fallback.textContent = teamName.charAt(0).toUpperCase();
+          target.parentNode?.appendChild(fallback);
+        }}
+      />
+    </div>
   );
 };
 
@@ -399,7 +377,6 @@ export default function Matches() {
     setIsDarkTheme(!isDarkTheme);
   };
 
-  // Load matches from API on mount
   useEffect(() => {
     loadMatchesFromApi();
     loadRiskyTeams();
@@ -523,12 +500,6 @@ export default function Matches() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  // Format date for display
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
-
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const hours = date.getHours();
@@ -538,11 +509,6 @@ export default function Matches() {
   };
 
   const todayStr = new Date().toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-  const safePicksCount = sortedMatches.filter(m => 
-    m.aiConfidence >= 80 && m.risk <= 30 && m.upsetProbability <= 15 &&
-    m.formStability !== 'falling' && m.formStability !== 'slump' && m.formStability !== 'inconsistent'
-  ).length;
 
   const liveCount = sortedMatches.filter(m => m.matchStatus === 'live').length;
   const upcomingCount = sortedMatches.filter(m => m.matchStatus === 'upcoming').length;
@@ -584,7 +550,6 @@ export default function Matches() {
     ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length)
     : 0;
 
-  /** Render sort indicator arrow for a column */
   const renderSortIndicator = (column: 'date' | 'confidence' | 'risk' | 'upset' | 'status') => {
     if (sortBy === column) {
       return sortOrder === 'asc' 
@@ -594,7 +559,6 @@ export default function Matches() {
     return <ArrowUpDown className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />;
   };
 
-  /** Format coefficient for display */
   const formatCoeff = (coeff: number | null | undefined): string => {
     if (coeff == null || coeff === 0) return '—';
     return coeff.toFixed(2);
@@ -611,7 +575,6 @@ export default function Matches() {
             </h1>
 
             <div className="flex items-center gap-3">
-              {/* Theme Switcher */}
               <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
                 <button
                   onClick={() => { if (isDarkTheme) toggleTheme(); }}
@@ -633,10 +596,8 @@ export default function Matches() {
                 </button>
               </div>
 
-              {/* Divider */}
               <div className="w-px h-8 bg-[#D1D5DB]" />
 
-              {/* User Info */}
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
                   <User className="h-4 w-4 text-white" strokeWidth={2} />
@@ -747,13 +708,12 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== MATCHES TABLE with INLINE FILTERS ===== */}
+          {/* ===== MATCHES TABLE ===== */}
           <Card 
             className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
-              {/* Row 1: Date + Refresh */}
               <div className="flex items-center justify-between mb-5">
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
                   <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -787,9 +747,7 @@ export default function Matches() {
                 </Tooltip>
               </div>
 
-              {/* Row 2: Inline compact filters */}
               <div className="flex items-center gap-3 flex-wrap">
-                {/* Search */}
                 <div className="relative flex-shrink-0">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
                   <Input
@@ -800,7 +758,6 @@ export default function Matches() {
                   />
                 </div>
 
-                {/* Status */}
                 <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
                   <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[130px] text-sm">
                     <SelectValue placeholder="Статус" />
@@ -813,7 +770,6 @@ export default function Matches() {
                   </SelectContent>
                 </Select>
 
-                {/* Tier */}
                 <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
                   <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[120px] text-sm">
                     <SelectValue placeholder="Tier" />
@@ -826,7 +782,6 @@ export default function Matches() {
                   </SelectContent>
                 </Select>
 
-                {/* Match Type */}
                 <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
                   <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[110px] text-sm">
                     <SelectValue placeholder="Формат" />
@@ -839,7 +794,6 @@ export default function Matches() {
                   </SelectContent>
                 </Select>
 
-                {/* Confidence */}
                 <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
                   <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[150px] text-sm">
                     <SelectValue placeholder="Впевненість" />
@@ -852,7 +806,6 @@ export default function Matches() {
                   </SelectContent>
                 </Select>
 
-                {/* Risk */}
                 <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
                   <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[130px] text-sm">
                     <SelectValue placeholder="Ризик" />
@@ -865,7 +818,6 @@ export default function Matches() {
                   </SelectContent>
                 </Select>
 
-                {/* Hot Matches Toggle */}
                 <Button
                   variant={showHotMatches ? "default" : "outline"}
                   onClick={() => setShowHotMatches(!showHotMatches)}
@@ -986,14 +938,14 @@ export default function Matches() {
                             {/* Match with logos */}
                             <td className="py-4 px-5">
                               <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1.5">
-                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={22} />
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={26} />
                                     <span className="font-semibold text-[#111827] text-base">{match.team1}</span>
                                   </div>
                                   <span className="text-[#4B5563] text-sm font-medium">vs</span>
-                                  <div className="flex items-center gap-1.5">
-                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={22} />
+                                  <div className="flex items-center gap-2">
+                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={26} />
                                     <span className="font-semibold text-[#111827] text-base">{match.team2}</span>
                                   </div>
                                 </div>
@@ -1019,10 +971,9 @@ export default function Matches() {
                               </div>
                             </td>
 
-                            {/* Time */}
+                            {/* Time — only time, no date */}
                             <td className="py-4 px-5 text-center">
                               <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
-                              <div className="text-sm text-[#4B5563]">{formatDate(match.date)}</div>
                             </td>
 
                             {/* Score */}
@@ -1072,9 +1023,9 @@ export default function Matches() {
                             {/* Betting Coefficients */}
                             <td className="py-4 px-4 text-center">
                               {hasCoeffs ? (
-                                <div className="space-y-1">
+                                <div className="space-y-1.5">
                                   <div className="flex items-center justify-center gap-2 text-sm">
-                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={16} />
+                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={20} />
                                     <span className={`font-bold ${
                                       (match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0)
                                         ? 'text-[#22C55E]' : 'text-[#111827]'
@@ -1083,7 +1034,7 @@ export default function Matches() {
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-center gap-2 text-sm">
-                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={16} />
+                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={20} />
                                     <span className={`font-bold ${
                                       (match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0)
                                         ? 'text-[#22C55E]' : 'text-[#111827]'
@@ -1114,7 +1065,7 @@ export default function Matches() {
                               <span className="text-sm text-[#374151] font-medium">{match.context}</span>
                             </td>
 
-                            {/* AI Recommendation — icon */}
+                            {/* AI Recommendation */}
                             <td className="py-4 px-4 text-center">
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -1131,7 +1082,7 @@ export default function Matches() {
                               </Tooltip>
                             </td>
 
-                            {/* Comment — blue icon */}
+                            {/* Comment */}
                             <td className="py-4 px-4 text-center">
                               {riskComments ? (
                                 <Tooltip>
@@ -1161,7 +1112,6 @@ export default function Matches() {
             </CardContent>
           </Card>
 
-          {/* AI Recommendation Modal */}
           <AIRecommendationModal
             open={aiModalOpen}
             onClose={() => setAiModalOpen(false)}
@@ -1170,7 +1120,6 @@ export default function Matches() {
             isLoading={aiLoading}
           />
 
-          {/* Comment Modal */}
           <CommentModal
             open={commentModalOpen}
             onClose={() => setCommentModalOpen(false)}
