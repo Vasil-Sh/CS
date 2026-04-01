@@ -1174,7 +1174,7 @@ export default function StrategyOverview() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="text-[#111827] font-medium">Критерії стратегії *</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-xl border-[#E5E7EB] font-medium text-[#374151]">
+                    <Button type="button" variant="outline" size="sm" onClick={addCriterion} className="rounded-xl bg-[#EFF6FF] border-[#DBEAFE] font-medium text-[#3B82F6] hover:bg-[#DBEAFE]">
                       <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                       Додати критерій
                     </Button>

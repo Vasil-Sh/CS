@@ -569,7 +569,7 @@ export default function GoalsManager() {
                               {getGoalIcon(goal.type)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-[#111827] text-base truncate">{goal.name}</p>
+                              <p className="font-semibold text-[#111827] text-base leading-tight">{goal.name}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">
                                   {getGoalTypeLabel(goal.type)}

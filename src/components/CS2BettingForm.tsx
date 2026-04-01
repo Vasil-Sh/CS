@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
@@ -665,7 +666,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         riskyTeams: formData.riskyTeams,
         notes: `${formData.reasoning}\n\nKey Factors: ${formData.keyFactors}\n\nNotes: ${formData.notes}`,
         goalId: finalGoalId,
-        winProbability: winProbability
+        winProbability: isNaN(winProbability) ? undefined : winProbability
       };
 
       await realGoogleSheetsService.addRecord(record);
@@ -760,6 +761,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const expectedValue = calculateExpectedValue();
   const potentialProfit = calculatePotentialProfit();
   const isValuePositive = parseFloat(expectedValue) > 0;
+  const hasConfidence = formData.confidence !== '' && !isNaN(parseFloat(formData.confidence));
 
   const getCurrencySymbol = () => {
     return '₴';
@@ -805,7 +807,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const inputClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";
   const selectTriggerClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] focus:border-[#111827] focus:ring-0 transition-colors";
   const labelClass = "text-sm font-medium text-[#374151]";
-  const sectionTitleClass = "text-base font-semibold text-[#111827] flex items-center gap-2.5";
+  const sectionTitleClass = "text-base font-semibold text-[#111827] flex items-center gap-2.5 bg-[#F3F4F6] px-4 py-2.5 rounded-2xl -mx-0";
 
   return (
     <div className="space-y-6">
@@ -944,52 +946,51 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     </div>
                   </div>
 
-                  {formData.betCategory === 'Ординар' && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="format" className={labelClass}>Формат</Label>
-                      <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                        <SelectTrigger className={selectTriggerClass}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="BO1">BO1</SelectItem>
-                          <SelectItem value="BO3">BO3</SelectItem>
-                          <SelectItem value="BO5">BO5</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  {/* Format + Goal on same row */}
+                  <div className={`grid gap-4 ${formData.betCategory === 'Ординар' && activeGoals.length > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                    {formData.betCategory === 'Ординар' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="format" className={labelClass}>Формат</Label>
+                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
+                          <SelectTrigger className={selectTriggerClass}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BO1">BO1</SelectItem>
+                            <SelectItem value="BO3">BO3</SelectItem>
+                            <SelectItem value="BO5">BO5</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
-                  {/* Goals */}
-                  {activeGoals.length > 0 && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-2`}>
-                        <Flag className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-                        Прив&apos;язати до цілі (необов&apos;язково)
-                      </Label>
-                      <Select 
-                        value={formData.goalId || 'all'} 
-                        onValueChange={(value) => {
-                          setFormData({...formData, goalId: value === 'all' ? '' : value});
-                        }}
-                      >
-                        <SelectTrigger className={selectTriggerClass}>
-                          <SelectValue placeholder="Оберіть ціль або залиште порожнім" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Без цілі</SelectItem>
-                          {activeGoals.map((goal) => (
-                            <SelectItem key={goal.id} value={goal.id}>
-                              {goal.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-[#9CA3AF] mt-1">
-                        Ця ставка буде враховуватись у прогресі обраної цілі
-                      </p>
-                    </div>
-                  )}
+                    {activeGoals.length > 0 && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-2`}>
+                          <Flag className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
+                          Ціль (необов&apos;язково)
+                        </Label>
+                        <Select 
+                          value={formData.goalId || 'all'} 
+                          onValueChange={(value) => {
+                            setFormData({...formData, goalId: value === 'all' ? '' : value});
+                          }}
+                        >
+                          <SelectTrigger className={selectTriggerClass}>
+                            <SelectValue placeholder="Оберіть ціль" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Без цілі</SelectItem>
+                            {activeGoals.map((goal) => (
+                              <SelectItem key={goal.id} value={goal.id}>
+                                {goal.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Divider */}
@@ -1162,7 +1163,26 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         </div>
                         
                         <div className="space-y-1.5">
-                          <Label htmlFor="confidence" className={labelClass}>Впевненість (%) <span className="text-[#EF4444]">*</span></Label>
+                          <Label htmlFor="confidence" className={`${labelClass} flex items-center gap-1.5`}>
+                            Впевненість (%)
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#E5E7EB] cursor-help">
+                                    <Info className="h-3 w-3 text-[#6B7280]" strokeWidth={2} />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[280px] text-sm">
+                                  <p className="font-medium mb-1">Ваша оцінка ймовірності виграшу</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Вкажіть від 1 до 100%, наскільки ви впевнені у цьому прогнозі. 
+                                    Це поле використовується для розрахунку Expected Value (EV) — математичної вигідності ставки. 
+                                    Поле необов&apos;язкове, але допомагає оцінити якість прогнозу.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </Label>
                           <Input
                             id="confidence"
                             type="number"
@@ -1171,7 +1191,6 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                             value={formData.confidence}
                             onChange={(e) => setFormData({...formData, confidence: e.target.value})}
                             placeholder="70"
-                            required
                             className={inputClass}
                           />
                         </div>
@@ -1317,7 +1336,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                 <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
               </div>
               <div className="p-6 space-y-4">
-                {formData.stake && formData.confidence && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
+                {formData.stake && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
                   <>
                     {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
                       <div className="p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
@@ -1337,60 +1356,72 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                       </div>
                     </div>
                     
-                    {/* EV Display */}
-                    <div className={`p-4 rounded-2xl border ${
-                      evVerdict.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
-                      evVerdict.color === 'yellow' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
-                      'bg-[#FEF2F2] border-[#FECACA]'
-                    }`}>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className={`text-sm font-medium ${
-                            evVerdict.color === 'green' ? 'text-[#166534]' :
-                            evVerdict.color === 'yellow' ? 'text-[#92400E]' :
-                            'text-[#991B1B]'
-                          }`}>
-                            {evVerdict.icon} {evVerdict.text}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setShowEVDetails(!showEVDetails)}
-                            className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-black/5 transition-colors"
-                          >
-                            {showEVDetails ? <ChevronUp className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />}
-                          </button>
-                        </div>
-                        <p className={`text-xs ${
-                          evVerdict.color === 'green' ? 'text-[#15803D]' :
-                          evVerdict.color === 'yellow' ? 'text-[#B45309]' :
-                          'text-[#B91C1C]'
-                        }`}>
-                          {evVerdict.description}
-                        </p>
-                        
-                        {showEVDetails && (
-                          <div className={`mt-3 pt-3 border-t ${
-                            evVerdict.color === 'green' ? 'border-[#BBF7D0]' :
-                            evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
-                            'border-[#FECACA]'
-                          }`}>
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-xs">
-                                <span className="text-[#6B7280]">Expected Value:</span>
-                                <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 font-medium ${
-                                  isValuePositive ? 'bg-[#22C55E] text-white hover:bg-[#22C55E]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
-                                }`}>
-                                  {isValuePositive ? '+' : ''}{expectedValue}%
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-[#6B7280]">
-                                EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
-                              </p>
-                            </div>
+                    {/* EV Display - only shown when confidence is provided */}
+                    {hasConfidence && (
+                      <div className={`p-4 rounded-2xl border ${
+                        evVerdict.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
+                        evVerdict.color === 'yellow' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
+                        'bg-[#FEF2F2] border-[#FECACA]'
+                      }`}>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className={`text-sm font-medium ${
+                              evVerdict.color === 'green' ? 'text-[#166534]' :
+                              evVerdict.color === 'yellow' ? 'text-[#92400E]' :
+                              'text-[#991B1B]'
+                            }`}>
+                              {evVerdict.icon} {evVerdict.text}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setShowEVDetails(!showEVDetails)}
+                              className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-black/5 transition-colors"
+                            >
+                              {showEVDetails ? <ChevronUp className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />}
+                            </button>
                           </div>
-                        )}
+                          <p className={`text-xs ${
+                            evVerdict.color === 'green' ? 'text-[#15803D]' :
+                            evVerdict.color === 'yellow' ? 'text-[#B45309]' :
+                            'text-[#B91C1C]'
+                          }`}>
+                            {evVerdict.description}
+                          </p>
+                          
+                          {showEVDetails && (
+                            <div className={`mt-3 pt-3 border-t ${
+                              evVerdict.color === 'green' ? 'border-[#BBF7D0]' :
+                              evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
+                              'border-[#FECACA]'
+                            }`}>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-[#6B7280]">Expected Value:</span>
+                                  <Badge className={`rounded-full border-0 text-xs px-2 py-0.5 font-medium ${
+                                    isValuePositive ? 'bg-[#22C55E] text-white hover:bg-[#22C55E]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
+                                  }`}>
+                                    {isValuePositive ? '+' : ''}{expectedValue}%
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-[#6B7280]">
+                                  EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Hint when no confidence */}
+                    {!hasConfidence && (
+                      <div className="p-3 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                        <p className="text-xs text-[#9CA3AF] flex items-center gap-1.5">
+                          <Info className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
+                          Вкажіть впевненість для розрахунку Expected Value (EV)
+                        </p>
+                      </div>
+                    )}
                     
                     <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
                       <div className="flex justify-between items-center">
@@ -1406,7 +1437,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     </div>
                     <p className="text-sm font-semibold text-[#111827] mb-1">Заповніть форму для розрахунків</p>
                     <p className="text-xs text-[#9CA3AF]">
-                      Введіть суму, впевненість та коефіцієнт
+                      Введіть суму та коефіцієнт
                     </p>
                   </div>
                 )}

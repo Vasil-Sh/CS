@@ -350,10 +350,6 @@ export default function MyBets() {
     }
   }, []);
 
-  const handleBankCardClick = useCallback(() => {
-    setBankModalOpen(true);
-  }, []);
-
   const sortedBets = useMemo(() => 
     [...recentBets].sort((a: Bet, b: Bet) => {
       if (a.result === 'Pending' && b.result !== 'Pending') return -1;
@@ -560,19 +556,13 @@ export default function MyBets() {
         {/* ===== QUICK STATS - Row 1 ===== */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           
-          {/* 1. Поточний банк */}
+          {/* 1. Поточний банк — removed edit button */}
           <div 
-            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
-            onClick={handleBankCardClick}
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative overflow-hidden"
             style={cardBaseStyle}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
-            <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-[#F3F4F6] group-hover:bg-[#111827] px-3 py-1.5 rounded-full transition-all duration-300">
-              <Pencil className="h-3.5 w-3.5 text-[#6B7280] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
-              <span className="text-xs font-medium text-[#6B7280] group-hover:text-white transition-colors duration-300">Редагувати</span>
-            </div>
-
             <div className="flex items-center gap-2 mb-3">
               <Wallet className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
@@ -593,28 +583,7 @@ export default function MyBets() {
             </div>
           </div>
 
-          {/* 2. Всього записів */}
-          <div 
-            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-            style={cardBaseStyle}
-            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-lg font-semibold text-[#111827]">Всього записів</span>
-            </div>
-            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
-              {stats.totalBets}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-[#9CA3AF]">
-                {activeBets.length > 0 ? `${activeBets.length} активних` : 'Немає активних'}
-              </span>
-            </div>
-          </div>
-
-          {/* 3. Профіт */}
+          {/* 2. Профіт (swapped with Всього записів) */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
@@ -636,6 +605,27 @@ export default function MyBets() {
               )}
               <span className={`text-base font-normal ${(stats.totalProfit || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                 {(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
+              </span>
+            </div>
+          </div>
+
+          {/* 3. Всього записів (swapped with Профіт) */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-lg font-semibold text-[#111827]">Всього записів</span>
+            </div>
+            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+              {stats.totalBets}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#9CA3AF]">
+                {activeBets.length > 0 ? `${activeBets.length} активних` : 'Немає активних'}
               </span>
             </div>
           </div>
