@@ -135,9 +135,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
   useEffect(() => {
     if (formData.team1 || formData.team2) {
-      checkRiskyTeams(formData.team1, formData.team2);
+      checkRiskyTeams(formData.team1, formData.team2, formData.game);
     }
-  }, [formData.team1, formData.team2]);
+  }, [formData.team1, formData.team2, formData.game]);
 
   const validateAgainstStrategy = () => {
     if (!primaryStrategy) {
@@ -230,7 +230,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       .replace(/[^a-z0-9]/g, '');
   };
 
-  const checkRiskyTeams = (team1: string, team2: string) => {
+  /** Map form game value to risky team game value */
+  const getGameFilterValue = (formGame: 'CS2' | 'Dota2'): string => {
+    return formGame === 'CS2' ? 'CS' : 'Dota';
+  };
+
+  const checkRiskyTeams = (team1: string, team2: string, currentGame: 'CS2' | 'Dota2') => {
     if (!team1 && !team2) {
       setFormData(prev => ({ ...prev, riskyTeams: [] }));
       return;
@@ -241,8 +246,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     
     const normalizedTeam1 = normalizeTeamName(team1);
     const normalizedTeam2 = normalizeTeamName(team2);
+    const gameFilter = getGameFilterValue(currentGame);
     
     savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
+      // Only show risky teams that match the currently selected game
+      if (riskyTeam.game !== gameFilter) return;
+
       const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
       
       if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
@@ -313,7 +322,8 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
             'iem', 'katowice', 'cologne', 'sydney', 'beijing',
             'major', 'championship', 'pgl', 'antwerp', 'stockholm',
             'faceit', 'london', 'eleague', 'dreamhack', 'masters',
-            'nodwin', 'clutch', 'series'
+            'nodwin', 'clutch', 'series',
+            'digital', 'crusade', 'draculan'
           ];
           
           let tournamentStartIndex = -1;
@@ -379,8 +389,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           
           const normalizedTeam1 = normalizeTeamName(result.team1);
           const normalizedTeam2 = normalizeTeamName(result.team2);
+          const gameFilter = 'Dota'; // Dota URL → filter by Dota game
           
           savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
+            // Only show risky teams matching the game
+            if (riskyTeam.game !== gameFilter) return;
+
             const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
             
             if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
@@ -415,8 +429,12 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
           
           const normalizedTeam1 = normalizeTeamName(result.team1);
           const normalizedTeam2 = normalizeTeamName(result.team2);
+          const gameFilter = 'CS'; // HLTV URL → filter by CS game
           
           savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
+            // Only show risky teams matching the game
+            if (riskyTeam.game !== gameFilter) return;
+
             const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
             
             if (normalizedTeam1 === normalizedRiskyTeam || normalizedTeam2 === normalizedRiskyTeam ||
@@ -1005,7 +1023,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         disabled={isParsingMatch || !formData.matchUrl}
                         className="rounded-2xl px-5 border-[#E5E7EB] hover:bg-[#F3F4F6] hover:border-[#D1D5DB] h-11 text-sm font-medium"
                       >
-                        {isParsingMatch ? 'Парсинг...' : 'Парсити'}
+                        {isParsingMatch ? 'Оновлення...' : 'Оновити'}
                       </Button>
                     </div>
                     <p className="text-xs text-[#9CA3AF]">
