@@ -26,7 +26,8 @@ import {
   Check,
   X,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ArrowRightLeft
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
@@ -66,6 +67,8 @@ interface DrawdownPeriod {
   maxDrawdown: number;
   recovery: boolean;
 }
+
+const ALL_STATUSES = ['БАН', 'Нестабільні', 'Обережно', 'Рідко', 'Надійна'] as const;
 
 const INITIAL_RISKY_TEAMS: RiskyTeam[] = [
   { name: 'Liquid', game: 'CS', status: 'БАН', notes: '' },
@@ -166,6 +169,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [editName, setEditName] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [editStatus, setEditStatus] = useState('');
+  const [editGame, setEditGame] = useState('');
+
+  // Status filters per game block
+  const [csStatusFilter, setCsStatusFilter] = useState<string>('all');
+  const [dotaStatusFilter, setDotaStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     localStorage.setItem('admin_risky_teams', JSON.stringify(riskyTeams));
@@ -254,6 +262,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditName(team.name);
     setEditNotes(team.notes);
     setEditStatus(team.status);
+    setEditGame(team.game);
   };
 
   const cancelEditing = () => {
@@ -261,24 +270,35 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditName('');
     setEditNotes('');
     setEditStatus('');
+    setEditGame('');
   };
 
   const saveEditing = () => {
     if (editingIndex === null || !editName.trim()) return;
     
+    const oldGame = riskyTeams[editingIndex].game;
     const updatedTeams = [...riskyTeams];
     updatedTeams[editingIndex] = {
       ...updatedTeams[editingIndex],
       name: editName.trim(),
       notes: editNotes,
-      status: editStatus
+      status: editStatus,
+      game: editGame
     };
     setRiskyTeams(updatedTeams);
     setEditingIndex(null);
+    
+    if (oldGame !== editGame) {
+      const targetLabel = editGame === 'CS' ? 'CS' : 'Dota 2';
+      toast.success(`Команду "${editName.trim()}" перенесено в блок ${targetLabel}`);
+    } else {
+      toast.success('Команду оновлено');
+    }
+    
     setEditName('');
     setEditNotes('');
     setEditStatus('');
-    toast.success('Команду оновлено');
+    setEditGame('');
   };
 
   const getStatusBadge = (status: string) => {
@@ -291,8 +311,28 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return 'bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] rounded-lg font-medium text-xs';
       case 'Рідко':
         return 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg font-medium text-xs';
+      case 'Надійна':
+        return 'bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg font-medium text-xs';
       default:
         return 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs';
+    }
+  };
+
+  const getStatusFilterBadge = (status: string, isActive: boolean) => {
+    const base = isActive ? 'ring-2 ring-offset-1' : 'opacity-70 hover:opacity-100';
+    switch (status) {
+      case 'БАН':
+        return `bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] ${isActive ? 'ring-[#FECACA]' : ''} ${base}`;
+      case 'Нестабільні':
+        return `bg-[#FFF7ED] text-[#EA580C] border border-[#FED7AA] ${isActive ? 'ring-[#FED7AA]' : ''} ${base}`;
+      case 'Обережно':
+        return `bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] ${isActive ? 'ring-[#FDE68A]' : ''} ${base}`;
+      case 'Рідко':
+        return `bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] ${isActive ? 'ring-[#BFDBFE]' : ''} ${base}`;
+      case 'Надійна':
+        return `bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0] ${isActive ? 'ring-[#BBF7D0]' : ''} ${base}`;
+      default:
+        return `bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] ${isActive ? 'ring-[#E5E7EB]' : ''} ${base}`;
     }
   };
 
@@ -492,17 +532,32 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const riskLevel = getRiskLevel();
   const volatilityLevel = riskMetrics.volatility > 30 ? 'high' : riskMetrics.volatility > 20 ? 'medium' : 'low';
 
-  const teamsByGame = {
-    CS: filteredTeams.filter(t => t.game === 'CS'),
-    Дота: filteredTeams.filter(t => t.game === 'Дота')
-  };
+  // Apply both search and status filters
+  const csTeams = filteredTeams.filter(t => t.game === 'CS' && (csStatusFilter === 'all' || t.status === csStatusFilter));
+  const dotaTeams = filteredTeams.filter(t => t.game === 'Дота' && (dotaStatusFilter === 'all' || t.status === dotaStatusFilter));
 
   const teamsByStatus = {
-    БАН: filteredTeams.filter(t => t.status === 'БАН'),
-    Нестабільні: filteredTeams.filter(t => t.status === 'Нестабільні'),
-    Обережно: filteredTeams.filter(t => t.status === 'Обережно'),
-    Рідко: filteredTeams.filter(t => t.status === 'Рідко')
+    'БАН': filteredTeams.filter(t => t.status === 'БАН'),
+    'Нестабільні': filteredTeams.filter(t => t.status === 'Нестабільні'),
+    'Обережно': filteredTeams.filter(t => t.status === 'Обережно'),
+    'Рідко': filteredTeams.filter(t => t.status === 'Рідко'),
+    'Надійна': filteredTeams.filter(t => t.status === 'Надійна')
   };
+
+  // Count statuses per game for filter badges
+  const csStatusCounts = useMemo(() => {
+    const csAll = filteredTeams.filter(t => t.game === 'CS');
+    const counts: Record<string, number> = { all: csAll.length };
+    ALL_STATUSES.forEach(s => { counts[s] = csAll.filter(t => t.status === s).length; });
+    return counts;
+  }, [filteredTeams]);
+
+  const dotaStatusCounts = useMemo(() => {
+    const dotaAll = filteredTeams.filter(t => t.game === 'Дота');
+    const counts: Record<string, number> = { all: dotaAll.length };
+    ALL_STATUSES.forEach(s => { counts[s] = dotaAll.filter(t => t.status === s).length; });
+    return counts;
+  }, [filteredTeams]);
 
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
@@ -516,6 +571,38 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     transform: 'scale(1.03)',
     boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
   };
+
+  const renderStatusFilter = (
+    currentFilter: string,
+    setFilter: (val: string) => void,
+    statusCounts: Record<string, number>
+  ) => (
+    <div className="flex flex-wrap items-center gap-1.5 mt-4">
+      <button
+        onClick={() => setFilter('all')}
+        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+          currentFilter === 'all'
+            ? 'bg-[#111827] text-white ring-2 ring-offset-1 ring-[#111827]'
+            : 'bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] opacity-70 hover:opacity-100'
+        }`}
+      >
+        Всі ({statusCounts.all})
+      </button>
+      {ALL_STATUSES.map(status => {
+        const count = statusCounts[status] || 0;
+        if (count === 0) return null;
+        return (
+          <button
+            key={status}
+            onClick={() => setFilter(currentFilter === status ? 'all' : status)}
+            className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${getStatusFilterBadge(status, currentFilter === status)}`}
+          >
+            {status} ({count})
+          </button>
+        );
+      })}
+    </div>
+  );
 
   const renderTeamCard = (team: RiskyTeam, globalIndex: number) => {
     const isEditing = editingIndex === globalIndex;
@@ -534,19 +621,39 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   placeholder="Назва команди"
                 />
               </div>
-              <div className="w-40">
+              <div className="w-36">
                 <label className="text-xs font-medium text-[#6B7280] mb-1 block">Статус</label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
                   className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
                 >
-                  <option value="БАН">БАН</option>
-                  <option value="Нестабільні">Нестабільні</option>
-                  <option value="Обережно">Обережно</option>
-                  <option value="Рідко">Рідко</option>
+                  {ALL_STATUSES.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
                 </select>
               </div>
+            </div>
+            {/* Game selector for transfer */}
+            <div>
+              <label className="text-xs font-medium text-[#6B7280] mb-1 flex items-center gap-1.5">
+                <ArrowRightLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Перенести в блок
+              </label>
+              <select
+                value={editGame}
+                onChange={(e) => setEditGame(e.target.value)}
+                className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
+              >
+                <option value="CS">🎯 CS</option>
+                <option value="Дота">🛡️ Дота</option>
+              </select>
+              {editGame !== team.game && (
+                <p className="text-xs text-[#2563EB] mt-1 flex items-center gap-1">
+                  <ArrowRightLeft className="h-3 w-3" strokeWidth={1.5} />
+                  Команду буде перенесено в блок {editGame === 'CS' ? 'CS' : 'Dota 2'}
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-[#6B7280] mb-1 block">Коментар</label>
@@ -734,7 +841,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </div>
 
         {/* Stats Cards for Teams */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
             style={cardBaseStyle}
@@ -743,7 +850,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           >
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-[#6B7280]">Всього команд</span>
+              <span className="text-sm font-medium text-[#6B7280]">Всього</span>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight">{riskyTeams.length}</div>
           </div>
@@ -758,7 +865,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
               <span className="text-sm font-medium text-[#6B7280]">БАН</span>
             </div>
-            <div className="text-4xl font-bold text-[#EF4444] tracking-tight">{teamsByStatus.БАН.length}</div>
+            <div className="text-4xl font-bold text-[#EF4444] tracking-tight">{teamsByStatus['БАН'].length}</div>
           </div>
 
           <div 
@@ -771,7 +878,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
               <span className="text-sm font-medium text-[#6B7280]">Нестабільні</span>
             </div>
-            <div className="text-4xl font-bold text-[#F59E0B] tracking-tight">{teamsByStatus.Нестабільні.length}</div>
+            <div className="text-4xl font-bold text-[#F59E0B] tracking-tight">{teamsByStatus['Нестабільні'].length}</div>
           </div>
 
           <div 
@@ -784,7 +891,20 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <div className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
               <span className="text-sm font-medium text-[#6B7280]">Обережно</span>
             </div>
-            <div className="text-4xl font-bold text-[#D97706] tracking-tight">{teamsByStatus.Обережно.length}</div>
+            <div className="text-4xl font-bold text-[#D97706] tracking-tight">{teamsByStatus['Обережно'].length}</div>
+          </div>
+
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+              <span className="text-sm font-medium text-[#6B7280]">Надійна</span>
+            </div>
+            <div className="text-4xl font-bold text-[#22C55E] tracking-tight">{teamsByStatus['Надійна'].length}</div>
           </div>
         </div>
 
@@ -841,10 +961,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
                     className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
                   >
-                    <option value="БАН">БАН</option>
-                    <option value="Нестабільні">Нестабільні</option>
-                    <option value="Обережно">Обережно</option>
-                    <option value="Рідко">Рідко</option>
+                    {ALL_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="md:col-span-2">
@@ -921,16 +1040,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   CS команди
                 </span>
                 <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
-                  {teamsByGame.CS.length}
+                  {csTeams.length}
                 </Badge>
               </CardTitle>
+              {renderStatusFilter(csStatusFilter, setCsStatusFilter, csStatusCounts)}
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {teamsByGame.CS.length === 0 ? (
-                  <p className="text-center text-[#9CA3AF] py-8 text-sm">Немає команд CS</p>
+                {csTeams.length === 0 ? (
+                  <p className="text-center text-[#9CA3AF] py-8 text-sm">
+                    {csStatusFilter !== 'all' ? `Немає CS команд зі статусом "${csStatusFilter}"` : 'Немає команд CS'}
+                  </p>
                 ) : (
-                  teamsByGame.CS.map((team) => {
+                  csTeams.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
                     return renderTeamCard(team, globalIndex);
                   })
@@ -953,16 +1075,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   Dota 2 команди
                 </span>
                 <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
-                  {teamsByGame.Дота.length}
+                  {dotaTeams.length}
                 </Badge>
               </CardTitle>
+              {renderStatusFilter(dotaStatusFilter, setDotaStatusFilter, dotaStatusCounts)}
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {teamsByGame.Дота.length === 0 ? (
-                  <p className="text-center text-[#9CA3AF] py-8 text-sm">Немає команд Dota 2</p>
+                {dotaTeams.length === 0 ? (
+                  <p className="text-center text-[#9CA3AF] py-8 text-sm">
+                    {dotaStatusFilter !== 'all' ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"` : 'Немає команд Dota 2'}
+                  </p>
                 ) : (
-                  teamsByGame.Дота.map((team) => {
+                  dotaTeams.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
                     return renderTeamCard(team, globalIndex);
                   })
