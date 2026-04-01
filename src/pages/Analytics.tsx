@@ -522,11 +522,11 @@ export default function Analytics() {
   };
 
   const tabs = [
-    { id: 'profit', label: 'Прибуток', icon: null },
+    { id: 'profit', label: 'Прибуток', icon: Wallet },
     { id: 'goals', label: 'Цілі', icon: Flag },
-    { id: 'odds', label: 'Коефіцієнти', icon: null },
-    { id: 'comparison', label: 'Періоди', icon: null },
-    { id: 'risks', label: 'Ризики', icon: null },
+    { id: 'odds', label: 'Коефіцієнти', icon: BarChart3 },
+    { id: 'comparison', label: 'Періоди', icon: Calendar },
+    { id: 'risks', label: 'Ризики', icon: AlertTriangle },
   ];
 
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
