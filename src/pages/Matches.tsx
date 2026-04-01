@@ -993,7 +993,6 @@ export default function Matches() {
                             {/* Time + Day */}
                             <td className={`py-4 px-5 text-center ${colDivider}`}>
                               <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
-                              <div className="text-sm text-[#4B5563]">{formatDateWithDay(match.date)}</div>
                             </td>
 
                             {/* Score */}
