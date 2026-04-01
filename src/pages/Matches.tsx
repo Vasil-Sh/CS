@@ -188,42 +188,42 @@ const getFormStabilityInfo = (form: FormStability) => {
     case 'hot_streak':
       return {
         icon: <Flame className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Hot Streak',
+        label: 'Серія перемог',
         color: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0',
         tooltip: '🔥 Команда у топ-формі з серією перемог. Висока ймовірність продовження успішної гри.'
       };
     case 'stable':
       return {
         icon: <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Stable',
+        label: 'Стабільна',
         color: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0',
         tooltip: '🛡️ Стабільна форма з передбачуваними результатами. Надійний вибір для ставок.'
       };
     case 'momentum':
       return {
         icon: <TrendingUp className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Momentum',
+        label: 'На підйомі',
         color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0',
         tooltip: '📈 Команда набирає темп і покращує результати. Позитивна динаміка.'
       };
     case 'falling':
       return {
         icon: <TrendingDown className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Falling',
+        label: 'Спад',
         color: 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0',
         tooltip: '📉 Команда втрачає форму з погіршенням результатів. Обережно зі ставками.'
       };
     case 'slump':
       return {
         icon: <AlertCircle className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Slump',
+        label: 'Криза',
         color: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0',
         tooltip: '⚠️ Команда у кризі з серією поразок. Високий ризик для ставок.'
       };
     case 'inconsistent':
       return {
         icon: <AlertTriangle className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: 'Inconsistent',
+        label: 'Нестабільна',
         color: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0',
         tooltip: '⚡ Непередбачувана форма зі змінними результатами. Складно прогнозувати.'
       };
@@ -350,6 +350,12 @@ const colDivider = 'border-r border-[#E5E7EB]';
 const getDayOfWeek = (date: Date): string => {
   const days = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
   return days[date.getDay()];
+};
+
+/** Truncate tournament name to a max length, adding ellipsis */
+const truncateTournament = (name: string, maxLen = 28): string => {
+  if (name.length <= maxLen) return name;
+  return name.slice(0, maxLen).trimEnd() + '…';
 };
 
 export default function Matches() {
@@ -583,6 +589,9 @@ export default function Matches() {
     if (coeff == null || coeff === 0) return '—';
     return coeff.toFixed(2);
   };
+
+  // Suppress unused variable warning
+  void formatDateWithDay;
 
   return (
     <TooltipProvider>
@@ -948,6 +957,9 @@ export default function Matches() {
                         const hasCoeffs = (match.bettingCoefficientTeam1 != null && match.bettingCoefficientTeam2 != null) &&
                           ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
 
+                        // Build form stability label with favorite team name
+                        const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
+
                         return (
                           <tr 
                             key={match.id} 
@@ -978,12 +990,13 @@ export default function Matches() {
                                   </Badge>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <Badge className={`${formInfo.color} rounded-lg px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1`}>
+                                      <Badge className={`${formInfo.color} rounded-lg px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1 max-w-[200px]`}>
                                         {formInfo.icon}
-                                        {formInfo.label}
+                                        <span className="truncate">{formLabelWithTeam}</span>
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
+                                      <p className="text-sm font-semibold mb-1">{match.favorite}</p>
                                       <p className="text-sm">{formInfo.tooltip}</p>
                                     </TooltipContent>
                                   </Tooltip>
@@ -1100,9 +1113,18 @@ export default function Matches() {
                               </div>
                             </td>
 
-                            {/* Tournament */}
-                            <td className={`py-4 px-5 ${colDivider}`}>
-                              <span className="text-sm text-[#374151] font-medium">{match.context}</span>
+                            {/* Tournament — compact with tooltip for full name */}
+                            <td className={`py-4 px-4 ${colDivider}`}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="text-xs text-[#374151] font-medium leading-tight block max-w-[140px] truncate cursor-help">
+                                    {truncateTournament(match.context)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-[300px] bg-[#111827] text-white p-3 rounded-xl">
+                                  <p className="text-sm">{match.context}</p>
+                                </TooltipContent>
+                              </Tooltip>
                             </td>
 
                             {/* AI Recommendation */}
