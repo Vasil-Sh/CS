@@ -221,15 +221,19 @@ class RealGoogleSheetsService {
     return [];
   }
 
-  // Get strategy by name
-  getStrategyByName(strategyName: string): CS2Strategy | null {
+  // Get strategy by name or ID
+  getStrategyByName(nameOrId: string): CS2Strategy | null {
     try {
       // Check custom strategies from localStorage
       const customStrategies = localStorage.getItem('customStrategies');
       if (customStrategies) {
         const strategies: CS2Strategy[] = JSON.parse(customStrategies);
-        const found = strategies.find(s => s.name === strategyName);
-        if (found) return found;
+        // Search by name first
+        const foundByName = strategies.find(s => s.name === nameOrId);
+        if (foundByName) return foundByName;
+        // Then search by ID
+        const foundById = strategies.find(s => s.id === nameOrId);
+        if (foundById) return foundById;
       }
       
       return null;

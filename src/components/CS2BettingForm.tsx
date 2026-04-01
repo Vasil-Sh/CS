@@ -107,12 +107,14 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   });
 
   useEffect(() => {
-    const primaryStrategyName = localStorage.getItem('primaryStrategy');
-    if (primaryStrategyName) {
-      const strategy = realGoogleSheetsService.getStrategyByName(primaryStrategyName);
+    // Load primary strategy from localStorage — value can be an ID (UUID) or a name
+    const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
+    if (savedPrimaryStrategy) {
+      // getStrategyByName now searches by both name and ID
+      const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
       if (strategy) {
         setPrimaryStrategy(strategy);
-        setFormData(prev => ({ ...prev, strategy: primaryStrategyName }));
+        setFormData(prev => ({ ...prev, strategy: strategy.name }));
       }
     }
 
@@ -139,6 +141,29 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
       checkRiskyTeams(formData.team1, formData.team2, formData.game);
     }
   }, [formData.team1, formData.team2, formData.game]);
+
+  // Listen for changes to primaryStrategy in localStorage (e.g. from StrategyOverview)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
+      if (savedPrimaryStrategy) {
+        const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
+        if (strategy) {
+          setPrimaryStrategy(strategy);
+          setFormData(prev => ({ ...prev, strategy: strategy.name }));
+        } else {
+          setPrimaryStrategy(null);
+          setFormData(prev => ({ ...prev, strategy: '' }));
+        }
+      } else {
+        setPrimaryStrategy(null);
+        setFormData(prev => ({ ...prev, strategy: '' }));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const validateAgainstStrategy = () => {
     if (!primaryStrategy) {
