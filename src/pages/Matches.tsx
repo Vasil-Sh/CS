@@ -266,12 +266,12 @@ const getStatusPriority = (status?: 'upcoming' | 'live' | 'finished'): number =>
   }
 };
 
-/** Team logo component with fallback */
+/** Team logo component — no clipping, object-contain with padding */
 const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName: string; size?: number }) => {
   if (!src) {
     return (
       <div 
-        className="flex items-center justify-center rounded-lg bg-[#E5E7EB] text-[#374151] font-bold text-xs flex-shrink-0"
+        className="flex items-center justify-center rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs flex-shrink-0"
         style={{ width: size, height: size, minWidth: size }}
       >
         {teamName.charAt(0).toUpperCase()}
@@ -280,8 +280,8 @@ const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName:
   }
   return (
     <div
-      className="flex items-center justify-center flex-shrink-0 rounded-lg bg-[#F3F4F6] overflow-hidden"
-      style={{ width: size, height: size, minWidth: size, padding: 2 }}
+      className="flex items-center justify-center flex-shrink-0"
+      style={{ width: size, height: size, minWidth: size }}
     >
       <img
         src={src}
@@ -291,7 +291,7 @@ const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName:
           const target = e.target as HTMLImageElement;
           target.style.display = 'none';
           const fallback = document.createElement('div');
-          fallback.className = 'flex items-center justify-center w-full h-full text-[#374151] font-bold text-xs';
+          fallback.className = 'flex items-center justify-center w-full h-full rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs';
           fallback.textContent = teamName.charAt(0).toUpperCase();
           target.parentNode?.appendChild(fallback);
         }}
@@ -341,6 +341,15 @@ const cardHoverStyle = {
 };
 
 const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
+
+/** Column divider style — right border */
+const colDivider = 'border-r border-[#E5E7EB]';
+
+/** Get Ukrainian day of week short name */
+const getDayOfWeek = (date: Date): string => {
+  const days = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  return days[date.getDay()];
+};
 
 export default function Matches() {
   const currentUser = localStorage.getItem('username') || '';
@@ -508,7 +517,17 @@ export default function Matches() {
     return date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const todayStr = new Date().toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  /** Format date with day of week: "Вт, 01.04.2026" */
+  const formatDateWithDay = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = getDayOfWeek(date);
+    const formatted = date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `${day}, ${formatted}`;
+  };
+
+  const today = new Date();
+  const todayDayName = getDayOfWeek(today);
+  const todayStr = `${todayDayName}, ${today.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
 
   const liveCount = sortedMatches.filter(m => m.matchStatus === 'live').length;
   const upcomingCount = sortedMatches.filter(m => m.matchStatus === 'upcoming').length;
@@ -854,12 +873,12 @@ export default function Matches() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                        <th className="text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider">Матч</th>
+                        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
                         <th 
-                          className="text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors rounded-lg select-none" 
+                          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
                           onClick={() => toggleSort('date')}
                         >
                           <div className="flex items-center justify-center gap-1.5">
@@ -867,9 +886,9 @@ export default function Matches() {
                             {renderSortIndicator('date')}
                           </div>
                         </th>
-                        <th className="text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider">Рахунок</th>
+                        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
                         <th 
-                          className="text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors rounded-lg select-none"
+                          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
                           onClick={() => toggleSort('status')}
                         >
                           <Tooltip>
@@ -890,7 +909,7 @@ export default function Matches() {
                             </TooltipContent>
                           </Tooltip>
                         </th>
-                        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">
+                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-help">Прогноз</span>
@@ -900,7 +919,7 @@ export default function Matches() {
                             </TooltipContent>
                           </Tooltip>
                         </th>
-                        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">
+                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-help">Коеф.</span>
@@ -910,9 +929,9 @@ export default function Matches() {
                             </TooltipContent>
                           </Tooltip>
                         </th>
-                        <th className="text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider">Позиції</th>
-                        <th className="text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider">Турнір</th>
-                        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">AI</th>
+                        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Позиції</th>
+                        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
+                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
                         <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">Нотатки</th>
                       </tr>
                     </thead>
@@ -936,16 +955,16 @@ export default function Matches() {
                             } ${isLive ? 'bg-red-50/30' : ''}`}
                           >
                             {/* Match with logos */}
-                            <td className="py-4 px-5">
+                            <td className={`py-4 px-5 ${colDivider}`}>
                               <div className="space-y-2">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-2">
-                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={26} />
+                                  <div className="flex items-center gap-2.5">
+                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={28} />
                                     <span className="font-semibold text-[#111827] text-base">{match.team1}</span>
                                   </div>
                                   <span className="text-[#4B5563] text-sm font-medium">vs</span>
-                                  <div className="flex items-center gap-2">
-                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={26} />
+                                  <div className="flex items-center gap-2.5">
+                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={28} />
                                     <span className="font-semibold text-[#111827] text-base">{match.team2}</span>
                                   </div>
                                 </div>
@@ -958,7 +977,7 @@ export default function Matches() {
                                   </Badge>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <Badge className={`${formInfo.color} px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1`}>
+                                      <Badge className={`${formInfo.color} rounded-lg px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1`}>
                                         {formInfo.icon}
                                         {formInfo.label}
                                       </Badge>
@@ -971,13 +990,14 @@ export default function Matches() {
                               </div>
                             </td>
 
-                            {/* Time — only time, no date */}
-                            <td className="py-4 px-5 text-center">
+                            {/* Time + Day */}
+                            <td className={`py-4 px-5 text-center ${colDivider}`}>
                               <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
+                              <div className="text-sm text-[#4B5563]">{formatDateWithDay(match.date)}</div>
                             </td>
 
                             {/* Score */}
-                            <td className="py-4 px-5 text-center">
+                            <td className={`py-4 px-5 text-center ${colDivider}`}>
                               {(match.score1 !== undefined && match.score2 !== undefined && (match.score1 > 0 || match.score2 > 0 || isLive || isFinished)) ? (
                                 <div className="flex items-center justify-center gap-1">
                                   <span className={`text-xl font-bold ${
@@ -1002,12 +1022,12 @@ export default function Matches() {
                             </td>
 
                             {/* Status */}
-                            <td className="py-4 px-5 text-center">
+                            <td className={`py-4 px-5 text-center ${colDivider}`}>
                               {getStatusBadge(match.matchStatus)}
                             </td>
 
                             {/* Prediction % */}
-                            <td className="py-4 px-4 text-center">
+                            <td className={`py-4 px-4 text-center ${colDivider}`}>
                               {hasPrediction ? (
                                 <PredictionBar
                                   percent1={match.predictionPercentTeam1 ?? 0}
@@ -1021,10 +1041,10 @@ export default function Matches() {
                             </td>
 
                             {/* Betting Coefficients */}
-                            <td className="py-4 px-4 text-center">
+                            <td className={`py-4 px-4 text-center ${colDivider}`}>
                               {hasCoeffs ? (
                                 <div className="space-y-1.5">
-                                  <div className="flex items-center justify-center gap-2 text-sm">
+                                  <div className="flex items-center justify-center gap-2.5 text-sm">
                                     <TeamLogo src={match.logoTeam1} teamName={match.team1} size={20} />
                                     <span className={`font-bold ${
                                       (match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0)
@@ -1033,7 +1053,7 @@ export default function Matches() {
                                       {formatCoeff(match.bettingCoefficientTeam1)}
                                     </span>
                                   </div>
-                                  <div className="flex items-center justify-center gap-2 text-sm">
+                                  <div className="flex items-center justify-center gap-2.5 text-sm">
                                     <TeamLogo src={match.logoTeam2} teamName={match.team2} size={20} />
                                     <span className={`font-bold ${
                                       (match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0)
@@ -1049,7 +1069,7 @@ export default function Matches() {
                             </td>
 
                             {/* Positions */}
-                            <td className="py-4 px-5 text-center">
+                            <td className={`py-4 px-5 text-center ${colDivider}`}>
                               <div className="space-y-1">
                                 <div className="text-sm text-[#374151]">
                                   {match.team1}: <span className="font-bold text-[#111827]">#{match.positionTeam1 ?? '—'}</span>
@@ -1061,12 +1081,12 @@ export default function Matches() {
                             </td>
 
                             {/* Tournament */}
-                            <td className="py-4 px-5">
+                            <td className={`py-4 px-5 ${colDivider}`}>
                               <span className="text-sm text-[#374151] font-medium">{match.context}</span>
                             </td>
 
                             {/* AI Recommendation */}
-                            <td className="py-4 px-4 text-center">
+                            <td className={`py-4 px-4 text-center ${colDivider}`}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <button

@@ -4,7 +4,6 @@ node_modules/
 .pnp.js
 
 # Production builds
-/dist
 /build
 
 # Environment variables
@@ -74,7 +73,6 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -107,7 +105,6 @@ ehthumbs.db
 Thumbs.db
 
 # Vite
-dist-ssr
 *.local
 
 # Tailwind CSS
