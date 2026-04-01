@@ -29,7 +29,8 @@ import {
   CheckCircle2,
   Radio,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -1035,7 +1036,17 @@ export default function Matches() {
                                   team2={match.team2}
                                 />
                               ) : (
-                                <span className="text-[#9CA3AF] text-base">—</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                                      —
+                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+                                    <p className="text-sm">Прогноз ще недоступний — дані з'являться ближче до початку матчу</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </td>
 
@@ -1063,7 +1074,17 @@ export default function Matches() {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-[#9CA3AF] text-base">—</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                                      —
+                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+                                    <p className="text-sm">Коефіцієнти ще не виставлені букмекерами</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </td>
 
@@ -1101,7 +1122,7 @@ export default function Matches() {
                               </Tooltip>
                             </td>
 
-                            {/* Comment */}
+                            {/* Comment / Notes */}
                             <td className="py-4 px-4 text-center">
                               {riskComments ? (
                                 <Tooltip>
@@ -1118,7 +1139,17 @@ export default function Matches() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="text-[#9CA3AF] text-base">—</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                                      —
+                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[240px] bg-[#111827] text-white p-3 rounded-xl">
+                                    <p className="text-sm">Жодна з команд не внесена до списку ризикових — нотатки відсутні</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </td>
                           </tr>
