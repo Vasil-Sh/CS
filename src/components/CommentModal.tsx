@@ -16,17 +16,6 @@ export default function CommentModal({
 }: CommentModalProps) {
   const commentLines = comment.split('\n').filter(line => line.trim());
 
-  const getAccentColor = (line: string) => {
-    if (line.includes('🔴')) return '#EF4444';
-    if (line.includes('🟠')) return '#F97316';
-    if (line.includes('🟡')) return '#EAB308';
-    return '#3B82F6';
-  };
-
-  const removeEmojis = (text: string) => {
-    return text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
-  };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md rounded-2xl border border-[#E5E7EB] shadow-xl bg-white p-0 gap-0">
@@ -45,33 +34,18 @@ export default function CommentModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Content */}
-        <div className="px-6 pb-6 space-y-3">
-          {commentLines.map((line, index) => {
-            if (!line.trim()) return null;
-            
-            const parts = line.split(':');
-            const teamPart = parts[0]?.trim() || '';
-            const commentPart = parts.slice(1).join(':').trim() || '';
-            const accentColor = getAccentColor(line);
-
-            return (
-              <div 
+        {/* Content — simple text block */}
+        <div className="px-6 pb-6">
+          <div className="rounded-xl bg-[#F9FAFB] px-5 py-4 space-y-2">
+            {commentLines.map((line, index) => (
+              <p 
                 key={index}
-                className="rounded-xl bg-[#F9FAFB] px-4 py-3 border-l-[3px]"
-                style={{ borderLeftColor: accentColor }}
+                className="text-[15px] leading-relaxed text-[#111827]"
               >
-                <p className="font-semibold text-sm text-[#111827]">
-                  {removeEmojis(teamPart)}
-                </p>
-                {commentPart && (
-                  <p className="text-sm text-[#6B7280] mt-1 leading-relaxed">
-                    {commentPart}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+                {line.trim()}
+              </p>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
