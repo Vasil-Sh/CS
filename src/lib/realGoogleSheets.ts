@@ -23,6 +23,7 @@ export interface CS2BettingRecord {
   exchangeRate?: number | null;
   originalProfit?: number;
   createdAt?: number; // ДОДАНО: timestamp для точного сортування
+  winProbability?: number; // ДОДАНО: імовірність виграшу
 }
 
 export type ActionMode = 'warning' | 'block';
@@ -303,10 +304,11 @@ class RealGoogleSheetsService {
         originalAmount: record.originalAmount,
         exchangeRate: record.exchangeRate,
         originalProfit: record.originalProfit,
-        createdAt: timestamp // ДОДАНО: зберігаємо точний час створення
+        createdAt: timestamp, // ДОДАНО: зберігаємо точний час створення
+        winProbability: record.winProbability // ДОДАНО: зберігаємо імовірність виграшу
       };
       
-      console.log('💾 Saving record with timestamp:', newRecord.createdAt);
+      console.log('💾 Saving record with timestamp:', newRecord.createdAt, 'winProbability:', newRecord.winProbability);
       
       existingData.push(newRecord);
       localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));

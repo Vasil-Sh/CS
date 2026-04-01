@@ -128,6 +128,29 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
     console.log('📋 Loaded active goals:', active.length, active);
   };
 
+  // Helper: find the last stake amount used for a given goalId
+  const getLastStakeForGoal = (goalId: string): string => {
+    try {
+      const allRecords = realGoogleSheetsService.getAllRecords();
+      // Filter records that belong to this goal, sorted by createdAt desc (newest first)
+      const goalRecords = allRecords
+        .filter((r) => r.goalId === goalId)
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      
+      if (goalRecords.length > 0) {
+        const lastRecord = goalRecords[0];
+        // Prefer originalAmount (user-entered amount before currency conversion), fallback to amount
+        const lastAmount = lastRecord.originalAmount ?? lastRecord.amount;
+        if (lastAmount && lastAmount > 0) {
+          return String(lastAmount);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting last stake for goal:', error);
+    }
+    return '';
+  };
+
   useEffect(() => {
     if (primaryStrategy) {
       validateAgainstStrategy();
@@ -1000,7 +1023,17 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                         <Select 
                           value={formData.goalId || 'all'} 
                           onValueChange={(value) => {
-                            setFormData({...formData, goalId: value === 'all' ? '' : value});
+                            const selectedGoalId = value === 'all' ? '' : value;
+                            // Auto-fill stake from the last bet of the selected goal
+                            if (selectedGoalId) {
+                              const lastStake = getLastStakeForGoal(selectedGoalId);
+                              if (lastStake) {
+                                setFormData(prev => ({ ...prev, goalId: selectedGoalId, stake: lastStake }));
+                                toast.info(`Суму автоматично заповнено з останнього прогнозу цілі: ${lastStake} ₴`);
+                                return;
+                              }
+                            }
+                            setFormData(prev => ({ ...prev, goalId: selectedGoalId }));
                           }}
                         >
                           <SelectTrigger className={selectTriggerClass}>
