@@ -221,6 +221,9 @@ export default function Admin() {
 
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
+  // Common border class for vertical dividers between columns (not on last column)
+  const cellBorder = 'border-r border-[#E5E7EB]';
+
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
 
@@ -488,13 +491,13 @@ export default function Admin() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Telegram</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Username</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Ціна</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Дата початку</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Дата закінчення</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Статус</TableHead>
+                <TableRow className="bg-[#F9FAFB] border-b border-[#D1D5DB]">
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Telegram</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Username</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Ціна</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата початку</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата закінчення</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Статус</TableHead>
                   <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Адмін</TableHead>
                 </TableRow>
               </TableHeader>
@@ -521,38 +524,38 @@ export default function Admin() {
                   users.map((user, index) => (
                     <TableRow 
                       key={index} 
-                      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${
+                      className={`border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors ${
                         user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
                           ? 'bg-[#FFFBEB]/50'
                           : ''
                       }`}
                     >
-                      <TableCell className="font-medium text-[#111827] py-4 px-5 text-sm">{renderTelegram(user.telegram)}</TableCell>
-                      <TableCell className="text-[#6B7280] py-4 px-5 text-sm">
+                      <TableCell className={`font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}`}>{renderTelegram(user.telegram)}</TableCell>
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderUsername(user.username)}
                         {user.isAdmin && (
                           <span className="ml-1.5">👑</span>
                         )}
                       </TableCell>
-                      <TableCell className="py-4 px-5">
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
                           <DollarSign className="mr-1 h-3.5 w-3.5" strokeWidth={1.5} />
                           {user.priceMonth}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-[#6B7280] py-4 px-5 text-sm">
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
                           {user.startDate}
                         </div>
                       </TableCell>
-                      <TableCell className="text-[#6B7280] py-4 px-5 text-sm">
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
                           {user.endDate}
                         </div>
                       </TableCell>
-                      <TableCell className="py-4 px-5">
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         {getExpiryBadge(user)}
                       </TableCell>
                       <TableCell className="py-4 px-5">
