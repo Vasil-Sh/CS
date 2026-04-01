@@ -497,31 +497,82 @@ export default function StrategyOverview() {
 
   const renderSparkline = (profitHistory?: number[]) => {
     if (!profitHistory || profitHistory.length < 2) {
-      return <div className="h-8 flex items-center justify-center text-xs text-[#9CA3AF]">Немає даних</div>;
+      return <div className="h-10 flex items-center justify-center text-xs text-[#9CA3AF]">Немає даних</div>;
     }
 
     const max = Math.max(...profitHistory);
     const min = Math.min(...profitHistory);
     const range = max - min || 1;
+    const padding = 4; // padding in pixel-like units for the SVG
+    const width = 200;
+    const height = 40;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
 
     const points = profitHistory.map((value, index) => {
-      const x = (index / (profitHistory.length - 1)) * 100;
-      const y = 100 - ((value - min) / range) * 100;
-      return `${x},${y}`;
-    }).join(' ');
+      const x = padding + (index / (profitHistory.length - 1)) * chartWidth;
+      const y = padding + (1 - (value - min) / range) * chartHeight;
+      return { x, y };
+    });
+
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+
+    // Create area fill path (closed shape under the line)
+    const areaD = pathD + ` L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
 
     const lastValue = profitHistory[profitHistory.length - 1];
-    const prevValue = profitHistory[profitHistory.length - 2];
-    const trend = lastValue > prevValue ? 'up' : lastValue < prevValue ? 'down' : 'neutral';
+    const firstValue = profitHistory[0];
+    const trend = lastValue >= firstValue ? 'up' : 'down';
+    const strokeColor = trend === 'up' ? '#22C55E' : '#EF4444';
+    const fillColor = trend === 'up' ? '#22C55E' : '#EF4444';
+    const gradientId = `sparkline-gradient-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Last point for the dot indicator
+    const lastPoint = points[points.length - 1];
 
     return (
-      <div className="relative h-8">
-        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
-          <polyline
-            points={points}
+      <div className="relative h-10">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-full"
+          preserveAspectRatio="none"
+          style={{ overflow: 'visible' }}
+        >
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={fillColor} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={fillColor} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          {/* Area fill */}
+          <path
+            d={areaD}
+            fill={`url(#${gradientId})`}
+          />
+          {/* Main line */}
+          <path
+            d={pathD}
             fill="none"
-            stroke={trend === 'up' ? '#22C55E' : trend === 'down' ? '#EF4444' : '#6B7280'}
+            stroke={strokeColor}
             strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          {/* End dot */}
+          <circle
+            cx={lastPoint.x}
+            cy={lastPoint.y}
+            r="3"
+            fill={strokeColor}
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={lastPoint.x}
+            cy={lastPoint.y}
+            r="5"
+            fill={strokeColor}
+            opacity="0.3"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
