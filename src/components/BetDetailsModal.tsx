@@ -150,7 +150,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       return text;
     } else {
       const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
-      const winProbability = bet.winProbability || 65;
+      const winProbability = bet.winProbability != null && !isNaN(bet.winProbability) ? bet.winProbability : null;
       
       let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
       text += `📊 Тип прогнозу: ${bet.betType}\n`;
@@ -161,7 +161,12 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       
       text += `💰 Коефіцієнт: ${bet.odds.toFixed(2)}\n`;
       text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
-      text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
+      
+      if (winProbability !== null) {
+        text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
+      } else {
+        text += `\n`;
+      }
       
       const matchUrl = bet.matchUrl || '';
       if (matchUrl) {
