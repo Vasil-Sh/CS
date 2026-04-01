@@ -267,7 +267,7 @@ const getStatusPriority = (status?: 'upcoming' | 'live' | 'finished'): number =>
   }
 };
 
-/** Team logo component — no clipping, object-contain with padding */
+/** Team logo component */
 const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName: string; size?: number }) => {
   if (!src) {
     return (
@@ -356,6 +356,20 @@ const getDayOfWeek = (date: Date): string => {
 const truncateTournament = (name: string, maxLen = 28): string => {
   if (name.length <= maxLen) return name;
   return name.slice(0, maxLen).trimEnd() + '…';
+};
+
+/** Format date key for grouping: "YYYY-MM-DD" */
+const getDateKey = (dateStr: string): string => {
+  const d = new Date(dateStr);
+  return d.toISOString().split('T')[0];
+};
+
+/** Format date group header: "Ср, 01.04.2026" */
+const formatDateGroupHeader = (dateKey: string): string => {
+  const d = new Date(dateKey + 'T12:00:00');
+  const dayShort = getDayOfWeek(d);
+  const formatted = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return `${dayShort}, ${formatted}`;
 };
 
 export default function Matches() {
@@ -480,6 +494,7 @@ export default function Matches() {
     setCommentModalOpen(true);
   };
 
+  // Apply filters
   const filteredMatches = matches.filter(match => {
     if (filterTier !== 'all' && match.tier !== filterTier) return false;
     if (filterConfidence === 'high' && match.aiConfidence <= 80) return false;
@@ -496,6 +511,7 @@ export default function Matches() {
     return true;
   });
 
+  // Sort matches
   const sortedMatches = [...filteredMatches].sort((a, b) => {
     let comparison = 0;
     switch (sortBy) {
@@ -516,6 +532,19 @@ export default function Matches() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
+  // Separate live and non-live matches
+  const liveMatches = sortedMatches.filter(m => m.matchStatus === 'live');
+  const nonLiveMatches = sortedMatches.filter(m => m.matchStatus !== 'live');
+
+  // Group non-live matches by date
+  const groupedByDate: Record<string, Match[]> = {};
+  nonLiveMatches.forEach(match => {
+    const key = getDateKey(match.date);
+    if (!groupedByDate[key]) groupedByDate[key] = [];
+    groupedByDate[key].push(match);
+  });
+  const sortedDateKeys = Object.keys(groupedByDate).sort();
+
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const hours = date.getHours();
@@ -523,18 +552,6 @@ export default function Matches() {
     if (hours === 0 && minutes === 0) return 'TBD';
     return date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   };
-
-  /** Format date with day of week: "Вт, 01.04.2026" */
-  const formatDateWithDay = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const day = getDayOfWeek(date);
-    const formatted = date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${day}, ${formatted}`;
-  };
-
-  const today = new Date();
-  const todayDayName = getDayOfWeek(today);
-  const todayStr = `${todayDayName}, ${today.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
 
   const liveCount = sortedMatches.filter(m => m.matchStatus === 'live').length;
   const upcomingCount = sortedMatches.filter(m => m.matchStatus === 'upcoming').length;
@@ -590,8 +607,284 @@ export default function Matches() {
     return coeff.toFixed(2);
   };
 
-  // Suppress unused variable warning
-  void formatDateWithDay;
+  /** Render a single match row */
+  const renderMatchRow = (match: Match) => {
+    const formInfo = getFormStabilityInfo(match.formStability);
+    const riskComments = getMatchRiskComments(match.team1, match.team2);
+    const isFinished = match.matchStatus === 'finished';
+    const isLive = match.matchStatus === 'live';
+
+    const hasPrediction = (match.predictionPercentTeam1 != null && match.predictionPercentTeam2 != null) &&
+      ((match.predictionPercentTeam1 ?? 0) > 0 || (match.predictionPercentTeam2 ?? 0) > 0);
+    const hasCoeffs = (match.bettingCoefficientTeam1 != null && match.bettingCoefficientTeam2 != null) &&
+      ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
+
+    const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
+
+    return (
+      <tr 
+        key={match.id} 
+        className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${
+          isFinished ? 'opacity-60' : ''
+        } ${isLive ? 'bg-red-50/30' : ''}`}
+      >
+        <td className={`py-4 px-5 ${colDivider}`}>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <TeamLogo src={match.logoTeam1} teamName={match.team1} size={28} />
+                <span className="font-semibold text-[#111827] text-base">{match.team1}</span>
+              </div>
+              <span className="text-[#4B5563] text-sm font-medium">vs</span>
+              <div className="flex items-center gap-2.5">
+                <TeamLogo src={match.logoTeam2} teamName={match.team2} size={28} />
+                <span className="font-semibold text-[#111827] text-base">{match.team2}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-lg px-2 py-0.5 text-xs font-semibold">
+                {match.matchType}
+              </Badge>
+              <Badge className="bg-[#111827] text-white border-0 rounded-lg px-2 py-0.5 text-xs font-semibold uppercase">
+                {match.tier}
+              </Badge>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge className={`${formInfo.color} rounded-lg px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1 max-w-[200px]`}>
+                    {formInfo.icon}
+                    <span className="truncate">{formLabelWithTeam}</span>
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
+                  <p className="text-sm font-semibold mb-1">{match.favorite}</p>
+                  <p className="text-sm">{formInfo.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        </td>
+
+        <td className={`py-4 px-5 text-center ${colDivider}`}>
+          <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
+        </td>
+
+        <td className={`py-4 px-5 text-center ${colDivider}`}>
+          {(match.score1 !== undefined && match.score2 !== undefined && (match.score1 > 0 || match.score2 > 0 || isLive || isFinished)) ? (
+            <div className="flex items-center justify-center gap-1">
+              <span className={`text-xl font-bold ${
+                isFinished && match.score1 > match.score2 ? 'text-[#22C55E]' : 
+                isFinished && match.score1 < match.score2 ? 'text-[#EF4444]' : 
+                'text-[#111827]'
+              }`}>{match.score1}</span>
+              <span className="text-[#6B7280] text-base font-medium mx-1">:</span>
+              <span className={`text-xl font-bold ${
+                isFinished && match.score2 > match.score1 ? 'text-[#22C55E]' : 
+                isFinished && match.score2 < match.score1 ? 'text-[#EF4444]' : 
+                'text-[#111827]'
+              }`}>{match.score2}</span>
+            </div>
+          ) : (
+            <span className="text-[#9CA3AF] text-base">—</span>
+          )}
+        </td>
+
+        <td className={`py-4 px-5 text-center ${colDivider}`}>
+          {getStatusBadge(match.matchStatus)}
+        </td>
+
+        <td className={`py-4 px-4 text-center ${colDivider}`}>
+          {hasPrediction ? (
+            <PredictionBar
+              percent1={match.predictionPercentTeam1 ?? 0}
+              percent2={match.predictionPercentTeam2 ?? 0}
+              team1={match.team1}
+              team2={match.team2}
+            />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                  —
+                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+                <p className="text-sm">Прогноз ще недоступний — дані з'являться ближче до початку матчу</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </td>
+
+        <td className={`py-4 px-4 text-center ${colDivider}`}>
+          {hasCoeffs ? (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-center gap-2.5 text-sm">
+                <TeamLogo src={match.logoTeam1} teamName={match.team1} size={20} />
+                <span className={`font-bold ${
+                  (match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0)
+                    ? 'text-[#22C55E]' : 'text-[#111827]'
+                }`}>{formatCoeff(match.bettingCoefficientTeam1)}</span>
+              </div>
+              <div className="flex items-center justify-center gap-2.5 text-sm">
+                <TeamLogo src={match.logoTeam2} teamName={match.team2} size={20} />
+                <span className={`font-bold ${
+                  (match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0)
+                    ? 'text-[#22C55E]' : 'text-[#111827]'
+                }`}>{formatCoeff(match.bettingCoefficientTeam2)}</span>
+              </div>
+            </div>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                  —
+                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+                <p className="text-sm">Коефіцієнти ще не виставлені букмекерами</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </td>
+
+        <td className={`py-4 px-5 text-center ${colDivider}`}>
+          <div className="space-y-1">
+            <div className="text-sm text-[#374151]">
+              {match.team1}: <span className="font-bold text-[#111827]">#{match.positionTeam1 ?? '—'}</span>
+            </div>
+            <div className="text-sm text-[#374151]">
+              {match.team2}: <span className="font-bold text-[#111827]">#{match.positionTeam2 ?? '—'}</span>
+            </div>
+          </div>
+        </td>
+
+        <td className={`py-4 px-4 ${colDivider}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-[#374151] font-medium leading-tight block max-w-[140px] truncate cursor-help">
+                {truncateTournament(match.context)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] bg-[#111827] text-white p-3 rounded-xl">
+              <p className="text-sm">{match.context}</p>
+            </TooltipContent>
+          </Tooltip>
+        </td>
+
+        <td className={`py-4 px-4 text-center ${colDivider}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleGetAIRecommendation(match)}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all duration-200"
+              >
+                <Lightbulb className="h-4.5 w-4.5 text-[#7C3AED]" strokeWidth={1.5} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <p className="text-sm">Показати AI рекомендацію</p>
+            </TooltipContent>
+          </Tooltip>
+        </td>
+
+        <td className="py-4 px-4 text-center">
+          {riskComments ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleShowComment(match)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all duration-200"
+                >
+                  <Eye className="h-4.5 w-4.5 text-[#2563EB]" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">Переглянути коментар</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
+                  —
+                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[240px] bg-[#111827] text-white p-3 rounded-xl">
+                <p className="text-sm">Жодна з команд не внесена до списку ризикових — нотатки відсутні</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </td>
+      </tr>
+    );
+  };
+
+  /** Render the table header row */
+  const renderTableHeader = () => (
+    <thead>
+      <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
+        <th 
+          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
+          onClick={() => toggleSort('date')}
+        >
+          <div className="flex items-center justify-center gap-1.5">
+            Час
+            {renderSortIndicator('date')}
+          </div>
+        </th>
+        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
+        <th 
+          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
+          onClick={() => toggleSort('status')}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center gap-1.5">
+                Статус
+                {renderSortIndicator('status')}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <p className="text-sm">
+                {sortBy === 'status' && sortOrder === 'asc' 
+                  ? '↑ LIVE → Очікуються → Завершені' 
+                  : sortBy === 'status' && sortOrder === 'desc'
+                  ? '↓ Завершені → Очікуються → LIVE'
+                  : 'Натисніть для сортування за статусом'}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </th>
+        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">Прогноз</span>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <p className="text-sm">Відсоток прогнозу перемоги кожної команди</p>
+            </TooltipContent>
+          </Tooltip>
+        </th>
+        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">Коеф.</span>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <p className="text-sm">Букмекерські коефіцієнти на перемогу</p>
+            </TooltipContent>
+          </Tooltip>
+        </th>
+        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Позиції</th>
+        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
+        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
+        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">Нотатки</th>
+      </tr>
+    </thead>
+  );
 
   return (
     <TooltipProvider>
@@ -644,7 +937,7 @@ export default function Matches() {
           </div>
         </div>
 
-        <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
+        <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4">
 
           {/* ===== QUICK STATS ===== */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -737,452 +1030,212 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== MATCHES TABLE ===== */}
-          <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-            style={{ boxShadow: chartCardShadow }}
-          >
-            <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
-              <div className="flex items-center justify-between mb-5">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                    <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+          {/* ===== FILTERS BAR — compact, centered ===== */}
+          <div className="flex justify-center">
+            <Card 
+              className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden w-fit"
+              style={{ boxShadow: chartCardShadow }}
+            >
+              <CardContent className="px-5 py-3.5">
+                <div className="flex items-center gap-2.5 flex-nowrap">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={refreshMatches}
+                        disabled={isLoading}
+                        size="sm"
+                        className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-9 px-4 transition-all duration-200 text-sm"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                        )}
+                        <span className="ml-1.5">Оновити</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                      <p className="text-sm">Оновити матчі з API</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <div className="relative flex-shrink-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
+                    <Input
+                      placeholder="Пошук..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 pr-2 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-9 w-[140px] text-sm"
+                    />
                   </div>
-                  {todayStr}
-                  <span className="text-sm font-normal text-[#4B5563] ml-2">
-                    ({sortedMatches.length} матчів)
-                  </span>
-                </CardTitle>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={refreshMatches}
-                      disabled={isLoading}
-                      size="sm"
-                      className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-10 px-5 transition-all duration-200 text-sm"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
-                      )}
-                      <span className="ml-2">Оновити</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                    <p className="text-sm">Оновити матчі з API</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="relative flex-shrink-0">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-                  <Input
-                    placeholder="Пошук..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-3 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-10 w-[160px] text-sm"
-                  />
+                  <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
+                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[125px] text-sm">
+                      <SelectValue placeholder="Статус" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Всі статуси</SelectItem>
+                      <SelectItem value="live">🔴 LIVE</SelectItem>
+                      <SelectItem value="upcoming">🕐 Очікуються</SelectItem>
+                      <SelectItem value="finished">✅ Завершені</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
+                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[110px] text-sm">
+                      <SelectValue placeholder="Tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Всі Tier</SelectItem>
+                      <SelectItem value="tier1">Tier 1</SelectItem>
+                      <SelectItem value="tier2">Tier 2</SelectItem>
+                      <SelectItem value="tier3">Tier 3</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
+                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[100px] text-sm">
+                      <SelectValue placeholder="Формат" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Формат</SelectItem>
+                      <SelectItem value="Bo1">Bo1</SelectItem>
+                      <SelectItem value="Bo3">Bo3</SelectItem>
+                      <SelectItem value="Bo5">Bo5</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
+                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[140px] text-sm">
+                      <SelectValue placeholder="Впевненість" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Впевненість</SelectItem>
+                      <SelectItem value="high">Висока (&gt;80%)</SelectItem>
+                      <SelectItem value="medium">Середня (60-80%)</SelectItem>
+                      <SelectItem value="low">Низька (&lt;60%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
+                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[110px] text-sm">
+                      <SelectValue placeholder="Ризик" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Ризик</SelectItem>
+                      <SelectItem value="safe">Низький</SelectItem>
+                      <SelectItem value="moderate">Помірний</SelectItem>
+                      <SelectItem value="high">Високий</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant={showHotMatches ? "default" : "outline"}
+                    onClick={() => setShowHotMatches(!showHotMatches)}
+                    className={`rounded-xl font-medium h-9 px-3.5 transition-all duration-200 text-sm ${
+                      showHotMatches 
+                        ? 'bg-[#111827] hover:bg-[#1F2937] text-white border-0' 
+                        : 'border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] text-[#374151]'
+                    }`}
+                  >
+                    <Flame className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+                    Гарячі
+                  </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
-                  <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[130px] text-sm">
-                    <SelectValue placeholder="Статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Всі статуси</SelectItem>
-                    <SelectItem value="live">🔴 LIVE</SelectItem>
-                    <SelectItem value="upcoming">🕐 Очікуються</SelectItem>
-                    <SelectItem value="finished">✅ Завершені</SelectItem>
-                  </SelectContent>
-                </Select>
+          {/* ===== LOADING / EMPTY STATE ===== */}
+          {initialLoading && (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-[#2563EB] mx-auto" />
+                <p className="text-[#4B5563] text-sm">Завантаження матчів...</p>
+              </div>
+            </div>
+          )}
 
-                <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                  <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[120px] text-sm">
-                    <SelectValue placeholder="Tier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Всі Tier</SelectItem>
-                    <SelectItem value="tier1">Tier 1</SelectItem>
-                    <SelectItem value="tier2">Tier 2</SelectItem>
-                    <SelectItem value="tier3">Tier 3</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                  <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[110px] text-sm">
-                    <SelectValue placeholder="Формат" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Формат</SelectItem>
-                    <SelectItem value="Bo1">Bo1</SelectItem>
-                    <SelectItem value="Bo3">Bo3</SelectItem>
-                    <SelectItem value="Bo5">Bo5</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                  <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[150px] text-sm">
-                    <SelectValue placeholder="Впевненість" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Впевненість</SelectItem>
-                    <SelectItem value="high">Висока (&gt;80%)</SelectItem>
-                    <SelectItem value="medium">Середня (60-80%)</SelectItem>
-                    <SelectItem value="low">Низька (&lt;60%)</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                  <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-10 w-[130px] text-sm">
-                    <SelectValue placeholder="Ризик" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Ризик</SelectItem>
-                    <SelectItem value="safe">Низький</SelectItem>
-                    <SelectItem value="moderate">Помірний</SelectItem>
-                    <SelectItem value="high">Високий</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant={showHotMatches ? "default" : "outline"}
-                  onClick={() => setShowHotMatches(!showHotMatches)}
-                  className={`rounded-xl font-medium h-10 px-4 transition-all duration-200 text-sm ${
-                    showHotMatches 
-                      ? 'bg-[#111827] hover:bg-[#1F2937] text-white border-0' 
-                      : 'border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] text-[#374151]'
-                  }`}
-                >
-                  <Flame className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Гарячі
+          {!initialLoading && sortedMatches.length === 0 && (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center space-y-4">
+                <Trophy className="h-10 w-10 text-[#9CA3AF] mx-auto" />
+                <p className="text-[#4B5563] text-sm">Матчів не знайдено</p>
+                <Button onClick={refreshMatches} variant="outline" size="sm" className="rounded-xl">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Спробувати знову
                 </Button>
               </div>
-            </CardHeader>
+            </div>
+          )}
 
-            <CardContent className="p-0">
-              {initialLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-center space-y-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-[#2563EB] mx-auto" />
-                    <p className="text-[#4B5563] text-sm">Завантаження матчів...</p>
+          {/* ===== LIVE MATCHES — bigger header text & icons ===== */}
+          {!initialLoading && liveMatches.length > 0 && (
+            <Card 
+              className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+              style={{ boxShadow: chartCardShadow }}
+            >
+              <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
+                <CardTitle>
+                  <div className="flex items-center gap-4">
+                    <Radio className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
+                    <span className="text-2xl font-bold text-[#111827] tracking-tight">
+                      Live Counter-Strike matches
+                    </span>
+                    <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
+                      {liveMatches.length}
+                    </Badge>
                   </div>
-                </div>
-              ) : sortedMatches.length === 0 ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-center space-y-4">
-                    <Trophy className="h-10 w-10 text-[#9CA3AF] mx-auto" />
-                    <p className="text-[#4B5563] text-sm">Матчів не знайдено</p>
-                    <Button onClick={refreshMatches} variant="outline" size="sm" className="rounded-xl">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Спробувати знову
-                    </Button>
-                  </div>
-                </div>
-              ) : (
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
-                        <th 
-                          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
-                          onClick={() => toggleSort('date')}
-                        >
-                          <div className="flex items-center justify-center gap-1.5">
-                            Час
-                            {renderSortIndicator('date')}
-                          </div>
-                        </th>
-                        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
-                        <th 
-                          className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
-                          onClick={() => toggleSort('status')}
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center justify-center gap-1.5">
-                                Статус
-                                {renderSortIndicator('status')}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                              <p className="text-sm">
-                                {sortBy === 'status' && sortOrder === 'asc' 
-                                  ? '↑ LIVE → Очікуються → Завершені' 
-                                  : sortBy === 'status' && sortOrder === 'desc'
-                                  ? '↓ Завершені → Очікуються → LIVE'
-                                  : 'Натисніть для сортування за статусом'}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </th>
-                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help">Прогноз</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                              <p className="text-sm">Відсоток прогнозу перемоги кожної команди</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </th>
-                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help">Коеф.</span>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                              <p className="text-sm">Букмекерські коефіцієнти на перемогу</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </th>
-                        <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Позиції</th>
-                        <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
-                        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
-                        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">Нотатки</th>
-                      </tr>
-                    </thead>
+                    {renderTableHeader()}
                     <tbody>
-                      {sortedMatches.map((match) => {
-                        const formInfo = getFormStabilityInfo(match.formStability);
-                        const riskComments = getMatchRiskComments(match.team1, match.team2);
-                        const isFinished = match.matchStatus === 'finished';
-                        const isLive = match.matchStatus === 'live';
-
-                        const hasPrediction = (match.predictionPercentTeam1 != null && match.predictionPercentTeam2 != null) &&
-                          ((match.predictionPercentTeam1 ?? 0) > 0 || (match.predictionPercentTeam2 ?? 0) > 0);
-                        const hasCoeffs = (match.bettingCoefficientTeam1 != null && match.bettingCoefficientTeam2 != null) &&
-                          ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
-
-                        // Build form stability label with favorite team name
-                        const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
-
-                        return (
-                          <tr 
-                            key={match.id} 
-                            className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${
-                              isFinished ? 'opacity-60' : ''
-                            } ${isLive ? 'bg-red-50/30' : ''}`}
-                          >
-                            {/* Match with logos */}
-                            <td className={`py-4 px-5 ${colDivider}`}>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-2.5">
-                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={28} />
-                                    <span className="font-semibold text-[#111827] text-base">{match.team1}</span>
-                                  </div>
-                                  <span className="text-[#4B5563] text-sm font-medium">vs</span>
-                                  <div className="flex items-center gap-2.5">
-                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={28} />
-                                    <span className="font-semibold text-[#111827] text-base">{match.team2}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-lg px-2 py-0.5 text-xs font-semibold">
-                                    {match.matchType}
-                                  </Badge>
-                                  <Badge className="bg-[#111827] text-white border-0 rounded-lg px-2 py-0.5 text-xs font-semibold uppercase">
-                                    {match.tier}
-                                  </Badge>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Badge className={`${formInfo.color} rounded-lg px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1 max-w-[200px]`}>
-                                        {formInfo.icon}
-                                        <span className="truncate">{formLabelWithTeam}</span>
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
-                                      <p className="text-sm font-semibold mb-1">{match.favorite}</p>
-                                      <p className="text-sm">{formInfo.tooltip}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Time + Day */}
-                            <td className={`py-4 px-5 text-center ${colDivider}`}>
-                              <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
-                            </td>
-
-                            {/* Score */}
-                            <td className={`py-4 px-5 text-center ${colDivider}`}>
-                              {(match.score1 !== undefined && match.score2 !== undefined && (match.score1 > 0 || match.score2 > 0 || isLive || isFinished)) ? (
-                                <div className="flex items-center justify-center gap-1">
-                                  <span className={`text-xl font-bold ${
-                                    isFinished && match.score1 > match.score2 ? 'text-[#22C55E]' : 
-                                    isFinished && match.score1 < match.score2 ? 'text-[#EF4444]' : 
-                                    'text-[#111827]'
-                                  }`}>
-                                    {match.score1}
-                                  </span>
-                                  <span className="text-[#6B7280] text-base font-medium mx-1">:</span>
-                                  <span className={`text-xl font-bold ${
-                                    isFinished && match.score2 > match.score1 ? 'text-[#22C55E]' : 
-                                    isFinished && match.score2 < match.score1 ? 'text-[#EF4444]' : 
-                                    'text-[#111827]'
-                                  }`}>
-                                    {match.score2}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-[#9CA3AF] text-base">—</span>
-                              )}
-                            </td>
-
-                            {/* Status */}
-                            <td className={`py-4 px-5 text-center ${colDivider}`}>
-                              {getStatusBadge(match.matchStatus)}
-                            </td>
-
-                            {/* Prediction % */}
-                            <td className={`py-4 px-4 text-center ${colDivider}`}>
-                              {hasPrediction ? (
-                                <PredictionBar
-                                  percent1={match.predictionPercentTeam1 ?? 0}
-                                  percent2={match.predictionPercentTeam2 ?? 0}
-                                  team1={match.team1}
-                                  team2={match.team2}
-                                />
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                                      —
-                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
-                                    <p className="text-sm">Прогноз ще недоступний — дані з'являться ближче до початку матчу</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </td>
-
-                            {/* Betting Coefficients */}
-                            <td className={`py-4 px-4 text-center ${colDivider}`}>
-                              {hasCoeffs ? (
-                                <div className="space-y-1.5">
-                                  <div className="flex items-center justify-center gap-2.5 text-sm">
-                                    <TeamLogo src={match.logoTeam1} teamName={match.team1} size={20} />
-                                    <span className={`font-bold ${
-                                      (match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0)
-                                        ? 'text-[#22C55E]' : 'text-[#111827]'
-                                    }`}>
-                                      {formatCoeff(match.bettingCoefficientTeam1)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center justify-center gap-2.5 text-sm">
-                                    <TeamLogo src={match.logoTeam2} teamName={match.team2} size={20} />
-                                    <span className={`font-bold ${
-                                      (match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0)
-                                        ? 'text-[#22C55E]' : 'text-[#111827]'
-                                    }`}>
-                                      {formatCoeff(match.bettingCoefficientTeam2)}
-                                    </span>
-                                  </div>
-                                </div>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                                      —
-                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
-                                    <p className="text-sm">Коефіцієнти ще не виставлені букмекерами</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </td>
-
-                            {/* Positions */}
-                            <td className={`py-4 px-5 text-center ${colDivider}`}>
-                              <div className="space-y-1">
-                                <div className="text-sm text-[#374151]">
-                                  {match.team1}: <span className="font-bold text-[#111827]">#{match.positionTeam1 ?? '—'}</span>
-                                </div>
-                                <div className="text-sm text-[#374151]">
-                                  {match.team2}: <span className="font-bold text-[#111827]">#{match.positionTeam2 ?? '—'}</span>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Tournament — compact with tooltip for full name */}
-                            <td className={`py-4 px-4 ${colDivider}`}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="text-xs text-[#374151] font-medium leading-tight block max-w-[140px] truncate cursor-help">
-                                    {truncateTournament(match.context)}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-[300px] bg-[#111827] text-white p-3 rounded-xl">
-                                  <p className="text-sm">{match.context}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </td>
-
-                            {/* AI Recommendation */}
-                            <td className={`py-4 px-4 text-center ${colDivider}`}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() => handleGetAIRecommendation(match)}
-                                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all duration-200"
-                                  >
-                                    <Lightbulb className="h-4.5 w-4.5 text-[#7C3AED]" strokeWidth={1.5} />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                                  <p className="text-sm">Показати AI рекомендацію</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </td>
-
-                            {/* Comment / Notes */}
-                            <td className="py-4 px-4 text-center">
-                              {riskComments ? (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button
-                                      onClick={() => handleShowComment(match)}
-                                      className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all duration-200"
-                                    >
-                                      <Eye className="h-4.5 w-4.5 text-[#2563EB]" strokeWidth={1.5} />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                                    <p className="text-sm">Переглянути коментар</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                                      —
-                                      <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-[240px] bg-[#111827] text-white p-3 rounded-xl">
-                                    <p className="text-sm">Жодна з команд не внесена до списку ризикових — нотатки відсутні</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {liveMatches.map(renderMatchRow)}
                     </tbody>
                   </table>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ===== DATE GROUP CARDS — bigger header text & icons ===== */}
+          {!initialLoading && sortedDateKeys.map((dateKey) => {
+            const dateMatches = groupedByDate[dateKey];
+            return (
+              <Card 
+                key={dateKey}
+                className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                style={{ boxShadow: chartCardShadow }}
+              >
+                <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
+                  <CardTitle>
+                    <div className="flex items-center gap-4">
+                      <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
+                      <span className="text-2xl font-bold text-[#111827] tracking-tight">
+                        {formatDateGroupHeader(dateKey)}
+                      </span>
+                      <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
+                        {dateMatches.length}
+                      </Badge>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      {renderTableHeader()}
+                      <tbody>
+                        {dateMatches.map(renderMatchRow)}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
 
           <AIRecommendationModal
             open={aiModalOpen}
