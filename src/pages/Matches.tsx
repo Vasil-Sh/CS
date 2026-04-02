@@ -35,7 +35,11 @@ import {
   Filter,
   ThumbsUp,
   ThumbsDown,
-  PlusCircle
+  PlusCircle,
+  CheckSquare,
+  Square,
+  Layers,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -451,6 +455,9 @@ export default function Matches() {
 
   // Match ratings state
   const [matchRatings, setMatchRatings] = useState<Record<string, MatchRating>>(loadMatchRatings);
+
+  // Multi-select for Express
+  const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(new Set());
   
   const { toast } = useToast();
 
@@ -498,6 +505,60 @@ export default function Matches() {
           date: match.date,
           matchUrl: match.url || '',
         }
+      }
+    });
+  };
+
+  // Toggle match selection for Express
+  const toggleMatchSelection = (matchId: string) => {
+    setSelectedMatchIds(prev => {
+      const next = new Set(prev);
+      if (next.has(matchId)) {
+        next.delete(matchId);
+      } else {
+        if (next.size >= 10) {
+          toast({
+            title: '⚠️ Максимум 10 матчів',
+            description: 'В експресі може бути не більше 10 подій',
+            variant: 'destructive'
+          });
+          return prev;
+        }
+        next.add(matchId);
+      }
+      return next;
+    });
+  };
+
+  // Clear all selected matches
+  const clearSelectedMatches = () => {
+    setSelectedMatchIds(new Set());
+  };
+
+  // Navigate to MyBets with selected matches for Express
+  const handleCreateExpress = () => {
+    const selectedMatches = matches.filter(m => selectedMatchIds.has(m.id));
+    if (selectedMatches.length < 2) {
+      toast({
+        title: '⚠️ Мінімум 2 матчі',
+        description: 'Для створення експресу потрібно обрати щонайменше 2 матчі',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const expressMatches = selectedMatches.map(m => ({
+      team1: m.team1,
+      team2: m.team2,
+      tournament: m.context,
+      format: m.matchType,
+      date: m.date,
+      matchUrl: m.url || '',
+    }));
+
+    navigate('/my-bets', {
+      state: {
+        expressMatches
       }
     });
   };
@@ -713,6 +774,7 @@ export default function Matches() {
     const riskComments = getMatchRiskComments(match.team1, match.team2);
     const isFinished = match.matchStatus === 'finished';
     const isLive = match.matchStatus === 'live';
+    const isSelected = selectedMatchIds.has(match.id);
 
     const hasPrediction = (match.predictionPercentTeam1 != null && match.predictionPercentTeam2 != null) &&
       ((match.predictionPercentTeam1 ?? 0) > 0 || (match.predictionPercentTeam2 ?? 0) > 0);
@@ -727,7 +789,7 @@ export default function Matches() {
         key={match.id} 
         className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-all duration-200 ${
           isFinished ? 'opacity-60' : ''
-        } ${isLive ? 'bg-red-50/30' : ''} ${getRowRatingStyle(match.id)}`}
+        } ${isLive ? 'bg-red-50/30' : ''} ${isSelected ? 'bg-[#EFF6FF]/60 !border-l-[#3B82F6]' : ''} ${getRowRatingStyle(match.id)}`}
       >
         {/* Rating column — icon-only thumbs up/down */}
         <td className={`py-4 px-3 ${colDivider}`}>
@@ -944,21 +1006,48 @@ export default function Matches() {
           )}
         </td>
 
-        {/* Add to predictions column — icon-only "+" button */}
+        {/* Add to predictions column — "+" button and Express checkbox together */}
         <td className="py-4 px-3 text-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => handleAddToBets(match)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all duration-200 hover:shadow-md hover:shadow-green-100"
-              >
-                <PlusCircle className="h-4.5 w-4.5" strokeWidth={1.5} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">Додати до прогнозів</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="flex items-center justify-center gap-2">
+            {/* Add single match to predictions */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleAddToBets(match)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all duration-200 hover:shadow-md hover:shadow-green-100"
+                >
+                  <PlusCircle className="h-4.5 w-4.5" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">Додати до прогнозів</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Express checkbox */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => toggleMatchSelection(match.id)}
+                  className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-[#3B82F6] text-white shadow-sm border border-[#3B82F6]'
+                      : 'text-[#9CA3AF] hover:bg-[#EFF6FF] hover:text-[#3B82F6] border border-[#E5E7EB] hover:border-[#93C5FD]'
+                  }`}
+                  title={isSelected ? 'Прибрати з експресу' : 'Додати до експресу'}
+                >
+                  {isSelected ? (
+                    <CheckSquare className="h-4 w-4" strokeWidth={2} />
+                  ) : (
+                    <Layers className="h-4 w-4" strokeWidth={1.5} />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">{isSelected ? 'Прибрати з експресу' : 'Додати до експресу'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </td>
       </tr>
     );
@@ -1014,7 +1103,18 @@ export default function Matches() {
         <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Нотатки</th>
-        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">Додати до прогнозів</th>
+        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex items-center gap-1.5 cursor-help">
+                Додати до прогнозів
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg max-w-[220px]">
+              <p className="text-sm">+ Додати одиночний прогноз<br/>🔲 Обрати для експресу (2-10 матчів)</p>
+            </TooltipContent>
+          </Tooltip>
+        </th>
       </tr>
     </thead>
   );
@@ -1425,6 +1525,46 @@ export default function Matches() {
             comment={selectedCommentMatch ? getMatchRiskComments(selectedCommentMatch.team1, selectedCommentMatch.team2) : ''}
           />
         </div>
+
+        {/* ===== FLOATING EXPRESS BAR ===== */}
+        {selectedMatchIds.size > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+            <div 
+              className="flex items-center gap-4 px-6 py-4 bg-[#111827] text-white rounded-2xl border border-[#374151]"
+              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)' }}
+            >
+              <div className="flex items-center gap-2.5">
+                <Layers className="h-5 w-5 text-[#60A5FA]" strokeWidth={1.5} />
+                <span className="text-base font-semibold">
+                  Експрес: {selectedMatchIds.size} {selectedMatchIds.size === 1 ? 'матч' : selectedMatchIds.size >= 2 && selectedMatchIds.size <= 4 ? 'матчі' : 'матчів'}
+                </span>
+              </div>
+
+              <div className="w-px h-8 bg-[#374151]" />
+
+              <Button
+                onClick={handleCreateExpress}
+                disabled={selectedMatchIds.size < 2}
+                className={`rounded-xl font-medium text-sm px-5 py-2.5 transition-all duration-200 ${
+                  selectedMatchIds.size >= 2
+                    ? 'bg-[#3B82F6] hover:bg-[#2563EB] text-white'
+                    : 'bg-[#374151] text-[#6B7280] cursor-not-allowed'
+                }`}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                Створити Експрес
+              </Button>
+
+              <button
+                onClick={clearSelectedMatches}
+                className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-[#374151] text-[#9CA3AF] hover:text-white transition-colors"
+                title="Очистити вибір"
+              >
+                <X className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

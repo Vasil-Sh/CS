@@ -136,6 +136,9 @@ export default function MyBets() {
   // Prefill data from Matches page navigation
   const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
 
+
+  // Express matches data from Matches page navigation (multi-select)
+  const [expressMatchesData, setExpressMatchesData] = useState<MatchPrefillData[] | null>(null);
   // Filter state for the table — 'today' or 'all'
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('all');
 
@@ -163,11 +166,14 @@ export default function MyBets() {
 
   // Handle prefill data from Matches page (via react-router navigation state)
   useEffect(() => {
-    const state = location.state as { prefillMatch?: MatchPrefillData } | null;
-    if (state?.prefillMatch) {
+    const state = location.state as { prefillMatch?: MatchPrefillData; expressMatches?: MatchPrefillData[] } | null;
+    if (state?.expressMatches && state.expressMatches.length >= 2) {
+      setExpressMatchesData(state.expressMatches);
+      setActiveTab('add');
+      window.history.replaceState({}, document.title);
+    } else if (state?.prefillMatch) {
       setPrefillData(state.prefillMatch);
       setActiveTab('add');
-      // Clear the location state so it doesn't re-trigger on re-renders
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -549,6 +555,11 @@ export default function MyBets() {
   // Clear prefill data after it's been consumed by the form
   const handlePrefillConsumed = useCallback(() => {
     setPrefillData(null);
+  }, []);
+
+  // Clear express matches data after it's been consumed by the form
+  const handleExpressMatchesConsumed = useCallback(() => {
+    setExpressMatchesData(null);
   }, []);
 
   const tabs = [
@@ -1294,6 +1305,8 @@ export default function MyBets() {
                 onRecordAdded={handleRecordAdded} 
                 prefillData={prefillData}
                 onPrefillConsumed={handlePrefillConsumed}
+                expressMatchesData={expressMatchesData}
+                onExpressMatchesConsumed={handleExpressMatchesConsumed}
               />
             )}
             {activeTab === 'strategies' && <StrategyOverview />}
