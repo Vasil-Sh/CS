@@ -879,9 +879,9 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
       
       if (finalGoalId) {
         const goalName = activeGoals.find(g => g.id === finalGoalId)?.name;
-        toast.success(`Запис додано і прив'язана до цілі: ${goalName}`);
+        toast.success(`✅ Запис створено та прив'язано до цілі "${goalName}". Переглянути можна на екрані "Останні записи".`);
       } else {
-        toast.success('Запис додано!');
+        toast.success('✅ Ваш запис успішно створено! Переглянути його можна на екрані "Останні записи".');
       }
       
       setFormData(getDefaultFormData(primaryStrategy?.name));
