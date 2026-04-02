@@ -6,15 +6,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info, RotateCcw } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
 import StrategyViolationDialog from './StrategyViolationDialog';
 
+export interface MatchPrefillData {
+  team1: string;
+  team2: string;
+  tournament: string;
+  format: string;
+  date: string;
+  matchUrl?: string;
+  odds?: string;
+}
+
 interface CS2BettingFormProps {
   onRecordAdded?: () => void;
+  prefillData?: MatchPrefillData | null;
+  onPrefillConsumed?: () => void;
 }
 
 interface RiskyTeam {
@@ -69,7 +81,32 @@ interface Goal {
   status: 'active' | 'completed' | 'failed';
 }
 
-export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
+const getDefaultFormData = (strategyName?: string) => ({
+  date: new Date().toISOString().split('T')[0],
+  game: 'CS2' as 'CS2' | 'Dota2',
+  matchUrl: '',
+  tournament: '',
+  team1: '',
+  team2: '',
+  format: 'BO3',
+  riskyTeams: [] as RiskyTeam[],
+  betType: '',
+  betCategory: 'Ординар',
+  selection: '',
+  odds: '',
+  stake: '',
+  currency: 'UAH',
+  exchangeRate: '41',
+  confidence: '',
+  strategy: strategyName || '',
+  reasoning: '',
+  keyFactors: '',
+  riskLevel: '',
+  notes: '',
+  goalId: ''
+});
+
+export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillConsumed }: CS2BettingFormProps) {
   const currentUser = localStorage.getItem('username') || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
@@ -80,31 +117,9 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [showEVDetails, setShowEVDetails] = useState(false);
+  const [isPrefilled, setIsPrefilled] = useState(false);
   
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    game: 'CS2' as 'CS2' | 'Dota2',
-    matchUrl: '',
-    tournament: '',
-    team1: '',
-    team2: '',
-    format: 'BO3',
-    riskyTeams: [] as RiskyTeam[],
-    betType: '',
-    betCategory: 'Ординар',
-    selection: '',
-    odds: '',
-    stake: '',
-    currency: 'UAH',
-    exchangeRate: '41',
-    confidence: '',
-    strategy: '',
-    reasoning: '',
-    keyFactors: '',
-    riskLevel: '',
-    notes: '',
-    goalId: ''
-  });
+  const [formData, setFormData] = useState(getDefaultFormData());
 
   useEffect(() => {
     // Load primary strategy from localStorage — value can be an ID (UUID) or a name
@@ -120,6 +135,40 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
 
     loadActiveGoals();
   }, []);
+
+  // Handle prefill data from Matches page
+  useEffect(() => {
+    if (prefillData) {
+      const formatMap: Record<string, string> = {
+        'Bo1': 'BO1',
+        'Bo3': 'BO3',
+        'Bo5': 'BO5',
+      };
+      const mappedFormat = formatMap[prefillData.format] || prefillData.format || 'BO3';
+      
+      setFormData(prev => ({
+        ...prev,
+        team1: prefillData.team1 || '',
+        team2: prefillData.team2 || '',
+        tournament: prefillData.tournament || '',
+        format: mappedFormat,
+        date: prefillData.date ? prefillData.date.split('T')[0] : prev.date,
+        matchUrl: prefillData.matchUrl || '',
+        odds: prefillData.odds || '',
+      }));
+      setIsPrefilled(true);
+      onPrefillConsumed?.();
+      toast.success('Дані матчу підставлено у форму');
+    }
+  }, [prefillData, onPrefillConsumed]);
+
+  const clearForm = () => {
+    setFormData(getDefaultFormData(primaryStrategy?.name));
+    setExpressEvents([]);
+    setStrategyViolations([]);
+    setIsPrefilled(false);
+    toast.success('Форму очищено');
+  };
 
   const loadActiveGoals = () => {
     const goals = UserDataService.getUserData(currentUser, 'goals', []);
@@ -728,33 +777,11 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
         toast.success('Запис додано!');
       }
       
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        game: 'CS2',
-        matchUrl: '',
-        tournament: '',
-        team1: '',
-        team2: '',
-        format: 'BO3',
-        riskyTeams: [],
-        betType: '',
-        betCategory: 'Ординар',
-        selection: '',
-        odds: '',
-        stake: '',
-        currency: 'UAH',
-        exchangeRate: '41',
-        confidence: '',
-        strategy: primaryStrategy?.name || '',
-        reasoning: '',
-        keyFactors: '',
-        riskLevel: '',
-        notes: '',
-        goalId: ''
-      });
+      setFormData(getDefaultFormData(primaryStrategy?.name));
       
       setExpressEvents([]);
       setStrategyViolations([]);
+      setIsPrefilled(false);
 
       onRecordAdded?.();
     } catch (error) {
@@ -859,6 +886,10 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
   const labelClass = "text-sm font-medium text-[#374151]";
   const sectionTitleClass = "text-base font-semibold text-[#111827] flex items-center gap-2.5 bg-[#F3F4F6] px-4 py-2.5 rounded-2xl -mx-0";
 
+  // Suppress unused variable warnings
+  void potentialProfit;
+  void stakeInCurrency;
+
   return (
     <div className="space-y-6">
       <StrategyViolationDialog
@@ -936,11 +967,26 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               {/* Form Header */}
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                  <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                    <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-lg font-semibold text-[#111827]">Новий прогноз</span>
+                  {isPrefilled && (
+                    <Badge className="bg-[#DBEAFE] text-[#2563EB] border-0 rounded-full text-xs font-medium px-2.5 py-0.5 hover:bg-[#DBEAFE]">
+                      З матчів
+                    </Badge>
+                  )}
                 </div>
-                <span className="text-lg font-semibold text-[#111827]">Новий прогноз</span>
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all duration-200"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+                  Очистити
+                </button>
               </div>
               
               <div className="p-6 space-y-8">
@@ -1486,7 +1532,7 @@ export default function CS2BettingForm({ onRecordAdded }: CS2BettingFormProps) {
                     <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-[#374151]">Макс. програш:</span>
-                        <span className="font-semibold text-[#EF4444] text-xl">-{stakeInCurrency} {getCurrencySymbol()}</span>
+                        <span className="font-semibold text-[#EF4444] text-xl">-{formData.stake} {getCurrencySymbol()}</span>
                       </div>
                     </div>
                   </>

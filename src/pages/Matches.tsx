@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,10 @@ import {
   ArrowUp,
   ArrowDown,
   Info,
-  Filter
+  Filter,
+  ThumbsUp,
+  ThumbsDown,
+  PlusCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -100,6 +104,28 @@ interface Match {
   bettingCoefficientTeam1?: number | null;
   bettingCoefficientTeam2?: number | null;
 }
+
+type MatchRating = 'like' | 'dislike' | null;
+
+/** Load match ratings from localStorage */
+const loadMatchRatings = (): Record<string, MatchRating> => {
+  try {
+    const saved = localStorage.getItem('match_ratings');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.error('Error loading match ratings:', e);
+  }
+  return {};
+};
+
+/** Save match ratings to localStorage */
+const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
+  try {
+    localStorage.setItem('match_ratings', JSON.stringify(ratings));
+  } catch (e) {
+    console.error('Error saving match ratings:', e);
+  }
+};
 
 function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const matchType = parseMatchType(apiMatch.type);
@@ -386,6 +412,7 @@ export default function Matches() {
   const currentUser = localStorage.getItem('username') || '';
   const userRole = localStorage.getItem('userRole');
   const isAdmin = userRole === 'admin';
+  const navigate = useNavigate();
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -410,6 +437,9 @@ export default function Matches() {
   const [selectedCommentMatch, setSelectedCommentMatch] = useState<Match | null>(null);
   
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
+
+  // Match ratings state
+  const [matchRatings, setMatchRatings] = useState<Record<string, MatchRating>>(loadMatchRatings);
   
   const { toast } = useToast();
 
@@ -435,6 +465,31 @@ export default function Matches() {
     loadMatchesFromApi();
     loadRiskyTeams();
   }, []);
+
+  const handleRateMatch = (matchId: string, rating: MatchRating) => {
+    setMatchRatings(prev => {
+      const current = prev[matchId];
+      const newRating = current === rating ? null : rating;
+      const updated = { ...prev, [matchId]: newRating };
+      saveMatchRatings(updated);
+      return updated;
+    });
+  };
+
+  const handleAddToBets = (match: Match) => {
+    navigate('/my-bets', {
+      state: {
+        prefillMatch: {
+          team1: match.team1,
+          team2: match.team2,
+          tournament: match.context,
+          format: match.matchType,
+          date: match.date,
+          matchUrl: match.url || '',
+        }
+      }
+    });
+  };
 
   const loadMatchesFromApi = async () => {
     try {
@@ -633,6 +688,14 @@ export default function Matches() {
     return coeff.toFixed(2);
   };
 
+  /** Get the visual style for the match row based on rating */
+  const getRowRatingStyle = (matchId: string): string => {
+    const rating = matchRatings[matchId];
+    if (rating === 'like') return 'bg-[#F0FDF4]/60 border-l-4 border-l-[#22C55E]';
+    if (rating === 'dislike') return 'bg-[#FEF2F2]/60 border-l-4 border-l-[#EF4444]';
+    return 'border-l-4 border-l-transparent';
+  };
+
   /** Render a single match row */
   const renderMatchRow = (match: Match) => {
     const formInfo = getFormStabilityInfo(match.formStability);
@@ -646,14 +709,43 @@ export default function Matches() {
       ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
 
     const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
+    const currentRating = matchRatings[match.id] || null;
 
     return (
       <tr 
         key={match.id} 
-        className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${
+        className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-all duration-200 ${
           isFinished ? 'opacity-60' : ''
-        } ${isLive ? 'bg-red-50/30' : ''}`}
+        } ${isLive ? 'bg-red-50/30' : ''} ${getRowRatingStyle(match.id)}`}
       >
+        {/* Rating column — icon-only thumbs up/down */}
+        <td className={`py-4 px-3 ${colDivider}`}>
+          <div className="flex items-center justify-center gap-1.5">
+            <button
+              onClick={() => handleRateMatch(match.id, 'like')}
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                currentRating === 'like'
+                  ? 'bg-[#22C55E] text-white shadow-sm'
+                  : 'text-[#6B7280] hover:bg-[#F0FDF4] hover:text-[#22C55E] border border-transparent hover:border-[#BBF7D0]'
+              }`}
+              title="Цікавий"
+            >
+              <ThumbsUp className="h-4 w-4" strokeWidth={currentRating === 'like' ? 2 : 1.5} />
+            </button>
+            <button
+              onClick={() => handleRateMatch(match.id, 'dislike')}
+              className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                currentRating === 'dislike'
+                  ? 'bg-[#EF4444] text-white shadow-sm'
+                  : 'text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] border border-transparent hover:border-[#FECACA]'
+              }`}
+              title="Не цікавий"
+            >
+              <ThumbsDown className="h-4 w-4" strokeWidth={currentRating === 'dislike' ? 2 : 1.5} />
+            </button>
+          </div>
+        </td>
+
         <td className={`py-4 px-5 ${colDivider}`}>
           <div className="space-y-2">
             <div className="flex items-center gap-3">
@@ -729,9 +821,8 @@ export default function Matches() {
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                  —
-                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                <span className="inline-flex items-center justify-center cursor-help">
+                  <Info className="h-4.5 w-4.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} />
                 </span>
               </TooltipTrigger>
               <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
@@ -762,9 +853,8 @@ export default function Matches() {
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                  —
-                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                <span className="inline-flex items-center justify-center cursor-help">
+                  <Info className="h-4.5 w-4.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} />
                 </span>
               </TooltipTrigger>
               <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
@@ -809,12 +899,12 @@ export default function Matches() {
               </button>
             </TooltipTrigger>
             <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">Показати AI рекомендацію</p>
+              <p className="text-sm">AI рекомендація</p>
             </TooltipContent>
           </Tooltip>
         </td>
 
-        <td className="py-4 px-4 text-center">
+        <td className={`py-4 px-4 text-center ${colDivider}`}>
           {riskComments ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -826,22 +916,38 @@ export default function Matches() {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                <p className="text-sm">Переглянути коментар</p>
+                <p className="text-sm">Коментар</p>
               </TooltipContent>
             </Tooltip>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[#9CA3AF] text-base cursor-help inline-flex items-center gap-1">
-                  —
-                  <Info className="h-3.5 w-3.5 text-[#D1D5DB]" strokeWidth={1.5} />
+                <span className="inline-flex items-center justify-center cursor-help">
+                  <Info className="h-4.5 w-4.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[240px] bg-[#111827] text-white p-3 rounded-xl">
-                <p className="text-sm">Жодна з команд не внесена до списку ризикових — нотатки відсутні</p>
+              <TooltipContent className="max-w-[200px] bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">Немає нотаток</p>
               </TooltipContent>
             </Tooltip>
           )}
+        </td>
+
+        {/* Add to predictions column */}
+        <td className="py-4 px-3 text-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleAddToBets(match)}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all duration-200 hover:shadow-md hover:shadow-green-100"
+              >
+                <PlusCircle className="h-4.5 w-4.5" strokeWidth={1.5} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <p className="text-sm">Додати прогноз</p>
+            </TooltipContent>
+          </Tooltip>
         </td>
       </tr>
     );
@@ -851,6 +957,9 @@ export default function Matches() {
   const renderTableHeader = () => (
     <thead>
       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
+          Інтерес до Матчу
+        </th>
         <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
         <th 
           className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
@@ -879,35 +988,26 @@ export default function Matches() {
                   ? '↑ LIVE → Очікуються → Завершені' 
                   : sortBy === 'status' && sortOrder === 'desc'
                   ? '↓ Завершені → Очікуються → LIVE'
-                  : 'Натисніть для сортування за статусом'}
+                  : 'Сортування за статусом'}
               </p>
             </TooltipContent>
           </Tooltip>
         </th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">Прогноз</span>
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">Відсоток прогнозу перемоги кожної команди</p>
-            </TooltipContent>
-          </Tooltip>
+          Прогноз
         </th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">Коеф.</span>
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">Букмекерські коефіцієнти на перемогу</p>
-            </TooltipContent>
-          </Tooltip>
+          Коеф.
         </th>
         <th className={`text-center py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Позиції</th>
         <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
-        <th className="text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider">Нотатки</th>
+        <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Нотатки</th>
+        <th className="text-center py-4 px-3 text-xs font-semibold text-[#374151] uppercase tracking-wider">
+          <span className="flex items-center justify-center">
+            <PlusCircle className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
+          </span>
+        </th>
       </tr>
     </thead>
   );
