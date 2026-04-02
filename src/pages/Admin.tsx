@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Users, 
   RefreshCw, 
-  Shield, 
   Calendar,
   CheckCircle,
   XCircle,
@@ -16,8 +19,12 @@ import {
   Eye,
   EyeOff,
   Crown,
-  MoreHorizontal,
-  User
+  User,
+  Plus,
+  Pencil,
+  Trash2,
+  Save,
+  X
 } from 'lucide-react';
 import {
   Table,
@@ -28,6 +35,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface UserData {
   telegram: string;
@@ -39,7 +47,19 @@ interface UserData {
   isActive: boolean;
   isAdmin: boolean;
   daysUntilExpiry?: number;
+  isLocal?: boolean; // locally added user
 }
+
+const EMPTY_USER: Omit<UserData, 'isActive' | 'daysUntilExpiry'> = {
+  telegram: '',
+  username: '',
+  password: '',
+  priceMonth: '',
+  startDate: '',
+  endDate: '',
+  isAdmin: false,
+  isLocal: true,
+};
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -48,10 +68,21 @@ export default function Admin() {
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [error, setError] = useState('');
   const [showUsernames, setShowUsernames] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const userRole = localStorage.getItem('userRole');
   const currentUser = localStorage.getItem('username') || '';
-  const isAdmin = userRole === 'admin';
+
+  // Add user dialog
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({ ...EMPTY_USER });
+
+  // Edit user dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserData | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
+
+  // Delete confirm dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState<number>(-1);
 
   useEffect(() => {
     if (userRole !== 'admin') {
@@ -60,14 +91,6 @@ export default function Admin() {
     }
     fetchUsers();
   }, [userRole, navigate]);
-
-  useEffect(() => {
-    const handleClickOutside = () => setShowActionsMenu(false);
-    if (showActionsMenu) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [showActionsMenu]);
 
   const getDaysUntilExpiry = (endDateStr: string): number => {
     try {
@@ -92,6 +115,46 @@ export default function Admin() {
     return daysLeft >= 0;
   };
 
+  const loadLocalUsers = (): UserData[] => {
+    try {
+      const saved = localStorage.getItem('adminLocalUsers');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading local users:', e);
+    }
+    return [];
+  };
+
+  const saveLocalUsers = (localUsers: UserData[]) => {
+    localStorage.setItem('adminLocalUsers', JSON.stringify(localUsers));
+  };
+
+  // Load edits overlay (for editing Google Sheets users locally)
+  const loadUserEdits = (): Record<string, Partial<UserData>> => {
+    try {
+      const saved = localStorage.getItem('adminUserEdits');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading user edits:', e);
+    }
+    return {};
+  };
+
+  const saveUserEdits = (edits: Record<string, Partial<UserData>>) => {
+    localStorage.setItem('adminUserEdits', JSON.stringify(edits));
+  };
+
+  const applyEditsToUser = (user: UserData, edits: Record<string, Partial<UserData>>): UserData => {
+    const key = user.username;
+    if (edits[key]) {
+      const edited = { ...user, ...edits[key] };
+      edited.isActive = isSubscriptionActive(edited.endDate);
+      edited.daysUntilExpiry = getDaysUntilExpiry(edited.endDate);
+      return edited;
+    }
+    return user;
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     setError('');
@@ -104,6 +167,8 @@ export default function Admin() {
       const text = await response.text();
       
       const rows = text.split('\n').slice(1);
+      const edits = loadUserEdits();
+
       const parsedUsers: UserData[] = rows
         .filter(row => row.trim())
         .map(row => {
@@ -120,7 +185,7 @@ export default function Admin() {
           
           const daysLeft = getDaysUntilExpiry(endDate);
           
-          return {
+          const user: UserData = {
             telegram,
             username,
             password,
@@ -130,11 +195,21 @@ export default function Admin() {
             isActive: isSubscriptionActive(endDate),
             isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes',
             daysUntilExpiry: daysLeft,
+            isLocal: false,
           };
+
+          return applyEditsToUser(user, edits);
         })
         .filter((user): user is UserData => user !== null);
       
-      setUsers(parsedUsers);
+      // Merge with local users
+      const localUsers = loadLocalUsers().map(u => ({
+        ...u,
+        isActive: isSubscriptionActive(u.endDate),
+        daysUntilExpiry: getDaysUntilExpiry(u.endDate),
+      }));
+
+      setUsers([...parsedUsers, ...localUsers]);
       setLastUpdate(new Date().toLocaleString('uk-UA'));
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -142,6 +217,118 @@ export default function Admin() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Add new user
+  const handleAddUser = () => {
+    if (!newUser.username.trim() || !newUser.telegram.trim()) {
+      toast.error('Заповніть Telegram та Username');
+      return;
+    }
+
+    // Check duplicate
+    if (users.some(u => u.username.toLowerCase() === newUser.username.toLowerCase().trim())) {
+      toast.error('Користувач з таким username вже існує');
+      return;
+    }
+
+    const userData: UserData = {
+      ...newUser,
+      telegram: newUser.telegram.trim(),
+      username: newUser.username.trim(),
+      password: newUser.password.trim(),
+      priceMonth: newUser.priceMonth.trim(),
+      startDate: newUser.startDate.trim(),
+      endDate: newUser.endDate.trim(),
+      isActive: isSubscriptionActive(newUser.endDate),
+      daysUntilExpiry: getDaysUntilExpiry(newUser.endDate),
+      isLocal: true,
+    };
+
+    const localUsers = loadLocalUsers();
+    localUsers.push(userData);
+    saveLocalUsers(localUsers);
+
+    setUsers(prev => [...prev, userData]);
+    setNewUser({ ...EMPTY_USER });
+    setAddDialogOpen(false);
+    toast.success(`Користувача "${userData.username}" додано!`);
+  };
+
+  // Open edit dialog
+  const openEditDialog = (user: UserData, index: number) => {
+    setEditingUser({ ...user });
+    setEditingIndex(index);
+    setEditDialogOpen(true);
+  };
+
+  // Save edit
+  const handleSaveEdit = () => {
+    if (!editingUser) return;
+
+    const updated: UserData = {
+      ...editingUser,
+      isActive: isSubscriptionActive(editingUser.endDate),
+      daysUntilExpiry: getDaysUntilExpiry(editingUser.endDate),
+    };
+
+    if (editingUser.isLocal) {
+      // Update local user
+      const localUsers = loadLocalUsers();
+      const localIdx = localUsers.findIndex(u => u.username === users[editingIndex]?.username);
+      if (localIdx >= 0) {
+        localUsers[localIdx] = updated;
+        saveLocalUsers(localUsers);
+      }
+    } else {
+      // Save edit overlay for Google Sheets user
+      const edits = loadUserEdits();
+      const originalUsername = users[editingIndex]?.username;
+      if (originalUsername) {
+        edits[originalUsername] = {
+          telegram: updated.telegram,
+          username: updated.username,
+          password: updated.password,
+          priceMonth: updated.priceMonth,
+          startDate: updated.startDate,
+          endDate: updated.endDate,
+          isAdmin: updated.isAdmin,
+        };
+        saveUserEdits(edits);
+      }
+    }
+
+    setUsers(prev => prev.map((u, i) => i === editingIndex ? updated : u));
+    setEditDialogOpen(false);
+    setEditingUser(null);
+    setEditingIndex(-1);
+    toast.success('Дані користувача оновлено!');
+  };
+
+  // Delete user
+  const confirmDelete = (index: number) => {
+    setDeletingIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (deletingIndex < 0) return;
+    const user = users[deletingIndex];
+
+    if (user.isLocal) {
+      const localUsers = loadLocalUsers().filter(u => u.username !== user.username);
+      saveLocalUsers(localUsers);
+    } else {
+      // For Google Sheets users, we just hide them via a "deleted" list
+      const deleted: string[] = JSON.parse(localStorage.getItem('adminDeletedUsers') || '[]');
+      deleted.push(user.username);
+      localStorage.setItem('adminDeletedUsers', JSON.stringify(deleted));
+    }
+
+    setUsers(prev => prev.filter((_, i) => i !== deletingIndex));
+    setDeleteDialogOpen(false);
+    setDeletingIndex(-1);
+    toast.success(`Користувача "${user.username}" видалено!`);
   };
 
   const activeUsers = users.filter(u => u.isActive).length;
@@ -207,7 +394,7 @@ export default function Admin() {
     return telegram;
   };
 
-  // Card hover style matching Analytics
+  // Card hover style
   const cardBaseStyle = {
     transform: 'scale(1)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
@@ -220,9 +407,19 @@ export default function Admin() {
   };
 
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
-
-  // Common border class for vertical dividers between columns (not on last column)
   const cellBorder = 'border-r border-[#E5E7EB]';
+
+  // Today's date in DD/MM/YYYY format for default values
+  const todayFormatted = (() => {
+    const d = new Date();
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  })();
+
+  const monthLaterFormatted = (() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  })();
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
@@ -235,72 +432,16 @@ export default function Admin() {
           </h1>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActionsMenu(!showActionsMenu);
-                }}
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200"
-                title="Дії"
-              >
-                <MoreHorizontal className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
-              </button>
-              
-              {showActionsMenu && (
-                <div 
-                  className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[200px] z-50"
-                  style={{
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)'
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      fetchUsers();
-                      setShowActionsMenu(false);
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    <RefreshCw className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-                    Оновити дані
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowUsernames(!showUsernames);
-                      setShowActionsMenu(false);
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    {showUsernames ? (
-                      <>
-                        <EyeOff className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-                        Приховати дані
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-                        Показати дані
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
+              <User className="h-4 w-4 text-white" strokeWidth={2} />
             </div>
-
-            <div className="w-px h-8 bg-[#D1D5DB]" />
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
-                <User className="h-4 w-4 text-white" strokeWidth={2} />
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-medium text-[#111827] leading-tight">
-                  {currentUser || 'User'}
-                </p>
-                <p className="text-xs text-[#6B7280] leading-tight">
-                  Адміністратор
-                </p>
-              </div>
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-[#111827] leading-tight">
+                {currentUser || 'User'}
+              </p>
+              <p className="text-xs text-[#6B7280] leading-tight">
+                Адміністратор
+              </p>
             </div>
           </div>
         </div>
@@ -315,6 +456,60 @@ export default function Admin() {
             <AlertDescription className="text-sm text-[#DC2626] ml-2">{error}</AlertDescription>
           </Alert>
         )}
+
+        {/* Action Buttons Row — always visible */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-10 px-5 text-sm"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" strokeWidth={1.5} />
+                Завантаження...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                Оновити дані
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={() => setShowUsernames(!showUsernames)}
+            variant="outline"
+            className="rounded-xl border-[#E5E7EB] font-medium h-10 px-5 text-sm text-[#374151]"
+          >
+            {showUsernames ? (
+              <>
+                <EyeOff className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                Приховати дані
+              </>
+            ) : (
+              <>
+                <Eye className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                Показати дані
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={() => {
+              setNewUser({
+                ...EMPTY_USER,
+                startDate: todayFormatted,
+                endDate: monthLaterFormatted,
+              });
+              setAddDialogOpen(true);
+            }}
+            className="rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium h-10 px-5 text-sm"
+          >
+            <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+            Додати користувача
+          </Button>
+        </div>
 
         {/* Privacy Notice */}
         {!showUsernames && (
@@ -359,12 +554,8 @@ export default function Admin() {
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardBaseStyle);
-            }}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
               <Users className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
@@ -382,12 +573,8 @@ export default function Admin() {
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardBaseStyle);
-            }}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
               <CheckCircle className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
@@ -407,12 +594,8 @@ export default function Admin() {
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardBaseStyle);
-            }}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
               <Crown className="h-5 w-5 text-[#F59E0B]" strokeWidth={1.5} />
@@ -430,12 +613,8 @@ export default function Admin() {
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardBaseStyle);
-            }}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
               <XCircle className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
@@ -468,23 +647,9 @@ export default function Admin() {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={fetchUsers}
-                disabled={loading}
-                className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-10 px-5 transition-all duration-200 text-sm"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" strokeWidth={1.5} />
-                    Завантаження...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                    Оновити
-                  </>
-                )}
-              </Button>
+              <div className="text-sm text-[#9CA3AF]">
+                {users.length} {users.length === 1 ? 'користувач' : users.length < 5 ? 'користувачі' : 'користувачів'}
+              </div>
             </div>
           </div>
           
@@ -498,13 +663,14 @@ export default function Admin() {
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата початку</TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата закінчення</TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Статус</TableHead>
-                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5">Адмін</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Адмін</TableHead>
+                  <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 text-center">Дії</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-[#9CA3AF] py-16 text-sm">
+                    <TableCell colSpan={8} className="text-center text-[#9CA3AF] py-16 text-sm">
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
                           <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.5} />
@@ -530,7 +696,14 @@ export default function Admin() {
                           : ''
                       }`}
                     >
-                      <TableCell className={`font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}`}>{renderTelegram(user.telegram)}</TableCell>
+                      <TableCell className={`font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}`}>
+                        {renderTelegram(user.telegram)}
+                        {user.isLocal && (
+                          <Badge className="ml-2 bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] px-1.5 py-0.5 rounded text-[10px] border-0 font-medium">
+                            LOCAL
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderUsername(user.username)}
                         {user.isAdmin && (
@@ -558,7 +731,7 @@ export default function Admin() {
                       <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         {getExpiryBadge(user)}
                       </TableCell>
-                      <TableCell className="py-4 px-5">
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         {user.isAdmin ? (
                           <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] px-3 py-1.5 rounded-lg border border-[#FDE68A] font-medium text-xs">
                             <Crown className="mr-1 h-3.5 w-3.5" strokeWidth={1.5} />
@@ -570,6 +743,24 @@ export default function Admin() {
                           </Badge>
                         )}
                       </TableCell>
+                      <TableCell className="py-4 px-5">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => openEditDialog(user, index)}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#EFF6FF] text-[#3B82F6] transition-colors"
+                            title="Редагувати"
+                          >
+                            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={() => confirmDelete(index)}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#FEF2F2] text-[#EF4444] transition-colors"
+                            title="Видалити"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -578,6 +769,268 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* ===== ADD USER DIALOG ===== */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-[#111827]">
+              <Plus className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+              Додати користувача
+            </DialogTitle>
+            <DialogDescription className="text-[#6B7280]">
+              Заповніть дані нового користувача
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Telegram *</Label>
+                <Input
+                  value={newUser.telegram}
+                  onChange={(e) => setNewUser({ ...newUser, telegram: e.target.value })}
+                  placeholder="@username"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Username *</Label>
+                <Input
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  placeholder="login"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Пароль</Label>
+                <Input
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  placeholder="password"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Ціна / місяць</Label>
+                <Input
+                  value={newUser.priceMonth}
+                  onChange={(e) => setNewUser({ ...newUser, priceMonth: e.target.value })}
+                  placeholder="100"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Дата початку (DD/MM/YYYY)</Label>
+                <Input
+                  value={newUser.startDate}
+                  onChange={(e) => setNewUser({ ...newUser, startDate: e.target.value })}
+                  placeholder="01/04/2026"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Дата закінчення (DD/MM/YYYY)</Label>
+                <Input
+                  value={newUser.endDate}
+                  onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
+                  placeholder="01/05/2026"
+                  className="rounded-xl border-[#E5E7EB] mt-1.5"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-[#111827] font-medium text-sm">Роль</Label>
+              <Select
+                value={newUser.isAdmin ? 'admin' : 'user'}
+                onValueChange={(val) => setNewUser({ ...newUser, isAdmin: val === 'admin' })}
+              >
+                <SelectTrigger className="rounded-xl border-[#E5E7EB] mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Користувач</SelectItem>
+                  <SelectItem value="admin">Адміністратор</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setAddDialogOpen(false)}
+              className="rounded-xl border-[#E5E7EB] font-medium"
+            >
+              <X className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Скасувати
+            </Button>
+            <Button
+              onClick={handleAddUser}
+              className="rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Додати
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== EDIT USER DIALOG ===== */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-[#111827]">
+              <Pencil className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+              Редагувати користувача
+            </DialogTitle>
+            <DialogDescription className="text-[#6B7280]">
+              Змініть дані користувача
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingUser && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Telegram</Label>
+                  <Input
+                    value={editingUser.telegram}
+                    onChange={(e) => setEditingUser({ ...editingUser, telegram: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Username</Label>
+                  <Input
+                    value={editingUser.username}
+                    onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Пароль</Label>
+                  <Input
+                    value={editingUser.password}
+                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Ціна / місяць</Label>
+                  <Input
+                    value={editingUser.priceMonth}
+                    onChange={(e) => setEditingUser({ ...editingUser, priceMonth: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Дата початку (DD/MM/YYYY)</Label>
+                  <Input
+                    value={editingUser.startDate}
+                    onChange={(e) => setEditingUser({ ...editingUser, startDate: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[#111827] font-medium text-sm">Дата закінчення (DD/MM/YYYY)</Label>
+                  <Input
+                    value={editingUser.endDate}
+                    onChange={(e) => setEditingUser({ ...editingUser, endDate: e.target.value })}
+                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[#111827] font-medium text-sm">Роль</Label>
+                <Select
+                  value={editingUser.isAdmin ? 'admin' : 'user'}
+                  onValueChange={(val) => setEditingUser({ ...editingUser, isAdmin: val === 'admin' })}
+                >
+                  <SelectTrigger className="rounded-xl border-[#E5E7EB] mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Користувач</SelectItem>
+                    <SelectItem value="admin">Адміністратор</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="rounded-xl border-[#E5E7EB] font-medium"
+            >
+              <X className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Скасувати
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              className="rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium"
+            >
+              <Save className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Зберегти
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== DELETE CONFIRM DIALOG ===== */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="rounded-3xl border border-[#E5E7EB]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[#EF4444]">
+              <AlertTriangle className="h-5 w-5" strokeWidth={1.5} />
+              Видалити користувача?
+            </DialogTitle>
+            <DialogDescription className="text-[#6B7280]">
+              {deletingIndex >= 0 && users[deletingIndex] && (
+                <>
+                  Ви впевнені, що хочете видалити користувача <span className="font-semibold text-[#111827]">&quot;{users[deletingIndex].username}&quot;</span>?
+                  <br /><br />
+                  Ця дія незворотна.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="rounded-xl border-[#E5E7EB] font-medium"
+            >
+              Скасувати
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="rounded-xl bg-[#EF4444] hover:bg-[#DC2626] font-medium"
+            >
+              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Видалити
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
