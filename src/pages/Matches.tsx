@@ -372,6 +372,15 @@ const formatDateGroupHeader = (dateKey: string): string => {
   return `${dayShort}, ${formatted}`;
 };
 
+/** Get today's date key in YYYY-MM-DD format */
+const getTodayDateKey = (): string => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function Matches() {
   const currentUser = localStorage.getItem('username') || '';
   const userRole = localStorage.getItem('userRole');
@@ -536,10 +545,13 @@ export default function Matches() {
   const liveMatches = sortedMatches.filter(m => m.matchStatus === 'live');
   const nonLiveMatches = sortedMatches.filter(m => m.matchStatus !== 'live');
 
-  // Group non-live matches by date
+  // Group non-live matches by date, filtering out past days
+  const todayKey = getTodayDateKey();
   const groupedByDate: Record<string, Match[]> = {};
   nonLiveMatches.forEach(match => {
     const key = getDateKey(match.date);
+    // Skip matches from past days (before today)
+    if (key < todayKey) return;
     if (!groupedByDate[key]) groupedByDate[key] = [];
     groupedByDate[key].push(match);
   });
@@ -1201,7 +1213,7 @@ export default function Matches() {
             </Card>
           )}
 
-          {/* ===== DATE GROUP CARDS — bigger header text & icons ===== */}
+          {/* ===== DATE GROUP CARDS — only today and future dates ===== */}
           {!initialLoading && sortedDateKeys.map((dateKey) => {
             const dateMatches = groupedByDate[dateKey];
             return (
