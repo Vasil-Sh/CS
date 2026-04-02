@@ -51,7 +51,7 @@ export default function Login() {
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
         <Card className={`
-          w-full max-w-lg bg-white/97 backdrop-blur-sm border-2 border-[#E8E6DC] 
+          w-full max-w-lg bg-white border-2 border-[#E8E6DC] 
           shadow-[0_16px_64px_rgba(0,0,0,0.08)] rounded-[36px] 
           transition-colors duration-300
           ${isAdminInput 
