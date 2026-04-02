@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   Users, 
   RefreshCw, 
@@ -828,22 +829,24 @@ export default function Admin() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#111827] font-medium text-sm">Дата початку (DD/MM/YYYY)</Label>
-                <Input
-                  value={newUser.startDate}
-                  onChange={(e) => setNewUser({ ...newUser, startDate: e.target.value })}
-                  placeholder="01/04/2026"
-                  className="rounded-xl border-[#E5E7EB] mt-1.5"
-                />
+                <Label className="text-[#111827] font-medium text-sm">Дата початку</Label>
+                <div className="mt-1.5">
+                  <DatePicker
+                    value={newUser.startDate}
+                    onChange={(val) => setNewUser({ ...newUser, startDate: val })}
+                    placeholder="Оберіть дату"
+                  />
+                </div>
               </div>
               <div>
-                <Label className="text-[#111827] font-medium text-sm">Дата закінчення (DD/MM/YYYY)</Label>
-                <Input
-                  value={newUser.endDate}
-                  onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
-                  placeholder="01/05/2026"
-                  className="rounded-xl border-[#E5E7EB] mt-1.5"
-                />
+                <Label className="text-[#111827] font-medium text-sm">Дата закінчення</Label>
+                <div className="mt-1.5">
+                  <DatePicker
+                    value={newUser.endDate}
+                    onChange={(val) => setNewUser({ ...newUser, endDate: val })}
+                    placeholder="Оберіть дату"
+                  />
+                </div>
               </div>
             </div>
 
@@ -939,20 +942,24 @@ export default function Admin() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-[#111827] font-medium text-sm">Дата початку (DD/MM/YYYY)</Label>
-                  <Input
-                    value={editingUser.startDate}
-                    onChange={(e) => setEditingUser({ ...editingUser, startDate: e.target.value })}
-                    className="rounded-xl border-[#E5E7EB] mt-1.5"
-                  />
+                  <Label className="text-[#111827] font-medium text-sm">Дата початку</Label>
+                  <div className="mt-1.5">
+                    <DatePicker
+                      value={editingUser.startDate}
+                      onChange={(val) => setEditingUser({ ...editingUser, startDate: val })}
+                      placeholder="Оберіть дату"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <Label className="text-[#111827] font-medium text-sm">Дата закінчення (DD/MM/YYYY)</Label>
-                  <Input
-                    value={editingUser.endDate}
-                    onChange={(e) => setEditingUser({ ...editingUser, endDate: e.target.value })}
-                    className="rounded-xl border-[#E5E7EB] mt-1.5"
-                  />
+                  <Label className="text-[#111827] font-medium text-sm">Дата закінчення</Label>
+                  <div className="mt-1.5">
+                    <DatePicker
+                      value={editingUser.endDate}
+                      onChange={(val) => setEditingUser({ ...editingUser, endDate: val })}
+                      placeholder="Оберіть дату"
+                    />
+                  </div>
                 </div>
               </div>
 
