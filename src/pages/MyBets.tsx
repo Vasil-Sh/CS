@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import CS2BettingForm from '@/components/CS2BettingForm';
+import type { MatchPrefillData } from '@/components/CS2BettingForm';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import ExpressDetailsModal from '@/components/ExpressDetailsModal';
@@ -107,6 +109,7 @@ export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
   const userRole = localStorage.getItem('userRole');
   const isAdminRole = userRole === 'admin';
+  const location = useLocation();
   
   const [stats, setStats] = useState<BetStats>(() => 
     UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)
@@ -129,6 +132,9 @@ export default function MyBets() {
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+  // Prefill data from Matches page navigation
+  const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
 
   // Filter state for the table — 'today' or 'all'
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('all');
@@ -154,6 +160,17 @@ export default function MyBets() {
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme);
   };
+
+  // Handle prefill data from Matches page (via react-router navigation state)
+  useEffect(() => {
+    const state = location.state as { prefillMatch?: MatchPrefillData } | null;
+    if (state?.prefillMatch) {
+      setPrefillData(state.prefillMatch);
+      setActiveTab('add');
+      // Clear the location state so it doesn't re-trigger on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
@@ -528,6 +545,11 @@ export default function MyBets() {
     setSortBy('date');
     setSortOrder('desc');
   };
+
+  // Clear prefill data after it's been consumed by the form
+  const handlePrefillConsumed = useCallback(() => {
+    setPrefillData(null);
+  }, []);
 
   const tabs = [
     { id: 'records', label: 'Останні записи', icon: ClipboardList },
@@ -1267,7 +1289,13 @@ export default function MyBets() {
           {/* Tab Content */}
           <div>
             {activeTab === 'records' && renderRecordsTable()}
-            {activeTab === 'add' && <CS2BettingForm onRecordAdded={handleRecordAdded} />}
+            {activeTab === 'add' && (
+              <CS2BettingForm 
+                onRecordAdded={handleRecordAdded} 
+                prefillData={prefillData}
+                onPrefillConsumed={handlePrefillConsumed}
+              />
+            )}
             {activeTab === 'strategies' && <StrategyOverview />}
           </div>
         </div>

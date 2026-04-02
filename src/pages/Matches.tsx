@@ -127,6 +127,17 @@ const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
   }
 };
 
+const HLTV_BASE_URL = 'https://www.hltv.org';
+
+/** Build a full HLTV URL from an API link (which may be relative) */
+function buildHltvUrl(link: string): string {
+  if (!link) return '';
+  // Already a full URL
+  if (link.startsWith('http://') || link.startsWith('https://')) return link;
+  // Relative path — prepend HLTV base
+  return `${HLTV_BASE_URL}${link.startsWith('/') ? '' : '/'}${link}`;
+}
+
 function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const matchType = parseMatchType(apiMatch.type);
   const context = parseMatchContext(apiMatch.type, apiMatch.link);
@@ -195,7 +206,7 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     tier,
     matchType,
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
-    url: apiMatch.link,
+    url: buildHltvUrl(apiMatch.link),
     score1: apiMatch.score1,
     score2: apiMatch.score2,
     matchStatus: status,

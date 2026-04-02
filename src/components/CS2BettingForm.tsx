@@ -1437,17 +1437,17 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         <div className="space-y-6 relative">
           <div className="sticky top-6 space-y-6">
             {/* Calculations Card */}
-            <div className="bg-white border border-[#DBEAFE] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div 
-                className="flex items-center gap-3 px-6 py-5 border-b border-[#BFDBFE]"
-                style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
+                className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]"
+                style={{}}
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
-                  <Calculator className="h-5 w-5 text-white" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                  <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
-                <span className="text-lg font-semibold text-white">Розрахунки</span>
+                <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
               </div>
               <div className="p-6 space-y-4">
                 {formData.stake && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
@@ -1559,23 +1559,23 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
             </div>
 
             {/* Risky Teams Card */}
-            <div className="bg-white border border-[#DBEAFE] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div 
-                className="flex items-center gap-3 px-6 py-5 border-b border-[#BFDBFE]"
-                style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
+                className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]"
+                style={{}}
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
-                  <AlertTriangle className="h-5 w-5 text-white" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                  <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
-                <span className="text-lg font-semibold text-white">Ризиковані команди</span>
+                <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
               </div>
               <div className="p-6">
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto">
                     {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-4 border border-[#BFDBFE] rounded-2xl bg-white space-y-2.5 hover:border-[#3B82F6] transition-colors">
+                      <div key={index} className="p-4 border border-[#3B82F6] rounded-2xl bg-white space-y-2.5 hover:border-[#3B82F6] transition-colors">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
