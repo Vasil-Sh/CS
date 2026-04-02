@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as SonnerToaster } from 'sonner';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -31,6 +32,7 @@ function App() {
         </Route>
       </Routes>
       <Toaster />
+      <SonnerToaster position="top-center" richColors closeButton duration={4000} />
     </Router>
   );
 }
