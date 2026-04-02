@@ -933,7 +933,7 @@ export default function Matches() {
           )}
         </td>
 
-        {/* Add to predictions column */}
+        {/* Add to predictions column — icon-only "+" button */}
         <td className="py-4 px-3 text-center">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -945,7 +945,7 @@ export default function Matches() {
               </button>
             </TooltipTrigger>
             <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">Додати прогноз</p>
+              <p className="text-sm">Додати до прогнозів</p>
             </TooltipContent>
           </Tooltip>
         </td>
@@ -1003,11 +1003,7 @@ export default function Matches() {
         <th className={`text-left py-4 px-5 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Турнір</th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
         <th className={`text-center py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Нотатки</th>
-        <th className="text-center py-4 px-3 text-xs font-semibold text-[#374151] uppercase tracking-wider">
-          <span className="flex items-center justify-center">
-            <PlusCircle className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
-          </span>
-        </th>
+        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">Додати до прогнозів</th>
       </tr>
     </thead>
   );
