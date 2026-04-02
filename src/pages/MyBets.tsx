@@ -16,7 +16,8 @@ import {
   Flag, Wallet, Eye, ChevronDown, ChevronUp,
   Plus, History, LineChart, ArrowUpRight, ArrowDownRight,
   MoreHorizontal, Pencil, Filter, X,
-  Sun, Moon, User
+  Sun, Moon, User,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -101,17 +102,9 @@ function getTodayStr(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-/** Format YYYY-MM-DD → DD.MM.YYYY */
-function formatDateDisplay(dateStr: string): string {
-  try {
-    const [y, m, d] = dateStr.split('-');
-    return `${d}.${m}.${y}`;
-  } catch {
-    return dateStr;
-  }
-}
+type TableFilterMode = 'today' | 'all';
 
-type TableFilterMode = 'today' | 'date' | 'all';
+const ITEMS_PER_PAGE = 10;
 
 export default function MyBets() {
   const currentUser = localStorage.getItem('username') || '';
@@ -141,9 +134,11 @@ export default function MyBets() {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
-  // Filter state for the table
+  // Filter state for the table — only 'today' or 'all'
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('all');
-  const [filterDate, setFilterDate] = useState<string>(getTodayStr());
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [bankrollStats, setBankrollStats] = useState(() => {
     return BankrollService.getBankrollStats(currentUser, recentBets);
@@ -361,17 +356,30 @@ export default function MyBets() {
     [recentBets]
   );
 
-  // Filtered bets based on tableFilter
+  // Filtered bets based on tableFilter (only 'today' or 'all')
   const filteredBets = useMemo(() => {
     if (tableFilter === 'all') return sortedBets;
     
-    const targetDate = tableFilter === 'today' ? getTodayStr() : filterDate;
+    const targetDate = getTodayStr();
     
     return sortedBets.filter((bet: Bet) => {
       const normalizedBetDate = normalizeDateStr(bet.date);
       return normalizedBetDate === targetDate;
     });
-  }, [sortedBets, tableFilter, filterDate]);
+  }, [sortedBets, tableFilter]);
+
+  // Pagination logic
+  const totalPages = Math.max(1, Math.ceil(filteredBets.length / ITEMS_PER_PAGE));
+
+  // Reset page to 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tableFilter]);
+
+  const paginatedBets = useMemo(() => {
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredBets.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+  }, [filteredBets, currentPage]);
 
   const { activeBets, winningBets, losingBets } = useMemo(() => ({
     activeBets: recentBets.filter((bet: Bet) => bet.result === 'Pending'),
@@ -451,12 +459,24 @@ export default function MyBets() {
     }
   }, [showActionsMenu]);
 
-  // Format filter date for display
-  const formatFilterDateLabel = useCallback((dateStr: string): string => {
-    const today = getTodayStr();
-    if (dateStr === today) return 'Сьогодні';
-    return formatDateDisplay(dateStr);
-  }, []);
+  // Generate page numbers for pagination
+  const getPageNumbers = (): (number | '...')[] => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages: (number | '...')[] = [];
+
+    if (currentPage <= 3) {
+      pages.push(1, 2, 3, 4, '...', totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+    } else {
+      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+    }
+
+    return pages;
+  };
 
   const tabs = [
     { id: 'add', label: 'Додати запис', icon: Plus },
@@ -556,7 +576,7 @@ export default function MyBets() {
         {/* ===== QUICK STATS - Row 1 ===== */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           
-          {/* 1. Поточний банк — removed edit button */}
+          {/* 1. Поточний банк */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative overflow-hidden"
             style={cardBaseStyle}
@@ -583,7 +603,7 @@ export default function MyBets() {
             </div>
           </div>
 
-          {/* 2. Профіт (swapped with Всього записів) */}
+          {/* 2. Профіт */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
@@ -609,7 +629,7 @@ export default function MyBets() {
             </div>
           </div>
 
-          {/* 3. Всього записів (swapped with Профіт) */}
+          {/* 3. Всього записів */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
@@ -772,7 +792,7 @@ export default function MyBets() {
             </button>
           </div>
 
-          {/* Filter Bar */}
+          {/* Filter Bar — only Сьогодні and Всі матчі */}
           {isTableExpanded && (
             <div className="flex items-center gap-3 px-6 py-3.5 border-b border-[#F3F4F6] bg-[#FAFAFA]">
               <Filter className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -780,10 +800,7 @@ export default function MyBets() {
               
               {/* Today button */}
               <button
-                onClick={() => {
-                  setTableFilter('today');
-                  setFilterDate(getTodayStr());
-                }}
+                onClick={() => setTableFilter('today')}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   tableFilter === 'today'
                     ? 'bg-[#111827] text-white shadow-sm'
@@ -792,47 +809,6 @@ export default function MyBets() {
               >
                 Сьогодні
               </button>
-
-              {/* Date picker - native input styled as button overlay */}
-              <div className="relative flex items-center">
-                <label
-                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer select-none ${
-                    tableFilter === 'date'
-                      ? 'bg-white text-[#111827] border-2 border-[#111827] shadow-sm'
-                      : 'bg-white text-[#374151] border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB]'
-                  }`}
-                >
-                  <Calendar className="h-3.5 w-3.5 pointer-events-none" strokeWidth={1.5} />
-                  <span className="pointer-events-none">
-                    {tableFilter === 'date' ? formatDateDisplay(filterDate) : 'Обрати дату'}
-                  </span>
-                  <input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setFilterDate(e.target.value);
-                        setTableFilter('date');
-                      }
-                    }}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    style={{ colorScheme: 'light' }}
-                  />
-                </label>
-                {tableFilter === 'date' && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setTableFilter('today');
-                      setFilterDate(getTodayStr());
-                    }}
-                    className="relative z-20 ml-1.5 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/10 transition-colors"
-                    title="Скинути"
-                  >
-                    <X className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={2} />
-                  </button>
-                )}
-              </div>
 
               {/* All bets button */}
               <button
@@ -859,172 +835,228 @@ export default function MyBets() {
           {isTableExpanded && (
             <div className="px-0 pb-6">
               {filteredBets.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Дата</th>
-                        <th className="text-left px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider min-w-[220px] border-l border-[#E5E7EB]">Матч</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Тип</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Валюта</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Сума</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Коеф.</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Профіт</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Ціль</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Статус</th>
-                        <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Дії</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBets.map((bet: Bet) => {
-                        const isPending = bet.result === 'Pending';
-                        const isWin = bet.result === 'Win';
-                        const isLoss = bet.result === 'Loss';
-                        const currency = bet.currency || 'UAH';
-                        const currencySymbol = getCurrencySymbol(currency);
-                        const displayAmount = bet.originalAmount || bet.amount;
-                        const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
-                        const goalName = getGoalName(bet.goalId);
-                        
-                        const isExpress = isExpressBet(bet);
-                        const expressEventCount = isExpress ? getExpressEventCount(bet) : 0;
-                        const betKey = `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}`;
-                        
-                        return (
-                          <tr 
-                            key={betKey}
-                            className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors duration-150"
-                          >
-                            <td className="px-4 py-4 text-center">
-                              <span className="text-base text-[#374151] font-medium">{bet.date}</span>
-                            </td>
-                            <td className="px-4 py-4 border-l border-[#F3F4F6]">
-                              <div className="min-w-0">
-                                <div className="font-semibold text-base text-[#111827] truncate" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
-                                  {bet.match || `${bet.team1} vs ${bet.team2}`}
-                                </div>
-                                {!isExpress && (
-                                  <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>
-                                )}
-                                <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
-                                  {bet.format}
-                                </Badge>
-                              </div>
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              {isExpress ? (
-                                <div className="flex flex-col items-center gap-1.5">
-                                  <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">
-                                    Express {expressEventCount}×
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Дата</th>
+                          <th className="text-left px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider min-w-[220px] border-l border-[#E5E7EB]">Матч</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Тип</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Валюта</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Сума</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Коеф.</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Профіт</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Ціль</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Статус</th>
+                          <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Дії</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedBets.map((bet: Bet) => {
+                          const isPending = bet.result === 'Pending';
+                          const isWin = bet.result === 'Win';
+                          const isLoss = bet.result === 'Loss';
+                          const currency = bet.currency || 'UAH';
+                          const currencySymbol = getCurrencySymbol(currency);
+                          const displayAmount = bet.originalAmount || bet.amount;
+                          const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
+                          const goalName = getGoalName(bet.goalId);
+                          
+                          const isExpress = isExpressBet(bet);
+                          const expressEventCount = isExpress ? getExpressEventCount(bet) : 0;
+                          const betKey = `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}`;
+                          
+                          return (
+                            <tr 
+                              key={betKey}
+                              className="border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors duration-150"
+                            >
+                              <td className="px-4 py-4 text-center">
+                                <span className="text-base text-[#374151] font-medium">{bet.date}</span>
+                              </td>
+                              <td className="px-4 py-4 border-l border-[#F3F4F6]">
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-base text-[#111827] truncate" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
+                                    {bet.match || `${bet.team1} vs ${bet.team2}`}
+                                  </div>
+                                  {!isExpress && (
+                                    <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>
+                                  )}
+                                  <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
+                                    {bet.format}
                                   </Badge>
-                                  <button
-                                    onClick={() => handleExpressDetailsClick(bet)}
-                                    className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200"
-                                  >
-                                    Деталі
-                                  </button>
                                 </div>
-                              ) : (
-                                <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
-                                  {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                {isExpress ? (
+                                  <div className="flex flex-col items-center gap-1.5">
+                                    <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">
+                                      Express {expressEventCount}×
+                                    </Badge>
+                                    <button
+                                      onClick={() => handleExpressDetailsClick(bet)}
+                                      className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200"
+                                    >
+                                      Деталі
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
+                                    {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
+                                  </Badge>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                <span className="text-base text-[#6B7280] font-medium">{currency}</span>
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                <span className="text-base font-semibold text-[#111827]">{currencySymbol}{displayAmount}</span>
+                                {currency === 'USD' && bet.exchangeRate && (
+                                  <div className="text-sm text-[#9CA3AF] mt-0.5">
+                                    ≈ ₴{(displayAmount * bet.exchangeRate).toFixed(2)}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                <span className="text-base font-bold text-[#111827]">{bet.odds.toFixed(2)}</span>
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                {displayProfit !== undefined && displayProfit !== null ? (
+                                  <div>
+                                    <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                                      {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
+                                    </span>
+                                    {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
+                                      <div className="text-sm text-[#9CA3AF] mt-0.5">
+                                        ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-[#D1D5DB] text-base">—</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                {goalName ? (
+                                  <Badge className="font-medium px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-sm max-w-[130px] truncate hover:bg-[#EFF6FF]" title={goalName}>
+                                    <Flag className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" strokeWidth={1.5} />
+                                    <span className="truncate">{goalName}</span>
+                                  </Badge>
+                                ) : (
+                                  <span className="text-[#D1D5DB] text-sm">—</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                <Badge 
+                                  className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${
+                                    isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' :
+                                    isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' :
+                                    'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'
+                                  }`}
+                                >
+                                  {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
                                 </Badge>
-                              )}
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              <span className="text-base text-[#6B7280] font-medium">{currency}</span>
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              <span className="text-base font-semibold text-[#111827]">{currencySymbol}{displayAmount}</span>
-                              {currency === 'USD' && bet.exchangeRate && (
-                                <div className="text-sm text-[#9CA3AF] mt-0.5">
-                                  ≈ ₴{(displayAmount * bet.exchangeRate).toFixed(2)}
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              <span className="text-base font-bold text-[#111827]">{bet.odds.toFixed(2)}</span>
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              {displayProfit !== undefined && displayProfit !== null ? (
-                                <div>
-                                  <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                                    {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
-                                  </span>
-                                  {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
-                                    <div className="text-sm text-[#9CA3AF] mt-0.5">
-                                      ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
-                                    </div>
+                              </td>
+                              <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
+                                <div className="flex gap-2 justify-center">
+                                  {isPending && (
+                                    <>
+                                      <button
+                                        onClick={() => updateBetResult(bet, 'Win')}
+                                        className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#16A34A] transition-all duration-200"
+                                        title="Виграш"
+                                      >
+                                        <CheckCircle className="h-4 w-4" strokeWidth={2} />
+                                      </button>
+                                      <button
+                                        onClick={() => updateBetResult(bet, 'Loss')}
+                                        className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#DC2626] transition-all duration-200"
+                                        title="Програш"
+                                      >
+                                        <XCircle className="h-4 w-4" strokeWidth={2} />
+                                      </button>
+                                    </>
+                                  )}
+                                  <button
+                                    onClick={() => handleShareBet(bet)}
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#3B82F6] transition-all duration-200"
+                                    title="Поділитися"
+                                  >
+                                    <Share2 className="h-4 w-4" strokeWidth={2} />
+                                  </button>
+                                  {isAdmin && (
+                                    <button
+                                      onClick={() => handleBetDetailsClick(bet)}
+                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#7C3AED] transition-all duration-200"
+                                      title="Деталі"
+                                    >
+                                      <Eye className="h-4 w-4" strokeWidth={2} />
+                                    </button>
                                   )}
                                 </div>
-                              ) : (
-                                <span className="text-[#D1D5DB] text-base">—</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              {goalName ? (
-                                <Badge className="font-medium px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-sm max-w-[130px] truncate hover:bg-[#EFF6FF]" title={goalName}>
-                                  <Flag className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" strokeWidth={1.5} />
-                                  <span className="truncate">{goalName}</span>
-                                </Badge>
-                              ) : (
-                                <span className="text-[#D1D5DB] text-sm">—</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              <Badge 
-                                className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${
-                                  isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' :
-                                  isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' :
-                                  'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'
-                                }`}
-                              >
-                                {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
-                              </Badge>
-                            </td>
-                            <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                              <div className="flex gap-2 justify-center">
-                                {isPending && (
-                                  <>
-                                    <button
-                                      onClick={() => updateBetResult(bet, 'Win')}
-                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#DCFCE7] hover:border-[#86EFAC] text-[#16A34A] transition-all duration-200"
-                                      title="Виграш"
-                                    >
-                                      <CheckCircle className="h-4 w-4" strokeWidth={2} />
-                                    </button>
-                                    <button
-                                      onClick={() => updateBetResult(bet, 'Loss')}
-                                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#DC2626] transition-all duration-200"
-                                      title="Програш"
-                                    >
-                                      <XCircle className="h-4 w-4" strokeWidth={2} />
-                                    </button>
-                                  </>
-                                )}
-                                <button
-                                  onClick={() => handleShareBet(bet)}
-                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#3B82F6] transition-all duration-200"
-                                  title="Поділитися"
-                                >
-                                  <Share2 className="h-4 w-4" strokeWidth={2} />
-                                </button>
-                                {isAdmin && (
-                                  <button
-                                    onClick={() => handleBetDetailsClick(bet)}
-                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#7C3AED] transition-all duration-200"
-                                    title="Деталі"
-                                  >
-                                    <Eye className="h-4 w-4" strokeWidth={2} />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-1.5 pt-6 px-6">
+                      {/* Previous button */}
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 ${
+                          currentPage === 1
+                            ? 'text-[#D1D5DB] cursor-not-allowed'
+                            : 'text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]'
+                        }`}
+                        title="Попередня"
+                      >
+                        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+                      </button>
+
+                      {/* Page numbers */}
+                      {getPageNumbers().map((page, idx) => (
+                        page === '...' ? (
+                          <span key={`dots-${idx}`} className="flex items-center justify-center w-9 h-9 text-sm text-[#9CA3AF]">
+                            …
+                          </span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`flex items-center justify-center min-w-[36px] h-9 rounded-xl text-sm font-medium transition-all duration-200 px-2 ${
+                              currentPage === page
+                                ? 'bg-[#111827] text-white shadow-sm'
+                                : 'text-[#374151] hover:bg-[#F3F4F6] hover:text-[#111827]'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      ))}
+
+                      {/* Next button */}
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 ${
+                          currentPage === totalPages
+                            ? 'text-[#D1D5DB] cursor-not-allowed'
+                            : 'text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827]'
+                        }`}
+                        title="Наступна"
+                      >
+                        <ChevronRight className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-16">
                   <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#F3F4F6] mx-auto mb-4">
@@ -1034,17 +1066,6 @@ export default function MyBets() {
                     <>
                       <p className="text-[#111827] font-semibold text-lg">Немає записів за сьогодні</p>
                       <p className="text-base text-[#9CA3AF] mt-1">Додайте новий запис або перегляньте всі матчі</p>
-                      <button
-                        onClick={() => setTableFilter('all')}
-                        className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors"
-                      >
-                        Показати всі матчі
-                      </button>
-                    </>
-                  ) : tableFilter === 'date' ? (
-                    <>
-                      <p className="text-[#111827] font-semibold text-lg">Немає записів за {formatFilterDateLabel(filterDate)}</p>
-                      <p className="text-base text-[#9CA3AF] mt-1">Оберіть іншу дату або перегляньте всі матчі</p>
                       <button
                         onClick={() => setTableFilter('all')}
                         className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors"
