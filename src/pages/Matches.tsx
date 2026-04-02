@@ -30,7 +30,8 @@ import {
   Radio,
   ArrowUp,
   ArrowDown,
-  Info
+  Info,
+  Filter
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -416,6 +417,20 @@ export default function Matches() {
     setIsDarkTheme(!isDarkTheme);
   };
 
+  // Reset all filters
+  const resetAllFilters = () => {
+    setFilterStatus('all');
+    setFilterTier('all');
+    setFilterMatchType('all');
+    setFilterConfidence('all');
+    setFilterRisk('all');
+    setShowHotMatches(false);
+    setSearchQuery('');
+  };
+
+  // Check if any filter is active
+  const hasActiveFilters = filterStatus !== 'all' || filterTier !== 'all' || filterMatchType !== 'all' || filterConfidence !== 'all' || filterRisk !== 'all' || showHotMatches || searchQuery !== '';
+
   useEffect(() => {
     loadMatchesFromApi();
     loadRiskyTeams();
@@ -550,7 +565,6 @@ export default function Matches() {
   const groupedByDate: Record<string, Match[]> = {};
   nonLiveMatches.forEach(match => {
     const key = getDateKey(match.date);
-    // Skip matches from past days (before today)
     if (key < todayKey) return;
     if (!groupedByDate[key]) groupedByDate[key] = [];
     groupedByDate[key].push(match);
@@ -1042,120 +1056,160 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== FILTERS BAR — compact, centered ===== */}
-          <div className="flex justify-center">
-            <Card 
-              className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden w-fit"
-              style={{ boxShadow: chartCardShadow }}
-            >
-              <CardContent className="px-5 py-3.5">
-                <div className="flex items-center gap-2.5 flex-nowrap">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={refreshMatches}
-                        disabled={isLoading}
-                        size="sm"
-                        className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-9 px-4 transition-all duration-200 text-sm"
-                      >
-                        {isLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
-                        ) : (
-                          <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
-                        )}
-                        <span className="ml-1.5">Оновити</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                      <p className="text-sm">Оновити матчі з API</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <div className="relative flex-shrink-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
-                    <Input
-                      placeholder="Пошук..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-2 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-9 w-[140px] text-sm"
-                    />
-                  </div>
-
-                  <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
-                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[125px] text-sm">
-                      <SelectValue placeholder="Статус" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі статуси</SelectItem>
-                      <SelectItem value="live">🔴 LIVE</SelectItem>
-                      <SelectItem value="upcoming">🕐 Очікуються</SelectItem>
-                      <SelectItem value="finished">✅ Завершені</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[110px] text-sm">
-                      <SelectValue placeholder="Tier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі Tier</SelectItem>
-                      <SelectItem value="tier1">Tier 1</SelectItem>
-                      <SelectItem value="tier2">Tier 2</SelectItem>
-                      <SelectItem value="tier3">Tier 3</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[100px] text-sm">
-                      <SelectValue placeholder="Формат" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Формат</SelectItem>
-                      <SelectItem value="Bo1">Bo1</SelectItem>
-                      <SelectItem value="Bo3">Bo3</SelectItem>
-                      <SelectItem value="Bo5">Bo5</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[140px] text-sm">
-                      <SelectValue placeholder="Впевненість" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Впевненість</SelectItem>
-                      <SelectItem value="high">Висока (&gt;80%)</SelectItem>
-                      <SelectItem value="medium">Середня (60-80%)</SelectItem>
-                      <SelectItem value="low">Низька (&lt;60%)</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                    <SelectTrigger className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors h-9 w-[110px] text-sm">
-                      <SelectValue placeholder="Ризик" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Ризик</SelectItem>
-                      <SelectItem value="safe">Низький</SelectItem>
-                      <SelectItem value="moderate">Помірний</SelectItem>
-                      <SelectItem value="high">Високий</SelectItem>
-                    </SelectContent>
-                  </Select>
-
+          {/* ===== SINGLE-ROW FILTER BAR — Analytics-style container ===== */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-4 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Refresh button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button
-                    variant={showHotMatches ? "default" : "outline"}
-                    onClick={() => setShowHotMatches(!showHotMatches)}
-                    className={`rounded-xl font-medium h-9 px-3.5 transition-all duration-200 text-sm ${
-                      showHotMatches 
-                        ? 'bg-[#111827] hover:bg-[#1F2937] text-white border-0' 
-                        : 'border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] text-[#374151]'
-                    }`}
+                    onClick={refreshMatches}
+                    disabled={isLoading}
+                    className="rounded-[20px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 transition-all duration-300 text-sm"
                   >
-                    <Flame className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-                    Гарячі
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                    )}
+                    <span className="ml-2">Оновити</span>
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                  <p className="text-sm">Оновити матчі з API</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
+                <Input
+                  placeholder="Пошук..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-3 rounded-[20px] border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-11 w-[160px] text-sm bg-white/80"
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-8 bg-[#D1D5DB]/60" />
+
+              {/* Status filter */}
+              <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
+                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[140px] text-sm ${
+                  filterStatus !== 'all' 
+                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
+                }`}>
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Всі статуси</SelectItem>
+                  <SelectItem value="live">🔴 LIVE</SelectItem>
+                  <SelectItem value="upcoming">🕐 Очікуються</SelectItem>
+                  <SelectItem value="finished">✅ Завершені</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Tier filter */}
+              <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
+                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
+                  filterTier !== 'all' 
+                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
+                }`}>
+                  <SelectValue placeholder="Tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Всі Tier</SelectItem>
+                  <SelectItem value="tier1">Tier 1</SelectItem>
+                  <SelectItem value="tier2">Tier 2</SelectItem>
+                  <SelectItem value="tier3">Tier 3</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Format filter */}
+              <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
+                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
+                  filterMatchType !== 'all' 
+                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
+                }`}>
+                  <SelectValue placeholder="Формат" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Формат</SelectItem>
+                  <SelectItem value="Bo1">Bo1</SelectItem>
+                  <SelectItem value="Bo3">Bo3</SelectItem>
+                  <SelectItem value="Bo5">Bo5</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Confidence filter */}
+              <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
+                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[150px] text-sm ${
+                  filterConfidence !== 'all' 
+                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
+                }`}>
+                  <SelectValue placeholder="Впевненість" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Впевненість</SelectItem>
+                  <SelectItem value="high">Висока (&gt;80%)</SelectItem>
+                  <SelectItem value="medium">Середня (60-80%)</SelectItem>
+                  <SelectItem value="low">Низька (&lt;60%)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Risk filter */}
+              <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
+                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
+                  filterRisk !== 'all' 
+                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
+                }`}>
+                  <SelectValue placeholder="Ризик" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Ризик</SelectItem>
+                  <SelectItem value="safe">Низький</SelectItem>
+                  <SelectItem value="moderate">Помірний</SelectItem>
+                  <SelectItem value="high">Високий</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Hot matches toggle */}
+              <button
+                onClick={() => setShowHotMatches(!showHotMatches)}
+                className={`
+                  rounded-[20px] px-5 h-11 font-medium text-sm
+                  transition-all duration-300 ease-in-out
+                  inline-flex items-center gap-2
+                  ${showHotMatches 
+                    ? 'bg-white text-[#111827] border-2 border-[#111827] shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
+                    : 'bg-white/80 text-[#9CA3AF] border border-[#E5E7EB] hover:bg-white hover:text-[#6B7280] hover:border-[#D1D5DB]'
+                  }
+                `}
+              >
+                <Flame className="h-4 w-4" strokeWidth={1.5} />
+                Гарячі
+              </button>
+
+              {/* Reset filters */}
+              {hasActiveFilters && (
+                <>
+                  <div className="w-px h-8 bg-[#D1D5DB]/60" />
+                  <button
+                    onClick={resetAllFilters}
+                    className="rounded-[20px] px-4 h-11 font-medium text-sm text-[#6B7280] hover:text-[#111827] bg-white/80 hover:bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all duration-300 inline-flex items-center gap-2"
+                  >
+                    <Filter className="h-4 w-4" strokeWidth={1.5} />
+                    Скинути
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* ===== LOADING / EMPTY STATE ===== */}
@@ -1181,7 +1235,7 @@ export default function Matches() {
             </div>
           )}
 
-          {/* ===== LIVE MATCHES — bigger header text & icons ===== */}
+          {/* ===== LIVE MATCHES ===== */}
           {!initialLoading && liveMatches.length > 0 && (
             <Card 
               className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
