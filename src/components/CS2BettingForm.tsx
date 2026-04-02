@@ -903,17 +903,22 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
       {/* Strategy Banner */}
       {primaryStrategy && (
-        <div className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 flex items-center gap-4"
+        <div className="rounded-3xl overflow-hidden border border-[#BFDBFE]"
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
-            <Shield className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-[#6B7280]">
-              Активна стратегія: <span className="font-semibold text-[#111827]">{primaryStrategy.name}</span>
-            </p>
-            <p className="text-sm text-[#9CA3AF] mt-0.5 truncate">{primaryStrategy.description}</p>
+          <div 
+            className="flex items-center gap-4 px-6 py-5"
+            style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
+          >
+            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
+              <Shield className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-white/80">
+                Активна стратегія: <span className="font-semibold text-white">{primaryStrategy.name}</span>
+              </p>
+              <p className="text-sm text-white/60 mt-0.5 truncate">{primaryStrategy.description}</p>
+            </div>
           </div>
         </div>
       )}
@@ -1432,14 +1437,17 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         <div className="space-y-6 relative">
           <div className="sticky top-6 space-y-6">
             {/* Calculations Card */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#DBEAFE] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                  <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div 
+                className="flex items-center gap-3 px-6 py-5 border-b border-[#BFDBFE]"
+                style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
+              >
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <Calculator className="h-5 w-5 text-white" strokeWidth={1.5} />
                 </div>
-                <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
+                <span className="text-lg font-semibold text-white">Розрахунки</span>
               </div>
               <div className="p-6 space-y-4">
                 {formData.stake && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
@@ -1595,8 +1603,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                   </div>
                 ) : (
                   <div className="text-center py-6 flex flex-col items-center justify-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
-                      <AlertTriangle className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
+                      <AlertTriangle className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
                     </div>
                     <p className="text-sm text-[#6B7280]">Ризикових команд не знайдено</p>
                   </div>
