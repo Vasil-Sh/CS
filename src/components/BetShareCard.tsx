@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import {
   Trophy, TrendingDown, Target, Calendar, CheckCircle2,
   ChevronDown, ChevronUp, DollarSign, Percent
@@ -22,6 +21,7 @@ interface BetShareCardProps {
     originalProfit?: number;
     exchangeRate?: number;
   };
+  compact?: boolean;
 }
 
 function translateBetType(betType: string): string {
@@ -112,7 +112,7 @@ const themes = {
   },
 };
 
-export default function BetShareCard({ bet }: BetShareCardProps) {
+export default function BetShareCard({ bet, compact = false }: BetShareCardProps) {
   const [isEventsOpen, setIsEventsOpen] = useState(false);
   
   const isWin = bet.result === 'Win';
@@ -176,24 +176,49 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
   const statusText = isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується';
   
+  const expressLabel = isExpress ? `Експрес ${bet.format}` : '';
+  
   const theme = isWin ? themes.Win : isLoss ? themes.Loss : themes.Pending;
+
+  // Sizing: compact (used in modal) vs full
+  const bannerPx = compact ? 'px-5' : 'px-6';
+  const bannerPy = compact ? 'py-3.5' : 'py-5';
+  const bodyPadding = compact ? 'p-4' : 'p-6';
+  const bodyGap = compact ? 'space-y-3' : 'space-y-4';
+  const iconSize = compact ? 'w-10 h-10' : 'w-11 h-11';
+  const iconRound = compact ? 'rounded-xl' : 'rounded-2xl';
+  const statusFont = compact ? 'text-base' : 'text-lg';
+  const matchFont = compact ? 'text-base' : 'text-lg';
+  const expressHeaderFont = compact ? 'text-base' : 'text-lg';
+  const selectionFont = compact ? 'text-lg' : 'text-xl';
+  const cellPadding = compact ? 'p-3' : 'p-4';
+  const cellRadius = compact ? '16px' : '20px';
+  const cellValueFont = compact ? 'text-base' : 'text-lg';
+  const profitPadding = compact ? 'p-3.5' : 'p-5';
+  const profitValueFont = compact ? 'text-xl' : 'text-2xl';
+  const badgePx = compact ? 'px-3 py-1.5' : 'px-3.5 py-2';
+  const badgeFont = compact ? 'text-xs' : 'text-sm';
+  const dividerMx = compact ? '-mx-4' : '-mx-6';
+  const cardRadius = compact ? '26px' : '32px';
+  const eventPadding = compact ? 'p-3' : 'p-3.5';
+  const eventRadius = compact ? '16px' : '20px';
 
   return (
     <div 
       className="w-full overflow-hidden bg-white"
       style={{ 
-        borderRadius: '32px',
+        borderRadius: cardRadius,
         border: '1px solid #E5E7EB',
         boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)'
       }}
     >
-      {/* Status Banner — gradient colored bar at the top */}
+      {/* Status Banner */}
       <div 
-        className="flex items-center justify-between px-6 py-5 text-white"
+        className={`flex items-center justify-between ${bannerPx} ${bannerPy} text-white`}
         style={{ background: theme.gradient }}
       >
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5">
+          <div className={`flex items-center justify-center ${iconSize} ${iconRound} bg-white/20 backdrop-blur-sm`}>
             {isWin ? (
               <Trophy className="h-5 w-5 text-white" strokeWidth={1.5} />
             ) : isLoss ? (
@@ -203,62 +228,63 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
             )}
           </div>
           <div>
-            <p className="font-bold text-lg leading-tight">{statusText}</p>
-            <p className="text-xs text-white/70 font-medium">{bet.date}</p>
+            <p className={`font-bold ${statusFont} leading-tight`}>{statusText}</p>
+            <p className="text-[11px] text-white/70 font-medium">{bet.date}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-sm font-medium text-white/80 bg-white/15 px-3.5 py-2 rounded-2xl backdrop-blur-sm">
+        <div className={`flex items-center gap-1.5 ${badgeFont} font-medium text-white/80 bg-white/15 ${badgePx} rounded-2xl backdrop-blur-sm`}>
           <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-          <span>{bet.format}</span>
+          <span>{isExpress ? expressLabel : bet.format}</span>
         </div>
       </div>
 
-      {/* Card body — all content inside the container */}
-      <div className="p-6 space-y-4">
-        {/* Match Name */}
-        <div className="text-center py-2">
-          <h3 className="text-lg font-bold text-[#111827] tracking-tight">
-            {matchName}
-          </h3>
-        </div>
-
-        {/* Divider — full width with negative margins */}
-        <div className="-mx-6 border-t border-[#F3F4F6]" />
+      {/* Card body */}
+      <div className={`${bodyPadding} ${bodyGap}`}>
+        {/* Match Name — only for non-express */}
+        {!isExpress && (
+          <>
+            <div className="text-center py-1.5">
+              <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
+                {matchName}
+              </h3>
+            </div>
+            <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
+          </>
+        )}
 
         {/* Express Events or Regular Selection */}
         {isExpress && parsedEvents.length > 0 ? (
           <div>
-            {/* Express header — centered text with chevron on the right */}
             <button
               onClick={() => setIsEventsOpen(!isEventsOpen)}
-              className="w-full relative flex items-center justify-center py-2 hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-full relative flex items-center justify-center py-1.5 hover:opacity-80 transition-opacity cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                {isWin && <CheckCircle2 className="h-5 w-5" style={{ color: theme.accent }} strokeWidth={1.5} />}
-                <p className="text-lg font-bold text-[#111827] tracking-tight">
-                  Експрес {bet.format}
+                {isWin && <CheckCircle2 className="h-4.5 w-4.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                <p className={`${expressHeaderFont} font-bold text-[#111827] tracking-tight`}>
+                  {parsedEvents.length} {parsedEvents.length === 1 ? 'подія' : parsedEvents.length < 5 ? 'події' : 'подій'}
                 </p>
               </div>
               <span className="absolute right-0 top-1/2 -translate-y-1/2">
                 {isEventsOpen ? (
-                  <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <ChevronUp className="h-4.5 w-4.5 text-[#9CA3AF]" strokeWidth={1.5} />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <ChevronDown className="h-4.5 w-4.5 text-[#9CA3AF]" strokeWidth={1.5} />
                 )}
               </span>
             </button>
             
             {isEventsOpen && (
-              <div className="space-y-2.5 pt-2">
+              <div className="space-y-2 pt-2">
                 {parsedEvents.map((event, index) => (
                   <div 
                     key={index} 
-                    className="p-3.5"
-                    style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}` }}
+                    className={eventPadding}
+                    style={{ borderRadius: eventRadius, backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}` }}
                   >
-                    <div className="flex items-start gap-2 mb-2">
+                    <div className="flex items-start gap-2 mb-1.5">
                       <span 
-                        className="flex items-center justify-center min-w-[22px] h-[22px] rounded-full text-[11px] font-bold text-white"
+                        className="flex items-center justify-center min-w-[21px] h-[21px] rounded-full text-[10px] font-bold text-white"
                         style={{ backgroundColor: theme.accent }}
                       >
                         {event.number}
@@ -268,8 +294,8 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                       </p>
                     </div>
                     
-                    <div className="space-y-1 ml-8">
-                      <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wide">
+                    <div className="space-y-0.5 ml-7">
+                      <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide">
                         {event.betType}
                       </p>
                       <div className="flex items-center justify-between">
@@ -277,7 +303,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                           <BlurReveal isPending={isPending}>{event.selection}</BlurReveal>
                         </p>
                         <span 
-                          className="text-xs font-bold px-2.5 py-1 rounded-full"
+                          className="text-[11px] font-bold px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: theme.accentLight, color: theme.accent }}
                         >
                           {event.odds}
@@ -288,62 +314,78 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
                 ))}
               </div>
             )}
+
+            <div className={`${dividerMx} border-t border-[#F3F4F6] mt-3`} />
           </div>
-        ) : selection && (
-          <div className="text-center py-1">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
-              <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wide">
-                {betCategory}
+        ) : isExpress && parsedEvents.length === 0 ? (
+          <>
+            <div className="text-center py-1.5">
+              <div className="flex items-center justify-center gap-2">
+                {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
+                  {matchName}
+                </h3>
+              </div>
+            </div>
+            <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
+          </>
+        ) : selection ? (
+          <>
+            <div className="text-center py-1">
+              <div className="flex items-center justify-center gap-2 mb-0.5">
+                {isWin && <CheckCircle2 className="h-3.5 w-3.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wide">
+                  {betCategory}
+                </p>
+              </div>
+              <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
+                <BlurReveal isPending={isPending}>{selection}</BlurReveal>
               </p>
             </div>
-            <p className="text-xl font-bold tracking-tight" style={{ color: theme.accent }}>
-              <BlurReveal isPending={isPending}>{selection}</BlurReveal>
-            </p>
-          </div>
+            <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
+          </>
+        ) : (
+          <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
         )}
 
-        {/* Divider — full width with negative margins */}
-        <div className="-mx-6 border-t border-[#F3F4F6]" />
-
-        {/* Amount & Odds — compact row */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Amount & Odds */}
+        <div className="grid grid-cols-2 gap-2.5">
           <div 
-            className="text-center p-4"
-            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
+            className={`text-center ${cellPadding}`}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
           >
-            <div className="flex items-center justify-center gap-1.5 mb-1">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
               <DollarSign className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
               <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider">Сума</p>
             </div>
-            <p className="text-lg font-bold text-[#111827]">
+            <p className={`${cellValueFont} font-bold text-[#111827]`}>
               {currencySymbol}{displayAmount}
             </p>
           </div>
           <div 
-            className="text-center p-4"
-            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
+            className={`text-center ${cellPadding}`}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
           >
-            <div className="flex items-center justify-center gap-1.5 mb-1">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
               <Percent className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
               <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider">Коефіцієнт</p>
             </div>
-            <p className="text-lg font-bold text-[#111827]">
+            <p className={`${cellValueFont} font-bold text-[#111827]`}>
               {bet.odds.toFixed(2)}
             </p>
           </div>
         </div>
 
-        {/* Profit — colored background block */}
+        {/* Profit */}
         {!isPending && displayProfit !== undefined && displayProfit !== null && (
           <div 
-            className="p-5 text-center"
-            style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            className={`${profitPadding} text-center`}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
           >
-            <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider" style={{ color: theme.accent }}>
+            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Профіт
             </p>
-            <p className="text-2xl font-bold tracking-tight" style={{ color: theme.accent }}>
+            <p className={`${profitValueFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
               {displayProfit > 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
             </p>
           </div>
@@ -352,13 +394,13 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Pending — possible win */}
         {isPending && (
           <div 
-            className="p-5 text-center"
-            style={{ borderRadius: '20px', backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            className={`${profitPadding} text-center`}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
           >
-            <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider" style={{ color: theme.accent }}>
+            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Можливий виграш
             </p>
-            <p className="text-2xl font-bold tracking-tight" style={{ color: theme.accent }}>
+            <p className={`${profitValueFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
               <BlurReveal isPending={isPending}>
                 +{((bet.odds - 1) * displayAmount).toFixed(2)} {currencySymbol}
               </BlurReveal>
@@ -369,13 +411,13 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         {/* Total Amount */}
         {!isLoss && (
           <div 
-            className="p-5 text-center"
-            style={{ borderRadius: '20px', backgroundColor: '#F9FAFB' }}
+            className={`${profitPadding} text-center`}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
           >
-            <p className="text-[11px] font-semibold mb-1 uppercase tracking-wider text-[#9CA3AF]">
+            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider text-[#9CA3AF]">
               Загальна сума
             </p>
-            <p className="text-2xl font-bold text-[#111827] tracking-tight">
+            <p className={`${profitValueFont} font-bold text-[#111827] tracking-tight`}>
               {isPending ? (
                 <BlurReveal isPending={isPending}>
                   {totalAmount.toFixed(2)} {currencySymbol}
