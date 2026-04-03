@@ -36,7 +36,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   PlusCircle,
-  CheckSquare,
+  CircleCheck,
   Square,
   Layers,
   X
@@ -1037,7 +1037,7 @@ export default function Matches() {
                   title={isSelected ? 'Прибрати з експресу' : 'Додати до експресу'}
                 >
                   {isSelected ? (
-                    <CheckSquare className="h-4 w-4" strokeWidth={2} />
+                    <CircleCheck className="h-4 w-4" strokeWidth={2} />
                   ) : (
                     <Layers className="h-4 w-4" strokeWidth={1.5} />
                   )}
