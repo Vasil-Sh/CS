@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info, RotateCcw } from 'lucide-react';
+import { Plus, Calculator, DollarSign, Link, AlertTriangle, Calendar, Trophy, X, Trash2, Shield, Flag, Users, ChevronDown, ChevronUp, Info, RotateCcw, TrendingUp } from 'lucide-react';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
@@ -83,6 +83,8 @@ interface Goal {
   status: 'active' | 'completed' | 'failed';
 }
 
+const MAX_CONFIDENCE = 95;
+
 const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
   date: new Date().toISOString().split('T')[0],
   game: 'CS2' as 'CS2' | 'Dota2',
@@ -119,6 +121,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [showEVDetails, setShowEVDetails] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
+  const [showKellyDetails, setShowKellyDetails] = useState(false);
   // Track whether express events were pre-filled from Matches page (hides "add event" button)
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
 
@@ -791,6 +794,102 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return '0';
   };
 
+  // ===== NEW: Bookmaker implied probability =====
+  const calculateBookmakerProbability = (): number | null => {
+    const odds = formData.betCategory === 'Експрес'
+      ? calculateTotalExpressOdds()
+      : parseFloat(formData.odds);
+    if (!odds || odds <= 1) return null;
+    return (1 / odds) * 100;
+  };
+
+  // ===== NEW: Value Bet analysis =====
+  const getValueBetAnalysis = () => {
+    const confidence = parseFloat(formData.confidence);
+    const bookmakerProb = calculateBookmakerProbability();
+    if (!confidence || !bookmakerProb) return null;
+
+    const diff = confidence - bookmakerProb;
+    const isValueBet = diff > 0;
+
+    return {
+      bookmakerProb: bookmakerProb.toFixed(1),
+      userProb: confidence.toFixed(1),
+      diff: Math.abs(diff).toFixed(1),
+      isValueBet,
+      message: isValueBet
+        ? `Ви оцінюєте подію на ${Math.abs(diff).toFixed(1)}% вище за букмекера (Value Bet)`
+        : `Букмекер оцінює подію на ${Math.abs(diff).toFixed(1)}% вище за вас`
+    };
+  };
+
+  // ===== NEW: Kelly Criterion calculation =====
+  const calculateKellyCriterion = () => {
+    const odds = formData.betCategory === 'Експрес'
+      ? calculateTotalExpressOdds()
+      : parseFloat(formData.odds);
+    const confidence = parseFloat(formData.confidence);
+    
+    if (!odds || odds <= 1 || !confidence) return null;
+
+    const p = confidence / 100; // probability of winning
+    const q = 1 - p; // probability of losing
+    const b = odds - 1; // net odds (profit per unit)
+
+    // Kelly fraction: (bp - q) / b
+    const kellyFraction = (b * p - q) / b;
+
+    // Get current bankroll
+    const bets = realGoogleSheetsService.getAllRecords();
+    const bankrollStats = BankrollService.getBankrollStats(currentUser, bets);
+    const currentBankroll = bankrollStats.currentBank;
+
+    if (currentBankroll <= 0) return null;
+
+    // Full Kelly
+    const fullKelly = Math.max(0, kellyFraction);
+    const fullKellyAmount = fullKelly * currentBankroll;
+
+    // Half Kelly (more conservative)
+    const halfKelly = fullKelly / 2;
+    const halfKellyAmount = halfKelly * currentBankroll;
+
+    // Determine risk level and recommendation
+    let riskLevel: 'low' | 'medium' | 'high';
+    let recommendation: string;
+    let recommendedAmount: number;
+
+    if (kellyFraction <= 0) {
+      riskLevel = 'high';
+      recommendation = 'Критерій Келлі не рекомендує цю ставку. Ризик великий.';
+      recommendedAmount = 0;
+    } else if (fullKelly <= 0.05) {
+      riskLevel = 'low';
+      recommendation = `Ваша впевненість помірна. Рекомендована сума — ${Math.round(halfKellyAmount)} ₴ (½ Келлі)`;
+      recommendedAmount = halfKellyAmount;
+    } else if (fullKelly <= 0.15) {
+      riskLevel = 'medium';
+      recommendation = `Ваша впевненість висока. Рекомендована сума — ${Math.round(halfKellyAmount)} ₴ (½ Келлі)`;
+      recommendedAmount = halfKellyAmount;
+    } else {
+      riskLevel = 'high';
+      recommendation = `Ризик великий, краще поставити ${Math.round(halfKellyAmount)} ₴ (½ Келлі) замість ${Math.round(fullKellyAmount)} ₴`;
+      recommendedAmount = halfKellyAmount;
+    }
+
+    return {
+      fullKelly: (fullKelly * 100).toFixed(1),
+      halfKelly: (halfKelly * 100).toFixed(1),
+      fullKellyAmount: Math.round(fullKellyAmount),
+      halfKellyAmount: Math.round(halfKellyAmount),
+      currentBankroll: Math.round(currentBankroll),
+      riskLevel,
+      recommendation,
+      recommendedAmount: Math.round(recommendedAmount),
+      isNegative: kellyFraction <= 0
+    };
+  };
+
   const convertToUAH = (amount: number, currency: string, rate: number) => {
     if (currency === 'USD') {
       return amount * rate;
@@ -951,10 +1050,40 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     setPendingSubmit(false);
   };
 
+  // Handle confidence change with cap at MAX_CONFIDENCE
+  const handleConfidenceChange = (value: string) => {
+    const numValue = parseFloat(value);
+    if (value === '' || isNaN(numValue)) {
+      setFormData(prev => ({ ...prev, confidence: value }));
+      return;
+    }
+    // Cap at MAX_CONFIDENCE
+    if (numValue > MAX_CONFIDENCE) {
+      setFormData(prev => ({ ...prev, confidence: String(MAX_CONFIDENCE) }));
+      toast.warning(`⚠️ Максимальна впевненість обмежена до ${MAX_CONFIDENCE}%. У спорті 100% впевненість нереалістична.`);
+      return;
+    }
+    if (numValue < 1) {
+      setFormData(prev => ({ ...prev, confidence: '1' }));
+      return;
+    }
+    setFormData(prev => ({ ...prev, confidence: value }));
+  };
+
+  // Apply Kelly recommended amount to stake
+  const applyKellyAmount = (amount: number) => {
+    if (amount > 0) {
+      setFormData(prev => ({ ...prev, stake: String(amount) }));
+      toast.success(`Суму змінено на ${amount} ₴ (рекомендація Келлі)`);
+    }
+  };
+
   const expectedValue = calculateExpectedValue();
   const potentialProfit = calculatePotentialProfit();
   const isValuePositive = parseFloat(expectedValue) > 0;
   const hasConfidence = formData.confidence !== '' && !isNaN(parseFloat(formData.confidence));
+  const confidenceValue = parseFloat(formData.confidence);
+  const isHighConfidence = hasConfidence && confidenceValue > 90;
 
   const getCurrencySymbol = () => {
     return '₴';
@@ -965,6 +1094,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const totalExpressOdds = calculateTotalExpressOdds();
   const expressRisk = getExpressRiskLevel();
   const evVerdict = getEVVerdict();
+  const valueBetAnalysis = getValueBetAnalysis();
+  const kellyData = hasConfidence ? calculateKellyCriterion() : null;
 
   const getBetTypeOptions = () => {
     if (formData.game === 'Dota2') {
@@ -1402,7 +1533,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                         
                         <div className="space-y-1.5">
                           <Label htmlFor="confidence" className={`${labelClass} flex items-center gap-1.5`}>
-                            Впевненість (%)
+                            Впевненість (%, макс. {MAX_CONFIDENCE})
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -1413,9 +1544,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                                 <TooltipContent side="top" className="max-w-[280px] text-sm">
                                   <p className="font-medium mb-1">Ваша оцінка ймовірності виграшу</p>
                                   <p className="text-xs text-muted-foreground">
-                                    Вкажіть від 1 до 100%, наскільки ви впевнені у цьому прогнозі. 
-                                    Це поле використовується для розрахунку Expected Value (EV) — математичної вигідності ставки. 
-                                    Поле необов&apos;язкове, але допомагає оцінити якість прогнозу.
+                                    Вкажіть від 1 до {MAX_CONFIDENCE}%. У спорті 100% впевненість нереалістична через непередбачувані фактори 
+                                    (травми, помилки суддів, форс-мажори). Максимум обмежено до {MAX_CONFIDENCE}% для реалістичних розрахунків.
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -1425,12 +1555,19 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             id="confidence"
                             type="number"
                             min="1"
-                            max="100"
+                            max={MAX_CONFIDENCE}
                             value={formData.confidence}
-                            onChange={(e) => setFormData({...formData, confidence: e.target.value})}
+                            onChange={(e) => handleConfidenceChange(e.target.value)}
                             placeholder="70"
-                            className={inputClass}
+                            className={`${inputClass} ${isHighConfidence ? 'border-[#F59E0B] focus:border-[#F59E0B]' : ''}`}
                           />
+                          {/* High confidence warning */}
+                          {isHighConfidence && (
+                            <p className="text-xs text-[#D97706] flex items-center gap-1.5 mt-1">
+                              <AlertTriangle className="h-3 w-3 flex-shrink-0" strokeWidth={2} />
+                              Впевненість &gt;90% — будьте обережні. У спорті завжди є непередбачувані фактори.
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1664,6 +1801,48 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                         <span className="font-semibold text-[#16A34A] text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
+
+                    {/* ===== NEW: Value Bet Comparison ===== */}
+                    {hasConfidence && valueBetAnalysis && (
+                      <div className={`p-4 rounded-2xl border ${
+                        valueBetAnalysis.isValueBet 
+                          ? 'bg-[#EFF6FF] border-[#BFDBFE]' 
+                          : 'bg-[#FFF7ED] border-[#FED7AA]'
+                      }`}>
+                        <div className="space-y-2.5">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className={`h-4 w-4 ${valueBetAnalysis.isValueBet ? 'text-[#2563EB]' : 'text-[#EA580C]'}`} strokeWidth={1.5} />
+                            <span className={`text-sm font-medium ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                              {valueBetAnalysis.isValueBet ? '💎 Value Bet' : '⚠️ Не Value Bet'}
+                            </span>
+                          </div>
+                          <p className={`text-xs ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                            {valueBetAnalysis.message}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className={`p-2.5 rounded-xl ${valueBetAnalysis.isValueBet ? 'bg-white/70' : 'bg-white/70'}`}>
+                              <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-0.5">Букмекер</p>
+                              <p className={`text-sm font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                                {valueBetAnalysis.bookmakerProb}%
+                              </p>
+                            </div>
+                            <div className={`p-2.5 rounded-xl ${valueBetAnalysis.isValueBet ? 'bg-white/70' : 'bg-white/70'}`}>
+                              <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-0.5">Ваша оцінка</p>
+                              <p className={`text-sm font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                                {valueBetAnalysis.userProb}%
+                              </p>
+                            </div>
+                          </div>
+                          <div className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-medium ${
+                            valueBetAnalysis.isValueBet 
+                              ? 'bg-[#DBEAFE] text-[#1E40AF]' 
+                              : 'bg-[#FFEDD5] text-[#9A3412]'
+                          }`}>
+                            {valueBetAnalysis.isValueBet ? '↑' : '↓'} Різниця: {valueBetAnalysis.diff}%
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* EV Display */}
                     {hasConfidence && (
@@ -1722,11 +1901,101 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                       </div>
                     )}
 
+                    {/* ===== NEW: Kelly Criterion Recommendation ===== */}
+                    {hasConfidence && kellyData && (
+                      <div className={`p-4 rounded-2xl border ${
+                        kellyData.isNegative 
+                          ? 'bg-[#FEF2F2] border-[#FECACA]' 
+                          : kellyData.riskLevel === 'low' 
+                            ? 'bg-[#F0FDF4] border-[#BBF7D0]' 
+                            : kellyData.riskLevel === 'medium' 
+                              ? 'bg-[#FFFBEB] border-[#FDE68A]' 
+                              : 'bg-[#FFF7ED] border-[#FED7AA]'
+                      }`}>
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className={`h-4 w-4 ${
+                                kellyData.isNegative ? 'text-[#EF4444]' : 'text-[#16A34A]'
+                              }`} strokeWidth={1.5} />
+                              <span className={`text-sm font-medium ${
+                                kellyData.isNegative ? 'text-[#991B1B]' : 'text-[#166534]'
+                              }`}>
+                                📊 Критерій Келлі
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setShowKellyDetails(!showKellyDetails)}
+                              className="flex items-center justify-center w-6 h-6 rounded-md hover:bg-black/5 transition-colors"
+                            >
+                              {showKellyDetails ? <ChevronUp className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />}
+                            </button>
+                          </div>
+                          
+                          <p className={`text-xs ${
+                            kellyData.isNegative ? 'text-[#B91C1C]' : 
+                            kellyData.riskLevel === 'low' ? 'text-[#15803D]' : 
+                            kellyData.riskLevel === 'medium' ? 'text-[#B45309]' : 'text-[#9A3412]'
+                          }`}>
+                            {kellyData.recommendation}
+                          </p>
+
+                          {!kellyData.isNegative && kellyData.recommendedAmount > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => applyKellyAmount(kellyData.recommendedAmount)}
+                              className={`w-full py-2 px-3 rounded-xl text-xs font-medium transition-all ${
+                                kellyData.riskLevel === 'low' 
+                                  ? 'bg-[#22C55E]/10 text-[#16A34A] hover:bg-[#22C55E]/20 border border-[#BBF7D0]' 
+                                  : kellyData.riskLevel === 'medium'
+                                    ? 'bg-[#F59E0B]/10 text-[#D97706] hover:bg-[#F59E0B]/20 border border-[#FDE68A]'
+                                    : 'bg-[#EA580C]/10 text-[#EA580C] hover:bg-[#EA580C]/20 border border-[#FED7AA]'
+                              }`}
+                            >
+                              Застосувати {kellyData.recommendedAmount} ₴
+                            </button>
+                          )}
+
+                          {showKellyDetails && (
+                            <div className={`mt-2 pt-2.5 border-t space-y-2 ${
+                              kellyData.isNegative ? 'border-[#FECACA]' : 
+                              kellyData.riskLevel === 'low' ? 'border-[#BBF7D0]' : 
+                              kellyData.riskLevel === 'medium' ? 'border-[#FDE68A]' : 'border-[#FED7AA]'
+                            }`}>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-[#6B7280]">Поточний банк:</span>
+                                <span className="font-medium text-[#111827]">{kellyData.currentBankroll} ₴</span>
+                              </div>
+                              {!kellyData.isNegative && (
+                                <>
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-[#6B7280]">Повний Келлі ({kellyData.fullKelly}%):</span>
+                                    <span className="font-medium text-[#111827]">{kellyData.fullKellyAmount} ₴</span>
+                                  </div>
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-[#6B7280]">½ Келлі ({kellyData.halfKelly}%):</span>
+                                    <Badge className="bg-[#22C55E] text-white border-0 rounded-full text-xs px-2 py-0.5 font-medium hover:bg-[#22C55E]">
+                                      {kellyData.halfKellyAmount} ₴
+                                    </Badge>
+                                  </div>
+                                </>
+                              )}
+                              <p className="text-[10px] text-[#9CA3AF] leading-relaxed mt-1">
+                                Критерій Келлі — математична формула для оптимального розміру ставки. 
+                                Рекомендуємо використовувати ½ Келлі для консервативного підходу.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {!hasConfidence && (
                       <div className="p-3 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
                         <p className="text-xs text-[#9CA3AF] flex items-center gap-1.5">
                           <Info className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
-                          Вкажіть впевненість для розрахунку Expected Value (EV)
+                          Вкажіть впевненість для розрахунку Value Bet, EV та рекомендації Келлі
                         </p>
                       </div>
                     )}
