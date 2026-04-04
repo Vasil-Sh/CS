@@ -1096,12 +1096,12 @@ export default function Analytics() {
 
             {activeTab === 'goals' && <GoalsManager />}
 
-            {/* ===== КОЕФІЦІЄНТИ TAB — REDESIGNED ===== */}
+            {/* ===== КОЕФІЦІЄНТИ TAB — GREEN CHARTS ===== */}
             {activeTab === 'odds' && (
               <div className="space-y-6">
                 {bets.length > 0 ? (
                   <>
-                    {/* ===== CHART — monochrome, single Y axis, no hover background ===== */}
+                    {/* ===== CHART — green color scheme matching Прибуток по місяцях ===== */}
                     <Card 
                       className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
                       style={{ boxShadow: chartCardShadow }}
@@ -1115,12 +1115,12 @@ export default function Analytics() {
                             Вінрейт & ROI по категоріях коефіцієнтів
                           </span>
                           <div className="flex gap-2">
-                            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-                              <div className="w-2.5 h-2.5 rounded-sm bg-[#111827] mr-1.5" />
+                            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                              <div className="w-2.5 h-2.5 rounded-sm bg-[#10B981] mr-1.5" />
                               Вінрейт
                             </Badge>
-                            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-                              <div className="w-2.5 h-2.5 rounded-sm bg-[#D1D5DB] mr-1.5" />
+                            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                              <div className="w-2.5 h-2.5 rounded-sm bg-[#6EE7B7] mr-1.5" />
                               ROI
                             </Badge>
                           </div>
@@ -1166,7 +1166,7 @@ export default function Analytics() {
                             <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
                             <Bar 
                               dataKey="winRate" 
-                              fill="#111827" 
+                              fill="#10B981" 
                               name="winRate"
                               radius={[6, 6, 0, 0]}
                               maxBarSize={80}
@@ -1174,7 +1174,7 @@ export default function Analytics() {
                             />
                             <Bar 
                               dataKey="roi" 
-                              fill="#D1D5DB" 
+                              fill="#6EE7B7" 
                               name="roi"
                               radius={[6, 6, 0, 0]}
                               maxBarSize={80}
@@ -1224,7 +1224,7 @@ export default function Analytics() {
                                   className="h-full rounded-full transition-all duration-500"
                                   style={{ 
                                     width: `${Math.min(winRateNum, 100)}%`,
-                                    backgroundColor: hasData ? '#111827' : '#D1D5DB'
+                                    backgroundColor: hasData ? '#10B981' : '#D1D5DB'
                                   }}
                                 />
                               </div>

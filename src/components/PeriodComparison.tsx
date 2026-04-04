@@ -217,7 +217,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Chart 1: Profit + Bets */}
+          {/* Chart 1: Profit + Bets — GREEN theme */}
           <Card 
             className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
@@ -234,7 +234,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
                     Прибуток
                   </Badge>
-                  <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
                     Ставки
                   </Badge>
                 </div>
@@ -289,7 +289,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Bar 
                     yAxisId="bets" 
                     dataKey="bets" 
-                    fill="#E5E7EB" 
+                    fill="#6EE7B7" 
                     name="bets"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={48}
@@ -298,10 +298,10 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                     yAxisId="profit" 
                     type="monotone" 
                     dataKey="profit" 
-                    stroke="#111827" 
+                    stroke="#10B981" 
                     strokeWidth={2.5} 
                     name="profit"
-                    dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                 </ComposedChart>
@@ -309,7 +309,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             </CardContent>
           </Card>
 
-          {/* Chart 2: Win Rate + ROI */}
+          {/* Chart 2: Win Rate + ROI — GREEN theme */}
           <Card 
             className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
@@ -323,12 +323,12 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   Win Rate та ROI тренди
                 </span>
                 <div className="flex gap-2">
-                  <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-[#111827] mr-1.5" />
+                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#10B981] mr-1.5" />
                     Win Rate
                   </Badge>
-                  <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-[#D1D5DB] mr-1.5" />
+                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#6EE7B7] mr-1.5" />
                     ROI
                   </Badge>
                 </div>
@@ -374,19 +374,19 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Line 
                     type="monotone" 
                     dataKey="winRate" 
-                    stroke="#111827" 
+                    stroke="#10B981" 
                     strokeWidth={2.5} 
                     name="winRate"
-                    dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="roi" 
-                    stroke="#D1D5DB" 
+                    stroke="#6EE7B7" 
                     strokeWidth={2.5} 
                     name="roi"
-                    dot={{ fill: '#D1D5DB', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#6EE7B7', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
