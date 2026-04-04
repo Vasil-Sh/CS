@@ -84,6 +84,7 @@ interface Goal {
 }
 
 const MAX_CONFIDENCE = 95;
+const DEFAULT_MAX_STAKE_PERCENT = 7;
 
 const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
   date: new Date().toISOString().split('T')[0],
@@ -122,10 +123,12 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const [showEVDetails, setShowEVDetails] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [showKellyDetails, setShowKellyDetails] = useState(false);
-  // Track whether express events were pre-filled from Matches page (hides "add event" button)
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
+  const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
+    const saved = localStorage.getItem('maxStakePercent');
+    return saved ? parseInt(saved, 10) : DEFAULT_MAX_STAKE_PERCENT;
+  });
 
-  // Initialize formData and expressEvents considering initial props
   const [formData, setFormData] = useState(() => {
     const initialCategory = (expressMatchesData && expressMatchesData.length >= 2) ? 'Експрес' : 'Ординар';
     return getDefaultFormData(undefined, initialCategory);
@@ -143,27 +146,26 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return [];
   });
 
-  // Refs to track consumed state and prevent duplicate processing
   const expressConsumedRef = useRef(
     !!(expressMatchesData && expressMatchesData.length >= 2)
   );
   const prefillConsumedRef = useRef(false);
 
-  // On mount: consume express data if it was used in initializer, load strategy, goals
   useEffect(() => {
-    // If we initialized with express data, mark as prefilled and notify parent
+    localStorage.setItem('maxStakePercent', String(maxStakePercent));
+  }, [maxStakePercent]);
+
+  useEffect(() => {
     if (expressMatchesData && expressMatchesData.length >= 2 && expressConsumedRef.current) {
       setIsPrefilled(true);
       setIsExpressFromMatches(true);
       const matchCount = expressMatchesData.length;
-      // Defer callback to avoid re-render during mount
       setTimeout(() => {
         onExpressMatchesConsumed?.();
         toast.success(`${matchCount} матчів додано до експресу. Заповніть коефіцієнти та вибір для кожної події.`);
       }, 0);
     }
 
-    // Load primary strategy from localStorage
     const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
     if (savedPrimaryStrategy) {
       const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
@@ -177,7 +179,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle prefill data from Matches page (single match → Ординар)
   useEffect(() => {
     if (prefillData && !prefillConsumedRef.current) {
       prefillConsumedRef.current = true;
@@ -199,7 +200,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         matchUrl: prefillData.matchUrl || '',
         odds: prefillData.odds || '',
       }));
-      // Do NOT set isPrefilled for single match — no badge needed
       setTimeout(() => {
         onPrefillConsumed?.();
       }, 0);
@@ -211,7 +211,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     }
   }, [prefillData, onPrefillConsumed]);
 
-  // Handle express matches data arriving AFTER mount (e.g. prop changes)
   useEffect(() => {
     if (expressMatchesData && expressMatchesData.length >= 2 && !expressConsumedRef.current) {
       expressConsumedRef.current = true;
@@ -348,18 +347,15 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     validateAgainstStrategy();
   }, [validateAgainstStrategy]);
 
-  // Check risky teams from formData team fields (for Ординар or manual express)
   useEffect(() => {
     if (formData.team1 || formData.team2) {
       checkRiskyTeams(formData.team1, formData.team2, formData.game);
     }
   }, [formData.team1, formData.team2, formData.game]);
 
-  // Check risky teams from express events (for express pre-filled from matches)
   useEffect(() => {
     if (expressEvents.length === 0) return;
-    // Only run this check when we have express events and no formData teams (i.e. express from matches)
-    if (formData.team1 || formData.team2) return; // formData teams already trigger the other useEffect
+    if (formData.team1 || formData.team2) return;
 
     const savedRiskyTeams = loadRiskyTeamsFromStorage();
     if (savedRiskyTeams.length === 0) return;
@@ -377,7 +373,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
       savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
         if (riskyTeam.game !== gameFilter) return;
-        if (addedNames.has(riskyTeam.name)) return; // avoid duplicates
+        if (addedNames.has(riskyTeam.name)) return;
 
         const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
 
@@ -400,7 +396,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expressEvents, formData.game]);
 
-  // Listen for changes to primaryStrategy in localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
@@ -794,7 +789,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return '0';
   };
 
-  // ===== NEW: Bookmaker implied probability =====
   const calculateBookmakerProbability = (): number | null => {
     const odds = formData.betCategory === 'Експрес'
       ? calculateTotalExpressOdds()
@@ -803,7 +797,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return (1 / odds) * 100;
   };
 
-  // ===== NEW: Value Bet analysis =====
   const getValueBetAnalysis = () => {
     const confidence = parseFloat(formData.confidence);
     const bookmakerProb = calculateBookmakerProbability();
@@ -811,19 +804,40 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
     const diff = confidence - bookmakerProb;
     const isValueBet = diff > 0;
+    const edgePercent = Math.abs(diff);
 
     return {
       bookmakerProb: bookmakerProb.toFixed(1),
       userProb: confidence.toFixed(1),
-      diff: Math.abs(diff).toFixed(1),
+      diff: edgePercent.toFixed(1),
       isValueBet,
       message: isValueBet
-        ? `Ви оцінюєте подію на ${Math.abs(diff).toFixed(1)}% вище за букмекера (Value Bet)`
-        : `Букмекер оцінює подію на ${Math.abs(diff).toFixed(1)}% вище за вас`
+        ? `Ви оцінюєте подію на ${edgePercent.toFixed(1)}% вище за букмекера (Value Bet)`
+        : `Букмекер оцінює подію на ${edgePercent.toFixed(1)}% вище за вас`
     };
   };
 
-  // ===== NEW: Kelly Criterion calculation =====
+  const getOverconfidenceWarning = (): string | null => {
+    const confidence = parseFloat(formData.confidence);
+    if (!confidence) return null;
+    
+    const currentOdds = formData.betCategory === 'Експрес'
+      ? calculateTotalExpressOdds()
+      : parseFloat(formData.odds);
+    
+    if (!currentOdds || currentOdds <= 1) return null;
+
+    if (confidence >= 85 && currentOdds >= 1.6) {
+      return `Ви вказали дуже високу впевненість (${confidence}%) при коефіцієнті ${currentOdds.toFixed(2)}. Букмекер оцінює ймовірність ~${(100 / currentOdds).toFixed(0)}%. Ви впевнені, що не емоціонуєте?`;
+    }
+
+    if (confidence >= 80 && currentOdds >= 2.0) {
+      return `Коефіцієнт ${currentOdds.toFixed(2)} вказує на рівний матч, але ваша впевненість ${confidence}%. Перевірте, чи не завищуєте оцінку.`;
+    }
+
+    return null;
+  };
+
   const calculateKellyCriterion = () => {
     const odds = formData.betCategory === 'Експрес'
       ? calculateTotalExpressOdds()
@@ -832,61 +846,75 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     
     if (!odds || odds <= 1 || !confidence) return null;
 
-    const p = confidence / 100; // probability of winning
-    const q = 1 - p; // probability of losing
-    const b = odds - 1; // net odds (profit per unit)
+    const p = confidence / 100;
+    const q = 1 - p;
+    const b = odds - 1;
 
-    // Kelly fraction: (bp - q) / b
     const kellyFraction = (b * p - q) / b;
 
-    // Get current bankroll
     const bets = realGoogleSheetsService.getAllRecords();
     const bankrollStats = BankrollService.getBankrollStats(currentUser, bets);
     const currentBankroll = bankrollStats.currentBank;
 
     if (currentBankroll <= 0) return null;
 
-    // Full Kelly
+    const maxStakeFraction = maxStakePercent / 100;
+
     const fullKelly = Math.max(0, kellyFraction);
     const fullKellyAmount = fullKelly * currentBankroll;
 
-    // Half Kelly (more conservative)
     const halfKelly = fullKelly / 2;
     const halfKellyAmount = halfKelly * currentBankroll;
 
-    // Determine risk level and recommendation
+    const maxAllowedAmount = currentBankroll * maxStakeFraction;
+    const cappedHalfKellyAmount = Math.min(halfKellyAmount, maxAllowedAmount);
+    const cappedFullKellyAmount = Math.min(fullKellyAmount, maxAllowedAmount);
+    const isCapped = halfKellyAmount > maxAllowedAmount;
+
+    const recommendedBankrollPercent = currentBankroll > 0 
+      ? ((cappedHalfKellyAmount / currentBankroll) * 100).toFixed(1) 
+      : '0';
+
     let riskLevel: 'low' | 'medium' | 'high';
     let recommendation: string;
     let recommendedAmount: number;
 
     if (kellyFraction <= 0) {
       riskLevel = 'high';
-      recommendation = 'Критерій Келлі не рекомендує цю ставку. Ризик великий.';
+      recommendation = 'Критерій Келлі не рекомендує цю ставку. Математично невигідно.';
       recommendedAmount = 0;
+    } else if (isCapped) {
+      riskLevel = 'high';
+      recommendation = `Келлі рекомендує ${Math.round(halfKellyAmount)} ₴ (${((halfKelly) * 100).toFixed(1)}% банку), але ліміт ${maxStakePercent}% обмежує до ${Math.round(maxAllowedAmount)} ₴`;
+      recommendedAmount = Math.round(maxAllowedAmount);
     } else if (fullKelly <= 0.05) {
       riskLevel = 'low';
-      recommendation = `Ваша впевненість помірна. Рекомендована сума — ${Math.round(halfKellyAmount)} ₴ (½ Келлі)`;
-      recommendedAmount = halfKellyAmount;
+      recommendation = `Помірна впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
+      recommendedAmount = Math.round(cappedHalfKellyAmount);
     } else if (fullKelly <= 0.15) {
       riskLevel = 'medium';
-      recommendation = `Ваша впевненість висока. Рекомендована сума — ${Math.round(halfKellyAmount)} ₴ (½ Келлі)`;
-      recommendedAmount = halfKellyAmount;
+      recommendation = `Висока впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
+      recommendedAmount = Math.round(cappedHalfKellyAmount);
     } else {
       riskLevel = 'high';
-      recommendation = `Ризик великий, краще поставити ${Math.round(halfKellyAmount)} ₴ (½ Келлі) замість ${Math.round(fullKellyAmount)} ₴`;
-      recommendedAmount = halfKellyAmount;
+      recommendation = `Ризик великий → рекомендовано ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку) замість ${Math.round(cappedFullKellyAmount)} ₴`;
+      recommendedAmount = Math.round(cappedHalfKellyAmount);
     }
 
     return {
       fullKelly: (fullKelly * 100).toFixed(1),
       halfKelly: (halfKelly * 100).toFixed(1),
-      fullKellyAmount: Math.round(fullKellyAmount),
-      halfKellyAmount: Math.round(halfKellyAmount),
+      fullKellyAmount: Math.round(cappedFullKellyAmount),
+      halfKellyAmount: Math.round(cappedHalfKellyAmount),
+      uncappedHalfKellyAmount: Math.round(halfKellyAmount),
       currentBankroll: Math.round(currentBankroll),
+      maxAllowedAmount: Math.round(maxAllowedAmount),
       riskLevel,
       recommendation,
       recommendedAmount: Math.round(recommendedAmount),
-      isNegative: kellyFraction <= 0
+      isNegative: kellyFraction <= 0,
+      isCapped,
+      recommendedBankrollPercent,
     };
   };
 
@@ -1050,14 +1078,12 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     setPendingSubmit(false);
   };
 
-  // Handle confidence change with cap at MAX_CONFIDENCE
   const handleConfidenceChange = (value: string) => {
     const numValue = parseFloat(value);
     if (value === '' || isNaN(numValue)) {
       setFormData(prev => ({ ...prev, confidence: value }));
       return;
     }
-    // Cap at MAX_CONFIDENCE
     if (numValue > MAX_CONFIDENCE) {
       setFormData(prev => ({ ...prev, confidence: String(MAX_CONFIDENCE) }));
       toast.warning(`⚠️ Максимальна впевненість обмежена до ${MAX_CONFIDENCE}%. У спорті 100% впевненість нереалістична.`);
@@ -1070,7 +1096,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     setFormData(prev => ({ ...prev, confidence: value }));
   };
 
-  // Apply Kelly recommended amount to stake
   const applyKellyAmount = (amount: number) => {
     if (amount > 0) {
       setFormData(prev => ({ ...prev, stake: String(amount) }));
@@ -1096,6 +1121,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const evVerdict = getEVVerdict();
   const valueBetAnalysis = getValueBetAnalysis();
   const kellyData = hasConfidence ? calculateKellyCriterion() : null;
+  const overconfidenceWarning = hasConfidence ? getOverconfidenceWarning() : null;
 
   const getBetTypeOptions = () => {
     if (formData.game === 'Dota2') {
@@ -1127,13 +1153,11 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     }
   };
 
-  // Shared input styles
   const inputClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";
   const selectTriggerClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] focus:border-[#111827] focus:ring-0 transition-colors";
   const labelClass = "text-sm font-medium text-[#374151]";
   const sectionTitleClass = "text-base font-semibold text-[#111827] flex items-center gap-2.5 bg-[#F3F4F6] px-4 py-2.5 rounded-2xl -mx-0";
 
-  // Suppress unused variable warnings
   void potentialProfit;
   void stakeInCurrency;
   void pendingSubmit;
@@ -1362,7 +1386,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                 <div className="border-t border-[#F3F4F6]" />
 
                 {/* === Section: Match Info & Bet Details === */}
-                {/* Hide match input section when express was pre-filled from matches and events exist */}
                 {!(isExpressFromMatches && expressEvents.length > 0) && (
                   <div className="space-y-4">
                     <h3 className={sectionTitleClass}>
@@ -1561,7 +1584,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             placeholder="70"
                             className={`${inputClass} ${isHighConfidence ? 'border-[#F59E0B] focus:border-[#F59E0B]' : ''}`}
                           />
-                          {/* High confidence warning */}
                           {isHighConfidence && (
                             <p className="text-xs text-[#D97706] flex items-center gap-1.5 mt-1">
                               <AlertTriangle className="h-3 w-3 flex-shrink-0" strokeWidth={2} />
@@ -1675,7 +1697,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             </button>
                           </div>
                           
-                          {/* Inline editable fields for each express event */}
                           <div className="grid grid-cols-3 gap-2">
                             <Select
                               value={event.betType}
@@ -1715,7 +1736,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             />
                           </div>
 
-                          {/* Show filled info summary */}
                           {!needsOdds && !needsSelection && (
                             <div className="flex items-center gap-2 text-xs text-[#6B7280]">
                               <span>{event.betType}:</span>
@@ -1730,7 +1750,6 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     })}
                   </div>
 
-                  {/* Warning if some events need data */}
                   {!allExpressEventsComplete && (
                     <div className="p-3 bg-[#FFFBEB] rounded-2xl border border-[#FDE68A]">
                       <p className="text-xs text-[#92400E] flex items-center gap-1.5">
@@ -1773,9 +1792,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
             <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
-              <div 
-                className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]"
-              >
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
                   <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
@@ -1802,7 +1819,22 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                       </div>
                     </div>
 
-                    {/* ===== NEW: Value Bet Comparison ===== */}
+                    {/* Overconfidence Warning */}
+                    {overconfidenceWarning && (
+                      <div className="p-4 rounded-2xl border border-[#FCA5A5] bg-[#FEF2F2]">
+                        <div className="flex items-start gap-2.5">
+                          <AlertTriangle className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                          <div>
+                            <p className="text-sm font-medium text-[#991B1B] mb-1">⚠️ Можливий Overconfidence</p>
+                            <p className="text-xs text-[#B91C1C] leading-relaxed">
+                              {overconfidenceWarning}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Value Bet Analysis */}
                     {hasConfidence && valueBetAnalysis && (
                       <div className={`p-4 rounded-2xl border ${
                         valueBetAnalysis.isValueBet 
@@ -1819,20 +1851,22 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                           <p className={`text-xs ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
                             {valueBetAnalysis.message}
                           </p>
+
                           <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div className={`p-2.5 rounded-xl ${valueBetAnalysis.isValueBet ? 'bg-white/70' : 'bg-white/70'}`}>
+                            <div className="p-2.5 rounded-xl bg-white/70">
                               <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-0.5">Букмекер</p>
                               <p className={`text-sm font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
                                 {valueBetAnalysis.bookmakerProb}%
                               </p>
                             </div>
-                            <div className={`p-2.5 rounded-xl ${valueBetAnalysis.isValueBet ? 'bg-white/70' : 'bg-white/70'}`}>
+                            <div className="p-2.5 rounded-xl bg-white/70">
                               <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-0.5">Ваша оцінка</p>
                               <p className={`text-sm font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
                                 {valueBetAnalysis.userProb}%
                               </p>
                             </div>
                           </div>
+
                           <div className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-medium ${
                             valueBetAnalysis.isValueBet 
                               ? 'bg-[#DBEAFE] text-[#1E40AF]' 
@@ -1901,7 +1935,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                       </div>
                     )}
 
-                    {/* ===== NEW: Kelly Criterion Recommendation ===== */}
+                    {/* Kelly Criterion */}
                     {hasConfidence && kellyData && (
                       <div className={`p-4 rounded-2xl border ${
                         kellyData.isNegative 
@@ -1941,6 +1975,15 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             {kellyData.recommendation}
                           </p>
 
+                          {kellyData.isCapped && !kellyData.isNegative && (
+                            <div className="p-2 bg-[#FEF3C7] rounded-xl border border-[#FDE68A]">
+                              <p className="text-[10px] text-[#92400E] flex items-center gap-1">
+                                <Shield className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
+                                Ліміт {maxStakePercent}% банку захищає від надмірного ризику
+                              </p>
+                            </div>
+                          )}
+
                           {!kellyData.isNegative && kellyData.recommendedAmount > 0 && (
                             <button
                               type="button"
@@ -1953,7 +1996,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                                     : 'bg-[#EA580C]/10 text-[#EA580C] hover:bg-[#EA580C]/20 border border-[#FED7AA]'
                               }`}
                             >
-                              Застосувати {kellyData.recommendedAmount} ₴
+                              Застосувати {kellyData.recommendedAmount} ₴ ({kellyData.recommendedBankrollPercent}% банку)
                             </button>
                           )}
 
@@ -1966,6 +2009,10 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                               <div className="flex justify-between text-xs">
                                 <span className="text-[#6B7280]">Поточний банк:</span>
                                 <span className="font-medium text-[#111827]">{kellyData.currentBankroll} ₴</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-[#6B7280]">Макс. ставка ({maxStakePercent}%):</span>
+                                <span className="font-medium text-[#111827]">{kellyData.maxAllowedAmount} ₴</span>
                               </div>
                               {!kellyData.isNegative && (
                                 <>
@@ -1981,9 +2028,33 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                                   </div>
                                 </>
                               )}
+
+                              {/* Max Stake % setting */}
+                              <div className="pt-2 border-t border-dashed border-[#E5E7EB]">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] text-[#6B7280] uppercase tracking-wider">Max Stake %</span>
+                                  <div className="flex items-center gap-1.5">
+                                    {[3, 5, 7, 10].map(pct => (
+                                      <button
+                                        key={pct}
+                                        type="button"
+                                        onClick={() => setMaxStakePercent(pct)}
+                                        className={`px-2 py-0.5 rounded-md text-[10px] font-medium transition-all ${
+                                          maxStakePercent === pct
+                                            ? 'bg-[#111827] text-white'
+                                            : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+                                        }`}
+                                      >
+                                        {pct}%
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
                               <p className="text-[10px] text-[#9CA3AF] leading-relaxed mt-1">
                                 Критерій Келлі — математична формула для оптимального розміру ставки. 
-                                Рекомендуємо використовувати ½ Келлі для консервативного підходу.
+                                Ліміт Max Stake % захищає від ситуацій, коли Келлі рекомендує занадто велику частку банку.
                               </p>
                             </div>
                           )}
@@ -2025,9 +2096,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
             <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
-              <div 
-                className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]"
-              >
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
                   <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                 </div>
