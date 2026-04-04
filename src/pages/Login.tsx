@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { authService } from '@/lib/authService';
-import { Loader2, LogIn, TrendingUp, User, Lock } from 'lucide-react';
+import { Loader2, LogIn, TrendingUp, User, Lock, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -25,7 +25,7 @@ export default function Login() {
     try {
       const result = await authService.login(username, password);
       if (result.success) {
-        navigate('/analytics');
+        navigate('/app/analytics');
       } else {
         setError(result.error || 'Невірний логін або пароль');
       }
@@ -47,6 +47,17 @@ export default function Login() {
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
       </svg>
+
+      {/* Back to Landing link */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link 
+          to="/" 
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-white/80 backdrop-blur-sm border-2 border-[#E8E6DC] text-[#4a4a5a] hover:text-[#1a1a2e] hover:border-[#D0CEC4] transition-all duration-200 text-sm font-medium"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          На головну
+        </Link>
+      </div>
 
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-6">

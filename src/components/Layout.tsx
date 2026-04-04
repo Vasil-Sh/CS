@@ -15,13 +15,13 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const navigation = [
-  { name: 'Аналітика', href: '/analytics', icon: BarChart3 },
-  { name: 'Матчі', href: '/matches', icon: Trophy },
-  { name: 'Журнал прогнозів', href: '/my-bets', icon: Wallet },
+  { name: 'Аналітика', href: '/app/analytics', icon: BarChart3 },
+  { name: 'Матчі', href: '/app/matches', icon: Trophy },
+  { name: 'Журнал прогнозів', href: '/app/my-bets', icon: Wallet },
 ];
 
 const adminNavigation = [
-  { name: 'Адмін панель', href: '/admin', icon: Shield, adminOnly: true },
+  { name: 'Адмін панель', href: '/app/admin', icon: Shield, adminOnly: true },
 ];
 
 export default function Layout() {
@@ -42,7 +42,7 @@ export default function Layout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('username');
-    navigate('/login');
+    navigate('/');
   };
 
   const NavItems = () => (

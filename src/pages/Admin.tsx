@@ -87,7 +87,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (userRole !== 'admin') {
-      navigate('/matches');
+      navigate('/app/matches');
       return;
     }
     fetchUsers();

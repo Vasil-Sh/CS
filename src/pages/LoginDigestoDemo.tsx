@@ -22,7 +22,7 @@ export default function LoginDigestoDemo() {
     try {
       const result = await authService.login(username, password);
       if (result.success) {
-        navigate('/analytics');
+        navigate('/app/analytics');
       } else {
         setError(result.error || 'Невірний логін або пароль');
       }

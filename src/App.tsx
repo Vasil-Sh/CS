@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 import LoginDigestoDemo from '@/pages/LoginDigestoDemo';
 import Analytics from '@/pages/Analytics';
@@ -14,17 +15,21 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login-digesto-demo" element={<LoginDigestoDemo />} />
+
+        {/* Protected routes */}
         <Route
-          path="/"
+          path="/app"
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/analytics" replace />} />
+          <Route index element={<Navigate to="/app/analytics" replace />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="matches" element={<Matches />} />
           <Route path="my-bets" element={<MyBets />} />
