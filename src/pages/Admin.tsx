@@ -16,7 +16,6 @@ import {
   Loader2,
   Bell,
   AlertTriangle,
-  DollarSign,
   Eye,
   EyeOff,
   Crown,
@@ -60,6 +59,11 @@ const EMPTY_USER: Omit<UserData, 'isActive' | 'daysUntilExpiry'> = {
   endDate: '',
   isAdmin: false,
   isLocal: true,
+};
+
+/** Strip any currency symbols ($, ₴, €, etc.) from a price string, keep only digits and separators */
+const cleanPrice = (price: string): string => {
+  return price.replace(/[$₴€£¥]/g, '').trim();
 };
 
 export default function Admin() {
@@ -179,7 +183,7 @@ export default function Admin() {
           const telegram = matches[0].replace(/"/g, '').trim();
           const username = matches[1].replace(/"/g, '').trim();
           const password = matches[2].replace(/"/g, '').trim();
-          const priceMonth = matches[3].replace(/"/g, '').trim();
+          const priceMonth = cleanPrice(matches[3].replace(/"/g, '').trim());
           const startDate = matches[4].replace(/"/g, '').trim();
           const endDate = matches[5].replace(/"/g, '').trim();
           const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
@@ -238,7 +242,7 @@ export default function Admin() {
       telegram: newUser.telegram.trim(),
       username: newUser.username.trim(),
       password: newUser.password.trim(),
-      priceMonth: newUser.priceMonth.trim(),
+      priceMonth: cleanPrice(newUser.priceMonth.trim()),
       startDate: newUser.startDate.trim(),
       endDate: newUser.endDate.trim(),
       isActive: isSubscriptionActive(newUser.endDate),
@@ -269,6 +273,7 @@ export default function Admin() {
 
     const updated: UserData = {
       ...editingUser,
+      priceMonth: cleanPrice(editingUser.priceMonth),
       isActive: isSubscriptionActive(editingUser.endDate),
       daysUntilExpiry: getDaysUntilExpiry(editingUser.endDate),
     };
@@ -713,8 +718,7 @@ export default function Admin() {
                       </TableCell>
                       <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                          <DollarSign className="mr-1 h-3.5 w-3.5" strokeWidth={1.5} />
-                          {user.priceMonth}
+                          {cleanPrice(user.priceMonth)} грн
                         </Badge>
                       </TableCell>
                       <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
@@ -817,7 +821,7 @@ export default function Admin() {
                 />
               </div>
               <div>
-                <Label className="text-[#111827] font-medium text-sm">Ціна / місяць</Label>
+                <Label className="text-[#111827] font-medium text-sm">Ціна / місяць (грн)</Label>
                 <Input
                   value={newUser.priceMonth}
                   onChange={(e) => setNewUser({ ...newUser, priceMonth: e.target.value })}
@@ -931,7 +935,7 @@ export default function Admin() {
                   />
                 </div>
                 <div>
-                  <Label className="text-[#111827] font-medium text-sm">Ціна / місяць</Label>
+                  <Label className="text-[#111827] font-medium text-sm">Ціна / місяць (грн)</Label>
                   <Input
                     value={editingUser.priceMonth}
                     onChange={(e) => setEditingUser({ ...editingUser, priceMonth: e.target.value })}
