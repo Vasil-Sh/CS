@@ -1,235 +1,279 @@
-# CS2 Betting Tracker
+# CS2 & Dota 2 Betting Tracker
 
-A comprehensive betting tracking and analytics platform for CS2 (Counter-Strike 2) with advanced features for managing bets, analyzing performance, and setting goals.
+Комплексна платформа для відстеження ставок, аналітики та управління банкролом для CS2 та Dota 2. Побудована на React + TypeScript з сучасним UI на базі shadcn/ui.
 
-## 🚀 Features
+**GitHub**: [https://github.com/Vasil-Sh/CS.git](https://github.com/Vasil-Sh/CS.git)
 
-### 📊 Betting Management
-- **Add Bets**: Record single and express (parlay) bets with detailed information
-- **Multi-Currency Support**: Track bets in UAH and USD with automatic exchange rate conversion
-- **Real-time Updates**: Mark bets as Win/Loss with automatic profit calculation
-- **Express Bets**: Support for multi-event express bets with expandable details view
-- **Goal Tracking**: Link bets to specific goals for better organization
+---
 
-### 💰 Bankroll Management
-- **Initial Bankroll Setup**: Set your starting bankroll amount
-- **Current Bank Display**: Real-time display of current bankroll with gradient card design
-- **Profit Tracking**: Automatic calculation of total profit/loss
-- **Daily Reset**: Automatic daily reset functionality for fresh tracking
+## 🚀 Основні можливості
 
-### 📈 Analytics & Statistics
-- **Performance Dashboard**: Comprehensive analytics with multiple visualization types
-- **ROI Analysis**: Track Return on Investment across different bet types
-- **Win Rate Tracking**: Monitor your success rate over time
-- **Profit by Strategy**: Analyze which betting strategies perform best
-- **Monthly Trends**: View profit trends by month
+### 📊 Управління ставками (MyBets)
+- **Ординарні ставки** — запис одиночних ставок з детальною інформацією (команди, турнір, формат, тип прогнозу, коефіцієнт)
+- **Експрес-ставки** — підтримка до 10 подій в одному експресі з автоматичним розрахунком загального коефіцієнта
+- **Експрес з матчів** — можливість обрати кілька матчів зі сторінки Matches і автоматично створити експрес
+- **Мультивалютність** — підтримка UAH та USD з автоматичною конвертацією за курсом
+- **Результати** — позначення ставок як Win/Loss з автоматичним розрахунком прибутку
+- **Прив'язка до цілей** — кожну ставку можна прив'язати до активної цілі
+- **Автозаповнення з URL** — вставте посилання з HLTV або Dota 2 для автоматичного парсингу команд та турніру
+- **Коментарі до ставок** — можливість додавати нотатки та обґрунтування
 
-### 🎯 Goals System
-- **Multiple Goal Types**: Amount-based, Ladder, ROI, and Win Rate goals
-- **Progress Tracking**: Visual progress bars for each goal
-- **Goal Status**: Active, Completed, and Failed goal tracking
-- **Bet Linking**: Associate bets with specific goals
+### 💰 Банкрол-менеджмент
+- **Початковий банк** — встановлення стартового банку через модальне вікно
+- **Поточний банк** — відображення в реальному часі з урахуванням прибутку/збитку
+- **Валідація ставок** — попередження при перевищенні поточного банку
+- **Ручні корекції** — підтримка депозитів/виводів
 
-### 📱 User Interface
-- **Modern Design**: Clean, gradient-based UI with Tailwind CSS
-- **Responsive Layout**: Fully responsive design for desktop and mobile
-- **Dark/Light Themes**: Support for both light and dark color schemes
-- **Smooth Animations**: Polished transitions and hover effects
-- **Interactive Tables**: Sortable, filterable tables with expandable rows
+### 📈 Аналітика (Analytics)
+- **Дашборд статистики** — 8 карток: поточний банк, загальні ставки, прибуток, вінрейт, активні, виграші, програші, середній ROI
+- **Графік балансу** — лінійний графік зміни балансу з часом (зелена палітра)
+- **Розподіл коефіцієнтів** — аналіз прибутковості по діапазонах коефіцієнтів
+- **Scatter-графік** — візуалізація залежності коефіцієнтів від прибутку
+- **Кругова діаграма** — розподіл типів ставок
+- **Календарна теплокарта** — активність ставок за останні 12 тижнів (CalendarHeatmap)
+- **Фільтри** — фільтрація по періоду, грі, стратегії, типу ставки
+- **Порівняння періодів** — аналіз трендів по тижнях/місяцях з графіками прибутку та вінрейту (PeriodComparison)
 
-## 🛠️ Technology Stack
+### 🎯 Система цілей (Goals)
+- **Типи цілей**: сума (Amount), драбинка (Ladder), ROI, вінрейт (Win Rate)
+- **Прогрес-бари** — візуальне відстеження прогресу кожної цілі
+- **Статуси** — активні, завершені, провалені
+- **Прив'язка ставок** — автоматичне підтягування суми з останньої ставки цілі
+- **Модальне вікно результату** — відображення підсумків при завершенні цілі
 
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **State Management**: React Hooks (useState, useEffect, useMemo, useCallback)
-- **Data Persistence**: LocalStorage + Google Sheets integration
-- **Build Tool**: Vite
-- **Icons**: Lucide React
-- **Notifications**: Sonner (toast notifications)
+### 🛡️ Стратегії (Strategies)
+- **Створення стратегій** — назва, опис, допустимі коефіцієнти, формати, типи ставок
+- **Основна стратегія** — вибір активної стратегії для автоматичної перевірки
+- **Перевірка відхилень** — попередження при відхиленні від стратегії (коефіцієнт, формат, тип)
+- **Діалог підтвердження** — при порушенні стратегії з'являється діалог з поясненням ризиків
+- **Статистика по стратегіях** — аналіз ефективності кожної стратегії з графіками
 
-## 📦 Installation
+### 🏆 Матчі (Matches)
+- **Список матчів** — перегляд майбутніх матчів CS2 та Dota 2
+- **Фільтрація** — пошук, сортування, фільтри по грі та турніру
+- **Швидке додавання** — перехід до форми ставки з автозаповненням даних матчу
+- **Експрес-вибір** — вибір кількох матчів для створення експресу
+- **Tier-система команд** — рейтинг команд з tier-класифікацією (TeamTierSystem)
+- **Аналіз команд** — детальна статистика команд (TeamAnalysis, TeamStats)
+
+### 🔧 Адмін-панель (Admin)
+- **Управління користувачами** — перегляд та управління акаунтами
+- **Ризиковані команди** — додавання команд з мітками (БАН, Нестабільні, Обережно, Рідко, Надійна)
+- **Автоматичне попередження** — при виборі ризикованої команди у формі ставки з'являється попередження
+- **Налаштування** — управління параметрами платформи
+
+### 🧮 Розумні розрахунки (Sidebar у формі ставки)
+- **Потенційний прибуток** — автоматичний розрахунок на основі суми та коефіцієнта
+- **💎 Value Bet** — порівняння вашої впевненості з ймовірністю букмекера (implied probability з коефіцієнта). Підсвічує як Value Bet або попереджає
+- **Expected Value (EV)** — математична оцінка вигідності ставки з розгорнутими деталями
+- **📊 Критерій Келлі** — рекомендація оптимальної суми ставки на основі банку, впевненості та коефіцієнта. Кнопка "Застосувати" для швидкого введення рекомендованої суми
+- **Обмеження впевненості** — максимум 95% (у спорті 100% нереалістично), попередження при >90%
+- **Максимальний програш** — відображення потенційних втрат
+- **Ризик експресу** — індикатор ризику для експрес-ставок (помірний/підвищений/високий)
+
+### 📊 Управління ризиками (RiskManagement)
+- **Аналіз ризиків** — оцінка поточного стану банку та серій
+- **Ризиковані команди** — відстеження команд з підвищеним ризиком
+- **Рекомендації** — поради щодо управління банкролом
+
+### 🔐 Аутентифікація
+- **Логін-система** — захищені маршрути з ProtectedRoute
+- **Мультикористувацькість** — кожен користувач має ізольовані дані
+- **LocalStorage** — збереження даних окремо для кожного користувача
+
+---
+
+## 🛠️ Технологічний стек
+
+| Категорія | Технологія |
+|-----------|-----------|
+| **Фреймворк** | React 18 + TypeScript |
+| **UI-бібліотека** | shadcn/ui + Tailwind CSS |
+| **Графіки** | Recharts (LineChart, BarChart, PieChart, ScatterChart, ComposedChart) |
+| **Маршрутизація** | React Router v6 |
+| **Стан** | React Hooks (useState, useEffect, useMemo, useCallback) |
+| **Збереження даних** | LocalStorage + Google Sheets інтеграція |
+| **Збірка** | Vite |
+| **Іконки** | Lucide React |
+| **Сповіщення** | Sonner (toast notifications) |
+| **Парсинг** | Власний HLTV/Dota 2 URL парсер |
+
+---
+
+## 📦 Встановлення та запуск
 
 ```bash
-# Install dependencies
+# Клонувати репозиторій
+git clone https://github.com/Vasil-Sh/CS.git
+cd CS
+
+# Встановити залежності
 pnpm install
 
-# Run development server
+# Запустити dev-сервер
 pnpm run dev
 
-# Build for production
+# Збірка для продакшену
 pnpm run build
 
-# Lint code
+# Перевірка коду
 pnpm run lint
 ```
 
-## 🏗️ Project Structure
+---
+
+## 🏗️ Структура проєкту
 
 ```
 src/
 ├── components/
-│   ├── ui/                    # shadcn/ui components
-│   ├── BettingHistory.tsx     # Betting history component
-│   ├── CS2BettingForm.tsx     # Bet creation form
-│   ├── StrategyOverview.tsx   # Strategy analysis
-│   ├── BetShareModal.tsx      # Share bet modal
-│   └── InitialBankModal.tsx   # Bankroll setup modal
+│   ├── ui/                          # shadcn/ui базові компоненти
+│   ├── CS2BettingForm.tsx           # Форма створення ставки (ординар + експрес)
+│   ├── BettingHistory.tsx           # Історія ставок з таблицею
+│   ├── StrategyOverview.tsx         # Управління стратегіями
+│   ├── GoalsManager.tsx             # Менеджер цілей
+│   ├── BalanceChart.tsx             # Графік балансу
+│   ├── CalendarHeatmap.tsx          # Календарна теплокарта активності
+│   ├── PeriodComparison.tsx         # Порівняння періодів (тренди)
+│   ├── RiskManagement.tsx           # Управління ризиками
+│   ├── TeamTierSystem.tsx           # Tier-система команд
+│   ├── TeamAnalysis.tsx             # Аналіз команд
+│   ├── TeamStats.tsx                # Статистика команд
+│   ├── MatchCard.tsx                # Картка матчу
+│   ├── BetShareModal.tsx            # Модальне вікно шерінгу ставки
+│   ├── BetShareCard.tsx             # Картка для шерінгу
+│   ├── BetDetailsModal.tsx          # Деталі ставки
+│   ├── ExpressDetailsModal.tsx      # Деталі експрес-ставки
+│   ├── CommentModal.tsx             # Модальне вікно коментарів
+│   ├── CompletedGoalResultModal.tsx # Результат завершеної цілі
+│   ├── InitialBankModal.tsx         # Встановлення початкового банку
+│   ├── StrategyViolationDialog.tsx  # Діалог порушення стратегії
+│   ├── KellyCalculator.tsx          # Калькулятор Келлі
+│   ├── Layout.tsx                   # Основний layout з навігацією
+│   ├── ProtectedRoute.tsx           # Захищений маршрут
+│   └── ...
 ├── pages/
-│   ├── MyBets.tsx            # Main betting page (REFACTORED)
-│   ├── Analytics.tsx         # Analytics dashboard
-│   ├── Goals.tsx             # Goals management
-│   ├── Matches.tsx           # Match listings
-│   └── Admin.tsx             # Admin panel
+│   ├── Analytics.tsx                # Аналітика та дашборд
+│   ├── Matches.tsx                  # Список матчів
+│   ├── MyBets.tsx                   # Мої ставки (додавання, історія, стратегії)
+│   ├── Admin.tsx                    # Адмін-панель
+│   ├── Login.tsx                    # Сторінка входу
+│   └── NotFound.tsx                 # 404 сторінка
 ├── lib/
-│   ├── realGoogleSheets.ts   # Google Sheets integration
-│   ├── userDataService.ts    # User data management
-│   └── bankrollService.ts    # Bankroll calculations
-└── types/
-    └── betting.ts            # TypeScript type definitions
+│   ├── parser/                      # HLTV/Dota 2 парсери
+│   │   ├── hltvParser.ts            # Головний парсер HLTV
+│   │   ├── MatchesParser.js         # Парсер матчів
+│   │   ├── GameParser.js            # Парсер ігор
+│   │   └── ...
+│   ├── realGoogleSheets.ts          # Google Sheets інтеграція
+│   ├── bankrollService.ts           # Сервіс банкролу
+│   ├── userDataService.ts           # Сервіс даних користувача
+│   ├── authService.ts               # Сервіс аутентифікації
+│   ├── analytics.ts                 # Аналітичні функції
+│   ├── riskyTeamsService.ts         # Сервіс ризикованих команд
+│   └── utils.ts                     # Утиліти
+├── types/
+│   └── betting.ts                   # TypeScript типи (Bet, BettingStats, etc.)
+├── hooks/
+│   ├── use-mobile.tsx               # Хук для мобільного відображення
+│   └── useUISettings.ts             # Хук налаштувань UI
+├── services/
+│   └── csharp-data-service.ts       # Сервіс даних
+├── App.tsx                          # Головний компонент з маршрутизацією
+├── main.tsx                         # Точка входу
+└── index.css                        # Глобальні стилі
 ```
-
-## 🔄 Recent Refactoring (v2.0)
-
-### Code Optimization
-- **Performance Improvements**:
-  - Converted all callbacks to `useCallback` hooks to prevent unnecessary re-renders
-  - Implemented `useMemo` for expensive computations (sorting, filtering)
-  - Optimized state management with proper dependency arrays
-
-- **Type Safety**:
-  - Added proper TypeScript interfaces for all components
-  - Removed all `any` types and replaced with specific types
-  - Created `StatCardProps` interface for reusable stat cards
-
-- **Code Organization**:
-  - Extracted `StatCard` component for better reusability
-  - Moved constants to top-level (`DEFAULT_STATS`)
-  - Improved function naming and structure
-  - Better separation of concerns
-
-- **Removed Unused Code**:
-  - Cleaned up duplicate state initializations
-  - Removed redundant effect dependencies
-  - Eliminated unnecessary loading states
-  - Simplified data fetching logic
-
-### New Features
-- **Timestamp-based Sorting**: Bets now sort by creation timestamp (`createdAt`) for accurate chronological order
-- **Express Bet Details**: Fixed expandable express bet details rendering directly under bet rows
-- **Improved UI**: Enhanced visual hierarchy with better color coding for pending bets
-- **Better Performance**: Reduced bundle size from 1,139.86 kB to 1,136.51 kB (-3.35 kB)
-
-## 📊 Key Components
-
-### MyBets Page (Refactored)
-The main betting management page with:
-- **8 Stat Cards**: Current Bank, Total Bets, Profit, Win Rate, Active, Wins, Losses, Average ROI
-- **Sortable Table**: Pending bets first, then by creation time (newest first)
-- **Express Bet Support**: Expandable details for multi-event bets
-- **Action Buttons**: Win/Loss marking, Share functionality
-- **Three Tabs**: Add Bet, History, Strategies
-
-### Performance Optimizations
-```typescript
-// Before: Direct computation in render
-const sortedBets = [...recentBets].sort((a, b) => { ... });
-
-// After: Memoized computation
-const sortedBets = useMemo(() => 
-  [...recentBets].sort((a, b) => { ... }),
-  [recentBets]
-);
-
-// Before: Inline function
-onClick={() => updateBetResult(bet, 'Win')}
-
-// After: Memoized callback
-const updateBetResult = useCallback(async (bet, result) => { ... }, [deps]);
-```
-
-## 🎨 Design System
-
-### Color Palette
-- **Primary**: Blue gradient (from-blue-500 via-purple-500 to-pink-500)
-- **Success**: Green (#10b981)
-- **Warning**: Amber (#f59e0b)
-- **Error**: Red (#ef4444)
-- **Info**: Cyan (#06b6d4)
-
-### Typography
-- **Headings**: font-bold, tracking-tight
-- **Body**: font-medium
-- **Stats**: text-3xl font-semibold
-
-## 🔐 Data Management
-
-### LocalStorage Keys
-- `currentUser`: Current logged-in user
-- `{user}_mybets_data`: User's bet history
-- `{user}_mybets_stats`: User's statistics
-- `{user}_goals`: User's goals
-- `{user}_bankroll`: Bankroll information
-
-### Google Sheets Integration
-- Real-time data sync with Google Sheets
-- Automatic backup of all betting data
-- Support for multiple users
-
-## 📝 Usage Examples
-
-### Adding a Single Bet
-```typescript
-// Fill in the CS2BettingForm:
-- Date: 2024-01-15
-- Match: Team A vs Team B
-- Bet Type: Match Winner
-- Selection: Team A
-- Odds: 2.50
-- Amount: 100 UAH
-- Format: Single
-```
-
-### Adding an Express Bet
-```typescript
-// Express bet with 3 events:
-Event 1: Team A vs Team B | Match Winner: Team A @1.80
-Event 2: Team C vs Team D | Over 2.5 Maps: Yes @1.65
-Event 3: Team E vs Team F | First Map Winner: Team E @1.90
-Total Odds: 5.64
-```
-
-## 🐛 Bug Fixes
-
-### v2.0 Fixes
-1. **Express Bet Details**: Fixed issue where details wouldn't open when clicking "Деталі" button
-2. **Sorting Order**: Implemented proper timestamp-based sorting with `createdAt` field
-3. **TypeScript Errors**: Resolved all `any` type errors for better type safety
-4. **Performance**: Optimized re-renders with proper memoization
-
-## 🚀 Deployment
-
-The application is deployed and accessible at the configured URL. All changes are automatically synced to the GitHub repository.
-
-### Build Information
-- **CSS Size**: 93.73 kB (gzip: 14.88 kB)
-- **JS Size**: 1,136.51 kB (gzip: 312.97 kB)
-- **Build Time**: ~7.7 seconds
-
-## 🤝 Contributing
-
-This is a private project. For any issues or feature requests, please contact the development team.
-
-## 📄 License
-
-Private - All rights reserved
-
-## 🔗 Links
-
-- **GitHub Repository**: https://github.com/Vasil-Sh/CS.git
-- **Documentation**: See inline code comments for detailed documentation
 
 ---
 
-**Last Updated**: December 27, 2024
-**Version**: 2.0.0 (Refactored)
-**Commit**: `10e761d` - Виправлено відкриття деталей експрес-ставок
+## 🎨 Дизайн-система
+
+### Кольорова палітра
+- **Фон**: `#FFFFFF` (білий), `#F9FAFB` (світло-сірий)
+- **Текст**: `#111827` (основний), `#374151` (вторинний), `#6B7280` (третинний), `#9CA3AF` (підказки)
+- **Акценти**: `#2563EB` (синій — стратегії), `#16A34A` (зелений — прибуток), `#EF4444` (червоний — збиток), `#F59E0B` (жовтий — попередження)
+- **Графіки**: зелена палітра (`#22C55E`, `#16A34A`, `#15803D`)
+- **Бордери**: `#E5E7EB`, `#F3F4F6`
+
+### Компоненти
+- **Картки**: `rounded-3xl`, `border border-[#F3F4F6]`, `box-shadow: 0 1px 2px rgba(0,0,0,0.04)`
+- **Кнопки**: `rounded-2xl`, основна — `bg-[#111827]`, outline — `border-[#E5E7EB]`
+- **Інпути**: `rounded-2xl`, `h-11`, `border-[#E5E7EB]`, focus — `border-[#111827]`
+- **Бейджі**: `rounded-full`, кольорові відповідно до статусу
+
+### Типографіка
+- **Заголовки**: `font-semibold`, `text-[#111827]`
+- **Лейбли**: `text-sm font-medium text-[#374151]`
+- **Секції**: `bg-[#F3F4F6] px-4 py-2.5 rounded-2xl`
+
+---
+
+## 🔑 Ключі LocalStorage
+
+| Ключ | Опис |
+|------|------|
+| `username` | Поточний користувач |
+| `{user}_mybets_data` | Історія ставок |
+| `{user}_mybets_stats` | Статистика |
+| `{user}_goals` | Цілі |
+| `bankroll_data` | Дані банкролу |
+| `primaryStrategy` | Активна стратегія |
+| `admin_risky_teams` | Ризиковані команди |
+
+---
+
+## 📱 Маршрути
+
+| Шлях | Сторінка | Опис |
+|------|----------|------|
+| `/login` | Login | Сторінка входу |
+| `/analytics` | Analytics | Аналітика та дашборд (головна) |
+| `/matches` | Matches | Список матчів |
+| `/my-bets` | MyBets | Мої ставки (3 таби: Додати, Історія, Стратегії) |
+| `/admin` | Admin | Адмін-панель |
+
+---
+
+## 📊 Збірка
+
+```
+dist/index.html                     0.78 kB │ gzip:   0.41 kB
+dist/assets/index-B5dw_eCD.css    114.70 kB │ gzip:  17.94 kB
+dist/assets/index-D3J7jnTc.js   1,391.64 kB │ gzip: 375.41 kB
+```
+
+---
+
+## 📝 Останні зміни
+
+### v3.0 — Квітень 2026
+- ✅ Value Bet — порівняння впевненості з ймовірністю букмекера
+- ✅ Критерій Келлі — рекомендація оптимальної суми ставки
+- ✅ Обмеження впевненості до 95% з попередженням при >90%
+- ✅ Зелена палітра графіків на сторінках Analytics та PeriodComparison
+- ✅ Круглі чекмарки у дропдаунах та кнопках вибору
+- ✅ Повідомлення про успішне створення запису
+- ✅ Покращений UI форми ставок з секціями та іконками
+- ✅ Експрес з матчів — вибір кількох матчів для автоматичного створення експресу
+
+### v2.0 — Грудень 2024
+- Рефакторинг MyBets з оптимізацією продуктивності (useCallback, useMemo)
+- TypeScript типізація — видалення всіх `any` типів
+- Timestamp-based сортування ставок
+- Виправлення деталей експрес-ставок
+
+---
+
+## 🤝 Контрибуція
+
+Приватний проєкт. З питань та пропозицій звертайтесь до команди розробки.
+
+## 📄 Ліцензія
+
+Private — Всі права захищені.
+
+---
+
+**Останнє оновлення**: 4 квітня 2026  
+**Версія**: 3.0.0  
+**Репозиторій**: [https://github.com/Vasil-Sh/CS.git](https://github.com/Vasil-Sh/CS.git)
