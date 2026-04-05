@@ -4,8 +4,6 @@ import {
   BarChart3, 
   Shield, 
   Target, 
-  Zap, 
-  Trophy,
   ArrowRight,
   ChevronRight,
   LineChart,
@@ -13,49 +11,54 @@ import {
   Wallet,
   Star,
   Menu,
-  X
+  X,
+  Database,
+  FileCheck,
+  Search,
+  AlertTriangle,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const features = [
   {
-    icon: BarChart3,
-    title: 'Глибока аналітика',
-    description: 'Детальна статистика ваших ставок: ROI, winrate, профіт по місяцях, аналіз по командах та коефіцієнтах.',
+    icon: Database,
+    title: 'Дисциплінований облік',
+    description: 'Автоматизуйте збір даних через HLTV/Dota2 парсери. Позбавтеся помилок ручного вводу та неструктурованих таблиць.',
   },
   {
     icon: Brain,
-    title: 'Value Bet аналіз',
-    description: 'Автоматичний розрахунок Value Bet та Критерій Келлі для оптимального розміру ставки.',
-  },
-  {
-    icon: Target,
-    title: 'Стратегії та цілі',
-    description: 'Створюйте власні стратегії, встановлюйте цілі та відстежуйте прогрес у реальному часі.',
+    title: 'Валідація впевненості',
+    description: 'Порівнюйте власну оцінку ймовірності з ринковими котируваннями. Виявляйте статистичні аномалії (Value) без емоційного впливу.',
   },
   {
     icon: Shield,
-    title: 'Ризик-менеджмент',
-    description: 'Система ризикових команд, попередження та контроль банкролу для захисту вашого капіталу.',
+    title: 'Математичний ризик-менеджмент',
+    description: 'Використовуйте Критерій Келлі та ліміти експозиції (Max Stake) для захисту капіталу від серійних просадок.',
   },
   {
     icon: LineChart,
-    title: 'Порівняння періодів',
-    description: 'Порівнюйте свої результати за різні періоди та відстежуйте динаміку покращення.',
+    title: 'Ретроспективний аналіз',
+    description: 'Порівнюйте результати за різні періоди, виявляйте слабкі місця у вашій моделі та відстежуйте динаміку покращення.',
+  },
+  {
+    icon: Target,
+    title: 'Інвестиційні протоколи',
+    description: 'Створюйте власні стратегії з чіткими правилами входу, лімітами та автоматичними попередженнями при відхиленнях.',
   },
   {
     icon: Wallet,
-    title: 'Управління банкролом',
-    description: 'Повний контроль над банкролом: депозити, виводи, автоматичний розрахунок балансу.',
+    title: 'Контроль капіталу',
+    description: 'Повний облік руху коштів: депозити, виводи, автоматичний розрахунок балансу та exposure на кожну позицію.',
   },
 ];
 
 const stats = [
-  { value: '15+', label: 'Метрик аналітики' },
-  { value: '70+', label: 'Ризикових команд' },
-  { value: '5', label: 'Типів стратегій' },
-  { value: '24/7', label: 'Доступність' },
+  { value: '15+', label: 'Аналітичних метрик' },
+  { value: '70+', label: 'Активів у базі волатильності' },
+  { value: '5', label: 'Інвестиційних протоколів' },
+  { value: '24/7', label: 'Доступність платформи' },
 ];
 
 export default function Landing() {
@@ -82,8 +85,8 @@ export default function Landing() {
               <a href="#features" className="text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors duration-200 text-sm font-medium">
                 Можливості
               </a>
-              <a href="#stats" className="text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors duration-200 text-sm font-medium">
-                Статистика
+              <a href="#philosophy" className="text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors duration-200 text-sm font-medium">
+                Філософія
               </a>
               <a href="#how-it-works" className="text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors duration-200 text-sm font-medium">
                 Як це працює
@@ -127,11 +130,11 @@ export default function Landing() {
               Можливості
             </a>
             <a 
-              href="#stats" 
+              href="#philosophy" 
               className="block text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors text-base font-medium py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Статистика
+              Філософія
             </a>
             <a 
               href="#how-it-works" 
@@ -170,37 +173,38 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] mb-8">
-              <Zap className="h-4 w-4 text-[#3e75ff]" />
-              <span className="text-sm font-medium text-[#4a4a5a]">CS2 Betting Intelligence Platform</span>
+              <BarChart3 className="h-4 w-4 text-[#3e75ff]" />
+              <span className="text-sm font-medium text-[#4a4a5a]">Decision Support System for Esports Analytics</span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#1a1a2e] tracking-tight leading-[1.1] mb-6">
-              Розумні рішення.{' '}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1a1a2e] tracking-tight leading-[1.1] mb-6">
+              Система підтримки{' '}
               <span className="bg-gradient-to-r from-[#3e75ff] to-[#5b8cff] bg-clip-text text-transparent">
-                Точна аналітика.
+                прийняття рішень
               </span>
+              {' '}для кіберспортивної аналітики
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xl lg:text-2xl text-[#6a6a7a] font-light leading-relaxed max-w-2xl mx-auto mb-10">
-              Платформа для аналізу CS2 ставок з Value Bet розрахунками, стратегіями та повним контролем банкролу.
+            <p className="text-lg lg:text-xl text-[#6a6a7a] font-light leading-relaxed max-w-3xl mx-auto mb-10">
+              MatchIQ — це професійний бек-офіс для тих, хто будує стратегію на математичних моделях, а не на інтуїції. Контролюйте ризики, валідуйте гіпотези та ведіть облік з точністю фінансового аудиту.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/login">
                 <Button className="h-14 px-10 bg-gradient-to-r from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] text-white font-semibold rounded-[24px] shadow-[0_8px_24px_rgba(62,117,255,0.35)] hover:shadow-[0_12px_32px_rgba(62,117,255,0.45)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-base">
-                  Почати зараз
+                  Почати роботу
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <a href="#features">
+              <a href="#philosophy">
                 <Button 
                   variant="outline" 
                   className="h-14 px-10 bg-transparent hover:bg-transparent border-2 border-[#E8E6DC] hover:border-[#3e75ff] text-[#4a4a5a] hover:text-[#3e75ff] font-semibold rounded-[24px] transition-all duration-300 text-base"
                 >
-                  Дізнатись більше
+                  Наша філософія
                 </Button>
               </a>
             </div>
@@ -230,57 +234,66 @@ export default function Landing() {
                 {/* Dashboard Preview Content */}
                 <div className="p-8 lg:p-12 bg-gradient-to-br from-white to-[#FAFAF8]">
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-                    {/* Stat Cards */}
+                    {/* Stat Cards - Financial terminology */}
                     <div className="bg-white rounded-[20px] border-2 border-[#E8E6DC] p-5 shadow-sm">
-                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Загальний профіт</p>
+                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Реалізований профіт</p>
                       <p className="text-2xl font-bold text-[#22C55E]">+12,450₴</p>
-                      <p className="text-xs text-[#22C55E] mt-1">↑ 18.5%</p>
+                      <p className="text-xs text-[#22C55E] mt-1">↑ 18.5% ROI</p>
                     </div>
                     <div className="bg-white rounded-[20px] border-2 border-[#E8E6DC] p-5 shadow-sm">
-                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Winrate</p>
+                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Hit Rate</p>
                       <p className="text-2xl font-bold text-[#1a1a2e]">67.3%</p>
-                      <p className="text-xs text-[#3e75ff] mt-1">152 / 226</p>
+                      <p className="text-xs text-[#3e75ff] mt-1">152 / 226 позицій</p>
                     </div>
                     <div className="bg-white rounded-[20px] border-2 border-[#E8E6DC] p-5 shadow-sm">
-                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">ROI</p>
-                      <p className="text-2xl font-bold text-[#3e75ff]">24.8%</p>
-                      <p className="text-xs text-[#22C55E] mt-1">↑ 3.2%</p>
+                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Avg. Edge</p>
+                      <p className="text-2xl font-bold text-[#3e75ff]">+4.8%</p>
+                      <p className="text-xs text-[#22C55E] mt-1">Value виявлено</p>
                     </div>
                     <div className="bg-white rounded-[20px] border-2 border-[#E8E6DC] p-5 shadow-sm">
-                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Банкрол</p>
+                      <p className="text-xs text-[#8B8B9A] font-medium mb-1">Капітал</p>
                       <p className="text-2xl font-bold text-[#1a1a2e]">62,450₴</p>
-                      <p className="text-xs text-[#8B8B9A] mt-1">Початковий: 50,000₴</p>
+                      <p className="text-xs text-[#8B8B9A] mt-1">Exposure: 4.2%</p>
                     </div>
                   </div>
 
-                  {/* Chart placeholder */}
+                  {/* Chart - clean financial style */}
                   <div className="bg-white rounded-[20px] border-2 border-[#E8E6DC] p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-sm font-semibold text-[#1a1a2e]">Динаміка балансу</h3>
+                      <h3 className="text-sm font-semibold text-[#1a1a2e]">Equity Curve</h3>
                       <div className="flex gap-2">
-                        <span className="px-3 py-1 bg-[#3e75ff] text-white text-xs rounded-full font-medium">Місяць</span>
-                        <span className="px-3 py-1 bg-[#F5F5F0] text-[#8B8B9A] text-xs rounded-full font-medium">Тиждень</span>
+                        <span className="px-3 py-1 bg-[#3e75ff] text-white text-xs rounded-full font-medium">90 днів</span>
+                        <span className="px-3 py-1 bg-[#F5F5F0] text-[#8B8B9A] text-xs rounded-full font-medium">30 днів</span>
                       </div>
                     </div>
-                    {/* SVG Chart */}
+                    {/* SVG Chart - clean financial line */}
                     <svg viewBox="0 0 800 200" className="w-full h-32 lg:h-40">
                       <defs>
                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#22C55E" stopOpacity="0.2" />
+                          <stop offset="0%" stopColor="#22C55E" stopOpacity="0.15" />
                           <stop offset="100%" stopColor="#22C55E" stopOpacity="0" />
                         </linearGradient>
                       </defs>
+                      {/* Grid lines */}
+                      <line x1="0" y1="50" x2="800" y2="50" stroke="#E8E6DC" strokeWidth="0.5" strokeDasharray="4 4" />
+                      <line x1="0" y1="100" x2="800" y2="100" stroke="#E8E6DC" strokeWidth="0.5" strokeDasharray="4 4" />
+                      <line x1="0" y1="150" x2="800" y2="150" stroke="#E8E6DC" strokeWidth="0.5" strokeDasharray="4 4" />
+                      {/* Main line */}
                       <path
-                        d="M 0 160 Q 50 150 100 140 T 200 120 T 300 100 T 400 90 T 500 70 T 600 50 T 700 40 T 800 20"
+                        d="M 0 160 Q 40 155 80 148 T 160 135 T 240 128 T 320 110 T 400 105 T 480 85 T 560 72 T 640 55 T 720 38 T 800 20"
                         fill="none"
                         stroke="#22C55E"
-                        strokeWidth="3"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                       />
+                      {/* Area fill */}
                       <path
-                        d="M 0 160 Q 50 150 100 140 T 200 120 T 300 100 T 400 90 T 500 70 T 600 50 T 700 40 T 800 20 V 200 H 0 Z"
+                        d="M 0 160 Q 40 155 80 148 T 160 135 T 240 128 T 320 110 T 400 105 T 480 85 T 560 72 T 640 55 T 720 38 T 800 20 V 200 H 0 Z"
                         fill="url(#chartGradient)"
                       />
+                      {/* Data point */}
+                      <circle cx="800" cy="20" r="4" fill="#22C55E" />
+                      <circle cx="800" cy="20" r="8" fill="#22C55E" fillOpacity="0.2" />
                     </svg>
                   </div>
                 </div>
@@ -310,13 +323,13 @@ export default function Landing() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f2f8ff] border border-[#3e75ff]/20 mb-6">
               <Star className="h-4 w-4 text-[#3e75ff]" />
-              <span className="text-sm font-medium text-[#3e75ff]">Можливості платформи</span>
+              <span className="text-sm font-medium text-[#3e75ff]">Data over Luck</span>
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
-              Все для аналізу ставок
+              Інструменти для обробки даних
             </h2>
             <p className="text-lg text-[#6a6a7a] font-light max-w-2xl mx-auto">
-              Повний набір інструментів для прийняття обґрунтованих рішень та контролю вашого банкролу.
+              Акцент на тому, що допомагає уникати когнітивних помилок та приймати рішення на основі математики.
             </p>
           </div>
 
@@ -340,15 +353,72 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Philosophy Section */}
+      <section id="philosophy" className="py-20 lg:py-32 bg-[#F5F5F0]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border-2 border-[#E8E6DC] shadow-[0_2px_8px_rgba(0,0,0,0.04)] mb-6">
+                <BookOpen className="h-4 w-4 text-[#3e75ff]" />
+                <span className="text-sm font-medium text-[#4a4a5a]">Філософія MatchIQ</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
+                Ми не даємо прогнозів
+              </h2>
+            </div>
+
+            <div className="bg-white border-2 border-[#E8E6DC] rounded-[32px] p-8 lg:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+              <p className="text-lg lg:text-xl text-[#4a4a5a] leading-relaxed mb-8">
+                MatchIQ — це не сервіс підказок і не магічний алгоритм. Це інструмент для тих, хто вже має власну аналітичну модель і потребує професійного середовища для її тестування, моніторингу та масштабування.
+              </p>
+              <p className="text-lg lg:text-xl text-[#4a4a5a] leading-relaxed mb-10">
+                Наша мета — перетворити хаотичний процес на структуровану систему прийняття рішень.
+              </p>
+
+              {/* Philosophy pillars */}
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="p-6 bg-[#FAFAF8] rounded-[20px] border-2 border-[#E8E6DC]">
+                  <div className="w-12 h-12 bg-[#1a1a2e] rounded-[16px] flex items-center justify-center mb-4">
+                    <Search className="w-6 h-6 text-white" strokeWidth={1.5} />
+                  </div>
+                  <h4 className="text-base font-semibold text-[#1a1a2e] mb-2">Дані, а не інтуїція</h4>
+                  <p className="text-sm text-[#6a6a7a] leading-relaxed">
+                    Кожне рішення підкріплене математичними розрахунками та статистичним аналізом.
+                  </p>
+                </div>
+                <div className="p-6 bg-[#FAFAF8] rounded-[20px] border-2 border-[#E8E6DC]">
+                  <div className="w-12 h-12 bg-[#1a1a2e] rounded-[16px] flex items-center justify-center mb-4">
+                    <Shield className="w-6 h-6 text-white" strokeWidth={1.5} />
+                  </div>
+                  <h4 className="text-base font-semibold text-[#1a1a2e] mb-2">Дисципліна понад все</h4>
+                  <p className="text-sm text-[#6a6a7a] leading-relaxed">
+                    Автоматичні попередження при відхиленнях від стратегії та лімітів ризику.
+                  </p>
+                </div>
+                <div className="p-6 bg-[#FAFAF8] rounded-[20px] border-2 border-[#E8E6DC]">
+                  <div className="w-12 h-12 bg-[#1a1a2e] rounded-[16px] flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-6 h-6 text-white" strokeWidth={1.5} />
+                  </div>
+                  <h4 className="text-base font-semibold text-[#1a1a2e] mb-2">Контроль когнітивних помилок</h4>
+                  <p className="text-sm text-[#6a6a7a] leading-relaxed">
+                    Overconfidence detection, порівняння з ринковими котируваннями та ретроспективний аудит.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
-      <section id="how-it-works" className="py-20 lg:py-32 bg-[#F5F5F0]">
+      <section id="how-it-works" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
               Як це працює
             </h2>
             <p className="text-lg text-[#6a6a7a] font-light max-w-2xl mx-auto">
-              Три простих кроки до повного контролю над вашими ставками.
+              Три етапи структурованого процесу прийняття рішень.
             </p>
           </div>
 
@@ -356,21 +426,21 @@ export default function Landing() {
             {[
               {
                 step: '01',
-                icon: Trophy,
-                title: 'Записуйте ставки',
-                description: 'Додавайте ставки через зручну форму з автоматичним розрахунком Value Bet та рекомендаціями Келлі.',
+                icon: FileCheck,
+                title: 'Протоколювання',
+                description: 'Фіксуйте кожен прогноз з детальними метриками: коефіцієнт, EV, впевненість, exposure на капітал.',
               },
               {
                 step: '02',
-                icon: BarChart3,
-                title: 'Аналізуйте результати',
-                description: 'Відстежуйте ROI, winrate, профіт по командах та стратегіях. Порівнюйте періоди.',
+                icon: Shield,
+                title: 'Верифікація',
+                description: 'Перевіряйте прогноз на відповідність вашому інвестиційному протоколу та лімітам ризику.',
               },
               {
                 step: '03',
-                icon: Target,
-                title: 'Покращуйте стратегію',
-                description: 'Використовуйте дані для оптимізації стратегії та досягнення ваших фінансових цілей.',
+                icon: BarChart3,
+                title: 'Аудит',
+                description: 'Отримуйте глибоку ретроспективу своїх рішень для виявлення слабких місць у моделі.',
               },
             ].map((item, index) => {
               const Icon = item.icon;
@@ -402,10 +472,10 @@ export default function Landing() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <h2 className="text-4xl lg:text-5xl font-bold text-white tracking-tight mb-6">
-            Готові покращити свої результати?
+            Готові структурувати свій процес?
           </h2>
           <p className="text-xl text-[#8B8B9A] font-light mb-10 max-w-2xl mx-auto">
-            Приєднуйтесь до MatchIQ та почніть приймати рішення на основі даних, а не інтуїції.
+            Приєднуйтесь до MatchIQ та почніть приймати рішення на основі даних та математичних моделей.
           </p>
           <Link to="/login">
             <Button className="h-16 px-12 bg-gradient-to-r from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] text-white font-semibold rounded-[28px] shadow-[0_8px_32px_rgba(62,117,255,0.4)] hover:shadow-[0_12px_40px_rgba(62,117,255,0.5)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-lg">
@@ -427,7 +497,7 @@ export default function Landing() {
               <span className="text-lg font-semibold text-[#1a1a2e]">MatchIQ</span>
             </div>
             <p className="text-sm text-[#8B8B9A] font-light">
-              © 2026 MatchIQ Analytics. Всі права захищені.
+              © 2026 MatchIQ Analytics. Decision Support System for Esports.
             </p>
           </div>
         </div>
