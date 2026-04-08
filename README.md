@@ -1,4 +1,4 @@
-# CS2 & Dota 2 Betting Tracker
+# CS2 & Dota 2 Tracker
 
 Комплексна платформа для відстеження ставок, аналітики та управління банкролом для CS2 та Dota 2. Побудована на React + TypeScript з сучасним UI на базі shadcn/ui.
 
