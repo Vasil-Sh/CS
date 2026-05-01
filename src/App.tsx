@@ -9,6 +9,7 @@ import LoginDigestoDemo from '@/pages/LoginDigestoDemo';
 import Analytics from '@/pages/Analytics';
 import Matches from '@/pages/Matches';
 import MyBets from '@/pages/MyBets';
+import Strategy from '@/pages/Strategy';
 import Admin from '@/pages/Admin';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="matches" element={<Matches />} />
           <Route path="my-bets" element={<MyBets />} />
+          <Route path="strategy" element={<Strategy />} />
           <Route path="admin" element={<Admin />} />
         </Route>
       </Routes>

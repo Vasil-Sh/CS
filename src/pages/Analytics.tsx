@@ -523,10 +523,8 @@ export default function Analytics() {
 
   const tabs = [
     { id: 'profit', label: 'Прибуток', icon: Wallet },
-    { id: 'goals', label: 'Цілі', icon: Flag },
     { id: 'odds', label: 'Коефіцієнти', icon: BarChart3 },
     { id: 'comparison', label: 'Періоди', icon: Calendar },
-    { id: 'risks', label: 'Ризики', icon: AlertTriangle },
   ];
 
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
@@ -825,7 +823,7 @@ export default function Analytics() {
         {/* Custom Tabs Navigation */}
         <div className="space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (

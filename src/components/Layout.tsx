@@ -9,7 +9,8 @@ import {
   LogOut,
   User,
   Shield,
-  TrendingUp
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Аналітика', href: '/app/analytics', icon: BarChart3 },
   { name: 'Матчі', href: '/app/matches', icon: Trophy },
   { name: 'Додати запис', href: '/app/my-bets', icon: Plus },
+  { name: 'Стратегія', href: '/app/strategy', icon: Target },
 ];
 
 const adminNavigation = [

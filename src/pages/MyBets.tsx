@@ -565,7 +565,6 @@ export default function MyBets() {
   const tabs = [
     { id: 'records', label: 'Останні записи', icon: ClipboardList },
     { id: 'add', label: 'Додати запис', icon: Plus },
-    { id: 'strategies', label: 'Стратегії', icon: LineChart },
   ];
 
   /** Render the "Останні записи" table content */
@@ -1271,7 +1270,7 @@ export default function MyBets() {
         {/* ===== TABS NAVIGATION ===== */}
         <div className="space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-3 gap-3">
+            <div className={`grid gap-3 grid-cols-${tabs.length}`} style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
