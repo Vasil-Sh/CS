@@ -33,7 +33,7 @@ export default function Strategy() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[#f3f3f3]">
       <div className="px-4 sm:px-6 lg:px-10 py-8 max-w-[1600px] mx-auto">
         {/* Page header */}
         <div className="mb-8">
