@@ -759,7 +759,14 @@ export default function MyBets() {
                     const currency = bet.currency || 'UAH';
                     const currencySymbol = getCurrencySymbol(currency);
                     const displayAmount = bet.originalAmount || bet.amount;
-                    const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
+                    let displayProfit: number | undefined = bet.originalProfit;
+                    if (displayProfit === undefined && bet.profit !== undefined && bet.profit !== null) {
+                      if (bet.currency === 'USD' && bet.exchangeRate) {
+                        displayProfit = bet.profit / bet.exchangeRate;
+                      } else {
+                        displayProfit = bet.profit;
+                      }
+                    }
                     const goalName = getGoalName(bet.goalId);
                     
                     const isExpress = isExpressBet(bet);
