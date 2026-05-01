@@ -1540,18 +1540,50 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <Label htmlFor="stake" className={labelClass}>Сума прогнозу (₴) <span className="text-[#EF4444]">*</span></Label>
-                          <Input
-                            id="stake"
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            value={formData.stake}
-                            onChange={(e) => setFormData({...formData, stake: e.target.value})}
-                            placeholder="100"
-                            required
-                            className={inputClass}
-                          />
+                          <Label htmlFor="stake" className={labelClass}>
+                            Сума прогнозу ({formData.currency === 'USD' ? '$' : '₴'}) <span className="text-[#EF4444]">*</span>
+                          </Label>
+                          <div className="flex gap-2">
+                            <div className="inline-flex items-center rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-1 h-11 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => setFormData({...formData, currency: 'UAH'})}
+                                className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
+                                  formData.currency === 'UAH'
+                                    ? 'bg-white text-[#111827] shadow-sm'
+                                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                                }`}
+                                aria-label="Гривня"
+                                title="Гривня (UAH)"
+                              >
+                                ₴
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setFormData({...formData, currency: 'USD'})}
+                                className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
+                                  formData.currency === 'USD'
+                                    ? 'bg-white text-[#111827] shadow-sm'
+                                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
+                                }`}
+                                aria-label="Долар"
+                                title="Долар США (USD)"
+                              >
+                                $
+                              </button>
+                            </div>
+                            <Input
+                              id="stake"
+                              type="number"
+                              min="1"
+                              step="0.01"
+                              value={formData.stake}
+                              onChange={(e) => setFormData({...formData, stake: e.target.value})}
+                              placeholder="100"
+                              required
+                              className={`flex-1 ${inputClass}`}
+                            />
+                          </div>
                         </div>
                         
                         <div className="space-y-1.5">
