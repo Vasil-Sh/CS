@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,15 @@ import {
   Pencil,
   Trash2,
   Save,
-  X
+  X,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Zap,
+  TrendingDown,
+  DollarSign,
+  Wallet
 } from 'lucide-react';
 import {
   Table,
@@ -50,6 +58,9 @@ interface UserData {
   isLocal?: boolean; // locally added user
 }
 
+type StatusFilter = 'all' | 'active' | 'expired';
+type SortDirection = 'asc' | 'desc' | null;
+
 const EMPTY_USER: Omit<UserData, 'isActive' | 'daysUntilExpiry'> = {
   telegram: '',
   username: '',
@@ -66,6 +77,22 @@ const cleanPrice = (price: string): string => {
   return price.replace(/[$₴€£¥]/g, '').trim();
 };
 
+/** Parse DD/MM/YYYY to Date */
+const parseDate = (dateStr: string): Date | null => {
+  try {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    if (!day || !month || !year) return null;
+    return new Date(year, month - 1, day);
+  } catch {
+    return null;
+  }
+};
+
+/** Format Date to DD/MM/YYYY */
+const formatDate = (d: Date): string => {
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+};
+
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
@@ -75,6 +102,11 @@ export default function Admin() {
   const [showUsernames, setShowUsernames] = useState(false);
   const userRole = localStorage.getItem('userRole');
   const currentUser = localStorage.getItem('username') || '';
+
+  // Filters & search & sort
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   // Add user dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -173,6 +205,7 @@ export default function Admin() {
       
       const rows = text.split('\n').slice(1);
       const edits = loadUserEdits();
+      const deletedList: string[] = JSON.parse(localStorage.getItem('adminDeletedUsers') || '[]');
 
       const parsedUsers: UserData[] = rows
         .filter(row => row.trim())
@@ -205,7 +238,8 @@ export default function Admin() {
 
           return applyEditsToUser(user, edits);
         })
-        .filter((user): user is UserData => user !== null);
+        .filter((user): user is UserData => user !== null)
+        .filter(u => !deletedList.includes(u.username));
       
       // Merge with local users
       const localUsers = loadLocalUsers().map(u => ({
@@ -311,6 +345,48 @@ export default function Admin() {
     toast.success('Дані користувача оновлено!');
   };
 
+  // Extend subscription by 30 days
+  const handleExtend = (index: number) => {
+    const user = users[index];
+    if (!user) return;
+
+    // Base date: max(today, current endDate)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentEnd = parseDate(user.endDate);
+    const baseDate = currentEnd && currentEnd > today ? currentEnd : today;
+
+    const newEnd = new Date(baseDate);
+    newEnd.setDate(newEnd.getDate() + 30);
+    const newEndStr = formatDate(newEnd);
+
+    const updated: UserData = {
+      ...user,
+      endDate: newEndStr,
+      isActive: isSubscriptionActive(newEndStr),
+      daysUntilExpiry: getDaysUntilExpiry(newEndStr),
+    };
+
+    if (user.isLocal) {
+      const localUsers = loadLocalUsers();
+      const localIdx = localUsers.findIndex(u => u.username === user.username);
+      if (localIdx >= 0) {
+        localUsers[localIdx] = updated;
+        saveLocalUsers(localUsers);
+      }
+    } else {
+      const edits = loadUserEdits();
+      edits[user.username] = {
+        ...edits[user.username],
+        endDate: newEndStr,
+      };
+      saveUserEdits(edits);
+    }
+
+    setUsers(prev => prev.map((u, i) => i === index ? updated : u));
+    toast.success(`Підписку продовжено на 30 днів — до ${newEndStr}`);
+  };
+
   // Delete user
   const confirmDelete = (index: number) => {
     setDeletingIndex(index);
@@ -337,10 +413,94 @@ export default function Admin() {
     toast.success(`Користувача "${user.username}" видалено!`);
   };
 
+  // Toggle sort by end date
+  const toggleSort = () => {
+    setSortDirection(prev => {
+      if (prev === null) return 'asc';
+      if (prev === 'asc') return 'desc';
+      return null;
+    });
+  };
+
+  // ==== Business metrics ====
   const activeUsers = users.filter(u => u.isActive).length;
   const inactiveUsers = users.filter(u => !u.isActive).length;
   const adminUsers = users.filter(u => u.isAdmin).length;
   const expiringUsers = users.filter(u => u.isActive && u.daysUntilExpiry !== undefined && u.daysUntilExpiry <= 3 && u.daysUntilExpiry >= 0);
+
+  /**
+   * MRR (Monthly Recurring Revenue) — sum of monthly prices of currently active subscribers
+   */
+  const mrr = useMemo(() => {
+    return users
+      .filter(u => u.isActive)
+      .reduce((sum, u) => {
+        const price = parseFloat(cleanPrice(u.priceMonth)) || 0;
+        return sum + price;
+      }, 0);
+  }, [users]);
+
+  /**
+   * Churn Rate — percentage of users whose subscriptions expired and were not renewed.
+   * Simple approximation: inactive / total * 100
+   */
+  const churnRate = useMemo(() => {
+    if (users.length === 0) return 0;
+    return (inactiveUsers / users.length) * 100;
+  }, [users.length, inactiveUsers]);
+
+  /**
+   * LTV (Lifetime Value) — average total revenue per user across their subscription period.
+   * Approximation: for each user sum = price * months_between(startDate, endDate), then average.
+   */
+  const ltv = useMemo(() => {
+    if (users.length === 0) return 0;
+    const totals = users.map(u => {
+      const price = parseFloat(cleanPrice(u.priceMonth)) || 0;
+      const start = parseDate(u.startDate);
+      const end = parseDate(u.endDate);
+      if (!start || !end) return price; // fallback: one month
+      const diffMs = end.getTime() - start.getTime();
+      const months = Math.max(1, diffMs / (1000 * 60 * 60 * 24 * 30));
+      return price * months;
+    });
+    const sum = totals.reduce((a, b) => a + b, 0);
+    return sum / users.length;
+  }, [users]);
+
+  // ==== Filtered & sorted users for table ====
+  const displayedUsers = useMemo(() => {
+    let result = users.map((u, i) => ({ user: u, originalIndex: i }));
+
+    // Status filter
+    if (statusFilter === 'active') {
+      result = result.filter(({ user }) => user.isActive);
+    } else if (statusFilter === 'expired') {
+      result = result.filter(({ user }) => !user.isActive);
+    }
+
+    // Search
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      result = result.filter(({ user }) =>
+        user.telegram.toLowerCase().includes(q) ||
+        user.username.toLowerCase().includes(q)
+      );
+    }
+
+    // Sort by end date
+    if (sortDirection) {
+      result = [...result].sort((a, b) => {
+        const da = parseDate(a.user.endDate);
+        const db = parseDate(b.user.endDate);
+        const ta = da ? da.getTime() : 0;
+        const tb = db ? db.getTime() : 0;
+        return sortDirection === 'asc' ? ta - tb : tb - ta;
+      });
+    }
+
+    return result;
+  }, [users, statusFilter, searchQuery, sortDirection]);
 
   const getExpiryBadge = (user: UserData) => {
     if (!user.isActive) {
@@ -426,6 +586,10 @@ export default function Admin() {
     d.setMonth(d.getMonth() + 1);
     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   })();
+
+  const formatMoney = (n: number) => {
+    return new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 0 }).format(Math.round(n));
+  };
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
@@ -635,13 +799,78 @@ export default function Admin() {
           </div>
         </div>
 
+        {/* ===== BUSINESS METRICS ===== */}
+        <div>
+          <h2 className="text-lg font-semibold text-[#111827] mb-4">Бізнес-метрики</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            {/* MRR */}
+            <div
+              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              style={cardBaseStyle}
+              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Wallet className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+                <span className="text-lg font-semibold text-[#111827]">MRR</span>
+              </div>
+              <div className="text-4xl font-bold text-[#3B82F6] tracking-tight mb-2">
+                {formatMoney(mrr)} <span className="text-2xl text-[#6B7280]">грн</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Щомісячний регулярний дохід</span>
+              </div>
+            </div>
+
+            {/* LTV */}
+            <div
+              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              style={cardBaseStyle}
+              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <DollarSign className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+                <span className="text-lg font-semibold text-[#111827]">LTV</span>
+              </div>
+              <div className="text-4xl font-bold text-[#22C55E] tracking-tight mb-2">
+                {formatMoney(ltv)} <span className="text-2xl text-[#6B7280]">грн</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Середній дохід з користувача</span>
+              </div>
+            </div>
+
+            {/* Churn Rate */}
+            <div
+              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              style={cardBaseStyle}
+              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingDown className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
+                <span className="text-lg font-semibold text-[#111827]">Churn Rate</span>
+              </div>
+              <div className="text-4xl font-bold text-[#EF4444] tracking-tight mb-2">
+                {churnRate.toFixed(1)}<span className="text-2xl text-[#6B7280]">%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Відтік користувачів</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         {/* Users Table */}
         <div 
           className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden"
           style={{ boxShadow: chartCardShadow }}
         >
           <div className="bg-white border-b border-[#E5E7EB] p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                   <Users className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
@@ -654,8 +883,75 @@ export default function Admin() {
                 </div>
               </div>
               <div className="text-sm text-[#9CA3AF]">
-                {users.length} {users.length === 1 ? 'користувач' : users.length < 5 ? 'користувачі' : 'користувачів'}
+                Показано: {displayedUsers.length} з {users.length}
               </div>
+            </div>
+
+            {/* ===== TOOLBAR: filters + search ===== */}
+            <div className="flex flex-wrap items-center gap-3 mt-5">
+              {/* Status filter tabs */}
+              <div className="inline-flex rounded-xl bg-[#F3F4F6] p-1 border border-[#E5E7EB]">
+                {[
+                  { key: 'all' as StatusFilter, label: 'Всі', count: users.length },
+                  { key: 'active' as StatusFilter, label: 'Активні', count: activeUsers },
+                  { key: 'expired' as StatusFilter, label: 'Прострочені', count: inactiveUsers },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      statusFilter === tab.key
+                        ? 'bg-white text-[#111827] shadow-sm'
+                        : 'text-[#6B7280] hover:text-[#374151]'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`ml-2 text-xs ${statusFilter === tab.key ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Search */}
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Пошук за Telegram або username"
+                  className="pl-9 rounded-xl border-[#E5E7EB] h-10"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#374151]"
+                  >
+                    <X className="h-4 w-4" strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort */}
+              <Button
+                onClick={toggleSort}
+                variant="outline"
+                className="rounded-xl border-[#E5E7EB] font-medium h-10 px-4 text-sm text-[#374151]"
+              >
+                {sortDirection === 'asc' ? (
+                  <ArrowUp className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                ) : sortDirection === 'desc' ? (
+                  <ArrowDown className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                ) : (
+                  <ArrowUpDown className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                )}
+                Сортувати за датою
+                {sortDirection && (
+                  <span className="ml-2 text-xs text-[#9CA3AF]">
+                    ({sortDirection === 'asc' ? 'скоро закінчаться' : 'пізніше закінчаться'})
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
           
@@ -667,14 +963,25 @@ export default function Admin() {
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Username</TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Ціна</TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата початку</TableHead>
-                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата закінчення</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>
+                    <button onClick={toggleSort} className="flex items-center gap-1 hover:text-[#111827] transition-colors">
+                      Дата закінчення
+                      {sortDirection === 'asc' ? (
+                        <ArrowUp className="h-3 w-3" strokeWidth={2} />
+                      ) : sortDirection === 'desc' ? (
+                        <ArrowDown className="h-3 w-3" strokeWidth={2} />
+                      ) : (
+                        <ArrowUpDown className="h-3 w-3" strokeWidth={2} />
+                      )}
+                    </button>
+                  </TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Статус</TableHead>
                   <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Адмін</TableHead>
                   <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 text-center">Дії</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length === 0 ? (
+                {displayedUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-[#9CA3AF] py-16 text-sm">
                       {loading ? (
@@ -687,15 +994,19 @@ export default function Admin() {
                           <div className="p-6 bg-[#F3F4F6] rounded-2xl inline-block mb-4">
                             <Users className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
                           </div>
-                          <p className="text-[#6B7280]">Немає даних</p>
+                          <p className="text-[#6B7280]">
+                            {searchQuery || statusFilter !== 'all'
+                              ? 'Нічого не знайдено за вашими фільтрами'
+                              : 'Немає даних'}
+                          </p>
                         </div>
                       )}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  users.map((user, index) => (
+                  displayedUsers.map(({ user, originalIndex }) => (
                     <TableRow 
-                      key={index} 
+                      key={originalIndex} 
                       className={`border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors ${
                         user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
                           ? 'bg-[#FFFBEB]/50'
@@ -751,14 +1062,21 @@ export default function Admin() {
                       <TableCell className="py-4 px-5">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
-                            onClick={() => openEditDialog(user, index)}
+                            onClick={() => handleExtend(originalIndex)}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#F0FDF4] text-[#22C55E] transition-colors"
+                            title="Продовжити на 30 днів"
+                          >
+                            <Zap className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={() => openEditDialog(user, originalIndex)}
                             className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#EFF6FF] text-[#3B82F6] transition-colors"
                             title="Редагувати"
                           >
                             <Pencil className="h-4 w-4" strokeWidth={1.5} />
                           </button>
                           <button
-                            onClick={() => confirmDelete(index)}
+                            onClick={() => confirmDelete(originalIndex)}
                             className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#FEF2F2] text-[#EF4444] transition-colors"
                             title="Видалити"
                           >
