@@ -122,7 +122,14 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const currency = bet.currency || 'UAH';
   const currencySymbol = currency === 'USD' ? '$' : '₴';
   const displayAmount = bet.originalAmount || bet.amount;
-  const displayProfit = bet.originalProfit !== undefined ? bet.originalProfit : bet.profit;
+  let displayProfit: number | undefined = bet.originalProfit;
+  if (displayProfit === undefined && bet.profit !== undefined && bet.profit !== null) {
+    if (currency === "USD" && bet.exchangeRate) {
+      displayProfit = bet.profit / bet.exchangeRate;
+    } else {
+      displayProfit = bet.profit;
+    }
+  }
 
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
   
