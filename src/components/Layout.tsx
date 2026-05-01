@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { 
   BarChart3, 
   Trophy, 
-  Wallet,
+  Plus,
   Menu,
   LogOut,
   User,
@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const navigation = [
   { name: 'Аналітика', href: '/app/analytics', icon: BarChart3 },
   { name: 'Матчі', href: '/app/matches', icon: Trophy },
-  { name: 'Журнал прогнозів', href: '/app/my-bets', icon: Wallet },
+  { name: 'Додати запис', href: '/app/my-bets', icon: Plus },
 ];
 
 const adminNavigation = [

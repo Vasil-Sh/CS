@@ -999,7 +999,7 @@ export default function MyBets() {
       <div className="px-6 lg:px-8 pt-6 pb-2">
         <div className="flex items-center justify-between">
           <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Журнал прогнозів
+            Додати запис
           </h1>
 
           <div className="flex items-center gap-3">
