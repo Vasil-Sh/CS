@@ -1276,7 +1276,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     Основні налаштування
                   </h3>
                 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="date" className={labelClass}>Дата матчу</Label>
                       <Input
@@ -1303,7 +1303,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     </div>
                     
                     <div className="space-y-1.5">
-                      <Label htmlFor="betCategory" className={labelClass}>Категорія прогнозу</Label>
+                      <Label htmlFor="betCategory" className={labelClass}>Категорія</Label>
                       <Select 
                         key={formData.betCategory}
                         value={formData.betCategory} 
@@ -1324,10 +1324,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
 
-                  {/* Format + Goal on same row */}
-                  <div className={`grid gap-4 ${formData.betCategory === 'Ординар' && activeGoals.length > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
                     {formData.betCategory === 'Ординар' && (
                       <div className="space-y-1.5">
                         <Label htmlFor="format" className={labelClass}>Формат</Label>
@@ -1346,9 +1343,9 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
                     {activeGoals.length > 0 && (
                       <div className="space-y-1.5">
-                        <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-2`}>
-                          <Flag className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-                          Ціль (необов&apos;язково)
+                        <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-1.5`}>
+                          <Flag className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
+                          Ціль
                         </Label>
                         <Select 
                           value={formData.goalId || 'all'} 
@@ -1366,7 +1363,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                           }}
                         >
                           <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Оберіть ціль" />
+                            <SelectValue placeholder="Без цілі" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Без цілі</SelectItem>
