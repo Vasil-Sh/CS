@@ -807,31 +807,21 @@ export default function MyBets() {
                           )}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
-                          <span className="text-base text-[#6B7280] font-medium">{currency}</span>
+                          <span className={`text-base font-semibold ${currency === 'USD' ? 'text-[#22C55E]' : 'text-[#3B82F6]'}`}>
+                            {currency}
+                          </span>
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           <span className="text-base font-semibold text-[#111827]">{currencySymbol}{displayAmount}</span>
-                          {currency === 'USD' && bet.exchangeRate && (
-                            <div className="text-sm text-[#9CA3AF] mt-0.5">
-                              ≈ ₴{(displayAmount * bet.exchangeRate).toFixed(2)}
-                            </div>
-                          )}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           <span className="text-base font-bold text-[#111827]">{bet.odds.toFixed(2)}</span>
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           {displayProfit !== undefined && displayProfit !== null ? (
-                            <div>
-                              <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                                {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
-                              </span>
-                              {currency === 'USD' && bet.exchangeRate && bet.profit !== undefined && (
-                                <div className="text-sm text-[#9CA3AF] mt-0.5">
-                                  ≈ {bet.profit >= 0 ? '+' : ''}{bet.profit.toFixed(2)} ₴
-                                </div>
-                              )}
-                            </div>
+                            <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                              {displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}
+                            </span>
                           ) : (
                             <span className="text-[#D1D5DB] text-base">—</span>
                           )}
