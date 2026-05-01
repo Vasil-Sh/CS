@@ -3,15 +3,16 @@ import { Target, Flag, AlertTriangle } from 'lucide-react';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
 import RiskManagement from '@/components/RiskManagement';
+import StrategyOverviewHeader from '@/components/StrategyOverviewHeader';
 import { UserDataService } from '@/lib/userDataService';
 import type { Bet } from '@/types/betting';
 
 /**
  * Strategy page — unified screen that hosts strategies, goals and risks.
  *
- * This page extracts the "Стратегії" tab previously living inside MyBets and
- * the "Цілі" / "Ризики" tabs previously living inside Analytics, so users
- * can access all strategy-related views from a single navigation entry.
+ * Layout and typography mirror the Analytics page: same horizontal padding
+ * (`px-6 lg:px-8`), same title size (`text-[48px] font-semibold`), and same
+ * content spacing so navigation feels consistent across the app.
  */
 export default function Strategy() {
   const [activeTab, setActiveTab] = useState<'strategies' | 'goals' | 'risks'>('strategies');
@@ -20,8 +21,6 @@ export default function Strategy() {
   const currentUser = localStorage.getItem('username') || 'default';
 
   useEffect(() => {
-    // RiskManagement needs the user's bets. We reuse the same storage layer
-    // that Analytics / MyBets rely on to stay consistent.
     const myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
     setBets(myBetsData || []);
   }, [currentUser]);
@@ -33,17 +32,20 @@ export default function Strategy() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3]">
-      <div className="px-4 sm:px-6 lg:px-10 py-8 max-w-[1600px] mx-auto">
-        {/* Page header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-semibold text-[#1a1a2e] tracking-tight">
+    <div className="min-h-screen bg-[#f3f3f3] relative">
+      {/* ===== HEADER ===== */}
+      <div className="px-6 lg:px-8 pt-6 pb-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
             Стратегія
           </h1>
-          <p className="mt-2 text-[#6B7280] text-base">
-            Стратегії, цілі та управління ризиками в одному місці
-          </p>
         </div>
+      </div>
+
+      {/* ===== CONTENT ===== */}
+      <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
+        {/* Overview header: KPI cards + current strategy + insight */}
+        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} />
 
         {/* Tabs bar — matches styling used elsewhere in the app */}
         <div className="space-y-6">
