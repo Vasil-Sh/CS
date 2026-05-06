@@ -534,6 +534,39 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const riskLevel = getRiskLevel();
   const volatilityLevel = riskMetrics.volatility > 30 ? 'high' : riskMetrics.volatility > 20 ? 'medium' : 'low';
 
+  // Team-based statistics for overview cards
+  const teamStats = useMemo(() => {
+    const total = riskyTeams.length;
+    const csCount = riskyTeams.filter(t => t.game === 'CS').length;
+    const dotaCount = riskyTeams.filter(t => t.game === 'Дота').length;
+    const banCount = riskyTeams.filter(t => t.status === 'БАН').length;
+    const unstableCount = riskyTeams.filter(t => t.status === 'Нестабільні').length;
+    const carefulCount = riskyTeams.filter(t => t.status === 'Обережно').length;
+    const rareCount = riskyTeams.filter(t => t.status === 'Рідко').length;
+    const reliableCount = riskyTeams.filter(t => t.status === 'Надійна').length;
+    const noStatusCount = riskyTeams.filter(t => t.status === 'Без статусу').length;
+    const attentionCount = banCount + unstableCount; // High-risk teams
+    const dominantGame = csCount >= dotaCount ? 'CS' : 'Dota 2';
+    const dominantGameCount = Math.max(csCount, dotaCount);
+    const banPercentage = total > 0 ? Math.round((banCount / total) * 100) : 0;
+
+    return {
+      total,
+      csCount,
+      dotaCount,
+      banCount,
+      unstableCount,
+      carefulCount,
+      rareCount,
+      reliableCount,
+      noStatusCount,
+      attentionCount,
+      dominantGame,
+      dominantGameCount,
+      banPercentage,
+    };
+  }, [riskyTeams]);
+
   // Apply both search and status filters
   const csTeams = filteredTeams.filter(t => t.game === 'CS' && (csStatusFilter === 'all' || t.status === csStatusFilter));
   const dotaTeams = filteredTeams.filter(t => t.game === 'Дота' && (dotaStatusFilter === 'all' || t.status === dotaStatusFilter));
@@ -820,8 +853,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </div>
         )}
 
-        {/* Risk Overview Cards */}
+        {/* Team-focused Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Total risky teams */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
@@ -830,50 +864,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           >
             <div className="flex items-center gap-2 mb-3">
               <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Всього команд</span>
             </div>
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
-              {riskLevel.level === 'high' ? 'Високий' : riskLevel.level === 'medium' ? 'Середній' : 'Низький'}
+              {teamStats.total}
             </div>
-            <Badge className={`${riskLevel.bgColor} ${riskLevel.color} hover:${riskLevel.bgColor} px-3 py-1.5 rounded-lg border ${riskLevel.level === 'high' ? 'border-[#FECACA]' : riskLevel.level === 'medium' ? 'border-[#FDE68A]' : 'border-[#BBF7D0]'} font-medium text-xs`}>
-              Поточна оцінка
-            </Badge>
-          </div>
-
-          <div 
-            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-            style={cardBaseStyle}
-            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingDown className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Макс. просадка</span>
-            </div>
-            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
-              {riskMetrics.maxDrawdown}%
-            </div>
-            <span className="text-sm text-[#9CA3AF]">Максимальне падіння від піку</span>
-          </div>
-
-          <div 
-            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-            style={cardBaseStyle}
-            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Коефіцієнт Шарпа</span>
-            </div>
-            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">{riskMetrics.sharpeRatio}</div>
             <span className="text-sm text-[#9CA3AF]">
-              {riskMetrics.sharpeRatio > 1 ? 'Відмінно' : 
-               riskMetrics.sharpeRatio > 0.5 ? 'Добре' : 
-               riskMetrics.sharpeRatio > 0 ? 'Задовільно' : 'Погано'}
+              CS: {teamStats.csCount} · Dota: {teamStats.dotaCount}
             </span>
           </div>
 
+          {/* БАН — forbidden teams */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
@@ -881,13 +882,52 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Волатильність</span>
+              <TrendingDown className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Заборонені</span>
             </div>
-            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">{riskMetrics.volatility}%</div>
-            <Badge className={`px-3 py-1.5 rounded-lg font-medium text-xs border ${volatilityLevel === 'low' ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : volatilityLevel === 'medium' ? 'bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border-[#FDE68A]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
-              {volatilityLevel === 'low' ? 'Стабільно' : 
-               volatilityLevel === 'medium' ? 'Помірно' : 'Нестабільно'}
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.banCount}
+            </div>
+            <Badge className="bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs px-3 py-1.5">
+              БАН · {teamStats.banPercentage}% від усіх
+            </Badge>
+          </div>
+
+          {/* Потребують уваги (БАН + Нестабільні) */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Високий ризик</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.attentionCount}
+            </div>
+            <span className="text-sm text-[#9CA3AF]">
+              БАН: {teamStats.banCount} · Нестабільні: {teamStats.unstableCount}
+            </span>
+          </div>
+
+          {/* Game dominance */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Основна гра</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.dominantGame}
+            </div>
+            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
+              {teamStats.dominantGameCount} команд у списку
             </Badge>
           </div>
         </div>

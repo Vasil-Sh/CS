@@ -28,7 +28,7 @@ export default function Strategy() {
   const tabs = [
     { id: 'strategies' as const, label: 'Стратегії', icon: Target },
     { id: 'goals' as const, label: 'Цілі', icon: Flag },
-    { id: 'risks' as const, label: 'Ризики', icon: AlertTriangle },
+    { id: 'risks' as const, label: 'Ризиковані команди', icon: AlertTriangle },
   ];
 
   return (
