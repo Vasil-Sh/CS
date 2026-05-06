@@ -457,22 +457,22 @@ export default function GoalsManager() {
   ];
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-[#111827]">Мої цілі</h2>
+    <div className="space-y-6">
+      {/* Unified centered pill bar: info + tabs + action buttons */}
+      <div className="space-y-6">
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F9FAFB] p-1.5 rounded-2xl flex-wrap justify-center">
+            {/* Info tooltip — blue */}
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="text-[#447afc] hover:text-[#3366e6] transition-colors">
-                    <Info className="h-5 w-5" strokeWidth={2} />
+                  <button className="flex items-center justify-center px-3.5 py-3.5 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                    <Info className="h-[18px] w-[18px]" strokeWidth={2} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="start" className="max-w-xs rounded-2xl px-4 py-3 bg-white border border-[#E5E7EB] shadow-lg">
                   <div className="space-y-1.5">
-                    <p className="text-sm font-medium text-[#111827]">Як працювати з цілями</p>
+                    <p className="text-sm font-semibold text-[#111827]">Як працювати з цілями</p>
                     <p className="text-sm text-[#6B7280]">1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"</p>
                     <p className="text-sm text-[#6B7280]">2. Після розрахунку ставки (Win/Loss) поверніться сюди</p>
                     <p className="text-sm text-[#6B7280]">3. Натисніть "Оновити" — прогрес оновиться автоматично</p>
@@ -481,52 +481,58 @@ export default function GoalsManager() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-          <p className="text-lg text-[#6B7280]">Фокус на дисципліні та прогресі</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleManualUpdate} disabled={isUpdating} variant="outline"
-            className="rounded-3xl border border-[#E5E7EB] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base text-[#374151]">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
-            Оновити
-          </Button>
-          <Button onClick={() => setShowCreateDialog(true)} disabled={activeGoals.length >= 3}
-            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
-            <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-            Створити ціль
-          </Button>
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="space-y-5">
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-2 gap-3">
+            {/* Tabs */}
             {tabs.map((tab) => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
                   className={`
-                    relative rounded-[24px] px-6 py-4 font-light text-base
-                    transition-all duration-300 ease-in-out
-                    ${activeTab === tab.id 
-                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
+                    relative px-7 py-3.5 text-base rounded-xl transition-all duration-200
+                    flex items-center gap-2
+                    ${isActive
+                      ? 'bg-white text-[#111827] font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
+                      : 'bg-transparent text-[#6B7280] hover:text-[#111827] font-medium'
                     }
-                  `}>
-                  <span className="flex items-center justify-center gap-2">
-                    <Icon className="h-4 w-4" strokeWidth={1.5} />
-                    {tab.label}
-                  </span>
+                  `}
+                >
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                  {tab.label}
                 </button>
               );
             })}
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E5E7EB] mx-0.5" />
+
+            {/* Update button — 70% pill style inside the bar */}
+            <button
+              onClick={handleManualUpdate}
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-medium text-[#6B7280] hover:text-[#111827] hover:bg-white hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`h-[18px] w-[18px] ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+              Оновити
+            </button>
+
+            {/* Create goal button — 70% accent blue pill */}
+            <button
+              onClick={() => setShowCreateDialog(true)}
+              disabled={activeGoals.length >= 3}
+              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2} />
+              Створити ціль
+            </button>
           </div>
         </div>
 
         {/* Active Tab */}
         {activeTab === 'active' && (
-          <div>
+          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">
             {activeGoals.length === 0 ? (
               <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
                 <CardContent className="py-12 text-center">
@@ -552,7 +558,7 @@ export default function GoalsManager() {
 
                   return (
                     <Card key={goal.id}
-                      className={`rounded-3xl bg-white transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E5E7EB]'}`}
+                      className={`rounded-3xl bg-[#F8FAFC] transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
                       style={cardBaseStyle}
                       onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -681,7 +687,7 @@ export default function GoalsManager() {
 
         {/* Completed Tab */}
         {activeTab === 'completed' && (
-          <div>
+          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">
             {completedGoals.length === 0 ? (
               <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
                 <CardContent className="py-12 text-center">
@@ -696,7 +702,7 @@ export default function GoalsManager() {
               <div className="grid grid-cols-3 gap-6">
                 {completedGoals.map(goal => (
                   <Card key={goal.id}
-                    className="border border-[#BBF7D0] rounded-3xl bg-white"
+                    className="border border-[#BBF7D0] rounded-3xl bg-[#F8FAFC]"
                     style={cardBaseStyle}
                     onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                     onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}

@@ -697,44 +697,49 @@ export default function StrategyOverview() {
   const profitChartData = getProfitChartData();
 
   const tabs = [
-    { id: 'overview', label: 'Огляд стратегій' },
-    { id: 'performance', label: 'Ефективність' },
-    { id: 'create', label: 'Створити нову' },
+    { id: 'overview', label: 'Огляд стратегій', icon: Eye },
+    { id: 'performance', label: 'Ефективність', icon: BarChart3 },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-semibold text-[#111827] tracking-tight flex items-center gap-3">
-          <Brain className="h-6 w-6 text-[#111827]" strokeWidth={1.5} />
-          Мої стратегії
-        </h2>
-        <p className="text-[#6B7280] font-normal mt-1">Управління та аналіз ваших стратегій ставок на CS2</p>
-      </div>
-
       <div className="space-y-6">
-        {/* Tabs Navigation */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-3 border border-[#E5E7EB]" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-          <div className="grid grid-cols-3 gap-3">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  relative rounded-2xl px-6 py-4 text-base
-                  transition-all duration-300 ease-in-out
-                  ${activeTab === tab.id 
-                    ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'bg-transparent text-[#9CA3AF] hover:bg-[#F9FAFB] hover:text-[#6B7280] font-normal'
-                  }
-                `}
-              >
-                <span className="flex items-center justify-center gap-2">
+        {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F9FAFB] p-1.5 rounded-2xl flex-wrap justify-center">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    relative px-7 py-3.5 text-base rounded-xl transition-all duration-200
+                    flex items-center gap-2
+                    ${isActive
+                      ? 'bg-white text-[#111827] font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
+                      : 'bg-transparent text-[#6B7280] hover:text-[#111827] font-medium'
+                    }
+                  `}
+                >
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                   {tab.label}
-                </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E5E7EB] mx-0.5" />
+
+            {/* Create strategy button — accent blue pill inside the bar */}
+            <button
+              onClick={() => setActiveTab('create')}
+              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
+            >
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2} />
+              Створити нову
+            </button>
           </div>
         </div>
 
@@ -818,18 +823,18 @@ export default function StrategyOverview() {
                     </div>
                   </div>
 
-                  {/* Strategy Cards */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredAndSortedStrategies.map((strategy, index) => {
-                      const stats = strategyStats[strategy.name] || {} as StrategyStats;
-                      const isPrimary = primaryStrategy === (strategy.id || strategy.name);
-                      
-                      return (
-                        <div
-                          key={index}
-                          className={`bg-white border rounded-3xl overflow-hidden hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all ${isPrimary ? 'border-[#3B82F6]' : 'border-[#F3F4F6]'}`}
-                          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-                        >
+                  {/* Strategy Cards — wrapped in a white container like GoalsManager */}
+                  <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {filteredAndSortedStrategies.map((strategy, index) => {
+                        const stats = strategyStats[strategy.name] || {} as StrategyStats;
+                        const isPrimary = primaryStrategy === (strategy.id || strategy.name);
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
+                          >
                           <div className="p-5">
                             {/* Card Header */}
                             <div className="flex items-center justify-between mb-4">
@@ -902,10 +907,11 @@ export default function StrategyOverview() {
                                 <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                               </Button>
                             </div>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </>
               )}

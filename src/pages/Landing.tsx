@@ -265,19 +265,13 @@ export default function Landing() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <Link to="/login">
-                <Button className="h-14 px-8 bg-gradient-to-r from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] text-white font-semibold rounded-[20px] shadow-[0_8px_24px_rgba(62,117,255,0.35)] hover:shadow-[0_12px_32px_rgba(62,117,255,0.45)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-base">
+                <Button className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 py-2 h-14 px-8 from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] shadow-[0_8px_24px_rgba(62,117,255,0.35)] hover:shadow-[0_12px_32px_rgba(62,117,255,0.45)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[8px] pr-[32px] pb-[8px] pl-[32px] rounded-3xl text-[16px] font-semibold text-center text-[#FFFFFF] bg-[#0F172AE6] opacity-100">
                   Перевірити свою ставку
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/login">
-                <Button
-                  variant="outline"
-                  className="h-14 px-8 !bg-transparent hover:!bg-transparent border-2 border-[#E8E6DC] hover:border-[#3e75ff] text-[#4a4a5a] hover:text-[#3e75ff] font-semibold rounded-[20px] transition-all duration-300 text-base"
-                >
-                  Запустити аудит банку
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                
               </Link>
             </div>
 
@@ -311,7 +305,7 @@ export default function Landing() {
       </section>
 
       {/* Mini Demo - Validation Layer */}
-      <section id="features" className="py-20 lg:py-28 bg-white">
+      <section id="features" className="py-20 lg:py-28 mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[112px] pr-[0px] pb-[112px] pl-[0px] rounded-none text-[16px] font-normal text-[#020817] bg-[#FFFFFF] opacity-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">

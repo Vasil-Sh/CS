@@ -19,16 +19,13 @@ import {
   Info,
   RefreshCw,
   Download,
-  ChevronDown,
-  ChevronUp,
   Calendar,
   Pencil,
   Check,
   X,
-  ArrowUpRight,
-  ArrowDownRight,
   ArrowRightLeft
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
 import { toast } from 'sonner';
@@ -732,41 +729,90 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Header row: info icon & Google Sheets button (right) */}
-        <div className="flex items-center justify-end gap-3">
+        {/* Unified pill-bar: info + Google Sheets + Search toggle + Add team */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F9FAFB] p-1.5 rounded-2xl flex-wrap justify-center">
+            {/* Info tooltip */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200">
-                  <Info className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+                <button className="flex items-center justify-center px-3.5 py-3.5 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                  <Info className="h-[18px] w-[18px]" strokeWidth={2} />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                <p className="text-sm font-medium text-[#111827] mb-1">Управління ризиками</p>
+              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-[#111827] mb-1">Управління ризиками</p>
                 <p className="text-sm text-[#6B7280] leading-relaxed">
                   Аналіз ризиків та контроль банкролу. Список ризикових команд, метрики просадок, волатильності та рекомендації.
                 </p>
               </TooltipContent>
             </Tooltip>
 
-            <Button
+            {/* Google Sheets button */}
+            <button
               onClick={updateFromGoogleSheets}
               disabled={isUpdating}
-              variant="outline"
-              className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] text-sm font-medium text-[#374151] h-10 px-4"
+              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-medium text-[#6B7280] hover:text-[#111827] hover:bg-white hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUpdating ? (
                 <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" strokeWidth={1.5} />
+                  <RefreshCw className="h-[18px] w-[18px] animate-spin" strokeWidth={1.75} />
                   Оновлення...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  <Download className="h-[18px] w-[18px]" strokeWidth={1.75} />
                   Оновити з Google Sheets
                 </>
               )}
-            </Button>
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E5E7EB] mx-0.5" />
+
+            {/* Search toggle */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`
+                flex items-center gap-2 px-7 py-3.5 text-base rounded-xl transition-all duration-200
+                ${isSearchOpen
+                  ? 'bg-white text-[#111827] font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
+                  : 'bg-transparent text-[#6B7280] hover:text-[#111827] font-medium'
+                }
+              `}
+            >
+              <Search className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              Пошук команди
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E5E7EB] mx-0.5" />
+
+            {/* Add new team — accent blue */}
+            <button
+              onClick={() => setIsAddTeamOpen(true)}
+              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
+            >
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2} />
+              Додати нову команду
+            </button>
+          </div>
         </div>
+
+        {/* Inline search input — shown when toggled */}
+        {isSearchOpen && (
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Пошук за назвою, грою, статусом або примітками..."
+                className="pl-10 w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
 
         {/* Risk Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -840,121 +886,86 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </div>
         </div>
 
-        {/* Add New Team - Collapsible */}
-        <Card 
-          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-          style={{ boxShadow: chartCardShadow }}
-        >
-          <CardHeader 
-            className="bg-white border-b border-[#E5E7EB] p-6 cursor-pointer hover:bg-[#F9FAFB] transition-colors"
-            onClick={() => setIsAddTeamOpen(!isAddTeamOpen)}
-          >
-            <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
-              <span className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                  <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+        {/* Add New Team - Modal Dialog */}
+        <Dialog open={isAddTeamOpen} onOpenChange={setIsAddTeamOpen}>
+          <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB] bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-[#111827]">
+                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                  <Plus className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.75} />
                 </div>
                 Додати нову команду
-              </span>
-              {isAddTeamOpen ? (
-                <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-              )}
-            </CardTitle>
-          </CardHeader>
-          {isAddTeamOpen && (
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-[#6B7280]">Назва команди</label>
-                  <Input
-                    value={newTeam.name}
-                    onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                    placeholder="Введіть назву команди"
-                    className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6B7280]">Гра</label>
-                  <select
-                    value={newTeam.game}
-                    onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
-                    className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
-                  >
-                    <option value="CS">CS</option>
-                    <option value="Дота">Дота</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6B7280]">Статус</label>
-                  <select
-                    value={newTeam.status}
-                    onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
-                    className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
-                  >
-                    {ALL_STATUSES.map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="text-sm font-medium text-[#6B7280]">Примітки</label>
-                  <Textarea
-                    value={newTeam.notes}
-                    onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
-                    placeholder="Додайте примітки про команду"
-                    className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
-                    rows={3}
-                  />
-                </div>
+              </DialogTitle>
+              <DialogDescription className="text-[#6B7280]">
+                Заповніть інформацію про ризикову команду
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+              <div>
+                <label className="text-sm font-medium text-[#6B7280]">Назва команди</label>
+                <Input
+                  value={newTeam.name}
+                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
+                  placeholder="Введіть назву команди"
+                  className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                />
               </div>
+              <div>
+                <label className="text-sm font-medium text-[#6B7280]">Гра</label>
+                <select
+                  value={newTeam.game}
+                  onChange={(e) => setNewTeam({ ...newTeam, game: e.target.value })}
+                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
+                >
+                  <option value="CS">CS</option>
+                  <option value="Дота">Дота</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6B7280]">Статус</label>
+                <select
+                  value={newTeam.status}
+                  onChange={(e) => setNewTeam({ ...newTeam, status: e.target.value })}
+                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
+                >
+                  {ALL_STATUSES.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-[#6B7280]">Примітки</label>
+                <Textarea
+                  value={newTeam.notes}
+                  onChange={(e) => setNewTeam({ ...newTeam, notes: e.target.value })}
+                  placeholder="Додайте примітки про команду"
+                  className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
               <Button
-                onClick={addRiskyTeam}
-                className="mt-4 bg-[#111827] hover:bg-[#1F2937] text-white rounded-xl text-sm px-6"
+                variant="outline"
+                onClick={() => setIsAddTeamOpen(false)}
+                className="rounded-xl border-[#E5E7EB] font-medium"
+              >
+                Скасувати
+              </Button>
+              <Button
+                onClick={() => {
+                  addRiskyTeam();
+                  if (newTeam.name.trim()) setIsAddTeamOpen(false);
+                }}
+                className="bg-[#447afc] hover:bg-[#5b8ffd] text-white rounded-xl text-sm px-6 font-semibold"
                 disabled={!newTeam.name.trim()}
               >
-                <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                <Plus className="mr-2 h-4 w-4" strokeWidth={2} />
                 Додати команду
               </Button>
-            </CardContent>
-          )}
-        </Card>
-
-        {/* Search - Collapsible */}
-        <Card 
-          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-          style={{ boxShadow: chartCardShadow }}
-        >
-          <CardHeader 
-            className="bg-white border-b border-[#E5E7EB] p-6 cursor-pointer hover:bg-[#F9FAFB] transition-colors"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-          >
-            <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
-              <span className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                  <Search className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                </div>
-                Пошук команд
-              </span>
-              {isSearchOpen ? (
-                <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-              )}
-            </CardTitle>
-          </CardHeader>
-          {isSearchOpen && (
-            <CardContent className="p-6">
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Пошук за назвою, грою, статусом або примітками..."
-                className="w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
-              />
-            </CardContent>
-          )}
-        </Card>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Teams by Game */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

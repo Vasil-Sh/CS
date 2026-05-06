@@ -1,5 +1,15 @@
 import { useMemo } from 'react';
-import { Target, Flag, TrendingUp, ShieldAlert, Star, Activity, Sparkles } from 'lucide-react';
+import {
+  Target,
+  Flag,
+  TrendingUp,
+  ShieldAlert,
+  Star,
+  Activity,
+  Sparkles,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { UserDataService } from '@/lib/userDataService';
@@ -8,9 +18,10 @@ import type { Bet } from '@/types/betting';
 /**
  * StrategyOverviewHeader
  *
- * Summary block displayed above the Strategy tabs. Style mirrors Analytics KPI
- * cards: black monochrome icons on light-gray rounded squares, centered labels,
- * and a scale/shadow hover effect.
+ * Summary block displayed above the Strategy tabs. Style now mirrors the
+ * Analytics KPI cards 1-to-1 (Поточний банк / Загальний профіт / Всього ставок /
+ * Вінрейт): left-aligned icon + title row, large 4xl bold value, and a bottom
+ * row with directional arrow + semantic color + muted caption.
  */
 
 interface StrategyOverviewHeaderProps {
@@ -46,7 +57,7 @@ interface StoredGoal {
   totalSteps?: number;
 }
 
-// Shared card style — identical to Analytics cards (scale + shadow on hover)
+// Shared card style — identical to Analytics KPI cards
 const cardBaseStyle: React.CSSProperties = {
   transform: 'scale(1)',
   boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
@@ -247,275 +258,352 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
   const goalInfo = primaryGoal ? goalProgress(primaryGoal) : null;
 
   return (
-    <div className="space-y-4">
-      {/* KPI cards — matches Analytics card style */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Active strategy */}
+    <div className="space-y-6">
+      {/* ===== KPI CARDS — matches Analytics style 1:1 ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* 1. Активна стратегія */}
         <button
           type="button"
           onClick={() => onNavigateTab('strategies')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6] mb-3">
-              <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            </div>
-            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">
-              Активна стратегія
-            </span>
-            {activeStrategy ? (
-              <>
-                <div className="flex items-center justify-center gap-1.5 mb-2 w-full">
-                  <Star className="h-3.5 w-3.5 fill-[#111827] text-[#111827] flex-shrink-0" strokeWidth={1.5} />
-                  <p className="text-base font-semibold text-[#111827] truncate" title={activeStrategy.name}>
-                    {activeStrategy.name}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center gap-2 flex-wrap">
-                  <Badge className={`${riskBadgeClass(activeStrategy.riskLevel)} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}>
-                    {riskLabel(activeStrategy.riskLevel)}
-                  </Badge>
-                  {strategyRoi.roi !== null ? (
-                    <span className={`text-sm font-semibold ${strategyRoi.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                      ROI {strategyRoi.roi >= 0 ? '+' : ''}{strategyRoi.roi.toFixed(1)}%
-                    </span>
-                  ) : (
-                    <span className="text-sm text-[#9CA3AF]">Немає ставок</span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-base font-semibold text-[#111827] mb-1">Не обрано</p>
-                <p className="text-xs text-[#6B7280]">Оберіть стратегію</p>
-              </>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#111827]">Активна стратегія</span>
           </div>
+          {activeStrategy ? (
+            <>
+              <div
+                className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate flex items-center gap-2"
+                title={activeStrategy.name}
+              >
+                <Star
+                  className="h-6 w-6 fill-[#111827] text-[#111827] flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+                <span className="truncate">{activeStrategy.name}</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge
+                  className={`${riskBadgeClass(
+                    activeStrategy.riskLevel,
+                  )} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}
+                >
+                  {riskLabel(activeStrategy.riskLevel)}
+                </Badge>
+                {strategyRoi.roi !== null ? (
+                  <>
+                    {strategyRoi.roi >= 0 ? (
+                      <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                    )}
+                    <span
+                      className={`text-base font-normal ${
+                        strategyRoi.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'
+                      }`}
+                    >
+                      ROI {strategyRoi.roi >= 0 ? '+' : ''}
+                      {strategyRoi.roi.toFixed(1)}%
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-[#9CA3AF]">Немає ставок</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2">Не обрано</div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
+              </div>
+            </>
+          )}
         </button>
 
-        {/* Primary goal progress */}
+        {/* 2. Головна ціль */}
         <button
           type="button"
           onClick={() => onNavigateTab('goals')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6] mb-3">
-              <Flag className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            </div>
-            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">
-              Головна ціль
-            </span>
-            {primaryGoal && goalInfo ? (
-              <>
-                <p className="text-base font-semibold text-[#111827] truncate w-full mb-1" title={primaryGoal.name}>
-                  {primaryGoal.name}
-                </p>
-                <p className="text-xs text-[#6B7280] mb-2">{goalInfo.label}</p>
-                <div className="w-full">
-                  <Progress value={goalInfo.percent} className="h-2" />
-                  <p className="text-xs text-[#9CA3AF] font-medium mt-1.5">{goalInfo.percent.toFixed(0)}% виконано</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-base font-semibold text-[#111827] mb-1">Немає активних цілей</p>
-                <p className="text-xs text-[#6B7280]">Додайте ціль</p>
-              </>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <Flag className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#111827]">Головна ціль</span>
           </div>
+          {primaryGoal && goalInfo ? (
+            <>
+              <div
+                className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate"
+                title={primaryGoal.name}
+              >
+                {primaryGoal.name}
+              </div>
+              <div className="space-y-1.5">
+                <Progress value={goalInfo.percent} className="h-2" />
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#6B7280]">{goalInfo.label}</span>
+                  <span className="text-sm font-semibold text-[#111827]">
+                    {goalInfo.percent.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2">0</div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Немає активних цілей</span>
+              </div>
+            </>
+          )}
         </button>
 
-        {/* Today's risk */}
+        {/* 3. Рівень ризику */}
         <button
           type="button"
           onClick={() => onNavigateTab('risks')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6] mb-3">
-              <ShieldAlert className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            </div>
-            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">
-              Рівень ризику
-            </span>
-            {todayRisk.level ? (
-              <>
-                <p className={`text-xl font-semibold mb-1 ${
-                  todayRisk.level === 'High' ? 'text-[#DC2626]' :
-                  todayRisk.level === 'Medium' ? 'text-[#D97706]' :
-                  'text-[#16A34A]'
-                }`}>
-                  {riskLabel(todayRisk.level)}
-                </p>
-                <p className="text-xs text-[#6B7280]">
-                  Вінрейт 7 днів: {todayRisk.winRate?.toFixed(0)}%
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-base font-semibold text-[#111827] mb-1">Немає даних</p>
-                <p className="text-xs text-[#6B7280]">Мін. 3 ставки за тиждень</p>
-              </>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldAlert className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#111827]">Рівень ризику</span>
           </div>
+          {todayRisk.level ? (
+            <>
+              <div
+                className={`text-4xl font-bold tracking-tight mb-2 ${
+                  todayRisk.level === 'High'
+                    ? 'text-[#DC2626]'
+                    : todayRisk.level === 'Medium'
+                    ? 'text-[#D97706]'
+                    : 'text-[#16A34A]'
+                }`}
+              >
+                {riskLabel(todayRisk.level)}
+              </div>
+              <div className="flex items-center gap-2">
+                {(todayRisk.winRate ?? 0) >= 50 ? (
+                  <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                ) : (
+                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                )}
+                <span
+                  className={`text-base font-normal ${
+                    (todayRisk.winRate ?? 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'
+                  }`}
+                >
+                  Вінрейт {todayRisk.winRate?.toFixed(0)}%
+                </span>
+                <span className="text-sm text-[#9CA3AF]">за 7 днів</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">—</div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
+              </div>
+            </>
+          )}
         </button>
 
-        {/* 30-day win rate */}
+        {/* 4. Вінрейт 30 днів */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative overflow-hidden"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6] mb-3">
-              <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            </div>
-            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">
-              Вінрейт 30 днів
-            </span>
-            {winRate30d.winRate !== null ? (
-              <>
-                <p className={`text-2xl font-semibold mb-1 ${winRate30d.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                  {winRate30d.winRate.toFixed(1)}%
-                </p>
-                <p className="text-xs text-[#6B7280]">
-                  На основі {winRate30d.totalBets} {winRate30d.totalBets === 1 ? 'ставки' : winRate30d.totalBets < 5 ? 'ставок' : 'ставок'}
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-2xl font-semibold text-[#111827] mb-1">—</p>
-                <p className="text-xs text-[#6B7280]">Немає завершених ставок</p>
-              </>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#111827]">Вінрейт 30 днів</span>
           </div>
+          {winRate30d.winRate !== null ? (
+            <>
+              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                {winRate30d.winRate.toFixed(1)}%
+              </div>
+              <div className="flex items-center gap-2">
+                {winRate30d.winRate >= 50 ? (
+                  <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                ) : (
+                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                )}
+                <span
+                  className={`text-base font-normal ${
+                    winRate30d.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'
+                  }`}
+                >
+                  {winRate30d.winRate >= 50 ? 'Вище середнього' : 'Нижче середнього'}
+                </span>
+                <span className="text-sm text-[#9CA3AF]">
+                  ({winRate30d.totalBets} ставок)
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">—</div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Current strategy + insight row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* ===== CURRENT STRATEGY + INSIGHT ROW ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Current strategy details card */}
         <div
-          className="lg:col-span-2 bg-white border border-[#F3F4F6] rounded-3xl p-6"
+          className="lg:col-span-2 bg-white border border-[#F3F4F6] rounded-3xl p-7"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                <Activity className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#111827]">
+                <Activity className="h-5 w-5 text-white" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-[#111827]">Поточна стратегія</h3>
-                <p className="text-xs text-[#6B7280]">Правила, яких ви дотримуєтесь</p>
+                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Поточна стратегія</h3>
+                <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
               </div>
             </div>
             {activeStrategy && (
-              <Badge className={`${riskBadgeClass(activeStrategy.riskLevel)} text-xs font-medium px-2.5 py-0.5 border-0 rounded-full hover:opacity-100`}>
+              <Badge
+                className={`${riskBadgeClass(
+                  activeStrategy.riskLevel,
+                )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
+              >
                 {riskLabel(activeStrategy.riskLevel)} ризик
               </Badge>
             )}
           </div>
 
           {activeStrategy ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <p className="text-lg font-semibold text-[#111827]">{activeStrategy.name}</p>
+                <p className="text-2xl font-bold text-[#111827] tracking-tight">
+                  {activeStrategy.name}
+                </p>
                 {activeStrategy.description && (
-                  <p className="text-sm text-[#6B7280] mt-1 leading-relaxed">{activeStrategy.description}</p>
+                  <p className="text-base text-[#4B5563] mt-2 leading-relaxed">
+                    {activeStrategy.description}
+                  </p>
                 )}
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="p-3 bg-[#F9FAFB] rounded-2xl text-center">
-                  <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider">Мін. коеф.</p>
-                  <p className="text-base font-semibold text-[#111827] mt-1">
+                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                  <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">
+                    Мін. коеф.
+                  </p>
+                  <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                     {activeStrategy.minOdds ?? '—'}
                   </p>
                 </div>
-                <div className="p-3 bg-[#F9FAFB] rounded-2xl text-center">
-                  <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider">Макс. коеф.</p>
-                  <p className="text-base font-semibold text-[#111827] mt-1">
+                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                  <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">
+                    Макс. коеф.
+                  </p>
+                  <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                     {activeStrategy.maxOdds ?? '—'}
                   </p>
                 </div>
-                <div className="p-3 bg-[#F9FAFB] rounded-2xl text-center">
-                  <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider">Формати</p>
-                  <p className="text-base font-semibold text-[#111827] mt-1 truncate">
+                <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
+                  <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">
+                    Формати
+                  </p>
+                  <p className="text-lg font-bold text-[#15803D] mt-1.5 truncate">
                     {activeStrategy.allowedFormats?.join(', ') || 'Усі'}
                   </p>
                 </div>
-                <div className="p-3 bg-[#F9FAFB] rounded-2xl text-center">
-                  <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider">Типи ставок</p>
-                  <p className="text-base font-semibold text-[#111827] mt-1 truncate">
+                <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
+                  <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">
+                    Типи ставок
+                  </p>
+                  <p className="text-lg font-bold text-[#B45309] mt-1.5 truncate">
                     {activeStrategy.allowedBetTypes?.join(', ') || 'Усі'}
                   </p>
                 </div>
               </div>
 
               {activeStrategy.criteria && activeStrategy.criteria.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Ключові критерії</p>
-                  <ul className="space-y-1.5">
-                    {activeStrategy.criteria.slice(0, 3).map((c, idx) => (
-                      <li key={idx} className="text-sm text-[#374151] flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-[#111827] rounded-full mt-2 flex-shrink-0" />
+                <div className="pt-2">
+                  <p className="text-sm font-bold text-[#111827] mb-3 flex items-center gap-2">
+                    <Target className="h-4 w-4 text-[#111827]" strokeWidth={2} />
+                    Ключові критерії
+                  </p>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                    {activeStrategy.criteria.map((c, idx) => (
+                      <li
+                        key={idx}
+                        className="text-base text-[#111827] flex items-start gap-3 font-medium"
+                      >
+                        <span className="flex items-center justify-center w-5 h-5 bg-[#111827] text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
                         <span>{c}</span>
                       </li>
                     ))}
-                    {activeStrategy.criteria.length > 3 && (
-                      <li className="text-xs text-[#9CA3AF]">+ ще {activeStrategy.criteria.length - 3} критеріїв</li>
-                    )}
                   </ul>
                 </div>
               )}
             </div>
           ) : (
-            <div className="py-8 text-center">
-              <p className="text-sm text-[#6B7280] mb-3">
-                Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб відстежувати результати.
+            <div className="py-10 text-center">
+              <p className="text-base text-[#4B5563] mb-4">
+                Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб
+                відстежувати результати.
               </p>
               <button
                 type="button"
                 onClick={() => onNavigateTab('strategies')}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-base font-semibold transition-colors"
               >
-                <Target className="h-4 w-4" strokeWidth={1.5} />
+                <Target className="h-4 w-4" strokeWidth={2} />
                 Обрати стратегію
               </button>
             </div>
           )}
         </div>
 
-        {/* Insight card */}
+        {/* Insight card — light style */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl p-6"
+          className="relative bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7] border border-[#FDE68A] rounded-3xl p-7 overflow-hidden"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-              <Sparkles className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+          {/* Decorative glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#F59E0B] opacity-20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#FBBF24] opacity-15 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] shadow-lg">
+                <Sparkles className="h-5 w-5 text-white" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Персональна порада</h3>
+                <p className="text-sm text-[#92400E] mt-0.5">На основі вашої статистики</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-[#111827]">Персональна порада</h3>
-              <p className="text-xs text-[#6B7280]">На основі вашої статистики</p>
-            </div>
+            <p className="text-base text-[#111827] leading-relaxed font-medium">{insight}</p>
           </div>
-          <p className="text-sm text-[#374151] leading-relaxed">{insight}</p>
         </div>
       </div>
     </div>
