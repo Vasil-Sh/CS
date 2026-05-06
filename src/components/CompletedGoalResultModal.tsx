@@ -29,6 +29,19 @@ interface Bet {
   amount?: number;
 }
 
+interface LadderStep {
+  step: number;
+  startAmount: number;
+  minPlannedAmount?: number;
+  maxPlannedAmount?: number;
+  plannedAmount?: number;
+  actualAmount?: number;
+  actualOdds?: number;
+  deviation?: number;
+  status: 'completed' | 'current' | 'locked';
+  completedAt?: string;
+}
+
 interface Goal {
   id: string;
   name: string;
@@ -45,6 +58,7 @@ interface Goal {
   currentStep?: number;
   totalSteps?: number;
   currentBank?: number;
+  steps?: LadderStep[];
   targetROI?: number;
   currentROI?: number;
   targetWinRate?: number;
@@ -66,22 +80,46 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
   const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
   const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id);
 
-  const totalBets = goalBets.length;
-  const winBets = goalBets.filter((bet: Bet) => bet.result === 'Win').length;
-  const lossBets = goalBets.filter((bet: Bet) => bet.result === 'Loss').length;
-  const winRate = totalBets > 0 ? (winBets / totalBets) * 100 : 0;
+  // Primary stats from tagged bets
+  let totalBets = goalBets.length;
+  let winBets = goalBets.filter((bet: Bet) => bet.result === 'Win').length;
+  let lossBets = goalBets.filter((bet: Bet) => bet.result === 'Loss').length;
 
-  const totalStaked = goalBets.reduce((sum: number, bet: Bet) => sum + (bet.amount || 100), 0);
-  const totalProfit = goalBets.reduce((sum: number, bet: Bet) => {
+  let totalStaked = goalBets.reduce((sum: number, bet: Bet) => sum + (bet.amount || 100), 0);
+  let totalProfit = goalBets.reduce((sum: number, bet: Bet) => {
     if (bet.result === 'Win') return sum + (bet.profit || ((bet.odds - 1) * (bet.amount || 100)));
     if (bet.result === 'Loss') return sum - (bet.amount || 100);
     return sum;
   }, 0);
 
-  const avgOdds = winBets > 0 
-    ? goalBets.filter((bet: Bet) => bet.result === 'Win').reduce((sum: number, bet: Bet) => sum + bet.odds, 0) / winBets 
+  let avgOdds = winBets > 0
+    ? goalBets.filter((bet: Bet) => bet.result === 'Win').reduce((sum: number, bet: Bet) => sum + bet.odds, 0) / winBets
     : 0;
 
+  // Fallback for ladder goals: derive stats from completed steps when no tagged bets exist
+  if (goal.type === 'ladder' && totalBets === 0 && goal.steps && goal.steps.length > 0) {
+    const completedSteps = goal.steps.filter(s => s.status === 'completed');
+    if (completedSteps.length > 0) {
+      winBets = completedSteps.length;
+      totalBets = completedSteps.length;
+      lossBets = 0;
+      totalStaked = completedSteps.reduce((sum, s) => sum + (s.startAmount || 0), 0);
+      totalProfit = completedSteps.reduce((sum, s) => {
+        const stake = s.startAmount || 0;
+        const win = s.actualAmount ?? (stake * (s.actualOdds || 0));
+        return sum + (win - stake);
+      }, 0);
+      const oddsSum = completedSteps.reduce((sum, s) => sum + (s.actualOdds || 0), 0);
+      avgOdds = oddsSum / completedSteps.length;
+    }
+  }
+
+  // Fallback for amount goals: use goal.currentAmount as the achieved profit if no bets
+  if (goal.type === 'amount' && totalBets === 0 && (goal.currentAmount || 0) > 0) {
+    totalProfit = goal.currentAmount || 0;
+  }
+
+  const winRate = totalBets > 0 ? (winBets / totalBets) * 100 : 0;
   const roi = totalStaked > 0 ? (totalProfit / totalStaked) * 100 : 0;
 
   const startDate = new Date(goal.createdAt);
