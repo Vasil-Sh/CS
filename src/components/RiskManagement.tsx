@@ -731,7 +731,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       <div className="space-y-6">
         {/* Unified pill-bar: info + Google Sheets + Search toggle + Add team */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 bg-[#F9FAFB] p-1.5 rounded-2xl flex-wrap justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F4F4F5] p-1.5 rounded-2xl flex-wrap justify-center">
             {/* Info tooltip */}
             <Tooltip>
               <TooltipTrigger asChild>
