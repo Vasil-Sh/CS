@@ -592,7 +592,7 @@ export default function GoalsManager() {
                         </div>
 
                         {/* Key metric */}
-                        <div className="bg-[#F9FAFB] rounded-2xl px-4 py-3 border border-[#F3F4F6] mb-3">
+                        <div className="bg-white rounded-2xl px-4 py-3 border border-[#E5E7EB] mb-3">
                           <p className="text-sm text-[#6B7280] leading-tight">{keyMetric.label}</p>
                           <p className={`text-2xl font-bold tracking-tight leading-tight ${keyMetric.color}`}>
                             {keyMetric.value}
