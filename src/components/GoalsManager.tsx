@@ -461,7 +461,7 @@ export default function GoalsManager() {
       {/* Unified centered pill bar: info + tabs + action buttons */}
       <div className="space-y-6">
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 bg-[#F4F4F5] p-1.5 rounded-2xl flex-wrap justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F4F4F5] border border-[#E5E7EB] p-1.5 rounded-2xl flex-wrap justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             {/* Info tooltip — blue */}
             <TooltipProvider delayDuration={0}>
               <Tooltip>
