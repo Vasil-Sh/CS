@@ -37,7 +37,7 @@ export default function Strategy() {
       <div className="px-6 lg:px-8 pt-6 pb-2">
         <div className="flex items-center justify-between">
           <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Стратегія
+            Стратегії та Цілі
           </h1>
         </div>
       </div>

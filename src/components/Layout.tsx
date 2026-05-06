@@ -18,7 +18,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const navigation = [
   { name: 'Аналітика', href: '/app/analytics', icon: BarChart3 },
   { name: 'Додати запис', href: '/app/my-bets', icon: Plus },
-  { name: 'Стратегія', href: '/app/strategy', icon: Target },
+  { name: 'Стратегії та Цілі', href: '/app/strategy', icon: Target },
   { name: 'Матчі', href: '/app/matches', icon: Trophy },
 ];
 
