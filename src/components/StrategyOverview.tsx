@@ -855,14 +855,14 @@ export default function StrategyOverview() {
                             
                             {/* Main Stats */}
                             <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="flex flex-col items-center justify-center p-3 bg-[#F9FAFB] rounded-2xl">
+                              <div className="flex flex-col items-center justify-center p-3 bg-white border border-[#E5E7EB] rounded-2xl">
                                 <div className={`text-2xl font-bold ${(stats.roi || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                                   {(stats.roi || 0) >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
                                 </div>
                                 <div className="text-xs text-[#6B7280] font-medium mt-1">ROI</div>
                                 {getTrendIndicator(stats)}
                               </div>
-                              <div className="flex flex-col items-center justify-center p-3 bg-[#F9FAFB] rounded-2xl">
+                              <div className="flex flex-col items-center justify-center p-3 bg-white border border-[#E5E7EB] rounded-2xl">
                                 <div className={`text-2xl font-bold ${(stats.winRate || 0) >= 50 ? 'text-[#3B82F6]' : 'text-[#6B7280]'}`}>
                                   {stats.winRate?.toFixed(0) || 0}%
                                 </div>
@@ -873,7 +873,7 @@ export default function StrategyOverview() {
 
                             {/* Sparkline */}
                             {(stats.totalBets || 0) > 0 && (
-                              <div className="p-3 bg-[#F9FAFB] rounded-2xl mb-4">
+                              <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl mb-4">
                                 <div className="text-xs text-[#6B7280] font-medium mb-2">Тренд прибутку</div>
                                 {renderSparkline(stats.profitHistory)}
                               </div>
