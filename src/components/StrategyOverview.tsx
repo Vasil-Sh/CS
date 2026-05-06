@@ -706,7 +706,7 @@ export default function StrategyOverview() {
       <div className="space-y-6">
         {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 bg-[#F9FAFB] p-1.5 rounded-2xl flex-wrap justify-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#F4F4F5] p-1.5 rounded-2xl flex-wrap justify-center">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;
