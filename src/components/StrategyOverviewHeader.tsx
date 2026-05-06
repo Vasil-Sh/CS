@@ -543,20 +543,19 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
 
               {activeStrategy.criteria && activeStrategy.criteria.length > 0 && (
                 <div className="pt-2">
-                  <p className="text-sm font-bold text-[#111827] mb-3 flex items-center gap-2">
-                    <Target className="h-4 w-4 text-[#111827]" strokeWidth={2} />
+                  <p className="text-2xl font-bold text-[#111827] tracking-tight mb-4">
                     Ключові критерії
                   </p>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {activeStrategy.criteria.map((c, idx) => (
                       <li
                         key={idx}
-                        className="text-base text-[#111827] flex items-start gap-3 font-medium"
+                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#6366F1] hover:shadow-md transition-all duration-200"
                       >
-                        <span className="flex items-center justify-center w-5 h-5 bg-[#111827] text-white text-xs font-bold rounded-full flex-shrink-0 mt-0.5">
+                        <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
                           {idx + 1}
                         </span>
-                        <span>{c}</span>
+                        <span className="text-sm text-[#111827] font-semibold leading-snug">{c}</span>
                       </li>
                     ))}
                   </ul>
