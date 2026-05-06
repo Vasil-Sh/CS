@@ -933,25 +933,30 @@ export default function Admin() {
               </div>
 
               {/* Sort */}
-              <Button
-                onClick={toggleSort}
-                variant="outline"
-                className="rounded-xl border-[#E5E7EB] font-medium h-10 px-4 text-sm text-[#374151]"
+              <Select
+                value={sortDirection ?? 'none'}
+                onValueChange={(value) =>
+                  setSortDirection(value === 'none' ? null : (value as SortDirection))
+                }
               >
-                {sortDirection === 'asc' ? (
-                  <ArrowUp className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                ) : sortDirection === 'desc' ? (
-                  <ArrowDown className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                ) : (
-                  <ArrowUpDown className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                )}
-                Сортувати за датою
-                {sortDirection && (
-                  <span className="ml-2 text-xs text-[#9CA3AF]">
-                    ({sortDirection === 'asc' ? 'скоро закінчаться' : 'пізніше закінчаться'})
-                  </span>
-                )}
-              </Button>
+                <SelectTrigger className="rounded-xl border-[#E5E7EB] font-medium h-10 px-4 text-sm text-[#374151] w-auto min-w-[260px]">
+                  <div className="flex items-center gap-2">
+                    {sortDirection === 'asc' ? (
+                      <ArrowUp className="h-4 w-4" strokeWidth={1.5} />
+                    ) : sortDirection === 'desc' ? (
+                      <ArrowDown className="h-4 w-4" strokeWidth={1.5} />
+                    ) : (
+                      <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
+                    )}
+                    <SelectValue placeholder="Сортувати за датою" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="none">Сортувати за датою</SelectItem>
+                  <SelectItem value="asc">Скоро закінчаться</SelectItem>
+                  <SelectItem value="desc">Пізніше закінчаться</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
