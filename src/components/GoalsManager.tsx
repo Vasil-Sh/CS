@@ -700,56 +700,153 @@ export default function GoalsManager() {
               </Card>
             ) : (
               <div className="grid grid-cols-3 gap-6">
-                {completedGoals.map(goal => (
-                  <Card key={goal.id}
-                    className="border border-[#BBF7D0] rounded-3xl bg-[#F8FAFC]"
-                    style={cardBaseStyle}
-                    onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-                    onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-                  >
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="p-2 bg-[#F0FDF4] rounded-2xl">
-                          <Trophy className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+                {completedGoals.map(goal => {
+                  // Derive a headline result value per goal type
+                  let resultLabel = 'Результат';
+                  let resultValue = '';
+                  switch (goal.type) {
+                    case 'amount':
+                      resultLabel = 'Досягнуто';
+                      resultValue = `${(goal.currentAmount ?? goal.targetAmount ?? 0).toFixed(0)} грн`;
+                      break;
+                    case 'ladder':
+                      resultLabel = 'Фінальний банк';
+                      resultValue = `${(goal.currentBank ?? goal.targetLadderAmount ?? 0).toFixed(0)} грн`;
+                      break;
+                    case 'roi':
+                      resultLabel = 'ROI';
+                      resultValue = `${(goal.currentROI ?? goal.targetROI ?? 0).toFixed(1)}%`;
+                      break;
+                    case 'winrate':
+                      resultLabel = 'Win Rate';
+                      resultValue = `${(goal.currentWinRate ?? goal.targetWinRate ?? 0).toFixed(1)}%`;
+                      break;
+                  }
+
+                  // Duration in days between creation and completion
+                  const createdMs = new Date(goal.createdAt).getTime();
+                  const completedMs = goal.completedAt ? new Date(goal.completedAt).getTime() : createdMs;
+                  const durationDays = Math.max(1, Math.round((completedMs - createdMs) / (1000 * 60 * 60 * 24)));
+
+                  // Ladder extra info
+                  const ladderStepsDone = goal.type === 'ladder' ? (goal.currentStep ?? goal.steps?.filter(s => s.status === 'completed').length ?? 0) : 0;
+
+                  return (
+                    <Card key={goal.id}
+                      className="border border-[#BBF7D0] rounded-3xl bg-[#F8FAFC]"
+                      style={cardBaseStyle}
+                      onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                      onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                    >
+                      <CardContent className="p-5 flex flex-col h-full">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div className="p-2 bg-[#F0FDF4] rounded-2xl flex-shrink-0">
+                              <Trophy className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-[#111827] text-base leading-tight truncate" title={goal.name}>{goal.name}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">
+                                  {getGoalTypeLabel(goal.type)}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge className="bg-[#22C55E] text-white border-0 rounded-xl text-xs px-2.5 py-0.5 font-medium flex-shrink-0">
+                            <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
+                            Завершено
+                          </Badge>
                         </div>
-                        <Badge className="bg-[#22C55E] text-white border-0 rounded-xl text-xs px-2.5 py-0.5 font-medium">
-                          <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                          Завершено
-                        </Badge>
-                      </div>
-                      <h4 className="text-base font-semibold text-[#111827] line-clamp-2 mb-2">{goal.name}</h4>
-                      <div className="space-y-1.5 text-base mb-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[#6B7280]">Тип:</span>
-                          <Badge className="bg-[#F3F4F6] text-[#374151] border-0 rounded-xl text-xs px-2 py-0 font-medium">{getGoalTypeLabel(goal.type)}</Badge>
+
+                        {/* Key result */}
+                        <div className="bg-white rounded-2xl px-4 py-3 border border-[#E5E7EB] mb-3">
+                          <p className="text-sm text-[#6B7280] leading-tight">{resultLabel}</p>
+                          <p className="text-2xl font-bold tracking-tight leading-tight text-[#22C55E]">
+                            {resultValue}
+                          </p>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[#6B7280]">Дата:</span>
-                          <span className="font-medium text-[#22C55E]">{goal.completedAt && new Date(goal.completedAt).toLocaleDateString('uk-UA')}</span>
+
+                        {/* Secondary stats — fills the middle space */}
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB]">
+                            <p className="text-xs text-[#6B7280] leading-tight">Завершено</p>
+                            <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                              {goal.completedAt ? new Date(goal.completedAt).toLocaleDateString('uk-UA') : '—'}
+                            </p>
+                          </div>
+                          <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB]">
+                            <p className="text-xs text-[#6B7280] leading-tight">Тривалість</p>
+                            <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                              {durationDays} {durationDays === 1 ? 'день' : durationDays < 5 ? 'дні' : 'днів'}
+                            </p>
+                          </div>
+                          {goal.type === 'ladder' && (
+                            <>
+                              <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB]">
+                                <p className="text-xs text-[#6B7280] leading-tight">Кроків пройдено</p>
+                                <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                                  {ladderStepsDone}
+                                </p>
+                              </div>
+                              <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB]">
+                                <p className="text-xs text-[#6B7280] leading-tight">Старт</p>
+                                <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                                  {(goal.startAmount ?? 0).toFixed(0)} грн
+                                </p>
+                              </div>
+                            </>
+                          )}
+                          {goal.type === 'amount' && (
+                            <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB] col-span-2">
+                              <p className="text-xs text-[#6B7280] leading-tight">Ціль</p>
+                              <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                                {(goal.targetAmount ?? 0).toFixed(0)} грн
+                              </p>
+                            </div>
+                          )}
+                          {goal.type === 'roi' && (
+                            <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB] col-span-2">
+                              <p className="text-xs text-[#6B7280] leading-tight">Цільовий ROI</p>
+                              <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                                {(goal.targetROI ?? 0).toFixed(1)}%
+                              </p>
+                            </div>
+                          )}
+                          {goal.type === 'winrate' && (
+                            <div className="bg-white rounded-2xl px-3 py-2 border border-[#E5E7EB] col-span-2">
+                              <p className="text-xs text-[#6B7280] leading-tight">Цільовий Win Rate</p>
+                              <p className="text-sm font-semibold text-[#111827] leading-tight mt-0.5">
+                                {(goal.targetWinRate ?? 0).toFixed(1)}%
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      {/* Action Buttons — same style as Active tab */}
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => openCompletedGoalResult(goal)}
-                          variant="outline"
-                          className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]"
-                        >
-                          <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                          Деталі
-                        </Button>
-                        <Button
-                          onClick={() => confirmDeleteGoal(goal.id)}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                        {/* Action Buttons — pushed to bottom */}
+                        <div className="flex gap-2 mt-auto">
+                          <Button
+                            onClick={() => openCompletedGoalResult(goal)}
+                            variant="outline"
+                            className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]"
+                          >
+                            <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
+                            Деталі
+                          </Button>
+                          <Button
+                            onClick={() => confirmDeleteGoal(goal.id)}
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
