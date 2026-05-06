@@ -161,6 +161,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSheetsGuideOpen, setIsSheetsGuideOpen] = useState(false);
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
@@ -747,9 +748,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </TooltipContent>
             </Tooltip>
 
-            {/* Google Sheets button */}
+            {/* Google Sheets button — opens guide modal */}
             <button
-              onClick={updateFromGoogleSheets}
+              onClick={() => setIsSheetsGuideOpen(true)}
               disabled={isUpdating}
               className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-medium text-[#6B7280] hover:text-[#111827] hover:bg-white hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -761,7 +762,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               ) : (
                 <>
                   <Download className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                  Оновити з Google Sheets
+                  Підтягнути команди з Google Sheets
                 </>
               )}
             </button>
@@ -885,6 +886,170 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </Badge>
           </div>
         </div>
+
+        {/* Google Sheets Guide Dialog */}
+        <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
+          <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] bg-white">
+            <DialogHeader className="pb-3 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#EFF6FF] rounded-xl flex-shrink-0">
+                  <Download className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.75} />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold text-[#111827]">
+                    Підтягнути команди з Google Sheets
+                  </DialogTitle>
+                  <DialogDescription className="text-[#6B7280] mt-0.5">
+                    Як оформити документ, щоб дані правильно підтягнулись
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 py-3">
+              {/* Step 1 */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-semibold text-[#111827] mb-1">Створіть Google Sheets документ</h4>
+                    <p className="text-sm text-[#6B7280] leading-relaxed">
+                      Відкрийте новий документ на <span className="font-medium text-[#111827]">Google Sheets</span> і дайте йому будь-яку назву.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-semibold text-[#111827] mb-2">Оформіть колонки у такому порядку</h4>
+                    <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#F3F4F6]">
+                          <tr>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">A — Назва команди</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">B — Гра</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">C — Статус</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">D — Коментар</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b border-[#F3F4F6]">
+                            <td className="px-3 py-2 text-[#374151]">Liquid</td>
+                            <td className="px-3 py-2 text-[#374151]">CS</td>
+                            <td className="px-3 py-2 text-[#374151]">БАН</td>
+                            <td className="px-3 py-2 text-[#374151]">Нестабільна форма</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 text-[#374151]">Team Spirit</td>
+                            <td className="px-3 py-2 text-[#374151]">Дота</td>
+                            <td className="px-3 py-2 text-[#374151]">Обережно</td>
+                            <td className="px-3 py-2 text-[#374151]">Тільки на +1.5</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="text-xs text-[#9CA3AF] mt-2">
+                      💡 Перший рядок може бути заголовком — він буде автоматично проігнорований.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-semibold text-[#111827] mb-2">Допустимі значення</h4>
+                    <div className="space-y-1.5 text-sm">
+                      <div>
+                        <span className="text-[#6B7280]">Колонка </span>
+                        <span className="font-semibold text-[#111827]">B (Гра):</span>
+                        <span className="text-[#374151]"> </span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS</Badge>
+                        <span className="text-[#6B7280] mx-1">або</span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Дота</Badge>
+                      </div>
+                      <div>
+                        <span className="text-[#6B7280]">Колонка </span>
+                        <span className="font-semibold text-[#111827]">C (Статус):</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {ALL_STATUSES.map(s => (
+                            <Badge key={s} className={getStatusBadge(s)}>{s}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                    4
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-semibold text-[#111827] mb-1">Відкрийте доступ до документу</h4>
+                    <p className="text-sm text-[#6B7280] leading-relaxed">
+                      Натисніть <span className="font-medium text-[#111827]">«Поділитися» → «Усі, хто має посилання» → «Читач»</span>, щоб документ був доступний для читання.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+                <div className="text-sm text-[#92400E]">
+                  <span className="font-semibold">Важливо:</span> дублікати команд (за назвою та грою) автоматично пропускаються — додаються лише нові записи.
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 pt-3 border-t border-[#E5E7EB]">
+              <Button
+                variant="outline"
+                onClick={() => setIsSheetsGuideOpen(false)}
+                disabled={isUpdating}
+                className="rounded-xl border-[#E5E7EB] font-medium"
+              >
+                Скасувати
+              </Button>
+              <Button
+                onClick={async () => {
+                  await updateFromGoogleSheets();
+                  setIsSheetsGuideOpen(false);
+                }}
+                disabled={isUpdating}
+                className="bg-[#447afc] hover:bg-[#5b8ffd] text-white rounded-xl text-sm px-6 font-semibold disabled:opacity-60"
+              >
+                {isUpdating ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" strokeWidth={2} />
+                    Завантаження...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" strokeWidth={2} />
+                    Отримати данні
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Add New Team - Modal Dialog */}
         <Dialog open={isAddTeamOpen} onOpenChange={setIsAddTeamOpen}>
