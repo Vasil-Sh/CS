@@ -833,9 +833,9 @@ export default function StrategyOverview() {
                         return (
                           <div
                             key={index}
-                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
+                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all flex flex-col ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
                           >
-                          <div className="p-5">
+                          <div className="p-5 flex flex-col flex-1">
                             {/* Card Header */}
                             <div className="flex items-center justify-between mb-4">
                               <span className="flex items-center gap-2">
@@ -871,16 +871,20 @@ export default function StrategyOverview() {
                               </div>
                             </div>
 
-                            {/* Sparkline */}
-                            {(stats.totalBets || 0) > 0 && (
-                              <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl mb-4">
-                                <div className="text-xs text-[#6B7280] font-medium mb-2">Тренд прибутку</div>
-                                {renderSparkline(stats.profitHistory)}
-                              </div>
-                            )}
+                            {/* Sparkline — always rendered to keep consistent card height */}
+                            <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl mb-4">
+                              <div className="text-xs text-[#6B7280] font-medium mb-2">Тренд прибутку</div>
+                              {(stats.totalBets || 0) > 0 ? (
+                                renderSparkline(stats.profitHistory)
+                              ) : (
+                                <div className="h-10 flex items-center justify-center text-xs text-[#9CA3AF]">
+                                  Немає ставок для цієї стратегії
+                                </div>
+                              )}
+                            </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex gap-2">
+                            {/* Action Buttons — pushed to the bottom */}
+                            <div className="flex gap-2 mt-auto">
                               <Button
                                 onClick={() => openDetailsDialog(strategy)}
                                 variant="outline"
