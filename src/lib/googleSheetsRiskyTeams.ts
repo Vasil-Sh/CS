@@ -33,8 +33,8 @@ class GoogleSheetsRiskyTeamsService {
       game = gameStr.includes('дота') ? 'Дота' : 'CS';
     }
 
-    // Detect status
-    let status = 'Обережно'; // default
+    // Detect status. If nothing matches, fall back to "Без статусу" (no status yet)
+    let status = 'Без статусу';
     if (cleanNotes.includes('БАН')) {
       status = 'БАН';
     } else if (cleanNotes.includes('Нестабільні') || cleanNotes.includes('нестабільн')) {
@@ -43,6 +43,8 @@ class GoogleSheetsRiskyTeamsService {
       status = 'Рідко';
     } else if (cleanNotes.includes('Обережно') || cleanNotes.includes('обережно')) {
       status = 'Обережно';
+    } else if (cleanNotes.includes('Надійна') || cleanNotes.includes('надійн')) {
+      status = 'Надійна';
     }
 
     // Clean up notes - remove game indicator and status from the beginning

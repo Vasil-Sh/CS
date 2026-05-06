@@ -65,7 +65,7 @@ interface DrawdownPeriod {
   recovery: boolean;
 }
 
-const ALL_STATUSES = ['БАН', 'Нестабільні', 'Обережно', 'Рідко', 'Надійна'] as const;
+const ALL_STATUSES = ['БАН', 'Нестабільні', 'Обережно', 'Рідко', 'Надійна', 'Без статусу'] as const;
 
 const INITIAL_RISKY_TEAMS: RiskyTeam[] = [
   { name: 'Liquid', game: 'CS', status: 'БАН', notes: '' },
@@ -311,6 +311,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg font-medium text-xs';
       case 'Надійна':
         return 'bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg font-medium text-xs';
+      case 'Без статусу':
+        return 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs';
       default:
         return 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs';
     }
@@ -329,6 +331,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return `bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] ${isActive ? 'ring-[#BFDBFE]' : ''} ${base}`;
       case 'Надійна':
         return `bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0] ${isActive ? 'ring-[#BBF7D0]' : ''} ${base}`;
+      case 'Без статусу':
+        return `bg-[#F9FAFB] text-[#6B7280] border border-[#E5E7EB] ${isActive ? 'ring-[#E5E7EB]' : ''} ${base}`;
       default:
         return `bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] ${isActive ? 'ring-[#E5E7EB]' : ''} ${base}`;
     }
@@ -539,7 +543,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     'Нестабільні': filteredTeams.filter(t => t.status === 'Нестабільні'),
     'Обережно': filteredTeams.filter(t => t.status === 'Обережно'),
     'Рідко': filteredTeams.filter(t => t.status === 'Рідко'),
-    'Надійна': filteredTeams.filter(t => t.status === 'Надійна')
+    'Надійна': filteredTeams.filter(t => t.status === 'Надійна'),
+    'Без статусу': filteredTeams.filter(t => t.status === 'Без статусу')
   };
 
   // Count statuses per game for filter badges
@@ -947,17 +952,26 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                             <td className="px-3 py-2 text-[#374151]">БАН</td>
                             <td className="px-3 py-2 text-[#374151]">Нестабільна форма</td>
                           </tr>
-                          <tr>
+                          <tr className="border-b border-[#F3F4F6]">
                             <td className="px-3 py-2 text-[#374151]">Team Spirit</td>
                             <td className="px-3 py-2 text-[#374151]">Дота</td>
                             <td className="px-3 py-2 text-[#374151]">Обережно</td>
                             <td className="px-3 py-2 text-[#374151]">Тільки на +1.5</td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 text-[#374151]">Nova Esports</td>
+                            <td className="px-3 py-2 text-[#374151]">CS</td>
+                            <td className="px-3 py-2 text-[#9CA3AF] italic">(порожньо)</td>
+                            <td className="px-3 py-2 text-[#374151]">Нова команда — статус ще не визначено</td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
                     <p className="text-xs text-[#9CA3AF] mt-2">
                       💡 Перший рядок може бути заголовком — він буде автоматично проігнорований.
+                    </p>
+                    <p className="text-xs text-[#6B7280] mt-1">
+                      ℹ️ Колонка <span className="font-semibold text-[#111827]">C (Статус)</span> — необов'язкова. Якщо залишити комірку порожньою, команда додається зі статусом <Badge className="bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs ml-1">Без статусу</Badge> і ви зможете виставити його вручну пізніше.
                     </p>
                   </div>
                 </div>
