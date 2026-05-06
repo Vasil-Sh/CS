@@ -6,7 +6,6 @@ import {
   ShieldAlert,
   Star,
   Activity,
-  Sparkles,
   ArrowUpRight,
   ArrowDownRight,
 } from 'lucide-react';
@@ -42,19 +41,29 @@ interface StoredStrategy {
   allowedBetTypes?: string[];
 }
 
+type GoalType = 'amount' | 'ladder' | 'roi' | 'winrate';
+
 interface StoredGoal {
   id: string;
   name: string;
-  type: 'amount' | 'ladder' | 'roi' | 'winrate';
+  type: GoalType;
   status: 'active' | 'completed' | 'failed';
   targetAmount?: number;
   currentAmount?: number;
+  startAmount?: number;
+  targetLadderAmount?: number;
+  minOdds?: number;
+  maxOdds?: number;
+  currentStep?: number;
+  totalSteps?: number;
+  currentBank?: number;
   targetROI?: number;
   currentROI?: number;
   targetWinRate?: number;
   currentWinRate?: number;
-  currentStep?: number;
-  totalSteps?: number;
+  betsPerDay?: number;
+  isPrimary?: boolean;
+  createdAt?: string;
 }
 
 // Shared card style — identical to Analytics KPI cards
@@ -106,6 +115,36 @@ const riskLabel = (risk: string) => {
   }
 };
 
+const goalTypeLabel = (type: GoalType): string => {
+  switch (type) {
+    case 'amount':
+      return 'Сума';
+    case 'ladder':
+      return 'Лесенка';
+    case 'roi':
+      return 'ROI';
+    case 'winrate':
+      return 'Win Rate';
+    default:
+      return '—';
+  }
+};
+
+const goalTypeBadgeClass = (type: GoalType): string => {
+  switch (type) {
+    case 'amount':
+      return 'bg-[#DBEAFE] text-[#1E40AF]';
+    case 'ladder':
+      return 'bg-[#EDE9FE] text-[#6D28D9]';
+    case 'roi':
+      return 'bg-[#D1FAE5] text-[#047857]';
+    case 'winrate':
+      return 'bg-[#FEF3C7] text-[#B45309]';
+    default:
+      return 'bg-[#F3F4F6] text-[#374151]';
+  }
+};
+
 const computeTodayRisk = (bets: Bet[]): { level: 'Low' | 'Medium' | 'High' | null; winRate: number | null } => {
   const now = Date.now();
   const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -146,7 +185,10 @@ const compute30dWinRate = (bets: Bet[]): { winRate: number | null; totalBets: nu
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal | null => {
   const active = goals.filter((g) => g.status === 'active');
   if (active.length === 0) return null;
-  const priority: Record<StoredGoal['type'], number> = { amount: 0, ladder: 1, roi: 2, winrate: 3 };
+  // Prefer explicitly primary goal first
+  const explicit = active.find((g) => g.isPrimary);
+  if (explicit) return explicit;
+  const priority: Record<GoalType, number> = { amount: 0, ladder: 1, roi: 2, winrate: 3 };
   return [...active].sort((a, b) => priority[a.type] - priority[b.type])[0];
 };
 
@@ -193,34 +235,40 @@ const computeStrategyRoi = (bets: Bet[], strategyName: string): { roi: number | 
   return { roi, bets: related.length };
 };
 
-const buildInsight = (args: {
-  activeStrategy: StoredStrategy | null;
-  strategyRoi: number | null;
-  todayRisk: 'Low' | 'Medium' | 'High' | null;
-  winRate30d: number | null;
-  primaryGoal: StoredGoal | null;
-}): string => {
-  const { activeStrategy, strategyRoi, todayRisk, winRate30d, primaryGoal } = args;
-
-  if (!activeStrategy) {
-    return 'Оберіть основну стратегію, щоб бачити персональні інсайти та відстежувати її ефективність.';
+/** Build the 4 key criteria lines for the current active goal, mirroring strategy "Ключові критерії". */
+const buildGoalCriteria = (goal: StoredGoal): string[] => {
+  switch (goal.type) {
+    case 'amount':
+      return [
+        `Цільова сума ${(goal.targetAmount ?? 0).toFixed(0)} ₴`,
+        `Накопичено ${(goal.currentAmount ?? 0).toFixed(0)} ₴`,
+        `Залишилось ${Math.max(0, (goal.targetAmount ?? 0) - (goal.currentAmount ?? 0)).toFixed(0)} ₴`,
+        goal.betsPerDay ? `До ${goal.betsPerDay} ставок на день` : 'Без обмежень по ставках',
+      ];
+    case 'ladder':
+      return [
+        `Початкова сума ${(goal.startAmount ?? 0).toFixed(0)} ₴`,
+        `Цільова сума ${(goal.targetLadderAmount ?? 0).toFixed(0)} ₴`,
+        `Коефіцієнт ${goal.minOdds ?? '—'} – ${goal.maxOdds ?? '—'}`,
+        `Крок ${goal.currentStep ?? 0} / ${goal.totalSteps ?? 0}`,
+      ];
+    case 'roi':
+      return [
+        `Цільовий ROI ${(goal.targetROI ?? 0).toFixed(1)}%`,
+        `Поточний ROI ${(goal.currentROI ?? 0).toFixed(1)}%`,
+        `Різниця ${((goal.currentROI ?? 0) - (goal.targetROI ?? 0)).toFixed(1)}%`,
+        goal.betsPerDay ? `До ${goal.betsPerDay} ставок на день` : 'Без обмежень по ставках',
+      ];
+    case 'winrate':
+      return [
+        `Цільовий Win Rate ${(goal.targetWinRate ?? 0).toFixed(1)}%`,
+        `Поточний Win Rate ${(goal.currentWinRate ?? 0).toFixed(1)}%`,
+        `Різниця ${((goal.currentWinRate ?? 0) - (goal.targetWinRate ?? 0)).toFixed(1)}%`,
+        goal.betsPerDay ? `До ${goal.betsPerDay} ставок на день` : 'Без обмежень по ставках',
+      ];
+    default:
+      return [];
   }
-  if (todayRisk === 'High') {
-    return 'За останній тиждень вінрейт нижчий за 35%. Зменшіть розмір ставки та перегляньте критерії стратегії.';
-  }
-  if (strategyRoi !== null && strategyRoi < -5) {
-    return `Поточна стратегія показує ROI ${strategyRoi.toFixed(1)}%. Розгляньте перехід на консервативніший підхід.`;
-  }
-  if (strategyRoi !== null && strategyRoi > 10) {
-    return `Стратегія "${activeStrategy.name}" показує відмінний ROI +${strategyRoi.toFixed(1)}%. Продовжуйте її використовувати!`;
-  }
-  if (winRate30d !== null && winRate30d >= 55) {
-    return `Вінрейт за 30 днів ${winRate30d.toFixed(0)}% — ви на правильному шляху. Фокусуйтесь на дисципліні.`;
-  }
-  if (primaryGoal) {
-    return `Ви прямуєте до цілі "${primaryGoal.name}". Кожна зважена ставка наближає вас до результату.`;
-  }
-  return 'Додайте ціль і встановіть основну стратегію — це допоможе системі формувати персональні поради.';
 };
 
 export default function StrategyOverviewHeader({ bets, onNavigateTab }: StrategyOverviewHeaderProps) {
@@ -247,15 +295,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
     };
   }, [bets, currentUser]);
 
-  const insight = buildInsight({
-    activeStrategy,
-    strategyRoi: strategyRoi.roi,
-    todayRisk: todayRisk.level,
-    winRate30d: winRate30d.winRate,
-    primaryGoal,
-  });
-
   const goalInfo = primaryGoal ? goalProgress(primaryGoal) : null;
+  const goalCriteria = primaryGoal ? buildGoalCriteria(primaryGoal) : [];
 
   return (
     <div className="space-y-6">
@@ -463,11 +504,11 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         </div>
       </div>
 
-      {/* ===== CURRENT STRATEGY + INSIGHT ROW ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* ===== CURRENT STRATEGY + CURRENT GOAL ROW — equal size ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
-          className="lg:col-span-2 bg-white border border-[#F3F4F6] rounded-3xl p-7"
+          className="bg-white border border-[#F3F4F6] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -494,7 +535,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           </div>
 
           {activeStrategy ? (
-            <div className="space-y-5">
+            <div className="space-y-5 flex-1">
               <div>
                 <p className="text-2xl font-bold text-[#111827] tracking-tight">
                   {activeStrategy.name}
@@ -563,7 +604,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
               )}
             </div>
           ) : (
-            <div className="py-10 text-center">
+            <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
               <p className="text-base text-[#4B5563] mb-4">
                 Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб
                 відстежувати результати.
@@ -580,29 +621,202 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           )}
         </div>
 
-        {/* Insight card — light style */}
+        {/* Current goal details card — mirrors strategy card structure */}
         <div
-          className="relative bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7] border border-[#FDE68A] rounded-3xl p-7 overflow-hidden"
+          className="bg-white border border-[#F3F4F6] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          {/* Decorative glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#F59E0B] opacity-20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#FBBF24] opacity-15 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] shadow-lg">
-                <Sparkles className="h-5 w-5 text-white" strokeWidth={2} />
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#111827]">
+                <Flag className="h-5 w-5 text-white" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Персональна порада</h3>
-                <p className="text-sm text-[#92400E] mt-0.5">На основі вашої статистики</p>
+                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Поточна ціль</h3>
+                <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
               </div>
             </div>
-            <p className="text-base text-[#111827] leading-relaxed font-medium">{insight}</p>
+            {primaryGoal && (
+              <Badge
+                className={`${goalTypeBadgeClass(
+                  primaryGoal.type,
+                )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
+              >
+                {goalTypeLabel(primaryGoal.type)}
+              </Badge>
+            )}
           </div>
+
+          {primaryGoal && goalInfo ? (
+            <div className="space-y-5 flex-1">
+              <div>
+                <p className="text-2xl font-bold text-[#111827] tracking-tight">
+                  {primaryGoal.name}
+                </p>
+                <p className="text-base text-[#4B5563] mt-2 leading-relaxed">
+                  Прогрес {goalInfo.percent.toFixed(1)}% — {goalInfo.label}
+                </p>
+                <div className="mt-3">
+                  <Progress value={Math.min(goalInfo.percent, 100)} className="h-2" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {primaryGoal.type === 'amount' && (
+                  <>
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                      <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль</p>
+                      <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
+                        {(primaryGoal.targetAmount ?? 0).toFixed(0)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
+                      <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Накоп.</p>
+                      <p className="text-2xl font-bold text-[#15803D] mt-1.5">
+                        {(primaryGoal.currentAmount ?? 0).toFixed(0)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
+                      <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Залиш.</p>
+                      <p className="text-2xl font-bold text-[#B45309] mt-1.5">
+                        {Math.max(0, (primaryGoal.targetAmount ?? 0) - (primaryGoal.currentAmount ?? 0)).toFixed(0)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
+                      <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
+                      <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
+                        {primaryGoal.betsPerDay || 'Усі'}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {primaryGoal.type === 'ladder' && (
+                  <>
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                      <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Старт</p>
+                      <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
+                        {(primaryGoal.startAmount ?? 0).toFixed(0)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                      <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль</p>
+                      <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
+                        {(primaryGoal.targetLadderAmount ?? 0).toFixed(0)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
+                      <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Коеф.</p>
+                      <p className="text-lg font-bold text-[#15803D] mt-1.5 truncate">
+                        {primaryGoal.minOdds ?? '—'} – {primaryGoal.maxOdds ?? '—'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
+                      <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Крок</p>
+                      <p className="text-lg font-bold text-[#B45309] mt-1.5 truncate">
+                        {primaryGoal.currentStep ?? 0} / {primaryGoal.totalSteps ?? 0}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {primaryGoal.type === 'roi' && (
+                  <>
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                      <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль ROI</p>
+                      <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
+                        {(primaryGoal.targetROI ?? 0).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
+                      <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Поточн.</p>
+                      <p className="text-2xl font-bold text-[#15803D] mt-1.5">
+                        {(primaryGoal.currentROI ?? 0).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
+                      <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Різниця</p>
+                      <p className="text-2xl font-bold text-[#B45309] mt-1.5">
+                        {((primaryGoal.currentROI ?? 0) - (primaryGoal.targetROI ?? 0)).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
+                      <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
+                      <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
+                        {primaryGoal.betsPerDay || 'Усі'}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {primaryGoal.type === 'winrate' && (
+                  <>
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
+                      <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль WR</p>
+                      <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
+                        {(primaryGoal.targetWinRate ?? 0).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
+                      <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Поточн.</p>
+                      <p className="text-2xl font-bold text-[#15803D] mt-1.5">
+                        {(primaryGoal.currentWinRate ?? 0).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
+                      <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Різниця</p>
+                      <p className="text-2xl font-bold text-[#B45309] mt-1.5">
+                        {((primaryGoal.currentWinRate ?? 0) - (primaryGoal.targetWinRate ?? 0)).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
+                      <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
+                      <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
+                        {primaryGoal.betsPerDay || 'Усі'}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {goalCriteria.length > 0 && (
+                <div className="pt-2">
+                  <p className="text-2xl font-bold text-[#111827] tracking-tight mb-4">
+                    Ключові критерії
+                  </p>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {goalCriteria.map((c, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#6366F1] hover:shadow-md transition-all duration-200"
+                      >
+                        <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
+                          {idx + 1}
+                        </span>
+                        <span className="text-sm text-[#111827] font-semibold leading-snug">{c}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
+              <p className="text-base text-[#4B5563] mb-4">
+                У вас ще немає активної цілі. Створіть її у вкладці &quot;Цілі&quot;, щоб відстежувати прогрес.
+              </p>
+              <button
+                type="button"
+                onClick={() => onNavigateTab('goals')}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-base font-semibold transition-colors"
+              >
+                <Flag className="h-4 w-4" strokeWidth={2} />
+                Створити ціль
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
