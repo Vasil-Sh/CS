@@ -361,10 +361,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`text-center ${cellPadding}`}
             style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
           >
-            <div className="flex items-center justify-center gap-1 mb-0.5">
-              <DollarSign className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
-              <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider">Сума</p>
-            </div>
+            <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-0.5">Сума</p>
             <p className={`${cellValueFont} font-bold text-[#111827]`}>
               {currencySymbol}{displayAmount}
             </p>
@@ -373,10 +370,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`text-center ${cellPadding}`}
             style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
           >
-            <div className="flex items-center justify-center gap-1 mb-0.5">
-              <Percent className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
-              <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider">Коефіцієнт</p>
-            </div>
+            <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-0.5">Коефіцієнт</p>
             <p className={`${cellValueFont} font-bold text-[#111827]`}>
               {bet.odds.toFixed(2)}
             </p>
