@@ -460,7 +460,7 @@ export default function GoalsManager() {
     <div className="space-y-6">
       {/* Unified centered pill bar: info + tabs + action buttons */}
       <div className="space-y-6">
-        <div className="flex justify-center">
+        <div className="flex justify-center relative z-50">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {/* Info tooltip — blue */}
             <TooltipProvider delayDuration={0}>
@@ -470,7 +470,7 @@ export default function GoalsManager() {
                     <Info className="h-4 w-4" strokeWidth={2} />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="max-w-xs rounded-2xl px-4 py-3 bg-white border border-[#E5E7EB] shadow-lg">
+                <TooltipContent side="bottom" align="start" className="max-w-xs rounded-2xl px-4 py-3 bg-white border border-[#E5E7EB] shadow-lg z-[9999]">
                   <div className="space-y-1.5">
                     <p className="text-sm font-semibold text-[#111827]">Як працювати з цілями</p>
                     <p className="text-sm text-[#6B7280]">1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"</p>
