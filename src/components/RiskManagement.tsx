@@ -1190,7 +1190,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* CS Teams */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#E5E7EB] rounded-2xl bg-white "
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1225,7 +1225,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
           {/* Dota Teams */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#E5E7EB] rounded-2xl bg-white "
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1262,7 +1262,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         {/* Detailed Risk Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#E5E7EB] rounded-2xl bg-white "
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1359,7 +1359,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </Card>
 
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#E5E7EB] rounded-2xl bg-white "
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
