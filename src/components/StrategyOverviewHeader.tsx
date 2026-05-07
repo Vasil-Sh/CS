@@ -306,7 +306,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         <button
           type="button"
           onClick={() => onNavigateTab('strategies')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -318,14 +318,14 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           {activeStrategy ? (
             <>
               <div
-                className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate flex items-center gap-2"
+                className="text-2xl font-bold text-[#111827] tracking-tight mb-2 flex items-center gap-2"
                 title={activeStrategy.name}
               >
                 <Star
                   className="h-6 w-6 fill-[#111827] text-[#111827] flex-shrink-0"
                   strokeWidth={1.5}
                 />
-                <span className="truncate">{activeStrategy.name}</span>
+                <span className="break-words leading-tight">{activeStrategy.name}</span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge
@@ -370,7 +370,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         <button
           type="button"
           onClick={() => onNavigateTab('goals')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -411,7 +411,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         <button
           type="button"
           onClick={() => onNavigateTab('risks')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
+          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -461,7 +461,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
 
         {/* 4. Вінрейт 30 днів */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative overflow-hidden"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
