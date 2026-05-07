@@ -706,7 +706,7 @@ export default function StrategyOverview() {
       <div className="space-y-6">
         {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 bg-[#F4F4F5] border border-[#E5E7EB] p-1.5 rounded-2xl flex-wrap justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;
@@ -715,29 +715,29 @@ export default function StrategyOverview() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    relative px-7 py-3.5 text-base rounded-xl transition-all duration-200
+                    relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out
                     flex items-center gap-2
                     ${isActive
-                      ? 'bg-white text-[#111827] font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
-                      : 'bg-transparent text-[#6B7280] hover:text-[#111827] font-medium'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]'
+                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] font-light'
                     }
                   `}
                 >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                  <Icon className="h-4 w-4" strokeWidth={1.5} />
                   {tab.label}
                 </button>
               );
             })}
 
             {/* Divider */}
-            <div className="w-px h-7 bg-[#E5E7EB] mx-0.5" />
+            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
 
             {/* Create strategy button — accent blue pill inside the bar */}
             <button
               onClick={() => setActiveTab('create')}
-              className="flex items-center gap-2 px-7 py-3.5 text-base rounded-xl font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
             >
-              <Plus className="h-[18px] w-[18px]" strokeWidth={2} />
+              <Plus className="h-4 w-4" strokeWidth={2} />
               Створити нову
             </button>
           </div>
