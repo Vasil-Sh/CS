@@ -5,6 +5,11 @@ node_modules/
 
 # Production builds
 /build
+/dist
+
+# Atoms.dev / MGX config
+.mgx/
+.atoms/
 
 # Environment variables
 .env
@@ -76,7 +81,6 @@ out
 
 # Gatsby files
 .cache/
-# public
 
 # Storybook build outputs
 .out
