@@ -1831,35 +1831,31 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                 </div>
                 <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-6 space-y-3">
                 {formData.stake && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
                   <>
-                    {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                      <div className="p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#6B7280]">Загальний коефіцієнт:</span>
-                          <Badge className="bg-[#111827] text-white border-0 rounded-full text-base px-4 py-1 font-semibold hover:bg-[#111827]">
-                            {totalExpressOdds.toFixed(2)}
-                          </Badge>
+                    {/* Top summary row */}
+                    <div className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
+                      {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-[#6B7280]">Коеф:</span>
+                          <span className="text-base font-bold text-[#111827]">{totalExpressOdds.toFixed(2)}</span>
                         </div>
-                      </div>
-                    )}
-                    
-                    <div className="p-4 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#374151]">Потенційний прибуток:</span>
-                        <span className="font-semibold text-[#16A34A] text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
+                      )}
+                      <div className={`flex items-center gap-2 ${formData.betCategory !== 'Експрес' || expressEvents.length === 0 ? 'w-full justify-between' : ''}`}>
+                        <span className="text-sm text-[#6B7280]">Прибуток:</span>
+                        <span className="text-lg font-bold text-[#16A34A]">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
                       </div>
                     </div>
 
                     {/* Overconfidence Warning */}
                     {overconfidenceWarning && (
-                      <div className="p-4 rounded-2xl border border-[#FCA5A5] bg-[#FEF2F2]">
+                      <div className="p-3.5 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA]">
                         <div className="flex items-start gap-2.5">
                           <AlertTriangle className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                           <div>
-                            <p className="text-sm font-medium text-[#991B1B] mb-1">⚠️ Можливий Overconfidence</p>
-                            <p className="text-xs text-[#B91C1C] leading-relaxed">
+                            <p className="text-sm font-medium text-[#111827] mb-0.5">Можливий Overconfidence</p>
+                            <p className="text-xs text-[#6B7280] leading-relaxed">
                               {overconfidenceWarning}
                             </p>
                           </div>
@@ -1869,41 +1865,37 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
                     {/* Value Bet Analysis */}
                     {hasConfidence && valueBetAnalysis && (
-                      <div className={`p-5 rounded-2xl border ${
-                        valueBetAnalysis.isValueBet 
-                          ? 'bg-[#EFF6FF] border-[#BFDBFE]' 
-                          : 'bg-[#FFF7ED] border-[#FED7AA]'
-                      }`}>
+                      <div className="p-4 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA]">
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
-                            <TrendingUp className={`h-5 w-5 ${valueBetAnalysis.isValueBet ? 'text-[#2563EB]' : 'text-[#EA580C]'}`} strokeWidth={1.5} />
-                            <span className={`text-base font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                            <TrendingUp className="h-4 w-4 text-[#111827]" strokeWidth={1.5} />
+                            <span className="text-sm font-semibold text-[#111827]">
                               {valueBetAnalysis.isValueBet ? '💎 Value Bet' : '⚠️ Не Value Bet'}
                             </span>
                           </div>
-                          <p className={`text-sm ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                          <p className="text-xs text-[#6B7280]">
                             {valueBetAnalysis.message}
                           </p>
 
-                          <div className="grid grid-cols-2 gap-3 mt-3">
-                            <div className="p-3 rounded-xl bg-white/70">
-                              <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">Букмекер</p>
-                              <p className={`text-lg font-bold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2.5 rounded-xl bg-white border border-[#F3F4F6]">
+                              <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider mb-0.5">Букмекер</p>
+                              <p className="text-base font-bold text-[#111827]">
                                 {valueBetAnalysis.bookmakerProb}%
                               </p>
                             </div>
-                            <div className="p-3 rounded-xl bg-white/70">
-                              <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">Ваша оцінка</p>
-                              <p className={`text-lg font-bold ${valueBetAnalysis.isValueBet ? 'text-[#1E40AF]' : 'text-[#9A3412]'}`}>
+                            <div className="p-2.5 rounded-xl bg-white border border-[#F3F4F6]">
+                              <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider mb-0.5">Ваша оцінка</p>
+                              <p className="text-base font-bold text-[#111827]">
                                 {valueBetAnalysis.userProb}%
                               </p>
                             </div>
                           </div>
 
-                          <div className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium ${
+                          <div className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium ${
                             valueBetAnalysis.isValueBet 
-                              ? 'bg-[#DBEAFE] text-[#1E40AF]' 
-                              : 'bg-[#FFEDD5] text-[#9A3412]'
+                              ? 'bg-[#F0FDF4] text-[#16A34A]' 
+                              : 'bg-[#FEF2F2] text-[#EF4444]'
                           }`}>
                             {valueBetAnalysis.isValueBet ? '↑' : '↓'} Різниця: {valueBetAnalysis.diff}%
                           </div>
@@ -1913,18 +1905,10 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     
                     {/* EV Display */}
                     {hasConfidence && (
-                      <div className={`p-5 rounded-2xl border ${
-                        evVerdict.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
-                        evVerdict.color === 'yellow' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
-                        'bg-[#FEF2F2] border-[#FECACA]'
-                      }`}>
-                        <div className="space-y-2.5">
+                      <div className="p-4 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA]">
+                        <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className={`text-base font-semibold ${
-                              evVerdict.color === 'green' ? 'text-[#166534]' :
-                              evVerdict.color === 'yellow' ? 'text-[#92400E]' :
-                              'text-[#991B1B]'
-                            }`}>
+                            <span className="text-sm font-semibold text-[#111827]">
                               {evVerdict.icon} {evVerdict.text}
                             </span>
                             <button
@@ -1932,33 +1916,25 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                               onClick={() => setShowEVDetails(!showEVDetails)}
                               className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/5 transition-colors"
                             >
-                              {showEVDetails ? <ChevronUp className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />}
+                              {showEVDetails ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />}
                             </button>
                           </div>
-                          <p className={`text-sm ${
-                            evVerdict.color === 'green' ? 'text-[#15803D]' :
-                            evVerdict.color === 'yellow' ? 'text-[#B45309]' :
-                            'text-[#B91C1C]'
-                          }`}>
+                          <p className="text-xs text-[#6B7280]">
                             {evVerdict.description}
                           </p>
                           
                           {showEVDetails && (
-                            <div className={`mt-3 pt-3 border-t ${
-                              evVerdict.color === 'green' ? 'border-[#BBF7D0]' :
-                              evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
-                              'border-[#FECACA]'
-                            }`}>
-                              <div className="space-y-2.5">
+                            <div className="mt-2 pt-2 border-t border-[#E5E7EB]">
+                              <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                  <span className="text-sm text-[#6B7280]">Expected Value:</span>
-                                  <Badge className={`rounded-full border-0 text-sm px-3 py-1 font-medium ${
-                                    isValuePositive ? 'bg-[#22C55E] text-white hover:bg-[#22C55E]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
+                                  <span className="text-xs text-[#6B7280]">Expected Value:</span>
+                                  <Badge className={`rounded-full border-0 text-xs px-2.5 py-0.5 font-medium ${
+                                    isValuePositive ? 'bg-[#111827] text-white hover:bg-[#111827]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
                                   }`}>
                                     {isValuePositive ? '+' : ''}{expectedValue}%
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-[#6B7280]">
+                                <p className="text-xs text-[#9CA3AF]">
                                   EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
                                 </p>
                               </div>
@@ -1970,24 +1946,11 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
                     {/* Kelly Criterion */}
                     {hasConfidence && kellyData && (
-                      <div className={`p-5 rounded-2xl border ${
-                        kellyData.isNegative 
-                          ? 'bg-[#FEF2F2] border-[#FECACA]' 
-                          : kellyData.riskLevel === 'low' 
-                            ? 'bg-[#F0FDF4] border-[#BBF7D0]' 
-                            : kellyData.riskLevel === 'medium' 
-                              ? 'bg-[#FFFBEB] border-[#FDE68A]' 
-                              : 'bg-[#FFF7ED] border-[#FED7AA]'
-                      }`}>
+                      <div className="p-4 rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA]">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <DollarSign className={`h-5 w-5 ${
-                                kellyData.isNegative ? 'text-[#EF4444]' : 'text-[#16A34A]'
-                              }`} strokeWidth={1.5} />
-                              <span className={`text-base font-semibold ${
-                                kellyData.isNegative ? 'text-[#991B1B]' : 'text-[#166534]'
-                              }`}>
+                              <span className="text-sm font-semibold text-[#111827]">
                                 📊 Критерій Келлі
                               </span>
                             </div>
@@ -1996,24 +1959,18 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                               onClick={() => setShowKellyDetails(!showKellyDetails)}
                               className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-black/5 transition-colors"
                             >
-                              {showKellyDetails ? <ChevronUp className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />}
+                              {showKellyDetails ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />}
                             </button>
                           </div>
                           
-                          <p className={`text-sm ${
-                            kellyData.isNegative ? 'text-[#B91C1C]' : 
-                            kellyData.riskLevel === 'low' ? 'text-[#15803D]' : 
-                            kellyData.riskLevel === 'medium' ? 'text-[#B45309]' : 'text-[#9A3412]'
-                          }`}>
+                          <p className="text-xs text-[#6B7280]">
                             {kellyData.recommendation}
                           </p>
 
                           {kellyData.isCapped && !kellyData.isNegative && (
-                            <div className="p-2.5 bg-[#FEF3C7] rounded-xl border border-[#FDE68A]">
-                              <p className="text-xs text-[#92400E] flex items-center gap-1.5">
-                                <Shield className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
-                                Ліміт {maxStakePercent}% банку захищає від надмірного ризику
-                              </p>
+                            <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                              <Shield className="h-3.5 w-3.5 flex-shrink-0 text-[#9CA3AF]" strokeWidth={1.5} />
+                              <span>Ліміт {maxStakePercent}% банку захищає від надмірного ризику</span>
                             </div>
                           )}
 
@@ -2021,61 +1978,49 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                             <button
                               type="button"
                               onClick={() => applyKellyAmount(kellyData.recommendedAmount)}
-                              className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
-                                kellyData.riskLevel === 'low' 
-                                  ? 'bg-[#22C55E]/10 text-[#16A34A] hover:bg-[#22C55E]/20 border border-[#BBF7D0]' 
-                                  : kellyData.riskLevel === 'medium'
-                                    ? 'bg-[#F59E0B]/10 text-[#D97706] hover:bg-[#F59E0B]/20 border border-[#FDE68A]'
-                                    : 'bg-[#EA580C]/10 text-[#EA580C] hover:bg-[#EA580C]/20 border border-[#FED7AA]'
-                              }`}
+                              className="w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all bg-[#111827] text-white hover:bg-[#1F2937]"
                             >
                               Застосувати {kellyData.recommendedAmount} ₴ ({kellyData.recommendedBankrollPercent}% банку)
                             </button>
                           )}
 
                           {showKellyDetails && (
-                            <div className={`mt-3 pt-3 border-t space-y-3 ${
-                              kellyData.isNegative ? 'border-[#FECACA]' : 
-                              kellyData.riskLevel === 'low' ? 'border-[#BBF7D0]' : 
-                              kellyData.riskLevel === 'medium' ? 'border-[#FDE68A]' : 'border-[#FED7AA]'
-                            }`}>
+                            <div className="mt-2 pt-3 border-t border-[#E5E7EB] space-y-2.5">
                               <div className="flex justify-between items-center">
-                                <span className="text-sm text-[#6B7280]">Поточний банк:</span>
-                                <span className="text-sm font-semibold text-[#111827]">{kellyData.currentBankroll} ₴</span>
+                                <span className="text-xs text-[#6B7280]">Поточний банк:</span>
+                                <span className="text-xs font-semibold text-[#111827]">{kellyData.currentBankroll} ₴</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-sm text-[#6B7280]">Макс. ставка ({maxStakePercent}%):</span>
-                                <span className="text-sm font-semibold text-[#111827]">{kellyData.maxAllowedAmount} ₴</span>
+                                <span className="text-xs text-[#6B7280]">Макс. ставка ({maxStakePercent}%):</span>
+                                <span className="text-xs font-semibold text-[#111827]">{kellyData.maxAllowedAmount} ₴</span>
                               </div>
                               {!kellyData.isNegative && (
                                 <>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">Повний Келлі ({kellyData.fullKelly}%):</span>
-                                    <span className="text-sm font-semibold text-[#111827]">{kellyData.fullKellyAmount} ₴</span>
+                                    <span className="text-xs text-[#6B7280]">Повний Келлі ({kellyData.fullKelly}%):</span>
+                                    <span className="text-xs font-semibold text-[#111827]">{kellyData.fullKellyAmount} ₴</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">½ Келлі ({kellyData.halfKelly}%):</span>
-                                    <Badge className="bg-[#22C55E] text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-[#22C55E]">
-                                      {kellyData.halfKellyAmount} ₴
-                                    </Badge>
+                                    <span className="text-xs text-[#6B7280]">½ Келлі ({kellyData.halfKelly}%):</span>
+                                    <span className="text-xs font-bold text-[#111827]">{kellyData.halfKellyAmount} ₴</span>
                                   </div>
                                 </>
                               )}
 
                               {/* Max Stake % setting */}
-                              <div className="pt-3 border-t border-dashed border-[#E5E7EB]">
+                              <div className="pt-2.5 border-t border-dashed border-[#E5E7EB]">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-[#6B7280] uppercase tracking-wider font-medium">Max Stake %</span>
-                                  <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-medium">Max Stake %</span>
+                                  <div className="flex items-center gap-1.5">
                                     {[3, 5, 7, 10].map(pct => (
                                       <button
                                         key={pct}
                                         type="button"
                                         onClick={() => setMaxStakePercent(pct)}
-                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                                           maxStakePercent === pct
                                             ? 'bg-[#111827] text-white'
-                                            : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+                                            : 'bg-white text-[#6B7280] hover:bg-[#E5E7EB] border border-[#E5E7EB]'
                                         }`}
                                       >
                                         {pct}%
@@ -2085,7 +2030,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                                 </div>
                               </div>
 
-                              <p className="text-xs text-[#9CA3AF] leading-relaxed mt-2">
+                              <p className="text-[11px] text-[#9CA3AF] leading-relaxed">
                                 Критерій Келлі — математична формула для оптимального розміру ставки. 
                                 Ліміт Max Stake % захищає від ситуацій, коли Келлі рекомендує занадто велику частку банку.
                               </p>
@@ -2096,19 +2041,18 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     )}
 
                     {!hasConfidence && (
-                      <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                        <p className="text-sm text-[#9CA3AF] flex items-center gap-2">
-                          <Info className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
+                      <div className="p-3.5 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
+                        <p className="text-xs text-[#9CA3AF] flex items-center gap-2">
+                          <Info className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
                           Вкажіть впевненість для розрахунку Value Bet, EV та рекомендації Келлі
                         </p>
                       </div>
                     )}
                     
-                    <div className="p-5 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#374151]">Макс. програш:</span>
-                        <span className="font-semibold text-[#EF4444] text-xl">-{formData.stake} {getCurrencySymbol()}</span>
-                      </div>
+                    {/* Max loss - bottom row */}
+                    <div className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6]">
+                      <span className="text-sm text-[#6B7280]">Макс. програш:</span>
+                      <span className="text-lg font-bold text-[#EF4444]">-{formData.stake} {getCurrencySymbol()}</span>
                     </div>
                   </>
                 ) : (
