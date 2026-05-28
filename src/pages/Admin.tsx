@@ -29,10 +29,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Zap,
-  TrendingDown,
-  DollarSign,
-  Wallet
+  Zap
 } from 'lucide-react';
 import {
   Table,
@@ -428,45 +425,7 @@ export default function Admin() {
   const adminUsers = users.filter(u => u.isAdmin).length;
   const expiringUsers = users.filter(u => u.isActive && u.daysUntilExpiry !== undefined && u.daysUntilExpiry <= 3 && u.daysUntilExpiry >= 0);
 
-  /**
-   * MRR (Monthly Recurring Revenue) — sum of monthly prices of currently active subscribers
-   */
-  const mrr = useMemo(() => {
-    return users
-      .filter(u => u.isActive)
-      .reduce((sum, u) => {
-        const price = parseFloat(cleanPrice(u.priceMonth)) || 0;
-        return sum + price;
-      }, 0);
-  }, [users]);
 
-  /**
-   * Churn Rate — percentage of users whose subscriptions expired and were not renewed.
-   * Simple approximation: inactive / total * 100
-   */
-  const churnRate = useMemo(() => {
-    if (users.length === 0) return 0;
-    return (inactiveUsers / users.length) * 100;
-  }, [users.length, inactiveUsers]);
-
-  /**
-   * LTV (Lifetime Value) — average total revenue per user across their subscription period.
-   * Approximation: for each user sum = price * months_between(startDate, endDate), then average.
-   */
-  const ltv = useMemo(() => {
-    if (users.length === 0) return 0;
-    const totals = users.map(u => {
-      const price = parseFloat(cleanPrice(u.priceMonth)) || 0;
-      const start = parseDate(u.startDate);
-      const end = parseDate(u.endDate);
-      if (!start || !end) return price; // fallback: one month
-      const diffMs = end.getTime() - start.getTime();
-      const months = Math.max(1, diffMs / (1000 * 60 * 60 * 24 * 30));
-      return price * months;
-    });
-    const sum = totals.reduce((a, b) => a + b, 0);
-    return sum / users.length;
-  }, [users]);
 
   // ==== Filtered & sorted users for table ====
   const displayedUsers = useMemo(() => {
@@ -587,9 +546,7 @@ export default function Admin() {
     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   })();
 
-  const formatMoney = (n: number) => {
-    return new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 0 }).format(Math.round(n));
-  };
+
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
@@ -799,70 +756,7 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* ===== BUSINESS METRICS ===== */}
-        <div>
-          <h2 className="text-lg font-semibold text-[#111827] mb-4">Бізнес-метрики</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            {/* MRR */}
-            <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Wallet className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
-                <span className="text-lg font-semibold text-[#111827]">MRR</span>
-              </div>
-              <div className="text-4xl font-bold text-[#3B82F6] tracking-tight mb-2">
-                {formatMoney(mrr)} <span className="text-2xl text-[#6B7280]">грн</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Щомісячний регулярний дохід</span>
-              </div>
-            </div>
-
-            {/* LTV */}
-            <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <DollarSign className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
-                <span className="text-lg font-semibold text-[#111827]">LTV</span>
-              </div>
-              <div className="text-4xl font-bold text-[#22C55E] tracking-tight mb-2">
-                {formatMoney(ltv)} <span className="text-2xl text-[#6B7280]">грн</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Середній дохід з користувача</span>
-              </div>
-            </div>
-
-            {/* Churn Rate */}
-            <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingDown className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
-                <span className="text-lg font-semibold text-[#111827]">Churn Rate</span>
-              </div>
-              <div className="text-4xl font-bold text-[#EF4444] tracking-tight mb-2">
-                {churnRate.toFixed(1)}<span className="text-2xl text-[#6B7280]">%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Відтік користувачів</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
 
         {/* Users Table */}
         <div 
@@ -887,10 +781,10 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* ===== TOOLBAR: filters + search ===== */}
-            <div className="flex flex-wrap items-center gap-3 mt-5">
+            {/* ===== TOOLBAR: filters + search + sort — single row ===== */}
+            <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB] p-3">
               {/* Status filter tabs */}
-              <div className="inline-flex rounded-xl bg-[#F3F4F6] p-1 border border-[#E5E7EB]">
+              <div className="inline-flex rounded-xl bg-white p-1 border border-[#E5E7EB] shadow-sm">
                 {[
                   { key: 'all' as StatusFilter, label: 'Всі', count: users.length },
                   { key: 'active' as StatusFilter, label: 'Активні', count: activeUsers },
@@ -901,12 +795,12 @@ export default function Admin() {
                     onClick={() => setStatusFilter(tab.key)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       statusFilter === tab.key
-                        ? 'bg-white text-[#111827] shadow-sm'
-                        : 'text-[#6B7280] hover:text-[#374151]'
+                        ? 'bg-[#111827] text-white shadow-sm'
+                        : 'text-[#6B7280] hover:text-[#374151] hover:bg-[#F3F4F6]'
                     }`}
                   >
                     {tab.label}
-                    <span className={`ml-2 text-xs ${statusFilter === tab.key ? 'text-[#3B82F6]' : 'text-[#9CA3AF]'}`}>
+                    <span className={`ml-2 text-xs font-semibold ${statusFilter === tab.key ? 'text-[#93C5FD]' : 'text-[#9CA3AF]'}`}>
                       {tab.count}
                     </span>
                   </button>
@@ -914,13 +808,13 @@ export default function Admin() {
               </div>
 
               {/* Search */}
-              <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <div className="relative flex-1 min-w-[180px] max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Пошук за Telegram або username"
-                  className="pl-9 rounded-xl border-[#E5E7EB] h-10"
+                  className="pl-9 rounded-xl border-[#E5E7EB] bg-white h-10 shadow-sm"
                 />
                 {searchQuery && (
                   <button
@@ -932,29 +826,29 @@ export default function Admin() {
                 )}
               </div>
 
-              {/* Sort */}
+              {/* Sort dropdown */}
               <Select
                 value={sortDirection ?? 'none'}
                 onValueChange={(value) =>
                   setSortDirection(value === 'none' ? null : (value as SortDirection))
                 }
               >
-                <SelectTrigger className="rounded-xl border-[#E5E7EB] font-medium h-10 px-4 text-sm text-[#374151] w-auto min-w-[260px]">
+                <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white font-medium h-10 px-4 text-sm text-[#374151] w-auto min-w-[200px] shadow-sm">
                   <div className="flex items-center gap-2">
                     {sortDirection === 'asc' ? (
-                      <ArrowUp className="h-4 w-4" strokeWidth={1.5} />
+                      <ArrowUp className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                     ) : sortDirection === 'desc' ? (
-                      <ArrowDown className="h-4 w-4" strokeWidth={1.5} />
+                      <ArrowDown className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                     ) : (
-                      <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
+                      <ArrowUpDown className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
                     )}
                     <SelectValue placeholder="Сортувати за датою" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="none">Сортувати за датою</SelectItem>
-                  <SelectItem value="asc">Скоро закінчаться</SelectItem>
-                  <SelectItem value="desc">Пізніше закінчаться</SelectItem>
+                <SelectContent className="rounded-xl border-[#E5E7EB] shadow-lg">
+                  <SelectItem value="none" className="rounded-lg">Без сортування</SelectItem>
+                  <SelectItem value="asc" className="rounded-lg">Скоро закінчаться ↑</SelectItem>
+                  <SelectItem value="desc" className="rounded-lg">Пізніше закінчаться ↓</SelectItem>
                 </SelectContent>
               </Select>
             </div>

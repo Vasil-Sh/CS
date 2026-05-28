@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { 
   Calendar, 
@@ -39,7 +38,8 @@ import {
   CircleCheck,
   Square,
   Layers,
-  X
+  X,
+  ChevronDown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -48,6 +48,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import AIRecommendationModal from '@/components/AIRecommendationModal';
 import CommentModal from '@/components/CommentModal';
 import { openRouterService, type AIRecommendation } from '@/lib/openRouterService';
@@ -1263,24 +1269,24 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== SINGLE-ROW FILTER BAR — Analytics-style container ===== */}
+          {/* ===== PILL FILTER BAR — Analytics-style ===== */}
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-4 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-wrap justify-between">
               {/* Refresh button */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <button
                     onClick={refreshMatches}
                     disabled={isLoading}
-                    className="rounded-[20px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 transition-all duration-300 text-sm"
+                    className="rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 transition-all duration-300 text-sm inline-flex items-center gap-2 disabled:opacity-50"
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
                     ) : (
                       <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
                     )}
-                    <span className="ml-2">Оновити</span>
-                  </Button>
+                    Оновити
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
                   <p className="text-sm">Оновити матчі з API</p>
@@ -1288,114 +1294,132 @@ export default function Matches() {
               </Tooltip>
 
               {/* Search */}
-              <div className="relative">
+              <div className="relative flex-1 min-w-[140px]">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
                 <Input
                   placeholder="Пошук..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-3 rounded-[20px] border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-11 w-[160px] text-sm bg-white/80"
+                  className="pl-10 pr-3 rounded-[24px] border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-11 w-full text-sm bg-white/80"
                 />
               </div>
 
-              {/* Divider */}
-              <div className="w-px h-8 bg-[#D1D5DB]/60" />
 
-              {/* Status filter */}
-              <Select value={filterStatus} onValueChange={(value: 'all' | 'upcoming' | 'live' | 'finished') => setFilterStatus(value)}>
-                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[140px] text-sm ${
-                  filterStatus !== 'all' 
-                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
-                }`}>
-                  <SelectValue placeholder="Статус" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Всі статуси</SelectItem>
-                  <SelectItem value="live">🔴 LIVE</SelectItem>
-                  <SelectItem value="upcoming">🕐 Очікуються</SelectItem>
-                  <SelectItem value="finished">✅ Завершені</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Status filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    filterStatus !== 'all'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                      : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
+                  }`}>
+                    <Radio className="h-4 w-4" strokeWidth={1.5} />
+                    {filterStatus === 'all' ? 'Статус' : filterStatus === 'live' ? '🔴 LIVE' : filterStatus === 'upcoming' ? 'Очікуються' : 'Завершені'}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1">
+                  <DropdownMenuItem onClick={() => setFilterStatus('all')} className="rounded-lg">Всі статуси</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('live')} className="rounded-lg">🔴 LIVE</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('upcoming')} className="rounded-lg">🕐 Очікуються</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('finished')} className="rounded-lg">✅ Завершені</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {/* Tier filter */}
-              <Select value={filterTier} onValueChange={(value: 'all' | 'tier1' | 'tier2' | 'tier3') => setFilterTier(value)}>
-                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
-                  filterTier !== 'all' 
-                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
-                }`}>
-                  <SelectValue placeholder="Tier" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Всі Tier</SelectItem>
-                  <SelectItem value="tier1">Tier 1</SelectItem>
-                  <SelectItem value="tier2">Tier 2</SelectItem>
-                  <SelectItem value="tier3">Tier 3</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Tier filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    filterTier !== 'all'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                      : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
+                  }`}>
+                    <Trophy className="h-4 w-4" strokeWidth={1.5} />
+                    {filterTier === 'all' ? 'Tier' : filterTier === 'tier1' ? 'Tier 1' : filterTier === 'tier2' ? 'Tier 2' : 'Tier 3'}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1">
+                  <DropdownMenuItem onClick={() => setFilterTier('all')} className="rounded-lg">Всі Tier</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier('tier1')} className="rounded-lg">Tier 1</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier('tier2')} className="rounded-lg">Tier 2</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier('tier3')} className="rounded-lg">Tier 3</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {/* Format filter */}
-              <Select value={filterMatchType} onValueChange={(value: 'all' | 'Bo1' | 'Bo3' | 'Bo5') => setFilterMatchType(value)}>
-                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
-                  filterMatchType !== 'all' 
-                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
-                }`}>
-                  <SelectValue placeholder="Формат" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Формат</SelectItem>
-                  <SelectItem value="Bo1">Bo1</SelectItem>
-                  <SelectItem value="Bo3">Bo3</SelectItem>
-                  <SelectItem value="Bo5">Bo5</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Format filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    filterMatchType !== 'all'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                      : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
+                  }`}>
+                    <Layers className="h-4 w-4" strokeWidth={1.5} />
+                    {filterMatchType === 'all' ? 'Формат' : filterMatchType}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1">
+                  <DropdownMenuItem onClick={() => setFilterMatchType('all')} className="rounded-lg">Всі формати</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType('Bo1')} className="rounded-lg">Bo1</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType('Bo3')} className="rounded-lg">Bo3</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType('Bo5')} className="rounded-lg">Bo5</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {/* Confidence filter */}
-              <Select value={filterConfidence} onValueChange={(value: 'all' | 'high' | 'medium' | 'low') => setFilterConfidence(value)}>
-                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[150px] text-sm ${
-                  filterConfidence !== 'all' 
-                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
-                }`}>
-                  <SelectValue placeholder="Впевненість" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Впевненість</SelectItem>
-                  <SelectItem value="high">Висока (&gt;80%)</SelectItem>
-                  <SelectItem value="medium">Середня (60-80%)</SelectItem>
-                  <SelectItem value="low">Низька (&lt;60%)</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Confidence filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    filterConfidence !== 'all'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                      : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
+                  }`}>
+                    <Brain className="h-4 w-4" strokeWidth={1.5} />
+                    {filterConfidence === 'all' ? 'Впевненість' : filterConfidence === 'high' ? 'Висока' : filterConfidence === 'medium' ? 'Середня' : 'Низька'}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1">
+                  <DropdownMenuItem onClick={() => setFilterConfidence('all')} className="rounded-lg">Всі рівні</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterConfidence('high')} className="rounded-lg">Висока (&gt;80%)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterConfidence('medium')} className="rounded-lg">Середня (60-80%)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterConfidence('low')} className="rounded-lg">Низька (&lt;60%)</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {/* Risk filter */}
-              <Select value={filterRisk} onValueChange={(value: 'all' | 'safe' | 'moderate' | 'high') => setFilterRisk(value)}>
-                <SelectTrigger className={`rounded-[20px] border transition-all duration-300 h-11 w-[120px] text-sm ${
-                  filterRisk !== 'all' 
-                    ? 'bg-white border-[#111827] text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'border-[#E5E7EB] hover:border-[#D1D5DB] bg-white/80 text-[#6B7280]'
-                }`}>
-                  <SelectValue placeholder="Ризик" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Ризик</SelectItem>
-                  <SelectItem value="safe">Низький</SelectItem>
-                  <SelectItem value="moderate">Помірний</SelectItem>
-                  <SelectItem value="high">Високий</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Risk filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    filterRisk !== 'all'
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                      : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
+                  }`}>
+                    <Shield className="h-4 w-4" strokeWidth={1.5} />
+                    {filterRisk === 'all' ? 'Ризик' : filterRisk === 'safe' ? 'Низький' : filterRisk === 'moderate' ? 'Помірний' : 'Високий'}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1">
+                  <DropdownMenuItem onClick={() => setFilterRisk('all')} className="rounded-lg">Всі рівні</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRisk('safe')} className="rounded-lg">Низький</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRisk('moderate')} className="rounded-lg">Помірний</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRisk('high')} className="rounded-lg">Високий</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {/* Hot matches toggle */}
+              {/* Hot matches toggle — pill button */}
               <button
                 onClick={() => setShowHotMatches(!showHotMatches)}
                 className={`
-                  rounded-[20px] px-5 h-11 font-medium text-sm
+                  rounded-[24px] px-5 h-11 font-medium text-sm
                   transition-all duration-300 ease-in-out
                   inline-flex items-center gap-2
-                  ${showHotMatches 
-                    ? 'bg-white text-[#111827] border-2 border-[#111827] shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                    : 'bg-white/80 text-[#9CA3AF] border border-[#E5E7EB] hover:bg-white hover:text-[#6B7280] hover:border-[#D1D5DB]'
+                  ${showHotMatches
+                    ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]'
+                    : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm'
                   }
                 `}
               >
@@ -1409,9 +1433,9 @@ export default function Matches() {
                   <div className="w-px h-8 bg-[#D1D5DB]/60" />
                   <button
                     onClick={resetAllFilters}
-                    className="rounded-[20px] px-4 h-11 font-medium text-sm text-[#6B7280] hover:text-[#111827] bg-white/80 hover:bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all duration-300 inline-flex items-center gap-2"
+                    className="rounded-[24px] px-4 h-11 font-medium text-sm text-[#6B7280] hover:text-[#111827] bg-white hover:bg-[#F9FAFB] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm transition-all duration-300 inline-flex items-center gap-2"
                   >
-                    <Filter className="h-4 w-4" strokeWidth={1.5} />
+                    <X className="h-4 w-4" strokeWidth={1.5} />
                     Скинути
                   </button>
                 </>
@@ -1419,7 +1443,7 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== LOADING / EMPTY STATE ===== */}
+                    {/* ===== LOADING / EMPTY STATE ===== */}
           {initialLoading && (
             <div className="flex items-center justify-center py-20">
               <div className="text-center space-y-4">
