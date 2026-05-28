@@ -26,6 +26,7 @@ import type { Bet } from '@/types/betting';
 interface StrategyOverviewHeaderProps {
   bets: Bet[];
   onNavigateTab: (tab: 'strategies' | 'goals' | 'risks') => void;
+  refreshKey?: number;
 }
 
 interface StoredStrategy {
@@ -185,11 +186,9 @@ const compute30dWinRate = (bets: Bet[]): { winRate: number | null; totalBets: nu
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal | null => {
   const active = goals.filter((g) => g.status === 'active');
   if (active.length === 0) return null;
-  // Prefer explicitly primary goal first
+  // Only return a goal that is explicitly marked as primary
   const explicit = active.find((g) => g.isPrimary);
-  if (explicit) return explicit;
-  const priority: Record<GoalType, number> = { amount: 0, ladder: 1, roi: 2, winrate: 3 };
-  return [...active].sort((a, b) => priority[a.type] - priority[b.type])[0];
+  return explicit || null;
 };
 
 const goalProgress = (goal: StoredGoal): { percent: number; label: string } => {
@@ -271,7 +270,7 @@ const buildGoalCriteria = (goal: StoredGoal): string[] => {
   }
 };
 
-export default function StrategyOverviewHeader({ bets, onNavigateTab }: StrategyOverviewHeaderProps) {
+export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey }: StrategyOverviewHeaderProps) {
   const currentUser = localStorage.getItem('username') || 'default';
 
   const { activeStrategy, primaryGoal, todayRisk, winRate30d, strategyRoi } = useMemo(() => {
@@ -293,7 +292,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
       winRate30d: wr,
       strategyRoi: roi,
     };
-  }, [bets, currentUser]);
+  }, [bets, currentUser, refreshKey]);
 
   const goalInfo = primaryGoal ? goalProgress(primaryGoal) : null;
   const goalCriteria = primaryGoal ? buildGoalCriteria(primaryGoal) : [];
@@ -357,12 +356,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
               </div>
             </>
           ) : (
-            <>
-              <div className="text-3xl font-bold text-[#374151] tracking-tight mb-2">Не обрано</div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
-              </div>
-            </>
+            <div className="flex flex-col items-start py-1">
+              <div className="text-2xl font-bold text-[#9CA3AF] tracking-tight mb-1.5">Не обрано</div>
+              <span className="inline-flex items-center gap-1.5 text-sm text-[#6B7280]">
+                <Target className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
+                Оберіть основну стратегію
+              </span>
+            </div>
           )}
         </button>
 
@@ -382,7 +382,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           {primaryGoal && goalInfo ? (
             <>
               <div
-                className="text-3xl font-bold text-[#374151] tracking-tight mb-2 truncate"
+                className="text-2xl font-bold text-[#374151] tracking-tight mb-2 truncate"
                 title={primaryGoal.name}
               >
                 {primaryGoal.name}
@@ -398,12 +398,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
               </div>
             </>
           ) : (
-            <>
-              <div className="text-3xl font-bold text-[#374151] tracking-tight mb-2">0</div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Немає активних цілей</span>
-              </div>
-            </>
+            <div className="flex flex-col items-start py-1">
+              <div className="text-2xl font-bold text-[#9CA3AF] tracking-tight mb-1.5">Не обрано</div>
+              <span className="inline-flex items-center gap-1.5 text-sm text-[#6B7280]">
+                <Flag className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
+                Оберіть головну ціль
+              </span>
+            </div>
           )}
         </button>
 

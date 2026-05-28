@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Target, Flag, AlertTriangle } from 'lucide-react';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
@@ -17,6 +17,7 @@ import type { Bet } from '@/types/betting';
 export default function Strategy() {
   const [activeTab, setActiveTab] = useState<'strategies' | 'goals' | 'risks'>('strategies');
   const [bets, setBets] = useState<Bet[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const currentUser = localStorage.getItem('username') || 'default';
 
@@ -24,6 +25,20 @@ export default function Strategy() {
     const myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
     setBets(myBetsData || []);
   }, [currentUser]);
+
+  // Listen for custom event dispatched by GoalsManager / StrategyOverview
+  const handleDataChanged = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('strategy-data-changed', handleDataChanged);
+    window.addEventListener('goals-data-changed', handleDataChanged);
+    return () => {
+      window.removeEventListener('strategy-data-changed', handleDataChanged);
+      window.removeEventListener('goals-data-changed', handleDataChanged);
+    };
+  }, [handleDataChanged]);
 
   const tabs = [
     { id: 'strategies' as const, label: 'Стратегії', icon: Target },
@@ -45,7 +60,7 @@ export default function Strategy() {
       {/* ===== CONTENT ===== */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Overview header: KPI cards + current strategy + insight */}
-        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} />
+        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} refreshKey={refreshKey} />
 
         {/* Tabs bar — matches styling used elsewhere in the app */}
         <div className="space-y-6">

@@ -161,7 +161,7 @@ export default function GoalsManager() {
   const [targetWinRateStr, setTargetWinRateStr] = useState('65');
   const [betsPerDayStr, setBetsPerDayStr] = useState('5');
 
-  useEffect(() => { if (currentUser) UserDataService.setUserData(currentUser, 'goals', goals); }, [goals, currentUser]);
+  useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); window.dispatchEvent(new Event('strategy-data-changed')); } }, [goals, currentUser]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
     if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0) return 0;

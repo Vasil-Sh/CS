@@ -179,6 +179,7 @@ export default function StrategyOverview() {
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
       localStorage.setItem('customStrategies', JSON.stringify(strategies));
+      window.dispatchEvent(new Event('strategy-data-changed'));
     } catch (error) {
       console.error('Error saving custom strategies:', error);
     }
@@ -486,6 +487,7 @@ export default function StrategyOverview() {
       localStorage.setItem('primaryStrategy', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
+    window.dispatchEvent(new Event('strategy-data-changed'));
   };
 
   const openDetailsDialog = (strategy: CS2Strategy) => {
