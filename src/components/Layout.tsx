@@ -118,22 +118,23 @@ export default function Layout() {
                 </ul>
               </li>
               <li className="mt-auto space-y-3">
-                <a
-                  href="https://t.me/cs2beet"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex flex-col gap-2 px-5 py-4 bg-[#E8F4FD] border-2 border-[#229ED9] rounded-[24px] transition-all duration-300 hover:bg-[#229ED9] hover:shadow-[0_4px_16px_rgba(34,158,217,0.3)] group"
-                >
-                  <div className="flex items-center gap-3">
-                    <svg className="h-5 w-5 text-[#229ED9] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#447afc] rounded-[24px] shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                  <span className="text-base font-semibold text-white">Потрібна допомога?</span>
+                  <p className="text-xs text-white/80 text-center">
+                    Є питання або пропозиції? Пиши в Telegram
+                  </p>
+                  <a
+                    href="https://t.me/cs2beet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-[16px] text-[#447afc] font-semibold text-sm transition-all duration-300 hover:bg-white/90 hover:shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                     </svg>
-                    <span className="text-base font-semibold text-[#229ED9] group-hover:text-white transition-colors">Потрібна допомога?</span>
-                  </div>
-                  <p className="text-xs text-[#5a7a9a] group-hover:text-white/80 transition-colors pl-8">
-                    Пиши в Telegram — відповімо на будь-яке питання по ставках та аналітиці
-                  </p>
-                </a>
+                    <span>Написати нам</span>
+                  </a>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
@@ -194,22 +195,23 @@ export default function Layout() {
                     <NavItems />
                   </ul>
                   <div className="mt-8 space-y-3">
-                    <a
-                      href="https://t.me/cs2beet"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex flex-col gap-2 px-5 py-4 bg-[#E8F4FD] border-2 border-[#229ED9] rounded-[24px] transition-all duration-300 hover:bg-[#229ED9] hover:shadow-[0_4px_16px_rgba(34,158,217,0.3)] group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <svg className="h-5 w-5 text-[#229ED9] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                    <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#447afc] rounded-[24px] shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                      <span className="text-base font-semibold text-white">Потрібна допомога?</span>
+                      <p className="text-xs text-white/80 text-center">
+                        Є питання або пропозиції? Пиши в Telegram
+                      </p>
+                      <a
+                        href="https://t.me/cs2beet"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-[16px] text-[#447afc] font-semibold text-sm transition-all duration-300 hover:bg-white/90 hover:shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                         </svg>
-                        <span className="text-base font-semibold text-[#229ED9] group-hover:text-white transition-colors">Потрібна допомога?</span>
-                      </div>
-                      <p className="text-xs text-[#5a7a9a] group-hover:text-white/80 transition-colors pl-8">
-                        Пиши в Telegram — відповімо на будь-яке питання по ставках та аналітиці
-                      </p>
-                    </a>
+                        <span>Написати нам</span>
+                      </a>
+                    </div>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
