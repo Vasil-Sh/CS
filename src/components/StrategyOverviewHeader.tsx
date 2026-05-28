@@ -312,17 +312,17 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            <span className="text-lg font-semibold text-[#111827]">Активна стратегія</span>
+            <Target className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#374151]">Активна стратегія</span>
           </div>
           {activeStrategy ? (
             <>
               <div
-                className="text-2xl font-bold text-[#111827] tracking-tight mb-2 flex items-center gap-2"
+                className="text-2xl font-bold text-[#374151] tracking-tight mb-2 flex items-center gap-2"
                 title={activeStrategy.name}
               >
                 <Star
-                  className="h-6 w-6 fill-[#111827] text-[#111827] flex-shrink-0"
+                  className="h-6 w-6 fill-[#447afc] text-[#447afc] flex-shrink-0"
                   strokeWidth={1.5}
                 />
                 <span className="break-words leading-tight">{activeStrategy.name}</span>
@@ -358,7 +358,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
             </>
           ) : (
             <>
-              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2">Не обрано</div>
+              <div className="text-3xl font-bold text-[#374151] tracking-tight mb-2">Не обрано</div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
               </div>
@@ -376,13 +376,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Flag className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            <span className="text-lg font-semibold text-[#111827]">Головна ціль</span>
+            <Flag className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#374151]">Головна ціль</span>
           </div>
           {primaryGoal && goalInfo ? (
             <>
               <div
-                className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate"
+                className="text-3xl font-bold text-[#374151] tracking-tight mb-2 truncate"
                 title={primaryGoal.name}
               >
                 {primaryGoal.name}
@@ -391,7 +391,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
                 <Progress value={goalInfo.percent} className="h-2" />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#6B7280]">{goalInfo.label}</span>
-                  <span className="text-sm font-semibold text-[#111827]">
+                  <span className="text-sm font-semibold text-[#374151]">
                     {goalInfo.percent.toFixed(0)}%
                   </span>
                 </div>
@@ -399,7 +399,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
             </>
           ) : (
             <>
-              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2">0</div>
+              <div className="text-3xl font-bold text-[#374151] tracking-tight mb-2">0</div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#9CA3AF]">Немає активних цілей</span>
               </div>
@@ -417,8 +417,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <ShieldAlert className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            <span className="text-lg font-semibold text-[#111827]">Рівень ризику</span>
+            <ShieldAlert className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#374151]">Рівень ризику</span>
           </div>
           {todayRisk.level ? (
             <>
@@ -451,7 +451,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
             </>
           ) : (
             <>
-              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">—</div>
+              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">—</div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
               </div>
@@ -467,12 +467,12 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-            <span className="text-lg font-semibold text-[#111827]">Вінрейт 30 днів</span>
+            <TrendingUp className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <span className="text-lg font-semibold text-[#374151]">Вінрейт 30 днів</span>
           </div>
           {winRate30d.winRate !== null ? (
             <>
-              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">
                 {winRate30d.winRate.toFixed(1)}%
               </div>
               <div className="flex items-center gap-2">
@@ -495,7 +495,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
             </>
           ) : (
             <>
-              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">—</div>
+              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">—</div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
               </div>
@@ -515,11 +515,11 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         >
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#111827]">
-                <Activity className="h-5 w-5 text-white" strokeWidth={2} />
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
+                <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Поточна стратегія</h3>
+                <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна стратегія</h3>
                 <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
               </div>
             </div>
@@ -537,7 +537,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           {activeStrategy ? (
             <div className="space-y-5 flex-1">
               <div>
-                <p className="text-2xl font-bold text-[#111827] tracking-tight">
+                <p className="text-2xl font-bold text-[#374151] tracking-tight">
                   {activeStrategy.name}
                 </p>
                 {activeStrategy.description && (
@@ -584,7 +584,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
 
               {activeStrategy.criteria && activeStrategy.criteria.length > 0 && (
                 <div className="pt-2">
-                  <p className="text-2xl font-bold text-[#111827] tracking-tight mb-4">
+                  <p className="text-2xl font-bold text-[#374151] tracking-tight mb-4">
                     Ключові критерії
                   </p>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -596,7 +596,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
                         <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
                           {idx + 1}
                         </span>
-                        <span className="text-sm text-[#111827] font-semibold leading-snug">{c}</span>
+                        <span className="text-sm text-[#374151] font-semibold leading-snug">{c}</span>
                       </li>
                     ))}
                   </ul>
@@ -612,7 +612,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
               <button
                 type="button"
                 onClick={() => onNavigateTab('strategies')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-base font-semibold transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
               >
                 <Target className="h-4 w-4" strokeWidth={2} />
                 Обрати стратегію
@@ -630,11 +630,11 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
         >
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#111827]">
-                <Flag className="h-5 w-5 text-white" strokeWidth={2} />
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4]">
+                <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#111827] tracking-tight">Поточна ціль</h3>
+                <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна ціль</h3>
                 <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
               </div>
             </div>
@@ -652,7 +652,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
           {primaryGoal && goalInfo ? (
             <div className="space-y-5 flex-1">
               <div>
-                <p className="text-2xl font-bold text-[#111827] tracking-tight">
+                <p className="text-2xl font-bold text-[#374151] tracking-tight">
                   {primaryGoal.name}
                 </p>
                 <p className="text-base text-[#4B5563] mt-2 leading-relaxed">
@@ -783,7 +783,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
 
               {goalCriteria.length > 0 && (
                 <div className="pt-2">
-                  <p className="text-2xl font-bold text-[#111827] tracking-tight mb-4">
+                  <p className="text-2xl font-bold text-[#374151] tracking-tight mb-4">
                     Ключові критерії
                   </p>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -795,7 +795,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
                         <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
                           {idx + 1}
                         </span>
-                        <span className="text-sm text-[#111827] font-semibold leading-snug">{c}</span>
+                        <span className="text-sm text-[#374151] font-semibold leading-snug">{c}</span>
                       </li>
                     ))}
                   </ul>
@@ -810,7 +810,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab }: Strategy
               <button
                 type="button"
                 onClick={() => onNavigateTab('goals')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white text-base font-semibold transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
               >
                 <Flag className="h-4 w-4" strokeWidth={2} />
                 Створити ціль

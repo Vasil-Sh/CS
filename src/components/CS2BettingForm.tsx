@@ -2129,11 +2129,14 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 flex flex-col items-center justify-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                      <AlertTriangle className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <div className="text-center py-10">
+                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
+                      <AlertTriangle className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
                     </div>
-                    <p className="text-sm text-[#6B7280]">Ризикових команд не знайдено</p>
+                    <p className="text-sm font-semibold text-[#111827] mb-1">Ризикових команд не знайдено</p>
+                    <p className="text-xs text-[#9CA3AF]">
+                      Почніть заповнювати форму або додайте команди у розділі Управління ризиками
+                    </p>
                   </div>
                 )}
               </div>
