@@ -746,7 +746,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-              <span className="text-lg font-semibold text-[#111827]">Всього ставок</span>
+              <span className="text-lg font-semibold text-[#111827]">Всього записів</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">

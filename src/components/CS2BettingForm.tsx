@@ -1255,7 +1255,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                   <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
                     <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">Новий прогноз</span>
+                  <span className="text-lg font-semibold text-[#111827]">Новий запис</span>
                   {isPrefilled && isExpressFromMatches && (
                     <Badge className="bg-[#DBEAFE] text-[#2563EB] border-0 rounded-full text-xs font-medium px-2.5 py-0.5 hover:bg-[#DBEAFE]">
                       Експрес з матчів
@@ -1391,7 +1391,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                   <div className="space-y-4">
                     <h3 className={sectionTitleClass}>
                       <Users className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
-                      Інформація про матч і деталі прогнозу
+                      Інформація про матч і деталі запису
                     </h3>
                   
                     {/* Match URL */}

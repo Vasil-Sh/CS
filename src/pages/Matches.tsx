@@ -1026,7 +1026,7 @@ export default function Matches() {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                <p className="text-sm">Додати до прогнозів</p>
+                <p className="text-sm">Додати до Записів</p>
               </TooltipContent>
             </Tooltip>
 
@@ -1113,7 +1113,7 @@ export default function Matches() {
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="inline-flex items-center gap-1.5 cursor-help">
-                Додати до прогнозів
+                Додати до Записів
               </span>
             </TooltipTrigger>
             <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg max-w-[220px]">
