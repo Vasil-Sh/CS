@@ -1242,7 +1242,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form */}
@@ -1819,8 +1819,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         </div>
 
         {/* Right Sidebar */}
-        <div className="space-y-6 relative">
-          <div className="sticky top-6 space-y-6">
+        <div className="xl:col-span-2 space-y-6 relative">
+          <div className="sticky top-6 space-y-6 xl:grid xl:grid-cols-2 xl:gap-6 xl:space-y-0">
             {/* Calculations Card */}
             <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
@@ -1846,7 +1846,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     )}
                     
                     {/* Potential profit - green accent */}
-                    <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-white rounded-2xl border border-[#86EFAC]">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-[#6B7280]">Потенційний прибуток:</span>
                         <span className="font-semibold text-[#16A34A] text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
@@ -1870,7 +1870,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
                     {/* Value Bet Analysis */}
                     {hasConfidence && valueBetAnalysis && (
-                      <div className="p-5 rounded-2xl border border-[#E5E7EB] bg-white">
+                      <div className={`p-5 rounded-2xl border bg-white ${valueBetAnalysis.isValueBet ? 'border-[#86EFAC]' : 'border-[#FCA5A5]'}`}>
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <TrendingUp className={`h-5 w-5 ${valueBetAnalysis.isValueBet ? 'text-[#16A34A]' : 'text-[#EF4444]'}`} strokeWidth={1.5} />
@@ -1910,7 +1910,11 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     
                     {/* EV Display */}
                     {hasConfidence && (
-                      <div className="p-5 rounded-2xl border border-[#E5E7EB] bg-white">
+                      <div className={`p-5 rounded-2xl border bg-white ${
+                        evVerdict.color === 'green' ? 'border-[#86EFAC]' :
+                        evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
+                        'border-[#FCA5A5]'
+                      }`}>
                         <div className="space-y-2.5">
                           <div className="flex items-center justify-between">
                             <span className={`text-base font-semibold ${
@@ -1955,7 +1959,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
                     {/* Kelly Criterion */}
                     {hasConfidence && kellyData && (
-                      <div className="p-5 rounded-2xl border border-[#E5E7EB] bg-white">
+                      <div className="p-5 rounded-2xl border border-[#93C5FD] bg-white">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -2063,7 +2067,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
                     )}
                     
                     {/* Max loss - red accent */}
-                    <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-white rounded-2xl border border-[#FCA5A5]">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-[#6B7280]">Макс. програш:</span>
                         <span className="font-semibold text-[#EF4444] text-xl">-{formData.stake} {getCurrencySymbol()}</span>
@@ -2085,7 +2089,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
             </div>
 
             {/* Risky Teams Card */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#F3F4F6] rounded-3xl"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
@@ -2096,7 +2100,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
               </div>
               <div className="p-6">
                 {formData.riskyTeams.length > 0 ? (
-                  <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  <div className="space-y-3">
                     {formData.riskyTeams.map((riskyTeam, index) => (
                       <div key={index} className="p-4 border border-[#3B82F6] rounded-2xl bg-white space-y-2.5 hover:border-[#3B82F6] transition-colors">
                         <div className="flex justify-between items-start gap-3">
