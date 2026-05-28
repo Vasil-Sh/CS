@@ -14,7 +14,8 @@ export default function CommentModal({
   matchInfo, 
   comment 
 }: CommentModalProps) {
-  const commentLines = comment.split('\n').filter(line => line.trim());
+  // Split by double newline to separate team comments into individual cards
+  const teamComments = comment.split('\n\n').filter(block => block.trim());
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -34,18 +35,30 @@ export default function CommentModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Content — simple text block */}
-        <div className="px-6 pb-6">
-          <div className="rounded-xl bg-[#F9FAFB] px-5 py-4 space-y-2">
-            {commentLines.map((line, index) => (
-              <p 
+        {/* Content — separate card per team */}
+        <div className="px-6 pb-6 space-y-3">
+          {teamComments.map((block, index) => {
+            // Extract team name from the block (format: "🟡 TeamName: notes")
+            const colonIndex = block.indexOf(':');
+            const teamLabel = colonIndex > -1 ? block.slice(0, colonIndex + 1) : '';
+            const teamNotes = colonIndex > -1 ? block.slice(colonIndex + 1).trim() : block;
+
+            return (
+              <div 
                 key={index}
-                className="text-[15px] leading-relaxed text-[#111827]"
+                className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 py-4"
               >
-                {line.trim()}
-              </p>
-            ))}
-          </div>
+                {teamLabel && (
+                  <p className="text-[15px] font-semibold text-[#111827] mb-1.5">
+                    {teamLabel}
+                  </p>
+                )}
+                <p className="text-[14px] leading-relaxed text-[#374151]">
+                  {teamNotes}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
