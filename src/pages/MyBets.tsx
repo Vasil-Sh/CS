@@ -128,7 +128,7 @@ export default function MyBets() {
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
-  const [activeTab, setActiveTab] = useState('records');
+  const [activeTab, setActiveTab] = useState('add');
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -338,25 +338,45 @@ export default function MyBets() {
       }
       
       const roi = (profitInUAH / bet.amount) * 100;
+      
+      // Update in localStorage (both general and user-specific keys)
       await realGoogleSheetsService.updateBetResult(bet, result, profitInUAH, roi);
       
-      const updatedBets = recentBets.map((b: Bet) => 
-        (b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds)
-          ? { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId }
-          : b
-      );
+      // Update local state using reliable matching (id/createdAt first, then fallback)
+      let matched = false;
+      const updatedBets = recentBets.map((b: Bet) => {
+        if (matched) return b;
+        // Match by id first (most reliable)
+        if (bet.id && b.id === bet.id) {
+          matched = true;
+          return { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId };
+        }
+        // Match by createdAt
+        if (bet.createdAt && b.createdAt === bet.createdAt) {
+          matched = true;
+          return { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId };
+        }
+        // Fallback: match by fields + only update first Pending match
+        if (!bet.id && !bet.createdAt &&
+            b.date === bet.date && b.match === bet.match && 
+            b.amount === bet.amount && b.odds === bet.odds && b.result === 'Pending') {
+          matched = true;
+          return { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId };
+        }
+        return b;
+      });
       
       setRecentBets(updatedBets);
-      UserDataService.setUserData(currentUser, 'mybets_data', updatedBets);
       toast.success(`Запис позначено як ${result === 'Win' ? 'виграшний' : 'програшний'}`);
       
+      // Only refresh stats, do NOT call loadRecentBets() to avoid race condition
+      // that would overwrite the just-updated local state with stale data
       loadStats();
-      loadRecentBets();
     } catch (error) {
       toast.error('Помилка при оновленні результату запису');
       console.error('Error in updateBetResult:', error);
     }
-  }, [recentBets, currentUser, loadStats, loadRecentBets]);
+  }, [recentBets, currentUser, loadStats]);
 
   const handleShareBet = useCallback((bet: Bet) => {
     setSelectedBet(bet);
@@ -563,8 +583,8 @@ export default function MyBets() {
   }, []);
 
   const tabs = [
-    { id: 'records', label: 'Останні записи', icon: ClipboardList },
     { id: 'add', label: 'Додати запис', icon: Plus },
+    { id: 'records', label: 'Останні записи', icon: ClipboardList },
   ];
 
   /** Render the "Останні записи" table content */
@@ -771,7 +791,7 @@ export default function MyBets() {
                     
                     const isExpress = isExpressBet(bet);
                     const expressEventCount = isExpress ? getExpressEventCount(bet) : 0;
-                    const betKey = `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}`;
+                    const betKey = bet.id || bet.createdAt?.toString() || `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}-${Math.random()}`;
                     
                     return (
                       <tr 
@@ -790,7 +810,7 @@ export default function MyBets() {
                               <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>
                             )}
                             <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
-                              {bet.format}
+                              {bet.game ? `${bet.game} • ${bet.format}` : bet.format}
                             </Badge>
                           </div>
                         </td>

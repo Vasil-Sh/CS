@@ -12,6 +12,7 @@ export interface Bet {
   profit?: number;
   strategy?: string;
   format?: string;
+  game?: string;
   currency?: string;
   originalAmount?: number;
   exchangeRate?: number;
@@ -21,6 +22,7 @@ export interface Bet {
   selection?: string;
   matchUrl?: string;
   winProbability?: number;
+  createdAt?: number;
 }
 
 export interface BettingStats {

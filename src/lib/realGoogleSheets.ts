@@ -13,6 +13,7 @@ export interface CS2BettingRecord {
   strategy: string;
   notes: string;
   format?: string;
+  game?: string;
   tournament?: string;
   matchUrl?: string;
   riskyTeams?: string[];
@@ -98,6 +99,27 @@ interface GoogleSheetsResponse {
   values?: string[][];
 }
 
+/** Helper to find a bet index using id/createdAt first, then fallback to field matching */
+function findBetIndex(records: CS2BettingRecord[], bet: CS2BettingRecord): number {
+  // Try matching by id first (most reliable)
+  if (bet.id) {
+    const idx = records.findIndex(r => r.id === bet.id);
+    if (idx !== -1) return idx;
+  }
+  // Try matching by createdAt
+  if (bet.createdAt) {
+    const idx = records.findIndex(r => r.createdAt === bet.createdAt);
+    if (idx !== -1) return idx;
+  }
+  // Fallback: match by date + amount + odds + Pending status (works for Express & regular bets)
+  return records.findIndex(r =>
+    r.date === bet.date &&
+    r.amount === bet.amount &&
+    r.odds === bet.odds &&
+    r.result === 'Pending'
+  );
+}
+
 class RealGoogleSheetsService {
   private spreadsheetId: string = '1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw';
   private apiKey: string = '';
@@ -162,7 +184,6 @@ class RealGoogleSheetsService {
   private processSheetData(rawData: string[][]): CS2BettingRecord[] {
     if (rawData.length < 2) return [];
     
-    const headers = rawData[0];
     const records: CS2BettingRecord[] = [];
     
     for (let i = 1; i < rawData.length; i++) {
@@ -271,7 +292,7 @@ class RealGoogleSheetsService {
     }
   }
 
-  // ОНОВЛЕНО: Add new record with timestamp
+  // ОНОВЛЕНО: Add new record with timestamp — зберігає ВСІ поля включаючи game та riskyTeams
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
       console.log('📝 addRecord called with:', record);
@@ -296,19 +317,21 @@ class RealGoogleSheetsService {
         strategy: record.strategy || '',
         notes: record.notes || '',
         format: record.format,
+        game: record.game, // ФІКС: зберігаємо гру (CS2/Dota2)
         tournament: record.tournament,
         matchUrl: record.matchUrl,
-        id: timestamp.toString(),
+        riskyTeams: record.riskyTeams, // ФІКС: зберігаємо ризикові команди
+        id: record.id || timestamp.toString(),
         goalId: record.goalId,
         currency: record.currency,
         originalAmount: record.originalAmount,
         exchangeRate: record.exchangeRate,
         originalProfit: record.originalProfit,
-        createdAt: timestamp, // ДОДАНО: зберігаємо точний час створення
+        createdAt: record.createdAt || timestamp, // ДОДАНО: зберігаємо точний час створення
         winProbability: record.winProbability // ДОДАНО: зберігаємо імовірність виграшу
       };
       
-      console.log('💾 Saving record with timestamp:', newRecord.createdAt, 'winProbability:', newRecord.winProbability);
+      console.log('💾 Saving record with timestamp:', newRecord.createdAt, 'game:', newRecord.game, 'winProbability:', newRecord.winProbability);
       
       existingData.push(newRecord);
       localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
@@ -331,18 +354,31 @@ class RealGoogleSheetsService {
     }
   }
 
-  // Update bet result
-  async updateBetResult(bet: CS2BettingRecord, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
+  // Update bet result — updates BOTH general and user-specific localStorage keys
+  // Accepts both CS2BettingRecord and Bet types (partial fields are OK for matching)
+  async updateBetResult(bet: Partial<CS2BettingRecord>, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
     try {
+      // Build a search object with available fields for findBetIndex
+      const searchBet: CS2BettingRecord = {
+        date: bet.date || '',
+        match: bet.match || '',
+        team1: bet.team1 || '',
+        team2: bet.team2 || '',
+        betType: bet.betType || '',
+        odds: bet.odds || 0,
+        amount: bet.amount || 0,
+        result: bet.result || 'Pending',
+        profit: bet.profit || 0,
+        roi: bet.roi || 0,
+        strategy: bet.strategy || '',
+        notes: bet.notes || '',
+        id: bet.id,
+        createdAt: bet.createdAt
+      };
+
+      // 1. Update general storage (cs2_betting_records)
       const existingData = this.getLocalStorageData('cs2_betting_records');
-      
-      // Find the bet to update (match by multiple fields since we don't have unique IDs)
-      const betIndex = existingData.findIndex((record: CS2BettingRecord) => 
-        record.date === bet.date &&
-        record.match === bet.match &&
-        record.amount === bet.amount &&
-        record.odds === bet.odds
-      );
+      const betIndex = findBetIndex(existingData, searchBet);
       
       if (betIndex !== -1) {
         existingData[betIndex] = {
@@ -350,13 +386,57 @@ class RealGoogleSheetsService {
           result,
           profit,
           roi,
+          originalProfit: bet.originalProfit !== undefined ? bet.originalProfit : existingData[betIndex].originalProfit,
           goalId: existingData[betIndex].goalId
         };
-        
         localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
-        console.log('✅ Bet result updated with goalId preserved:', existingData[betIndex]);
+        console.log('✅ Bet result updated in cs2_betting_records:', existingData[betIndex]);
       } else {
-        throw new Error('Bet not found for update');
+        console.warn('⚠️ Bet not found in cs2_betting_records, trying user-specific storage only');
+      }
+
+      // 2. Update user-specific storage
+      const currentUser = localStorage.getItem('currentUser') || localStorage.getItem('username') || '';
+      if (currentUser) {
+        const userKey = `user_${currentUser}_mybets_data`;
+        const userData = localStorage.getItem(userKey);
+        if (userData) {
+          const userBets: CS2BettingRecord[] = JSON.parse(userData);
+          const userBetIndex = findBetIndex(userBets, searchBet);
+          
+          if (userBetIndex !== -1) {
+            userBets[userBetIndex] = {
+              ...userBets[userBetIndex],
+              result,
+              profit,
+              roi,
+              originalProfit: bet.originalProfit !== undefined ? bet.originalProfit : userBets[userBetIndex].originalProfit,
+              goalId: userBets[userBetIndex].goalId
+            };
+            localStorage.setItem(userKey, JSON.stringify(userBets));
+            console.log('✅ Bet result updated in user-specific storage:', userBets[userBetIndex]);
+          } else {
+            console.warn('⚠️ Bet not found in user-specific storage');
+          }
+        }
+      }
+
+      if (betIndex === -1) {
+        // Check if at least user-specific was updated
+        const currentUser2 = localStorage.getItem('currentUser') || localStorage.getItem('username') || '';
+        if (currentUser2) {
+          const userKey = `user_${currentUser2}_mybets_data`;
+          const userData = localStorage.getItem(userKey);
+          if (userData) {
+            const userBets: CS2BettingRecord[] = JSON.parse(userData);
+            const userBetIndex = findBetIndex(userBets, searchBet);
+            if (userBetIndex !== -1) {
+              console.log('✅ Bet was found and updated in user-specific storage only');
+              return; // Success - found in user storage
+            }
+          }
+        }
+        throw new Error('Bet not found for update in any storage');
       }
     } catch (error) {
       console.error('Error updating bet result:', error);

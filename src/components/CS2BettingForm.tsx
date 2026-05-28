@@ -52,6 +52,7 @@ interface BetRecord {
   team2: string;
   tournament: string;
   format: string;
+  game: string;
   matchUrl: string;
   betType: string;
   odds: number;
@@ -987,6 +988,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         team2: formData.betCategory === 'Експрес' ? `${expressEvents.length}x` : formData.team2,
         tournament: formData.betCategory === 'Експрес' ? 'Експрес' : formData.tournament,
         format: formData.betCategory === 'Експрес' ? `${expressEvents.length}x` : formData.format,
+        game: formData.game === 'CS2' ? 'CS2' : 'Dota2',
         matchUrl: formData.matchUrl || '',
         betType: betTypeWithCategory,
         odds: finalOdds,
