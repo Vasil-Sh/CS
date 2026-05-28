@@ -1152,10 +1152,9 @@ export default function StrategyOverview() {
                   <span className="text-lg font-semibold text-[#111827]">Створити нову стратегію</span>
                 </div>
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={() => setTemplateDialogOpen(true)}
-                  className="rounded-xl border-[#E5E7EB] font-medium text-[#374151]"
+                  className="rounded-xl bg-[#447afc] hover:bg-[#3b6de0] text-white font-medium border-0"
                 >
                   <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Використати шаблон
@@ -1182,7 +1181,7 @@ export default function StrategyOverview() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="strategyName" className="text-[#111827] font-medium">Назва стратегії *</Label>
                     <Input
@@ -1207,6 +1206,19 @@ export default function StrategyOverview() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label htmlFor="expectedROI" className="text-[#111827] font-medium">Очікуваний ROI (%) *</Label>
+                    <Input
+                      id="expectedROI"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={newStrategy.expectedROI}
+                      onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
+                      className="rounded-xl border-[#E5E7EB] mt-1.5"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -1217,19 +1229,6 @@ export default function StrategyOverview() {
                     onChange={(e) => setNewStrategy({...newStrategy, description: e.target.value})}
                     placeholder="Детальний опис стратегії, коли її використовувати..."
                     rows={3}
-                    className="rounded-xl border-[#E5E7EB] mt-1.5"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="expectedROI" className="text-[#111827] font-medium">Очікуваний ROI (%) *</Label>
-                  <Input
-                    id="expectedROI"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={newStrategy.expectedROI}
-                    onChange={(e) => setNewStrategy({...newStrategy, expectedROI: parseInt(e.target.value) || 0})}
                     className="rounded-xl border-[#E5E7EB] mt-1.5"
                   />
                 </div>
