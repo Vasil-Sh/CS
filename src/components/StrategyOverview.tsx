@@ -750,25 +750,22 @@ export default function StrategyOverview() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {strategies.length === 0 ? (
-                <div
-                  className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-                >
-                  <div className="p-12 text-center">
-                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#F3F4F6] mx-auto mb-4">
-                      <Brain className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
+                <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
+                  <CardContent className="py-12 text-center">
+                    <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                      <Brain className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
                     </div>
-                    <h3 className="text-lg font-semibold text-[#111827] mb-2">Немає стратегій</h3>
-                    <p className="text-[#6B7280] mb-4">Створіть свою першу стратегію для ставок на CS2</p>
+                    <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає стратегій</h3>
+                    <p className="text-base text-[#6B7280] mb-4">Створіть свою першу стратегію для ставок на CS2</p>
                     <Button 
                       onClick={() => setActiveTab('create')} 
-                      className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium"
+                      className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
                     >
                       <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                       Створити стратегію
                     </Button>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ) : (
                 <>
                   {/* Filters and Search */}
