@@ -121,7 +121,7 @@ export default function Layout() {
                 <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
                   <span className="text-base font-semibold text-[#111827]">Потрібна допомога?</span>
                   <p className="text-xs text-[#111827] text-center">
-                    Є питання або пропозиції? Пиши в Telegram
+                    Є питання або пропозиції? Напиши нам в Telegram
                   </p>
                   <a
                     href="https://t.me/cs2beet"
@@ -198,7 +198,7 @@ export default function Layout() {
                     <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
                       <span className="text-base font-semibold text-[#111827]">Потрібна допомога?</span>
                       <p className="text-xs text-[#111827] text-center">
-                        Є питання або пропозиції? Пиши в Telegram
+                        Є питання або пропозиції? Напиши нам в Telegram
                       </p>
                       <a
                         href="https://t.me/cs2beet"
