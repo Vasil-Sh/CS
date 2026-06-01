@@ -20,6 +20,7 @@ const navigation = [
   { name: 'Додати запис', href: '/app/my-bets', icon: Plus },
   { name: 'Стратегії та Цілі', href: '/app/strategy', icon: Target },
   { name: 'Матчі', href: '/app/matches', icon: Trophy },
+  { name: 'Профіль', href: '/app/profile', icon: User },
 ];
 
 const adminNavigation = [

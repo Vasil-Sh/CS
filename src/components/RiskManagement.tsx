@@ -169,6 +169,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [editStatus, setEditStatus] = useState('');
   const [editGame, setEditGame] = useState('');
 
+
+
   // Status filters per game block
   const [csStatusFilter, setCsStatusFilter] = useState<string>('all');
   const [dotaStatusFilter, setDotaStatusFilter] = useState<string>('all');
@@ -805,8 +807,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               )}
             </button>
 
-            {/* Divider */}
-            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+
 
             {/* Search toggle */}
             <button

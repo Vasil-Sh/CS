@@ -641,9 +641,9 @@ export default function Analytics() {
                 <p className="text-sm font-medium text-[#111827] leading-tight">
                   {currentUser || 'User'}
                 </p>
-                <p className="text-xs text-[#6B7280] leading-tight">
-                  {isAdmin ? 'Адміністратор' : 'Користувач'}
-                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
+                  Активний
+                </span>
               </div>
             </div>
           </div>

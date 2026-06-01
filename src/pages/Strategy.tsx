@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Target, Flag, AlertTriangle } from 'lucide-react';
+import { Target, Flag, AlertTriangle, User } from 'lucide-react';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
 import RiskManagement from '@/components/RiskManagement';
@@ -54,6 +54,20 @@ export default function Strategy() {
           <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
             Стратегії та Цілі
           </h1>
+          {/* User Info */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
+              <User className="h-4 w-4 text-white" strokeWidth={2} />
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-[#111827] leading-tight">
+                {currentUser || 'User'}
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
+                Активний
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

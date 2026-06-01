@@ -8,6 +8,7 @@ import Login from '@/pages/Login';
 import LoginDigestoDemo from '@/pages/LoginDigestoDemo';
 import Analytics from '@/pages/Analytics';
 import Matches from '@/pages/Matches';
+import Profile from '@/pages/Profile';
 import MyBets from '@/pages/MyBets';
 import Strategy from '@/pages/Strategy';
 import Admin from '@/pages/Admin';
@@ -33,6 +34,7 @@ function App() {
           <Route index element={<Navigate to="/app/analytics" replace />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="matches" element={<Matches />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="my-bets" element={<MyBets />} />
           <Route path="strategy" element={<Strategy />} />
           <Route path="admin" element={<Admin />} />
