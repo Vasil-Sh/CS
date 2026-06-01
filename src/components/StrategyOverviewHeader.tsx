@@ -514,25 +514,27 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
-                <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
+          <div className="mb-6 pb-5 border-b border-[#F3F4F6]">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
+                  <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна стратегія</h3>
+                  <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна стратегія</h3>
-                <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
-              </div>
+              {activeStrategy && (
+                <Badge
+                  className={`${riskBadgeClass(
+                    activeStrategy.riskLevel,
+                  )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
+                >
+                  {riskLabel(activeStrategy.riskLevel)} ризик
+                </Badge>
+              )}
             </div>
-            {activeStrategy && (
-              <Badge
-                className={`${riskBadgeClass(
-                  activeStrategy.riskLevel,
-                )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
-              >
-                {riskLabel(activeStrategy.riskLevel)} ризик
-              </Badge>
-            )}
           </div>
 
           {activeStrategy ? (
@@ -629,25 +631,27 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4]">
-                <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={2} />
+          <div className="mb-6 pb-5 border-b border-[#F3F4F6]">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4]">
+                  <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={2} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна ціль</h3>
+                  <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна ціль</h3>
-                <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
-              </div>
+              {primaryGoal && (
+                <Badge
+                  className={`${goalTypeBadgeClass(
+                    primaryGoal.type,
+                  )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
+                >
+                  {goalTypeLabel(primaryGoal.type)}
+                </Badge>
+              )}
             </div>
-            {primaryGoal && (
-              <Badge
-                className={`${goalTypeBadgeClass(
-                  primaryGoal.type,
-                )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
-              >
-                {goalTypeLabel(primaryGoal.type)}
-              </Badge>
-            )}
           </div>
 
           {primaryGoal && goalInfo ? (

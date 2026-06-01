@@ -19,6 +19,7 @@ import {
   Moon
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { UserDataService } from '@/lib/userDataService';
 
 export default function Profile() {
   const username = localStorage.getItem('username') || 'User';
@@ -69,25 +70,28 @@ export default function Profile() {
     APP_STORAGE_KEYS.forEach(key => {
       const item = localStorage.getItem(key);
       if (item) {
-        totalSize += item.length * 2; // UTF-16 encoding = 2 bytes per char
+        totalSize += item.length * 2;
       }
     });
-    return (totalSize / 1024).toFixed(1); // KB
+    const userKey = `user_${username}_mybets_data`;
+    const userItem = localStorage.getItem(userKey);
+    if (userItem) {
+      totalSize += userItem.length * 2;
+    }
+    return (totalSize / 1024).toFixed(1);
   };
 
   const getDataStats = () => {
-    const bets = JSON.parse(localStorage.getItem('bets') || '[]');
+    const bets = UserDataService.getUserData(username, 'mybets_data', []);
     const riskyTeams = JSON.parse(localStorage.getItem('admin_risky_teams') || '[]');
-    const strategies = JSON.parse(localStorage.getItem('strategies') || '[]');
-    const goals = JSON.parse(localStorage.getItem('goals') || '[]');
-    const matches = JSON.parse(localStorage.getItem('matches') || '[]');
+    const strategies = JSON.parse(localStorage.getItem('customStrategies') || '[]');
+    const goals = UserDataService.getUserData(username, 'goals', []);
 
     return {
-      bets: bets.length,
-      riskyTeams: riskyTeams.length,
-      strategies: strategies.length,
-      goals: goals.length,
-      matches: matches.length,
+      bets: Array.isArray(bets) ? bets.length : 0,
+      riskyTeams: Array.isArray(riskyTeams) ? riskyTeams.length : 0,
+      strategies: Array.isArray(strategies) ? strategies.length : 0,
+      goals: Array.isArray(goals) ? goals.length : 0,
     };
   };
 
@@ -116,6 +120,26 @@ export default function Profile() {
           }
         }
       });
+
+      const userBetsKey = `user_${username}_mybets_data`;
+      const userBets = localStorage.getItem(userBetsKey);
+      if (userBets) {
+        try {
+          backupData[userBetsKey] = JSON.parse(userBets);
+        } catch {
+          backupData[userBetsKey] = userBets;
+        }
+      }
+
+      const userGoalsKey = `user_${username}_goals`;
+      const userGoals = localStorage.getItem(userGoalsKey);
+      if (userGoals) {
+        try {
+          backupData[userGoalsKey] = JSON.parse(userGoals);
+        } catch {
+          backupData[userGoalsKey] = userGoals;
+        }
+      }
 
       const jsonString = JSON.stringify(backupData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
@@ -153,7 +177,6 @@ export default function Profile() {
         const content = e.target?.result as string;
         const parsed = JSON.parse(content);
 
-        // Validate format
         if (!parsed._meta || parsed._meta.format !== 'matchiq-full-backup') {
           toast.error('Невірний формат файлу', {
             description: 'Файл не є бекапом MatchIQ. Використовуйте файл, створений через "Повний бекап".'
@@ -162,22 +185,18 @@ export default function Profile() {
           return;
         }
 
-        // Restore all keys
         let restoredCount = 0;
         Object.entries(parsed).forEach(([key, value]) => {
           if (key === '_meta') return;
-          if (APP_STORAGE_KEYS.includes(key)) {
-            const strValue = typeof value === 'string' ? value : JSON.stringify(value);
-            localStorage.setItem(key, strValue);
-            restoredCount++;
-          }
+          const strValue = typeof value === 'string' ? value : JSON.stringify(value);
+          localStorage.setItem(key, strValue);
+          restoredCount++;
         });
 
         toast.success(`Бекап відновлено! (${restoredCount} записів)`, {
           description: `Дані з ${new Date(parsed._meta.exportDate).toLocaleDateString('uk-UA')} відновлені. Сторінка перезавантажиться.`
         });
 
-        // Reload after short delay to apply changes
         setTimeout(() => {
           window.location.reload();
         }, 1500);
@@ -192,7 +211,6 @@ export default function Profile() {
     };
 
     reader.readAsText(file);
-    // Reset input
     event.target.value = '';
   };
 
@@ -211,69 +229,60 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
-      {/* ===== HEADER (same style as Strategy & Goals) ===== */}
+      {/* ===== HEADER - stays left-aligned ===== */}
       <div className="px-6 lg:px-8 pt-6 pb-2">
         <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
           Профіль
         </h1>
       </div>
 
-      <div className="px-6 lg:px-8 pb-8 space-y-8">
+      <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
 
-      {/* Data Statistics - large centered cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 justify-items-center">
+      {/* Data Statistics - 4 cards: label on top (single line), number below */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-8 py-8 w-full text-center"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-base font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Ставки</p>
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Ваші ставки</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.bets}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-8 py-8 w-full text-center"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-base font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Команди</p>
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Ризикові команди</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.riskyTeams}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-8 py-8 w-full text-center"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-base font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Стратегії</p>
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Стратегії</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.strategies}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-8 py-8 w-full text-center"
+          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-base font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Цілі</p>
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Цілі</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.goals}</p>
-        </div>
-        <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-8 py-8 w-full text-center"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-base font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Матчі</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.matches}</p>
         </div>
       </div>
 
       {/* User Info Card */}
-      <Card className="border border-[#E5E7EB] rounded-2xl bg-white" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] rounded-3xl bg-white" style={{ boxShadow: chartCardShadow }}>
         <CardContent className="p-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-[#447afc] rounded-2xl flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+            <div className="w-16 h-16 bg-[#447afc] rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
               <User className="h-8 w-8 text-white" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
@@ -290,7 +299,7 @@ export default function Profile() {
       </Card>
 
       {/* Theme & Language Settings */}
-      <Card className="border border-[#E5E7EB] rounded-2xl bg-white" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] rounded-3xl bg-white overflow-hidden" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -363,7 +372,7 @@ export default function Profile() {
                     : 'text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent'
                 }`}
               >
-                🇺🇦 Українська
+                UA
               </Button>
               <Button
                 variant="ghost"
@@ -375,7 +384,7 @@ export default function Profile() {
                     : 'text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent'
                 }`}
               >
-                🇬🇧 English
+                ENG
               </Button>
             </div>
           </div>
@@ -383,7 +392,7 @@ export default function Profile() {
       </Card>
 
       {/* Backup Section */}
-      <Card className="border border-[#E5E7EB] rounded-2xl bg-white" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] rounded-3xl bg-white overflow-hidden" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -416,7 +425,7 @@ export default function Profile() {
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-[#111827] mb-1">Повний бекап всіх даних</h3>
                 <p className="text-sm text-[#6B7280] mb-4">
-                  Експортує всі ваші дані (ставки, команди, стратегії, цілі, матчі, налаштування) в один JSON файл. 
+                  Експортує всі ваші дані (ставки, команди, стратегії, цілі, налаштування) в один JSON файл. 
                   Використовуйте для збереження копії або перенесення на інший пристрій.
                 </p>
                 <Button
