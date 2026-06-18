@@ -800,56 +800,56 @@ export default function Matches() {
         } ${isLive ? 'bg-red-50/30' : ''} ${isSelected ? 'bg-[#EFF6FF]/60 !border-l-[#3B82F6]' : ''} ${getRowRatingStyle(match.id)}`}
       >
         {/* Rating column — icon-only thumbs up/down */}
-        <td className={`py-3 px-2 ${colDivider}`}>
+        <td className={`py-4 px-3 ${colDivider}`}>
           <div className="flex items-center justify-center gap-1">
             <button
               onClick={() => handleRateMatch(match.id, 'like')}
-              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 ${
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all duration-200 ${
                 currentRating === 'like'
                   ? 'bg-[#22C55E] text-white shadow-sm'
                   : 'text-[#6B7280] hover:bg-[#F0FDF4] hover:text-[#22C55E] border border-transparent hover:border-[#BBF7D0]'
               }`}
               title="Цікавий"
             >
-              <ThumbsUp className="h-3.5 w-3.5" strokeWidth={currentRating === 'like' ? 2 : 1.5} />
+              <ThumbsUp className="h-4 w-4" strokeWidth={currentRating === 'like' ? 2 : 1.5} />
             </button>
             <button
               onClick={() => handleRateMatch(match.id, 'dislike')}
-              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 ${
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all duration-200 ${
                 currentRating === 'dislike'
                   ? 'bg-[#EF4444] text-white shadow-sm'
                   : 'text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] border border-transparent hover:border-[#FECACA]'
               }`}
               title="Не цікавий"
             >
-              <ThumbsDown className="h-3.5 w-3.5" strokeWidth={currentRating === 'dislike' ? 2 : 1.5} />
+              <ThumbsDown className="h-4 w-4" strokeWidth={currentRating === 'dislike' ? 2 : 1.5} />
             </button>
           </div>
         </td>
 
-        <td className={`py-3 px-3 ${colDivider}`}>
+        <td className={`py-4 px-4 ${colDivider}`}>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <TeamLogo src={match.logoTeam1} teamName={match.team1} size={22} />
-                <span className="font-semibold text-[#111827] text-sm">{match.team1}</span>
+                <TeamLogo src={match.logoTeam1} teamName={match.team1} size={28} />
+                <span className="font-semibold text-[#111827] text-base">{match.team1}</span>
               </div>
               <span className="text-[#9CA3AF] text-xs font-medium">vs</span>
               <div className="flex items-center gap-1.5">
-                <TeamLogo src={match.logoTeam2} teamName={match.team2} size={22} />
-                <span className="font-semibold text-[#111827] text-sm">{match.team2}</span>
+                <TeamLogo src={match.logoTeam2} teamName={match.team2} size={28} />
+                <span className="font-semibold text-[#111827] text-base">{match.team2}</span>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0 text-[10px] font-semibold">
+              <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                 {match.matchType}
               </Badge>
-              <Badge className="bg-[#111827] text-white border-0 rounded-md px-1.5 py-0 text-[10px] font-semibold uppercase">
+              <Badge className="bg-[#111827] text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
                 {match.tier}
               </Badge>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge className={`${formInfo.color} rounded-md px-1.5 py-0 text-[10px] font-semibold inline-flex items-center gap-0.5 max-w-[120px]`}>
+                  <Badge className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5 max-w-[120px]`}>
                     {formInfo.icon}
                     <span className="truncate">{formLabelWithTeam}</span>
                   </Badge>
@@ -864,7 +864,7 @@ export default function Matches() {
         </td>
 
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          <div className="text-sm font-semibold text-[#111827]">{formatTime(match.date)}</div>
+          <div className="text-base font-semibold text-[#111827]">{formatTime(match.date)}</div>
         </td>
 
         <td className={`py-3 px-2 text-center ${colDivider}`}>
@@ -875,7 +875,7 @@ export default function Matches() {
                 isFinished && match.score1 < match.score2 ? 'text-[#EF4444]' : 
                 'text-[#111827]'
               }`}>{match.score1}</span>
-              <span className="text-[#9CA3AF] text-sm font-medium">:</span>
+              <span className="text-[#9CA3AF] text-base font-medium">:</span>
               <span className={`text-base font-bold ${
                 isFinished && match.score2 > match.score1 ? 'text-[#22C55E]' : 
                 isFinished && match.score2 < match.score1 ? 'text-[#EF4444]' : 
@@ -896,9 +896,9 @@ export default function Matches() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => handleGetAIRecommendation(match)}
-                className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all duration-200"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all duration-200"
               >
-                <Lightbulb className="h-3.5 w-3.5 text-[#7C3AED]" strokeWidth={1.5} />
+                <Lightbulb className="h-4 w-4 text-[#7C3AED]" strokeWidth={1.5} />
               </button>
             </TooltipTrigger>
             <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
@@ -967,9 +967,9 @@ export default function Matches() {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => handleShowComment(match)}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all duration-200"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all duration-200"
                 >
-                  <Eye className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={1.5} />
+                  <Eye className="h-4 w-4 text-[#2563EB]" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
@@ -991,16 +991,16 @@ export default function Matches() {
         </td>
 
         {/* Add to predictions column — "+" button and Express checkbox together */}
-        <td className="py-3 px-2 text-center">
+        <td className="py-4 px-3 text-center">
           <div className="flex items-center justify-center gap-1.5">
             {/* Add single match to predictions */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={() => handleAddToBets(match)}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all duration-200"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all duration-200"
                 >
-                  <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <PlusCircle className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
@@ -1013,7 +1013,7 @@ export default function Matches() {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => toggleMatchSelection(match.id)}
-                  className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
                     isSelected
                       ? 'bg-[#3B82F6] text-white shadow-sm border border-[#3B82F6]'
                       : 'text-[#9CA3AF] hover:bg-[#EFF6FF] hover:text-[#3B82F6] border border-[#E5E7EB] hover:border-[#93C5FD]'
@@ -1021,9 +1021,9 @@ export default function Matches() {
                   title={isSelected ? 'Прибрати з експресу' : 'Додати до експресу'}
                 >
                   {isSelected ? (
-                    <CircleCheck className="h-3.5 w-3.5" strokeWidth={2} />
+                    <CircleCheck className="h-4 w-4" strokeWidth={2} />
                   ) : (
-                    <Layers className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    <Layers className="h-4 w-4" strokeWidth={1.5} />
                   )}
                 </button>
               </TooltipTrigger>
@@ -1044,9 +1044,9 @@ export default function Matches() {
         <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>
           Інтерес до Матчу
         </th>
-        <th className={`text-left py-3 px-3 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
+        <th className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
         <th 
-          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
+          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
           onClick={() => toggleSort('date')}
         >
           <div className="flex items-center justify-center gap-0.5">
@@ -1054,9 +1054,9 @@ export default function Matches() {
             {renderSortIndicator('date')}
           </div>
         </th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
         <th 
-          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
+          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
           onClick={() => toggleSort('status')}
         >
           <Tooltip>
@@ -1077,11 +1077,11 @@ export default function Matches() {
             </TooltipContent>
           </Tooltip>
         </th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Прогноз</th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Коеф.</th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>Нотатки</th>
-        <th className="text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Прогноз</th>
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Коеф.</th>
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>Нотатки</th>
+        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">
           Додати до Записів
         </th>
       </tr>
