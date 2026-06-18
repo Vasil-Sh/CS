@@ -12,6 +12,28 @@ class GoogleSheetsRiskyTeamsService {
   private readonly SHEET_ID = SPREADSHEET_ID_DATA;
 
   /**
+   * Parse team data from structured columns (A=name, B=game, C=status, D=comment)
+   * Used when user provides their own Google Sheets link
+   */
+  private parseTeamDataStructured(name: string, game: string, status: string, comment: string): RiskyTeamFromSheet | null {
+    if (!name || name.trim() === '') {
+      return null;
+    }
+    
+    const cleanName = name.trim();
+    const cleanGame = game.trim() || 'CS';
+    const cleanStatus = status.trim() || 'Без статусу';
+    const cleanComment = comment.trim();
+    
+    return {
+      name: cleanName,
+      game: cleanGame,
+      status: cleanStatus,
+      notes: cleanComment
+    };
+  }
+
+  /**
    * Parse team data from name and notes
    * Name is in one column, notes in the next column
    * Notes format examples:
@@ -67,11 +89,16 @@ class GoogleSheetsRiskyTeamsService {
 
   /**
    * Fetch risky teams from CSV export
+   * @param customSheetId - If provided, uses this spreadsheet ID and parses columns A-D (structured format).
+   *                        If not provided, uses the default sheet and parses columns L/M and N/O.
    */
-  async fetchRiskyTeamsFromCSV(): Promise<RiskyTeamFromSheet[]> {
+  async fetchRiskyTeamsFromCSV(customSheetId?: string): Promise<RiskyTeamFromSheet[]> {
     try {
+      const sheetId = customSheetId || this.SHEET_ID;
+      const isCustomSheet = !!customSheetId;
+
       // Export as CSV
-      const url = `https://docs.google.com/spreadsheets/d/${this.SHEET_ID}/export?format=csv&gid=0`;
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
       
       const response = await fetch(url);
       if (!response.ok) {
@@ -88,28 +115,38 @@ class GoogleSheetsRiskyTeamsService {
       // Skip header row, start from row 2 (index 1)
       for (let i = 1; i < rows.length; i++) {
         const values = rows[i];
-        
-        // Process columns L and M (indices 11 and 12)
-        // Column L (index 11) = team name
-        // Column M (index 12) = notes
-        if (values.length > 11 && values[11]) {
-          const teamName = values[11];
-          const teamNotes = values.length > 12 ? values[12] : '';
-          const teamData = this.parseTeamData(teamName, teamNotes);
-          if (teamData) {
-            riskyTeams.push(teamData);
+
+        if (isCustomSheet) {
+          // Custom sheet: columns A=team name, B=game, C=status, D=comment
+          if (values.length > 0 && values[0]) {
+            const teamName = values[0];
+            const teamGame = values.length > 1 ? values[1] : '';
+            const teamStatus = values.length > 2 ? values[2] : '';
+            const teamComment = values.length > 3 ? values[3] : '';
+            const teamData = this.parseTeamDataStructured(teamName, teamGame, teamStatus, teamComment);
+            if (teamData) {
+              riskyTeams.push(teamData);
+            }
           }
-        }
-        
-        // Process columns N and O (indices 13 and 14)
-        // Column N (index 13) = team name
-        // Column O (index 14) = notes
-        if (values.length > 13 && values[13]) {
-          const teamName = values[13];
-          const teamNotes = values.length > 14 ? values[14] : '';
-          const teamData = this.parseTeamData(teamName, teamNotes);
-          if (teamData) {
-            riskyTeams.push(teamData);
+        } else {
+          // Default sheet: columns L/M (11/12) and N/O (13/14)
+          if (values.length > 11 && values[11]) {
+            const teamName = values[11];
+            const teamNotes = values.length > 12 ? values[12] : '';
+            const teamData = this.parseTeamData(teamName, teamNotes);
+            if (teamData) {
+              riskyTeams.push(teamData);
+            }
+          }
+          
+          // Process columns N and O (indices 13 and 14)
+          if (values.length > 13 && values[13]) {
+            const teamName = values[13];
+            const teamNotes = values.length > 14 ? values[14] : '';
+            const teamData = this.parseTeamData(teamName, teamNotes);
+            if (teamData) {
+              riskyTeams.push(teamData);
+            }
           }
         }
       }
@@ -177,9 +214,10 @@ class GoogleSheetsRiskyTeamsService {
 
   /**
    * Main method to fetch risky teams
+   * @param customSheetId - If provided, uses this spreadsheet ID instead of the default one
    */
-  async fetchRiskyTeams(): Promise<RiskyTeamFromSheet[]> {
-    return await this.fetchRiskyTeamsFromCSV();
+  async fetchRiskyTeams(customSheetId?: string): Promise<RiskyTeamFromSheet[]> {
+    return await this.fetchRiskyTeamsFromCSV(customSheetId);
   }
 }
 

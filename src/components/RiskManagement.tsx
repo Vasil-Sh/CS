@@ -162,6 +162,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSheetsGuideOpen, setIsSheetsGuideOpen] = useState(false);
+  const [customSheetUrl, setCustomSheetUrl] = useState('');
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
@@ -187,10 +188,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       .replace(/[^a-z0-9]/g, '');
   };
 
+  /** Extract spreadsheet ID from Google Sheets URL */
+  const extractSheetId = (url: string): string | null => {
+    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : null;
+  };
+
   const updateFromGoogleSheets = async () => {
     setIsUpdating(true);
     try {
-      const teamsFromSheet = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+      // Якщо користувач ввів посилання на свій документ — використовуємо його
+      const customId = customSheetUrl.trim() ? extractSheetId(customSheetUrl.trim()) : null;
+      
+      const teamsFromSheet = await googleSheetsRiskyTeamsService.fetchRiskyTeams(customId || undefined);
       
       if (teamsFromSheet.length === 0) {
         toast.error('Не знайдено команд у документі');
@@ -1060,6 +1070,37 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <p className="text-sm text-[#6B7280] leading-relaxed">
                       Натисніть <span className="font-medium text-[#111827]">«Поділитися» → «Усі, хто має посилання» → «Читач»</span>, щоб документ був доступний для читання.
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 5 */}
+              <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE]">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#2563EB] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                    5
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-semibold text-[#111827] mb-2">Вставте посилання на ваш документ</h4>
+                    <p className="text-sm text-[#6B7280] mb-3">
+                      Скопіюйте посилання з адресного рядка браузера та вставте його сюди. Ви можете використовувати <span className="font-medium text-[#111827]">власний</span> Google Sheets документ.
+                    </p>
+                    <Input
+                      value={customSheetUrl}
+                      onChange={(e) => setCustomSheetUrl(e.target.value)}
+                      placeholder="https://docs.google.com/spreadsheets/d/ВАШ_ID/edit"
+                      className="rounded-xl border-[#BFDBFE] focus:border-[#2563EB] bg-white text-sm"
+                    />
+                    {customSheetUrl.trim() && !extractSheetId(customSheetUrl.trim()) && (
+                      <p className="text-xs text-[#EF4444] mt-1.5">
+                        ❌ Неправильний формат посилання. Перевірте, чи скопійовано повне посилання з Google Sheets.
+                      </p>
+                    )}
+                    {customSheetUrl.trim() && extractSheetId(customSheetUrl.trim()) && (
+                      <p className="text-xs text-[#16A34A] mt-1.5">
+                        ✓ Посилання правильне. Будуть завантажені команди з вашого документу.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
