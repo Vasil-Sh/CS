@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
+import ScatterTooltip from '@/components/analytics/ScatterTooltip';
+import MonthlyProfitBar from '@/components/analytics/MonthlyProfitBar';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import GoalsManager from '@/components/GoalsManager';
@@ -44,15 +46,6 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
-
-interface TooltipPayload {
-  payload: ScatterData;
-}
-
-interface ScatterTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayload[];
-}
 
 interface MonthlyData {
   month: string;
@@ -420,56 +413,6 @@ export default function Analytics() {
     roi: range.count > 0 ? Math.round((range.profit / (range.count * 100)) * 100) : 0,
     bets: range.count
   }));
-
-  const ScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-200">
-          <p className="text-sm font-bold text-gray-900 mb-2">Коеф.: {Number(data.odds).toFixed(2)}</p>
-          {data.match && (
-            <p className="text-sm text-gray-700 mb-1">Ставка: {data.match}</p>
-          )}
-          <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-            Профіт: {data.profit >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
-          </p>
-          {data.betType && (
-            <p className="text-sm text-gray-600">Тип: {data.betType}</p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Custom bar shape for monthly profit — green for positive, coral for negative
-  interface MonthlyBarProps {
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    payload?: MonthlyData;
-  }
-
-  const MonthlyProfitBar = (props: MonthlyBarProps) => {
-    const { x = 0, y = 0, width = 0, height = 0, payload } = props;
-    const isPositive = (payload?.profit || 0) >= 0;
-    const fillColor = isPositive ? '#10B981' : '#F87171';
-    const fillOpacity = isPositive ? 0.85 : 0.75;
-    
-    return (
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        fill={fillColor}
-        opacity={fillOpacity}
-        rx={4}
-        ry={4}
-      />
-    );
-  };
 
   const tabs = [
     { id: 'profit', label: 'Прибуток', icon: Wallet },
