@@ -21,6 +21,7 @@ import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
+import { logRender } from '@/lib/devLogger';
 import { 
   Target, 
   DollarSign,
@@ -57,6 +58,7 @@ interface MonthlyData {
 }
 
 export default function Analytics() {
+  logRender('Analytics');
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const isAdmin = user?.role === 'admin';

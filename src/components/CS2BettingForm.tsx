@@ -16,6 +16,7 @@ import { getStatusBadge, getGameEmoji, getBetTypeOptions } from '@/lib/displayHe
 import { parseDota2MatchFromUrl, parseCS2MatchFromUrl, type ParsedMatchResult } from '@/lib/matchUrlParser';
 import StrategyViolationDialog from './StrategyViolationDialog';
 import { calcTotalExpressOdds, calcExpectedValue, calcPotentialProfit, getValueBetAnalysis, getOverconfidenceWarning, calcKellyCriterion, getExpressRiskLevel, getEVVerdict } from '@/lib/betCalculations';
+import { logRender } from '@/lib/devLogger';
 
 export interface MatchPrefillData {
   team1: string;
@@ -117,6 +118,7 @@ const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
 });
 
 export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillConsumed, expressMatchesData, onExpressMatchesConsumed }: CS2BettingFormProps) {
+  logRender('CS2BettingForm');
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const [isSubmitting, setIsSubmitting] = useState(false);

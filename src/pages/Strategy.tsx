@@ -7,9 +7,11 @@ import StrategyOverviewHeader from '@/components/StrategyOverviewHeader';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { logRender } from '@/lib/devLogger';
 import type { Bet } from '@/types/betting';
 
 export default function Strategy() {
+  logRender('Strategy');
   const [activeTab, setActiveTab] = useState<'strategies' | 'goals' | 'risks'>('strategies');
   const [bets, setBets] = useState<Bet[]>([]);
 

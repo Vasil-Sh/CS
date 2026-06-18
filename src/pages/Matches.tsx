@@ -43,6 +43,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
+import { logRender } from '@/lib/devLogger';
 import { useToast } from '@/hooks/use-toast';
 import {
   Tooltip,
@@ -434,6 +435,7 @@ const getTodayDateKey = (): string => {
 };
 
 export default function Matches() {
+  logRender('Matches');
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const isAdmin = user?.role === 'admin';

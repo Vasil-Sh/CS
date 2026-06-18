@@ -14,6 +14,7 @@ import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { logRender } from '@/lib/devLogger';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,
   AlertTriangle, Clock, Plus, ArrowUpRight, ArrowDownRight,
@@ -36,6 +37,7 @@ type SortBy = 'date' | 'profit' | 'odds';
 const DEFAULT_STATS: BetStats = { totalBets: 0, winRate: 0, totalProfit: 0, averageROI: 0, profitByMonth: [], profitByStrategy: [] };
 
 export default function MyBets() {
+  logRender('MyBets');
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const isAdminRole = user?.role === 'admin';

@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from '@/lib/cardStyles';
+import { logRender } from '@/lib/devLogger';
 import { 
   Target, 
   TrendingUp, 
@@ -107,6 +108,7 @@ const cardBaseStyle = CARD_BASE_STYLE;
 const cardHoverStyle = CARD_HOVER_STYLE;
 
 export default function GoalsManager() {
+  logRender('GoalsManager');
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const bumpStrategy = useAppStore((s) => s.bumpStrategy);

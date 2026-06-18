@@ -1,5 +1,5 @@
 // Real Google Sheets integration for CS2 Analytics
-import { SPREADSHEET_ID_DATA } from './sheetsConfig';
+import { logServiceCall } from './devLogger';
 
 export interface CS2BettingRecord {
   date: string;
@@ -269,6 +269,7 @@ class RealGoogleSheetsService {
 
   // Get all records (синхронний метод для сумісності)
   getAllRecords(): CS2BettingRecord[] {
+    logServiceCall('GoogleSheets', 'getAllRecords');
     try {
       // Спочатку перевіряємо user-specific дані
       const currentUser = localStorage.getItem('currentUser') || '';
