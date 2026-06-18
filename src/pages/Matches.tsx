@@ -1139,7 +1139,7 @@ export default function Matches() {
           </div>
         </div>
 
-        <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4">
+        <div className="relative z-10 space-y-6 px-3 lg:px-4 pb-8 pt-4">
 
           {/* ===== QUICK STATS ===== */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
