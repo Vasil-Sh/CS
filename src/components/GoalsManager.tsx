@@ -13,6 +13,7 @@ import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from '@/lib/cardStyles';
 import { 
   Target, 
   TrendingUp, 
@@ -101,16 +102,9 @@ interface OddsScenario {
 const MAX_LADDER_STEPS = 500;
 
 // Card hover styles matching Analytics page
-const cardBaseStyle = {
-  transform: 'scale(1)',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-};
+const cardBaseStyle = CARD_BASE_STYLE;
 
-const cardHoverStyle = {
-  transform: 'scale(1.03)',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
-};
+const cardHoverStyle = CARD_HOVER_STYLE;
 
 export default function GoalsManager() {
   const { user } = useAuth();
