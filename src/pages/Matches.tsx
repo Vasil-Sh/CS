@@ -58,7 +58,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AIRecommendationModal from '@/components/AIRecommendationModal';
 import CommentModal from '@/components/CommentModal';
-import { geminiService, type AIRecommendation } from '@/lib/geminiService';
+import { deepSeekService, type AIRecommendation } from '@/lib/deepSeekService';
 import {
   fetchTodaysAndUpcomingMatches,
   parseMatchType,
@@ -625,7 +625,7 @@ export default function Matches() {
     setAiLoading(true);
     setAiRecommendation(null);
     try {
-      const recommendation = await geminiService.getMatchRecommendation({
+      const recommendation = await deepSeekService.getMatchRecommendation({
         team1: match.team1,
         team2: match.team2,
         format: match.matchType,
