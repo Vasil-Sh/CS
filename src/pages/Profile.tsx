@@ -216,14 +216,14 @@ export default function Profile() {
   };
 
   const cardBaseStyle = {
-    transform: 'scale(1)',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    transform: 'translateY(0)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
   };
 
   const cardHoverStyle = {
-    transform: 'scale(1.03)',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
   };
 
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
@@ -242,7 +242,7 @@ export default function Profile() {
       {/* Data Statistics - 4 cards: label on top (single line), number below */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -251,7 +251,7 @@ export default function Profile() {
           <p className="text-5xl font-bold text-[#111827]">{stats.bets}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -260,7 +260,7 @@ export default function Profile() {
           <p className="text-5xl font-bold text-[#111827]">{stats.riskyTeams}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -269,7 +269,7 @@ export default function Profile() {
           <p className="text-5xl font-bold text-[#111827]">{stats.strategies}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -280,7 +280,7 @@ export default function Profile() {
       </div>
 
       {/* User Info Card */}
-      <Card className="border border-[#E5E7EB] rounded-3xl bg-white" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardContent className="p-6">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 bg-[#447afc] rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
@@ -300,7 +300,7 @@ export default function Profile() {
       </Card>
 
       {/* Theme & Language Settings */}
-      <Card className="border border-[#E5E7EB] rounded-3xl bg-white overflow-hidden" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -393,7 +393,7 @@ export default function Profile() {
       </Card>
 
       {/* Backup Section */}
-      <Card className="border border-[#E5E7EB] rounded-3xl bg-white overflow-hidden" style={{ boxShadow: chartCardShadow }}>
+      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
