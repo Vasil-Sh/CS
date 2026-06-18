@@ -5,6 +5,7 @@ import GoalsManager from '@/components/GoalsManager';
 import RiskManagement from '@/components/RiskManagement';
 import StrategyOverviewHeader from '@/components/StrategyOverviewHeader';
 import { UserDataService } from '@/lib/userDataService';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Bet } from '@/types/betting';
 
 /**
@@ -19,7 +20,8 @@ export default function Strategy() {
   const [bets, setBets] = useState<Bet[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const currentUser = localStorage.getItem('username') || 'default';
+  const { user } = useAuth();
+  const currentUser = user?.username || 'default';
 
   useEffect(() => {
     const myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);

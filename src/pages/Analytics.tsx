@@ -14,6 +14,7 @@ import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -107,9 +108,9 @@ function MiniDonut({
 }
 
 export default function Analytics() {
-  const currentUser = localStorage.getItem('username') || '';
-  const userRole = localStorage.getItem('userRole');
-  const isAdmin = userRole === 'admin';
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
+  const isAdmin = user?.role === 'admin';
   
   const [stats, setStats] = useState<BettingStats>({
     totalBets: 0,

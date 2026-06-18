@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   BarChart3, 
   Trophy, 
@@ -30,21 +31,17 @@ const adminNavigation = [
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const username = localStorage.getItem('username');
-  const userRole = localStorage.getItem('userRole');
-  const isAdmin = userRole === 'admin';
+  const { user, isAdmin, isAuthenticated, logout } = useAuth();
+  const username = user?.username ?? '';
 
   useEffect(() => {
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
+    if (!isAuthenticated) {
       navigate('/login');
     }
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, isAuthenticated]);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('username');
+    logout();
     navigate('/');
   };
 

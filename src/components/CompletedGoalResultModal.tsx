@@ -18,6 +18,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { UserDataService } from '@/lib/userDataService';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 
 interface Bet {
@@ -73,10 +74,11 @@ interface CompletedGoalResultModalProps {
 
 export default function CompletedGoalResultModal({ goal, isOpen, onClose }: CompletedGoalResultModalProps) {
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
 
   if (!goal) return null;
 
-  const currentUser = localStorage.getItem('username') || '';
   const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
   const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id);
 

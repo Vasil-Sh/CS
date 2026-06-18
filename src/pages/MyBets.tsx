@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
@@ -106,9 +107,9 @@ type TableFilterMode = 'today' | 'all';
 const ITEMS_PER_PAGE = 10;
 
 export default function MyBets() {
-  const currentUser = localStorage.getItem('username') || '';
-  const userRole = localStorage.getItem('userRole');
-  const isAdminRole = userRole === 'admin';
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
+  const isAdminRole = user?.role === 'admin';
   const location = useLocation();
   
   const [stats, setStats] = useState<BetStats>(() => 

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { authService } from '@/lib/authService';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, LogIn, TrendingUp, User, Lock, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
@@ -13,6 +13,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   // Check if current input looks like admin credentials
   const isAdminInput = username.toLowerCase() === 'admin' || username.toLowerCase() === 'super_gus23_7482';
@@ -23,7 +24,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const result = await authService.login(username, password);
+      const result = await login(username, password);
       if (result.success) {
         navigate('/app/analytics');
       } else {

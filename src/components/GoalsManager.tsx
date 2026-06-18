@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserDataService } from '@/lib/userDataService';
+import { useAuth } from '@/contexts/AuthContext';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { 
   Target, 
@@ -110,8 +111,10 @@ const cardHoverStyle = {
   boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
 };
 
+import { useAuth } from '@/contexts/AuthContext';
 export default function GoalsManager() {
-  const currentUser = localStorage.getItem('username') || '';
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
   const [goals, setGoals] = useState<Goal[]>(() => {
     const loadedGoals = UserDataService.getUserData(currentUser, 'goals', []);
     return loadedGoals.map((goal: Goal) => {

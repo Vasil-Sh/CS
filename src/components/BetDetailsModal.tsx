@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Bet } from '@/types/betting';
 
 interface BetDetailsModalProps {
@@ -27,6 +28,8 @@ interface ParsedEvent {
 }
 
 export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalProps) {
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -39,9 +42,10 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   useEffect(() => {
     if (users.length > 0) {
-      checkAdminStatus();
+      const foundUser = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
+      setIsAdmin(foundUser?.isAdmin || false);
     }
-  }, [users]);
+  }, [users, currentUser]);
 
   useEffect(() => {
     if (bet && open) {
@@ -80,12 +84,6 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
     } catch (err) {
       console.error('Error fetching users:', err);
     }
-  };
-
-  const checkAdminStatus = () => {
-    const currentUser = localStorage.getItem('username') || '';
-    const user = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
-    setIsAdmin(user?.isAdmin || false);
   };
 
   if (!bet) return null;

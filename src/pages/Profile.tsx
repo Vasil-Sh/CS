@@ -21,10 +21,11 @@ import {
 import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
 
+import { useAuth } from '@/contexts/AuthContext';
 export default function Profile() {
-  const username = localStorage.getItem('username') || 'User';
-  const userRole = localStorage.getItem('userRole') || 'user';
-  const isAdmin = userRole === 'admin';
+  const { user } = useAuth();
+  const username = user?.username || 'User';
+  const isAdmin = user?.role === 'admin';
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   

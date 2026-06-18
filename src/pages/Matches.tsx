@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -430,9 +431,9 @@ const getTodayDateKey = (): string => {
 };
 
 export default function Matches() {
-  const currentUser = localStorage.getItem('username') || '';
-  const userRole = localStorage.getItem('userRole');
-  const isAdmin = userRole === 'admin';
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
+  const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
 
   const [matches, setMatches] = useState<Match[]>([]);

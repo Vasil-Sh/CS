@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,8 +98,9 @@ export default function Admin() {
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [error, setError] = useState('');
   const [showUsernames, setShowUsernames] = useState(false);
-  const userRole = localStorage.getItem('userRole');
-  const currentUser = localStorage.getItem('username') || '';
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const currentUser = user?.username || '';
 
   // Filters & search & sort
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');

@@ -15,7 +15,7 @@ export interface Bet {
   game?: string;
   currency?: string;
   originalAmount?: number;
-  exchangeRate?: number;
+  exchangeRate?: number | null;
   originalProfit?: number;
   roi?: number;
   goalId?: string;
@@ -23,6 +23,14 @@ export interface Bet {
   matchUrl?: string;
   winProbability?: number;
   createdAt?: number;
+  /** Risk assessment label */
+  risk?: string;
+  /** Additional notes / reasoning */
+  notes?: string;
+  /** Teams flagged as risky */
+  riskyTeams?: string[];
+  /** Tournament name */
+  tournament?: string;
 }
 
 export interface BettingStats {

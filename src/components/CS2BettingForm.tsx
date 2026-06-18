@@ -11,6 +11,7 @@ import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import StrategyViolationDialog from './StrategyViolationDialog';
 
 export interface MatchPrefillData {
@@ -113,7 +114,8 @@ const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
 });
 
 export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillConsumed, expressMatchesData, onExpressMatchesConsumed }: CS2BettingFormProps) {
-  const currentUser = localStorage.getItem('username') || '';
+  const { user } = useAuth();
+  const currentUser = user?.username || '';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingMatch, setIsParsingMatch] = useState(false);
   const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(null);
