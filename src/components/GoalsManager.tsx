@@ -367,6 +367,7 @@ export default function GoalsManager() {
     const updated = [...goals, goal];
     setGoals(updated);
     UserDataService.setUserData(currentUser, 'goals', updated);
+    bumpStrategy();
     setShowCreateDialog(false);
     resetNewGoalForm();
     toast.success('Ціль створена!', { description: '💡 Прив\'яжіть ставки до цієї цілі' });
@@ -385,7 +386,7 @@ export default function GoalsManager() {
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
-  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserData(currentUser, 'goals', u); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
+  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserData(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {
@@ -408,6 +409,7 @@ export default function GoalsManager() {
     }
     setGoals(updated);
     UserDataService.setUserData(currentUser, 'goals', updated);
+    bumpStrategy();
   };
   const openDetailsDialog = (goal: Goal) => { setSelectedGoal(goal); setShowDetailsDialog(true); setIsStepsCalculationExpanded(false); setIsLadderOverviewExpanded(true); setIsStepsProgressionExpanded(true); };
   const openCompletedGoalResult = (goal: Goal) => { setSelectedGoal(goal); setShowCompletedResultModal(true); };
