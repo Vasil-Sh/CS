@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Brain, Loader2 } from 'lucide-react';
-import type { AIRecommendation } from '@/lib/openRouterService';
+import type { AIRecommendation } from '@/lib/ai/shared';
 
 interface AIRecommendationModalProps {
   open: boolean;
