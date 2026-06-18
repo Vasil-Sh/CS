@@ -380,14 +380,14 @@ const PredictionBar = ({ percent1, percent2 }: { percent1: number; percent2: num
 };
 
 const cardBaseStyle = {
-  transform: 'scale(1)',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  transform: 'translateY(0)',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
 };
 
 const cardHoverStyle = {
-  transform: 'scale(1.03)',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+  transform: 'translateY(-3px)',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
 };
 
 const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
@@ -1182,7 +1182,7 @@ export default function Matches() {
           {/* ===== QUICK STATS ===== */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div 
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -1199,7 +1199,7 @@ export default function Matches() {
             </div>
 
             <div 
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -1215,7 +1215,7 @@ export default function Matches() {
             </div>
 
             <div 
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -1231,7 +1231,7 @@ export default function Matches() {
             </div>
 
             <div 
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -1247,7 +1247,7 @@ export default function Matches() {
             </div>
 
             <div 
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -1470,7 +1470,7 @@ export default function Matches() {
           {/* ===== LIVE MATCHES ===== */}
           {!initialLoading && liveMatches.length > 0 && (
             <Card 
-              className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+              className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300"
               style={{ boxShadow: chartCardShadow }}
             >
               <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
@@ -1505,7 +1505,7 @@ export default function Matches() {
             return (
               <Card 
                 key={dateKey}
-                className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300"
                 style={{ boxShadow: chartCardShadow }}
               >
                 <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
