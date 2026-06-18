@@ -1,15 +1,4 @@
-import { type ReactNode } from 'react';
-
-const cardBaseStyle: React.CSSProperties = {
-  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-  transform: 'translateY(0)',
-};
-
-const cardHoverStyle: React.CSSProperties = {
-  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-  transform: 'translateY(-2px)',
-};
+import { type ReactNode, useState } from 'react';
 
 interface StatCardProps {
   icon: ReactNode;
@@ -19,6 +8,8 @@ interface StatCardProps {
   valueColor?: string;
   subIcon?: ReactNode;
   onClick?: () => void;
+  /** Показувати зелений/червоний hint залежно від value */
+  trend?: 'up' | 'down' | 'neutral';
 }
 
 export default function StatCard({
@@ -29,15 +20,35 @@ export default function StatCard({
   valueColor = 'text-[#111827]',
   subIcon,
   onClick,
+  trend,
 }: StatCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const trendGlow = trend === 'up'
+    ? 'hover:shadow-[0_0_24px_rgba(34,197,94,0.15)] hover:border-[#BBF7D0]'
+    : trend === 'down'
+    ? 'hover:shadow-[0_0_24px_rgba(239,68,68,0.12)] hover:border-[#FECACA]'
+    : 'hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]';
+
   return (
     <div
-      className={`bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group${onClick ? ' cursor-pointer' : ''}`}
-      style={cardBaseStyle}
-      onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-      onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+      className={`relative bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 transition-all duration-300 ease-out cursor-default overflow-hidden ${trendGlow} ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ transform: isHovered ? 'translateY(-3px)' : 'translateY(0)' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
     >
+      {/* Animated gradient bar on hover */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-[3px] rounded-t-3xl transition-opacity duration-300 ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        } ${
+          trend === 'up' ? 'bg-gradient-to-r from-[#22C55E] via-[#4ADE80] to-[#22C55E]' :
+          trend === 'down' ? 'bg-gradient-to-r from-[#EF4444] via-[#F87171] to-[#EF4444]' :
+          'bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6]'
+        }`}
+      />
+
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <span className="text-lg font-semibold text-[#111827]">{label}</span>
