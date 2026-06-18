@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { UserDataService } from '@/lib/userDataService';
 import type { Bet } from '@/types/betting';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * StrategyOverviewHeader
@@ -265,7 +266,8 @@ const buildGoalCriteria = (goal: StoredGoal): string[] => {
 };
 
 export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey }: StrategyOverviewHeaderProps) {
-  const currentUser = localStorage.getItem('username') || 'default';
+  const { user } = useAuth();
+  const currentUser = user?.username || localStorage.getItem('username') || 'default';
 
   const { activeStrategy, primaryGoal, todayRisk, winRate30d, strategyRoi } = useMemo(() => {
     const strategies = loadStrategies();
