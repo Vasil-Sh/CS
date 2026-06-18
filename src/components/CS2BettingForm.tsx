@@ -179,8 +179,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     }
 
     loadActiveGoals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [primaryStrategy]); // load once on mount, re-load if primaryStrategy changes from localStorage
 
   useEffect(() => {
     if (prefillData && !prefillConsumedRef.current) {
@@ -396,8 +395,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     if (riskyTeamsFound.length > 0) {
       setFormData(prev => ({ ...prev, riskyTeams: riskyTeamsFound }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expressEvents, formData.game]);
+  }, [expressEvents, formData.game, normalizeTeamName, loadRiskyTeamsFromStorage, getGameFilterValue]);
 
   useEffect(() => {
     const handleStorageChange = () => {

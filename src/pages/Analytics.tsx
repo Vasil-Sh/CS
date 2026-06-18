@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -169,13 +169,13 @@ export default function Analytics() {
     }
   }, [showActionsMenu]);
 
-  const updateBankrollStats = () => {
+  const updateBankrollStats = useCallback(() => {
     const allBets = realGoogleSheetsService.getAllRecords();
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
     setBankrollStats(bankStats);
-  };
+  }, [currentUser]);
 
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -227,9 +227,9 @@ export default function Analytics() {
       setLoading(false);
       updateBankrollStats();
     }
-  };
+  }, [currentUser, updateBankrollStats]);
 
-  const clearAllData = () => {
+  const clearAllData = useCallback(() => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.')) {
       UserDataService.clearUserData(currentUser, 'mybets_data');
       UserDataService.clearUserData(currentUser, 'mybets_stats');
@@ -254,39 +254,44 @@ export default function Analytics() {
         roi: 0
       });
     }
-  };
+  }, [currentUser, updateBankrollStats]);
 
-  const handleBankCardClick = () => {
+  const handleBankCardClick = useCallback(() => {
     setBankModalOpen(true);
-  };
+  }, []);
 
-  const handleBankModalClose = (success: boolean) => {
+  const handleBankModalClose = useCallback((success: boolean) => {
     setBankModalOpen(false);
     if (success) {
       updateBankrollStats();
       bumpBankroll();
     }
-  };
+  }, [updateBankrollStats, bumpBankroll]);
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-  };
+  const toggleTheme = useCallback(() => {
+    setIsDarkTheme(prev => !prev);
+  }, []);
 
-  // Calculate metrics
-  const completedBets = bets.filter((bet: Bet) => bet.result !== 'Pending');
-  const winningBets = completedBets.filter((bet: Bet) => bet.result === 'Win');
-  const losingBets = completedBets.filter((bet: Bet) => bet.result === 'Loss');
-  
-  const calculateStreaks = () => {
+  // Derive memoized metrics
+  const { completedBets, winningBets, losingBets } = useMemo(() => {
+    const completed = bets.filter((bet: Bet) => bet.result !== 'Pending');
+    return {
+      completedBets: completed,
+      winningBets: completed.filter((bet: Bet) => bet.result === 'Win'),
+      losingBets: completed.filter((bet: Bet) => bet.result === 'Loss'),
+    };
+  }, [bets]);
+
+  const streaks = useMemo(() => {
     let currentWinStreak = 0;
     let currentLossStreak = 0;
     let maxWinStreak = 0;
     let maxLossStreak = 0;
-    
-    const sortedBets = [...completedBets].sort((a: Bet, b: Bet) => 
+
+    const sortedBets = [...completedBets].sort((a: Bet, b: Bet) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    
+
     for (const bet of sortedBets) {
       if (bet.result === 'Win') {
         currentWinStreak++;
@@ -298,13 +303,11 @@ export default function Analytics() {
         maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
       }
     }
-    
+
     return { maxWinStreak, maxLossStreak, currentWinStreak, currentLossStreak };
-  };
+  }, [completedBets]);
 
-  const streaks = calculateStreaks();
-
-  const oddsAnalysis = (): OddsRange[] => {
+  const oddsAnalysis = useMemo((): OddsRange[] => {
     const lowOdds = completedBets.filter((bet: Bet) => bet.odds < 2.0);
     const midOdds = completedBets.filter((bet: Bet) => bet.odds >= 2.0 && bet.odds < 3.0);
     const highOdds = completedBets.filter((bet: Bet) => bet.odds >= 3.0);
@@ -329,7 +332,7 @@ export default function Analytics() {
         profit: highOdds.reduce((sum: number, bet: Bet) => sum + (bet.profit || 0), 0)
       }
     ];
-  };
+  }, [completedBets]);
 
   const shortenBetTypeName = (betType: string): string => {
     if (betType.includes('Експрес') || betType.includes('|')) {
@@ -345,7 +348,7 @@ export default function Analytics() {
     return betType;
   };
 
-  const betTypeDistribution = () => {
+  const betTypeDistribution = useMemo(() => {
     const distribution: { [key: string]: { count: number; profit: number; wins: number; originalName: string } } = {};
     bets.forEach((bet: Bet) => {
       const originalType = bet.betType || 'Winner';
@@ -370,9 +373,9 @@ export default function Analytics() {
       winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
       color: colors[index % colors.length]
     }));
-  };
+  }, [bets]);
 
-  const monthlyProfitData = (): MonthlyData[] => {
+  const monthlyProfitData = useMemo((): MonthlyData[] => {
     const monthlyData: { [key: string]: { profit: number; wins: number; losses: number } } = {};
     
     completedBets.forEach((bet: Bet) => {
@@ -409,22 +412,21 @@ export default function Analytics() {
           winRate: data.wins + data.losses > 0 ? Math.round((data.wins / (data.wins + data.losses)) * 100) : 0
         };
       });
-  };
+  }, [completedBets]);
 
-  const balanceOverTime = (): BalanceData[] => {
-    const initialBalance = 0;
-    let runningBalance = initialBalance;
-    
-    const sortedBets = [...completedBets].sort((a: Bet, b: Bet) => 
+  const balanceOverTime = useMemo((): BalanceData[] => {
+    let runningBalance = 0;
+
+    const sortedBets = [...completedBets].sort((a: Bet, b: Bet) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    
-    const balanceData: BalanceData[] = [{ 
-      date: sortedBets[0]?.date || new Date().toISOString().split('T')[0], 
-      balance: initialBalance, 
-      profit: 0 
+
+    const balanceData: BalanceData[] = [{
+      date: sortedBets[0]?.date || new Date().toISOString().split('T')[0],
+      balance: 0,
+      profit: 0
     }];
-    
+
     sortedBets.forEach((bet: Bet) => {
       runningBalance += bet.profit || 0;
       balanceData.push({
@@ -435,11 +437,11 @@ export default function Analytics() {
         odds: bet.odds
       });
     });
-    
-    return balanceData;
-  };
 
-  const oddsVsProfitData = (): ScatterData[] => {
+    return balanceData;
+  }, [completedBets]);
+
+  const scatterData = useMemo((): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
       odds: Math.round(Number(bet.odds) * 100) / 100,
       profit: Math.round(Number(bet.profit) * 100) / 100,
@@ -448,13 +450,12 @@ export default function Analytics() {
       match: bet.match || '',
       fill: bet.result === 'Win' ? '#10b981' : '#ef4444'
     }));
-  };
+  }, [completedBets]);
 
-  const oddsData = oddsAnalysis();
-  const betTypes = betTypeDistribution();
-  const monthlyProfit = monthlyProfitData();
-  const balanceData = balanceOverTime();
-  const scatterData = oddsVsProfitData();
+  const oddsData = oddsAnalysis;    // now a memoized value, not a function call
+  const betTypes = betTypeDistribution;
+  const monthlyProfit = monthlyProfitData;
+  const balanceData = balanceOverTime;
 
   const oddsChartData = oddsData.map(range => ({
     range: range.range.replace(/\s*\(.*?\)\s*/g, ''),

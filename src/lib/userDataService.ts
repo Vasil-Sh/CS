@@ -1,4 +1,8 @@
-// User-specific data isolation service
+// User-specific data isolation service with debounced writes
+
+/** Simple debounce: coalesce rapid writes for the same key within 100ms */
+const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 export class UserDataService {
   private static getUserKey(username: string, key: string): string {
     return `user_${username}_${key}`;
@@ -16,11 +20,24 @@ export class UserDataService {
     }
   }
 
-  // Set user-specific data
+  // Set user-specific data (debounced: coalesces rapid writes per key)
   static setUserData<T>(username: string, key: string, value: T): void {
     try {
       const userKey = this.getUserKey(username, key);
-      localStorage.setItem(userKey, JSON.stringify(value));
+      const timerKey = userKey;
+
+      if (debounceTimers.has(timerKey)) {
+        clearTimeout(debounceTimers.get(timerKey));
+      }
+
+      debounceTimers.set(timerKey, setTimeout(() => {
+        try {
+          localStorage.setItem(userKey, JSON.stringify(value));
+          debounceTimers.delete(timerKey);
+        } catch (error) {
+          console.error('Error setting user data:', error);
+        }
+      }, 100));
     } catch (error) {
       console.error('Error setting user data:', error);
     }
