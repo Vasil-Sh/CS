@@ -415,6 +415,15 @@ const formatDateGroupHeader = (dateKey: string): string => {
   return `${dayShort}, ${formatted}`;
 };
 
+/** Format full date title: "Counter-Strike matches (Четвер, 18.06.2026)" */
+const formatFullDateTitle = (dateKey: string): string => {
+  const d = new Date(dateKey + 'T12:00:00');
+  const dayNames = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+  const dayFull = dayNames[d.getDay()];
+  const formatted = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return `Counter-Strike matches (${dayFull}, ${formatted})`;
+};
+
 /** Get today's date key in YYYY-MM-DD format */
 const getTodayDateKey = (): string => {
   const now = new Date();
@@ -684,14 +693,10 @@ export default function Matches() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  // Separate live and non-live matches
-  const liveMatches = sortedMatches.filter(m => m.matchStatus === 'live');
-  const nonLiveMatches = sortedMatches.filter(m => m.matchStatus !== 'live');
-
-  // Group non-live matches by date, filtering out past days
+  // Group matches by date, filtering out past days. Live matches go into today's group.
   const todayKey = getTodayDateKey();
   const groupedByDate: Record<string, Match[]> = {};
-  nonLiveMatches.forEach(match => {
+  sortedMatches.forEach(match => {
     const key = getDateKey(match.date);
     if (key < todayKey) return;
     if (!groupedByDate[key]) groupedByDate[key] = [];
@@ -1461,39 +1466,7 @@ export default function Matches() {
             </div>
           )}
 
-          {/* ===== LIVE MATCHES ===== */}
-          {!initialLoading && liveMatches.length > 0 && (
-            <Card 
-              className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300"
-              style={{ boxShadow: chartCardShadow }}
-            >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
-                <CardTitle>
-                  <div className="flex items-center gap-4">
-                    <Radio className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
-                    <span className="text-2xl font-bold text-[#111827] tracking-tight">
-                      Live Counter-Strike matches
-                    </span>
-                    <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
-                      {liveMatches.length}
-                    </Badge>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    {renderTableHeader()}
-                    <tbody>
-                      {liveMatches.map(renderMatchRow)}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* ===== DATE GROUP CARDS — only today and future dates ===== */}
+          {/* ===== DATE GROUP CARDS — today and future dates ===== */}
           {!initialLoading && sortedDateKeys.map((dateKey) => {
             const dateMatches = groupedByDate[dateKey];
             return (
@@ -1507,7 +1480,7 @@ export default function Matches() {
                     <div className="flex items-center gap-4">
                       <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
                       <span className="text-2xl font-bold text-[#111827] tracking-tight">
-                        {formatDateGroupHeader(dateKey)}
+                        {formatFullDateTitle(dateKey)}
                       </span>
                       <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
                         {dateMatches.length}
