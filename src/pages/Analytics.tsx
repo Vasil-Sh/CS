@@ -522,16 +522,16 @@ export default function Analytics() {
 
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
 
-  // Shared card style for hover shadow effect
+  // Shared card style for hover shadow effect (matches StatCard)
   const cardBaseStyle = {
-    transform: 'scale(1)',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    transform: 'translateY(0)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
   };
 
   const cardHoverStyle = {
-    transform: 'scale(1.03)',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
   };
 
   // Enhanced card shadow for chart cards — subtle depth like header
@@ -660,7 +660,7 @@ export default function Analytics() {
           
           {/* 1. Поточний банк */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden"
+            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#D1D5DB]"
             onClick={handleBankCardClick}
             style={cardBaseStyle}
             onMouseEnter={(e) => {
@@ -697,7 +697,7 @@ export default function Analytics() {
 
           {/* 2. Загальний профіт */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -728,7 +728,7 @@ export default function Analytics() {
 
           {/* 3. Всього ставок — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -772,7 +772,7 @@ export default function Analytics() {
 
           {/* 4. Win Rate — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1186,7 +1186,7 @@ export default function Analytics() {
                         return (
                           <div 
                             key={index}
-                            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+                            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
                             style={cardBaseStyle}
                             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}

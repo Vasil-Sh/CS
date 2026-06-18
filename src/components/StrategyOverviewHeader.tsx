@@ -69,13 +69,13 @@ interface StoredGoal {
 
 // Shared card style — identical to Analytics KPI cards
 const cardBaseStyle: React.CSSProperties = {
-  transform: 'scale(1)',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  transform: 'translateY(0)',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
 };
 const cardHoverStyle: React.CSSProperties = {
-  transform: 'scale(1.03)',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
+  transform: 'translateY(-3px)',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
 };
 
 const applyHover = (el: HTMLElement) => Object.assign(el.style, cardHoverStyle);
@@ -305,7 +305,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('strategies')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -370,7 +370,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('goals')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -412,7 +412,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('risks')}
-          className="text-left bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -462,7 +462,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* 4. Вінрейт 30 днів */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group relative"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group relative"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -509,7 +509,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl p-7 h-full flex flex-col"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -626,7 +626,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* Current goal details card — mirrors strategy card structure */}
         <div
-          className="bg-white border border-[#F3F4F6] rounded-3xl p-7 h-full flex flex-col"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
