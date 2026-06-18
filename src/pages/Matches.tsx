@@ -42,6 +42,7 @@ import {
   X,
   ChevronDown
 } from 'lucide-react';
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { useToast } from '@/hooks/use-toast';
 import {
   Tooltip,
