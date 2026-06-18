@@ -650,7 +650,7 @@ export default function Analytics() {
           <Alert className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5">
             <AlertTriangle className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
             <AlertDescription className="text-sm text-[#1E40AF] ml-2">
-              <strong className="font-medium">Немає даних для аналізу.</strong> Додайте ставки на сторінці "Мої ставки" для перегляду аналітики.
+              <strong className="font-medium">Немає даних для аналізу.</strong> Додайте данні на сторінці "Додати запис" для перегляду аналітики.
             </AlertDescription>
           </Alert>
         )}
