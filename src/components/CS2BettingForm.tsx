@@ -12,6 +12,8 @@ import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { getStatusBadge, getGameEmoji, getBetTypeOptions } from '@/lib/displayHelpers';
+import { parseDota2MatchFromUrl, parseCS2MatchFromUrl, type ParsedMatchResult } from '@/lib/matchUrlParser';
 import StrategyViolationDialog from './StrategyViolationDialog';
 
 export interface MatchPrefillData {
@@ -486,110 +488,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     }));
   };
 
-  const parseDota2MatchFromUrl = (url: string): { team1: string; team2: string; tournament: string } | null => {
-    try {
-      const regex = /dota2\/[^/]+\/([a-z0-9\-_]+-vs-[a-z0-9\-_]+)\//i;
-      const match = url.match(regex);
-      
-      if (match && match[1]) {
-        const matchInfo = match[1];
-        const parts = matchInfo.split('-');
-        const vsIndex = parts.findIndex(part => part === 'vs');
-        
-        if (vsIndex > 0 && vsIndex < parts.length - 1) {
-          const team1Parts = parts.slice(0, vsIndex);
-          const team1 = team1Parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-          
-          const team2Parts = parts.slice(vsIndex + 1);
-          const team2 = team2Parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-          
-          return {
-            team1,
-            team2,
-            tournament: 'Dota 2 Tournament'
-          };
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Error parsing Dota 2 URL:', error);
-      return null;
-    }
-  };
-
-  const parseCS2MatchFromUrl = (url: string): { team1: string; team2: string; tournament: string } | null => {
-    try {
-      const urlParts = url.split('/');
-      const matchInfo = urlParts[urlParts.length - 1];
-      
-      if (matchInfo) {
-        const parts = matchInfo.split('-');
-        const vsIndex = parts.findIndex(part => part === 'vs');
-        
-        if (vsIndex > 0 && vsIndex < parts.length - 1) {
-          const team1Parts = parts.slice(0, vsIndex);
-          const team1 = team1Parts.join(' ').toUpperCase();
-          const afterVs = parts.slice(vsIndex + 1);
-          
-          const tournamentKeywords = [
-            'esl', 'pro', 'league', 'season',
-            'blast', 'premier', 'spring', 'fall', 'groups', 'finals',
-            'iem', 'katowice', 'cologne', 'sydney', 'beijing',
-            'major', 'championship', 'pgl', 'antwerp', 'stockholm',
-            'faceit', 'london', 'eleague', 'dreamhack', 'masters',
-            'nodwin', 'clutch', 'series',
-            'digital', 'crusade', 'draculan'
-          ];
-          
-          let tournamentStartIndex = -1;
-          for (let i = 0; i < afterVs.length; i++) {
-            if (tournamentKeywords.some(keyword => 
-              afterVs[i].toLowerCase().includes(keyword.toLowerCase())
-            )) {
-              tournamentStartIndex = i;
-              break;
-            }
-          }
-          
-          let team2, tournament;
-          
-          if (tournamentStartIndex > 0) {
-            const team2Parts = afterVs.slice(0, tournamentStartIndex);
-            team2 = team2Parts.join(' ').toUpperCase();
-            const tournamentParts = afterVs.slice(tournamentStartIndex);
-            tournament = tournamentParts.join(' ').replace(/-/g, ' ').toUpperCase();
-          } else if (tournamentStartIndex === 0) {
-            team2 = afterVs.slice(0, 2).join(' ').toUpperCase();
-            tournament = afterVs.slice(2).join(' ').replace(/-/g, ' ').toUpperCase();
-          } else {
-            const midPoint = Math.ceil(afterVs.length / 2);
-            team2 = afterVs.slice(0, midPoint).join(' ').toUpperCase();
-            tournament = afterVs.slice(midPoint).join(' ').replace(/-/g, ' ').toUpperCase();
-          }
-          
-          team2 = team2.replace(/\s+/g, ' ').trim();
-          tournament = tournament.replace(/\s+/g, ' ').trim();
-          
-          tournament = tournament
-            .replace(/ESL PRO LEAGUE/g, 'ESL Pro League')
-            .replace(/BLAST PREMIER/g, 'BLAST Premier')
-            .replace(/IEM /g, 'IEM ')
-            .replace(/SEASON (\d+)/g, 'Season $1')
-            .replace(/NODWIN CLUTCH SERIES/g, 'NODWIN Clutch Series');
-          
-          return {
-            team1,
-            team2,
-            tournament: tournament || 'Unknown Tournament'
-          };
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Error parsing CS2 URL:', error);
-      return null;
-    }
-  };
+  // parseDota2MatchFromUrl, parseCS2MatchFromUrl — imported from @/lib/matchUrlParser
 
   const parseMatchFromUrl = async (url: string) => {
     setIsParsingMatch(true);
@@ -686,28 +585,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     }));
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'БАН':
-        return 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2] border-0 rounded-full font-medium text-sm px-3 py-1';
-      case 'Нестабільні':
-        return 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-full font-medium text-sm px-3 py-1';
-      case 'Обережно':
-        return 'bg-[#DBEAFE] text-[#2563EB] hover:bg-[#DBEAFE] border-0 rounded-full font-medium text-sm px-3 py-1';
-      case 'Рідко':
-        return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
-      case 'Надійна':
-        return 'bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border-0 rounded-full font-medium text-sm px-3 py-1';
-      case 'Без статусу':
-        return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
-      default:
-        return 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] border-0 rounded-full font-medium text-sm px-3 py-1';
-    }
-  };
-
-  const getGameEmoji = (game: string) => {
-    return game === 'CS' ? '🎯 CS:' : '🛡️ Дота:';
-  };
+  // getStatusBadge, getGameEmoji — imported from @/lib/displayHelpers
 
   const addExpressEvent = () => {
     if (expressEvents.length >= 10) {
@@ -1129,35 +1007,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
   const kellyData = hasConfidence ? calculateKellyCriterion() : null;
   const overconfidenceWarning = hasConfidence ? getOverconfidenceWarning() : null;
 
-  const getBetTypeOptions = () => {
-    if (formData.game === 'Dota2') {
-      return [
-        { value: 'Match Winner', label: 'Переможець матчу' },
-        { value: 'Map Winner', label: 'Переможець карти' },
-        { value: 'Total Maps', label: 'Тотал карт' },
-        { value: 'Handicap +1.5', label: 'Фора +1.5' },
-        { value: 'Handicap -1.5', label: 'Фора -1.5' },
-        { value: 'Handicap +2.5', label: 'Фора +2.5' },
-        { value: 'Handicap -2.5', label: 'Фора -2.5' },
-        { value: 'First Blood', label: 'Перша кров' },
-        { value: 'Total Kills', label: 'Тотал вбивств' },
-        { value: 'Roshan', label: 'Рошан' }
-      ];
-    } else {
-      return [
-        { value: 'Match Winner', label: 'Переможець матчу' },
-        { value: 'Map Winner', label: 'Переможець карти' },
-        { value: 'Total Maps', label: 'Тотал карт' },
-        { value: 'Handicap +1.5', label: 'Фора +1.5' },
-        { value: 'Handicap -1.5', label: 'Фора -1.5' },
-        { value: 'Handicap +2.5', label: 'Фора +2.5' },
-        { value: 'Handicap -2.5', label: 'Фора -2.5' },
-        { value: 'First Map', label: 'Перша карта' },
-        { value: 'Pistol Round', label: 'Пістолетний раунд' },
-        { value: 'Total Rounds', label: 'Тотал раундів' }
-      ];
-    }
-  };
+  // getBetTypeOptions — imported from @/lib/displayHelpers (accepts game param)
 
   const inputClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";
   const selectTriggerClass = "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] focus:border-[#111827] focus:ring-0 transition-colors";
@@ -1469,7 +1319,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                             <SelectValue placeholder="Оберіть тип прогнозу" />
                           </SelectTrigger>
                           <SelectContent>
-                            {getBetTypeOptions().map(option => (
+                            {getBetTypeOptions(formData.game).map(option => (
                               <SelectItem key={option.value} value={option.value}>
                                 {option.label}
                               </SelectItem>
@@ -1741,7 +1591,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                                 <SelectValue placeholder="Тип" />
                               </SelectTrigger>
                               <SelectContent>
-                                {getBetTypeOptions().map(opt => (
+                                {getBetTypeOptions(formData.game).map(opt => (
                                   <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                                 ))}
                               </SelectContent>
