@@ -5,7 +5,6 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import csharpDataService from '@/services/csharp-data-service';
 import BalanceChart from '@/components/BalanceChart';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
@@ -15,6 +14,7 @@ import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppStore } from '@/stores/appStore';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -126,7 +126,9 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState({ connected: false, environment: 'Browser' });
+  const [connectionStatus] = useState({ connected: false, environment: 'Browser' });
+  const bumpBankroll = useAppStore((s) => s.bumpBankroll);
+  const bankrollVersion = useAppStore((s) => s.bankrollVersion);
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [bankrollStats, setBankrollStats] = useState({
     initialBank: 0,
@@ -140,7 +142,6 @@ export default function Analytics() {
 
   useEffect(() => {
     loadAnalyticsData();
-    updateConnectionStatus();
     updateBankrollStats();
   }, []);
 
@@ -151,18 +152,14 @@ export default function Analytics() {
       }
     };
 
-    const handleBankrollUpdate = () => {
-      updateBankrollStats();
-    };
-
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('bankrollUpdated', handleBankrollUpdate);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('bankrollUpdated', handleBankrollUpdate);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [currentUser]);
+
+  // React to bankroll bumps from other components
+  useEffect(() => {
+    updateBankrollStats();
+  }, [bankrollVersion]);
 
   useEffect(() => {
     const handleClickOutside = () => setShowActionsMenu(false);
@@ -176,11 +173,6 @@ export default function Analytics() {
     const allBets = realGoogleSheetsService.getAllRecords();
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
     setBankrollStats(bankStats);
-  };
-
-  const updateConnectionStatus = () => {
-    const status = csharpDataService.getConnectionStatus();
-    setConnectionStatus(status);
   };
 
   const loadAnalyticsData = async () => {
@@ -233,7 +225,6 @@ export default function Analytics() {
       });
     } finally {
       setLoading(false);
-      updateConnectionStatus();
       updateBankrollStats();
     }
   };
@@ -273,7 +264,7 @@ export default function Analytics() {
     setBankModalOpen(false);
     if (success) {
       updateBankrollStats();
-      window.dispatchEvent(new Event('bankrollUpdated'));
+      bumpBankroll();
     }
   };
 

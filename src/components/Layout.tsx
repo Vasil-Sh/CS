@@ -135,6 +135,7 @@ export default function Layout() {
                 </div>
                 <button
                   onClick={handleLogout}
+                  aria-label="Вийти з облікового запису"
                   className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
@@ -171,7 +172,7 @@ export default function Layout() {
             </div>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12">
+                <Button variant="outline" size="icon" aria-label="Відкрити меню" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12">
                   <Menu className="h-6 w-6" strokeWidth={1.5} />
                 </Button>
               </SheetTrigger>

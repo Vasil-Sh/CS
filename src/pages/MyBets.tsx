@@ -13,6 +13,7 @@ import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppStore } from '@/stores/appStore';
 import { 
   TrendingUp, DollarSign, Target, BarChart3, Calendar, Trophy, 
   AlertTriangle, CheckCircle, XCircle, Clock, Trash2, Share2, 
@@ -130,7 +131,27 @@ export default function MyBets() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [activeTab, setActiveTab] = useState('add');
-  const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
+  const bankrollRefreshKeyState = useState(0);
+  const bankrollRefreshKey = bankrollRefreshKeyState[0];
+  const setBankrollRefreshKey = bankrollRefreshKeyState[1];
+  const bankrollVersion = useAppStore((s) => s.bankrollVersion);
+  const bumpBankroll = useAppStore((s) => s.bumpBankroll);
+
+  // React to cross-tab storage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.includes('bankroll_') && e.key.includes(currentUser)) {
+        setBankrollRefreshKey(prev => prev + 1);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [currentUser]);
+
+  // React to bankroll bumps from other components
+  useEffect(() => {
+    setBankrollRefreshKey(prev => prev + 1);
+  }, [bankrollVersion]);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
@@ -183,26 +204,6 @@ export default function MyBets() {
     const newStats = BankrollService.getBankrollStats(currentUser, recentBets);
     setBankrollStats(newStats);
   }, [currentUser, recentBets, bankrollRefreshKey]);
-
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key && e.key.includes('bankroll_') && e.key.includes(currentUser)) {
-        setBankrollRefreshKey(prev => prev + 1);
-      }
-    };
-
-    const handleBankrollUpdate = () => {
-      setBankrollRefreshKey(prev => prev + 1);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('bankrollUpdated', handleBankrollUpdate);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('bankrollUpdated', handleBankrollUpdate);
-    };
-  }, [currentUser]);
 
   useEffect(() => {
     fetchUsers();
@@ -388,9 +389,9 @@ export default function MyBets() {
     setBankModalOpen(false);
     if (success) {
       setBankrollRefreshKey(prev => prev + 1);
-      window.dispatchEvent(new Event('bankrollUpdated'));
+      bumpBankroll();
     }
-  }, []);
+  }, [bumpBankroll]);
 
   const sortedAndFilteredBets = useMemo(() => {
     // Step 1: Sort by pending first, then by date

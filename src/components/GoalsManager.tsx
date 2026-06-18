@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppStore } from '@/stores/appStore';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { 
   Target, 
@@ -114,6 +115,7 @@ const cardHoverStyle = {
 export default function GoalsManager() {
   const { user } = useAuth();
   const currentUser = user?.username || '';
+  const bumpStrategy = useAppStore((s) => s.bumpStrategy);
   const [goals, setGoals] = useState<Goal[]>(() => {
     const loadedGoals = UserDataService.getUserData(currentUser, 'goals', []);
     return loadedGoals.map((goal: Goal) => {
@@ -163,7 +165,7 @@ export default function GoalsManager() {
   const [targetWinRateStr, setTargetWinRateStr] = useState('65');
   const [betsPerDayStr, setBetsPerDayStr] = useState('5');
 
-  useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); window.dispatchEvent(new Event('strategy-data-changed')); } }, [goals, currentUser]);
+  useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); bumpStrategy(); } }, [goals, currentUser, bumpStrategy]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
     if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0) return 0;

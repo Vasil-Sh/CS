@@ -1,17 +1,30 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
+// Eagerly loaded (small / critical path)
 import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
-import LoginDigestoDemo from '@/pages/LoginDigestoDemo';
-import Analytics from '@/pages/Analytics';
-import Matches from '@/pages/Matches';
-import Profile from '@/pages/Profile';
-import MyBets from '@/pages/MyBets';
-import Strategy from '@/pages/Strategy';
-import Admin from '@/pages/Admin';
+
+// Lazy-loaded (heavy pages — code split per route)
+const LoginDigestoDemo = lazy(() => import('@/pages/LoginDigestoDemo'));
+const Analytics = lazy(() => import('@/pages/Analytics'));
+const Matches = lazy(() => import('@/pages/Matches'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const MyBets = lazy(() => import('@/pages/MyBets'));
+const Strategy = lazy(() => import('@/pages/Strategy'));
+const Admin = lazy(() => import('@/pages/Admin'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -20,7 +33,14 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/login-digesto-demo" element={<LoginDigestoDemo />} />
+        <Route
+          path="/login-digesto-demo"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LoginDigestoDemo />
+            </Suspense>
+          }
+        />
 
         {/* Protected routes */}
         <Route
@@ -31,13 +51,62 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/app/analytics" replace />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="matches" element={<Matches />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="my-bets" element={<MyBets />} />
-          <Route path="strategy" element={<Strategy />} />
-          <Route path="admin" element={<Admin />} />
+          <Route
+            index
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Navigate to="/app/analytics" replace />
+              </Suspense>
+            }
+          />
+          <Route
+            path="analytics"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Analytics />
+              </Suspense>
+            }
+          />
+          <Route
+            path="matches"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Matches />
+              </Suspense>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
+            }
+          />
+          <Route
+            path="my-bets"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <MyBets />
+              </Suspense>
+            }
+          />
+          <Route
+            path="strategy"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Strategy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="admin"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Admin />
+              </Suspense>
+            }
+          />
         </Route>
       </Routes>
       <Toaster />

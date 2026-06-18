@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Target, Flag, AlertTriangle, User } from 'lucide-react';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
@@ -6,41 +6,21 @@ import RiskManagement from '@/components/RiskManagement';
 import StrategyOverviewHeader from '@/components/StrategyOverviewHeader';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppStore } from '@/stores/appStore';
 import type { Bet } from '@/types/betting';
 
-/**
- * Strategy page — unified screen that hosts strategies, goals and risks.
- *
- * Layout and typography mirror the Analytics page: same horizontal padding
- * (`px-6 lg:px-8`), same title size (`text-[48px] font-semibold`), and same
- * content spacing so navigation feels consistent across the app.
- */
 export default function Strategy() {
   const [activeTab, setActiveTab] = useState<'strategies' | 'goals' | 'risks'>('strategies');
   const [bets, setBets] = useState<Bet[]>([]);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const { user } = useAuth();
   const currentUser = user?.username || 'default';
+  const strategyVersion = useAppStore((s) => s.strategyVersion);
 
   useEffect(() => {
     const myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
     setBets(myBetsData || []);
-  }, [currentUser]);
-
-  // Listen for custom event dispatched by GoalsManager / StrategyOverview
-  const handleDataChanged = useCallback(() => {
-    setRefreshKey((k) => k + 1);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('strategy-data-changed', handleDataChanged);
-    window.addEventListener('goals-data-changed', handleDataChanged);
-    return () => {
-      window.removeEventListener('strategy-data-changed', handleDataChanged);
-      window.removeEventListener('goals-data-changed', handleDataChanged);
-    };
-  }, [handleDataChanged]);
+  }, [currentUser, strategyVersion]);
 
   const tabs = [
     { id: 'strategies' as const, label: 'Стратегії', icon: Target },
@@ -76,7 +56,7 @@ export default function Strategy() {
       {/* ===== CONTENT ===== */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Overview header: KPI cards + current strategy + insight */}
-        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} refreshKey={refreshKey} />
+        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} refreshKey={strategyVersion} />
 
         {/* Tabs bar — matches styling used elsewhere in the app */}
         <div className="space-y-6">

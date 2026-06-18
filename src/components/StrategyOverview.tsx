@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, Eye, Zap, TrendingDown, Percent, CheckCircle2, Sparkles, DollarSign, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAppStore } from '@/stores/appStore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface BetData {
@@ -97,6 +98,7 @@ export default function StrategyOverview() {
   const [selectedStrategy, setSelectedStrategy] = useState<CS2Strategy | null>(null);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const bumpStrategy = useAppStore((s) => s.bumpStrategy);
   const [newlyCreatedStrategy, setNewlyCreatedStrategy] = useState<CS2Strategy | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [isCriteriaOpen, setIsCriteriaOpen] = useState(true);
@@ -179,7 +181,7 @@ export default function StrategyOverview() {
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
       localStorage.setItem('customStrategies', JSON.stringify(strategies));
-      window.dispatchEvent(new Event('strategy-data-changed'));
+      bumpStrategy();
     } catch (error) {
       console.error('Error saving custom strategies:', error);
     }
@@ -487,7 +489,7 @@ export default function StrategyOverview() {
       localStorage.setItem('primaryStrategy', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
-    window.dispatchEvent(new Event('strategy-data-changed'));
+    bumpStrategy();
   };
 
   const openDetailsDialog = (strategy: CS2Strategy) => {
