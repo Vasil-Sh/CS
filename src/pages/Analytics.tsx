@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
+import MiniDonut from '@/components/MiniDonut';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import GoalsManager from '@/components/GoalsManager';
@@ -15,6 +16,7 @@ import { BankrollService } from '@/lib/bankrollService';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -40,7 +42,7 @@ import {
   MoreHorizontal,
   Pencil
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 interface TooltipPayload {
@@ -60,51 +62,6 @@ interface MonthlyData {
   losses: number;
   totalBets: number;
   winRate: number;
-}
-
-// Mini Donut Chart component — centered, with white gap between segments
-function MiniDonut({ 
-  value, 
-  total, 
-  colors, 
-  size = 140 
-}: { 
-  value: number; 
-  total: number; 
-  colors: { main: string; sub1: string; sub2: string }; 
-  size?: number;
-}) {
-  const percentage = total > 0 ? (value / total) * 100 : 0;
-  const remaining = 100 - percentage;
-  
-  const data = [
-    { name: 'value', val: percentage || 0.01 },
-    { name: 'remaining', val: remaining || 0.01 },
-  ];
-
-  return (
-    <div className="flex items-center justify-center" style={{ width: size, height: size }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={size * 0.30}
-            outerRadius={size * 0.46}
-            startAngle={90}
-            endAngle={-270}
-            dataKey="val"
-            stroke="#ffffff"
-            strokeWidth={4}
-          >
-            <Cell fill={colors.main} />
-            <Cell fill={colors.sub2} />
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  );
 }
 
 export default function Analytics() {
@@ -523,19 +480,11 @@ export default function Analytics() {
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
 
   // Shared card style for hover shadow effect (matches StatCard)
-  const cardBaseStyle = {
-    transform: 'translateY(0)',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
-  };
-
-  const cardHoverStyle = {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-  };
+  const cardBaseStyle = CARD_BASE_STYLE;
+  const cardHoverStyle = CARD_HOVER_STYLE;
 
   // Enhanced card shadow for chart cards — subtle depth like header
-  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
+  const chartCardShadow = CHART_CARD_SHADOW;
 
   // Odds category labels
   const oddsCategoryLabels = [

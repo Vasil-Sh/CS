@@ -18,6 +18,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
 
@@ -215,18 +216,11 @@ export default function Profile() {
     event.target.value = '';
   };
 
-  const cardBaseStyle = {
-    transform: 'translateY(0)',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
-  };
+  const cardBaseStyle = CARD_BASE_STYLE;
 
-  const cardHoverStyle = {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-  };
+  const cardHoverStyle = CARD_HOVER_STYLE;
 
-  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
+  const chartCardShadow = CHART_CARD_SHADOW;
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
