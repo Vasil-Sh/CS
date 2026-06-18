@@ -158,6 +158,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     !!(expressMatchesData && expressMatchesData.length >= 2)
   );
   const prefillConsumedRef = useRef(false);
+  const strategyLoadedRef = useRef(false);
 
   useEffect(() => {
     localStorage.setItem('maxStakePercent', String(maxStakePercent));
@@ -174,6 +175,9 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
       }, 0);
     }
 
+    if (strategyLoadedRef.current) return;
+    strategyLoadedRef.current = true;
+
     const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
     if (savedPrimaryStrategy) {
       const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
@@ -184,7 +188,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     }
 
     loadActiveGoals();
-  }, [primaryStrategy]); // load once on mount, re-load if primaryStrategy changes from localStorage
+  }, []); // run once on mount only
 
   useEffect(() => {
     if (prefillData && !prefillConsumedRef.current) {
