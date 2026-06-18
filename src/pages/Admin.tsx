@@ -121,12 +121,12 @@ export default function Admin() {
   const [deletingIndex, setDeletingIndex] = useState<number>(-1);
 
   useEffect(() => {
-    if (userRole !== 'admin') {
+    if (!isAdmin) {
       navigate('/app/matches');
       return;
     }
     fetchUsers();
-  }, [userRole, navigate]);
+  }, [isAdmin, navigate]);
 
   const getDaysUntilExpiry = (endDateStr: string): number => {
     try {
