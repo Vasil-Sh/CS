@@ -395,7 +395,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     if (riskyTeamsFound.length > 0) {
       setFormData(prev => ({ ...prev, riskyTeams: riskyTeamsFound }));
     }
-  }, [expressEvents, formData.game, normalizeTeamName, loadRiskyTeamsFromStorage, getGameFilterValue]);
+  }, [expressEvents, formData.game]);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -419,7 +419,9 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const loadRiskyTeamsFromStorage = (): RiskyTeam[] => {
+// ── Pure utility functions (outside component, stable references) ──
+
+function loadRiskyTeamsFromStorage(): RiskyTeam[] {
     try {
       const saved = localStorage.getItem('admin_risky_teams');
       if (saved) {
@@ -437,7 +439,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     return [];
   };
 
-  const normalizeTeamName = (name: string): string => {
+function normalizeTeamName(name: string): string {
     return name
       .toLowerCase()
       .trim()
@@ -445,7 +447,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
       .replace(/[^a-z0-9]/g, '');
   };
 
-  const getGameFilterValue = (formGame: 'CS2' | 'Dota2'): string => {
+function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     return formGame === 'CS2' ? 'CS' : 'Dota';
   };
 
