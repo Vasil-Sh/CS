@@ -1,4 +1,5 @@
 // Real Google Sheets integration for CS2 Analytics
+import { SPREADSHEET_ID_DATA } from './sheetsConfig';
 import { logServiceCall } from './devLogger';
 
 export interface CS2BettingRecord {
