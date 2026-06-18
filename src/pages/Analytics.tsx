@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
-import ScatterTooltip from '@/components/analytics/ScatterTooltip';
-import MonthlyProfitBar from '@/components/analytics/MonthlyProfitBar';
+import MonthlyProfitChartCard from '@/components/analytics/MonthlyProfitChartCard';
+import OddsVsProfitScatterCard from '@/components/analytics/OddsVsProfitScatterCard';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import GoalsManager from '@/components/GoalsManager';
@@ -20,14 +20,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { 
-  TrendingUp, 
-  TrendingDown, 
   Target, 
   DollarSign,
   Filter,
   RefreshCw,
   Trash2,
-  CheckCircle,
   AlertTriangle,
   BarChart3,
   Calendar,
@@ -44,7 +41,7 @@ import {
   MoreHorizontal,
   Pencil
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Legend, ReferenceLine } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
 interface MonthlyData {
@@ -743,217 +740,8 @@ export default function Analytics() {
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* ===== MONTHLY PROFIT — BAR CHART ===== */}
-                      <Card 
-                        className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                        style={{ boxShadow: chartCardShadow }}
-                      >
-                        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                          <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
-                            <span className="flex items-center gap-3">
-                              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                                <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                              </div>
-                              Прибуток по місяцях
-                            </span>
-                            <div className="flex gap-2">
-                              <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                                Прибуток
-                              </Badge>
-                              <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-                                Кумулятивний
-                              </Badge>
-                            </div>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={monthlyProfit} barCategoryGap="20%">
-                              <defs>
-                                <linearGradient id="cumulativeLineGrad" x1="0" y1="0" x2="1" y2="0">
-                                  <stop offset="0%" stopColor="#111827" stopOpacity={0.5} />
-                                  <stop offset="50%" stopColor="#111827" stopOpacity={1} />
-                                  <stop offset="100%" stopColor="#111827" stopOpacity={0.7} />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                              <XAxis 
-                                dataKey="month" 
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#E5E7EB"
-                              />
-                              <YAxis 
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#E5E7EB"
-                              />
-                              <Tooltip 
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ 
-                                  backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                                  border: '1px solid #E5E7EB', 
-                                  borderRadius: '12px',
-                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
-                                }}
-                                formatter={(value: number | string, name: string) => {
-                                  if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
-                                  if (name === 'cumulative') return [`${value} ₴`, 'Загальний прибуток'];
-                                  return [value, name];
-                                }}
-                                labelFormatter={(label: string) => {
-                                  const monthData = monthlyProfit.find(m => m.month === label);
-                                  if (monthData) {
-                                    return `${label} (${monthData.totalBets} ставок)`;
-                                  }
-                                  return label;
-                                }}
-                              />
-                              <Legend 
-                                wrapperStyle={{ paddingTop: '20px' }}
-                                formatter={(value) => {
-                                  if (value === 'profit') return <span style={{ color: '#374151', fontSize: '13px' }}>Прибуток за місяць</span>;
-                                  if (value === 'cumulative') return <span style={{ color: '#374151', fontSize: '13px' }}>Загальний прибуток</span>;
-                                  return value;
-                                }}
-                              />
-                              <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
-                              <Bar 
-                                dataKey="profit" 
-                                name="profit"
-                                maxBarSize={48}
-                                shape={<MonthlyProfitBar />}
-                              />
-                              <Line 
-                                type="monotone" 
-                                dataKey="cumulative" 
-                                stroke="url(#cumulativeLineGrad)" 
-                                strokeWidth={2.5}
-                                name="cumulative"
-                                dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
-                                activeDot={{ r: 6 }}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                          
-                          <div className="mt-5 flex items-center justify-between gap-4 px-2">
-                            <div className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-[#10B981]" strokeWidth={1.5} />
-                              <span className="text-sm text-[#9CA3AF]">Макс:</span>
-                              <span className="text-sm font-semibold text-[#111827]">
-                                +{Math.max(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                              <span className="text-sm text-[#9CA3AF]">Мін:</span>
-                              <span className="text-sm font-semibold text-[#111827]">
-                                {Math.min(...monthlyProfit.map(m => m.profit)).toFixed(0)} ₴
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-                              <span className="text-sm text-[#9CA3AF]">Сер:</span>
-                              <span className="text-sm font-semibold text-[#111827]">
-                                {(monthlyProfit.reduce((sum, m) => sum + m.profit, 0) / monthlyProfit.length).toFixed(0)} ₴
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* ===== SCATTER CHART — ODDS vs PROFIT ===== */}
-                      <Card 
-                        className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
-                        style={{ boxShadow: chartCardShadow }}
-                      >
-                        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                          <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
-                            <span className="flex items-center gap-3">
-                              <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                                <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                              </div>
-                              Коефіцієнти vs Прибуток
-                            </span>
-                            <div className="flex gap-2">
-                              <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                                <CheckCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                Виграш
-                              </Badge>
-                              <Badge className="bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] px-3 py-1.5 rounded-lg border border-[#FECACA] font-medium text-xs">
-                                <AlertTriangle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-                                Програш
-                              </Badge>
-                            </div>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <ResponsiveContainer width="100%" height={300}>
-                            <ScatterChart>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                              
-                              <ReferenceLine 
-                                y={0} 
-                                stroke="#6B7280" 
-                                strokeWidth={2}
-                                strokeDasharray="8 4"
-                                label={{ 
-                                  value: 'Нульова лінія', 
-                                  position: 'insideTopRight',
-                                  style: { fontSize: 11, fill: '#6B7280', fontWeight: 600 }
-                                }}
-                              />
-                              
-                              <XAxis 
-                                dataKey="odds" 
-                                name="Коефіцієнт"
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#E5E7EB"
-                                label={{ value: 'Коефіцієнт', position: 'insideBottom', offset: -5, style: { fontSize: 12, fill: '#6B7280' } }}
-                                tickFormatter={(value) => Number(value).toFixed(2)}
-                              />
-                              <YAxis 
-                                dataKey="profit" 
-                                name="Прибуток"
-                                tick={{ fontSize: 12, fill: '#6B7280' }}
-                                stroke="#E5E7EB"
-                                label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#6B7280' } }}
-                              />
-                              <Tooltip content={<ScatterTooltip />} />
-                              <Scatter 
-                                data={scatterData} 
-                                fill="#8b5cf6"
-                                shape={(props: { cx?: number; cy?: number; fill?: string }) => {
-                                  const { cx, cy, fill } = props;
-                                  return (
-                                    <circle 
-                                      cx={cx} 
-                                      cy={cy} 
-                                      r={6} 
-                                      fill={fill}
-                                      opacity={0.7}
-                                      stroke={fill}
-                                      strokeWidth={1}
-                                      strokeOpacity={0.3}
-                                    />
-                                  );
-                                }}
-                              />
-                            </ScatterChart>
-                          </ResponsiveContainer>
-                          
-                          <div className="mt-5 flex items-center justify-center gap-8 px-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
-                              <span className="text-sm text-[#9CA3AF]">Виграш:</span>
-                              <span className="text-sm font-semibold text-[#111827]">{winningBets.length}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
-                              <span className="text-sm text-[#9CA3AF]">Програш:</span>
-                              <span className="text-sm font-semibold text-[#111827]">{losingBets.length}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <MonthlyProfitChartCard data={monthlyProfit} chartCardShadow={chartCardShadow} />
+                      <OddsVsProfitScatterCard data={scatterData} winCount={winningBets.length} lossCount={losingBets.length} chartCardShadow={chartCardShadow} />
                     </div>
                   </>
                 ) : (
