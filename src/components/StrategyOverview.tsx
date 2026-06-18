@@ -1631,7 +1631,7 @@ export default function StrategyOverview() {
                   className={`border transition-all rounded-2xl p-5 ${
                     alreadyExists
                       ? 'bg-[#F9FAFB] border-[#E5E7EB] opacity-60 cursor-not-allowed'
-                      : 'bg-white border-[#E5E7EB] hover:border-[#3B82F6] cursor-pointer'
+                      : 'bg-white border-[#E5E7EB] hover:border-[#D1D5DB] cursor-pointer'
                   }`}
                   onClick={() => !alreadyExists && applyTemplate(template)}
                 >

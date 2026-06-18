@@ -594,7 +594,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                     {activeStrategy.criteria.map((c, idx) => (
                       <li
                         key={idx}
-                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#6366F1] hover:shadow-md transition-all duration-200"
+                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#D1D5DB] hover:shadow-md transition-all duration-200"
                       >
                         <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
                           {idx + 1}
@@ -795,7 +795,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                     {goalCriteria.map((c, idx) => (
                       <li
                         key={idx}
-                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#6366F1] hover:shadow-md transition-all duration-200"
+                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#D1D5DB] hover:shadow-md transition-all duration-200"
                       >
                         <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
                           {idx + 1}

@@ -71,7 +71,7 @@ export default function CalendarHeatmap({ data }: CalendarHeatmapProps) {
                         <div
                           className={`w-3 h-3 rounded-sm ${
                             day.count > 0 ? getColor(day.profit) : 'bg-gray-100'
-                          } hover:ring-2 hover:ring-blue-300 transition-all`}
+                          } hover:ring-2 hover:ring-gray-300 transition-all`}
                         />
                       </TooltipTrigger>
                       <TooltipContent>
