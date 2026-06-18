@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getStatusBadge, getGameEmoji, getBetTypeOptions } from '@/lib/displayHelpers';
 import { parseDota2MatchFromUrl, parseCS2MatchFromUrl, type ParsedMatchResult } from '@/lib/matchUrlParser';
 import StrategyViolationDialog from './StrategyViolationDialog';
+import { calcTotalExpressOdds, calcExpectedValue, calcPotentialProfit, getValueBetAnalysis, getOverconfidenceWarning, calcKellyCriterion, getExpressRiskLevel, getEVVerdict } from '@/lib/betCalculations';
 
 export interface MatchPrefillData {
   team1: string;
@@ -640,186 +641,14 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     toast.success('Всі події експресу очищено');
   };
 
-  const calculateTotalExpressOdds = () => {
-    if (expressEvents.length === 0) return 1;
-    const validEvents = expressEvents.filter(e => e.odds && parseFloat(e.odds) > 0);
-    if (validEvents.length === 0) return 1;
-    return validEvents.reduce((total, event) => total * parseFloat(event.odds), 1);
-  };
-
-  const calculateExpectedValue = () => {
-    const odds = formData.betCategory === 'Експрес' 
-      ? calculateTotalExpressOdds() 
-      : parseFloat(formData.odds);
-    const confidence = parseFloat(formData.confidence);
-    
-    if (odds && confidence) {
-      const expectedValue = ((confidence / 100) * (odds - 1)) - ((1 - confidence / 100) * 1);
-      return (expectedValue * 100).toFixed(2);
-    }
-    return '0';
-  };
-
-  const calculatePotentialProfit = () => {
-    const odds = formData.betCategory === 'Експрес' 
-      ? calculateTotalExpressOdds() 
-      : parseFloat(formData.odds);
-    const stake = parseFloat(formData.stake);
-    
-    if (odds && stake) {
-      return ((odds - 1) * stake).toFixed(2);
-    }
-    return '0';
-  };
-
-  const calculateBookmakerProbability = (): number | null => {
-    const odds = formData.betCategory === 'Експрес'
-      ? calculateTotalExpressOdds()
-      : parseFloat(formData.odds);
-    if (!odds || odds <= 1) return null;
-    return (1 / odds) * 100;
-  };
-
-  const getValueBetAnalysis = () => {
-    const confidence = parseFloat(formData.confidence);
-    const bookmakerProb = calculateBookmakerProbability();
-    if (!confidence || !bookmakerProb) return null;
-
-    const diff = confidence - bookmakerProb;
-    const isValueBet = diff > 0;
-    const edgePercent = Math.abs(diff);
-
-    return {
-      bookmakerProb: bookmakerProb.toFixed(1),
-      userProb: confidence.toFixed(1),
-      diff: edgePercent.toFixed(1),
-      isValueBet,
-      message: isValueBet
-        ? `Ви оцінюєте подію на ${edgePercent.toFixed(1)}% вище за букмекера (Value Bet)`
-        : `Букмекер оцінює подію на ${edgePercent.toFixed(1)}% вище за вас`
-    };
-  };
-
-  const getOverconfidenceWarning = (): string | null => {
-    const confidence = parseFloat(formData.confidence);
-    if (!confidence) return null;
-    
-    const currentOdds = formData.betCategory === 'Експрес'
-      ? calculateTotalExpressOdds()
-      : parseFloat(formData.odds);
-    
-    if (!currentOdds || currentOdds <= 1) return null;
-
-    if (confidence >= 85 && currentOdds >= 1.6) {
-      return `Ви вказали дуже високу впевненість (${confidence}%) при коефіцієнті ${currentOdds.toFixed(2)}. Букмекер оцінює ймовірність ~${(100 / currentOdds).toFixed(0)}%. Ви впевнені, що не емоціонуєте?`;
-    }
-
-    if (confidence >= 80 && currentOdds >= 2.0) {
-      return `Коефіцієнт ${currentOdds.toFixed(2)} вказує на рівний матч, але ваша впевненість ${confidence}%. Перевірте, чи не завищуєте оцінку.`;
-    }
-
-    return null;
-  };
-
-  const calculateKellyCriterion = () => {
-    const odds = formData.betCategory === 'Експрес'
-      ? calculateTotalExpressOdds()
-      : parseFloat(formData.odds);
-    const confidence = parseFloat(formData.confidence);
-    
-    if (!odds || odds <= 1 || !confidence) return null;
-
-    const p = confidence / 100;
-    const q = 1 - p;
-    const b = odds - 1;
-
-    const kellyFraction = (b * p - q) / b;
-
-    const bets = realGoogleSheetsService.getAllRecords();
-    const bankrollStats = BankrollService.getBankrollStats(currentUser, bets);
-    const currentBankroll = bankrollStats.currentBank;
-
-    if (currentBankroll <= 0) return null;
-
-    const maxStakeFraction = maxStakePercent / 100;
-
-    const fullKelly = Math.max(0, kellyFraction);
-    const fullKellyAmount = fullKelly * currentBankroll;
-
-    const halfKelly = fullKelly / 2;
-    const halfKellyAmount = halfKelly * currentBankroll;
-
-    const maxAllowedAmount = currentBankroll * maxStakeFraction;
-    const cappedHalfKellyAmount = Math.min(halfKellyAmount, maxAllowedAmount);
-    const cappedFullKellyAmount = Math.min(fullKellyAmount, maxAllowedAmount);
-    const isCapped = halfKellyAmount > maxAllowedAmount;
-
-    const recommendedBankrollPercent = currentBankroll > 0 
-      ? ((cappedHalfKellyAmount / currentBankroll) * 100).toFixed(1) 
-      : '0';
-
-    let riskLevel: 'low' | 'medium' | 'high';
-    let recommendation: string;
-    let recommendedAmount: number;
-
-    if (kellyFraction <= 0) {
-      riskLevel = 'high';
-      recommendation = 'Критерій Келлі не рекомендує цю ставку. Математично невигідно.';
-      recommendedAmount = 0;
-    } else if (isCapped) {
-      riskLevel = 'high';
-      recommendation = `Келлі рекомендує ${Math.round(halfKellyAmount)} ₴ (${((halfKelly) * 100).toFixed(1)}% банку), але ліміт ${maxStakePercent}% обмежує до ${Math.round(maxAllowedAmount)} ₴`;
-      recommendedAmount = Math.round(maxAllowedAmount);
-    } else if (fullKelly <= 0.05) {
-      riskLevel = 'low';
-      recommendation = `Помірна впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
-      recommendedAmount = Math.round(cappedHalfKellyAmount);
-    } else if (fullKelly <= 0.15) {
-      riskLevel = 'medium';
-      recommendation = `Висока впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
-      recommendedAmount = Math.round(cappedHalfKellyAmount);
-    } else {
-      riskLevel = 'high';
-      recommendation = `Ризик великий → рекомендовано ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку) замість ${Math.round(cappedFullKellyAmount)} ₴`;
-      recommendedAmount = Math.round(cappedHalfKellyAmount);
-    }
-
-    return {
-      fullKelly: (fullKelly * 100).toFixed(1),
-      halfKelly: (halfKelly * 100).toFixed(1),
-      fullKellyAmount: Math.round(cappedFullKellyAmount),
-      halfKellyAmount: Math.round(cappedHalfKellyAmount),
-      uncappedHalfKellyAmount: Math.round(halfKellyAmount),
-      currentBankroll: Math.round(currentBankroll),
-      maxAllowedAmount: Math.round(maxAllowedAmount),
-      riskLevel,
-      recommendation,
-      recommendedAmount: Math.round(recommendedAmount),
-      isNegative: kellyFraction <= 0,
-      isCapped,
-      recommendedBankrollPercent,
-    };
-  };
+  const totalExpressOdds = calcTotalExpressOdds(expressEvents);
+  const expressRisk = getExpressRiskLevel(expressEvents.length);
 
   const convertToUAH = (amount: number, currency: string, rate: number) => {
     if (currency === 'USD') {
       return amount * rate;
     }
     return amount;
-  };
-
-  const getExpressRiskLevel = () => {
-    const count = expressEvents.length;
-    if (count <= 3) return { level: 'moderate', color: 'green', text: 'Помірний ризик', progress: 33 };
-    if (count <= 6) return { level: 'elevated', color: 'orange', text: 'Підвищений ризик', progress: 66 };
-    return { level: 'high', color: 'red', text: 'Високий ризик', progress: 100 };
-  };
-
-  const getEVVerdict = () => {
-    const ev = parseFloat(calculateExpectedValue());
-    if (ev > 5) return { icon: '✅', text: 'Позитивний прогноз', color: 'green', description: 'Математично вигідний прогноз з хорошим потенціалом' };
-    if (ev > 0) return { icon: '⚠️', text: 'Сумнівна ставка', color: 'yellow', description: 'Невелика позитивна вартість, потрібна висока впевненість' };
-    return { icon: '❌', text: 'Негативний прогноз', color: 'red', description: 'Математично невигідний прогноз, високий ризик втрат' };
   };
 
   const updateExpressEvent = (index: number, field: keyof ExpressEvent, value: string) => {
@@ -841,7 +670,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
       let matchName: string;
 
       if (formData.betCategory === 'Експрес') {
-        const totalOdds = calculateTotalExpressOdds();
+        const totalOdds = calcTotalExpressOdds(expressEvents);
         finalOdds = totalOdds;
         
         const eventsString = expressEvents.map((event, index) => 
@@ -987,8 +816,8 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     }
   };
 
-  const expectedValue = calculateExpectedValue();
-  const potentialProfit = calculatePotentialProfit();
+  const expectedValue = calcExpectedValue(formData.betCategory, expressEvents, formData.odds, formData.confidence);
+  const potentialProfit = calcPotentialProfit(formData.betCategory, expressEvents, formData.odds, formData.stake);
   const isValuePositive = parseFloat(expectedValue) > 0;
   const hasConfidence = formData.confidence !== '' && !isNaN(parseFloat(formData.confidence));
   const confidenceValue = parseFloat(formData.confidence);
@@ -998,14 +827,14 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     return '₴';
   };
 
-  const potentialProfitInCurrency = calculatePotentialProfit();
+  const potentialProfitInCurrency = calcPotentialProfit(formData.betCategory, expressEvents, formData.odds, formData.stake);
   const stakeInCurrency = formData.stake;
-  const totalExpressOdds = calculateTotalExpressOdds();
-  const expressRisk = getExpressRiskLevel();
-  const evVerdict = getEVVerdict();
-  const valueBetAnalysis = getValueBetAnalysis();
-  const kellyData = hasConfidence ? calculateKellyCriterion() : null;
-  const overconfidenceWarning = hasConfidence ? getOverconfidenceWarning() : null;
+  const evVerdict = getEVVerdict(parseFloat(expectedValue));
+  const valueBetAnalysis = getValueBetAnalysis(formData.betCategory, expressEvents, formData.odds, formData.confidence);
+  const betsForKelly = realGoogleSheetsService.getAllRecords();
+  const bankrollForKelly = BankrollService.getBankrollStats(currentUser, betsForKelly);
+  const kellyData = hasConfidence ? calcKellyCriterion(formData.betCategory, expressEvents, formData.odds, formData.confidence, bankrollForKelly.currentBank, maxStakePercent) : null;
+  const overconfidenceWarning = hasConfidence ? getOverconfidenceWarning(formData.betCategory, expressEvents, formData.odds, formData.confidence) : null;
 
   // getBetTypeOptions — imported from @/lib/displayHelpers (accepts game param)
 

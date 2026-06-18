@@ -41,6 +41,7 @@ export default function MyBets() {
   const isAdminRole = user?.role === 'admin';
   const location = useLocation();
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
+  const bumpBets = useAppStore((s) => s.bumpBets);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
 
   // ── State ──
@@ -129,7 +130,7 @@ export default function MyBets() {
   }, [currentUser]);
 
   // ── Handlers ──
-  const handleRecordAdded = useCallback(() => { loadStats(); loadRecentBets(); }, [loadStats, loadRecentBets]);
+  const handleRecordAdded = useCallback(() => { loadStats(); loadRecentBets(); bumpBets(); }, [loadStats, loadRecentBets, bumpBets]);
 
   const clearRecentBets = useCallback(async () => {
     if (!window.confirm('Ви впевнені, що хочете очистити всі дані?')) return;
