@@ -505,7 +505,7 @@ export default function Matches() {
   };
 
   const handleAddToBets = (match: Match) => {
-    navigate('/my-bets', {
+    navigate('/app/my-bets', {
       state: {
         prefillMatch: {
           team1: match.team1,
@@ -566,7 +566,7 @@ export default function Matches() {
       matchUrl: m.url || '',
     }));
 
-    navigate('/my-bets', {
+    navigate('/app/my-bets', {
       state: {
         expressMatches
       }
