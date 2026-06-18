@@ -1,4 +1,6 @@
 // Real Google Sheets integration for CS2 Analytics
+import { SPREADSHEET_ID_DATA } from './sheetsConfig';
+
 export interface CS2BettingRecord {
   date: string;
   match: string;
@@ -121,7 +123,7 @@ function findBetIndex(records: CS2BettingRecord[], bet: CS2BettingRecord): numbe
 }
 
 class RealGoogleSheetsService {
-  private spreadsheetId: string = '1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw';
+  private spreadsheetId: string = SPREADSHEET_ID_DATA;
   private apiKey: string = '';
 
   // Set API key for Google Sheets access

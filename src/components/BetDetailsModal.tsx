@@ -5,6 +5,7 @@ import { Copy, Check, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
 import type { Bet } from '@/types/betting';
 
 interface BetDetailsModalProps {
@@ -55,8 +56,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   const fetchUsers = async () => {
     try {
-      const SHEET_ID = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AUTH}/gviz/tq?tqx=out:csv`;
       
       const response = await fetch(url);
       const text = await response.text();

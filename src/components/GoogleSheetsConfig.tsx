@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Settings, ExternalLink, Key } from 'lucide-react';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
+import { SPREADSHEET_ID_DATA, SHEETS_VIEW_URL } from '@/lib/sheetsConfig';
 import { toast } from 'sonner';
 
 export default function GoogleSheetsConfig() {
@@ -89,7 +90,7 @@ export default function GoogleSheetsConfig() {
         <div className="space-y-2">
           <Label>ID вашого документа</Label>
           <div className="p-2 bg-gray-50 rounded text-sm font-mono">
-            1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw
+            {SPREADSHEET_ID_DATA}
           </div>
         </div>
 
@@ -114,7 +115,7 @@ export default function GoogleSheetsConfig() {
           
           <Button variant="outline" asChild>
             <a 
-              href="https://docs.google.com/spreadsheets/d/1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw/edit"
+              href={SHEETS_VIEW_URL}
               target="_blank"
               rel="noopener noreferrer"
             >

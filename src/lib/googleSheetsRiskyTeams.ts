@@ -1,3 +1,5 @@
+import { SPREADSHEET_ID_DATA } from './sheetsConfig';
+
 // Service for fetching risky teams from Google Sheets
 export interface RiskyTeamFromSheet {
   name: string;
@@ -7,7 +9,7 @@ export interface RiskyTeamFromSheet {
 }
 
 class GoogleSheetsRiskyTeamsService {
-  private readonly SHEET_ID = '1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw';
+  private readonly SHEET_ID = SPREADSHEET_ID_DATA;
 
   /**
    * Parse team data from name and notes

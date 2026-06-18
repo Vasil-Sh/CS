@@ -14,8 +14,10 @@ interface LoginResult {
   isAdmin?: boolean;
 }
 
+import { SPREADSHEET_ID_AUTH } from './sheetsConfig';
+
 class AuthService {
-  private spreadsheetId = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
+  private spreadsheetId = SPREADSHEET_ID_AUTH;
   private apiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || '';
 
   async fetchUsers(): Promise<AdminUser[]> {

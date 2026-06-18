@@ -22,6 +22,8 @@ import {
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
 
+import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
+
 // ── Types ──
 interface UserRecord { telegram: string; username: string; isAdmin?: boolean; }
 interface ParsedEvent { number: string; match: string; betType: string; selection: string; odds: string; }
@@ -105,8 +107,7 @@ export default function MyBets() {
   // ── Data fetching ──
   const fetchUsers = async () => {
     try {
-      const SHEET_ID = '1IhAUYQKcPjXetOGxCu-_YXxrj_kXt0QxKJCcGqPzZdo';
-      const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`);
+      const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AUTH}/gviz/tq?tqx=out:csv`);
       const text = await resp.text();
       const parsed: UserRecord[] = text.split('\n').slice(1).filter(r => r.trim()).map(row => {
         const m = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
