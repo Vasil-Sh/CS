@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip as UITooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, Eye, Zap, TrendingDown, Percent, CheckCircle2, Sparkles, DollarSign, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
 import { toast } from 'sonner';
@@ -711,6 +712,23 @@ export default function StrategyOverview() {
         {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            {/* Info tooltip */}
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger asChild>
+                  <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                    <Info className="h-4 w-4" strokeWidth={2} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                  <p className="text-sm font-semibold text-[#111827] mb-1">Стратегії</p>
+                  <p className="text-sm text-[#6B7280] leading-relaxed">
+                    Тут ви можете створювати та застосовувати стратегії ставок. Стратегія містить правила — які коефіцієнти, суми, формати матчів обирати. При створенні запису на сторінці «Додати запис» система перевірить, чи не порушуєте ви правила активної стратегії.
+                  </p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;

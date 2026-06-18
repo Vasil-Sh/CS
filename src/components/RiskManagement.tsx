@@ -793,7 +793,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
                 <p className="text-sm font-semibold text-[#111827] mb-1">Управління ризиками</p>
                 <p className="text-sm text-[#6B7280] leading-relaxed">
-                  Аналіз ризиків та контроль банкролу. Список ризикових команд, метрики просадок, волатильності та рекомендації.
+                  Тут ви можете вести список команд, на які не варто ставити або потрібно бути обережним. Кожній команді можна призначити статус (БАН, Обережно, Нестабільні тощо) та додати коментар. При створенні запису на сторінці «Додати запис» ви отримаєте попередження, якщо обрали ризикову команду.
                 </p>
               </TooltipContent>
             </Tooltip>
