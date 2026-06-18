@@ -33,6 +33,7 @@
 - **Календарна теплокарта** — активність ставок за останні 12 тижнів (CalendarHeatmap)
 - **Фільтри** — фільтрація по періоду, грі, стратегії, типу ставки
 - **Порівняння періодів** — аналіз трендів по тижнях/місяцях з графіками прибутку та вінрейту (PeriodComparison)
+- **Предиктивна аналітика** — прогнозування трендів, порівняння historical vs predicted, AI-рекомендації (PredictiveAnalytics)
 
 ### 🎯 Система цілей (Goals)
 - **Типи цілей**: сума (Amount), драбинка (Ladder), ROI, вінрейт (Win Rate)
@@ -43,13 +44,16 @@
 
 ### 🛡️ Стратегії (Strategies)
 - **Створення стратегій** — назва, опис, допустимі коефіцієнти, формати, типи ставок
+- **5 груп правил**: OddsControl, BetTypeRules, MatchFormatRules, ActivityLimits, PsychologicalTriggers
 - **Основна стратегія** — вибір активної стратегії для автоматичної перевірки
 - **Перевірка відхилень** — попередження при відхиленні від стратегії (коефіцієнт, формат, тип)
 - **Діалог підтвердження** — при порушенні стратегії з'являється діалог з поясненням ризиків
 - **Статистика по стратегіях** — аналіз ефективності кожної стратегії з графіками
+- **KPI-заголовок** — поточний банк, загальний прибуток, загальні ставки, вінрейт (StrategyOverviewHeader)
 
 ### 🏆 Матчі (Matches)
 - **Список матчів** — перегляд майбутніх матчів CS2 та Dota 2
+- **CS2 API** — live-дані з `api.cstest.pp.ua` (коефіцієнти, прогнози, логи команд)
 - **Фільтрація** — пошук, сортування, фільтри по грі та турніру
 - **Швидке додавання** — перехід до форми ставки з автозаповненням даних матчу
 - **Експрес-вибір** — вибір кількох матчів для створення експресу
@@ -59,6 +63,7 @@
 ### 🔧 Адмін-панель (Admin)
 - **Управління користувачами** — перегляд та управління акаунтами
 - **Ризиковані команди** — додавання команд з мітками (БАН, Нестабільні, Обережно, Рідко, Надійна)
+- **Google Sheets імпорт** — завантаження ризикованих команд з Google Sheets (`googleSheetsRiskyTeams.ts`)
 - **Автоматичне попередження** — при виборі ризикованої команди у формі ставки з'являється попередження
 - **Налаштування** — управління параметрами платформи
 
@@ -76,10 +81,42 @@
 - **Ризиковані команди** — відстеження команд з підвищеним ризиком
 - **Рекомендації** — поради щодо управління банкролом
 
+### 🤖 AI-рекомендації (AI)
+- **Gemini AI** — Google Gemini (gemini-1.5-flash, free tier) для генерації прогнозів на матчі з рівнем впевненості, обґрунтуванням та рівнем ризику
+- **OpenRouter (Claude 3.5 Sonnet)** — альтернативний AI-провайдер для поглибленого аналізу матчів з тією ж структурою відповіді
+- **AIRecommendationModal** — модальне вікно з детальним AI-прогнозом: переможець, впевненість (%), обґрунтування, рекомендована ставка, рівень ризику
+- **BettingRecommendation** — картка з рекомендацією (safe/risky/avoid), EV та поясненням
+
+### 📊 Предиктивна аналітика (PredictiveAnalytics)
+- **Прогнозування трендів** — порівняння історичних даних з прогнозованими
+- **Рекомендації по стратегіях** — AI-поради щодо покращення стратегії
+- **Графіки прогнозів** — візуалізація forecast-даних
+
+### 🔗 C# WinForms інтеграція (WebView2 Bridge)
+- **csharp-bridge.ts** — WebView2 Bridge Service для комунікації з C# бекендом через `window.chrome.webview.postMessage`
+- **csharp-data-service.ts** — шар кешування (5 хв) між C# бекендом і React-компонентами
+- **Mock-режим** — автоматичне перемикання на мок-дані при запуску в браузері (без WebView2)
+- **Методи**: `getAllGames`, `getTeamsData`, `getBetsData`, `getTeamMatches`, `getAnalytics` та ін.
+
+### 🌐 CS2 API інтеграція
+- **Live-матчі** — отримання актуальних матчів з `api.cstest.pp.ua`
+- **Коефіцієнти** — bettingCoefficient для обох команд
+- **Прогнози** — predictionPercent для кожної команди
+- **Автопарсинг формату** — BO1/BO3/BO5 з типу матчу
+
+### 📋 Детальні правила стратегій (5 груп)
+- **OddsControl** — мін/макс коефіцієнти, окремі правила для експресів, режим дії (warning/block)
+- **BetTypeRules** — дозволені типи (Ординар/Експрес/Система), макс подій в експресі, мін загальний коефіцієнт
+- **MatchFormatRules** — дозволені формати (BO1/BO3/BO5)
+- **ActivityLimits** — макс ставок/день, макс ставок/матч, мін пауза між ставками, блокування після N програшів
+- **PsychologicalTriggers** — попередження при серії програшів, високих коефіцієнтах, повторних ставках на одну команду
+
 ### 🔐 Аутентифікація
 - **Логін-система** — захищені маршрути з ProtectedRoute
+- **Google Sheets** — база користувачів у Google Sheets (логін/пароль/роль)
 - **Мультикористувацькість** — кожен користувач має ізольовані дані
 - **LocalStorage** — збереження даних окремо для кожного користувача
+- **Supabase** — Edge Functions для парсингу HLTV-матчів
 
 ---
 
@@ -87,16 +124,18 @@
 
 | Категорія | Технологія |
 |-----------|-----------|
-| **Фреймворк** | React 18 + TypeScript |
+| **Фреймворк** | React 19 + TypeScript |
 | **UI-бібліотека** | shadcn/ui + Tailwind CSS |
 | **Графіки** | Recharts (LineChart, BarChart, PieChart, ScatterChart, ComposedChart) |
 | **Маршрутизація** | React Router v6 |
-| **Стан** | React Hooks (useState, useEffect, useMemo, useCallback) |
-| **Збереження даних** | LocalStorage + Google Sheets інтеграція |
+| **Стан та форми** | react-hook-form + zod (валідація), React Hooks |
+| **Збереження даних** | LocalStorage + Google Sheets API + Supabase |
+| **AI-аналітика** | Google Gemini (free tier) + OpenRouter (Claude 3.5 Sonnet) |
+| **Бекенд-інтеграція** | WebView2 Bridge (C# WinForms) + Supabase Edge Functions |
 | **Збірка** | Vite |
 | **Іконки** | Lucide React |
 | **Сповіщення** | Sonner (toast notifications) |
-| **Парсинг** | Власний HLTV/Dota 2 URL парсер |
+| **Парсинг** | Власний HLTV/Dota 2 URL парсер (10 модулів) |
 
 ---
 
@@ -127,19 +166,25 @@ pnpm run lint
 ```
 src/
 ├── components/
-│   ├── ui/                          # shadcn/ui базові компоненти
+│   ├── ui/                          # shadcn/ui базові компоненти (~40 файлів)
 │   ├── CS2BettingForm.tsx           # Форма створення ставки (ординар + експрес)
+│   ├── BettingForm.tsx              # Альтернативна форма ставки з Google Sheets
 │   ├── BettingHistory.tsx           # Історія ставок з таблицею
 │   ├── StrategyOverview.tsx         # Управління стратегіями
+│   ├── StrategyOverviewHeader.tsx   # KPI-заголовок сторінки стратегій
 │   ├── GoalsManager.tsx             # Менеджер цілей
 │   ├── BalanceChart.tsx             # Графік балансу
+│   ├── StatsChart.tsx               # Універсальна обгортка для графіків (bar/line)
 │   ├── CalendarHeatmap.tsx          # Календарна теплокарта активності
 │   ├── PeriodComparison.tsx         # Порівняння періодів (тренди)
+│   ├── PredictiveAnalytics.tsx      # Предиктивна аналітика з прогнозами
 │   ├── RiskManagement.tsx           # Управління ризиками
 │   ├── TeamTierSystem.tsx           # Tier-система команд
 │   ├── TeamAnalysis.tsx             # Аналіз команд
 │   ├── TeamStats.tsx                # Статистика команд
 │   ├── MatchCard.tsx                # Картка матчу
+│   ├── AIRecommendationModal.tsx    # Модальне вікно AI-прогнозу
+│   ├── BettingRecommendation.tsx    # Картка рекомендації (safe/risky/avoid)
 │   ├── BetShareModal.tsx            # Модальне вікно шерінгу ставки
 │   ├── BetShareCard.tsx             # Картка для шерінгу
 │   ├── BetDetailsModal.tsx          # Деталі ставки
@@ -149,36 +194,58 @@ src/
 │   ├── InitialBankModal.tsx         # Встановлення початкового банку
 │   ├── StrategyViolationDialog.tsx  # Діалог порушення стратегії
 │   ├── KellyCalculator.tsx          # Калькулятор Келлі
+│   ├── GoogleSheetsConfig.tsx       # Налаштування Google Sheets API
+│   ├── PreviewButton.tsx            # Кнопка прев'ю UI
 │   ├── Layout.tsx                   # Основний layout з навігацією
 │   ├── ProtectedRoute.tsx           # Захищений маршрут
 │   └── ...
 ├── pages/
+│   ├── Landing.tsx                  # Публічна лендінг-сторінка
+│   ├── Login.tsx                    # Сторінка входу
+│   ├── LoginDigestoDemo.tsx         # Демо-сторінка входу
 │   ├── Analytics.tsx                # Аналітика та дашборд
 │   ├── Matches.tsx                  # Список матчів
-│   ├── MyBets.tsx                   # Мої ставки (додавання, історія, стратегії)
+│   ├── MyBets.tsx                   # Мої ставки (додавання, історія)
+│   ├── Strategy.tsx                 # Стратегії та цілі (окрема сторінка)
+│   ├── Profile.tsx                  # Профіль користувача
 │   ├── Admin.tsx                    # Адмін-панель
-│   ├── Login.tsx                    # Сторінка входу
-│   └── NotFound.tsx                 # 404 сторінка
+│   └── Index.tsx / NotFound.tsx     # Індексна та 404 сторінки
 ├── lib/
-│   ├── parser/                      # HLTV/Dota 2 парсери
-│   │   ├── hltvParser.ts            # Головний парсер HLTV
+│   ├── parser/                      # HLTV/Dota 2 парсери (10 файлів)
+│   │   ├── hltvParser.ts            # Головний парсер (з Supabase Edge Functions)
 │   │   ├── MatchesParser.js         # Парсер матчів
 │   │   ├── GameParser.js            # Парсер ігор
-│   │   └── ...
-│   ├── realGoogleSheets.ts          # Google Sheets інтеграція
+│   │   ├── GameBasicDetailsParser.js
+│   │   ├── GameDetailsParser.js
+│   │   ├── MapsParser.js            # Парсер карт
+│   │   ├── TeamBasicParser.js       # Парсер базової інфи команд
+│   │   ├── TeamGamesParser.js       # Парсер ігор команди
+│   │   ├── TeamMapsParser.js        # Парсер карт команди
+│   │   └── TeamPlayersParser.js     # Парсер гравців команди
+│   ├── geminiService.ts             # Google Gemini AI сервіс
+│   ├── openRouterService.ts         # OpenRouter AI сервіс (Claude 3.5 Sonnet)
+│   ├── csApi.ts                     # CS2 API клієнт (api.cstest.pp.ua)
+│   ├── realGoogleSheets.ts          # Google Sheets інтеграція (продакшен)
+│   ├── googleSheets.ts              # Google Sheets мок-сервіс (демо)
+│   ├── googleSheetsRiskyTeams.ts    # Завантаження ризикованих команд з Google Sheets
 │   ├── bankrollService.ts           # Сервіс банкролу
-│   ├── userDataService.ts           # Сервіс даних користувача
+│   ├── userDataService.ts           # Сервіс ізоляції даних користувача
 │   ├── authService.ts               # Сервіс аутентифікації
 │   ├── analytics.ts                 # Аналітичні функції
-│   ├── riskyTeamsService.ts         # Сервіс ризикованих команд
+│   ├── riskyTeamsService.ts         # Локальний сервіс ризикованих команд
 │   └── utils.ts                     # Утиліти
+├── services/
+│   ├── csharp-bridge.ts             # WebView2 міст для C# WinForms бекенду
+│   └── csharp-data-service.ts       # Кешований шар даних (5 хв)
 ├── types/
-│   └── betting.ts                   # TypeScript типи (Bet, BettingStats, etc.)
+│   ├── betting.ts                   # Основні типи (Bet, BettingStats, TeamStats, etc.)
+│   └── csharp-models.ts             # C#-сумісні моделі даних
 ├── hooks/
 │   ├── use-mobile.tsx               # Хук для мобільного відображення
+│   ├── use-toast.ts                 # Хук сповіщень
 │   └── useUISettings.ts             # Хук налаштувань UI
-├── services/
-│   └── csharp-data-service.ts       # Сервіс даних
+├── data/
+│   └── mockData.ts                  # Мокові дані для розробки
 ├── App.tsx                          # Головний компонент з маршрутизацією
 ├── main.tsx                         # Точка входу
 └── index.css                        # Глобальні стилі
@@ -224,13 +291,17 @@ src/
 
 ## 📱 Маршрути
 
-| Шлях | Сторінка | Опис |
-|------|----------|------|
-| `/login` | Login | Сторінка входу |
-| `/analytics` | Analytics | Аналітика та дашборд (головна) |
-| `/matches` | Matches | Список матчів |
-| `/my-bets` | MyBets | Мої ставки (3 таби: Додати, Історія, Стратегії) |
-| `/admin` | Admin | Адмін-панель |
+| Шлях | Сторінка | Доступ |
+|------|----------|--------|
+| `/` | Landing | Публічний |
+| `/login` | Login | Публічний |
+| `/login-digesto-demo` | LoginDigestoDemo | Публічний |
+| `/app/analytics` | Analytics | Захищений |
+| `/app/my-bets` | MyBets | Захищений |
+| `/app/strategy` | Strategy | Захищений |
+| `/app/matches` | Matches | Захищений |
+| `/app/profile` | Profile | Захищений |
+| `/app/admin` | Admin | Admin only |
 
 ---
 
