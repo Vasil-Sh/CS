@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -816,25 +816,38 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     }
   };
 
-  const expectedValue = calcExpectedValue(formData.betCategory, expressEvents, formData.odds, formData.confidence);
-  const potentialProfit = calcPotentialProfit(formData.betCategory, expressEvents, formData.odds, formData.stake);
-  const isValuePositive = parseFloat(expectedValue) > 0;
   const hasConfidence = formData.confidence !== '' && !isNaN(parseFloat(formData.confidence));
+
+  const { expectedValue, potentialProfit, evVerdict, valueBetAnalysis, kellyData, overconfidenceWarning } = useMemo(() => {
+    const ev = calcExpectedValue(formData.betCategory, expressEvents, formData.odds, formData.confidence);
+    const profit = calcPotentialProfit(formData.betCategory, expressEvents, formData.odds, formData.stake);
+    const verdict = getEVVerdict(parseFloat(ev));
+    const value = getValueBetAnalysis(formData.betCategory, expressEvents, formData.odds, formData.confidence);
+
+    let kelly = null;
+    if (hasConfidence) {
+      const betsStore = realGoogleSheetsService.getAllRecords();
+      const bankrollStats = BankrollService.getBankrollStats(currentUser, betsStore);
+      kelly = calcKellyCriterion(formData.betCategory, expressEvents, formData.odds, formData.confidence, bankrollStats.currentBank, maxStakePercent);
+    }
+
+    let warning = null;
+    if (hasConfidence) {
+      warning = getOverconfidenceWarning(formData.betCategory, expressEvents, formData.odds, formData.confidence);
+    }
+
+    return { expectedValue: ev, potentialProfit: profit, evVerdict: verdict, valueBetAnalysis: value, kellyData: kelly, overconfidenceWarning: warning };
+  }, [formData.betCategory, formData.odds, formData.stake, formData.confidence, expressEvents, currentUser, maxStakePercent, hasConfidence]);
+
+  const isValuePositive = parseFloat(expectedValue) > 0;
   const confidenceValue = parseFloat(formData.confidence);
   const isHighConfidence = hasConfidence && confidenceValue > 90;
+  const potentialProfitInCurrency = potentialProfit;
+  const stakeInCurrency = formData.stake;
 
   const getCurrencySymbol = () => {
     return '₴';
   };
-
-  const potentialProfitInCurrency = calcPotentialProfit(formData.betCategory, expressEvents, formData.odds, formData.stake);
-  const stakeInCurrency = formData.stake;
-  const evVerdict = getEVVerdict(parseFloat(expectedValue));
-  const valueBetAnalysis = getValueBetAnalysis(formData.betCategory, expressEvents, formData.odds, formData.confidence);
-  const betsForKelly = realGoogleSheetsService.getAllRecords();
-  const bankrollForKelly = BankrollService.getBankrollStats(currentUser, betsForKelly);
-  const kellyData = hasConfidence ? calcKellyCriterion(formData.betCategory, expressEvents, formData.odds, formData.confidence, bankrollForKelly.currentBank, maxStakePercent) : null;
-  const overconfidenceWarning = hasConfidence ? getOverconfidenceWarning(formData.betCategory, expressEvents, formData.odds, formData.confidence) : null;
 
   // getBetTypeOptions — imported from @/lib/displayHelpers (accepts game param)
 
