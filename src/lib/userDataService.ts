@@ -43,6 +43,16 @@ export class UserDataService {
     }
   }
 
+  /** Synchronous write — no debounce. Use for data that must be immediately readable. */
+  static setUserDataSync<T>(username: string, key: string, value: T): void {
+    try {
+      const userKey = this.getUserKey(username, key);
+      localStorage.setItem(userKey, JSON.stringify(value));
+    } catch (error) {
+      console.error('Error setting user data (sync):', error);
+    }
+  }
+
   // Clear user-specific data
   static clearUserData(username: string, key: string): void {
     try {

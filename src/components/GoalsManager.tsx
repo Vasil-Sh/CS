@@ -161,7 +161,7 @@ export default function GoalsManager() {
   const [targetWinRateStr, setTargetWinRateStr] = useState('65');
   const [betsPerDayStr, setBetsPerDayStr] = useState('5');
 
-  useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); bumpStrategy(); } }, [goals, currentUser, bumpStrategy]);
+  useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); } }, [goals, currentUser]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
     if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0) return 0;
@@ -366,7 +366,7 @@ export default function GoalsManager() {
     }
     const updated = [...goals, goal];
     setGoals(updated);
-    UserDataService.setUserData(currentUser, 'goals', updated);
+    UserDataService.setUserDataSync(currentUser, 'goals', updated);
     bumpStrategy();
     setShowCreateDialog(false);
     resetNewGoalForm();
@@ -386,7 +386,7 @@ export default function GoalsManager() {
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
-  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserData(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
+  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {
@@ -408,7 +408,7 @@ export default function GoalsManager() {
       toast.success('Головна ціль змінена');
     }
     setGoals(updated);
-    UserDataService.setUserData(currentUser, 'goals', updated);
+    UserDataService.setUserDataSync(currentUser, 'goals', updated);
     bumpStrategy();
   };
   const openDetailsDialog = (goal: Goal) => { setSelectedGoal(goal); setShowDetailsDialog(true); setIsStepsCalculationExpanded(false); setIsLadderOverviewExpanded(true); setIsStepsProgressionExpanded(true); };
