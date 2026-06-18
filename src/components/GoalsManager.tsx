@@ -111,7 +111,6 @@ const cardHoverStyle = {
   boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)',
 };
 
-import { useAuth } from '@/contexts/AuthContext';
 export default function GoalsManager() {
   const { user } = useAuth();
   const currentUser = user?.username || '';
