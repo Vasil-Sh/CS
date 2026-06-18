@@ -905,19 +905,6 @@ export default function Matches() {
           </Tooltip>
         </td>
 
-        <td className={`py-3 px-2 ${colDivider}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-[11px] text-[#374151] font-medium leading-tight block max-w-[100px] truncate cursor-help">
-                {truncateTournament(match.context)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] bg-[#111827] text-white p-3 rounded-xl">
-              <p className="text-sm">{match.context}</p>
-            </TooltipContent>
-          </Tooltip>
-        </td>
-
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           {hasPrediction ? (
             <PredictionBar
@@ -1052,12 +1039,12 @@ export default function Matches() {
   const renderTableHeader = () => (
     <thead>
       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap w-[72px] ${colDivider}`}>
-          👍/👎
+        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>
+          Інтерес до Матчу
         </th>
         <th className={`text-left py-3 px-3 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
         <th 
-          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap w-[72px] ${colDivider}`}
+          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
           onClick={() => toggleSort('date')}
         >
           <div className="flex items-center justify-center gap-0.5">
@@ -1065,9 +1052,9 @@ export default function Matches() {
             {renderSortIndicator('date')}
           </div>
         </th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider w-[62px] ${colDivider}`}>Рахунок</th>
+        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Рахунок</th>
         <th 
-          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap w-[80px] ${colDivider}`}
+          className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
           onClick={() => toggleSort('status')}
         >
           <Tooltip>
@@ -1088,24 +1075,12 @@ export default function Matches() {
             </TooltipContent>
           </Tooltip>
         </th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider w-[48px] ${colDivider}`}>
-          AI
-        </th>
-        <th className={`text-left py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider max-w-[110px] ${colDivider}`}>Турнір</th>
+        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>AI</th>
         <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Прогноз</th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider w-[56px] ${colDivider}`}>Коеф.</th>
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider w-[48px] ${colDivider}`}>💬</th>
-        <th className="text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap w-[72px]">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex items-center gap-0.5 cursor-help">
-                + Запис
-              </span>
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg max-w-[220px]">
-              <p className="text-sm">+ Додати одиночний прогноз<br/>🔲 Обрати для експресу (2-10 матчів)</p>
-            </TooltipContent>
-          </Tooltip>
+        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Коеф.</th>
+        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>Нотатки</th>
+        <th className="text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">
+          Додати до Записів
         </th>
       </tr>
     </thead>
