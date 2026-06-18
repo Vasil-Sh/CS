@@ -1041,7 +1041,7 @@ export default function Matches() {
   const renderTableHeader = () => (
     <thead>
       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-        <th className={`text-center py-3 px-2 text-[11px] font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>
+        <th className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}>
           Інтерес до Матчу
         </th>
         <th className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}>Матч</th>
