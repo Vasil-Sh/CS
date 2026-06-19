@@ -147,24 +147,15 @@ export default function MyBets() {
     } catch { toast.error('Помилка при очищенні даних'); }
   }, [currentUser, loadStats, loadRecentBets]);
 
-  const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
-    // Open result note dialog first
-    setPendingResultAction({ bet, result });
-    setResultNote('');
-    setResultNoteOpen(true);
-  }, []);
-
-  const confirmResultUpdate = useCallback(async () => {
-    if (!pendingResultAction) return;
-    const { bet, result } = pendingResultAction;
+  const executeResultUpdate = useCallback(async (bet: Bet, result: 'Win' | 'Loss', note: string = '') => {
     try {
       const betAmount = bet.originalAmount || bet.amount;
       const originalProfit = result === 'Win' ? (bet.odds - 1) * betAmount : -betAmount;
       const profitInUAH = bet.currency === 'USD' && bet.exchangeRate ? originalProfit * bet.exchangeRate : originalProfit;
       const roi = (profitInUAH / bet.amount) * 100;
-      // Add notes to the bet before updating
+      // Add notes to the bet before updating (only for losses with notes)
       const resultLabel = result === 'Win' ? 'Виграш' : 'Програш';
-      const betWithNotes = resultNote.trim() ? { ...bet, notes: bet.notes ? `${bet.notes}\nРезультат: ${resultLabel}` : `Результат: ${resultLabel}\nКоментар: ${resultNote.trim()}` } : bet;
+      const betWithNotes = note.trim() ? { ...bet, notes: bet.notes ? `${bet.notes}\nРезультат: ${resultLabel}` : `Результат: ${resultLabel}\nКоментар: ${note.trim()}` } : bet;
       await realGoogleSheetsService.updateBetResult(betWithNotes, result, profitInUAH, roi);
       let matched = false;
       setRecentBets(prev => prev.map(b => {
@@ -177,13 +168,30 @@ export default function MyBets() {
         return b;
       }));
       toast.success(`Запис позначено як ${result === 'Win' ? 'виграшний' : 'програшний'}`);
-      if (resultNote.trim()) toast('Нотатку додано до запису', { description: resultNote.trim() });
+      if (note.trim()) toast('Нотатку додано до запису', { description: note.trim() });
       loadStats();
     } catch { toast.error('Помилка при оновленні результату'); }
+  }, [currentUser, loadStats]);
+
+  const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
+    if (result === 'Loss') {
+      setPendingResultAction({ bet, result });
+      setResultNote('');
+      setResultNoteOpen(true);
+      return;
+    }
+    // Win — mark directly without notes dialog
+    await executeResultUpdate(bet, result);
+  }, [executeResultUpdate]);
+
+  const confirmResultUpdate = useCallback(async () => {
+    if (!pendingResultAction) return;
+    const { bet, result } = pendingResultAction;
+    await executeResultUpdate(bet, result, resultNote);
     setResultNoteOpen(false);
     setPendingResultAction(null);
     setResultNote('');
-  }, [pendingResultAction, currentUser, loadStats, resultNote]);
+  }, [pendingResultAction, executeResultUpdate, resultNote]);
 
   const handleShareBet = useCallback((bet: Bet) => { setSelectedBet(bet); setShareModalOpen(true); }, []);
   const handleBankModalClose = useCallback((success: boolean) => { setBankModalOpen(false); if (success) { setBankrollRefreshKey(p => p + 1); bumpBankroll(); } }, [bumpBankroll]);
