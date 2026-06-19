@@ -131,45 +131,59 @@ export default function BalanceTracker({
       {/* Divider */}
       <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
 
-      {/* Status + progress bar */}
+      {/* Section 1 — Status */}
+      <div className="rounded-2xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3 mb-3">
+        <p className="text-sm text-[#111827] font-medium">{statusText}</p>
+      </div>
+
+      {/* Section 2 — Progress bar */}
       <div className="mb-3">
-        <p className="text-sm text-[#6B7280] mb-2">{statusText}</p>
         {hasBets ? (
-          <>
-            <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-              <div
-                className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-700 ease-out`}
-                style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-0.5 px-0.5">
-              <span>0 ₴</span>
-              <span>{allTimeHigh.toLocaleString('uk-UA')} ₴</span>
-            </div>
-          </>
+          <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+            <div
+              className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-700 ease-out`}
+              style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
+            />
+          </div>
         ) : (
           <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden opacity-20" />
         )}
+        <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-0.5 px-0.5">
+          <span>0 ₴</span>
+          <span>{hasBets ? `${allTimeHigh.toLocaleString('uk-UA')} ₴` : '—'}</span>
+        </div>
       </div>
 
-      {/* Advice */}
-      <p className="text-xs text-[#9CA3AF] leading-relaxed mb-3">
-        💡 {advice}
-      </p>
-
-      {/* Per game summary */}
-      <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-3">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[#447afc]" />
-          CS2: {cs2Bets > 0 ? `${cs2Bets} ставок · ${cs2Profit >= 0 ? '+' : ''}${cs2Profit.toFixed(0)} ₴` : '—'}
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-          Dota 2: {dota2Bets > 0 ? `${dota2Bets} ставок · ${dota2Profit >= 0 ? '+' : ''}${dota2Profit.toFixed(0)} ₴` : '—'}
-        </span>
+      {/* Section 3 — Advice */}
+      <div className="rounded-2xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3 mb-3">
+        <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
       </div>
 
-      {/* Game filter */}
+      {/* Section 4 — Game summary */}
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#F3F4F6]">
+          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">CS2</p>
+          {cs2Bets > 0 ? (
+            <p className="text-sm font-semibold text-[#111827]">
+              {cs2Bets} ставок · <span className={cs2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
+            </p>
+          ) : (
+            <p className="text-sm text-[#D1D5DB]">—</p>
+          )}
+        </div>
+        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#F3F4F6]">
+          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">Dota 2</p>
+          {dota2Bets > 0 ? (
+            <p className="text-sm font-semibold text-[#111827]">
+              {dota2Bets} ставок · <span className={dota2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
+            </p>
+          ) : (
+            <p className="text-sm text-[#D1D5DB]">—</p>
+          )}
+        </div>
+      </div>
+
+      {/* Section 5 — Game filter */}
       <div className="border-t border-[#F3F4F6] pt-3 flex items-center gap-2">
         <span className="text-xs text-[#9CA3AF]">Дивитись на сторінці:</span>
         <div className="flex items-center gap-1">

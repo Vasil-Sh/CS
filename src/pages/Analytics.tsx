@@ -182,6 +182,19 @@ export default function Analytics() {
     }
   }, [currentUser, updateBankrollStats]);
 
+  // Refresh bankroll when user switches back to this tab
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const allBets = realGoogleSheetsService.getAllRecords();
+        const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
+        setBankrollStats(bankStats);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [currentUser]);
+
   const clearAllData = useCallback(() => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.')) {
       UserDataService.clearUserData(currentUser, 'mybets_data');

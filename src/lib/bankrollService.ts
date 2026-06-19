@@ -34,7 +34,7 @@ export class BankrollService {
       manualAdjustments: 0,
       lastUpdated: new Date().toISOString()
     };
-    UserDataService.setUserData(username, this.STORAGE_KEY, data);
+    UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
   }
 
   /**
@@ -105,7 +105,7 @@ export class BankrollService {
 
     data.initialBank = newAmount;
     data.lastUpdated = new Date().toISOString();
-    UserDataService.setUserData(username, this.STORAGE_KEY, data);
+    UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
   }
 
   /**
