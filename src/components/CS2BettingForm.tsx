@@ -866,6 +866,52 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
   void stakeInCurrency;
   void pendingSubmit;
 
+  // ── Tilt protection: block after N consecutive losses ──
+  const tiltBlock = useMemo(() => {
+    const blockKey = `tilt_block_${currentUser}`;
+    const stored = localStorage.getItem(blockKey);
+    if (stored) {
+      const block = JSON.parse(stored) as { until: number; reason: string };
+      if (Date.now() < block.until) {
+        return { blocked: true, reason: block.reason, minutesLeft: Math.ceil((block.until - Date.now()) / 60000) };
+      }
+      // Block expired — remove
+      localStorage.removeItem(blockKey);
+    }
+
+    const blockAfter = primaryStrategy?.activityLimits?.enabled
+      ? (primaryStrategy.activityLimits.blockAfterLosses ?? 3)
+      : null;
+
+    if (!blockAfter || blockAfter < 1) return { blocked: false, reason: '', minutesLeft: 0 };
+
+    const allBets = realGoogleSheetsService.getAllRecords();
+    // Sort by date descending, count consecutive losses
+    const sorted = [...allBets]
+      .filter(b => b.result === 'Win' || b.result === 'Loss')
+      .sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return (b.createdAt || dateB) - (a.createdAt || dateA);
+      });
+
+    let consecutiveLosses = 0;
+    for (const bet of sorted) {
+      if (bet.result === 'Loss') consecutiveLosses++;
+      else break;
+    }
+
+    if (consecutiveLosses >= blockAfter) {
+      const blockMinutes = primaryStrategy?.activityLimits?.blockDurationMinutes ?? 60;
+      const until = Date.now() + blockMinutes * 60000;
+      const reason = `Ти програв ${consecutiveLosses} раз${consecutiveLosses === 1 ? '' : consecutiveLosses < 5 ? 'и' : 'ів'} поспіль. Зроби паузу на ${blockMinutes} хв — це допоможе уникнути тілт-ставок.`;
+      localStorage.setItem(blockKey, JSON.stringify({ until, reason }));
+      return { blocked: true, reason, minutesLeft: blockMinutes };
+    }
+
+    return { blocked: false, reason: '', minutesLeft: 0 };
+  }, [currentUser, primaryStrategy]);
+
   const allExpressEventsComplete = expressEvents.length > 0 && expressEvents.every(e => e.odds && parseFloat(e.odds) > 0 && e.selection && e.betType);
 
   return (
@@ -878,6 +924,24 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         onConfirm={handleViolationConfirm}
         onCancel={handleViolationCancel}
       />
+
+      {/* Tilt Protection Block */}
+      {tiltBlock.blocked && (
+        <div className="rounded-3xl overflow-hidden border-2 border-[#FCA5A5]" style={{ boxShadow: '0 4px 24px rgba(239,68,68,0.15)' }}>
+          <div className="flex items-start gap-4 px-6 py-5" style={{ background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)' }}>
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FEE2E2] flex-shrink-0">
+              <AlertTriangle className="h-6 w-6 text-[#DC2626]" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-[#991B1B] mb-1">🔒 Тілт-захист активовано</p>
+              <p className="text-sm text-[#B91C1C] leading-relaxed">{tiltBlock.reason}</p>
+              <p className="text-xs text-[#DC2626] mt-2 font-medium">
+                Залишилось: {tiltBlock.minutesLeft} хв. Форма ставки заблокована до завершення паузи.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Strategy Banner */}
       {primaryStrategy && (
@@ -943,7 +1007,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`lg:col-span-2 space-y-6 ${tiltBlock.blocked ? 'opacity-50 pointer-events-none select-none' : ''}`}>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form */}
             <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
@@ -1499,7 +1563,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
             {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
               <Button 
                 type="submit" 
-                disabled={isSubmitting || (formData.betCategory === 'Експрес' && !allExpressEventsComplete)} 
+                disabled={isSubmitting || tiltBlock.blocked || (formData.betCategory === 'Експрес' && !allExpressEventsComplete)} 
                 className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
               >
                 {isSubmitting ? (

@@ -128,7 +128,9 @@ export default function StrategyOverview() {
     description: '',
     criteria: [''],
     riskLevel: 'Medium' as 'Low' | 'Medium' | 'High',
-    expectedROI: 10
+    expectedROI: 10,
+    blockAfterLosses: 3,
+    blockDurationMinutes: 60,
   });
 
   useEffect(() => {
@@ -419,6 +421,12 @@ export default function StrategyOverview() {
       criteria: validCriteria,
       riskLevel: newStrategy.riskLevel,
       expectedROI: newStrategy.expectedROI,
+      activityLimits: {
+        enabled: true,
+        blockAfterLosses: newStrategy.blockAfterLosses,
+        blockDurationMinutes: newStrategy.blockDurationMinutes,
+        actionMode: 'block',
+      },
       ...validationRules
     };
 
@@ -434,7 +442,9 @@ export default function StrategyOverview() {
       description: '',
       criteria: [''],
       riskLevel: 'Medium',
-      expectedROI: 10
+      expectedROI: 10,
+      blockAfterLosses: 3,
+      blockDurationMinutes: 60,
     });
 
     setSuccessDialogOpen(true);
@@ -450,7 +460,9 @@ export default function StrategyOverview() {
       description: template.description,
       criteria: [...template.criteria],
       riskLevel: template.riskLevel,
-      expectedROI: template.expectedROI
+      expectedROI: template.expectedROI,
+      blockAfterLosses: 3,
+      blockDurationMinutes: 60,
     });
     setTemplateDialogOpen(false);
     toast.success(`Шаблон "${template.name}" застосовано!`);
@@ -1214,6 +1226,51 @@ export default function StrategyOverview() {
                   </div>
                 </div>
 
+                {/* ── Tilt Protection Settings ── */}
+                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#E5E7EB]">
+                      <Shield className="h-4 w-4 text-[#6B7280]" strokeWidth={2} />
+                    </div>
+                    <h4 className="font-semibold text-[#6B7280] text-sm">🔒 Тілт-захист (anti-tilt)</h4>
+                  </div>
+                  <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                    Автоматично блокує форму ставки після N програшів поспіль, щоб уникнути емоційних ставок.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="blockAfterLosses" className="text-[#6B7280] font-medium text-sm">Блокувати після програшів</Label>
+                      <Input
+                        id="blockAfterLosses"
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={newStrategy.blockAfterLosses}
+                        onChange={(e) => setNewStrategy({...newStrategy, blockAfterLosses: parseInt(e.target.value) || 3})}
+                        className="rounded-xl border-[#E5E7EB] bg-white mt-1.5"
+                      />
+                      <p className="text-xs text-[#9CA3AF] mt-1">К-сть програшів поспіль</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="blockDurationMinutes" className="text-[#6B7280] font-medium text-sm">Тривалість блокування</Label>
+                      <div className="relative mt-1.5">
+                        <Input
+                          id="blockDurationMinutes"
+                          type="number"
+                          min={15}
+                          max={480}
+                          step={15}
+                          value={newStrategy.blockDurationMinutes}
+                          onChange={(e) => setNewStrategy({...newStrategy, blockDurationMinutes: parseInt(e.target.value) || 60})}
+                          className="rounded-xl border-[#E5E7EB] bg-white pr-12"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF]">хв</span>
+                      </div>
+                      <p className="text-xs text-[#9CA3AF] mt-1">Від 15 до 480 хв</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="strategyName" className="text-[#111827] font-medium">Назва стратегії *</Label>
@@ -1382,6 +1439,28 @@ export default function StrategyOverview() {
                   ))}
                 </ul>
               </div>
+
+              {/* Tilt Protection — shown if strategy has activityLimits */}
+              {newlyCreatedStrategy.activityLimits?.enabled && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-[#FEF2F2] rounded-2xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
+                      <span className="text-sm font-medium text-[#DC2626]">🔒 Блокування після</span>
+                    </div>
+                    <div className="text-2xl font-bold text-[#DC2626]">{newlyCreatedStrategy.activityLimits.blockAfterLosses} програшів</div>
+                    <p className="text-xs text-[#B91C1C] mt-1">поспіль</p>
+                  </div>
+                  <div className="p-4 bg-[#FEF2F2] rounded-2xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
+                      <span className="text-sm font-medium text-[#DC2626]">Пауза</span>
+                    </div>
+                    <div className="text-2xl font-bold text-[#DC2626]">{newlyCreatedStrategy.activityLimits.blockDurationMinutes ?? 60} хв</div>
+                    <p className="text-xs text-[#B91C1C] mt-1">без можливості додавати ставки</p>
+                  </div>
+                </div>
+              )}
 
               <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#DBEAFE]">
                 <h4 className="font-semibold mb-2 flex items-center gap-2 text-[#3B82F6] text-sm">
@@ -1583,6 +1662,36 @@ export default function StrategyOverview() {
                       )}
                     </div>
                   </CollapsibleContent>
+                </Collapsible>
+              )}
+
+              {/* Tilt Protection — shown if strategy has activityLimits */}
+              {selectedStrategy.activityLimits?.enabled && (selectedStrategy.activityLimits.blockAfterLosses || selectedStrategy.activityLimits.blockDurationMinutes) && (
+                <Collapsible open={true} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
+                  <div className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
+                        <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-base font-semibold text-[#111827]">🔒 Тілт-захист</h3>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 px-6 pb-6">
+                    {selectedStrategy.activityLimits.blockAfterLosses && (
+                      <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Блокування після</p>
+                        <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.activityLimits.blockAfterLosses} програшів</p>
+                        <p className="text-xs text-[#9CA3AF] mt-1">поспіль</p>
+                      </div>
+                    )}
+                    {(selectedStrategy.activityLimits.blockDurationMinutes ?? 60) > 0 && (
+                      <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Тривалість паузи</p>
+                        <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.activityLimits.blockDurationMinutes ?? 60} хв</p>
+                        <p className="text-xs text-[#9CA3AF] mt-1">без можливості додавати ставки</p>
+                      </div>
+                    )}
+                  </div>
                 </Collapsible>
               )}
 

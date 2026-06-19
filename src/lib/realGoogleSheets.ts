@@ -62,6 +62,7 @@ export interface ActivityLimits {
   maxBetsPerMatch?: number;
   minPauseBetweenBets?: number; // in minutes
   blockAfterLosses?: number;
+  blockDurationMinutes?: number; // how long to block after hitting the limit, default 60
   actionMode: ActionMode;
 }
 
