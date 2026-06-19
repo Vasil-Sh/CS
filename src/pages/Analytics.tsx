@@ -478,8 +478,10 @@ export default function Analytics() {
   // All-time high/low for balance tracker — based on actual bet history, not current bank
   const allTimeHigh = useMemo(() => {
     if (completedBets.length === 0) return 0; // no history yet
-    return Math.max(...balanceData.map(d => d.balance), bankrollStats.currentBank);
-  }, [balanceData, bankrollStats.currentBank, completedBets.length]);
+    // Include initial bank as potential peak (before any bet was placed)
+    const initialPeak = bankrollStats.initialBank || bankrollStats.currentBank;
+    return Math.max(initialPeak, ...balanceData.map(d => d.balance), bankrollStats.currentBank);
+  }, [balanceData, bankrollStats, completedBets.length]);
 
   const allTimeLow = useMemo(() => {
     if (completedBets.length === 0) return 0;

@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface BalanceTrackerProps {
@@ -58,7 +58,7 @@ export default function BalanceTracker({
   const statusText = !hasBets
     ? 'Поки немає завершених ставок'
     : isGrowing
-    ? 'Твій банк на максимумі — це найкращий результат! 🔥'
+    ? 'Банк на максимумі — це найкращий результат! 🔥'
     : isStable
     ? 'Банк стабільний, близько до найкращого результату'
     : isDipping
@@ -102,12 +102,11 @@ export default function BalanceTracker({
     >
       {/* Title row */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <TrendIcon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
+        <div className="flex items-center gap-2">
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0 -ml-0.5 mt-0.5">
+                <button className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
                   <Info className="h-3.5 w-3.5" strokeWidth={2} />
                 </button>
               </TooltipTrigger>
@@ -123,7 +122,7 @@ export default function BalanceTracker({
             </Tooltip>
           </TooltipProvider>
           <div>
-            <p className="text-sm text-[#9CA3AF]">Твій банк</p>
+            <p className="text-sm text-[#9CA3AF]">Трекер балансу</p>
             <p className="text-2xl font-bold text-[#111827]">
               {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
             </p>
