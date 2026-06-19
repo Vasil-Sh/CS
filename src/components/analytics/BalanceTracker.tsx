@@ -113,9 +113,9 @@ export default function BalanceTracker({
             </Tooltip>
           </TooltipProvider>
           <div>
-            <p className="text-lg font-semibold text-[#111827]">
-              Трекер балансу:{' '}
-              <span className="text-4xl font-bold tracking-tight">
+            <p className="text-lg font-semibold text-[#111827] flex items-baseline gap-1">
+              <span>Трекер балансу:</span>
+              <span className="text-2xl font-bold tracking-tight">
                 {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
               </span>
             </p>

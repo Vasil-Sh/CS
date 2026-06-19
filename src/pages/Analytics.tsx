@@ -91,7 +91,7 @@ export default function Analytics() {
   const [activeTab, setActiveTab] = useState('profit');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('all');
+  const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('CS2');
 
   useEffect(() => {
     loadAnalyticsData();
