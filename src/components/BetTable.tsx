@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import {
   Calendar, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag, FileText,
+  ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag, FileText, Search, X,
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
@@ -58,6 +58,8 @@ interface BetTableProps {
   sortOrder: 'asc' | 'desc';
   currentPage: number;
   onPageChange: (p: number) => void;
+  searchText: string;
+  onSearchTextChange: (v: string) => void;
   onShareBet: (bet: Bet) => void;
   onBetDetails: (bet: Bet) => void;
   onExpressDetails: (bet: Bet) => void;
@@ -72,6 +74,7 @@ export default function BetTable({
   periodFilter, onPeriodFilterChange,
   sortBy, onSortByChange,
   sortOrder, currentPage, onPageChange,
+  searchText, onSearchTextChange,
   onShareBet, onBetDetails, onExpressDetails, onUpdateResult,
 }: BetTableProps) {
   const [notesDialogBet, setNotesDialogBet] = useState<string>('');
@@ -120,6 +123,19 @@ export default function BetTable({
       });
     }
 
+    if (searchText.trim()) {
+      const query = searchText.trim().toLowerCase();
+      result = result.filter((bet) => {
+        return (bet.match?.toLowerCase().includes(query) || false)
+          || (bet.team1?.toLowerCase().includes(query) || false)
+          || (bet.team2?.toLowerCase().includes(query) || false)
+          || (bet.game?.toLowerCase().includes(query) || false)
+          || (bet.tournament?.toLowerCase().includes(query) || false)
+          || (bet.betType?.toLowerCase().includes(query) || false)
+          || (bet.strategy?.toLowerCase().includes(query) || false);
+      });
+    }
+
     if (sortBy !== 'date') {
       result = [...result].sort((a, b) => {
         const comparison = sortBy === 'profit' ? (a.profit || 0) - (b.profit || 0) : a.odds - b.odds;
@@ -129,7 +145,7 @@ export default function BetTable({
       result = result.reverse();
     }
     return result;
-  }, [bets, tableFilter, resultFilter, periodFilter, sortBy, sortOrder]);
+  }, [bets, tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
 
   const totalPages = Math.max(1, Math.ceil(sortedAndFilteredBets.length / ITEMS_PER_PAGE));
   const paginatedBets = useMemo(() => {
@@ -196,10 +212,26 @@ export default function BetTable({
               Скинути
             </button>
           )}
-          <div className="ml-auto">
-            <span className="text-sm text-[#9CA3AF]">
+          {/* Search */}
+          <div className="ml-auto flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
+              <input
+                type="text"
+                value={searchText}
+                onChange={(e) => onSearchTextChange(e.target.value)}
+                placeholder="Пошук за матчем, командою, грою…"
+                className="pl-9 pr-8 py-2 rounded-xl border border-[#E5E7EB] bg-white text-sm text-[#111827] placeholder:text-[#9CA3AF] w-56 focus:outline-none focus:border-[#111827] transition-colors"
+              />
+              {searchText && (
+                <button onClick={() => onSearchTextChange('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#111827]">
+                  <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+            <span className="text-sm text-[#9CA3AF] whitespace-nowrap">
               {sortedAndFilteredBets.length} {sortedAndFilteredBets.length === 1 ? 'запис' : sortedAndFilteredBets.length >= 2 && sortedAndFilteredBets.length <= 4 ? 'записи' : 'записів'}
-              {(tableFilter !== 'all' || hasActiveAdvancedFilters) && ` з ${bets.length}`}
+              {(tableFilter !== 'all' || hasActiveAdvancedFilters || !!searchText) && ` з ${bets.length}`}
             </span>
           </div>
         </div>

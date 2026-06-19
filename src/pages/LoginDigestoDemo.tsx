@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { authService } from '@/lib/authService';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, LogIn, Sparkles } from 'lucide-react';
 
 export default function LoginDigestoDemo() {
@@ -13,6 +13,7 @@ export default function LoginDigestoDemo() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ export default function LoginDigestoDemo() {
     setIsLoading(true);
 
     try {
-      const result = await authService.login(username, password);
+      const result = await login(username, password);
       if (result.success) {
         navigate('/app/analytics');
       } else {

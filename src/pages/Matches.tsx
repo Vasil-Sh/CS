@@ -45,6 +45,7 @@ import {
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/useTheme';
 import {
   Tooltip,
   TooltipContent,
@@ -453,7 +454,8 @@ export default function Matches() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'live' | 'finished'>('all');
   const [showHotMatches, setShowHotMatches] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDarkTheme = theme === 'dark';
   
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -472,10 +474,6 @@ export default function Matches() {
   const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(new Set());
   
   const { toast } = useToast();
-
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-  };
 
   // Reset all filters
   const resetAllFilters = () => {

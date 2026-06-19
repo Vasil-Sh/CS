@@ -92,7 +92,7 @@ export default function BalanceTracker({
       }}
     >
       {/* Title row */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
           <TooltipProvider delayDuration={200}>
             <Tooltip>
@@ -128,6 +128,8 @@ export default function BalanceTracker({
           </div>
         )}
       </div>
+      {/* Divider */}
+      <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
 
       {/* Status + progress bar */}
       <div className="mb-3">

@@ -14,6 +14,7 @@ import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/hooks/useTheme';
 import { logRender } from '@/lib/devLogger';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,
@@ -63,7 +64,8 @@ export default function MyBets() {
   const [activeTab, setActiveTab] = useState('add');
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDarkTheme = theme === 'dark';
   const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
   const [expressMatchesData, setExpressMatchesData] = useState<MatchPrefillData[] | null>(null);
   const [tableFilter, setTableFilter] = useState<TableFilterMode>('all');
@@ -73,6 +75,7 @@ export default function MyBets() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [bankrollStats, setBankrollStats] = useState({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
 
   // ── Derived ──
@@ -105,7 +108,7 @@ export default function MyBets() {
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
   useEffect(() => { loadStats(); loadRecentBets(); }, []);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
-  useEffect(() => { setCurrentPage(1); }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder]);
+  useEffect(() => { setCurrentPage(1); }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
   useEffect(() => { const h = () => setShowActionsMenu(false); if (showActionsMenu) { document.addEventListener('click', h); return () => document.removeEventListener('click', h); } }, [showActionsMenu]);
 
   // ── Data fetching ──
@@ -128,7 +131,7 @@ export default function MyBets() {
   }, [currentUser]);
 
   const loadRecentBets = useCallback(async () => {
-    try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data.slice(-20) : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
+    try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
     catch { setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', [])); }
   }, [currentUser]);
 
@@ -213,7 +216,6 @@ export default function MyBets() {
   const handleBetDetails = useCallback((bet: Bet) => { setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
 
   // ── UI ──
-  const toggleTheme = () => setIsDarkTheme(!isDarkTheme);
   const tabs = [
     { id: 'add', label: 'Додати запис', icon: Plus },
     { id: 'records', label: 'Останні записи', icon: ClipboardList },
@@ -283,6 +285,7 @@ export default function MyBets() {
               periodFilter={periodFilter} onPeriodFilterChange={setPeriodFilter}
               sortBy={sortBy} onSortByChange={setSortBy}
               sortOrder={sortOrder} currentPage={currentPage} onPageChange={setCurrentPage}
+              searchText={searchText} onSearchTextChange={setSearchText}
               onShareBet={handleShareBet} onBetDetails={handleBetDetails}
               onExpressDetails={handleExpressDetails} onUpdateResult={updateBetResult} />
           )}

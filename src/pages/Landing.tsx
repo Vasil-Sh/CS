@@ -19,24 +19,16 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [language, setLanguage] = useState<'UA' | 'EN'>('UA');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const { theme, toggleTheme } = useTheme();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
   const toggleLanguage = () => setLanguage((prev) => (prev === 'UA' ? 'EN' : 'UA'));
-  const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   const comparisonRows = [
     {

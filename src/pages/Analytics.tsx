@@ -346,14 +346,15 @@ export default function Analytics() {
   }, [bets]);
 
   const monthlyProfitData = useMemo((): MonthlyData[] => {
-    const monthlyData: { [key: string]: { profit: number; wins: number; losses: number } } = {};
+    const monthlyData: { [key: string]: { profit: number; wins: number; losses: number; sortKey: string } } = {};
     
     completedBets.forEach((bet: Bet) => {
       const date = new Date(bet.date);
+      const sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleDateString('uk-UA', { month: 'short', year: 'numeric' });
       
       if (!monthlyData[monthName]) {
-        monthlyData[monthName] = { profit: 0, wins: 0, losses: 0 };
+        monthlyData[monthName] = { profit: 0, wins: 0, losses: 0, sortKey };
       }
       monthlyData[monthName].profit += bet.profit || 0;
       if (bet.result === 'Win') {
@@ -365,11 +366,7 @@ export default function Analytics() {
     
     let cumulative = 0;
     return Object.entries(monthlyData)
-      .sort((a, b) => {
-        const dateA = new Date(a[0]);
-        const dateB = new Date(b[0]);
-        return dateA.getTime() - dateB.getTime();
-      })
+      .sort((a, b) => a[1].sortKey.localeCompare(b[1].sortKey))
       .map(([month, data]) => {
         cumulative += data.profit;
         return {

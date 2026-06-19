@@ -17,6 +17,7 @@ const Profile = lazy(() => import('@/pages/Profile'));
 const MyBets = lazy(() => import('@/pages/MyBets'));
 const Strategy = lazy(() => import('@/pages/Strategy'));
 const Admin = lazy(() => import('@/pages/Admin'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 function PageLoader() {
   return (
@@ -108,6 +109,16 @@ function App() {
             }
           />
         </Route>
+
+        {/* 404 catch-all */}
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <NotFound />
+            </Suspense>
+          }
+        />
       </Routes>
       <Toaster />
       <SonnerToaster position="top-center" richColors closeButton duration={4000} />

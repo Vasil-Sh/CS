@@ -11,6 +11,7 @@ import {
   Database,
   FileDown,
   FileUp,
+  FileSpreadsheet,
   CheckCircle2,
   AlertTriangle,
   Palette,
@@ -53,6 +54,8 @@ export default function Profile() {
   // Collect all localStorage keys used by the app
   const APP_STORAGE_KEYS = [
     'admin_risky_teams',
+    'customStrategies',
+    'primaryStrategy',
     'bets',
     'strategies',
     'goals',
@@ -99,6 +102,48 @@ export default function Profile() {
 
   const stats = getDataStats();
   const storageSize = getStorageSize();
+
+  const exportBetsCSV = () => {
+    const bets = UserDataService.getUserData(username, 'mybets_data', []);
+    if (!Array.isArray(bets) || bets.length === 0) {
+      toast.error('Немає ставок для експорту', { description: 'Додайте ставки через форму на сторінці Матчі' });
+      return;
+    }
+
+    const headers = ['Дата', 'Матч', 'Команда 1', 'Команда 2', 'Гра', 'Турнір', 'Тип ставки', 'Формат', 'Коефіцієнт', 'Сума (UAH)', 'Результат', 'Прибуток (UAH)', 'ROI %', 'Стратегія', 'Нотатки'];
+    const rows = bets.map((b: any) => [
+      b.date || '',
+      b.match || '',
+      b.team1 || '',
+      b.team2 || '',
+      b.game || '',
+      b.tournament || '',
+      b.betType || '',
+      b.format || '',
+      b.odds ?? '',
+      b.amount ?? '',
+      b.result || '',
+      b.profit ?? '',
+      b.roi != null ? Math.round(b.roi * 100) / 100 : '',
+      b.strategy || '',
+      `"${(b.notes || '').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `matchiq-bets-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`CSV експортовано! (${bets.length} ставок)`, {
+      description: `Файл: matchiq-bets-${new Date().toISOString().slice(0, 10)}.csv`
+    });
+  };
 
   const exportFullBackup = () => {
     setIsExporting(true);
@@ -439,6 +484,29 @@ export default function Profile() {
                       Завантажити повний бекап
                     </>
                   )}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* CSV Export */}
+          <div className="p-5 border border-[#E5E7EB] rounded-2xl hover:border-[#D1D5DB] transition-colors">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-[#FFF7ED] rounded-xl flex-shrink-0">
+                <FileSpreadsheet className="h-6 w-6 text-[#EA580C]" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-[#111827] mb-1">Експорт ставок у CSV</h3>
+                <p className="text-sm text-[#6B7280] mb-4">
+                  Вивантажує ваші ставки у формат CSV для аналізу в Excel або Google Sheets. 
+                  Містить усі поля: дата, матч, команди, гра, турнір, коефіцієнт, сума, результат, прибуток, ROI, стратегія, нотатки.
+                </p>
+                <Button
+                  onClick={exportBetsCSV}
+                  className="bg-[#EA580C] hover:bg-[#C2410C] text-white rounded-xl text-sm px-6 font-semibold"
+                >
+                  <FileSpreadsheet className="mr-2 h-4 w-4" strokeWidth={2} />
+                  Завантажити CSV
                 </Button>
               </div>
             </div>
