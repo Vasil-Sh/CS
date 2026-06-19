@@ -5,8 +5,7 @@ import type { MatchPrefillData } from '@/components/CS2BettingForm';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
 import ExpressDetailsModal from '@/components/ExpressDetailsModal';
-import BetDetailsModal from '@/components/BetDetailsModal';
-import InitialBankModal from '@/components/InitialBankModal';
+import BetDetailsModal from '@/components/BetDetailsModal';import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';import InitialBankModal from '@/components/InitialBankModal';
 import StatCard from '@/components/StatCard';
 import BetTable from '@/components/BetTable';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
@@ -54,8 +53,9 @@ export default function MyBets() {
   const [bankModalOpen, setBankModalOpen] = useState(false);
   const [expressModalOpen, setExpressModalOpen] = useState(false);
   const [betDetailsModalOpen, setBetDetailsModalOpen] = useState(false);
-  const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);
-  const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
+  const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(null);  const [resultNoteOpen, setResultNoteOpen] = useState(false);
+  const [resultNote, setResultNote] = useState('');
+  const [pendingResultAction, setPendingResultAction] = useState<{ bet: Bet; result: 'Win' | 'Loss' } | null>(null);  const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -147,26 +147,41 @@ export default function MyBets() {
   }, [currentUser, loadStats, loadRecentBets]);
 
   const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
+    // Open result note dialog first
+    setPendingResultAction({ bet, result });
+    setResultNote('');
+    setResultNoteOpen(true);
+  }, []);
+
+  const confirmResultUpdate = useCallback(async () => {
+    if (!pendingResultAction) return;
+    const { bet, result } = pendingResultAction;
     try {
       const betAmount = bet.originalAmount || bet.amount;
       const originalProfit = result === 'Win' ? (bet.odds - 1) * betAmount : -betAmount;
       const profitInUAH = bet.currency === 'USD' && bet.exchangeRate ? originalProfit * bet.exchangeRate : originalProfit;
       const roi = (profitInUAH / bet.amount) * 100;
-      await realGoogleSheetsService.updateBetResult(bet, result, profitInUAH, roi);
+      // Add notes to the bet before updating
+      const betWithNotes = resultNote.trim() ? { ...bet, notes: bet.notes ? `${bet.notes}\n[Результат: ${result}] ${resultNote.trim()}` : `[Результат: ${result}] ${resultNote.trim()}` } : bet;
+      await realGoogleSheetsService.updateBetResult(betWithNotes, result, profitInUAH, roi);
       let matched = false;
       setRecentBets(prev => prev.map(b => {
         if (matched) return b;
         if ((bet.id && b.id === bet.id) || (bet.createdAt && b.createdAt === bet.createdAt) ||
             (!bet.id && !bet.createdAt && b.date === bet.date && b.match === bet.match && b.amount === bet.amount && b.odds === bet.odds && b.result === 'Pending')) {
           matched = true;
-          return { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId };
+          return { ...b, result, profit: profitInUAH, originalProfit, roi, goalId: b.goalId, notes: betWithNotes.notes || b.notes };
         }
         return b;
       }));
       toast.success(`Запис позначено як ${result === 'Win' ? 'виграшний' : 'програшний'}`);
+      if (resultNote.trim()) toast('Нотатку додано до запису', { description: resultNote.trim() });
       loadStats();
     } catch { toast.error('Помилка при оновленні результату'); }
-  }, [currentUser, loadStats]);
+    setResultNoteOpen(false);
+    setPendingResultAction(null);
+    setResultNote('');
+  }, [pendingResultAction, currentUser, loadStats, resultNote]);
 
   const handleShareBet = useCallback((bet: Bet) => { setSelectedBet(bet); setShareModalOpen(true); }, []);
   const handleBankModalClose = useCallback((success: boolean) => { setBankModalOpen(false); if (success) { setBankrollRefreshKey(p => p + 1); bumpBankroll(); } }, [bumpBankroll]);
@@ -275,6 +290,47 @@ export default function MyBets() {
         {selectedBet && <BetShareModal bet={selectedBet} open={shareModalOpen} onClose={() => { setShareModalOpen(false); setSelectedBet(null); }} />}
         {selectedExpressBet && <ExpressDetailsModal bet={selectedExpressBet} open={expressModalOpen} onClose={() => { setExpressModalOpen(false); setSelectedExpressBet(null); setSelectedExpressEvents([]); }} parsedEvents={selectedExpressEvents} />}
         {selectedDetailsBet && <BetDetailsModal bet={selectedDetailsBet} open={betDetailsModalOpen} onClose={() => { setBetDetailsModalOpen(false); setSelectedDetailsBet(null); }} />}
+
+        {/* Result Note Dialog — opens when marking bet result */}
+        <Dialog open={resultNoteOpen} onOpenChange={(open) => { if (!open) { setResultNoteOpen(false); setPendingResultAction(null); setResultNote(''); } }}>
+          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-[#111827]">
+                Чому такий результат?
+              </DialogTitle>
+              <DialogDescription className="text-[#6B7280]">
+                {pendingResultAction && (
+                  <>
+                    <strong>{pendingResultAction.bet.match}</strong> —{' '}
+                    <span className={pendingResultAction.result === 'Win' ? 'text-[#22C55E] font-semibold' : 'text-[#EF4444] font-semibold'}>
+                      {pendingResultAction.result === 'Win' ? 'Виграш' : 'Програш'}
+                    </span>
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <textarea
+                value={resultNote}
+                onChange={(e) => setResultNote(e.target.value)}
+                placeholder={`Що спрацювало? Що ні? Це аналіз чи емоції?\n\nНаприклад:\n• Переоцінив форму команди\n• Не врахував заміну гравця\n• Емоційна ставка після серії програшів`}
+                className="w-full h-32 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none"
+                autoFocus
+              />
+              <p className="text-xs text-[#9CA3AF]">
+                💡 Нотатка збережеться з записом. Це допоможе аналізувати помилки в майбутньому.
+              </p>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => { setResultNoteOpen(false); setPendingResultAction(null); setResultNote(''); }} className="rounded-xl">
+                Пропустити
+              </Button>
+              <Button onClick={confirmResultUpdate} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white">
+                {pendingResultAction?.result === 'Win' ? '✅ Виграш' : '❌ Програш'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

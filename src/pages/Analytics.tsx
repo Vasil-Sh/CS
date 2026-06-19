@@ -11,6 +11,7 @@ import MonthlyProfitChartCard from '@/components/analytics/MonthlyProfitChartCar
 import OddsVsProfitScatterCard from '@/components/analytics/OddsVsProfitScatterCard';
 import OddsWinRateChartCard from '@/components/analytics/OddsWinRateChartCard';
 import OddsCategoryCards from '@/components/analytics/OddsCategoryCards';
+import BalanceTracker from '@/components/analytics/BalanceTracker';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import GoalsManager from '@/components/GoalsManager';
@@ -90,6 +91,7 @@ export default function Analytics() {
   const [activeTab, setActiveTab] = useState('profit');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('all');
 
   useEffect(() => {
     loadAnalyticsData();
@@ -223,15 +225,24 @@ export default function Analytics() {
     setIsDarkTheme(prev => !prev);
   }, []);
 
+  // Filter bets by game
+  const gameFilteredBets = useMemo(() => {
+    if (gameFilter === 'all') return bets;
+    return bets.filter((bet: Bet) => {
+      const g = bet.game || '';
+      return g === gameFilter || (gameFilter === 'CS2' && g === 'CS') || (gameFilter === 'Dota2' && g === 'Dota');
+    });
+  }, [bets, gameFilter]);
+
   // Derive memoized metrics
   const { completedBets, winningBets, losingBets } = useMemo(() => {
-    const completed = bets.filter((bet: Bet) => bet.result !== 'Pending');
+    const completed = gameFilteredBets.filter((bet: Bet) => bet.result !== 'Pending');
     return {
       completedBets: completed,
       winningBets: completed.filter((bet: Bet) => bet.result === 'Win'),
       losingBets: completed.filter((bet: Bet) => bet.result === 'Loss'),
     };
-  }, [bets]);
+  }, [gameFilteredBets]);
 
   const streaks = useMemo(() => {
     let currentWinStreak = 0;
@@ -301,7 +312,7 @@ export default function Analytics() {
 
   const betTypeDistribution = useMemo(() => {
     const distribution: { [key: string]: { count: number; profit: number; wins: number; originalName: string } } = {};
-    bets.forEach((bet: Bet) => {
+    gameFilteredBets.forEach((bet: Bet) => {
       const originalType = bet.betType || 'Winner';
       const shortType = shortenBetTypeName(originalType);
       
@@ -436,6 +447,17 @@ export default function Analytics() {
     { label: 'Середні', sublabel: '2.0 – 3.0' },
     { label: 'Високі', sublabel: '> 3.0' }
   ];
+
+  // All-time high/low for balance tracker
+  const allTimeHigh = useMemo(() => {
+    if (balanceData.length === 0) return bankrollStats.currentBank;
+    return Math.max(...balanceData.map(d => d.balance), bankrollStats.currentBank);
+  }, [balanceData, bankrollStats.currentBank]);
+
+  const allTimeLow = useMemo(() => {
+    if (balanceData.length === 0) return bankrollStats.currentBank;
+    return Math.min(...balanceData.map(d => d.balance), bankrollStats.currentBank);
+  }, [balanceData, bankrollStats.currentBank]);
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
@@ -708,8 +730,12 @@ export default function Analytics() {
 
         {/* Custom Tabs Navigation */}
         <div className="space-y-6">
+          <BalanceTracker currentBank={bankrollStats.currentBank} allTimeHigh={allTimeHigh} allTimeLow={allTimeLow} />
+
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex items-center gap-3">
+              {/* Tabs */}
+              <div className="grid flex-1 gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -732,6 +758,25 @@ export default function Analytics() {
                   </button>
                 );
               })}
+              </div>
+
+              {/* Game Filter Pills */}
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-xs text-[#9CA3AF] mr-1">Гра:</span>
+                {(['all', 'CS2', 'Dota2'] as const).map(g => (
+                  <button
+                    key={g}
+                    onClick={() => setGameFilter(g)}
+                    className={`px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
+                      gameFilter === g
+                        ? 'bg-[#111827] text-white shadow-sm'
+                        : 'bg-transparent text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]'
+                    }`}
+                  >
+                    {g === 'all' ? 'Всі' : g}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
