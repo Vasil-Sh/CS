@@ -1,5 +1,4 @@
-import { Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface BalanceTrackerProps {
   currentBank: number;
@@ -7,7 +6,6 @@ interface BalanceTrackerProps {
   allTimeLow: number;
   gameFilter: 'all' | 'CS2' | 'Dota2';
   onGameFilterChange: (f: 'all' | 'CS2' | 'Dota2') => void;
-  /** Total completed bets for each game (used in game-specific stats) */
   cs2Bets: number;
   dota2Bets: number;
   cs2Profit: number;
@@ -15,8 +13,8 @@ interface BalanceTrackerProps {
 }
 
 /**
- * Баланс-трекер у стилі StatCard — білий фон, сіра обводка, тінь при hover.
- * Показує поточний банк відносно історичного піку + фільтр гри.
+ * Стан банку — зрозуміла картка для новачків.
+ * Пояснює простими словами: скільки грошей у банку, чи зростає він, чи падає.
  */
 export default function BalanceTracker({
   currentBank,
@@ -29,51 +27,57 @@ export default function BalanceTracker({
   cs2Profit,
   dota2Profit,
 }: BalanceTrackerProps) {
-  const hasHistory = allTimeHigh > 0;
-  const percentOfPeak = hasHistory ? (currentBank / allTimeHigh) * 100 : 100;
+  const hasBets = allTimeHigh > 0;
+  const percentOfPeak = hasBets ? (currentBank / allTimeHigh) * 100 : 100;
 
-  // Game-specific data check
   const gameHasData =
-    gameFilter === 'all'
-      ? cs2Bets + dota2Bets > 0
-      : gameFilter === 'CS2'
-      ? cs2Bets > 0
-      : dota2Bets > 0;
+    gameFilter === 'all' ? cs2Bets + dota2Bets > 0
+    : gameFilter === 'CS2' ? cs2Bets > 0
+    : dota2Bets > 0;
 
-  const gameProfit =
-    gameFilter === 'all'
-      ? cs2Profit + dota2Profit
-      : gameFilter === 'CS2'
-      ? cs2Profit
-      : dota2Profit;
+  const gameProfit = gameFilter === 'all' ? cs2Profit + dota2Profit
+    : gameFilter === 'CS2' ? cs2Profit : dota2Profit;
+  const gameBets = gameFilter === 'all' ? cs2Bets + dota2Bets
+    : gameFilter === 'CS2' ? cs2Bets : dota2Bets;
 
-  const gameBets =
-    gameFilter === 'all'
-      ? cs2Bets + dota2Bets
-      : gameFilter === 'CS2'
-      ? cs2Bets
-      : dota2Bets;
+  const isGrowing = hasBets && percentOfPeak >= 98;
+  const isStable = hasBets && percentOfPeak >= 85 && percentOfPeak < 98;
+  const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
+  const isFalling = hasBets && percentOfPeak < 50;
 
-  const isAtPeak = percentOfPeak >= 98;
-  const isClose = percentOfPeak >= 85;
-  const isWarning = hasHistory && percentOfPeak >= 50 && percentOfPeak < 85;
-  const isDrop = hasHistory && percentOfPeak < 50;
+  const TrendIcon = !hasBets ? TrendingDown
+    : isGrowing || isStable ? TrendingUp
+    : TrendingDown;
 
-  const statusLabel = !hasHistory
-    ? 'Немає даних'
-    : isAtPeak
-    ? 'На піку 🔥'
-    : isClose
-    ? 'Близько до піку'
-    : isWarning
-    ? `Просадка ${(100 - percentOfPeak).toFixed(0)}%`
-    : `Просадка ${(100 - percentOfPeak).toFixed(0)}%`;
+  const iconColor = !hasBets ? 'text-[#9CA3AF]'
+    : isGrowing || isStable ? 'text-[#10B981]'
+    : isDipping ? 'text-[#F59E0B]'
+    : 'text-[#EF4444]';
 
-  const statusDot = !hasHistory || isAtPeak || isClose
-    ? 'bg-[#10B981]'
-    : isWarning
-    ? 'bg-[#F59E0B]'
-    : 'bg-[#EF4444]';
+  const statusText = !hasBets
+    ? 'Поки немає завершених ставок'
+    : isGrowing
+    ? 'Твій банк на максимумі — це найкращий результат! 🔥'
+    : isStable
+    ? 'Банк стабільний, близько до найкращого результату'
+    : isDipping
+    ? `Банк зменшився на ${(100 - percentOfPeak).toFixed(0)}% від найкращого`
+    : `Банк значно просів — на ${(100 - percentOfPeak).toFixed(0)}% від максимуму`;
+
+  const progressColor = !hasBets ? 'from-[#E5E7EB] to-[#D1D5DB]'
+    : isGrowing || isStable ? 'from-[#10B981] to-[#34D399]'
+    : isDipping ? 'from-[#F59E0B] to-[#FBBF24]'
+    : 'from-[#EF4444] to-[#F87171]';
+
+  const advice = !hasBets
+    ? 'Додавай записи про ставки — цей блок покаже твій прогрес'
+    : isGrowing
+    ? 'Ти на правильному шляху. Продовжуй!'
+    : isStable
+    ? 'Усе добре. Дотримуйся стратегії.'
+    : isDipping
+    ? 'Можливо варто зменшити ставки або зробити паузу'
+    : 'Радимо зменшити ставки та переглянути стратегію';
 
   return (
     <div
@@ -95,117 +99,88 @@ export default function BalanceTracker({
         });
       }}
     >
-      {/* Row 1: label + amount + percent */}
+      {/* Title row */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
-                  <Info className="h-4 w-4" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
-                <p className="text-sm font-semibold text-[#111827] mb-1">Баланс-трекер</p>
-                <p className="text-sm text-[#6B7280] leading-relaxed">
-                  Поточний банк відносно історичного максимуму.
-                  Зелена крапка — близько до піку, жовта — просадка, червона — значна просадка.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TrendIcon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
           <div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-base font-semibold text-[#111827]">Баланс-трекер</span>
-              <span className="text-2xl font-bold text-[#111827]">
-                {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="flex items-center gap-1 text-sm text-[#6B7280]">
-                <span className={`inline-block w-2 h-2 rounded-full ${statusDot}`} />
-                {statusLabel}
-              </span>
-              {hasHistory && (
-                <span className="text-sm text-[#9CA3AF]">
-                  · Пік: {allTimeHigh.toLocaleString('uk-UA')} ₴
-                </span>
-              )}
-            </div>
+            <p className="text-sm text-[#9CA3AF]">Твій банк</p>
+            <p className="text-2xl font-bold text-[#111827]">
+              {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+            </p>
           </div>
         </div>
-        {hasHistory && (
+        {hasBets && (
           <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-[#111827] tracking-tight">
-              {percentOfPeak.toFixed(0)}%
-            </div>
-            <div className="text-sm text-[#9CA3AF]">від піку</div>
+            <p className="text-xs text-[#9CA3AF]">Найкращий результат</p>
+            <p className="text-base font-semibold text-[#111827]">
+              {allTimeHigh.toLocaleString('uk-UA')} ₴
+            </p>
           </div>
         )}
       </div>
 
-      {/* Progress bar */}
-      <div className="mb-4">
-        {hasHistory ? (
+      {/* Status + progress bar */}
+      <div className="mb-3">
+        <p className="text-sm text-[#6B7280] mb-2">{statusText}</p>
+        {hasBets ? (
           <>
-            <div className="relative w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+            <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
               <div
-                className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#10B981] to-[#34D399] transition-all duration-700 ease-out"
+                className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-700 ease-out`}
                 style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
               />
-              <div className="absolute top-0 h-full w-0.5 bg-white" style={{ left: '50%' }} />
             </div>
-            <div className="flex justify-between text-[10px] text-[#9CA3AF] px-0.5 mt-0.5">
-              <span>{isDrop ? `⬇ ${percentOfPeak.toFixed(0)}%` : ''}</span>
-              <span className={percentOfPeak < 50 ? 'text-[#EF4444]' : ''}>50%</span>
-              <span>100%</span>
+            <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-0.5 px-0.5">
+              <span>0 ₴</span>
+              <span>{allTimeHigh.toLocaleString('uk-UA')} ₴</span>
             </div>
           </>
         ) : (
-          <>
-            <div className="relative w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden opacity-20" />
-            <p className="text-sm text-[#9CA3AF] mt-0.5">
-              Додайте записи — трекер покаже динаміку
-            </p>
-          </>
+          <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden opacity-20" />
         )}
       </div>
 
-      {/* Game stats row */}
-      <div className="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
+      {/* Advice */}
+      <p className="text-xs text-[#9CA3AF] leading-relaxed mb-3">
+        💡 {advice}
+      </p>
+
+      {/* Per game summary */}
+      <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-3">
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[#447afc]" />
-          CS2: {cs2Bets > 0 ? `${cs2Bets} ставок · ${cs2Profit >= 0 ? '+' : ''}${cs2Profit.toFixed(0)} ₴` : 'немає даних'}
+          CS2: {cs2Bets > 0 ? `${cs2Bets} ставок · ${cs2Profit >= 0 ? '+' : ''}${cs2Profit.toFixed(0)} ₴` : '—'}
         </span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-          Dota 2: {dota2Bets > 0 ? `${dota2Bets} ставок · ${dota2Profit >= 0 ? '+' : ''}${dota2Profit.toFixed(0)} ₴` : 'немає даних'}
+          Dota 2: {dota2Bets > 0 ? `${dota2Bets} ставок · ${dota2Profit >= 0 ? '+' : ''}${dota2Profit.toFixed(0)} ₴` : '—'}
         </span>
       </div>
 
-      {/* Divider + game filter */}
-      <div className="border-t border-[#F3F4F6] pt-3 flex items-center gap-3">
-        <span className="text-sm text-[#9CA3AF]">Гра:</span>
-        <div className="flex items-center gap-1.5">
+      {/* Game filter */}
+      <div className="border-t border-[#F3F4F6] pt-3 flex items-center gap-2">
+        <span className="text-xs text-[#9CA3AF]">Дивитись на сторінці:</span>
+        <div className="flex items-center gap-1">
           {(['CS2', 'Dota2'] as const).map((g) => (
             <button
               key={g}
               onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
                 gameFilter === g
                   ? 'bg-[#447afc] text-white shadow-[0_1px_4px_rgba(68,122,252,0.3)]'
                   : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6]'
               }`}
             >
-              {g === 'CS2' ? '🎯 CS2' : '🛡️ Dota 2'}
+              {g === 'CS2' ? 'CS2' : 'Dota 2'}
             </button>
           ))}
         </div>
-        {!gameHasData && (
-          <span className="text-sm text-[#EF4444] ml-2">Немає даних для {gameFilter}</span>
+        {gameFilter !== 'all' && !gameHasData && (
+          <span className="text-xs text-[#EF4444] ml-1">Немає даних</span>
         )}
-        {gameHasData && (
-          <span className="text-sm text-[#9CA3AF] ml-2">
+        {gameFilter !== 'all' && gameHasData && (
+          <span className="text-xs text-[#9CA3AF] ml-1">
             {gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴
           </span>
         )}
@@ -213,5 +188,6 @@ export default function BalanceTracker({
     </div>
   );
 }
+
 
 
