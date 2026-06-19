@@ -716,7 +716,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         roi: 0,
         strategy: formData.strategy,
         riskyTeams: formData.riskyTeams,
-        notes: `${formData.reasoning}\n\nKey Factors: ${formData.keyFactors}\n\nNotes: ${formData.notes}`,
+        notes: [formData.reasoning, formData.keyFactors ? `Key Factors: ${formData.keyFactors}` : '', formData.notes ? `Notes: ${formData.notes}` : ''].filter(Boolean).join('\n\n') || '',
         goalId: finalGoalId,
         winProbability: isNaN(winProbability) ? undefined : winProbability
       };

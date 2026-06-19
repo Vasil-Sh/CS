@@ -274,19 +274,19 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
             💡 Ви можете відредагувати текст перед копіюванням.{' '}
             {!isExpressBet && !bet.matchUrl && 'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
           </p>
-
-          {/* Notes Section */}
-          {bet.notes && (
-            <div className="border-t border-[#F3F4F6] pt-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-[#9CA3AF] uppercase tracking-wide">📝 Нотатки</span>
-              </div>
-              <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4">
-                <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{bet.notes}</p>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Notes Section — separate, outside the Telegram text area */}
+        {bet.notes && (
+          <div className="border-t border-[#F3F4F6] px-6 py-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-[#9CA3AF] uppercase tracking-wide">📝 Нотатки до запису</span>
+            </div>
+            <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4">
+              <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{bet.notes}</p>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
