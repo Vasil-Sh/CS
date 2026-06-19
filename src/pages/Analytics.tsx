@@ -475,16 +475,16 @@ export default function Analytics() {
     };
   }, [bets]);
 
-  // All-time high/low for balance tracker
+  // All-time high/low for balance tracker — based on actual bet history, not current bank
   const allTimeHigh = useMemo(() => {
-    if (balanceData.length === 0) return bankrollStats.currentBank;
+    if (completedBets.length === 0) return 0; // no history yet
     return Math.max(...balanceData.map(d => d.balance), bankrollStats.currentBank);
-  }, [balanceData, bankrollStats.currentBank]);
+  }, [balanceData, bankrollStats.currentBank, completedBets.length]);
 
   const allTimeLow = useMemo(() => {
-    if (balanceData.length === 0) return bankrollStats.currentBank;
+    if (completedBets.length === 0) return 0;
     return Math.min(...balanceData.map(d => d.balance), bankrollStats.currentBank);
-  }, [balanceData, bankrollStats.currentBank]);
+  }, [balanceData, bankrollStats.currentBank, completedBets.length]);
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
