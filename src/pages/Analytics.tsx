@@ -244,6 +244,14 @@ export default function Analytics() {
     };
   }, [gameFilteredBets]);
 
+  // Game-filtered stats for quick stat cards
+  const filteredStats = useMemo(() => {
+    const totalBets = completedBets.length;
+    const winRate = totalBets > 0 ? Math.round((winningBets.length / totalBets) * 100) : 0;
+    const totalProfit = completedBets.reduce((sum: number, bet: Bet) => sum + (bet.profit || 0), 0);
+    return { totalBets, winRate, totalProfit };
+  }, [completedBets, winningBets]);
+
   const streaks = useMemo(() => {
     let currentWinStreak = 0;
     let currentLossStreak = 0;
@@ -580,7 +588,7 @@ export default function Analytics() {
       {/* Main Content */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
 
-        {bets.length === 0 && (
+        {gameFilteredBets.length === 0 && (
           <Alert className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5">
             <AlertTriangle className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
             <AlertDescription className="text-sm text-[#1E40AF] ml-2">
@@ -617,13 +625,13 @@ export default function Analytics() {
               {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
             </div>
             <div className="flex items-center gap-2">
-              {stats.totalProfit >= 0 ? (
+              {filteredStats.totalProfit >= 0 ? (
                 <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
               ) : (
                 <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
               )}
-              <span className={`text-base font-normal ${stats.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                {stats.totalProfit >= 0 ? '+' : ''}{stats.totalProfit.toFixed(2)} ₴
+              <span className={`text-base font-normal ${filteredStats.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                {filteredStats.totalProfit >= 0 ? '+' : ''}{filteredStats.totalProfit.toFixed(2)} ₴
               </span>
               <span className="text-sm text-[#9CA3AF]">за весь час</span>
             </div>
@@ -645,16 +653,16 @@ export default function Analytics() {
               <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
-              {(stats.totalProfit || 0) >= 0 ? '+' : ''}{(stats.totalProfit || 0).toFixed(2)} ₴
+              {(filteredStats.totalProfit || 0) >= 0 ? '+' : ''}{(filteredStats.totalProfit || 0).toFixed(2)} ₴
             </div>
             <div className="flex items-center gap-2">
-              {(stats.totalProfit || 0) >= 0 ? (
+              {(filteredStats.totalProfit || 0) >= 0 ? (
                 <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
               ) : (
                 <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
               )}
-              <span className={`text-base font-normal ${(stats.totalProfit || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                {(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
+              <span className={`text-base font-normal ${(filteredStats.totalProfit || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                {(filteredStats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
               </span>
               <span className="text-sm text-[#9CA3AF]">за весь час</span>
             </div>
@@ -678,7 +686,7 @@ export default function Analytics() {
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">
                 <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
-                  {stats.totalBets || 0}
+                  {filteredStats.totalBets || 0}
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-1.5">
@@ -696,7 +704,7 @@ export default function Analytics() {
               <div className="flex items-center justify-center flex-shrink-0">
                 <MiniDonut 
                   value={winningBets.length} 
-                  total={stats.totalBets || 1} 
+                  total={filteredStats.totalBets || 1} 
                   colors={{ main: '#10B981', sub1: '#6EE7B7', sub2: '#FCA5A5' }}
                   size={140}
                 />
@@ -722,22 +730,22 @@ export default function Analytics() {
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">
                 <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
-                  {stats.winRate || 0}%
+                  {filteredStats.winRate || 0}%
                 </div>
                 <div className="flex items-center gap-2">
-                  {(stats.winRate || 0) >= 50 ? (
+                  {(filteredStats.winRate || 0) >= 50 ? (
                     <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
                   ) : (
                     <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
                   )}
-                  <span className={`text-sm font-semibold ${(stats.winRate || 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                    {(stats.winRate || 0) >= 50 ? 'Вище середнього' : 'Нижче середнього'}
+                  <span className={`text-sm font-semibold ${(filteredStats.winRate || 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                    {(filteredStats.winRate || 0) >= 50 ? 'Вище середнього' : 'Нижче середнього'}
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-center flex-shrink-0">
                 <MiniDonut 
-                  value={stats.winRate || 0} 
+                  value={filteredStats.winRate || 0} 
                   total={100} 
                   colors={{ main: '#10B981', sub1: '#6EE7B7', sub2: '#ECFDF5' }}
                   size={140}
@@ -792,7 +800,7 @@ export default function Analytics() {
           <div>
             {activeTab === 'profit' && (
               <div className="grid grid-cols-1 gap-6">
-                {bets.length > 0 ? (
+                {gameFilteredBets.length > 0 ? (
                   <>
                     <BalanceChart data={balanceData} />
                     
@@ -827,7 +835,7 @@ export default function Analytics() {
             {/* ===== КОЕФІЦІЄНТИ TAB — GREEN CHARTS ===== */}
             {activeTab === 'odds' && (
               <div className="space-y-6">
-                {bets.length > 0 ? (
+                {gameFilteredBets.length > 0 ? (
                   <>
                     <OddsWinRateChartCard data={oddsChartData} chartCardShadow={chartCardShadow} />
                     <OddsCategoryCards data={oddsData} labels={oddsCategoryLabels} />
