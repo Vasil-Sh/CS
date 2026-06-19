@@ -79,6 +79,11 @@ out
 # Nuxt.js build / generate output
 .nuxt
 
+# Playwright E2E test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
 # Gatsby files
 .cache/
 
