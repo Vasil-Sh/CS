@@ -215,6 +215,16 @@ export default function MyBets() {
   const handleExpressDetails = useCallback((bet: Bet) => { setSelectedExpressBet(bet); setSelectedExpressEvents(parseExpressEvents(bet.betType)); setExpressModalOpen(true); }, []);
   const handleBetDetails = useCallback((bet: Bet) => { setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
 
+  const handleDeleteBet = useCallback(async (bet: Bet) => {
+    if (window.confirm(`Видалити ставку "${bet.match || bet.betType}"? Ця дія незворотна.`)) {
+      await realGoogleSheetsService.deleteRecord(bet);
+      setRecentBets(prev => prev.filter(b => b.id !== bet.id && !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount)));
+      loadStats();
+      bumpBets();
+      toast.success('Ставку видалено');
+    }
+  }, [loadStats, bumpBets]);
+
   // ── UI ──
   const tabs = [
     { id: 'add', label: 'Додати запис', icon: Plus },
@@ -287,7 +297,7 @@ export default function MyBets() {
               sortOrder={sortOrder} currentPage={currentPage} onPageChange={setCurrentPage}
               searchText={searchText} onSearchTextChange={setSearchText}
               onShareBet={handleShareBet} onBetDetails={handleBetDetails}
-              onExpressDetails={handleExpressDetails} onUpdateResult={updateBetResult} />
+              onExpressDetails={handleExpressDetails} onUpdateResult={updateBetResult} onDeleteBet={handleDeleteBet} />
           )}
           {activeTab === 'add' && (
             <CS2BettingForm onRecordAdded={handleRecordAdded} prefillData={prefillData}

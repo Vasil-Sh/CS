@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { t } from '@/lib/i18n';
 import { 
   BarChart3, 
   Trophy, 
@@ -17,15 +18,15 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const navigation = [
-  { name: 'Аналітика', href: '/app/analytics', icon: BarChart3 },
-  { name: 'Додати запис', href: '/app/my-bets', icon: Plus },
-  { name: 'Стратегії та Цілі', href: '/app/strategy', icon: Target },
-  { name: 'Матчі', href: '/app/matches', icon: Trophy },
-  { name: 'Профіль', href: '/app/profile', icon: User },
+  { nameKey: 'nav.analytics', href: '/app/analytics', icon: BarChart3 },
+  { nameKey: 'nav.addRecord', href: '/app/my-bets', icon: Plus },
+  { nameKey: 'nav.strategies', href: '/app/strategy', icon: Target },
+  { nameKey: 'nav.matches', href: '/app/matches', icon: Trophy },
+  { nameKey: 'nav.profile', href: '/app/profile', icon: User },
 ];
 
 const adminNavigation = [
-  { name: 'Адмін панель', href: '/app/admin', icon: Shield, adminOnly: true },
+  { nameKey: 'nav.admin', href: '/app/admin', icon: Shield, adminOnly: true },
 ];
 
 export default function Layout() {
@@ -53,7 +54,7 @@ export default function Layout() {
         
         return (
           <Link
-            key={item.name}
+            key={item.nameKey}
             to={item.href}
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
@@ -63,7 +64,7 @@ export default function Layout() {
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
-            <span>{item.name}</span>
+            <span>{t(item.nameKey)}</span>
           </Link>
         );
       })}
@@ -73,7 +74,7 @@ export default function Layout() {
         
         return (
           <Link
-            key={item.name}
+            key={item.nameKey}
             to={item.href}
             className={cn(
               'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
@@ -83,7 +84,7 @@ export default function Layout() {
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
-            <span>{item.name}</span>
+            <span>{t(item.nameKey)}</span>
           </Link>
         );
       })}
@@ -130,16 +131,16 @@ export default function Layout() {
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                     </svg>
-                    <span>Написати нам</span>
+                    <span>{t('app.writeUs')}</span>
                   </a>
                 </div>
                 <button
                   onClick={handleLogout}
-                  aria-label="Вийти з облікового запису"
+                  aria-label={t('app.logout')}
                   className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
-                  <span>Вийти</span>
+                  <span>{t('app.logout')}</span>
                 </button>
               </li>
             </ul>
@@ -195,9 +196,9 @@ export default function Layout() {
                   </ul>
                   <div className="mt-8 space-y-3">
                     <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
-                      <span className="text-base font-semibold text-[#111827]">Потрібна допомога?</span>
+                      <span className="text-base font-semibold text-[#111827]">{t('app.help')}</span>
                       <p className="text-xs text-[#111827] text-center">
-                        Є питання або пропозиції? Напиши нам в Telegram
+                        {t('app.helpDesc')}
                       </p>
                       <a
                         href="https://t.me/cs2beet"
@@ -208,7 +209,7 @@ export default function Layout() {
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                         </svg>
-                        <span>Написати нам</span>
+                        <span>{t('app.writeUs')}</span>
                       </a>
                     </div>
                     <button
@@ -216,7 +217,7 @@ export default function Layout() {
                       className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                     >
                       <LogOut className="h-5 w-5" strokeWidth={1.5} />
-                      <span>Вийти</span>
+                      <span>{t('app.logout')}</span>
                     </button>
                   </div>
                 </nav>

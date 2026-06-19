@@ -23,6 +23,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
+import { AnalyticsSkeleton } from '@/components/PageSkeleton';
 import { 
   Target, 
   DollarSign,
@@ -500,6 +501,7 @@ export default function Analytics() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
+      {loading ? <AnalyticsSkeleton /> : (<>
       <InitialBankModal 
         open={bankModalOpen} 
         onClose={handleBankModalClose}
@@ -878,6 +880,8 @@ export default function Analytics() {
           </div>
         </div>
       </div>
+    </div>
+      )}
     </div>
   );
 }

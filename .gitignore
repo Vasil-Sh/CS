@@ -121,4 +121,4 @@ Thumbs.db
 .vercel
 
 # Turbo
-.turbo
+.turbo.playwright-mcp/

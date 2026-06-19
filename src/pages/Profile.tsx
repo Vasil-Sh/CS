@@ -24,19 +24,18 @@ import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { t, setLang, getLang, type Lang } from '@/lib/i18n';
+
 export default function Profile() {
   const { user } = useAuth();
   const username = user?.username || 'User';
   const isAdmin = user?.role === 'admin';
+  const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('app_theme') as 'light' | 'dark') || 'light';
-  });
-  
-  const [language, setLanguage] = useState<'uk' | 'en'>(() => {
-    return (localStorage.getItem('app_language') as 'uk' | 'en') || 'uk';
   });
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
@@ -45,9 +44,9 @@ export default function Profile() {
     toast.success(newTheme === 'dark' ? 'Темна тема активована' : 'Світла тема активована');
   };
 
-  const handleLanguageChange = (newLang: 'uk' | 'en') => {
+  const handleLanguageChange = (newLang: Lang) => {
+    setLang(newLang);
     setLanguage(newLang);
-    localStorage.setItem('app_language', newLang);
     toast.success(newLang === 'uk' ? 'Мова: Українська' : 'Language: English');
   };
 

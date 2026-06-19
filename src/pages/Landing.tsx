@@ -21,14 +21,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useTheme } from '@/hooks/useTheme';
+import { t, setLang, getLang, type Lang } from '@/lib/i18n';
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [language, setLanguage] = useState<'UA' | 'EN'>('UA');
+  const [language, setLanguage] = useState<Lang>(getLang);
   const { theme, toggleTheme } = useTheme();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
-  const toggleLanguage = () => setLanguage((prev) => (prev === 'UA' ? 'EN' : 'UA'));
+  const toggleLanguage = () => {
+    const next: Lang = language === 'uk' ? 'en' : 'uk';
+    setLang(next);
+    setLanguage(next);
+  };
 
   const comparisonRows = [
     {

@@ -268,6 +268,27 @@ class RealGoogleSheetsService {
     }
   }
 
+  // Delete a single record by id or by index match (date+match+amount+odds)
+  deleteRecord(record: Partial<CS2BettingRecord>): void {
+    const currentUser = localStorage.getItem('currentUser') || '';
+    const keys = ['cs2_betting_records'];
+    if (currentUser) keys.push(`user_${currentUser}_mybets_data`);
+
+    keys.forEach(key => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const items: CS2BettingRecord[] = JSON.parse(raw);
+      const idx = items.findIndex((r: CS2BettingRecord) => {
+        if (record.id && r.id === record.id) return true;
+        return r.date === record.date && r.match === record.match && r.amount === record.amount && r.odds === record.odds;
+      });
+      if (idx !== -1) {
+        items.splice(idx, 1);
+        localStorage.setItem(key, JSON.stringify(items));
+      }
+    });
+  }
+
   // Get all records (синхронний метод для сумісності)
   getAllRecords(): CS2BettingRecord[] {
     logServiceCall('GoogleSheets', 'getAllRecords');
