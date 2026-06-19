@@ -1,4 +1,5 @@
-import { Shield } from 'lucide-react';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface BalanceTrackerProps {
   currentBank: number;
@@ -65,10 +66,25 @@ export default function BalanceTracker({
       {/* Header row — bank + status */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-            <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-          </div>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                  <Info className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-[#111827] mb-1">Баланс-трекер</p>
+                <p className="text-sm text-[#6B7280] leading-relaxed">
+                  Показує ваш поточний банк відносно історичного максимуму. 
+                  Допомагає вчасно помітити просадку та скоригувати розмір ставок. 
+                  Зелена крапка — близько до піку, жовта — просадка, червона — значна просадка.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div>
+            <span className="text-sm text-[#9CA3AF]">Баланс-трекер</span>
             <p className="text-lg font-semibold text-[#111827]">
               {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
             </p>
@@ -101,7 +117,7 @@ export default function BalanceTracker({
           <>
             <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
               <div
-                className="absolute top-0 left-0 h-full rounded-full bg-[#111827] transition-all duration-700 ease-out"
+                className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#10B981] to-[#34D399] transition-all duration-700 ease-out"
                 style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
               />
               <div className="absolute top-0 h-full w-0.5 bg-white" style={{ left: '50%' }} />
