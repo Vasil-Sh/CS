@@ -616,7 +616,7 @@ export default function Analytics() {
           
           {/* 1. Поточний банк */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#D1D5DB]"
+            className="stat-card bg-white border border-transparent rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#D1D5DB]"
             onClick={handleBankCardClick}
             style={cardBaseStyle}
             onMouseEnter={(e) => {
@@ -653,7 +653,7 @@ export default function Analytics() {
 
           {/* 2. Загальний профіт */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -684,7 +684,7 @@ export default function Analytics() {
 
           {/* 3. Всього ставок — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -728,7 +728,7 @@ export default function Analytics() {
 
           {/* 4. Win Rate — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -795,8 +795,8 @@ export default function Analytics() {
                       relative rounded-[24px] px-6 py-4 font-light text-base
                       transition-all duration-300 ease-in-out
                       ${activeTab === tab.id 
-                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]' 
-                        : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
+                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB]' 
+                        : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent'
                       }
                     `}
                   >
@@ -880,7 +880,7 @@ export default function Analytics() {
           </div>
         </div>
       </div>
-    </div>
+    </>
       )}
     </div>
   );

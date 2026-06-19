@@ -56,11 +56,6 @@ export default function BalanceTracker({
     ? `Банк зменшився на ${(100 - percentOfPeak).toFixed(0)}% від найкращого`
     : `Банк значно просів — на ${(100 - percentOfPeak).toFixed(0)}% від максимуму`;
 
-  const progressColor = !hasBets ? 'from-[#E5E7EB] to-[#D1D5DB]'
-    : isGrowing || isStable ? 'from-[#10B981] to-[#34D399]'
-    : isDipping ? 'from-[#F59E0B] to-[#FBBF24]'
-    : 'from-[#EF4444] to-[#F87171]';
-
   const advice = !hasBets
     ? 'Додавай записи про ставки — цей блок покаже твій прогрес'
     : isGrowing
@@ -73,7 +68,7 @@ export default function BalanceTracker({
 
   return (
     <div
-      className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group transition-all duration-300 ease-out overflow-hidden"
+      className="bg-white border border-[#D1D5DB] rounded-3xl px-6 py-5 group transition-all duration-300 ease-out overflow-hidden"
       style={{
         boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
         transform: 'translateY(0)',
@@ -112,21 +107,8 @@ export default function BalanceTracker({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div>
-            <p className="text-sm text-[#9CA3AF]">Трекер балансу</p>
-            <p className="text-lg font-semibold text-[#111827]">
-              {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-            </p>
-          </div>
+          <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
         </div>
-        {hasBets && (
-          <div className="text-right flex-shrink-0">
-            <p className="text-xs text-[#9CA3AF]">Найкращий результат</p>
-            <p className="text-base font-semibold text-[#111827]">
-              {allTimeHigh.toLocaleString('uk-UA')} ₴
-            </p>
-          </div>
-        )}
       </div>
       {/* Divider */}
       <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
@@ -136,19 +118,45 @@ export default function BalanceTracker({
         <p className="text-sm text-[#111827] font-medium">{statusText}</p>
       </div>
 
-      {/* Section 2 — Progress bar */}
-      <div className="mb-3">
+      {/* Section 2 — Progress bar + amounts */}
+      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
+        {/* Amounts row — current bank on left, best result on right */}
+        {hasBets && (
+          <div className="flex justify-between items-baseline mb-2">
+            <div>
+              <p className="text-xs text-[#9CA3AF]">Поточний банк</p>
+              <p className="text-xl font-semibold text-[#111827]">
+                {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-[#9CA3AF]">Найкращий результат</p>
+              <p className="text-xl font-semibold text-[#111827]">
+                {allTimeHigh.toLocaleString('uk-UA')} ₴
+              </p>
+            </div>
+          </div>
+        )}
         {hasBets ? (
-          <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+          <div className="relative w-full h-3 bg-[#E5E7EB] rounded-full overflow-hidden">
+            {/* Filled bar with shimmer */}
             <div
-              className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-700 ease-out`}
-              style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
+              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
+              style={{
+                width: `${Math.min(percentOfPeak, 100)}%`,
+                background: isGrowing || isStable
+                  ? 'linear-gradient(90deg, #10B981, #34D399)'
+                  : isDipping
+                  ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                  : 'linear-gradient(90deg, #EF4444, #F87171)',
+                animation: 'shimmer 3s ease-in-out infinite',
+              }}
             />
           </div>
         ) : (
-          <div className="relative w-full h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden opacity-20" />
+          <div className="relative w-full h-3 bg-[#E5E7EB] rounded-full overflow-hidden opacity-20" />
         )}
-        <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-0.5 px-0.5">
+        <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-1">
           <span>0 ₴</span>
           <span>{hasBets ? `${allTimeHigh.toLocaleString('uk-UA')} ₴` : '—'}</span>
         </div>

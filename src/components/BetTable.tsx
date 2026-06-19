@@ -174,7 +174,7 @@ export default function BetTable({
   };
 
   return (
-    <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+    <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
       style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">

@@ -946,7 +946,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               {/* Form Header */}
@@ -1522,7 +1522,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         <div className="xl:col-span-2 space-y-6 relative">
           <div className="sticky top-6 space-y-6 xl:grid xl:grid-cols-2 xl:gap-6 xl:space-y-0">
             {/* Calculations Card */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
@@ -1789,7 +1789,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
             </div>
 
             {/* Risky Teams Card */}
-            <div className="bg-white border border-[#F3F4F6] rounded-3xl"
+            <div className="bg-white border border-[#D1D5DB] rounded-3xl"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">

@@ -69,7 +69,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
   }
 
   return (
-    <Card className="border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04)] rounded-2xl bg-white overflow-hidden">
+    <Card className="border border-[#D1D5DB] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04)] rounded-2xl bg-white overflow-hidden">
       <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
         <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
           <div className="p-2.5 bg-[#F3F4F6] rounded-xl">

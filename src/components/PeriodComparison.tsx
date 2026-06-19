@@ -219,7 +219,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Chart 1: Profit + Bets — GREEN theme */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -311,7 +311,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
           {/* Chart 2: Win Rate + ROI — GREEN theme */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -397,7 +397,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
         {/* Detailed Table */}
         <Card 
-          className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+          className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
           style={{ boxShadow: chartCardShadow }}
         >
           <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">

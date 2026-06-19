@@ -19,7 +19,7 @@ interface Props {
 export default function OddsWinRateChartCard({ data, chartCardShadow }: Props) {
   return (
     <Card
-      className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+      className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
       style={{ boxShadow: chartCardShadow }}
     >
       <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">

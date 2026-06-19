@@ -99,3 +99,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes shimmer {
+  0% { opacity: 1; }
+  50% { opacity: 0.85; }
+  100% { opacity: 1; }
+}
