@@ -434,11 +434,42 @@ export default function BetTable({
               </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="px-6 py-5">
-            <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4">
-              <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{notesDialogBet}</p>
+          <div className="px-6 py-5 space-y-4">
+            <div className="space-y-3">
+              {notesDialogBet.split('\n').filter(Boolean).map((line, i) => {
+                const isResult = line.startsWith('Результат:');
+                const isComment = line.startsWith('Коментар:');
+                if (isResult) {
+                  const val = line.replace('Результат:', '').trim();
+                  const isWin = val === 'Виграш';
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-sm text-[#9CA3AF]">Результат:</span>
+                      <span className={`text-sm font-semibold ${isWin ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                        {val}
+                      </span>
+                    </div>
+                  );
+                }
+                if (isComment) {
+                  return (
+                    <div key={i} className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4">
+                      <span className="text-xs text-[#9CA3AF] block mb-1">Коментар:</span>
+                      <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">
+                        {line.replace('Коментар:', '').trim()}
+                      </p>
+                    </div>
+                  );
+                }
+                if (line.startsWith('Key Factors:') || line.startsWith('Notes:')) return null;
+                return (
+                  <div key={i} className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] p-3">
+                    <p className="text-sm text-[#374151] whitespace-pre-wrap leading-relaxed">{line}</p>
+                  </div>
+                );
+              })}
             </div>
-            <Button onClick={() => setNotesDialogBet('')} className="mt-4 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white w-full">
+            <Button onClick={() => setNotesDialogBet('')} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white w-full">
               Закрити
             </Button>
           </div>

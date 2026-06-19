@@ -163,7 +163,8 @@ export default function MyBets() {
       const profitInUAH = bet.currency === 'USD' && bet.exchangeRate ? originalProfit * bet.exchangeRate : originalProfit;
       const roi = (profitInUAH / bet.amount) * 100;
       // Add notes to the bet before updating
-      const betWithNotes = resultNote.trim() ? { ...bet, notes: bet.notes ? `${bet.notes}\n[Результат: ${result}] ${resultNote.trim()}` : `[Результат: ${result}] ${resultNote.trim()}` } : bet;
+      const resultLabel = result === 'Win' ? 'Виграш' : 'Програш';
+      const betWithNotes = resultNote.trim() ? { ...bet, notes: bet.notes ? `${bet.notes}\nРезультат: ${resultLabel}` : `Результат: ${resultLabel}\nКоментар: ${resultNote.trim()}` } : bet;
       await realGoogleSheetsService.updateBetResult(betWithNotes, result, profitInUAH, roi);
       let matched = false;
       setRecentBets(prev => prev.map(b => {
