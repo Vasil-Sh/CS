@@ -97,8 +97,8 @@ export default function BalanceTracker({
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
-                  <Info className="h-3.5 w-3.5" strokeWidth={2} />
+                <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
+                  <Info className="h-5 w-5" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
@@ -113,9 +113,11 @@ export default function BalanceTracker({
             </Tooltip>
           </TooltipProvider>
           <div>
-            <p className="text-sm text-[#9CA3AF]">Трекер балансу</p>
-            <p className="text-2xl font-bold text-[#111827]">
-              {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+            <p className="text-lg font-semibold text-[#111827]">
+              Трекер балансу:{' '}
+              <span className="text-4xl font-bold tracking-tight">
+                {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
+              </span>
             </p>
           </div>
         </div>
