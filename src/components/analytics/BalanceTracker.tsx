@@ -46,15 +46,6 @@ export default function BalanceTracker({
   const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
   const isFalling = hasBets && percentOfPeak < 50;
 
-  const TrendIcon = !hasBets ? TrendingDown
-    : isGrowing || isStable ? TrendingUp
-    : TrendingDown;
-
-  const iconColor = !hasBets ? 'text-[#9CA3AF]'
-    : isGrowing || isStable ? 'text-[#10B981]'
-    : isDipping ? 'text-[#F59E0B]'
-    : 'text-[#EF4444]';
-
   const statusText = !hasBets
     ? 'Поки немає завершених ставок'
     : isGrowing
