@@ -379,15 +379,7 @@ export default function MyBets() {
               </DialogTitle>
               <DialogDescription className="text-[#6B7280]">
                 {deleteDialogBet && (
-                  <div className="mt-2 p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
-                    <p className="text-base font-semibold text-[#111827]">
-                      {deleteDialogBet.match || deleteDialogBet.betType}
-                    </p>
-                    <p className="text-base font-medium text-[#374151] mt-1">
-                      {deleteDialogBet.odds > 0 && <>{deleteDialogBet.odds}</>}
-                      {deleteDialogBet.amount > 0 && <> • {deleteDialogBet.amount} ₴</>}
-                    </p>
-                  </div>
+                  <span>{deleteDialogBet.match || deleteDialogBet.betType}</span>
                 )}
               </DialogDescription>
             </DialogHeader>
