@@ -13,6 +13,7 @@ import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { Button } from '@/components/ui/button';
 import { logRender } from '@/lib/devLogger';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,

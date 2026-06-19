@@ -23,7 +23,7 @@ export default function BalanceTracker({ currentBank, allTimeHigh, allTimeLow }:
 
   const zoneColor = isGreen ? '#10B981' : isYellow ? '#F59E0B' : '#EF4444';
   const zoneBg = isGreen ? 'bg-[#F0FDF4] border-[#BBF7D0]' : isYellow ? 'bg-[#FFFBEB] border-[#FDE68A]' : 'bg-[#FEF2F2] border-[#FECACA]';
-  const zoneIcon = isGreen ? Shield : isYellow ? AlertTriangle : TrendingDown;
+  const ZoneIcon = isGreen ? Shield : isYellow ? AlertTriangle : TrendingDown;
   const zoneText = isAtPeak
     ? 'Банк на історичному максимумі 🔥'
     : isGreen
@@ -46,7 +46,7 @@ export default function BalanceTracker({ currentBank, allTimeHigh, allTimeLow }:
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className={`p-2 rounded-xl ${isGreen ? 'bg-[#DCFCE7]' : isYellow ? 'bg-[#FEF3C7]' : 'bg-[#FEE2E2]'}`}>
-            <zoneIcon className="h-4 w-4" style={{ color: zoneColor }} strokeWidth={1.5} />
+            <ZoneIcon className="h-4 w-4" style={{ color: zoneColor }} strokeWidth={1.5} />
           </div>
           <div>
             <span className="text-sm font-semibold text-[#111827]">Баланс-трекер</span>
