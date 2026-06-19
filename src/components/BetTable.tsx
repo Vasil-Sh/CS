@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserDataService } from '@/lib/userDataService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Calendar, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag, FileText,
@@ -72,6 +74,7 @@ export default function BetTable({
   sortOrder, currentPage, onPageChange,
   onShareBet, onBetDetails, onExpressDetails, onUpdateResult,
 }: BetTableProps) {
+  const [notesDialogBet, setNotesDialogBet] = useState<string>('');
   const hasActiveAdvancedFilters = resultFilter !== 'all' || periodFilter !== 'all' || sortBy !== 'date';
 
   const resetAdvancedFilters = () => {
@@ -343,7 +346,7 @@ export default function BetTable({
                           {bet.notes ? (
                             <div className="relative group inline-block">
                               <button
-                                onClick={() => onBetDetails(bet)}
+                                onClick={() => setNotesDialogBet(bet.notes || '')}
                                 className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#3B82F6] transition-all duration-200"
                                 title="Переглянути нотатки"
                               >
@@ -414,6 +417,24 @@ export default function BetTable({
           </div>
         )}
       </div>
+
+      {/* Notes Dialog */}
+      <Dialog open={!!notesDialogBet} onOpenChange={(open) => { if (!open) setNotesDialogBet(''); }}>
+        <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[#111827]">
+              <FileText className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+              📝 Нотатки до запису
+            </DialogTitle>
+          </DialogHeader>
+          <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4 mt-2">
+            <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{notesDialogBet}</p>
+          </div>
+          <Button onClick={() => setNotesDialogBet('')} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white mt-2">
+            Закрити
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
