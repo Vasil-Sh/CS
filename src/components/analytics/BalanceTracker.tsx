@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface BalanceTrackerProps {
   currentBank: number;
@@ -103,6 +104,24 @@ export default function BalanceTracker({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <TrendIcon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0 -ml-0.5 mt-0.5">
+                  <Info className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
+                <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
+                  <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
+                  <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав. Це твій орієнтир.</span>
+                  <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму. Якщо смужка зелена — ти близько до рекорду. Якщо жовта чи червона — ти просів і варто зменшити ставки.</span>
+                  <span className="block">💡 <strong>Порада</strong> — підказка що робити далі, залежно від твого стану.</span>
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div>
             <p className="text-sm text-[#9CA3AF]">Твій банк</p>
             <p className="text-2xl font-bold text-[#111827]">
