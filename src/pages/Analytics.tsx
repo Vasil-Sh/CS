@@ -448,6 +448,25 @@ export default function Analytics() {
     { label: 'Високі', sublabel: '> 3.0' }
   ];
 
+  // Game-specific stats for BalanceTracker
+  const cs2Stats = useMemo(() => {
+    const cs2 = bets.filter((bet: Bet) => (bet.game || '') === 'CS2' || (bet.game || '') === 'CS');
+    const completedCS2 = cs2.filter((b: Bet) => b.result !== 'Pending');
+    return {
+      bets: completedCS2.length,
+      profit: completedCS2.reduce((sum: number, b: Bet) => sum + (b.profit || 0), 0),
+    };
+  }, [bets]);
+
+  const dota2Stats = useMemo(() => {
+    const dota = bets.filter((bet: Bet) => (bet.game || '') === 'Dota2' || (bet.game || '') === 'Dota');
+    const completedDota = dota.filter((b: Bet) => b.result !== 'Pending');
+    return {
+      bets: completedDota.length,
+      profit: completedDota.reduce((sum: number, b: Bet) => sum + (b.profit || 0), 0),
+    };
+  }, [bets]);
+
   // All-time high/low for balance tracker
   const allTimeHigh = useMemo(() => {
     if (balanceData.length === 0) return bankrollStats.currentBank;
@@ -736,6 +755,10 @@ export default function Analytics() {
             allTimeLow={allTimeLow}
             gameFilter={gameFilter}
             onGameFilterChange={setGameFilter}
+            cs2Bets={cs2Stats.bets}
+            dota2Bets={dota2Stats.bets}
+            cs2Profit={cs2Stats.profit}
+            dota2Profit={dota2Stats.profit}
           />
 
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
