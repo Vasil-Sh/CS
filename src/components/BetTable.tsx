@@ -420,19 +420,28 @@ export default function BetTable({
 
       {/* Notes Dialog */}
       <Dialog open={!!notesDialogBet} onOpenChange={(open) => { if (!open) setNotesDialogBet(''); }}>
-        <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-[#111827]">
-              <FileText className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
-              📝 Нотатки до запису
+        <DialogContent 
+          className="max-w-xl max-h-[80vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl bg-white p-0"
+          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12)' }}
+        >
+          <DialogHeader className="border-b border-[#F3F4F6] px-6 py-5 bg-[#F9FAFB] rounded-t-3xl">
+            <DialogTitle>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <FileText className="h-4.5 w-4.5 text-[#3B82F6]" strokeWidth={1.5} />
+                </div>
+                <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Нотатки до запису</h2>
+              </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4 mt-2">
-            <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{notesDialogBet}</p>
+          <div className="px-6 py-5">
+            <div className="rounded-2xl bg-[#FFFBEB] border border-[#FDE68A] p-4">
+              <p className="text-sm text-[#92400E] whitespace-pre-wrap leading-relaxed">{notesDialogBet}</p>
+            </div>
+            <Button onClick={() => setNotesDialogBet('')} className="mt-4 rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white w-full">
+              Закрити
+            </Button>
           </div>
-          <Button onClick={() => setNotesDialogBet('')} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white mt-2">
-            Закрити
-          </Button>
         </DialogContent>
       </Dialog>
     </div>
