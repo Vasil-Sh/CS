@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { UserDataService } from '@/lib/userDataService';
 import {
   Calendar, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag,
+  ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag, FileText,
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 
@@ -270,6 +270,7 @@ export default function BetTable({
                     </th>
                     <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Ціль</th>
                     <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Статус</th>
+                    <th className="text-center px-3 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Нотатки</th>
                     <th className="text-center px-4 py-3.5 text-sm font-semibold text-[#6B7280] uppercase tracking-wider border-l border-[#E5E7EB]">Дії</th>
                   </tr>
                 </thead>
@@ -337,6 +338,21 @@ export default function BetTable({
                           <Badge className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' : isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' : 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'}`}>
                             {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
                           </Badge>
+                        </td>
+                        <td className="px-3 py-4 text-center border-l border-[#F3F4F6]">
+                          {bet.notes ? (
+                            <div className="relative group inline-block">
+                              <button
+                                onClick={() => onBetDetails(bet)}
+                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] hover:bg-[#EFF6FF] hover:border-[#93C5FD] text-[#3B82F6] transition-all duration-200"
+                                title="Переглянути нотатки"
+                              >
+                                <FileText className="h-4 w-4" strokeWidth={1.5} />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[#D1D5DB] text-sm">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           <div className="flex gap-2 justify-center">
