@@ -301,7 +301,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('strategies')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -310,42 +310,23 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#374151]">Активна стратегія</span>
+            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Активна стратегія</span>
           </div>
           {activeStrategy ? (
             <>
-              <div
-                className="text-2xl font-bold text-[#374151] tracking-tight mb-2 flex items-center gap-2"
-                title={activeStrategy.name}
-              >
-                <Star
-                  className="h-6 w-6 fill-[#447afc] text-[#447afc] flex-shrink-0"
-                  strokeWidth={1.5}
-                />
-                <span className="break-words leading-tight">{activeStrategy.name}</span>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate" title={activeStrategy.name}>
+                {activeStrategy.name}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge
-                  className={`${riskBadgeClass(
-                    activeStrategy.riskLevel,
-                  )} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}
+                  className={`${riskBadgeClass(activeStrategy.riskLevel)} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}
                 >
                   {riskLabel(activeStrategy.riskLevel)}
                 </Badge>
                 {strategyRoi.roi !== null ? (
                   <>
-                    {strategyRoi.roi >= 0 ? (
-                      <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
-                    )}
-                    <span
-                      className={`text-base font-normal ${
-                        strategyRoi.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'
-                      }`}
-                    >
-                      ROI {strategyRoi.roi >= 0 ? '+' : ''}
-                      {strategyRoi.roi.toFixed(1)}%
+                    <span className={`text-sm font-semibold ${strategyRoi.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                      ROI {strategyRoi.roi >= 0 ? '+' : ''}{strategyRoi.roi.toFixed(1)}%
                     </span>
                   </>
                 ) : (
@@ -354,12 +335,9 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-start py-1">
-              <div className="text-2xl font-bold text-[#9CA3AF] tracking-tight mb-1.5">Не обрано</div>
-              <span className="inline-flex items-center gap-1.5 text-sm text-[#6B7280]">
-                <Target className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
-                Оберіть основну стратегію
-              </span>
+            <div className="flex flex-col">
+              <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
+              <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
             </div>
           )}
         </button>
@@ -368,7 +346,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('goals')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -377,33 +355,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
               <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#374151]">Головна ціль</span>
+            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Головна ціль</span>
           </div>
           {primaryGoal && goalInfo ? (
             <>
-              <div
-                className="text-2xl font-bold text-[#374151] tracking-tight mb-2 truncate"
-                title={primaryGoal.name}
-              >
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate" title={primaryGoal.name}>
                 {primaryGoal.name}
               </div>
               <div className="space-y-1.5">
-                <Progress value={Math.max(goalInfo.percent, 2)} className="h-2" />
+                <Progress value={Math.max(goalInfo.percent, 2)} className="h-2 shimmer-bar" />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#6B7280]">{goalInfo.label}</span>
-                  <span className="text-sm font-semibold text-[#374151]">
-                    {goalInfo.percent.toFixed(0)}%
-                  </span>
+                  <span className="text-sm font-semibold text-[#111827]">{goalInfo.percent.toFixed(0)}%</span>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-start py-1">
-              <div className="text-2xl font-bold text-[#9CA3AF] tracking-tight mb-1.5">Не обрано</div>
-              <span className="inline-flex items-center gap-1.5 text-sm text-[#6B7280]">
-                <Flag className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
-                Оберіть головну ціль
-              </span>
+            <div className="flex flex-col">
+              <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
+              <span className="text-sm text-[#9CA3AF]">Оберіть головну ціль</span>
             </div>
           )}
         </button>
@@ -412,7 +382,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('risks')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative"
+          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -421,22 +391,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FFF7ED]">
               <ShieldAlert className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#374151]">Рівень ризику</span>
+            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
           </div>
           {todayRisk.level ? (
             <>
-              <div
-                className={`text-4xl font-bold tracking-tight mb-2 ${
-                  todayRisk.level === 'High'
-                    ? 'text-[#DC2626]'
-                    : todayRisk.level === 'Medium'
-                    ? 'text-[#D97706]'
-                    : 'text-[#16A34A]'
-                }`}
-              >
+              <div className={`text-3xl font-bold tracking-tight mb-2 ${todayRisk.level === 'High' ? 'text-[#DC2626]' : todayRisk.level === 'Medium' ? 'text-[#D97706]' : 'text-[#16A34A]'}`}>
                 {riskLabel(todayRisk.level)}
               </div>
-              {/* Risk scale indicator */}
               <div className="flex items-center gap-1 mb-2">
                 <div className="flex-1 h-2 rounded-full bg-[#DCFCE7] relative">
                   {todayRisk.level === 'Low' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#16A34A] shadow-sm" />}
@@ -449,41 +410,28 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {(todayRisk.winRate ?? 0) >= 50 ? (
-                  <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
-                )}
-                <span
-                  className={`text-base font-normal ${
-                    (todayRisk.winRate ?? 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'
-                  }`}
-                >
+                <span className={`text-sm font-semibold ${(todayRisk.winRate ?? 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                   Вінрейт {todayRisk.winRate?.toFixed(0)}%
                 </span>
                 <span className="text-sm text-[#9CA3AF]">за 7 днів</span>
               </div>
             </>
           ) : (
-            <>
-              <div className="text-xl font-semibold text-[#9CA3AF] mb-2">Мін. 3 ставки</div>
-              <div className="text-sm text-[#9CA3AF] mb-2">за останні 7 днів</div>
-              {/* Risk scale — inactive */}
+            <div className="flex flex-col">
+              <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">—</div>
               <div className="flex items-center gap-1 mb-2 opacity-30">
                 <div className="flex-1 h-2 rounded-full bg-[#DCFCE7]" />
                 <div className="flex-1 h-2 rounded-full bg-[#FEF3C7]" />
                 <div className="flex-1 h-2 rounded-full bg-[#FEE2E2]" />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
-              </div>
-            </>
+              <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
+            </div>
           )}
         </button>
 
         {/* 4. Вінрейт 30 днів */}
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group relative"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -492,38 +440,23 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
               <TrendingUp className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#374151]">Вінрейт 30 днів</span>
+            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Вінрейт 30 днів</span>
           </div>
           {winRate30d.winRate !== null ? (
             <>
-              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">
-                {winRate30d.winRate.toFixed(1)}%
-              </div>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2">{winRate30d.winRate.toFixed(1)}%</div>
               <div className="flex items-center gap-2">
-                {winRate30d.winRate >= 50 ? (
-                  <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
-                )}
-                <span
-                  className={`text-base font-normal ${
-                    winRate30d.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'
-                  }`}
-                >
+                <span className={`text-sm font-semibold ${winRate30d.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
                   {winRate30d.winRate >= 50 ? 'Вище середнього' : 'Нижче середнього'}
                 </span>
-                <span className="text-sm text-[#9CA3AF]">
-                  ({winRate30d.totalBets} ставок)
-                </span>
+                <span className="text-sm text-[#9CA3AF]">({winRate30d.totalBets} ставок)</span>
               </div>
             </>
           ) : (
-            <>
-              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">—</div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
-              </div>
-            </>
+            <div className="flex flex-col">
+              <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">—</div>
+              <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
+            </div>
           )}
         </div>
       </div>

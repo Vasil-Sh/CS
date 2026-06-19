@@ -105,3 +105,8 @@
   50% { opacity: 0.85; }
   100% { opacity: 1; }
 }
+
+/* Animated progress bar — used in Goals cards */
+.shimmer-bar [role="progressbar"] {
+  animation: shimmer 3s ease-in-out infinite;
+}
