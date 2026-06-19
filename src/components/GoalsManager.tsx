@@ -119,7 +119,7 @@ export default function GoalsManager() {
         if (goal.steps && goal.minOdds && goal.maxOdds) {
           const migratedSteps = goal.steps.map(step => {
             if (!step.minPlannedAmount || !step.maxPlannedAmount) {
-              return { ...step, minPlannedAmount: step.startAmount * (goal.minOdds || 1.3), maxPlannedAmount: step.startAmount * (goal.maxOdds || 5) };
+              return { ...step, minPlannedAmount: Math.round(step.startAmount * (goal.minOdds || 1.3) * 100) / 100, maxPlannedAmount: Math.round(step.startAmount * (goal.maxOdds || 5) * 100) / 100 };
             }
             return step;
           });
@@ -196,13 +196,13 @@ export default function GoalsManager() {
             if (currentStepIndex >= steps.length) return;
             const cs = steps[currentStepIndex];
             if (cs.status !== 'current') return;
-            const betAmount = bet.amount || 0, actualWinAmount = betAmount * bet.odds;
+            const betAmount = bet.amount || 0, actualWinAmount = Math.round(betAmount * bet.odds * 100) / 100;
             const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.20;
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
-              const minPlanned = cs.minPlannedAmount || cs.startAmount * minOdds;
+              const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
               steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
               currentStepIndex++;
-              if (currentStepIndex < steps.length) steps[currentStepIndex] = { ...steps[currentStepIndex], startAmount: actualWinAmount, minPlannedAmount: actualWinAmount * minOdds, maxPlannedAmount: actualWinAmount * maxOdds, status: 'current' };
+              if (currentStepIndex < steps.length) steps[currentStepIndex] = { ...steps[currentStepIndex], startAmount: actualWinAmount, minPlannedAmount: Math.round(actualWinAmount * minOdds * 100) / 100, maxPlannedAmount: Math.round(actualWinAmount * maxOdds * 100) / 100, status: 'current' };
             }
           });
           const currentBank = currentStepIndex > 0 && steps[currentStepIndex - 1]?.actualAmount ? steps[currentStepIndex - 1].actualAmount : goal.startAmount || 0;

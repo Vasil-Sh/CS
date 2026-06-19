@@ -87,6 +87,10 @@ interface Goal {
   name: string;
   type: 'amount' | 'ladder' | 'roi' | 'winrate';
   status: 'active' | 'completed' | 'failed';
+  currentStep?: number;
+  startAmount?: number;
+  targetLadderAmount?: number;
+  steps?: { step: number; startAmount: number; status: string }[];
 }
 
 const MAX_CONFIDENCE = 95;
@@ -271,17 +275,34 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
   const getLastStakeForGoal = (goalId: string): string => {
     try {
+      // Read directly from localStorage to get full goal data (including steps)
+      const allGoals = UserDataService.getUserData(currentUser, 'goals', []);
+      const goal = allGoals.find((g: Goal) => g.id === goalId);
+      if (!goal) return '';
+
+      // For ladder goals — calculate amount from current step
+      if (goal.type === 'ladder') {
+        const steps = goal.steps;
+        if (steps && steps.length > 0) {
+          // currentStep is a 0-based array index into steps[]
+          const idx = goal.currentStep ?? 0;
+          if (idx < steps.length && steps[idx].startAmount > 0) {
+            return String(Math.round(steps[idx].startAmount * 100) / 100);
+          }
+        }
+        if (goal.startAmount && goal.startAmount > 0) return String(Math.round(goal.startAmount * 100) / 100);
+        return '';
+      }
+
+      // For non-ladder goals — pull last bet amount
       const allRecords = realGoogleSheetsService.getAllRecords();
       const goalRecords = allRecords
         .filter((r) => r.goalId === goalId)
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       
       if (goalRecords.length > 0) {
-        const lastRecord = goalRecords[0];
-        const lastAmount = lastRecord.originalAmount ?? lastRecord.amount;
-        if (lastAmount && lastAmount > 0) {
-          return String(lastAmount);
-        }
+        const lastAmount = goalRecords[0].originalAmount ?? goalRecords[0].amount;
+        if (lastAmount && lastAmount > 0) return String(Math.round(lastAmount * 100) / 100);
       }
     } catch (error) {
       console.error('Error getting last stake for goal:', error);

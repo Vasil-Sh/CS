@@ -405,7 +405,7 @@ const PredictionBar = ({ percent1, percent2, team1, team2, aiPrediction }: {
               {aiTeam1Conf}%
             </span>
             <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
-              <Brain className="h-3 w-3 text-[#7C3AED]" strokeWidth={1.5} />
+              <Brain className="h-3 w-3 text-[#9CA3AF]" strokeWidth={1.5} />
               AI
             </span>
             <span className={aiTeam2Conf > aiTeam1Conf ? 'font-bold text-[#7C3AED]' : 'text-[#4B5563]'}>
