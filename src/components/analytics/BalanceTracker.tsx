@@ -50,24 +50,21 @@ export default function BalanceTracker({
   return (
     <div className="rounded-3xl overflow-hidden border border-[#BFDBFE]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
       {/* Top — gradient banner with bank + status */}
-      <div className="flex items-center justify-between px-6 py-5" style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
-            <Shield className="h-5 w-5 text-white" strokeWidth={1.5} />
+      <div className="flex items-center justify-between px-6 py-4" style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-sm">
+            <Shield className="h-4.5 w-4.5 text-white" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="text-sm text-white/80">
-              Баланс-трекер:{' '}
-              <span className="font-semibold text-white">
-                {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-              </span>
+            <p className="text-base font-semibold text-white">
+              {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className={`text-xs px-2 py-0.5 rounded-full ${badgeBg} ${badgeText}`}>
+              <span className={`text-[11px] px-2 py-0 rounded-full ${badgeBg} ${badgeText}`}>
                 {statusLabel}
               </span>
               {hasHistory && (
-                <span className="text-xs text-white/60">
+                <span className="text-[11px] text-white/60">
                   Пік: {allTimeHigh.toLocaleString('uk-UA')} ₴
                 </span>
               )}
@@ -76,18 +73,18 @@ export default function BalanceTracker({
         </div>
         {hasHistory && (
           <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-white">{percentOfPeak.toFixed(0)}%</div>
-            <div className="text-xs text-white/60">від піку</div>
+            <div className="text-xl font-bold text-white">{percentOfPeak.toFixed(0)}%</div>
+            <div className="text-[11px] text-white/60">від піку</div>
           </div>
         )}
       </div>
 
       {/* Bottom — progress bar + game filter */}
-      <div className="bg-white px-6 py-3 flex items-center gap-4">
+      <div className="bg-white px-6 py-4 flex items-center gap-4">
         <div className="flex-1 min-w-0">
           {hasHistory ? (
             <>
-              <div className="relative w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+              <div className="relative w-full h-2.5 bg-[#E5E7EB] rounded-full overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#447afc] to-[#8B5CF6] transition-all duration-700 ease-out"
                   style={{ width: `${Math.min(percentOfPeak, 100)}%` }}
@@ -105,7 +102,7 @@ export default function BalanceTracker({
             </>
           ) : (
             <>
-              <div className="relative w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden opacity-30">
+              <div className="relative w-full h-2.5 bg-[#E5E7EB] rounded-full overflow-hidden opacity-30">
                 <div className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-[#447afc] to-[#8B5CF6]" style={{ width: '100%' }} />
               </div>
               <p className="text-[10px] text-[#9CA3AF] mt-0.5 text-center">
@@ -136,4 +133,5 @@ export default function BalanceTracker({
     </div>
   );
 }
+
 
