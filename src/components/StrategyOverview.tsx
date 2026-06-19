@@ -109,6 +109,7 @@ export default function StrategyOverview() {
   const [riskFilter, setRiskFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'roi' | 'profit' | 'name'>('roi');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Helper to get primary strategy name from id
   const getPrimaryStrategyName = (): string | null => {
@@ -729,6 +730,19 @@ export default function StrategyOverview() {
               </UITooltip>
             </TooltipProvider>
 
+            {/* Filter toggle button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
+                showFilters
+                  ? 'bg-[#447afc] text-white'
+                  : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]'
+              }`}
+              title="Фільтри"
+            >
+              <Filter className="h-4 w-4" strokeWidth={2} />
+            </button>
+
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;
@@ -789,6 +803,7 @@ export default function StrategyOverview() {
               ) : (
                 <>
                   {/* Filters and Search */}
+                  {showFilters && (
                   <div
                     className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
                     style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
@@ -841,6 +856,7 @@ export default function StrategyOverview() {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Strategy Cards — wrapped in a white container like GoalsManager */}
                   <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">

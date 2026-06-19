@@ -798,6 +798,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </TooltipContent>
             </Tooltip>
 
+            {/* Filter/search toggle — compact icon button */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
+                isSearchOpen
+                  ? 'bg-[#447afc] text-white'
+                  : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]'
+              }`}
+              title="Пошук"
+            >
+              <Search className="h-4 w-4" strokeWidth={2} />
+            </button>
+
             {/* Google Sheets button — opens guide modal */}
             <button
               onClick={() => setIsSheetsGuideOpen(true)}
@@ -812,26 +825,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               ) : (
                 <>
                   <Download className="h-4 w-4" strokeWidth={1.5} />
-                  Підтягнути команди з Google Sheets
+                    Підтягнути команди з Google Sheets
                 </>
               )}
-            </button>
-
-
-
-            {/* Search toggle */}
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`
-                flex items-center gap-2 px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out
-                ${isSearchOpen
-                  ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]'
-                  : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] font-light'
-                }
-              `}
-            >
-              <Search className="h-4 w-4" strokeWidth={1.5} />
-              Пошук команди
             </button>
 
             {/* Divider */}
@@ -1232,7 +1228,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* CS Teams */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white "
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1267,7 +1263,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
           {/* Dota Teams */}
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white "
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1304,7 +1300,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         {/* Detailed Risk Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white "
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -1401,7 +1397,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </Card>
 
           <Card 
-            className="border border-[#E5E7EB] rounded-2xl bg-white "
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">

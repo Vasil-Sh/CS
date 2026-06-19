@@ -307,7 +307,9 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Target className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
+              <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            </div>
             <span className="text-lg font-semibold text-[#374151]">Активна стратегія</span>
           </div>
           {activeStrategy ? (
@@ -372,7 +374,9 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Flag className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
+              <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
+            </div>
             <span className="text-lg font-semibold text-[#374151]">Головна ціль</span>
           </div>
           {primaryGoal && goalInfo ? (
@@ -384,7 +388,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 {primaryGoal.name}
               </div>
               <div className="space-y-1.5">
-                <Progress value={goalInfo.percent} className="h-2" />
+                <Progress value={Math.max(goalInfo.percent, 2)} className="h-2" />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#6B7280]">{goalInfo.label}</span>
                   <span className="text-sm font-semibold text-[#374151]">
@@ -414,7 +418,9 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <ShieldAlert className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FFF7ED]">
+              <ShieldAlert className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
+            </div>
             <span className="text-lg font-semibold text-[#374151]">Рівень ризику</span>
           </div>
           {todayRisk.level ? (
@@ -429,6 +435,18 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 }`}
               >
                 {riskLabel(todayRisk.level)}
+              </div>
+              {/* Risk scale indicator */}
+              <div className="flex items-center gap-1 mb-2">
+                <div className="flex-1 h-2 rounded-full bg-[#DCFCE7] relative">
+                  {todayRisk.level === 'Low' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#16A34A] shadow-sm" />}
+                </div>
+                <div className="flex-1 h-2 rounded-full bg-[#FEF3C7] relative">
+                  {todayRisk.level === 'Medium' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#D97706] shadow-sm" />}
+                </div>
+                <div className="flex-1 h-2 rounded-full bg-[#FEE2E2] relative">
+                  {todayRisk.level === 'High' && <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#DC2626] shadow-sm" />}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 {(todayRisk.winRate ?? 0) >= 50 ? (
@@ -448,7 +466,14 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </>
           ) : (
             <>
-              <div className="text-4xl font-bold text-[#374151] tracking-tight mb-2">—</div>
+              <div className="text-xl font-semibold text-[#9CA3AF] mb-2">Мін. 3 ставки</div>
+              <div className="text-sm text-[#9CA3AF] mb-2">за останні 7 днів</div>
+              {/* Risk scale — inactive */}
+              <div className="flex items-center gap-1 mb-2 opacity-30">
+                <div className="flex-1 h-2 rounded-full bg-[#DCFCE7]" />
+                <div className="flex-1 h-2 rounded-full bg-[#FEF3C7]" />
+                <div className="flex-1 h-2 rounded-full bg-[#FEE2E2]" />
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
               </div>
@@ -464,7 +489,9 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
+              <TrendingUp className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
+            </div>
             <span className="text-lg font-semibold text-[#374151]">Вінрейт 30 днів</span>
           </div>
           {winRate30d.winRate !== null ? (
@@ -656,11 +683,12 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 <p className="text-2xl font-bold text-[#374151] tracking-tight">
                   {primaryGoal.name}
                 </p>
-                <p className="text-base text-[#4B5563] mt-2 leading-relaxed">
-                  Прогрес {goalInfo.percent.toFixed(1)}% — {goalInfo.label}
-                </p>
                 <div className="mt-3">
-                  <Progress value={Math.min(goalInfo.percent, 100)} className="h-2" />
+                  <Progress value={Math.max(Math.min(goalInfo.percent, 100), 2)} className="h-2" />
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-sm text-[#6B7280]">{goalInfo.label}</span>
+                    <span className="text-sm font-semibold text-[#374151]">{goalInfo.percent.toFixed(0)}%</span>
+                  </div>
                 </div>
               </div>
 
