@@ -353,31 +353,71 @@ const TeamLogo = ({ src, teamName, size = 26 }: { src?: string | null; teamName:
   );
 };
 
-/** Prediction bar component */
-const PredictionBar = ({ percent1, percent2 }: { percent1: number; percent2: number; team1: string; team2: string }) => {
+/** Prediction bar component — HLTV prediction + optional AI prediction */
+const PredictionBar = ({ percent1, percent2, team1, team2, aiPrediction }: {
+  percent1: number; percent2: number; team1: string; team2: string;
+  aiPrediction?: AIRecommendation | null;
+}) => {
   const total = percent1 + percent2;
-  if (total === 0) return <span className="text-[#9CA3AF] text-sm">—</span>;
-  
-  const w1 = Math.round((percent1 / total) * 100);
-  const w2 = 100 - w1;
+  const w1 = total > 0 ? Math.round((percent1 / total) * 100) : 50;
+  const w2 = total > 0 ? (100 - w1) : 50;
   const isTeam1Favored = percent1 >= percent2;
+  const hasHltv = total > 0;
+
+  // AI gives: predicted team + confidence%. The opponent gets 100 - confidence.
+  const aiPredictedTeam1 = aiPrediction?.prediction === team1;
+  const aiPredictedTeam2 = aiPrediction?.prediction === team2;
+  const aiConf = aiPrediction?.confidence ?? 0;
+  const aiTeam1Conf = aiPredictedTeam1 ? aiConf : aiPredictedTeam2 ? 100 - aiConf : 0;
+  const aiTeam2Conf = aiPredictedTeam2 ? aiConf : aiPredictedTeam1 ? 100 - aiConf : 0;
+  const hasAi = aiPrediction && (aiPredictedTeam1 || aiPredictedTeam2);
 
   return (
-    <div className="space-y-1.5 min-w-[130px]">
-      <div className="flex items-center justify-between text-xs">
-        <span className={isTeam1Favored ? 'font-bold text-[#111827]' : 'text-[#4B5563]'}>{percent1}%</span>
-        <span className={!isTeam1Favored ? 'font-bold text-[#111827]' : 'text-[#4B5563]'}>{percent2}%</span>
-      </div>
-      <div className="flex h-2 rounded-full overflow-hidden bg-[#E5E7EB]">
-        <div 
-          className={`transition-all duration-300 ${isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
-          style={{ width: `${w1}%` }}
-        />
-        <div 
-          className={`transition-all duration-300 ${!isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
-          style={{ width: `${w2}%` }}
-        />
-      </div>
+    <div className="space-y-1.5 min-w-[150px]">
+      {/* HLTV prediction row */}
+      {hasHltv && (
+        <>
+          <div className="flex items-center justify-between text-xs">
+            <span className={isTeam1Favored ? 'font-bold text-[#111827]' : 'text-[#4B5563]'}>{percent1}%</span>
+            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
+              <TrendingUp className="h-3 w-3" strokeWidth={1.5} />
+              HLTV
+            </span>
+            <span className={!isTeam1Favored ? 'font-bold text-[#111827]' : 'text-[#4B5563]'}>{percent2}%</span>
+          </div>
+          <div className="flex h-2 rounded-full overflow-hidden bg-[#E5E7EB]">
+            <div 
+              className={`transition-all duration-300 ${isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
+              style={{ width: `${w1}%` }}
+            />
+            <div 
+              className={`transition-all duration-300 ${!isTeam1Favored ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'}`}
+              style={{ width: `${w2}%` }}
+            />
+          </div>
+        </>
+      )}
+      {/* AI prediction row — shown only when AI data available */}
+      {hasAi && (
+        <>
+          <div className="flex items-center justify-between text-xs mt-1">
+            <span className={aiTeam1Conf > aiTeam2Conf ? 'font-bold text-[#7C3AED]' : 'text-[#4B5563]'}>
+              {aiTeam1Conf}%
+            </span>
+            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
+              <Brain className="h-3 w-3 text-[#7C3AED]" strokeWidth={1.5} />
+              AI
+            </span>
+            <span className={aiTeam2Conf > aiTeam1Conf ? 'font-bold text-[#7C3AED]' : 'text-[#4B5563]'}>
+              {aiTeam2Conf}%
+            </span>
+          </div>
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-[#F3F4F6]">
+            <div className="bg-[#A78BFA] transition-all duration-300" style={{ width: `${aiTeam1Conf}%` }} />
+            <div className="bg-[#C4B5FD] transition-all duration-300" style={{ width: `${aiTeam2Conf}%` }} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -461,6 +501,8 @@ export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  // Store AI predictions per match ID so they persist in the table
+  const [aiPredictions, setAiPredictions] = useState<Record<string, AIRecommendation>>({});
   
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [selectedCommentMatch, setSelectedCommentMatch] = useState<Match | null>(null);
@@ -630,6 +672,15 @@ export default function Matches() {
 
   const handleGetAIRecommendation = async (match: Match) => {
     setSelectedMatch(match);
+
+    // Check cache first
+    const cached = aiPredictions[match.id];
+    if (cached) {
+      setAiRecommendation(cached);
+      setAiModalOpen(true);
+      return;
+    }
+
     setAiModalOpen(true);
     setAiLoading(true);
     setAiRecommendation(null);
@@ -642,6 +693,8 @@ export default function Matches() {
         odds: match.odds
       });
       setAiRecommendation(recommendation);
+      // Cache for table display
+      setAiPredictions(prev => ({ ...prev, [match.id]: recommendation }));
     } catch (error) {
       console.error('Error getting AI recommendation:', error);
       toast({ title: '❌ Помилка', description: 'Не вдалося отримати AI рекомендацію', variant: 'destructive' });
@@ -784,6 +837,8 @@ export default function Matches() {
 
     const hasPrediction = (match.predictionPercentTeam1 != null && match.predictionPercentTeam2 != null) &&
       ((match.predictionPercentTeam1 ?? 0) > 0 || (match.predictionPercentTeam2 ?? 0) > 0);
+    const hasAiPrediction = aiPredictions[match.id] != null;
+    const showPrediction = hasPrediction || hasAiPrediction;
     const hasCoeffs = (match.bettingCoefficientTeam1 != null && match.bettingCoefficientTeam2 != null) &&
       ((match.bettingCoefficientTeam1 ?? 0) > 0 || (match.bettingCoefficientTeam2 ?? 0) > 0);
 
@@ -906,12 +961,13 @@ export default function Matches() {
         </td>
 
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {hasPrediction ? (
+          {showPrediction ? (
             <PredictionBar
               percent1={match.predictionPercentTeam1 ?? 0}
               percent2={match.predictionPercentTeam2 ?? 0}
               team1={match.team1}
               team2={match.team2}
+              aiPrediction={aiPredictions[match.id]}
             />
           ) : (
             <Tooltip>
