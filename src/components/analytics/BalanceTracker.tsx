@@ -101,7 +101,7 @@ export default function BalanceTracker({
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827] transition-colors flex-shrink-0">
+                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
                   <Info className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
@@ -116,18 +116,18 @@ export default function BalanceTracker({
           </TooltipProvider>
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-sm text-[#9CA3AF]">Баланс-трекер</span>
-              <span className="text-lg font-semibold text-[#111827]">
+              <span className="text-base font-semibold text-[#111827]">Баланс-трекер</span>
+              <span className="text-2xl font-bold text-[#111827]">
                 {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
               </span>
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="flex items-center gap-1 text-xs text-[#6B7280]">
-                <span className={`inline-block w-1.5 h-1.5 rounded-full ${statusDot}`} />
+              <span className="flex items-center gap-1 text-sm text-[#6B7280]">
+                <span className={`inline-block w-2 h-2 rounded-full ${statusDot}`} />
                 {statusLabel}
               </span>
               {hasHistory && (
-                <span className="text-xs text-[#9CA3AF]">
+                <span className="text-sm text-[#9CA3AF]">
                   · Пік: {allTimeHigh.toLocaleString('uk-UA')} ₴
                 </span>
               )}
@@ -139,7 +139,7 @@ export default function BalanceTracker({
             <div className="text-2xl font-bold text-[#111827] tracking-tight">
               {percentOfPeak.toFixed(0)}%
             </div>
-            <div className="text-xs text-[#9CA3AF]">від піку</div>
+            <div className="text-sm text-[#9CA3AF]">від піку</div>
           </div>
         )}
       </div>
@@ -164,7 +164,7 @@ export default function BalanceTracker({
         ) : (
           <>
             <div className="relative w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden opacity-20" />
-            <p className="text-xs text-[#9CA3AF] mt-0.5">
+            <p className="text-sm text-[#9CA3AF] mt-0.5">
               Додайте записи — трекер покаже динаміку
             </p>
           </>
@@ -172,40 +172,40 @@ export default function BalanceTracker({
       </div>
 
       {/* Game stats row */}
-      <div className="flex items-center gap-4 text-xs text-[#6B7280] mb-3">
+      <div className="flex items-center gap-4 text-sm text-[#6B7280] mb-3">
         <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#447afc]" />
+          <span className="w-2 h-2 rounded-full bg-[#447afc]" />
           CS2: {cs2Bets > 0 ? `${cs2Bets} ставок · ${cs2Profit >= 0 ? '+' : ''}${cs2Profit.toFixed(0)} ₴` : 'немає даних'}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+          <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
           Dota 2: {dota2Bets > 0 ? `${dota2Bets} ставок · ${dota2Profit >= 0 ? '+' : ''}${dota2Profit.toFixed(0)} ₴` : 'немає даних'}
         </span>
       </div>
 
       {/* Divider + game filter */}
       <div className="border-t border-[#F3F4F6] pt-3 flex items-center gap-3">
-        <span className="text-xs text-[#9CA3AF]">Гра:</span>
+        <span className="text-sm text-[#9CA3AF]">Гра:</span>
         <div className="flex items-center gap-1.5">
-          {(['all', 'CS2', 'Dota2'] as const).map((g) => (
+          {(['CS2', 'Dota2'] as const).map((g) => (
             <button
               key={g}
-              onClick={() => onGameFilterChange(g)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+              onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 gameFilter === g
-                  ? 'bg-[#111827] text-white shadow-sm'
+                  ? 'bg-[#447afc] text-white shadow-[0_1px_4px_rgba(68,122,252,0.3)]'
                   : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6]'
               }`}
             >
-              {g === 'all' ? 'Всі' : g === 'CS2' ? 'CS2' : 'Dota 2'}
+              {g === 'CS2' ? '🎯 CS2' : '🛡️ Dota 2'}
             </button>
           ))}
         </div>
-        {gameFilter !== 'all' && !gameHasData && (
-          <span className="text-xs text-[#EF4444] ml-2">Немає даних для {gameFilter === 'CS2' ? 'CS2' : 'Dota 2'}</span>
+        {!gameHasData && (
+          <span className="text-sm text-[#EF4444] ml-2">Немає даних для {gameFilter}</span>
         )}
-        {gameFilter !== 'all' && gameHasData && (
-          <span className="text-xs text-[#9CA3AF] ml-2">
+        {gameHasData && (
+          <span className="text-sm text-[#9CA3AF] ml-2">
             {gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴
           </span>
         )}
