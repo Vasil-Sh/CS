@@ -732,10 +732,26 @@ export default function Analytics() {
         <div className="space-y-6">
           <BalanceTracker currentBank={bankrollStats.currentBank} allTimeHigh={allTimeHigh} allTimeLow={allTimeLow} />
 
+          {/* Game Filter Pills — standalone row */}
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-sm text-[#9CA3AF]">Гра:</span>
+            {(['all', 'CS2', 'Dota2'] as const).map(g => (
+              <button
+                key={g}
+                onClick={() => setGameFilter(g)}
+                className={`px-5 py-2.5 rounded-[24px] text-sm font-medium transition-all duration-200 ${
+                  gameFilter === g
+                    ? 'bg-[#447afc] text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)]'
+                    : 'bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB]'
+                }`}
+              >
+                {g === 'all' ? 'Всі ігри' : g === 'CS2' ? '🎯 CS2' : '🛡️ Dota 2'}
+              </button>
+            ))}
+          </div>
+
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="flex items-center gap-3">
-              {/* Tabs */}
-              <div className="grid flex-1 gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+            <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -758,25 +774,6 @@ export default function Analytics() {
                   </button>
                 );
               })}
-              </div>
-
-              {/* Game Filter Pills */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <span className="text-xs text-[#9CA3AF] mr-1">Гра:</span>
-                {(['all', 'CS2', 'Dota2'] as const).map(g => (
-                  <button
-                    key={g}
-                    onClick={() => setGameFilter(g)}
-                    className={`px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
-                      gameFilter === g
-                        ? 'bg-[#111827] text-white shadow-sm'
-                        : 'bg-transparent text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]'
-                    }`}
-                  >
-                    {g === 'all' ? 'Всі' : g}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
