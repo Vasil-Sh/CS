@@ -59,6 +59,7 @@ export default function MyBets() {
   const [resultNote, setResultNote] = useState('');
   const [pendingResultAction, setPendingResultAction] = useState<{ bet: Bet; result: 'Win' | 'Loss' } | null>(null);  const [selectedExpressEvents, setSelectedExpressEvents] = useState<ParsedEvent[]>([]);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(null);
+  const [deleteDialogBet, setDeleteDialogBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [activeTab, setActiveTab] = useState('add');
@@ -187,6 +188,15 @@ export default function MyBets() {
     await executeResultUpdate(bet, result);
   }, [executeResultUpdate]);
 
+  const skipResultNote = useCallback(async () => {
+    if (!pendingResultAction) return;
+    const { bet, result } = pendingResultAction;
+    await executeResultUpdate(bet, result, '');
+    setResultNoteOpen(false);
+    setPendingResultAction(null);
+    setResultNote('');
+  }, [pendingResultAction, executeResultUpdate]);
+
   const confirmResultUpdate = useCallback(async () => {
     if (!pendingResultAction) return;
     const { bet, result } = pendingResultAction;
@@ -215,15 +225,20 @@ export default function MyBets() {
   const handleExpressDetails = useCallback((bet: Bet) => { setSelectedExpressBet(bet); setSelectedExpressEvents(parseExpressEvents(bet.betType)); setExpressModalOpen(true); }, []);
   const handleBetDetails = useCallback((bet: Bet) => { setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
 
-  const handleDeleteBet = useCallback(async (bet: Bet) => {
-    if (window.confirm(`Видалити ставку "${bet.match || bet.betType}"? Ця дія незворотна.`)) {
-      await realGoogleSheetsService.deleteRecord(bet);
-      setRecentBets(prev => prev.filter(b => b.id !== bet.id && !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount)));
-      loadStats();
-      bumpBets();
-      toast.success('Ставку видалено');
-    }
-  }, [loadStats, bumpBets]);
+  const handleDeleteBet = useCallback((bet: Bet) => {
+    setDeleteDialogBet(bet);
+  }, []);
+
+  const confirmDeleteBet = useCallback(async () => {
+    if (!deleteDialogBet) return;
+    const bet = deleteDialogBet;
+    setDeleteDialogBet(null);
+    await realGoogleSheetsService.deleteRecord(bet);
+    setRecentBets(prev => prev.filter(b => b.id !== bet.id && !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount)));
+    loadStats();
+    bumpBets();
+    toast.success('Ставку видалено');
+  }, [deleteDialogBet, loadStats, bumpBets]);
 
   // ── UI ──
   const tabs = [
@@ -315,8 +330,8 @@ export default function MyBets() {
         {selectedDetailsBet && <BetDetailsModal bet={selectedDetailsBet} open={betDetailsModalOpen} onClose={() => { setBetDetailsModalOpen(false); setSelectedDetailsBet(null); }} />}
 
         {/* Result Note Dialog — opens when marking bet result */}
-        <Dialog open={resultNoteOpen} onOpenChange={(open) => { if (!open) { setResultNoteOpen(false); setPendingResultAction(null); setResultNote(''); } }}>
-          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
+        <Dialog open={resultNoteOpen} onOpenChange={(open) => { if (!open) skipResultNote(); }}>
+          <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB]">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-[#111827]">
                 Чому такий результат?
@@ -337,7 +352,7 @@ export default function MyBets() {
                 value={resultNote}
                 onChange={(e) => setResultNote(e.target.value)}
                 placeholder={`Що спрацювало? Що ні? Це аналіз чи емоції?\n\nНаприклад:\n• Переоцінив форму команди\n• Не врахував заміну гравця\n• Емоційна ставка після серії програшів`}
-                className="w-full h-32 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none"
+                className="w-full h-44 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none"
                 autoFocus
               />
               <p className="text-xs text-[#9CA3AF]">
@@ -345,11 +360,52 @@ export default function MyBets() {
               </p>
             </div>
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => { setResultNoteOpen(false); setPendingResultAction(null); setResultNote(''); }} className="rounded-xl">
+              <Button variant="outline" onClick={skipResultNote} className="rounded-xl">
                 Пропустити
               </Button>
               <Button onClick={confirmResultUpdate} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white">
-                {pendingResultAction?.result === 'Win' ? '✅ Виграш' : '❌ Програш'}
+                {pendingResultAction?.result === 'Win' ? '✅ Виграш' : 'Програш'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deleteDialogBet} onOpenChange={(open) => { if (!open) setDeleteDialogBet(null); }}>
+          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-[#111827]">
+                Видалити ставку?
+              </DialogTitle>
+              <DialogDescription className="text-[#6B7280]">
+                {deleteDialogBet && (
+                  <div className="mt-2 p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <p className="text-base font-semibold text-[#111827]">
+                      {deleteDialogBet.match || deleteDialogBet.betType}
+                    </p>
+                    <p className="text-base font-medium text-[#374151] mt-1">
+                      {deleteDialogBet.odds > 0 && <>{deleteDialogBet.odds}</>}
+                      {deleteDialogBet.amount > 0 && <> • {deleteDialogBet.amount} ₴</>}
+                    </p>
+                  </div>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-2">
+              <div className="flex items-start gap-3 p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
+                <AlertTriangle className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <p className="text-sm text-[#991B1B]">
+                  Ця дія незворотна. Дані про ставку будуть видалені назавжди.
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setDeleteDialogBet(null)} className="rounded-xl">
+                Скасувати
+              </Button>
+              <Button onClick={confirmDeleteBet} className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white">
+                <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                Видалити
               </Button>
             </DialogFooter>
           </DialogContent>

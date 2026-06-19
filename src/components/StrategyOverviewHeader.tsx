@@ -335,7 +335,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </>
           ) : (
-            <div className="flex flex-col">
+            <div className="py-1">
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
               <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
             </div>
@@ -371,7 +371,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </>
           ) : (
-            <div className="flex flex-col">
+            <div className="py-1">
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
               <span className="text-sm text-[#9CA3AF]">Оберіть головну ціль</span>
             </div>
@@ -417,7 +417,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </>
           ) : (
-            <div className="flex flex-col">
+            <div className="py-1">
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">—</div>
               <div className="flex items-center gap-1 mb-2 opacity-30">
                 <div className="flex-1 h-2 rounded-full bg-[#DCFCE7]" />
@@ -453,7 +453,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </>
           ) : (
-            <div className="flex flex-col">
+            <div className="py-1">
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">—</div>
               <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
             </div>
