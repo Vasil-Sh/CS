@@ -187,6 +187,16 @@ export default function Profile() {
         }
       }
 
+      const userBankrollKey = `user_${username}_bankroll_data`;
+      const userBankroll = localStorage.getItem(userBankrollKey);
+      if (userBankroll) {
+        try {
+          backupData[userBankrollKey] = JSON.parse(userBankroll);
+        } catch {
+          backupData[userBankrollKey] = userBankroll;
+        }
+      }
+
       const jsonString = JSON.stringify(backupData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

@@ -51,7 +51,6 @@ export class BankrollService {
     return bets
       .filter(bet => bet.result !== 'Pending')
       .reduce((sum, bet) => {
-        // Використовуємо profit в UAH для аналітики
         return sum + (bet.profit || 0);
       }, 0);
   }
@@ -97,12 +96,21 @@ export class BankrollService {
   }
 
   /**
-   * Оновити початковий банк (якщо користувач хоче змінити)
+   * Оновити початковий банк — додає різницю до manualAdjustments,
+   * щоб попередній прибуток/збиток не губився.
+   * Наприклад: було 366 → встановили 1000 → manualAdjustments += 634
+   * Результат: currentBank = 1000 + totalProfit + 634 ≈ 1366
    */
   static updateInitialBank(username: string, newAmount: number): void {
     const data = this.getBankrollData(username);
     if (!data) return;
 
+    // Порахувати старий поточний банк (з усіма ставками)
+    const oldStats = this.getBankrollStats(username, []);
+    const oldCurrent = oldStats.currentBank;
+
+    // Різницю між новим банком і старим поточним — додаємо як ручну корекцію
+    data.manualAdjustments += (newAmount - oldCurrent);
     data.initialBank = newAmount;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);

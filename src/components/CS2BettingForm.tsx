@@ -1874,7 +1874,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
             </div>
 
             {/* Risky Teams Card */}
-            <div className="bg-white border border-[#D1D5DB] rounded-3xl"
+            <div className="bg-white border border-[#D1D5DB] rounded-3xl flex flex-col"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
               <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
@@ -1883,7 +1883,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                 </div>
                 <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
               </div>
-              <div className="p-6">
+              <div className="p-6 flex flex-col flex-1">
                 {formData.riskyTeams.length > 0 ? (
                   <div className="space-y-3">
                     {formData.riskyTeams.map((riskyTeam, index) => (
@@ -1914,7 +1914,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10">
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
                     <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
                       <AlertTriangle className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
                     </div>

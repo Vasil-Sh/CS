@@ -103,7 +103,10 @@ export default function MyBets() {
     else if (state?.prefillMatch) { setPrefillData(state.prefillMatch); setActiveTab('add'); window.history.replaceState({}, document.title); }
   }, [location.state]);
 
-  useEffect(() => { setBankrollStats(BankrollService.getBankrollStats(currentUser, recentBets)); }, [currentUser, recentBets, bankrollRefreshKey]);
+  useEffect(() => { 
+    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets)); 
+  }, [currentUser, recentBets, bankrollRefreshKey]);
   useEffect(() => { fetchUsers(); }, []);
   useEffect(() => { if (users.length && currentUser) { const u = users.find(x => x.username.toLowerCase() === currentUser.toLowerCase()); setIsAdmin(u?.isAdmin || false); } }, [users, currentUser]);
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
