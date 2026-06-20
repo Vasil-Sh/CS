@@ -58,7 +58,7 @@ export default function Strategy() {
       {/* ===== CONTENT ===== */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Overview header: KPI cards + current strategy + insight */}
-        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} refreshKey={strategyVersion} />
+        <StrategyOverviewHeader bets={bets} onNavigateTab={setActiveTab} refreshKey={strategyVersion} currentUser={currentUser} />
 
         {/* Tabs bar — matches styling used elsewhere in the app */}
         <div className="space-y-6">
