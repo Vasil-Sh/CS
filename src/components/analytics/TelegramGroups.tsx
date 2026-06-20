@@ -686,14 +686,14 @@ export default function TelegramGroups() {
             onMouseEnter={(e) => applyCardHover(e.currentTarget)}
             onMouseLeave={(e) => resetCardHover(e.currentTarget)}
           >
-            {/* Header: icon + name only */}
+            {/* Header: icon + name */}
             <div className="px-7 pt-7 pb-5">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
                   <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-xl font-bold text-[#374151] tracking-tight truncate">{gs.groupName}</h4>
+                  <h4 className="text-xl font-bold text-[#374151] tracking-tight line-clamp-2">{gs.groupName}</h4>
                   {gs.totalBets > 0 && (
                     <div className="mt-1.5">
                       <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />
@@ -711,19 +711,21 @@ export default function TelegramGroups() {
               const g = groups.find(x => x.id === gs.groupId);
               return g?.link ? (
                 <div className="px-7 py-4">
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4 text-[#9CA3AF] flex-shrink-0" strokeWidth={1.5} />
-                    <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-[#447afc] hover:underline truncate">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4] flex-shrink-0">
+                      <ExternalLink className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-[#447afc] hover:underline truncate flex-1">
                       {tgHandle(g.link)}
                     </a>
                     <a
                       href={toWebPreviewUrl(g.link)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-1 px-2 py-1 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors flex-shrink-0"
+                      className="text-xs font-medium text-white bg-[#447afc] hover:bg-[#3568d4] inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
                       title="Переглянути канал без Telegram"
                     >
-                      <Eye className="h-3 w-3" strokeWidth={1.5} />
+                      <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Перегляд
                     </a>
                   </div>
@@ -797,11 +799,10 @@ export default function TelegramGroups() {
               {/* Bottom row: add bet + edit/delete */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
                   onClick={() => openAddBet(gs.groupId)}
-                  className="flex-1 rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-sm font-medium"
+                  className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-semibold transition-colors"
                 >
-                  <Plus className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+                  <Plus className="h-4 w-4 mr-1.5" strokeWidth={2} />
                   Додати ставку
                 </Button>
                 <button
@@ -816,7 +817,7 @@ export default function TelegramGroups() {
                 </button>
                 <button
                   onClick={() => setDeleteGroupConfirm(gs.groupId)}
-                  className="p-2 rounded-xl border border-[#E5E7EB] hover:bg-[#FEF2F2] text-[#9CA3AF] hover:text-[#DC2626] transition-colors flex-shrink-0"
+                  className="p-2 rounded-xl border border-[#FEE2E2] hover:bg-[#FEF2F2] text-[#EF4444] hover:text-[#DC2626] transition-colors flex-shrink-0"
                   title="Видалити групу"
                 >
                   <Trash2 className="h-4 w-4" strokeWidth={1.5} />
