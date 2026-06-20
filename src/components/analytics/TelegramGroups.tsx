@@ -686,63 +686,52 @@ export default function TelegramGroups() {
             onMouseEnter={(e) => applyCardHover(e.currentTarget)}
             onMouseLeave={(e) => resetCardHover(e.currentTarget)}
           >
-            {/* Header */}
-            <div className="px-7 pt-7">
-              <div className="flex items-start justify-between mb-6 pb-5">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
-                      <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xl font-bold text-[#374151] tracking-tight truncate">{gs.groupName}</h4>
-                      {(() => {
-                        const g = groups.find(x => x.id === gs.groupId);
-                        return g?.link ? (
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-xs text-[#447afc] hover:underline inline-flex items-center gap-1">
-                              <ExternalLink className="h-3 w-3" /> {tgHandle(g.link)}
-                            </a>
-                            <a
-                              href={toWebPreviewUrl(g.link)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[10px] text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors"
-                              title="Переглянути канал без Telegram"
-                            >
-                              <Eye className="h-3 w-3" strokeWidth={1.5} />
-                              Перегляд
-                            </a>
-                          </div>
-                        ) : null;
-                      })()}
-                    </div>
-                  </div>
+            {/* Header: icon + name only */}
+            <div className="px-7 pt-7 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
+                  <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
                 </div>
-                <div className="flex items-start gap-1 flex-shrink-0">
-                  {gs.totalBets > 0 && <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />}
-                  <button
-                    onClick={() => {
-                      const g = groups.find(x => x.id === gs.groupId);
-                      if (g) openEditGroup(g);
-                    }}
-                    className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors"
-                    title="Редагувати"
-                  >
-                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteGroupConfirm(gs.groupId)}
-                    className="p-1.5 rounded-lg hover:bg-[#FEF2F2] text-[#9CA3AF] hover:text-[#DC2626] transition-colors"
-                    title="Видалити"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  </button>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-xl font-bold text-[#374151] tracking-tight truncate">{gs.groupName}</h4>
+                  {gs.totalBets > 0 && (
+                    <div className="mt-1.5">
+                      <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Divider */}
+            {/* Divider 1 */}
+            <div className="h-px w-full bg-[#F3F4F6]" />
+
+            {/* Link section */}
+            {(() => {
+              const g = groups.find(x => x.id === gs.groupId);
+              return g?.link ? (
+                <div className="px-7 py-4">
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-[#9CA3AF] flex-shrink-0" strokeWidth={1.5} />
+                    <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-[#447afc] hover:underline truncate">
+                      {tgHandle(g.link)}
+                    </a>
+                    <a
+                      href={toWebPreviewUrl(g.link)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-1 px-2 py-1 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors flex-shrink-0"
+                      title="Переглянути канал без Telegram"
+                    >
+                      <Eye className="h-3 w-3" strokeWidth={1.5} />
+                      Перегляд
+                    </a>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Divider 2 */}
             <div className="h-px w-full bg-[#F3F4F6]" />
 
             {/* Content */}
@@ -805,15 +794,34 @@ export default function TelegramGroups() {
                 </span>
               </div>
 
-              {/* Action */}
-              <Button
-                variant="outline"
-                onClick={() => openAddBet(gs.groupId)}
-                className="w-full rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-sm font-medium"
-              >
-                <Plus className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-                Додати ставку
-              </Button>
+              {/* Bottom row: add bet + edit/delete */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => openAddBet(gs.groupId)}
+                  className="flex-1 rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-sm font-medium"
+                >
+                  <Plus className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+                  Додати ставку
+                </Button>
+                <button
+                  onClick={() => {
+                    const g = groups.find(x => x.id === gs.groupId);
+                    if (g) openEditGroup(g);
+                  }}
+                  className="p-2 rounded-xl border border-[#E5E7EB] hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors flex-shrink-0"
+                  title="Редагувати групу"
+                >
+                  <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                </button>
+                <button
+                  onClick={() => setDeleteGroupConfirm(gs.groupId)}
+                  className="p-2 rounded-xl border border-[#E5E7EB] hover:bg-[#FEF2F2] text-[#9CA3AF] hover:text-[#DC2626] transition-colors flex-shrink-0"
+                  title="Видалити групу"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
