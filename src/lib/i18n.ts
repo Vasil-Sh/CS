@@ -1,5 +1,7 @@
 export type Lang = 'uk' | 'en';
 
+import { useState, useEffect } from 'react';
+
 type TranslationMap = Record<string, Record<Lang, string>>;
 
 /**
@@ -161,6 +163,9 @@ const T: TranslationMap = {
 
 // ── Runtime helpers ──
 
+type LangListener = (lang: Lang) => void;
+const listeners = new Set<LangListener>();
+
 let currentLang: Lang = (() => {
   try { return (localStorage.getItem('matchiq_lang') as Lang) || 'uk'; } catch { return 'uk'; }
 })();
@@ -168,6 +173,12 @@ let currentLang: Lang = (() => {
 export function setLang(lang: Lang) {
   currentLang = lang;
   try { localStorage.setItem('matchiq_lang', lang); } catch { /* ignore */ }
+  listeners.forEach(fn => fn(lang));
+}
+
+export function onLangChange(fn: LangListener): () => void {
+  listeners.add(fn);
+  return () => { listeners.delete(fn); };
 }
 
 export function getLang(): Lang {
@@ -182,6 +193,16 @@ export function t(key: string, fallback?: string): string {
   const entry = T[key];
   if (!entry) return fallback || key;
   return entry[currentLang] || entry['uk'] || fallback || key;
+}
+
+/**
+ * React hook to subscribe to language changes.
+ * Returns current language — re-renders component when language switches.
+ */
+export function useLang(): Lang {
+  const [lang, setLangState] = useState<Lang>(currentLang);
+  useEffect(() => onLangChange(setLangState), []);
+  return lang;
 }
 
 /**

@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useTheme } from '@/hooks/useTheme';
 import {
   Tooltip,
@@ -514,8 +514,6 @@ export default function Matches() {
 
   // Multi-select for Express
   const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(new Set());
-  
-  const { toast } = useToast();
 
   // Reset all filters
   const resetAllFilters = () => {
@@ -569,10 +567,8 @@ export default function Matches() {
         next.delete(matchId);
       } else {
         if (next.size >= 10) {
-          toast({
-            title: '⚠️ Максимум 10 матчів',
-            description: 'В експресі може бути не більше 10 подій',
-            variant: 'destructive'
+          toast.error('⚠️ Максимум 10 матчів', {
+            description: 'В експресі може бути не більше 10 подій'
           });
           return prev;
         }
@@ -591,10 +587,8 @@ export default function Matches() {
   const handleCreateExpress = () => {
     const selectedMatches = matches.filter(m => selectedMatchIds.has(m.id));
     if (selectedMatches.length < 2) {
-      toast({
-        title: '⚠️ Мінімум 2 матчі',
-        description: 'Для створення експресу потрібно обрати щонайменше 2 матчі',
-        variant: 'destructive'
+      toast.error('⚠️ Мінімум 2 матчі', {
+        description: 'Для створення експресу потрібно обрати щонайменше 2 матчі'
       });
       return;
     }
@@ -624,10 +618,8 @@ export default function Matches() {
       }
     } catch (error) {
       console.error('Error loading matches from API:', error);
-      toast({
-        title: '⚠️ Помилка завантаження',
-        description: 'Не вдалося завантажити матчі з API',
-        variant: 'destructive'
+      toast.error('⚠️ Помилка завантаження', {
+        description: 'Не вдалося завантажити матчі з API'
       });
     } finally {
       setInitialLoading(false);
@@ -697,7 +689,7 @@ export default function Matches() {
       setAiPredictions(prev => ({ ...prev, [match.id]: recommendation }));
     } catch (error) {
       console.error('Error getting AI recommendation:', error);
-      toast({ title: '❌ Помилка', description: 'Не вдалося отримати AI рекомендацію', variant: 'destructive' });
+      toast.error('❌ Помилка', { description: 'Не вдалося отримати AI рекомендацію' });
     } finally {
       setAiLoading(false);
     }
@@ -785,17 +777,17 @@ export default function Matches() {
   const refreshMatches = async () => {
     setIsLoading(true);
     try {
-      toast({ title: '🔄 Завантаження матчів...', description: 'Оновлення з API' });
+      toast('🔄 Завантаження матчів...', { description: 'Оновлення з API' });
       const apiMatches = await fetchTodaysAndUpcomingMatches();
       if (apiMatches && apiMatches.length > 0) {
         const converted = apiMatches.map(apiMatchToMatch);
         setMatches(converted);
-        toast({ title: '✅ Матчі оновлено!', description: `Завантажено ${converted.length} матчів` });
+        toast.success('✅ Матчі оновлено!', { description: `Завантажено ${converted.length} матчів` });
       } else {
-        toast({ title: '⚠️ Матчі не знайдено', description: 'API повернув порожній результат', variant: 'destructive' });
+        toast.warning('⚠️ Матчі не знайдено', { description: 'API повернув порожній результат' });
       }
     } catch (error) {
-      toast({ title: '❌ Помилка завантаження', description: `${error instanceof Error ? error.message : 'Unknown error'}`, variant: 'destructive' });
+      toast.error('❌ Помилка завантаження', { description: `${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
       setIsLoading(false);
     }

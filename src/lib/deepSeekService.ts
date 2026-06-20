@@ -13,10 +13,9 @@ class DeepSeekService {
 
   constructor() {
     this.apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
-    console.log('🔑 DeepSeek API Key status:', this.apiKey ? 'Present' : 'Missing');
 
     if (this.apiKey && this.apiKey.trim() !== '' && this.apiKey !== 'your_deepseek_api_key_here') {
-      console.log('✅ DeepSeek API initialized successfully');
+      // DeepSeek API ready
     } else {
       console.warn('⚠️ DeepSeek API key not configured properly');
     }
@@ -28,7 +27,6 @@ class DeepSeekService {
     }
 
     try {
-      console.log('📡 Calling DeepSeek API...');
       const prompt = buildPrompt(matchData);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -61,7 +59,6 @@ class DeepSeekService {
         throw new Error('No response from API');
       }
 
-      console.log('✅ DeepSeek API response received');
       return parseAIResponse(text);
     } catch (error) {
       console.error('❌ DeepSeek API error:', error);

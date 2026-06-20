@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster } from 'sonner';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -120,8 +119,7 @@ function App() {
           }
         />
       </Routes>
-      <Toaster />
-      <SonnerToaster position="top-center" richColors closeButton duration={4000} />
+      <Toaster position="top-center" richColors closeButton duration={4000} />
     </Router>
   );
 }

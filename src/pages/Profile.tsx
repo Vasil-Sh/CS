@@ -25,6 +25,7 @@ import { UserDataService } from '@/lib/userDataService';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { t, setLang, getLang, type Lang } from '@/lib/i18n';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -34,13 +35,12 @@ export default function Profile() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('app_theme') as 'light' | 'dark') || 'light';
-  });
+  const { theme, toggleTheme } = useTheme();
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    setTheme(newTheme);
-    localStorage.setItem('app_theme', newTheme);
+    if (newTheme !== theme) {
+      toggleTheme();
+    }
     toast.success(newTheme === 'dark' ? 'Темна тема активована' : 'Світла тема активована');
   };
 

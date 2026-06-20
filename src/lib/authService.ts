@@ -25,10 +25,6 @@ class AuthService {
       const range = 'Доступи!A2:G100';
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
       
-      console.log('Fetching users from Google Sheets...');
-      console.log('API Key exists:', !!this.apiKey);
-      console.log('Spreadsheet ID:', this.spreadsheetId);
-      
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -39,9 +35,6 @@ class AuthService {
 
       const data = await response.json();
       const rows = data.values || [];
-      
-      console.log('Successfully fetched users:', rows.length);
-      console.log('Raw data:', rows);
 
       return rows.map((row: string[]) => ({
         telegram: row[0] || '',
@@ -60,11 +53,7 @@ class AuthService {
 
   async login(username: string, password: string): Promise<LoginResult> {
     try {
-      console.log('=== Starting login ===');
-      console.log('Username:', username);
-      
       const users = await this.fetchUsers();
-      console.log('Total users fetched:', users.length);
       
       const user = users.find(
         u => u.username.toLowerCase() === username.toLowerCase() && 
@@ -72,21 +61,16 @@ class AuthService {
       );
 
       if (!user) {
-        console.log('User not found or password mismatch');
         return { 
           success: false, 
           error: "Невірний логін або пароль" 
         };
       }
 
-      console.log('User found:', user);
-
       // Check if user is admin
       const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
-      console.log('Is admin:', isAdmin);
       
       if (isAdmin) {
-        console.log('Admin user logged in successfully');
         localStorage.setItem("authToken", "admin-token");
         localStorage.setItem("userRole", "admin");
         localStorage.setItem("username", username);
@@ -97,17 +81,12 @@ class AuthService {
       const endDate = this.parseDate(user.endDate);
       const now = new Date();
 
-      console.log('End date:', endDate);
-      console.log('Current date:', now);
-
       if (endDate && endDate > now) {
-        console.log('Subscription is valid');
         localStorage.setItem("authToken", "user-token");
         localStorage.setItem("userRole", "user");
         localStorage.setItem("username", username);
         return { success: true, isAdmin: false };
       } else {
-        console.log('Subscription expired');
         return { 
           success: false, 
           error: "Ваша підписка закінчилася. Зверніться до адміністратора." 
@@ -125,15 +104,11 @@ class AuthService {
   async validateAdmin(username: string, password: string): Promise<boolean> {
     try {
       const users = await this.fetchUsers();
-      console.log('Validating admin for username:', username);
       
       const user = users.find(
         u => u.username.toLowerCase() === username.toLowerCase() && 
              u.password === password
       );
-      
-      console.log('User found:', !!user);
-      console.log('Is admin:', user ? user.isAdmin : 'N/A');
       
       return user ? (user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes') : false;
     } catch (error) {
@@ -144,11 +119,7 @@ class AuthService {
 
   async validateUser(username: string, password: string): Promise<{ isValid: boolean; message?: string }> {
     try {
-      console.log('=== Starting user validation ===');
-      console.log('Username:', username);
-      
       const users = await this.fetchUsers();
-      console.log('Total users fetched:', users.length);
       
       const user = users.find(
         u => u.username.toLowerCase() === username.toLowerCase() && 
@@ -156,21 +127,16 @@ class AuthService {
       );
 
       if (!user) {
-        console.log('User not found or password mismatch');
         return { 
           isValid: false, 
           message: "Невірний логін або пароль" 
         };
       }
 
-      console.log('User found:', user);
-
       // Check if user is admin
       const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
-      console.log('Is admin:', isAdmin);
       
       if (isAdmin) {
-        console.log('Admin user validated successfully');
         return { isValid: true };
       }
 
@@ -178,14 +144,9 @@ class AuthService {
       const endDate = this.parseDate(user.endDate);
       const now = new Date();
 
-      console.log('End date:', endDate);
-      console.log('Current date:', now);
-
       if (endDate && endDate > now) {
-        console.log('Subscription is valid');
         return { isValid: true };
       } else {
-        console.log('Subscription expired');
         return { 
           isValid: false, 
           message: "Ваша підписка закінчилася. Зверніться до адміністратора." 
