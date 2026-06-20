@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,14 +140,20 @@ export default function TelegramGroups() {
     setDataLoaded(false);
   }, [currentUser]);
 
-  // Persist (only when we have real user AND data was loaded)
+  // Refs for immediate save (avoid effect delay on navigation)
+  const groupsRef = useRef(groups);
+  groupsRef.current = groups;
+  const betsRef = useRef(bets);
+  betsRef.current = bets;
+
+  // Persist — write immediately when data changes (ref-based for navigation safety)
   useEffect(() => {
     if (!currentUser || !dataLoaded) return;
-    UserDataService.setUserData(currentUser, 'tg_groups', groups);
+    UserDataService.setUserDataSync(currentUser, 'tg_groups', groups);
   }, [groups, currentUser, dataLoaded]);
   useEffect(() => {
     if (!currentUser || !dataLoaded) return;
-    UserDataService.setUserData(currentUser, 'tg_bets', bets);
+    UserDataService.setUserDataSync(currentUser, 'tg_bets', bets);
   }, [bets, currentUser, dataLoaded]);
 
   // Dialogs
@@ -175,11 +181,12 @@ export default function TelegramGroups() {
       return;
     }
 
+    let newGroups: TelegramGroup[];
     if (editingGroup) {
-      setGroups(prev => prev.map(g => g.id === editingGroup.id
+      newGroups = groupsRef.current.map(g => g.id === editingGroup.id
         ? { ...g, name: groupForm.name.trim(), link: groupForm.link.trim() }
         : g
-      ));
+      );
       toast.success('Групу оновлено');
     } else {
       const newGroup: TelegramGroup = {
@@ -188,9 +195,11 @@ export default function TelegramGroups() {
         link: groupForm.link.trim(),
         createdAt: new Date().toISOString(),
       };
-      setGroups(prev => [...prev, newGroup]);
+      newGroups = [...groupsRef.current, newGroup];
       toast.success('Групу додано!');
     }
+    setGroups(newGroups);
+    if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
 
     setGroupDialogOpen(false);
     setEditingGroup(null);
@@ -198,8 +207,14 @@ export default function TelegramGroups() {
   };
 
   const handleDeleteGroup = (groupId: string) => {
-    setGroups(prev => prev.filter(g => g.id !== groupId));
-    setBets(prev => prev.filter(b => b.groupId !== groupId));
+    const newGroups = groupsRef.current.filter(g => g.id !== groupId);
+    const newBets = betsRef.current.filter(b => b.groupId !== groupId);
+    setGroups(newGroups);
+    setBets(newBets);
+    if (currentUser) {
+      UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
+      UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
+    }
     toast.success('Групу та її ставки видалено');
     setDeleteGroupConfirm(null);
   };
@@ -226,11 +241,12 @@ export default function TelegramGroups() {
       return;
     }
 
+    let newBets: TelegramGroupBet[];
     if (editingBet) {
-      setBets(prev => prev.map(b => b.id === editingBet.id
+      newBets = betsRef.current.map(b => b.id === editingBet.id
         ? { ...betForm, id: editingBet.id, createdAt: editingBet.createdAt }
         : b
-      ));
+      );
       toast.success('Ставку оновлено');
     } else {
       const newBet: TelegramGroupBet = {
@@ -238,9 +254,11 @@ export default function TelegramGroups() {
         id: crypto.randomUUID(),
         createdAt: Date.now(),
       };
-      setBets(prev => [...prev, newBet]);
+      newBets = [...betsRef.current, newBet];
       toast.success('Ставку додано!');
     }
+    setBets(newBets);
+    if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
 
     setBetDialogOpen(false);
     setEditingBet(null);
@@ -248,7 +266,9 @@ export default function TelegramGroups() {
   };
 
   const handleDeleteBet = (betId: string) => {
-    setBets(prev => prev.filter(b => b.id !== betId));
+    const newBets = betsRef.current.filter(b => b.id !== betId);
+    setBets(newBets);
+    if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
     toast.success('Ставку видалено');
   };
 
