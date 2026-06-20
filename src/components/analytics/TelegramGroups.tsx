@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { logRender } from '@/lib/devLogger';
@@ -36,8 +35,6 @@ import {
   ShieldCheck,
   Eye,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
   Link
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
@@ -814,9 +811,6 @@ export default function TelegramGroups() {
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
 
-      {/* ===== Bot Setup (admin only) ===== */}
-      <BotSetup />
-
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="py-16 text-center">
@@ -1176,131 +1170,5 @@ function StatCard({ label, value, icon: Icon, color, iconColor }: {
       </div>
       <p className="text-3xl font-bold text-[#111827] tracking-tight">{value}</p>
     </div>
-  );
-}
-
-// ── Bot Setup Panel ──
-
-function BotSetup() {
-  const [open, setOpen] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem('tg_bot_webhook_url') || '');
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
-
-  useEffect(() => {
-    if (webhookUrl) localStorage.setItem('tg_bot_webhook_url', webhookUrl);
-  }, [webhookUrl]);
-
-  // Only show to admins
-  if (!isAdmin) return null;
-
-  return (
-    <Collapsible open={open} onOpenChange={setOpen} className="mt-6">
-      <Card className="border border-[#F3F4F6] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between px-6 py-4 hover:bg-[#F9FAFB] transition-colors text-left">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
-                <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
-              </div>
-              <div>
-                <h4 className="text-base font-semibold text-[#111827]">Telegram Bot (автоматичний збір)</h4>
-                <p className="text-xs text-[#9CA3AF]">Налаштуйте бота для автоматичного парсингу ставок з груп</p>
-              </div>
-            </div>
-            {open ? (
-              <ChevronUp className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
-            )}
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-6 pb-6 space-y-4 border-t border-[#F3F4F6] pt-4">
-            {/* Step 1 */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#447afc] text-white text-xs font-bold flex-shrink-0">1</span>
-                <p className="text-sm font-medium text-[#111827]">Створіть бота через @BotFather у Telegram</p>
-              </div>
-              <p className="text-xs text-[#6B7280] ml-8">
-                Напишіть <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">/newbot</code> → оберіть назву → скопіюйте <strong>API Token</strong>
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#447afc] text-white text-xs font-bold flex-shrink-0">2</span>
-                <p className="text-sm font-medium text-[#111827]">Розгорніть Google Apps Script</p>
-              </div>
-              <p className="text-xs text-[#6B7280] ml-8">
-                Код знаходиться у файлі <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">apps-script/telegram-bot.gs</code> у вашому репозиторії.
-              </p>
-              <div className="ml-8 space-y-1">
-                <p className="text-xs text-[#6B7280]">1. Відкрийте <a href="https://script.google.com" target="_blank" rel="noopener noreferrer" className="text-[#447afc] hover:underline">Google Apps Script</a></p>
-                <p className="text-xs text-[#6B7280]">2. Вставте код з <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">telegram-bot.gs</code></p>
-                <p className="text-xs text-[#6B7280]">3. Замініть <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">YOUR_BOT_TOKEN_HERE</code> на ваш токен</p>
-                <p className="text-xs text-[#6B7280]">4. Натисніть <strong>Deploy → New Deployment → Web App</strong></p>
-                <p className="text-xs text-[#6B7280]">5. Скопіюйте <strong>Deployment URL</strong> і вставте нижче</p>
-              </div>
-            </div>
-
-            {/* Webhook URL */}
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Webhook URL (Deployment URL)</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={webhookUrl}
-                  onChange={e => setWebhookUrl(e.target.value)}
-                  placeholder="https://script.google.com/macros/s/..."
-                  className="flex-1 rounded-xl border-[#E5E7EB] text-sm"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => { navigator.clipboard.writeText(webhookUrl).then(() => toast.success('URL скопійовано!')); }}
-                  className="rounded-xl border-[#E5E7EB] text-xs flex-shrink-0"
-                >
-                  <Link className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />
-                  Копіювати
-                </Button>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#447afc] text-white text-xs font-bold flex-shrink-0">3</span>
-                <p className="text-sm font-medium text-[#111827]">Додайте бота в групи як адміністратора</p>
-              </div>
-              <p className="text-xs text-[#6B7280] ml-8">
-                Перейдіть у кожну Telegram-групу → <strong>Add Member</strong> → знайдіть вашого бота → <strong>Make Admin</strong>. Бот почне автоматично отримувати повідомлення та парсити ставки.
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#447afc] text-white text-xs font-bold flex-shrink-0">4</span>
-                <p className="text-sm font-medium text-[#111827]">Запустіть setup() в Apps Script</p>
-              </div>
-              <p className="text-xs text-[#6B7280] ml-8">
-                У редакторі Apps Script виберіть функцію <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">setup</code> і натисніть <strong>Run</strong>. Це налаштує вебхук для бота.
-              </p>
-            </div>
-
-            <div className="p-4 bg-[#F0FDF4] rounded-xl border border-[#BBF7D0] mt-4">
-              <p className="text-sm font-medium text-[#16A34A] mb-1">✅ Бот налаштовано?</p>
-              <p className="text-xs text-[#6B7280]">
-                Ставки автоматично з'являтимуться в Google Sheets (USDT лист).
-                Сирі повідомлення зберігаються в листі <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">TG_Raw</code> для перевірки.
-                Для тестування парсингу запустіть <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-xs">testParse()</code> у Apps Script.
-              </p>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
   );
 }
