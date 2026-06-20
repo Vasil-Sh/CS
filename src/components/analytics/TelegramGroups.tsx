@@ -382,36 +382,244 @@ export default function TelegramGroups() {
     }
   };
 
+  // ── Shared UI ──
+  const renderDialogs = () => (
+    <>
+      {/* ===== Group Dialog ===== */}
+      <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
+        <DialogContent className="rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingGroup ? 'Редагувати групу' : 'Нова Telegram-група'}</DialogTitle>
+            <DialogDescription>
+              Додайте групу з якої будете аналізувати ставки
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Назва групи *</Label>
+              <Input
+                value={groupForm.name}
+                onChange={e => setGroupForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="Pro Betting 🇺🇦"
+                className="rounded-xl border-[#E5E7EB]"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Посилання</Label>
+              <Input
+                value={groupForm.link}
+                onChange={e => setGroupForm(p => ({ ...p, link: e.target.value }))}
+                placeholder="https://t.me/groupname"
+                className="rounded-xl border-[#E5E7EB]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGroupDialogOpen(false)} className="rounded-xl">Скасувати</Button>
+            <Button onClick={handleSaveGroup} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
+              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+              {editingGroup ? 'Зберегти' : 'Додати'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Bet Dialog ===== */}
+      <Dialog open={betDialogOpen} onOpenChange={setBetDialogOpen}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingBet ? 'Редагувати ставку' : 'Нова ставка з Telegram'}</DialogTitle>
+            <DialogDescription>
+              Додайте інформацію про ставку з Telegram-групи
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Група *</Label>
+              <Select value={betForm.groupId} onValueChange={v => setBetForm(p => ({ ...p, groupId: v }))}>
+                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
+                  <SelectValue placeholder="Оберіть групу" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Дата</Label>
+              <Input
+                type="date"
+                value={betForm.date}
+                onChange={e => setBetForm(p => ({ ...p, date: e.target.value }))}
+                className="rounded-xl border-[#E5E7EB]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Матч *</Label>
+                <Input
+                  value={betForm.match}
+                  onChange={e => setBetForm(p => ({ ...p, match: e.target.value }))}
+                  placeholder="NaVi vs FaZe"
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Тип ставки</Label>
+                <Select value={betForm.betType} onValueChange={v => setBetForm(p => ({ ...p, betType: v }))}>
+                  <SelectTrigger className="rounded-xl border-[#E5E7EB]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ординар">Ординар</SelectItem>
+                    <SelectItem value="Експрес">Експрес</SelectItem>
+                    <SelectItem value="Live">Live</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Команда 1</Label>
+                <Input
+                  value={betForm.team1}
+                  onChange={e => setBetForm(p => ({ ...p, team1: e.target.value }))}
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Команда 2</Label>
+                <Input
+                  value={betForm.team2}
+                  onChange={e => setBetForm(p => ({ ...p, team2: e.target.value }))}
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Коефіцієнт *</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  value={betForm.odds || ''}
+                  onChange={e => setBetForm(p => ({ ...p, odds: parseFloat(e.target.value) || 0 }))}
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Сума</Label>
+                <Input
+                  type="number"
+                  value={betForm.amount || ''}
+                  onChange={e => setBetForm(p => ({ ...p, amount: parseInt(e.target.value) || 0 }))}
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Прибуток</Label>
+                <Input
+                  type="number"
+                  value={betForm.profit || ''}
+                  onChange={e => setBetForm(p => ({ ...p, profit: parseInt(e.target.value) || 0 }))}
+                  className="rounded-xl border-[#E5E7EB]"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Результат</Label>
+              <Select value={betForm.result} onValueChange={v => setBetForm(p => ({ ...p, result: v as TelegramGroupBet['result'] }))}>
+                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Win">Виграш</SelectItem>
+                  <SelectItem value="Loss">Програш</SelectItem>
+                  <SelectItem value="Pending">Очікує</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1.5 block">Нотатки</Label>
+              <Input
+                value={betForm.notes}
+                onChange={e => setBetForm(p => ({ ...p, notes: e.target.value }))}
+                placeholder="Додаткові нотатки..."
+                className="rounded-xl border-[#E5E7EB]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBetDialogOpen(false)} className="rounded-xl">Скасувати</Button>
+            <Button onClick={handleSaveBet} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
+              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+              {editingBet ? 'Зберегти' : 'Додати'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Delete Group Confirm ===== */}
+      <Dialog open={!!deleteGroupConfirm} onOpenChange={() => setDeleteGroupConfirm(null)}>
+        <DialogContent className="rounded-2xl max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Видалити групу?</DialogTitle>
+            <DialogDescription>
+              Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl">Скасувати</Button>
+            <Button
+              onClick={() => deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)}
+              className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+              Видалити
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
   // ── Render ──
 
   if (!currentUser) return null;
+
   if (groups.length === 0) {
     return (
-      <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
-        <CardContent className="py-16 text-center">
-          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-            <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-          </div>
-          <h3 className="text-xl font-semibold text-[#111827] mb-2">
-            Немає доданих Telegram-груп
-          </h3>
-          <p className="text-[#6B7280] text-sm mb-6">
-            Додайте Telegram-групи зі ставками для аналізу їх результатів
-          </p>
-          <Button
-            onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2} />
-            Додати групу
-          </Button>
-        </CardContent>
-      </Card>
+      <>
+        {renderDialogs()}
+        <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
+          <CardContent className="py-16 text-center">
+            <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+              <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-xl font-semibold text-[#111827] mb-2">
+              Немає доданих Telegram-груп
+            </h3>
+            <p className="text-[#6B7280] text-sm mb-6">
+              Додайте Telegram-групи зі ставками для аналізу їх результатів
+            </p>
+            <Button
+              onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2} />
+              Додати групу
+            </Button>
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {renderDialogs()}
+      <div className="space-y-6">
       {/* ===== KPI Cards ===== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
@@ -764,203 +972,8 @@ export default function TelegramGroups() {
         </Card>
       )}
 
-      {/* ===== Group Dialog ===== */}
-      <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-        <DialogContent className="rounded-2xl max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingGroup ? 'Редагувати групу' : 'Нова Telegram-група'}</DialogTitle>
-            <DialogDescription>
-              Додайте групу з якої будете аналізувати ставки
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Назва групи *</Label>
-              <Input
-                value={groupForm.name}
-                onChange={e => setGroupForm(p => ({ ...p, name: e.target.value }))}
-                placeholder="Pro Betting 🇺🇦"
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Посилання</Label>
-              <Input
-                value={groupForm.link}
-                onChange={e => setGroupForm(p => ({ ...p, link: e.target.value }))}
-                placeholder="https://t.me/groupname"
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setGroupDialogOpen(false)} className="rounded-xl">Скасувати</Button>
-            <Button onClick={handleSaveGroup} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
-              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-              {editingGroup ? 'Зберегти' : 'Додати'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ===== Bet Dialog ===== */}
-      <Dialog open={betDialogOpen} onOpenChange={setBetDialogOpen}>
-        <DialogContent className="rounded-2xl max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingBet ? 'Редагувати ставку' : 'Нова ставка з Telegram'}</DialogTitle>
-            <DialogDescription>
-              Додайте інформацію про ставку з Telegram-групи
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Група *</Label>
-              <Select value={betForm.groupId} onValueChange={v => setBetForm(p => ({ ...p, groupId: v }))}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                  <SelectValue placeholder="Оберіть групу" />
-                </SelectTrigger>
-                <SelectContent>
-                  {groups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Дата</Label>
-              <Input
-                type="date"
-                value={betForm.date}
-                onChange={e => setBetForm(p => ({ ...p, date: e.target.value }))}
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Матч *</Label>
-                <Input
-                  value={betForm.match}
-                  onChange={e => setBetForm(p => ({ ...p, match: e.target.value }))}
-                  placeholder="NaVi vs FaZe"
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Тип ставки</Label>
-                <Select value={betForm.betType} onValueChange={v => setBetForm(p => ({ ...p, betType: v }))}>
-                  <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ординар">Ординар</SelectItem>
-                    <SelectItem value="Експрес">Експрес</SelectItem>
-                    <SelectItem value="Live">Live</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Команда 1</Label>
-                <Input
-                  value={betForm.team1}
-                  onChange={e => setBetForm(p => ({ ...p, team1: e.target.value }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Команда 2</Label>
-                <Input
-                  value={betForm.team2}
-                  onChange={e => setBetForm(p => ({ ...p, team2: e.target.value }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Коефіцієнт *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="1"
-                  value={betForm.odds || ''}
-                  onChange={e => setBetForm(p => ({ ...p, odds: parseFloat(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Сума</Label>
-                <Input
-                  type="number"
-                  value={betForm.amount || ''}
-                  onChange={e => setBetForm(p => ({ ...p, amount: parseInt(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Прибуток</Label>
-                <Input
-                  type="number"
-                  value={betForm.profit || ''}
-                  onChange={e => setBetForm(p => ({ ...p, profit: parseInt(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Результат</Label>
-              <Select value={betForm.result} onValueChange={v => setBetForm(p => ({ ...p, result: v as TelegramGroupBet['result'] }))}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Win">Виграш</SelectItem>
-                  <SelectItem value="Loss">Програш</SelectItem>
-                  <SelectItem value="Pending">Очікує</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Нотатки</Label>
-              <Input
-                value={betForm.notes}
-                onChange={e => setBetForm(p => ({ ...p, notes: e.target.value }))}
-                placeholder="Додаткові нотатки..."
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBetDialogOpen(false)} className="rounded-xl">Скасувати</Button>
-            <Button onClick={handleSaveBet} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
-              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-              {editingBet ? 'Зберегти' : 'Додати'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ===== Delete Group Confirm ===== */}
-      <Dialog open={!!deleteGroupConfirm} onOpenChange={() => setDeleteGroupConfirm(null)}>
-        <DialogContent className="rounded-2xl max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Видалити групу?</DialogTitle>
-            <DialogDescription>
-              Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl">Скасувати</Button>
-            <Button
-              onClick={() => deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)}
-              className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-              Видалити
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
+    </>
   );
 }
 
