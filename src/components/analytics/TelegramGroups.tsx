@@ -34,9 +34,28 @@ import {
   ShieldAlert,
   ShieldCheck,
   LayoutGrid,
-  ListOrdered
+  ListOrdered,
+  Eye
 } from 'lucide-react';
 import { CHART_CARD_SHADOW } from '@/lib/cardStyles';
+
+// ── Helpers ──
+
+/** Convert any Telegram link to web preview URL (no account needed for public channels) */
+function toWebPreviewUrl(link: string): string {
+  if (!link) return '';
+  // Already a /s/ link
+  if (link.includes('/s/')) return link;
+  // https://t.me/name → https://t.me/s/name
+  return link.replace(/^(https?:\/\/)?t\.me\/(?!s\/)/, '$1t.me/s/');
+}
+
+/** Extract handle from Telegram link for display */
+function tgHandle(link: string): string {
+  if (!link) return '';
+  const match = link.match(/t\.me\/(?:s\/)?([^/\s?#]+)/);
+  return match ? '@' + match[1] : link;
+}
 
 // ── Types ──
 
@@ -680,9 +699,21 @@ export default function TelegramGroups() {
                   {(() => {
                     const g = groups.find(x => x.id === gs.groupId);
                     return g?.link ? (
-                      <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-xs text-[#447afc] hover:underline inline-flex items-center gap-1 mt-0.5">
-                        <ExternalLink className="h-3 w-3" /> {g.link.replace('https://t.me/', '@')}
-                      </a>
+                      <div className="flex items-center gap-2 mt-1">
+                        <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-xs text-[#447afc] hover:underline inline-flex items-center gap-1">
+                          <ExternalLink className="h-3 w-3" /> {tgHandle(g.link)}
+                        </a>
+                        <a
+                          href={toWebPreviewUrl(g.link)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors"
+                          title="Переглянути канал без Telegram"
+                        >
+                          <Eye className="h-3 w-3" strokeWidth={1.5} />
+                          Перегляд
+                        </a>
+                      </div>
                     ) : null;
                   })()}
                 </div>
