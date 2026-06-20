@@ -7,6 +7,9 @@ node_modules/
 /build
 /dist
 
+# Playwright browser automation logs
+.playwright-mcp/
+
 # Atoms.dev / MatchIQ config
 .mgx/
 .atoms/

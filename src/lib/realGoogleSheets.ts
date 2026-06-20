@@ -154,6 +154,7 @@ class RealGoogleSheetsService {
       
       return this.getLocalStorageData('cs2_betting_records') || [];
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'fetchUSDTData');
       console.error('Error fetching USDT data:', error);
       return this.getLocalStorageData('cs2_betting_records') || [];
     }
@@ -179,6 +180,7 @@ class RealGoogleSheetsService {
       
       return this.getMockStrategyData();
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'fetchStrategyData');
       console.error('Error fetching strategy data:', error);
       return this.getMockStrategyData();
     }
@@ -264,6 +266,7 @@ class RealGoogleSheetsService {
       
       return null;
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'getStrategy');
       console.error('Error getting strategy:', error);
       return null;
     }
@@ -302,7 +305,6 @@ class RealGoogleSheetsService {
         if (userData) {
           const userBets = JSON.parse(userData);
           if (userBets.length > 0) {
-            console.log('✅ getAllRecords: loaded from user-specific storage:', userBets.length);
             return userBets;
           }
         }
@@ -310,10 +312,10 @@ class RealGoogleSheetsService {
       
       // Fallback до загального сховища
       const records = this.getLocalStorageData('cs2_betting_records');
-      console.log('✅ getAllRecords: loaded from general storage:', records.length);
       return records;
     } catch (error) {
-      console.error('❌ Error in getAllRecords:', error);
+      logServiceCall('RealGoogleSheets', 'getAllRecords');
+      console.error('Error in getAllRecords:', error);
       return [];
     }
   }
@@ -321,8 +323,6 @@ class RealGoogleSheetsService {
   // ОНОВЛЕНО: Add new record with timestamp — зберігає ВСІ поля включаючи game та riskyTeams
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
-      console.log('📝 addRecord called with:', record);
-      
       // For now, save to localStorage as we need write permissions for Google Sheets
       const existingData = this.getLocalStorageData('cs2_betting_records');
       
@@ -357,7 +357,6 @@ class RealGoogleSheetsService {
         winProbability: record.winProbability // ДОДАНО: зберігаємо імовірність виграшу
       };
       
-      console.log('💾 Saving record with timestamp:', newRecord.createdAt, 'game:', newRecord.game, 'winProbability:', newRecord.winProbability);
       
       existingData.push(newRecord);
       localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
@@ -370,12 +369,10 @@ class RealGoogleSheetsService {
         const userBets = userData ? JSON.parse(userData) : [];
         userBets.push(newRecord);
         localStorage.setItem(userKey, JSON.stringify(userBets));
-        console.log('✅ Also saved to user-specific key:', userKey);
       }
-      
-      console.log('✅ Record added to localStorage:', newRecord);
     } catch (error) {
-      console.error('❌ Error adding record:', error);
+      logServiceCall('RealGoogleSheets', 'addRecord');
+      console.error('Error adding record:', error);
       throw error;
     }
   }
@@ -416,7 +413,6 @@ class RealGoogleSheetsService {
           goalId: existingData[betIndex].goalId
         };
         localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
-        console.log('✅ Bet result updated in cs2_betting_records:', existingData[betIndex]);
       } else {
         console.warn('⚠️ Bet not found in cs2_betting_records, trying user-specific storage only');
       }
@@ -440,7 +436,6 @@ class RealGoogleSheetsService {
               goalId: userBets[userBetIndex].goalId
             };
             localStorage.setItem(userKey, JSON.stringify(userBets));
-            console.log('✅ Bet result updated in user-specific storage:', userBets[userBetIndex]);
           } else {
             console.warn('⚠️ Bet not found in user-specific storage');
           }
@@ -457,7 +452,6 @@ class RealGoogleSheetsService {
             const userBets: CS2BettingRecord[] = JSON.parse(userData);
             const userBetIndex = findBetIndex(userBets, searchBet);
             if (userBetIndex !== -1) {
-              console.log('✅ Bet was found and updated in user-specific storage only');
               return; // Success - found in user storage
             }
           }
@@ -465,6 +459,7 @@ class RealGoogleSheetsService {
         throw new Error('Bet not found for update in any storage');
       }
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'updateBetResult');
       console.error('Error updating bet result:', error);
       throw error;
     }
@@ -474,8 +469,8 @@ class RealGoogleSheetsService {
   async clearAllData(): Promise<void> {
     try {
       localStorage.removeItem('cs2_betting_records');
-      console.log('All betting data cleared from localStorage');
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'clearAllData');
       console.error('Error clearing data:', error);
       throw error;
     }
@@ -522,6 +517,7 @@ class RealGoogleSheetsService {
         profitByStrategy
       };
     } catch (error) {
+      logServiceCall('RealGoogleSheets', 'getBettingStatistics');
       console.error('Error calculating statistics:', error);
       return {
         totalBets: 0,
