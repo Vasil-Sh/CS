@@ -94,20 +94,32 @@ export default function TelegramGroups() {
   const { user } = useAuth();
   const currentUser = user?.username || '';
 
-  const [groups, setGroups] = useState<TelegramGroup[]>(() =>
-    UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', [])
-  );
-  const [bets, setBets] = useState<TelegramGroupBet[]>(() =>
-    UserDataService.getUserData<TelegramGroupBet[]>(currentUser, 'tg_bets', [])
-  );
+  const [groups, setGroups] = useState<TelegramGroup[]>([]);
+  const [bets, setBets] = useState<TelegramGroupBet[]>([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Persist
+  // Load user data when username becomes available
   useEffect(() => {
+    if (!currentUser || dataLoaded) return;
+    setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
+    setBets(UserDataService.getUserData<TelegramGroupBet[]>(currentUser, 'tg_bets', []));
+    setDataLoaded(true);
+  }, [currentUser, dataLoaded]);
+
+  // Reload when username changes (logout/login)
+  useEffect(() => {
+    setDataLoaded(false);
+  }, [currentUser]);
+
+  // Persist (only when we have real user AND data was loaded)
+  useEffect(() => {
+    if (!currentUser || !dataLoaded) return;
     UserDataService.setUserData(currentUser, 'tg_groups', groups);
-  }, [groups, currentUser]);
+  }, [groups, currentUser, dataLoaded]);
   useEffect(() => {
+    if (!currentUser || !dataLoaded) return;
     UserDataService.setUserData(currentUser, 'tg_bets', bets);
-  }, [bets, currentUser]);
+  }, [bets, currentUser, dataLoaded]);
 
   // Dialogs
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
