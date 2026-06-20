@@ -811,6 +811,9 @@ export default function TelegramGroups() {
     <>
       {renderDialogs()}
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
+      {/* ===== Bot Setup (admin only) ===== */}
+      <BotSetup />
+
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
 
@@ -1119,9 +1122,6 @@ export default function TelegramGroups() {
           </CardContent>
         </Card>
       )}
-
-        {/* ===== Bot Setup ===== */}
-        <BotSetup />
 
         </>
       )}
