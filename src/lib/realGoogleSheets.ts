@@ -252,20 +252,22 @@ class RealGoogleSheetsService {
     return [];
   }
 
-  // Get strategy by name or ID (user-scoped)
+  // Get strategy by name or ID (user-scoped with shared fallback)
   getStrategyByName(nameOrId: string): CS2Strategy | null {
     try {
       const currentUser = localStorage.getItem('username') || localStorage.getItem('currentUser') || '';
-      const strategies = currentUser
-        ? JSON.parse(localStorage.getItem(`user_${currentUser}_strategies_data`) || '[]')
-        : [];
+      let strategies: CS2Strategy[] = [];
+      if (currentUser) {
+        strategies = JSON.parse(localStorage.getItem(`user_${currentUser}_strategies_data`) || '[]');
+      }
+      // Fallback: old shared key
+      if (strategies.length === 0) {
+        const shared = localStorage.getItem('customStrategies');
+        if (shared) strategies = JSON.parse(shared);
+      }
 
-      // Search by name first
-      const foundByName = strategies.find((s: CS2Strategy) => s.name === nameOrId);
+      const foundByName = strategies.find((s: CS2Strategy) => s.name === nameOrId || s.id === nameOrId);
       if (foundByName) return foundByName;
-      // Then search by ID
-      const foundById = strategies.find((s: CS2Strategy) => s.id === nameOrId);
-      if (foundById) return foundById;
       
       return null;
     } catch (error) {

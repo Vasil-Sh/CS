@@ -140,8 +140,8 @@ export default function StrategyOverview() {
   });
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (currentUser) loadData();
+  }, [currentUser]);
 
   const loadData = async () => {
     try {
@@ -167,6 +167,7 @@ export default function StrategyOverview() {
 
   const loadCustomStrategiesFromStorage = (): CS2Strategy[] => {
     try {
+      // Try user-scoped first
       const strategies = UserDataService.getUserData<CS2Strategy[]>(currentUser, 'strategies_data', []);
       if (strategies.length > 0) {
         let needsSave = false;
@@ -178,6 +179,24 @@ export default function StrategyOverview() {
           return s;
         });
         if (needsSave) {
+          UserDataService.setUserDataSync(currentUser, 'strategies_data', migrated);
+        }
+        return migrated;
+      }
+      // Fallback: old shared key (before v1.14.6)
+      const saved = localStorage.getItem('customStrategies');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        let needsSave = false;
+        const migrated = parsed.map((s: CS2Strategy) => {
+          if (!s.id) {
+            needsSave = true;
+            return { ...s, id: crypto.randomUUID() };
+          }
+          return s;
+        });
+        // Auto-migrate to user-scoped key (only if currentUser is set)
+        if (currentUser) {
           UserDataService.setUserDataSync(currentUser, 'strategies_data', migrated);
         }
         return migrated;
@@ -510,7 +529,6 @@ export default function StrategyOverview() {
       setPrimaryStrategy(strategyId);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', strategyId);
       localStorage.setItem('primaryStrategy', strategyId);
-      console.log('[StrategyOverview] togglePrimary — currentUser:', currentUser, 'strategyId:', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();
