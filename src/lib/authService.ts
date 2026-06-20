@@ -23,7 +23,9 @@ class AuthService {
   async fetchUsers(): Promise<AdminUser[]> {
     try {
       const range = 'Доступи!A2:G100';
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
+      // Без кешу — щоб бачити свіжі зміни з Google Sheets
+      const cacheBuster = Date.now();
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}&_cb=${cacheBuster}`;
       
       const response = await fetch(url);
       
@@ -36,7 +38,7 @@ class AuthService {
       const data = await response.json();
       const rows = data.values || [];
 
-      return rows.map((row: string[]) => ({
+      const users = rows.map((row: string[]) => ({
         telegram: row[0] || '',
         username: row[1] || '',
         password: row[2] || '',
@@ -45,9 +47,30 @@ class AuthService {
         endDate: row[5] || '',
         isAdmin: row[6] || ''
       })).filter((user: AdminUser) => user.username && user.password);
+
+      // Apply local admin edits (made via Admin panel) to fetched users
+      return this.applyLocalEdits(users);
     } catch (error) {
       console.error('Error fetching users:', error);
       return [];
+    }
+  }
+
+  /** Apply adminUserEdits from localStorage on top of Google Sheets data */
+  private applyLocalEdits(users: AdminUser[]): AdminUser[] {
+    try {
+      const editsRaw = localStorage.getItem('adminUserEdits');
+      if (!editsRaw) return users;
+
+      const edits: Record<string, Partial<AdminUser>> = JSON.parse(editsRaw);
+
+      return users.map(user => {
+        const edit = edits[user.username];
+        if (!edit) return user;
+        return { ...user, ...edit };
+      });
+    } catch {
+      return users;
     }
   }
 
