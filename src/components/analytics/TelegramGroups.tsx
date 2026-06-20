@@ -35,7 +35,7 @@ import {
   ShieldCheck,
   Eye
 } from 'lucide-react';
-import { CHART_CARD_SHADOW } from '@/lib/cardStyles';
+import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
 // ── Helpers ──
 
@@ -657,7 +657,7 @@ export default function TelegramGroups() {
       {renderDialogs()}
       <div className="space-y-6">
       {/* ===== KPI Cards ===== */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
         <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#F0FDF4]" iconColor="text-[#16A34A]" />
         <StatCard 
@@ -966,14 +966,19 @@ function StatCard({ label, value, icon: Icon, color, iconColor }: {
   iconColor: string;
 }) {
   return (
-    <div className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-2xl px-5 py-4 transition-all duration-300" style={{ boxShadow: CHART_CARD_SHADOW }}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${color}`}>
-          <Icon className={`h-4 w-4 ${iconColor}`} strokeWidth={1.5} />
+    <div
+      className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 flex flex-col justify-between transition-all duration-300"
+      style={CARD_BASE_STYLE}
+      onMouseEnter={(e) => applyCardHover(e.currentTarget)}
+      onMouseLeave={(e) => resetCardHover(e.currentTarget)}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${color}`}>
+          <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={1.5} />
         </div>
-        <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">{label}</span>
+        <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-[#111827]">{value}</p>
+      <p className="text-3xl font-bold text-[#111827] tracking-tight">{value}</p>
     </div>
   );
 }
