@@ -548,21 +548,19 @@ export default function GoalsManager() {
 
         {/* Active Tab */}
         {activeTab === 'active' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">
+          <div className="bg-white border border-[#D1D5DB] rounded-3xl p-6">
             {activeGoals.length === 0 ? (
-              <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
-                <CardContent className="py-12 text-center">
-                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                    <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає активних цілей</h3>
-                  <p className="text-base text-[#6B7280] mb-4">Створіть першу ціль для відстеження прогресу</p>
-                  <Button onClick={() => setShowCreateDialog(true)} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
-                    <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                    Створити ціль
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="py-12 text-center">
+                <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                  <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає активних цілей</h3>
+                <p className="text-base text-[#6B7280] mb-4">Створіть першу ціль для відстеження прогресу</p>
+                <Button onClick={() => setShowCreateDialog(true)} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                  <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Створити ціль
+                </Button>
+              </div>
             ) : (
               <div className="grid grid-cols-3 gap-6">
                 {activeGoals.map(goal => {
@@ -703,17 +701,15 @@ export default function GoalsManager() {
 
         {/* Completed Tab */}
         {activeTab === 'completed' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6">
+          <div className="bg-white border border-[#D1D5DB] rounded-3xl p-6">
             {completedGoals.length === 0 ? (
-              <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
-                <CardContent className="py-12 text-center">
-                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                    <Trophy className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає завершених цілей</h3>
-                  <p className="text-base text-[#6B7280]">Завершені цілі з'являться тут</p>
-                </CardContent>
-              </Card>
+              <div className="py-12 text-center">
+                <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                  <Trophy className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає завершених цілей</h3>
+                <p className="text-base text-[#6B7280]">Завершені цілі з'являться тут</p>
+              </div>
             ) : (
               <div className="grid grid-cols-3 gap-6">
                 {completedGoals.map(goal => {

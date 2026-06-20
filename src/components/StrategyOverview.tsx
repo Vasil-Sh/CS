@@ -796,8 +796,8 @@ export default function StrategyOverview() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {strategies.length === 0 ? (
-                <Card className="border border-[#E5E7EB] rounded-3xl bg-white">
-                  <CardContent className="py-12 text-center">
+                <div className="bg-white border border-[#D1D5DB] rounded-3xl p-6">
+                  <div className="py-12 text-center">
                     <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
                       <Brain className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
                     </div>
@@ -810,8 +810,8 @@ export default function StrategyOverview() {
                       <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                       Створити стратегію
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ) : (
                 <>
                   {/* Filters and Search */}
@@ -1433,7 +1433,7 @@ export default function StrategyOverview() {
                 <ul className="space-y-2">
                   {newlyCreatedStrategy.criteria.map((criterion, idx) => (
                     <li key={idx} className="text-sm text-[#6B7280] flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#3B82F6] rounded-full mt-1.5 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full mt-1.5 flex-shrink-0"></div>
                       <span>{criterion}</span>
                     </li>
                   ))}
@@ -1720,10 +1720,10 @@ export default function StrategyOverview() {
                         style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                       >
                         <div className="flex items-start gap-3">
-                          <Badge className="rounded-xl bg-[#111827] text-white border-0 font-medium text-sm px-3 py-1 hover:bg-[#111827] flex-shrink-0">
+                          <Badge className="rounded-xl bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB] font-medium text-sm px-3 py-1 hover:bg-[#F3F4F6] flex-shrink-0">
                             #{idx + 1}
                           </Badge>
-                          <p className="text-sm text-[#111827] font-medium leading-relaxed">{criterion}</p>
+                          <p className="text-sm text-[#6B7280] font-medium leading-relaxed">{criterion}</p>
                         </div>
                       </div>
                     ))}
