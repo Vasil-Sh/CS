@@ -132,12 +132,16 @@ export default function Profile() {
     const riskyTeams = JSON.parse(localStorage.getItem('admin_risky_teams') || '[]');
     const strategies = UserDataService.getUserData(username, 'strategies_data', []);
     const goals = UserDataService.getUserData(username, 'goals', []);
+    const tgGroups = UserDataService.getUserData(username, 'tg_groups', []);
+    const tgBets = UserDataService.getUserData(username, 'tg_bets', []);
 
     return {
       bets: Array.isArray(bets) ? bets.length : 0,
       riskyTeams: Array.isArray(riskyTeams) ? riskyTeams.length : 0,
       strategies: Array.isArray(strategies) ? strategies.length : 0,
       goals: Array.isArray(goals) ? goals.length : 0,
+      tgGroups: Array.isArray(tgGroups) ? tgGroups.length : 0,
+      tgBets: Array.isArray(tgBets) ? tgBets.length : 0,
     };
   };
 
@@ -344,8 +348,8 @@ export default function Profile() {
 
       <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
 
-      {/* Data Statistics - 4 cards: label on top (single line), number below */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Data Statistics - 5 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
         <div
           className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
           style={cardBaseStyle}
@@ -381,6 +385,15 @@ export default function Profile() {
         >
           <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Цілі</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.goals}</p>
+        </div>
+        <div
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          style={cardBaseStyle}
+          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+        >
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Telegram Групи</p>
+          <p className="text-5xl font-bold text-[#111827]">{stats.tgGroups}</p>
         </div>
       </div>
 
@@ -531,7 +544,7 @@ export default function Profile() {
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-[#111827] mb-1">Повний бекап всіх даних</h3>
                 <p className="text-sm text-[#6B7280] mb-4">
-                  Експортує всі ваші дані (ставки, команди, стратегії, цілі, налаштування) в один JSON файл. 
+                  Експортує всі ваші дані (ставки, команди, стратегії, цілі, Telegram-групи, налаштування) в один JSON файл. 
                   Використовуйте для збереження копії або перенесення на інший пристрій.
                 </p>
                 <Button
