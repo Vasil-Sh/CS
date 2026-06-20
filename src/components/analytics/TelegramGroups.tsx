@@ -650,12 +650,12 @@ export default function TelegramGroups() {
   return (
     <>
       {renderDialogs()}
-      <div className="space-y-6">
+      <div className="flex flex-col flex-1 min-h-0 space-y-6">
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
 
       {groups.length === 0 ? (
-        <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
+        <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="py-16 text-center">
             <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
               <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />

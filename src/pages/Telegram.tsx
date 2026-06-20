@@ -9,7 +9,7 @@ export default function Telegram() {
   const currentUser = user?.username || 'User';
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative">
+    <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
       {/* ===== HEADER ===== */}
       <div className="px-6 lg:px-8 pt-6 pb-2">
         <div className="flex items-center justify-between">
@@ -34,7 +34,7 @@ export default function Telegram() {
       </div>
 
       {/* ===== CONTENT ===== */}
-      <div className="relative z-10 px-6 lg:px-8 pb-8 pt-4">
+      <div className="relative z-10 px-6 lg:px-8 pb-8 pt-4 flex-1 flex flex-col">
         <TelegramGroups />
       </div>
     </div>
