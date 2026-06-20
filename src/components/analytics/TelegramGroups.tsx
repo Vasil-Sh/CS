@@ -679,88 +679,102 @@ export default function TelegramGroups() {
       {/* ===== Cards View ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {rankedGroups.map((gs, idx) => (
-          <Card key={gs.groupId} className="border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: CHART_CARD_SHADOW }}>
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    {idx < 3 && (
-                      <span className={`text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center ${idx === 0 ? 'bg-[#FEF3C7] text-[#D97706]' : idx === 1 ? 'bg-[#F3F4F6] text-[#6B7280]' : 'bg-[#FDE8E8] text-[#C2410C]'}`}>
-                        {idx + 1}
-                      </span>
-                    )}
-                    <h4 className="text-base font-semibold text-[#111827] leading-tight">{gs.groupName}</h4>
+          <div
+            key={gs.groupId}
+            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl h-full flex flex-col overflow-hidden transition-all duration-300"
+            style={CARD_BASE_STYLE}
+            onMouseEnter={(e) => applyCardHover(e.currentTarget)}
+            onMouseLeave={(e) => resetCardHover(e.currentTarget)}
+          >
+            {/* Header */}
+            <div className="px-7 pt-7">
+              <div className="flex items-start justify-between mb-6 pb-5">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
+                      <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xl font-bold text-[#374151] tracking-tight truncate">{gs.groupName}</h4>
+                      {(() => {
+                        const g = groups.find(x => x.id === gs.groupId);
+                        return g?.link ? (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-xs text-[#447afc] hover:underline inline-flex items-center gap-1">
+                              <ExternalLink className="h-3 w-3" /> {tgHandle(g.link)}
+                            </a>
+                            <a
+                              href={toWebPreviewUrl(g.link)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors"
+                              title="Переглянути канал без Telegram"
+                            >
+                              <Eye className="h-3 w-3" strokeWidth={1.5} />
+                              Перегляд
+                            </a>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
                   </div>
-                  {(() => {
-                    const g = groups.find(x => x.id === gs.groupId);
-                    return g?.link ? (
-                      <div className="flex items-center gap-2 mt-1">
-                        <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-xs text-[#447afc] hover:underline inline-flex items-center gap-1">
-                          <ExternalLink className="h-3 w-3" /> {tgHandle(g.link)}
-                        </a>
-                        <a
-                          href={toWebPreviewUrl(g.link)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-[#9CA3AF] hover:text-[#447afc] inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md border border-[#E5E7EB] hover:border-[#447afc] transition-colors"
-                          title="Переглянути канал без Telegram"
-                        >
-                          <Eye className="h-3 w-3" strokeWidth={1.5} />
-                          Перегляд
-                        </a>
-                      </div>
-                    ) : null;
-                  })()}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex items-start gap-1 flex-shrink-0">
+                  {gs.totalBets > 0 && <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />}
                   <button
                     onClick={() => {
                       const g = groups.find(x => x.id === gs.groupId);
                       if (g) openEditGroup(g);
                     }}
                     className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors"
+                    title="Редагувати"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </button>
                   <button
                     onClick={() => setDeleteGroupConfirm(gs.groupId)}
                     className="p-1.5 rounded-lg hover:bg-[#FEF2F2] text-[#9CA3AF] hover:text-[#DC2626] transition-colors"
+                    title="Видалити"
                   >
                     <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* Stability badge */}
-              {gs.totalBets > 0 && (
-                <div className="flex items-center gap-2 mb-3">
-                  <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />
-                  {gs.streak !== 0 && (
-                    <span className={`text-[11px] font-medium ${gs.streak > 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                      {gs.streak > 0 ? '🔥' : '📉'} {Math.abs(gs.streak)} {gs.streak > 0 ? 'виграшів' : 'програшів'} поспіль
-                    </span>
-                  )}
-                </div>
+            {/* Divider */}
+            <div className="h-px w-full bg-[#F3F4F6]" />
+
+            {/* Content */}
+            <div className="space-y-4 flex-1 px-7 pb-7 pt-6">
+              {/* Streak indicator */}
+              {gs.streak !== 0 && (
+                <p className={`text-sm font-medium ${gs.streak > 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                  {gs.streak > 0 ? '🔥' : '📉'} {Math.abs(gs.streak)} {gs.streak > 0 ? 'виграшів' : 'програшів'} поспіль
+                </p>
               )}
 
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <div className="text-center p-2 bg-[#F9FAFB] rounded-xl">
-                  <p className="text-lg font-bold text-[#111827]">{gs.totalBets}</p>
-                  <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider">ставок</p>
+              {/* Stats grid */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ставок</p>
+                  <p className="text-2xl font-bold text-[#111827] mt-1.5">{gs.totalBets}</p>
                 </div>
-                <div className="text-center p-2 bg-[#F9FAFB] rounded-xl">
-                  <p className="text-lg font-bold text-[#16A34A]">{gs.wins}</p>
-                  <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider">виграшів</p>
+                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Виграшів</p>
+                  <p className="text-2xl font-bold text-[#16A34A] mt-1.5">{gs.wins}</p>
                 </div>
-                <div className="text-center p-2 bg-[#F9FAFB] rounded-xl">
-                  <p className={`text-lg font-bold ${gs.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>{gs.winRate.toFixed(0)}%</p>
-                  <p className="text-[10px] text-[#9CA3AF] uppercase tracking-wider">win rate</p>
+                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Win Rate</p>
+                  <p className={`text-2xl font-bold mt-1.5 ${gs.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {gs.winRate.toFixed(0)}%
+                  </p>
                 </div>
               </div>
 
               {/* Monthly mini-chart */}
               {gs.monthlyProfit.length > 0 && (
-                <div className="mb-3">
+                <div>
                   <div className="flex items-end gap-[3px] h-10">
                     {gs.monthlyProfit.map((m, i) => {
                       const maxVal = Math.max(...gs.monthlyProfit.map(x => Math.abs(x.profit)), 1);
@@ -783,30 +797,31 @@ export default function TelegramGroups() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-[#6B7280]">Прибуток</span>
-                <span className={`text-sm font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+              {/* Profit row */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#6B7280]">Прибуток</span>
+                <span className={`text-lg font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
                   {gs.totalProfit >= 0 ? '+' : ''}{gs.totalProfit.toFixed(0)} ₴
                 </span>
               </div>
 
+              {/* Action */}
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => openAddBet(gs.groupId)}
-                className="w-full rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-xs font-medium"
+                className="w-full rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-sm font-medium"
               >
-                <Plus className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                <Plus className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
                 Додати ставку
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
 
         {/* Add Group Card */}
         <button
           onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
-          className="border-2 border-dashed border-[#D1D5DB] rounded-2xl bg-white/50 hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer"
+          className="border-2 border-dashed border-[#D1D5DB] rounded-3xl bg-white/50 hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer"
         >
           <div className="p-3 bg-[#F3F4F6] rounded-full">
             <Plus className="h-5 w-5 text-[#9CA3AF]" strokeWidth={2} />
