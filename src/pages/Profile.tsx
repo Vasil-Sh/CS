@@ -58,7 +58,6 @@ export default function Profile() {
     'userRole',
     'username',
     'admin_risky_teams',
-    'maxStakePercent',
     'matchiq_theme',
     'matchiq_lang',
     'ui-settings',

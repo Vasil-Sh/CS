@@ -137,8 +137,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const [showKellyDetails, setShowKellyDetails] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
   const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
-    const saved = localStorage.getItem('maxStakePercent');
-    return saved ? parseInt(saved, 10) : DEFAULT_MAX_STAKE_PERCENT;
+    const saved = UserDataService.getUserData<number>(currentUser, 'max_stake_percent', 0);
+    return saved || DEFAULT_MAX_STAKE_PERCENT;
   });
 
   const [formData, setFormData] = useState(() => {
@@ -165,8 +165,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const strategyLoadedRef = useRef(false);
 
   useEffect(() => {
-    localStorage.setItem('maxStakePercent', String(maxStakePercent));
-  }, [maxStakePercent]);
+    UserDataService.setUserData(currentUser, 'max_stake_percent', maxStakePercent);
+  }, [maxStakePercent, currentUser]);
 
   useEffect(() => {
     if (expressMatchesData && expressMatchesData.length >= 2 && expressConsumedRef.current) {

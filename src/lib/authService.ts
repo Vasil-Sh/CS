@@ -98,11 +98,6 @@ class AuthService {
     try {
       const users = await this.fetchUsers();
 
-      // DEBUG
-      const localCount = this.getLocalUsersOnly().length;
-      console.debug('[Auth] Google Sheets users:', users.length - localCount, '| Local:', localCount, '| Total:', users.length);
-      if (users.length > 0) console.debug('[Auth] Sample:', users.slice(0, 3).map(u => `${u.username}:${u.password} end=${u.endDate}`));
-
       // If Google Sheets returned no users (API key missing?), try local-only auth
       if (users.length === 0) {
         const localOnly = this.getLocalUsersOnly();

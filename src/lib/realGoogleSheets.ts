@@ -137,8 +137,9 @@ class RealGoogleSheetsService {
   async fetchUSDTData(): Promise<CS2BettingRecord[]> {
     try {
       if (!this.apiKey) {
+        const username = localStorage.getItem('username') || '';
         console.warn('Google Sheets API key not set, using localStorage data');
-        return this.getLocalStorageData('cs2_betting_records') || [];
+        return username ? this.getUserBets(username) : [];
       }
 
       const range = 'USDT!A:Z'; // Adjust range as needed
@@ -152,11 +153,23 @@ class RealGoogleSheetsService {
         return this.processSheetData(data.values);
       }
       
-      return this.getLocalStorageData('cs2_betting_records') || [];
+      const username = localStorage.getItem('username') || '';
+      return username ? this.getUserBets(username) : [];
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'fetchUSDTData');
       console.error('Error fetching USDT data:', error);
-      return this.getLocalStorageData('cs2_betting_records') || [];
+      const username = localStorage.getItem('username') || '';
+      return username ? this.getUserBets(username) : [];
+    }
+  }
+
+  /** Get current user's bets from user-scoped storage */
+  private getUserBets(username: string): CS2BettingRecord[] {
+    try {
+      const raw = localStorage.getItem(`user_${username}_mybets_data`);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
     }
   }
 
@@ -234,16 +247,6 @@ class RealGoogleSheetsService {
     return strategies;
   }
 
-  // Get data from localStorage as fallback
-  private getLocalStorageData(key: string): CS2BettingRecord[] {
-    try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
   // Mock strategy data for demo
   private getMockStrategyData(): CS2Strategy[] {
     return [];
@@ -274,45 +277,32 @@ class RealGoogleSheetsService {
 
   // Delete a single record by id or by index match (date+match+amount+odds)
   deleteRecord(record: Partial<CS2BettingRecord>): void {
-    const currentUser = localStorage.getItem('currentUser') || '';
-    const keys = ['cs2_betting_records'];
-    if (currentUser) keys.push(`user_${currentUser}_mybets_data`);
+    const username = localStorage.getItem('username') || '';
+    if (!username) return;
 
-    keys.forEach(key => {
-      const raw = localStorage.getItem(key);
-      if (!raw) return;
-      const items: CS2BettingRecord[] = JSON.parse(raw);
-      const idx = items.findIndex((r: CS2BettingRecord) => {
-        if (record.id && r.id === record.id) return true;
-        return r.date === record.date && r.match === record.match && r.amount === record.amount && r.odds === record.odds;
-      });
-      if (idx !== -1) {
-        items.splice(idx, 1);
-        localStorage.setItem(key, JSON.stringify(items));
-      }
+    const key = `user_${username}_mybets_data`;
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    const items: CS2BettingRecord[] = JSON.parse(raw);
+    const idx = items.findIndex((r: CS2BettingRecord) => {
+      if (record.id && r.id === record.id) return true;
+      return r.date === record.date && r.match === record.match && r.amount === record.amount && r.odds === record.odds;
     });
+    if (idx !== -1) {
+      items.splice(idx, 1);
+      localStorage.setItem(key, JSON.stringify(items));
+    }
   }
 
   // Get all records (синхронний метод для сумісності)
   getAllRecords(): CS2BettingRecord[] {
     logServiceCall('GoogleSheets', 'getAllRecords');
     try {
-      // Спочатку перевіряємо user-specific дані
-      const currentUser = localStorage.getItem('currentUser') || '';
-      if (currentUser) {
-        const userKey = `user_${currentUser}_mybets_data`;
-        const userData = localStorage.getItem(userKey);
-        if (userData) {
-          const userBets = JSON.parse(userData);
-          if (userBets.length > 0) {
-            return userBets;
-          }
-        }
+      const username = localStorage.getItem('username') || '';
+      if (username) {
+        return this.getUserBets(username);
       }
-      
-      // Fallback до загального сховища
-      const records = this.getLocalStorageData('cs2_betting_records');
-      return records;
+      return [];
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'getAllRecords');
       console.error('Error in getAllRecords:', error);
@@ -320,13 +310,9 @@ class RealGoogleSheetsService {
     }
   }
 
-  // ОНОВЛЕНО: Add new record with timestamp — зберігає ВСІ поля включаючи game та riskyTeams
+  // Add new record with timestamp — user-scoped only
   async addRecord(record: Partial<CS2BettingRecord>): Promise<void> {
     try {
-      // For now, save to localStorage as we need write permissions for Google Sheets
-      const existingData = this.getLocalStorageData('cs2_betting_records');
-      
-      // ДОДАНО: timestamp для точного сортування
       const timestamp = Date.now();
       
       const newRecord: CS2BettingRecord = {
@@ -343,33 +329,29 @@ class RealGoogleSheetsService {
         strategy: record.strategy || '',
         notes: record.notes || '',
         format: record.format,
-        game: record.game, // ФІКС: зберігаємо гру (CS2/Dota2)
+        game: record.game,
         tournament: record.tournament,
         matchUrl: record.matchUrl,
-        riskyTeams: record.riskyTeams, // ФІКС: зберігаємо ризикові команди
+        riskyTeams: record.riskyTeams,
         id: record.id || timestamp.toString(),
         goalId: record.goalId,
         currency: record.currency,
         originalAmount: record.originalAmount,
         exchangeRate: record.exchangeRate,
         originalProfit: record.originalProfit,
-        createdAt: record.createdAt || timestamp, // ДОДАНО: зберігаємо точний час створення
-        winProbability: record.winProbability // ДОДАНО: зберігаємо імовірність виграшу
+        createdAt: record.createdAt || timestamp,
+        winProbability: record.winProbability
       };
       
-      
-      existingData.push(newRecord);
-      localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
-      
-      // Також зберігаємо в user-specific ключ для синхронізації
-      const currentUser = localStorage.getItem('currentUser') || '';
-      if (currentUser) {
-        const userKey = `user_${currentUser}_mybets_data`;
-        const userData = localStorage.getItem(userKey);
-        const userBets = userData ? JSON.parse(userData) : [];
-        userBets.push(newRecord);
-        localStorage.setItem(userKey, JSON.stringify(userBets));
+      const username = localStorage.getItem('username') || '';
+      if (!username) {
+        throw new Error('No user logged in');
       }
+      const userKey = `user_${username}_mybets_data`;
+      const userData = localStorage.getItem(userKey);
+      const userBets: CS2BettingRecord[] = userData ? JSON.parse(userData) : [];
+      userBets.push(newRecord);
+      localStorage.setItem(userKey, JSON.stringify(userBets));
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'addRecord');
       console.error('Error adding record:', error);
@@ -377,11 +359,9 @@ class RealGoogleSheetsService {
     }
   }
 
-  // Update bet result — updates BOTH general and user-specific localStorage keys
-  // Accepts both CS2BettingRecord and Bet types (partial fields are OK for matching)
+  // Update bet result — user-scoped only
   async updateBetResult(bet: Partial<CS2BettingRecord>, result: 'Win' | 'Loss', profit: number, roi: number): Promise<void> {
     try {
-      // Build a search object with available fields for findBetIndex
       const searchBet: CS2BettingRecord = {
         date: bet.date || '',
         match: bet.match || '',
@@ -399,65 +379,34 @@ class RealGoogleSheetsService {
         createdAt: bet.createdAt
       };
 
-      // 1. Update general storage (cs2_betting_records)
-      const existingData = this.getLocalStorageData('cs2_betting_records');
-      const betIndex = findBetIndex(existingData, searchBet);
-      
-      if (betIndex !== -1) {
-        existingData[betIndex] = {
-          ...existingData[betIndex],
+      const username = localStorage.getItem('username') || '';
+      if (!username) {
+        throw new Error('Bet not found for update — no user logged in');
+      }
+
+      const userKey = `user_${username}_mybets_data`;
+      const userData = localStorage.getItem(userKey);
+      if (!userData) {
+        throw new Error('Bet not found for update in user storage');
+      }
+
+      const userBets: CS2BettingRecord[] = JSON.parse(userData);
+      const userBetIndex = findBetIndex(userBets, searchBet);
+
+      if (userBetIndex !== -1) {
+        userBets[userBetIndex] = {
+          ...userBets[userBetIndex],
           result,
           profit,
           roi,
-          originalProfit: bet.originalProfit !== undefined ? bet.originalProfit : existingData[betIndex].originalProfit,
-          goalId: existingData[betIndex].goalId
+          originalProfit: bet.originalProfit !== undefined ? bet.originalProfit : userBets[userBetIndex].originalProfit,
+          goalId: userBets[userBetIndex].goalId
         };
-        localStorage.setItem('cs2_betting_records', JSON.stringify(existingData));
-      } else {
-        console.warn('⚠️ Bet not found in cs2_betting_records, trying user-specific storage only');
+        localStorage.setItem(userKey, JSON.stringify(userBets));
+        return;
       }
 
-      // 2. Update user-specific storage
-      const currentUser = localStorage.getItem('currentUser') || localStorage.getItem('username') || '';
-      if (currentUser) {
-        const userKey = `user_${currentUser}_mybets_data`;
-        const userData = localStorage.getItem(userKey);
-        if (userData) {
-          const userBets: CS2BettingRecord[] = JSON.parse(userData);
-          const userBetIndex = findBetIndex(userBets, searchBet);
-          
-          if (userBetIndex !== -1) {
-            userBets[userBetIndex] = {
-              ...userBets[userBetIndex],
-              result,
-              profit,
-              roi,
-              originalProfit: bet.originalProfit !== undefined ? bet.originalProfit : userBets[userBetIndex].originalProfit,
-              goalId: userBets[userBetIndex].goalId
-            };
-            localStorage.setItem(userKey, JSON.stringify(userBets));
-          } else {
-            console.warn('⚠️ Bet not found in user-specific storage');
-          }
-        }
-      }
-
-      if (betIndex === -1) {
-        // Check if at least user-specific was updated
-        const currentUser2 = localStorage.getItem('currentUser') || localStorage.getItem('username') || '';
-        if (currentUser2) {
-          const userKey = `user_${currentUser2}_mybets_data`;
-          const userData = localStorage.getItem(userKey);
-          if (userData) {
-            const userBets: CS2BettingRecord[] = JSON.parse(userData);
-            const userBetIndex = findBetIndex(userBets, searchBet);
-            if (userBetIndex !== -1) {
-              return; // Success - found in user storage
-            }
-          }
-        }
-        throw new Error('Bet not found for update in any storage');
-      }
+      throw new Error('Bet not found for update in any storage');
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'updateBetResult');
       console.error('Error updating bet result:', error);
@@ -465,10 +414,13 @@ class RealGoogleSheetsService {
     }
   }
 
-  // Clear all betting data
+  // Clear all betting data (user-scoped)
   async clearAllData(): Promise<void> {
     try {
-      localStorage.removeItem('cs2_betting_records');
+      const username = localStorage.getItem('username') || '';
+      if (username) {
+        localStorage.removeItem(`user_${username}_mybets_data`);
+      }
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'clearAllData');
       console.error('Error clearing data:', error);
