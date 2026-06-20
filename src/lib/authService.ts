@@ -99,6 +99,25 @@ class AuthService {
   async login(username: string, password: string): Promise<LoginResult> {
     try {
       const users = await this.fetchUsers();
+
+      // DEBUG
+      const localCount = this.getLocalUsersOnly().length;
+      console.debug('[Auth] Google Sheets users:', users.length - localCount, '| Local:', localCount, '| Total:', users.length);
+      if (users.length > 0) console.debug('[Auth] Sample:', users.slice(0, 3).map(u => `${u.username}:${u.password} end=${u.endDate}`));
+
+      // If Google Sheets returned no users (API key missing?), try local-only auth
+      if (users.length === 0) {
+        const localOnly = this.getLocalUsersOnly();
+        if (localOnly.length > 0) {
+          const localUser = localOnly.find(
+            u => u.username.toLowerCase() === username.toLowerCase() && u.password === password
+          );
+          if (localUser) {
+            return this.completeLogin(localUser, username);
+          }
+        }
+        return { success: false, error: "Невірний логін або пароль" };
+      }
       
       const user = users.find(
         u => u.username.toLowerCase() === username.toLowerCase() && 
@@ -112,36 +131,51 @@ class AuthService {
         };
       }
 
-      // Check if user is admin
-      const isAdmin = this.checkIsAdmin(user);
-      
-      if (isAdmin) {
-        localStorage.setItem("authToken", "admin-token");
-        localStorage.setItem("userRole", "admin");
-        localStorage.setItem("username", username);
-        return { success: true, isAdmin: true };
-      }
-
-      // Check subscription for regular users
-      const endDate = this.parseDate(user.endDate);
-      const now = new Date();
-
-      if (endDate && endDate > now) {
-        localStorage.setItem("authToken", "user-token");
-        localStorage.setItem("userRole", "user");
-        localStorage.setItem("username", username);
-        return { success: true, isAdmin: false };
-      } else {
-        return { 
-          success: false, 
-          error: "Ваша підписка закінчилася. Зверніться до адміністратора." 
-        };
-      }
+      return this.completeLogin(user, username);
     } catch (error) {
       console.error('Error during login:', error);
       return { 
         success: false, 
         error: "Помилка з'єднання. Спробуйте ще раз." 
+      };
+    }
+  }
+
+  /** Get only locally-created users (from adminLocalUsers in localStorage) */
+  private getLocalUsersOnly(): AdminUser[] {
+    try {
+      const raw = localStorage.getItem('adminLocalUsers');
+      if (!raw) return [];
+      return JSON.parse(raw) as AdminUser[];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Complete the login process for a found user */
+  private completeLogin(user: AdminUser, username: string): LoginResult {
+    const isAdmin = this.checkIsAdmin(user);
+    
+    if (isAdmin) {
+      localStorage.setItem("authToken", "admin-token");
+      localStorage.setItem("userRole", "admin");
+      localStorage.setItem("username", username);
+      return { success: true, isAdmin: true };
+    }
+
+    // Check subscription for regular users
+    const endDate = this.parseDate(user.endDate);
+    const now = new Date();
+
+    if (endDate && endDate > now) {
+      localStorage.setItem("authToken", "user-token");
+      localStorage.setItem("userRole", "user");
+      localStorage.setItem("username", username);
+      return { success: true, isAdmin: false };
+    } else {
+      return { 
+        success: false, 
+        error: "Ваша підписка закінчилася. Зверніться до адміністратора." 
       };
     }
   }
