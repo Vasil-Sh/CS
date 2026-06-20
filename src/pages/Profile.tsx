@@ -52,29 +52,26 @@ export default function Profile() {
     toast.success(newLang === 'uk' ? 'Мова: Українська' : 'Language: English');
   };
 
-  // Collect all localStorage keys used by the app (sync with exportFullBackup)
-  const APP_STORAGE_KEYS = [
-    // Auth & identity
+  // ── Shared keys (everyone) ──
+  const SHARED_KEYS = [
     'authToken',
     'userRole',
     'username',
-    // Strategies & teams
     'customStrategies',
     'primaryStrategy',
     'admin_risky_teams',
-    // Admin panel
+    'maxStakePercent',
+    'matchiq_theme',
+    'matchiq_lang',
+    'ui-settings',
+    'match_ratings',
+  ] as const;
+
+  // ── Admin-only keys ──
+  const ADMIN_KEYS = [
     'adminLocalUsers',
     'adminUserEdits',
     'adminDeletedUsers',
-    // Match ratings
-    'match_ratings',
-    // Betting preferences
-    'maxStakePercent',
-    // Appearance
-    'matchiq_theme',
-    'matchiq_lang',
-    // UI settings
-    'ui-settings',
   ] as const;
 
   // Keys to NEVER include in backup (security, ephemeral)
@@ -83,8 +80,8 @@ export default function Profile() {
     'currentUser',
   ]);
 
-  // Auto-collect ALL user-scoped keys for the current user
-  const collectUserScopedKeys = (): string[] => {
+  // Auto-collect user-scoped keys for the CURRENT user
+  const collectMyUserKeys = (): string[] => {
     const prefix = `user_${username}_`;
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -96,7 +93,19 @@ export default function Profile() {
     return keys;
   };
 
-  // Collect tilt-block keys for ALL users (dynamic keys)
+  // Admin only: auto-collect ALL user_* keys (all users)
+  const collectAllUserKeys = (): string[] => {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('user_') && !FORBIDDEN_BACKUP_KEYS.has(key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  };
+
+  // Admin only: collect tilt-block keys for all users
   const collectTiltKeys = (): string[] => {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -110,12 +119,11 @@ export default function Profile() {
 
   const getStorageSize = () => {
     let totalSize = 0;
-    const allKeys = [
-      ...APP_STORAGE_KEYS,
-      ...collectUserScopedKeys(),
-      ...collectTiltKeys(),
-    ];
-    allKeys.forEach(key => {
+    const keys = [...SHARED_KEYS, ...ADMIN_KEYS, ...collectMyUserKeys()];
+    if (isAdmin) {
+      keys.push(...collectAllUserKeys(), ...collectTiltKeys());
+    }
+    [...new Set(keys)].forEach(key => {
       const item = localStorage.getItem(key);
       if (item) totalSize += item.length * 2;
     });
@@ -189,37 +197,36 @@ export default function Profile() {
           exportDate: new Date().toISOString(),
           appVersion: '1.14.0',
           username: username,
+          isAdminBackup: isAdmin,
           format: 'matchiq-full-backup'
         }
       };
 
-      // Save static keys (skip forbidden ones)
-      APP_STORAGE_KEYS.forEach(key => {
+      // Helper: read and store a key
+      const storeKey = (key: string) => {
         if (FORBIDDEN_BACKUP_KEYS.has(key)) return;
         const item = localStorage.getItem(key);
         if (item) {
           try { backupData[key] = JSON.parse(item); }
           catch { backupData[key] = item; }
         }
-      });
+      };
 
-      // Auto-collect all user-scoped keys
-      collectUserScopedKeys().forEach(key => {
-        const item = localStorage.getItem(key);
-        if (item) {
-          try { backupData[key] = JSON.parse(item); }
-          catch { backupData[key] = item; }
-        }
-      });
+      // 1) Shared keys (everyone)
+      SHARED_KEYS.forEach(storeKey);
 
-      // Auto-collect tilt blocks
-      collectTiltKeys().forEach(key => {
-        const item = localStorage.getItem(key);
-        if (item) {
-          try { backupData[key] = JSON.parse(item); }
-          catch { backupData[key] = item; }
-        }
-      });
+      // 2) My own user_* keys
+      collectMyUserKeys().forEach(storeKey);
+
+      // ── Admin-only ──
+      if (isAdmin) {
+        // 3) Admin panel keys
+        ADMIN_KEYS.forEach(storeKey);
+        // 4) ALL users' user_* keys
+        collectAllUserKeys().forEach(storeKey);
+        // 5) Tilt blocks for all users
+        collectTiltKeys().forEach(storeKey);
+      }
 
       const jsonString = JSON.stringify(backupData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
@@ -266,15 +273,44 @@ export default function Profile() {
         }
 
         let restoredCount = 0;
+        let skippedAdmin = 0;
+
+        // Whitelist keys that current user is allowed to restore
+        const adminKeySet = new Set(ADMIN_KEYS);
+        const isAdminBackup = parsed._meta.isAdminBackup === true;
+
         Object.entries(parsed).forEach(([key, value]) => {
           if (key === '_meta') return;
+
+          // Admin-only keys — only restore if current user is admin
+          if (adminKeySet.has(key) && !isAdmin) {
+            skippedAdmin++;
+            return;
+          }
+
+          // Keys belonging to other users — only restore if admin
+          if (key.startsWith('user_') && !key.startsWith(`user_${username}_`) && !isAdmin) {
+            skippedAdmin++;
+            return;
+          }
+
+          // Tilt blocks — only restore if admin
+          if (key.startsWith('tilt_block_') && !isAdmin) {
+            skippedAdmin++;
+            return;
+          }
+
           const strValue = typeof value === 'string' ? value : JSON.stringify(value);
           localStorage.setItem(key, strValue);
           restoredCount++;
         });
 
-        toast.success(`Бекап відновлено! (${restoredCount} записів)`, {
-          description: `Дані з ${new Date(parsed._meta.exportDate).toLocaleDateString('uk-UA')} відновлені. Сторінка перезавантажиться.`
+        const msg = `Бекап відновлено! (${restoredCount} записів)`;
+        const descTail = isAdminBackup && !isAdmin
+          ? ` (${skippedAdmin} адмін-записів пропущено)`
+          : '';
+        toast.success(msg, {
+          description: `Дані з ${new Date(parsed._meta.exportDate).toLocaleDateString('uk-UA')} відновлені.${descTail} Сторінка перезавантажиться.`
         });
 
         setTimeout(() => {
