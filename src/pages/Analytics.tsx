@@ -825,7 +825,7 @@ export default function Analytics() {
                   </>
                 ) : (
                   <Card 
-                    className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                    className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
@@ -856,7 +856,7 @@ export default function Analytics() {
                   </>
                 ) : (
                   <Card 
-                    className="border border-[#E5E7EB] rounded-2xl bg-white overflow-hidden"
+                    className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
