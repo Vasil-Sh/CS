@@ -7,7 +7,7 @@ node_modules/
 /build
 /dist
 
-# Atoms.dev / MGX config
+# Atoms.dev / MatchIQ config
 .mgx/
 .atoms/
 

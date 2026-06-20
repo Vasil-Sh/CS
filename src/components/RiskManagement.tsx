@@ -28,6 +28,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
+import { logRender } from '@/lib/devLogger';
 import { toast } from 'sonner';
 
 interface RiskManagementProps {
@@ -145,6 +146,7 @@ const INITIAL_RISKY_TEAMS: RiskyTeam[] = [
 ];
 
 export default function RiskManagement({ bets }: RiskManagementProps) {
+  logRender('RiskManagement');
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>(() => {
     const saved = localStorage.getItem('admin_risky_teams');
     return saved ? JSON.parse(saved) : INITIAL_RISKY_TEAMS;

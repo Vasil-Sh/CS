@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
+import { logRender } from '@/lib/devLogger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -94,6 +95,7 @@ const formatDate = (d: Date): string => {
 };
 
 export default function Admin() {
+  logRender('Admin');
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(false);

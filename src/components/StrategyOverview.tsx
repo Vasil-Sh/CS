@@ -13,6 +13,7 @@ import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, Eye, Zap, TrendingDown, Percent, CheckCircle2, Sparkles, DollarSign, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
+import { logRender } from '@/lib/devLogger';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface BetData {
@@ -88,6 +89,7 @@ const STRATEGY_TEMPLATES: StrategyTemplate[] = [
 ];
 
 export default function StrategyOverview() {
+  logRender('StrategyOverview');
   const [strategies, setStrategies] = useState<CS2Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [bettingData, setBettingData] = useState<BetData[]>([]);

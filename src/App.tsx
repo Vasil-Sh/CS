@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'sonner';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Eagerly loaded (small / critical path)
 import Landing from '@/pages/Landing';
@@ -36,9 +37,11 @@ function App() {
         <Route
           path="/login-digesto-demo"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <LoginDigestoDemo />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <LoginDigestoDemo />
+              </Suspense>
+            </ErrorBoundary>
           }
         />
 
@@ -54,49 +57,61 @@ function App() {
           <Route
             index
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Navigate to="/app/analytics" replace />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Navigate to="/app/analytics" replace />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="analytics"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Analytics />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Analytics />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="matches"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Matches />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Matches />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="profile"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Profile />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Profile />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="my-bets"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <MyBets />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <MyBets />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
             path="strategy"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Strategy />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Strategy />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
           <Route
@@ -113,9 +128,11 @@ function App() {
         <Route
           path="*"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <NotFound />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <NotFound />
+              </Suspense>
+            </ErrorBoundary>
           }
         />
       </Routes>

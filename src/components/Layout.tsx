@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { t } from '@/lib/i18n';
+import { logRender } from '@/lib/devLogger';
 import { 
   BarChart3, 
   Trophy, 
@@ -12,7 +13,8 @@ import {
   User,
   Shield,
   TrendingUp,
-  Target
+  Target,
+  WifiOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -30,10 +32,23 @@ const adminNavigation = [
 ];
 
 export default function Layout() {
+  logRender('Layout');
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, isAuthenticated, logout } = useAuth();
   const username = user?.username ?? '';
+  const [offline, setOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const goOffline = () => setOffline(true);
+    const goOnline = () => setOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -93,6 +108,15 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
+      {/* Offline Banner */}
+      {offline && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#FEF3C7] border-b border-[#F59E0B] px-4 py-2 flex items-center justify-center gap-2">
+          <WifiOff className="h-4 w-4 text-[#D97706]" strokeWidth={2} />
+          <span className="text-sm font-medium text-[#92400E]">
+            Ви в офлайн-режимі. Дані завантажуються локально.
+          </span>
+        </div>
+      )}
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
         <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/97 backdrop-blur-xl px-8 py-8 border-r-2 border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">

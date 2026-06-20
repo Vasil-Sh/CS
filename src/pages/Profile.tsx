@@ -26,8 +26,10 @@ import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { t, setLang, getLang, type Lang } from '@/lib/i18n';
 import { useTheme } from '@/hooks/useTheme';
+import { logRender } from '@/lib/devLogger';
 
 export default function Profile() {
+  logRender('Profile');
   const { user } = useAuth();
   const username = user?.username || 'User';
   const isAdmin = user?.role === 'admin';
