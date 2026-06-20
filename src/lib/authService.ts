@@ -23,9 +23,7 @@ class AuthService {
   async fetchUsers(): Promise<AdminUser[]> {
     try {
       const range = 'Доступи!A2:G100';
-      // Без кешу — щоб бачити свіжі зміни з Google Sheets
-      const cacheBuster = Date.now();
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${range}?key=${this.apiKey}&_cb=${cacheBuster}`;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}?key=${this.apiKey}`;
       
       const response = await fetch(url);
       
