@@ -57,8 +57,6 @@ export default function Profile() {
     'authToken',
     'userRole',
     'username',
-    'customStrategies',
-    'primaryStrategy',
     'admin_risky_teams',
     'maxStakePercent',
     'matchiq_theme',
@@ -133,7 +131,7 @@ export default function Profile() {
   const getDataStats = () => {
     const bets = UserDataService.getUserData(username, 'mybets_data', []);
     const riskyTeams = JSON.parse(localStorage.getItem('admin_risky_teams') || '[]');
-    const strategies = JSON.parse(localStorage.getItem('customStrategies') || '[]');
+    const strategies = UserDataService.getUserData(username, 'strategies_data', []);
     const goals = UserDataService.getUserData(username, 'goals', []);
 
     return {

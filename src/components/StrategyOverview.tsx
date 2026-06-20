@@ -13,6 +13,8 @@ import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
 import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, Eye, Zap, TrendingDown, Percent, CheckCircle2, Sparkles, DollarSign, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserDataService } from '@/lib/userDataService';
 import { logRender } from '@/lib/devLogger';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -90,6 +92,8 @@ const STRATEGY_TEMPLATES: StrategyTemplate[] = [
 
 export default function StrategyOverview() {
   logRender('StrategyOverview');
+  const { user } = useAuth();
+  const currentUser = user?.username || localStorage.getItem('username') || 'default';
   const [strategies, setStrategies] = useState<CS2Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [bettingData, setBettingData] = useState<BetData[]>([]);
@@ -149,7 +153,7 @@ export default function StrategyOverview() {
       setBettingData(betsData);
       calculateStrategyStats(betsData);
       
-      const saved = localStorage.getItem('primaryStrategy');
+      const saved = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '');
       if (saved) {
         setPrimaryStrategy(saved);
       }
@@ -162,11 +166,10 @@ export default function StrategyOverview() {
 
   const loadCustomStrategiesFromStorage = (): CS2Strategy[] => {
     try {
-      const saved = localStorage.getItem('customStrategies');
-      if (saved) {
-        const parsed = JSON.parse(saved);
+      const strategies = UserDataService.getUserData<CS2Strategy[]>(currentUser, 'strategies_data', []);
+      if (strategies.length > 0) {
         let needsSave = false;
-        const migrated = parsed.map((s: CS2Strategy) => {
+        const migrated = strategies.map((s: CS2Strategy) => {
           if (!s.id) {
             needsSave = true;
             return { ...s, id: crypto.randomUUID() };
@@ -174,7 +177,7 @@ export default function StrategyOverview() {
           return s;
         });
         if (needsSave) {
-          localStorage.setItem('customStrategies', JSON.stringify(migrated));
+          UserDataService.setUserData(currentUser, 'strategies_data', migrated);
         }
         return migrated;
       }
@@ -186,7 +189,7 @@ export default function StrategyOverview() {
 
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
-      localStorage.setItem('customStrategies', JSON.stringify(strategies));
+      UserDataService.setUserData(currentUser, 'strategies_data', strategies);
       bumpStrategy();
     } catch (error) {
       console.error('Error saving custom strategies:', error);
@@ -486,7 +489,7 @@ export default function StrategyOverview() {
     
     if (primaryStrategy === strategyToDelete) {
       setPrimaryStrategy(null);
-      localStorage.removeItem('primaryStrategy');
+      UserDataService.setUserData(currentUser, 'primary_strategy', '');
     }
     
     toast.success('Стратегія успішно видалена!');
@@ -498,11 +501,11 @@ export default function StrategyOverview() {
     const strategyId = strategy.id || strategy.name;
     if (primaryStrategy === strategyId) {
       setPrimaryStrategy(null);
-      localStorage.removeItem('primaryStrategy');
+      UserDataService.setUserData(currentUser, 'primary_strategy', '');
       toast.success('Основну стратегію скасовано');
     } else {
       setPrimaryStrategy(strategyId);
-      localStorage.setItem('primaryStrategy', strategyId);
+      UserDataService.setUserData(currentUser, 'primary_strategy', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();

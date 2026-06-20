@@ -249,20 +249,20 @@ class RealGoogleSheetsService {
     return [];
   }
 
-  // Get strategy by name or ID
+  // Get strategy by name or ID (user-scoped)
   getStrategyByName(nameOrId: string): CS2Strategy | null {
     try {
-      // Check custom strategies from localStorage
-      const customStrategies = localStorage.getItem('customStrategies');
-      if (customStrategies) {
-        const strategies: CS2Strategy[] = JSON.parse(customStrategies);
-        // Search by name first
-        const foundByName = strategies.find(s => s.name === nameOrId);
-        if (foundByName) return foundByName;
-        // Then search by ID
-        const foundById = strategies.find(s => s.id === nameOrId);
-        if (foundById) return foundById;
-      }
+      const currentUser = localStorage.getItem('username') || localStorage.getItem('currentUser') || '';
+      const strategies = currentUser
+        ? JSON.parse(localStorage.getItem(`user_${currentUser}_strategies_data`) || '[]')
+        : [];
+
+      // Search by name first
+      const foundByName = strategies.find((s: CS2Strategy) => s.name === nameOrId);
+      if (foundByName) return foundByName;
+      // Then search by ID
+      const foundById = strategies.find((s: CS2Strategy) => s.id === nameOrId);
+      if (foundById) return foundById;
       
       return null;
     } catch (error) {

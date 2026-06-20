@@ -182,7 +182,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     if (strategyLoadedRef.current) return;
     strategyLoadedRef.current = true;
 
-    const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
+    const savedPrimaryStrategy = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '');
     if (savedPrimaryStrategy) {
       const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
       if (strategy) {
@@ -429,7 +429,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const savedPrimaryStrategy = localStorage.getItem('primaryStrategy');
+      const savedPrimaryStrategy = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '');
       if (savedPrimaryStrategy) {
         const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
         if (strategy) {
