@@ -351,48 +351,48 @@ export default function Profile() {
       {/* Data Statistics - 5 cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Ваші ставки</p>
+          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Ваші ставки</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.bets}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Ризикові команди</p>
+          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Ризикові команди</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.riskyTeams}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Стратегії</p>
+          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Стратегії</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.strategies}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Цілі</p>
+          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Цілі</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.goals}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-5 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider whitespace-nowrap mb-3">Telegram Групи</p>
+          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Telegram Групи</p>
           <p className="text-5xl font-bold text-[#111827]">{stats.tgGroups}</p>
         </div>
       </div>
