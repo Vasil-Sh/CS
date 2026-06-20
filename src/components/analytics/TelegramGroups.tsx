@@ -33,8 +33,6 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  LayoutGrid,
-  ListOrdered,
   Eye
 } from 'lucide-react';
 import { CHART_CARD_SHADOW } from '@/lib/cardStyles';
@@ -171,7 +169,6 @@ export default function TelegramGroups() {
   const [resultFilter, setResultFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'odds' | 'profit'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [viewMode, setViewMode] = useState<'cards' | 'ranking'>('cards');
 
   // ── Group CRUD ──
 
@@ -679,29 +676,7 @@ export default function TelegramGroups() {
         />
       </div>
 
-      {/* View toggle */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-[#111827]">
-          {viewMode === 'ranking' ? 'Рейтинг груп' : 'Групи'}
-        </h3>
-        <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-xl p-1">
-          <button
-            onClick={() => setViewMode('cards')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'cards' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF]'}`}
-          >
-            <LayoutGrid className="h-3.5 w-3.5" strokeWidth={1.5} />
-          </button>
-          <button
-            onClick={() => setViewMode('ranking')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'ranking' ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF]'}`}
-          >
-            <ListOrdered className="h-3.5 w-3.5" strokeWidth={1.5} />
-          </button>
-        </div>
-      </div>
-
       {/* ===== Cards View ===== */}
-      {viewMode === 'cards' && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {rankedGroups.map((gs, idx) => (
           <Card key={gs.groupId} className="border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: CHART_CARD_SHADOW }}>
@@ -839,73 +814,6 @@ export default function TelegramGroups() {
           <span className="text-sm font-medium text-[#9CA3AF]">Додати групу</span>
         </button>
       </div>
-      )}
-
-      {/* ===== Ranking Table View ===== */}
-      {viewMode === 'ranking' && (
-        <Card className="border border-[#F3F4F6] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
-          <CardContent className="p-6">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[#F3F4F6]">
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider w-10">#</th>
-                    <th className="text-left py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Група</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Стабільність</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Ставок</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Win Rate</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">ROI</th>
-                    <th className="text-right py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Прибуток</th>
-                    <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Стрік</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rankedGroups.map(gs => (
-                    <tr key={gs.groupId} className="border-b border-[#F9FAFB] hover:bg-[#F9FAFB] transition-colors">
-                      <td className="py-3 px-3">
-                        <span className={`text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center ${gs.rank === 1 ? 'bg-[#FEF3C7] text-[#D97706]' : gs.rank === 2 ? 'bg-[#F3F4F6] text-[#6B7280]' : gs.rank === 3 ? 'bg-[#FDE8E8] text-[#C2410C]' : 'text-[#9CA3AF]'}`}>
-                          {gs.rank}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="text-sm font-medium text-[#111827]">{gs.groupName}</span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="text-sm font-medium text-[#111827]">{gs.totalBets}</span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`text-sm font-semibold ${gs.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                          {gs.winRate.toFixed(0)}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`text-sm font-semibold ${gs.roi >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                          {gs.roi >= 0 ? '+' : ''}{gs.roi.toFixed(0)}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <span className={`text-sm font-semibold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                          {gs.totalProfit >= 0 ? '+' : ''}{gs.totalProfit.toFixed(0)} ₴
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {gs.streak !== 0 ? (
-                          <span className={`text-xs font-medium ${gs.streak > 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                            {gs.streak > 0 ? '🔥' : '📉'} {Math.abs(gs.streak)}
-                          </span>
-                        ) : <span className="text-xs text-[#9CA3AF]">—</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* ===== Bets Table ===== */}
       {bets.length > 0 && (
