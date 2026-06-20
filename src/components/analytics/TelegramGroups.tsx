@@ -33,7 +33,11 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  Eye
+  Eye,
+  Sparkles,
+  Monitor,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
@@ -53,6 +57,95 @@ function tgHandle(link: string): string {
   if (!link) return '';
   const match = link.match(/t\.me\/(?:s\/)?([^/\s?#]+)/);
   return match ? '@' + match[1] : link;
+}
+
+// ── Smart Parser ──
+
+interface ParsedBet {
+  team1: string;
+  team2: string;
+  odds: string;
+  match: string;
+  prediction: 'team1' | 'team2' | null; // which team was picked
+  confidence: string; // extracted confidence text like "уверен на 90%"
+  notes: string; // remaining text
+}
+
+/** Try to extract betting info from a Telegram message */
+function parseBetMessage(text: string): ParsedBet | null {
+  if (!text.trim()) return null;
+
+  let team1 = '';
+  let team2 = '';
+  let odds = '';
+  let prediction: 'team1' | 'team2' | null = null;
+  let confidence = '';
+
+  // Strip emojis and extra whitespace for cleaner parsing
+  const clean = text.replace(/[\u{1F600}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}]/gu, '').trim();
+
+  // Pattern 1: "Team1 vs Team2" or "Team1 - Team2" or "Team1 — Team2"
+  let vsMatch = clean.match(/(.+?)\s+(?:vs\.?|VS\.?|против|—|–|-)\s+(.+)/i);
+  if (!vsMatch) {
+    // Pattern 2: "Team1 / Team2"
+    vsMatch = clean.match(/(.+?)\s*\/\s*(.+)/);
+  }
+  if (!vsMatch) {
+    // Pattern 3: Just two recognizable team names (capitalized words)
+    vsMatch = clean.match(/([A-Z][\w\s.]{2,25}?)\s{2,}([A-Z][\w\s.]{2,25})/);
+  }
+  if (!vsMatch) {
+    // Pattern 4: Newline-separated teams
+    vsMatch = clean.match(/(.+)\n\s*\n(.+)/);
+  }
+
+  if (vsMatch) {
+    team1 = vsMatch[1].trim();
+    team2 = vsMatch[2].trim();
+  }
+
+  // Extract odds: any number like 1.85, 2.30, 3.5 near "кф", "коеф", "@", "odds:", etc.
+  const oddsMatch = clean.match(/(?:кое?ф|odds?|@|кф\.?)\s*[:=]?\s*(\d+[.,]\d+)|\b(\d+[.,]\d{2})\b(?!\s*(?:%|процент|дней|днів|часов))/i);
+  if (oddsMatch) {
+    odds = (oddsMatch[1] || oddsMatch[2]).replace(',', '.');
+  } else {
+    // Try trailing number pattern like "... 1.85"
+    const lastNum = clean.match(/(\d+[.,]\d{2})\s*$/);
+    if (lastNum && parseFloat(lastNum[1]) >= 1.01 && parseFloat(lastNum[1]) <= 20) {
+      odds = lastNum[1].replace(',', '.');
+    }
+  }
+
+  // Detect prediction: which team is mentioned with "победа", "win", "ставка", "заход", "win", "п1", "п2", "фора"
+  if (team1 && team2) {
+    const afterVs = clean.substring(clean.indexOf(team2) + team2.length).toLowerCase();
+    
+    // Check for "П1" / "П2" markers
+    if (/\bп1\b/.test(afterVs) || afterVs.includes(team1.toLowerCase())) {
+      prediction = 'team1';
+    } else if (/\bп2\b/.test(afterVs) || afterVs.includes(team2.toLowerCase())) {
+      prediction = 'team2';
+    }
+  }
+
+  // Detect confidence like "уверен на 85%", "🔥 90%", "confidence: 80%"
+  const confMatch = clean.match(/(?:уверен|confidence|🔥|ув\.?)\D*(\d{1,3})\s*%/i);
+  if (confMatch) {
+    confidence = confMatch[0].trim();
+  }
+
+  // Build match string
+  const match = team1 && team2 ? `${team1} vs ${team2}` : clean.substring(0, 80);
+
+  return {
+    team1,
+    team2,
+    odds,
+    match,
+    prediction,
+    confidence,
+    notes: clean.substring(0, 200),
+  };
 }
 
 // ── Types ──
@@ -163,6 +256,14 @@ export default function TelegramGroups() {
   const [betDialogOpen, setBetDialogOpen] = useState(false);
   const [editingBet, setEditingBet] = useState<TelegramGroupBet | null>(null);
   const [betForm, setBetForm] = useState({ ...EMPTY_BET });
+
+  // Quick Parse
+  const [quickParseText, setQuickParseText] = useState('');
+  const [quickParseOpen, setQuickParseOpen] = useState(false);
+
+  // iframe viewer
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerGroupId, setViewerGroupId] = useState<string | null>(null);
 
   // Filters & sort
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
@@ -290,7 +391,28 @@ export default function TelegramGroups() {
   const openAddBet = (groupId?: string) => {
     setEditingBet(null);
     setBetForm({ ...EMPTY_BET, groupId: groupId || '', date: new Date().toISOString().split('T')[0] });
+    setQuickParseText('');
+    setQuickParseOpen(false);
     setBetDialogOpen(true);
+  };
+
+  const handleQuickParse = () => {
+    const parsed = parseBetMessage(quickParseText);
+    if (!parsed) {
+      toast.warning('Не вдалося розпізнати ставку', { description: 'Спробуйте скопіювати повідомлення повністю або заповнити форму вручну' });
+      return;
+    }
+    setBetForm(p => ({
+      ...p,
+      match: parsed.match,
+      team1: parsed.team1,
+      team2: parsed.team2,
+      odds: parsed.odds ? parseFloat(parsed.odds) : p.odds,
+    }));
+    if (parsed.confidence) {
+      setBetForm(p => ({ ...p, notes: `[Авто] ${parsed.confidence} — ${parsed.notes.substring(0, 80)}` }));
+    }
+    toast.success('Ставку розпізнано!', { description: parsed.match && parsed.odds ? `${parsed.match} @ ${parsed.odds}` : 'Перевірте заповнені поля' });
   };
 
   // ── Stats calculation ──
@@ -469,6 +591,47 @@ export default function TelegramGroups() {
               Додайте інформацію про ставку з Telegram-групи
             </DialogDescription>
           </DialogHeader>
+
+          {/* Quick Parse — only for new bets, not edits */}
+          {!editingBet && (
+            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setQuickParseOpen(!quickParseOpen)}
+                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors ${quickParseOpen ? 'bg-[#EFF6FF] text-[#447afc]' : 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F3F4F6]'}`}
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" strokeWidth={1.5} />
+                  Швидке розпізнавання (Quick Parse)
+                </span>
+                <span className="text-xs text-[#9CA3AF]">{quickParseOpen ? 'Згорнути' : 'Розгорнути'}</span>
+              </button>
+              {quickParseOpen && (
+                <div className="px-4 py-3 space-y-2 border-t border-[#E5E7EB]">
+                  <p className="text-xs text-[#9CA3AF]">
+                    Вставте текст ставки з Telegram-каналу — система автоматично розпізнає команди, коефіцієнт та прогноз.
+                  </p>
+                  <textarea
+                    value={quickParseText}
+                    onChange={e => setQuickParseText(e.target.value)}
+                    placeholder={`Наприклад:\nNaVi vs FaZe @ 1.85\nСтавка на NaVi — уверен на 80%\n...або будь-який інший формат`}
+                    rows={4}
+                    className="w-full rounded-xl border border-[#E5E7EB] px-3 py-2 text-sm focus:border-[#447afc] focus:ring-1 focus:ring-[#447afc] outline-none resize-none"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleQuickParse}
+                    disabled={!quickParseText.trim()}
+                    className="w-full rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-medium transition-colors disabled:opacity-50"
+                  >
+                    <Sparkles className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+                    Розпізнати ставку
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
             <div>
               <Label className="text-sm font-medium mb-1.5 block">Група *</Label>
@@ -729,6 +892,14 @@ export default function TelegramGroups() {
                       <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Перегляд
                     </a>
+                    <button
+                      onClick={(e) => { e.preventDefault(); setViewerGroupId(g.id); setViewerOpen(true); }}
+                      className="text-xs font-medium text-[#6B7280] hover:text-[#447afc] bg-[#F3F4F6] hover:bg-[#EFF6FF] inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                      title="Відкрити канал у вбудованому переглядачі"
+                    >
+                      <Monitor className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      Монітор
+                    </button>
                   </div>
                 </div>
               ) : null;
@@ -959,6 +1130,39 @@ export default function TelegramGroups() {
           </CardContent>
         </Card>
       )}
+
+      {/* ===== Channel Viewer (slide-in panel) ===== */}
+      {viewerOpen && viewerGroupId && (() => {
+        const g = groups.find(x => x.id === viewerGroupId);
+        if (!g?.link) return null;
+        return (
+          <div className="fixed top-0 right-0 z-50 h-full w-[420px] bg-white border-l border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.12)] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] flex-shrink-0">
+                  <MessageCircle className="h-4 w-4 text-[#447afc]" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-semibold text-[#111827] truncate">{g.name}</h4>
+                  <p className="text-xs text-[#9CA3AF]">{tgHandle(g.link)}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setViewerOpen(false); setViewerGroupId(null); }}
+                className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors"
+              >
+                <X className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </div>
+            <iframe
+              src={toWebPreviewUrl(g.link)}
+              className="flex-1 w-full border-0"
+              title={`Канал ${g.name}`}
+              sandbox="allow-same-origin allow-scripts allow-popups"
+            />
+          </div>
+        );
+      })()}
 
         </>
       )}
