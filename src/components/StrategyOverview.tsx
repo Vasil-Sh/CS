@@ -153,7 +153,8 @@ export default function StrategyOverview() {
       setBettingData(betsData);
       calculateStrategyStats(betsData);
       
-      const saved = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '');
+      const saved = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '')
+        || localStorage.getItem('primaryStrategy') || '';
       if (saved) {
         setPrimaryStrategy(saved);
       }
@@ -490,6 +491,7 @@ export default function StrategyOverview() {
     if (primaryStrategy === strategyToDelete) {
       setPrimaryStrategy(null);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', '');
+      localStorage.setItem('primaryStrategy', '');
     }
     
     toast.success('Стратегія успішно видалена!');
@@ -502,10 +504,12 @@ export default function StrategyOverview() {
     if (primaryStrategy === strategyId) {
       setPrimaryStrategy(null);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', '');
+      localStorage.setItem('primaryStrategy', '');
       toast.success('Основну стратегію скасовано');
     } else {
       setPrimaryStrategy(strategyId);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', strategyId);
+      localStorage.setItem('primaryStrategy', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();

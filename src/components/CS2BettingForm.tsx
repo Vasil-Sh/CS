@@ -182,7 +182,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     if (strategyLoadedRef.current) return;
     strategyLoadedRef.current = true;
 
-    const savedPrimaryStrategy = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '');
+    const savedPrimaryStrategy = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '')
+      || localStorage.getItem('primaryStrategy') || '';
     if (savedPrimaryStrategy) {
       const strategy = realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
       if (strategy) {
