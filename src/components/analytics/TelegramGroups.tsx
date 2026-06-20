@@ -788,12 +788,16 @@ export default function TelegramGroups() {
                 </div>
               )}
 
-              {/* Profit row */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[#6B7280]">Прибуток</span>
-                <span className={`text-lg font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                  {gs.totalProfit >= 0 ? '+' : ''}{gs.totalProfit.toFixed(0)} ₴
-                </span>
+              {/* Profit row with dividers */}
+              <div className="-mx-7">
+                <div className="h-px w-full bg-[#F3F4F6]" />
+                <div className="flex items-center justify-between px-7 py-4">
+                  <span className="text-base font-bold text-[#111827]">Прибуток</span>
+                  <span className={`text-xl font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                    {gs.totalProfit >= 0 ? '+' : ''}{gs.totalProfit.toFixed(0)} ₴
+                  </span>
+                </div>
+                <div className="h-px w-full bg-[#F3F4F6]" />
               </div>
 
               {/* Bottom row: add bet + edit/delete */}
