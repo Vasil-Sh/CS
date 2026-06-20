@@ -510,7 +510,7 @@ export default function StrategyOverview() {
       setPrimaryStrategy(strategyId);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', strategyId);
       localStorage.setItem('primaryStrategy', strategyId);
-      console.debug('[StrategyOverview] togglePrimary — currentUser:', currentUser, 'strategyId:', strategyId);
+      console.log('[StrategyOverview] togglePrimary — currentUser:', currentUser, 'strategyId:', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();
