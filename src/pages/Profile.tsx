@@ -52,38 +52,73 @@ export default function Profile() {
     toast.success(newLang === 'uk' ? 'Мова: Українська' : 'Language: English');
   };
 
-  // Collect all localStorage keys used by the app
+  // Collect all localStorage keys used by the app (sync with exportFullBackup)
   const APP_STORAGE_KEYS = [
-    'admin_risky_teams',
+    // Auth & identity
+    'authToken',
+    'userRole',
+    'username',
+    // Strategies & teams
     'customStrategies',
     'primaryStrategy',
-    'bets',
-    'strategies',
-    'goals',
-    'bankroll',
-    'currency',
-    'username',
-    'userRole',
-    'authToken',
-    'admin_users',
-    'matches',
-    'completedGoals',
-    'strategyViolations',
-  ];
+    'admin_risky_teams',
+    // Admin panel
+    'adminLocalUsers',
+    'adminUserEdits',
+    'adminDeletedUsers',
+    // Match ratings
+    'match_ratings',
+    // Betting preferences
+    'maxStakePercent',
+    // Appearance
+    'matchiq_theme',
+    'matchiq_lang',
+    // UI settings
+    'ui-settings',
+  ] as const;
+
+  // Keys to NEVER include in backup (security, ephemeral)
+  const FORBIDDEN_BACKUP_KEYS = new Set([
+    'google_sheets_api_key',
+    'currentUser',
+  ]);
+
+  // Auto-collect ALL user-scoped keys for the current user
+  const collectUserScopedKeys = (): string[] => {
+    const prefix = `user_${username}_`;
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix) && !FORBIDDEN_BACKUP_KEYS.has(key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  };
+
+  // Collect tilt-block keys for ALL users (dynamic keys)
+  const collectTiltKeys = (): string[] => {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('tilt_block_')) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  };
 
   const getStorageSize = () => {
     let totalSize = 0;
-    APP_STORAGE_KEYS.forEach(key => {
+    const allKeys = [
+      ...APP_STORAGE_KEYS,
+      ...collectUserScopedKeys(),
+      ...collectTiltKeys(),
+    ];
+    allKeys.forEach(key => {
       const item = localStorage.getItem(key);
-      if (item) {
-        totalSize += item.length * 2;
-      }
+      if (item) totalSize += item.length * 2;
     });
-    const userKey = `user_${username}_mybets_data`;
-    const userItem = localStorage.getItem(userKey);
-    if (userItem) {
-      totalSize += userItem.length * 2;
-    }
     return (totalSize / 1024).toFixed(1);
   };
 
@@ -152,52 +187,39 @@ export default function Profile() {
       const backupData: Record<string, unknown> = {
         _meta: {
           exportDate: new Date().toISOString(),
-          appVersion: '1.0.0',
+          appVersion: '1.14.0',
           username: username,
           format: 'matchiq-full-backup'
         }
       };
 
+      // Save static keys (skip forbidden ones)
       APP_STORAGE_KEYS.forEach(key => {
+        if (FORBIDDEN_BACKUP_KEYS.has(key)) return;
         const item = localStorage.getItem(key);
         if (item) {
-          try {
-            backupData[key] = JSON.parse(item);
-          } catch {
-            backupData[key] = item;
-          }
+          try { backupData[key] = JSON.parse(item); }
+          catch { backupData[key] = item; }
         }
       });
 
-      const userBetsKey = `user_${username}_mybets_data`;
-      const userBets = localStorage.getItem(userBetsKey);
-      if (userBets) {
-        try {
-          backupData[userBetsKey] = JSON.parse(userBets);
-        } catch {
-          backupData[userBetsKey] = userBets;
+      // Auto-collect all user-scoped keys
+      collectUserScopedKeys().forEach(key => {
+        const item = localStorage.getItem(key);
+        if (item) {
+          try { backupData[key] = JSON.parse(item); }
+          catch { backupData[key] = item; }
         }
-      }
+      });
 
-      const userGoalsKey = `user_${username}_goals`;
-      const userGoals = localStorage.getItem(userGoalsKey);
-      if (userGoals) {
-        try {
-          backupData[userGoalsKey] = JSON.parse(userGoals);
-        } catch {
-          backupData[userGoalsKey] = userGoals;
+      // Auto-collect tilt blocks
+      collectTiltKeys().forEach(key => {
+        const item = localStorage.getItem(key);
+        if (item) {
+          try { backupData[key] = JSON.parse(item); }
+          catch { backupData[key] = item; }
         }
-      }
-
-      const userBankrollKey = `user_${username}_bankroll_data`;
-      const userBankroll = localStorage.getItem(userBankrollKey);
-      if (userBankroll) {
-        try {
-          backupData[userBankrollKey] = JSON.parse(userBankroll);
-        } catch {
-          backupData[userBankrollKey] = userBankroll;
-        }
-      }
+      });
 
       const jsonString = JSON.stringify(backupData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
