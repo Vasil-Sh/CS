@@ -177,7 +177,7 @@ export default function StrategyOverview() {
           return s;
         });
         if (needsSave) {
-          UserDataService.setUserData(currentUser, 'strategies_data', migrated);
+          UserDataService.setUserDataSync(currentUser, 'strategies_data', migrated);
         }
         return migrated;
       }
@@ -189,7 +189,7 @@ export default function StrategyOverview() {
 
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
-      UserDataService.setUserData(currentUser, 'strategies_data', strategies);
+      UserDataService.setUserDataSync(currentUser, 'strategies_data', strategies);
       bumpStrategy();
     } catch (error) {
       console.error('Error saving custom strategies:', error);
@@ -489,7 +489,7 @@ export default function StrategyOverview() {
     
     if (primaryStrategy === strategyToDelete) {
       setPrimaryStrategy(null);
-      UserDataService.setUserData(currentUser, 'primary_strategy', '');
+      UserDataService.setUserDataSync(currentUser, 'primary_strategy', '');
     }
     
     toast.success('Стратегія успішно видалена!');
@@ -501,11 +501,11 @@ export default function StrategyOverview() {
     const strategyId = strategy.id || strategy.name;
     if (primaryStrategy === strategyId) {
       setPrimaryStrategy(null);
-      UserDataService.setUserData(currentUser, 'primary_strategy', '');
+      UserDataService.setUserDataSync(currentUser, 'primary_strategy', '');
       toast.success('Основну стратегію скасовано');
     } else {
       setPrimaryStrategy(strategyId);
-      UserDataService.setUserData(currentUser, 'primary_strategy', strategyId);
+      UserDataService.setUserDataSync(currentUser, 'primary_strategy', strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();
