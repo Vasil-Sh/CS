@@ -852,11 +852,11 @@ export default function TelegramGroups() {
           >
             {/* Header: icon + name */}
             <div className="px-7 pt-7 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
                   <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 min-h-[3.5rem] flex flex-col justify-center">
                   <h4 className="text-xl font-bold text-[#374151] tracking-tight line-clamp-2">{gs.groupName}</h4>
                   {gs.totalBets > 0 && (
                     <div className="mt-1.5">
@@ -894,7 +894,9 @@ export default function TelegramGroups() {
                     </a>
                   </div>
                 </div>
-              ) : null;
+              ) : (
+                <div className="px-7 py-4" /> /* empty space for alignment */
+              );
             })()}
 
             {/* Divider 2 */}
@@ -998,7 +1000,7 @@ export default function TelegramGroups() {
         {/* Add Group Card */}
         <button
           onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
-          className="border-2 border-dashed border-[#D1D5DB] rounded-3xl bg-white/50 hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer"
+          className="border-2 border-dashed border-[#D1D5DB] rounded-3xl bg-white/50 hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer h-full"
         >
           <div className="p-3 bg-[#F3F4F6] rounded-full">
             <Plus className="h-5 w-5 text-[#9CA3AF]" strokeWidth={2} />
