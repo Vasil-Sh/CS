@@ -811,11 +811,11 @@ export default function TelegramGroups() {
     <>
       {renderDialogs()}
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
-      {/* ===== Bot Setup (admin only) ===== */}
-      <BotSetup />
-
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
+
+      {/* ===== Bot Setup (admin only) ===== */}
+      <BotSetup />
 
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
