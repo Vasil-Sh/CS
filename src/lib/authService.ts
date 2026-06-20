@@ -48,8 +48,8 @@ class AuthService {
         isAdmin: row[6] || ''
       })).filter((user: AdminUser) => user.username && user.password);
 
-      // Apply local admin edits (made via Admin panel) to fetched users
-      return this.applyLocalEdits(users);
+      // Apply local admin edits + local users + deleted list
+      return this.applyLocalOverrides(users);
     } catch (error) {
       console.error('Error fetching users:', error);
       return [];
@@ -57,21 +57,43 @@ class AuthService {
   }
 
   /** Apply adminUserEdits from localStorage on top of Google Sheets data */
-  private applyLocalEdits(users: AdminUser[]): AdminUser[] {
+  private applyLocalOverrides(users: AdminUser[]): AdminUser[] {
     try {
+      const deletedList: string[] = JSON.parse(localStorage.getItem('adminDeletedUsers') || '[]');
+
+      // 1. Apply edits to existing users
       const editsRaw = localStorage.getItem('adminUserEdits');
-      if (!editsRaw) return users;
+      const edits: Record<string, Partial<AdminUser>> = editsRaw ? JSON.parse(editsRaw) : {};
 
-      const edits: Record<string, Partial<AdminUser>> = JSON.parse(editsRaw);
-
-      return users.map(user => {
+      const merged = users.map(user => {
         const edit = edits[user.username];
         if (!edit) return user;
         return { ...user, ...edit };
       });
+
+      // 2. Add locally-created users (adminLocalUsers)
+      const localRaw = localStorage.getItem('adminLocalUsers');
+      if (localRaw) {
+        const localUsers = JSON.parse(localRaw) as AdminUser[];
+        localUsers.forEach((lu: AdminUser) => {
+          if (!merged.find(u => u.username.toLowerCase() === lu.username.toLowerCase())) {
+            merged.push(lu);
+          }
+        });
+      }
+
+      // 3. Filter out deleted users
+      return merged.filter(u => !deletedList.includes(u.username));
     } catch {
       return users;
     }
+  }
+
+  /** Normalize isAdmin field — handles both Google Sheets "так"/"yes" and Admin panel boolean */
+  private checkIsAdmin(user: AdminUser): boolean {
+    if (typeof user.isAdmin === 'boolean') return user.isAdmin;
+    const val = String(user.isAdmin || '').toLowerCase();
+    return val === 'так' || val === 'yes';
   }
 
   async login(username: string, password: string): Promise<LoginResult> {
@@ -91,7 +113,7 @@ class AuthService {
       }
 
       // Check if user is admin
-      const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
+      const isAdmin = this.checkIsAdmin(user);
       
       if (isAdmin) {
         localStorage.setItem("authToken", "admin-token");
@@ -133,7 +155,7 @@ class AuthService {
              u.password === password
       );
       
-      return user ? (user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes') : false;
+      return user ? this.checkIsAdmin(user) : false;
     } catch (error) {
       console.error('Error validating admin:', error);
       return false;
@@ -157,7 +179,7 @@ class AuthService {
       }
 
       // Check if user is admin
-      const isAdmin = user.isAdmin.toLowerCase() === 'так' || user.isAdmin.toLowerCase() === 'yes';
+      const isAdmin = this.checkIsAdmin(user);
       
       if (isAdmin) {
         return { isValid: true };

@@ -117,9 +117,11 @@ function App() {
           <Route
             path="admin"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <Admin />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Admin />
+                </Suspense>
+              </ErrorBoundary>
             }
           />
         </Route>
