@@ -34,10 +34,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Eye,
-  Sparkles,
-  Monitor,
-  ChevronLeft,
-  ChevronRight
+  Sparkles
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
@@ -260,10 +257,6 @@ export default function TelegramGroups() {
   // Quick Parse
   const [quickParseText, setQuickParseText] = useState('');
   const [quickParseOpen, setQuickParseOpen] = useState(false);
-
-  // iframe viewer
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const [viewerGroupId, setViewerGroupId] = useState<string | null>(null);
 
   // Filters & sort
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
@@ -892,14 +885,6 @@ export default function TelegramGroups() {
                       <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
                       Перегляд
                     </a>
-                    <button
-                      onClick={(e) => { e.preventDefault(); setViewerGroupId(g.id); setViewerOpen(true); }}
-                      className="text-xs font-medium text-[#6B7280] hover:text-[#447afc] bg-[#F3F4F6] hover:bg-[#EFF6FF] inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
-                      title="Відкрити канал у вбудованому переглядачі"
-                    >
-                      <Monitor className="h-3.5 w-3.5" strokeWidth={1.5} />
-                      Монітор
-                    </button>
                   </div>
                 </div>
               ) : null;
@@ -1130,39 +1115,6 @@ export default function TelegramGroups() {
           </CardContent>
         </Card>
       )}
-
-      {/* ===== Channel Viewer (slide-in panel) ===== */}
-      {viewerOpen && viewerGroupId && (() => {
-        const g = groups.find(x => x.id === viewerGroupId);
-        if (!g?.link) return null;
-        return (
-          <div className="fixed top-0 right-0 z-50 h-full w-[420px] bg-white border-l border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.12)] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] flex-shrink-0">
-                  <MessageCircle className="h-4 w-4 text-[#447afc]" strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-semibold text-[#111827] truncate">{g.name}</h4>
-                  <p className="text-xs text-[#9CA3AF]">{tgHandle(g.link)}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => { setViewerOpen(false); setViewerGroupId(null); }}
-                className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors"
-              >
-                <X className="h-4 w-4" strokeWidth={1.5} />
-              </button>
-            </div>
-            <iframe
-              src={toWebPreviewUrl(g.link)}
-              className="flex-1 w-full border-0"
-              title={`Канал ${g.name}`}
-              sandbox="allow-same-origin allow-scripts allow-popups"
-            />
-          </div>
-        );
-      })()}
 
         </>
       )}
