@@ -21,6 +21,7 @@ const T: TranslationMap = {
   'nav.analytics': { uk: 'Аналітика', en: 'Analytics' },
   'nav.addRecord': { uk: 'Додати запис', en: 'Add Record' },
   'nav.strategies': { uk: 'Стратегії та Цілі', en: 'Strategies & Goals' },
+  'nav.telegram': { uk: 'Telegram', en: 'Telegram' },
   'nav.matches': { uk: 'Матчі', en: 'Matches' },
   'nav.profile': { uk: 'Профіль', en: 'Profile' },
   'nav.admin': { uk: 'Адмін панель', en: 'Admin Panel' },

@@ -14,6 +14,7 @@ import {
   Shield,
   TrendingUp,
   Target,
+  MessageCircle,
   WifiOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const navigation = [
   { nameKey: 'nav.analytics', href: '/app/analytics', icon: BarChart3 },
   { nameKey: 'nav.addRecord', href: '/app/my-bets', icon: Plus },
+  { nameKey: 'nav.telegram', href: '/app/telegram', icon: MessageCircle },
   { nameKey: 'nav.strategies', href: '/app/strategy', icon: Target },
   { nameKey: 'nav.matches', href: '/app/matches', icon: Trophy },
   { nameKey: 'nav.profile', href: '/app/profile', icon: User },

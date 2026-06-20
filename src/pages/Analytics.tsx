@@ -15,7 +15,6 @@ import BalanceTracker from '@/components/analytics/BalanceTracker';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import GoalsManager from '@/components/GoalsManager';
-import TelegramGroups from '@/components/analytics/TelegramGroups';
 import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
@@ -45,8 +44,7 @@ import {
   Sun,
   Moon,
   MoreHorizontal,
-  Pencil,
-  MessageCircle
+  Pencil
 } from 'lucide-react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -451,7 +449,6 @@ export default function Analytics() {
     { id: 'profit', label: 'Прибуток', icon: Wallet },
     { id: 'odds', label: 'Коефіцієнти', icon: BarChart3 },
     { id: 'comparison', label: 'Періоди', icon: Calendar },
-    { id: 'telegram', label: 'Telegram', icon: MessageCircle },
   ];
 
   const activeFiltersCount = timeFilter !== 'all' ? 1 : 0;
@@ -879,7 +876,6 @@ export default function Analytics() {
             )}
 
             {activeTab === 'comparison' && <PeriodComparison bets={bets} />}
-            {activeTab === 'telegram' && <TelegramGroups />}
             {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
         </div>
