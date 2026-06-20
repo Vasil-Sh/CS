@@ -622,12 +622,39 @@ export default function TelegramGroups() {
 
   // ── Render ──
 
+  const renderKPICards = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#F0FDF4]" iconColor="text-[#16A34A]" />
+      <StatCard 
+        label="Win Rate" 
+        value={`${overallStats.winRate.toFixed(0)}%`} 
+        icon={overallStats.winRate >= 50 ? TrendingUp : TrendingDown} 
+        color="bg-[#FEF3C7]" 
+        iconColor={overallStats.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
+      />
+      <StatCard 
+        label="Прибуток" 
+        value={`${overallStats.totalProfit >= 0 ? '+' : ''}${overallStats.totalProfit.toFixed(0)}`} 
+        icon={Target} 
+        color="bg-[#F0FDF4]" 
+        iconColor={overallStats.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
+      />
+    </div>
+  );
+
+  // ── Render ──
+
   if (!currentUser) return null;
 
-  if (groups.length === 0) {
-    return (
-      <>
-        {renderDialogs()}
+  return (
+    <>
+      {renderDialogs()}
+      <div className="space-y-6">
+      {/* ===== KPI Cards — always visible ===== */}
+      {renderKPICards()}
+
+      {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="py-16 text-center">
             <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -648,34 +675,8 @@ export default function TelegramGroups() {
             </Button>
           </CardContent>
         </Card>
-      </>
-    );
-  }
-
-  return (
-    <>
-      {renderDialogs()}
-      <div className="space-y-6">
-      {/* ===== KPI Cards ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
-        <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#F0FDF4]" iconColor="text-[#16A34A]" />
-        <StatCard 
-          label="Win Rate" 
-          value={`${overallStats.winRate.toFixed(0)}%`} 
-          icon={overallStats.winRate >= 50 ? TrendingUp : TrendingDown} 
-          color="bg-[#FEF3C7]" 
-          iconColor={overallStats.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
-        />
-        <StatCard 
-          label="Прибуток" 
-          value={`${overallStats.totalProfit >= 0 ? '+' : ''}${overallStats.totalProfit.toFixed(0)}`} 
-          icon={Target} 
-          color="bg-[#F0FDF4]" 
-          iconColor={overallStats.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
-        />
-      </div>
-
+      ) : (
+      <>
       {/* ===== Cards View ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {rankedGroups.map((gs, idx) => (
@@ -959,6 +960,8 @@ export default function TelegramGroups() {
         </Card>
       )}
 
+        </>
+      )}
     </div>
     </>
   );
