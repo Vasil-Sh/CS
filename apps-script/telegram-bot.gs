@@ -24,7 +24,7 @@
 
 // ── CONFIG ──
 
-const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE'; // ← Replace with @BotFather token
+const BOT_TOKEN = '8782725993:AAHwz2fU7tfMndEnlMHiJWL_popSP2UZEuU'; // ← Replace with @BotFather token
 const SPREADSHEET_ID = '1WPchid4Di6XjUehfX1gnBinknUBiqiirSs16Vbn7rvw'; // ← MatchIQ data sheet
 
 // ── MAIN ──
@@ -171,7 +171,7 @@ function logRawMessage(chatId, chatTitle, text, timestamp) {
 function notifyAdmin(message) {
   // Send notification via Telegram bot to admin
   var adminChatId = getAdminChatId();
-  if (!adminChatId || !BOT_TOKEN || BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') return;
+  if (!adminChatId || !BOT_TOKEN || BOT_TOKEN === '6229104044:AAE6AeunZHuAsQu33dBLer5CqIwPLlrvxAE') return;
   
   var url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
   var payload = {
@@ -196,7 +196,7 @@ function getAdminChatId() {
 // ── SETUP: Run this once to enable the bot ──
 
 function setup() {
-  if (!BOT_TOKEN || BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') {
+  if (!BOT_TOKEN || BOT_TOKEN === '6229104044:AAE6AeunZHuAsQu33dBLer5CqIwPLlrvxAE') {
     throw new Error('Please set BOT_TOKEN first!');
   }
   
