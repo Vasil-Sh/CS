@@ -108,7 +108,7 @@ export default function BalanceTracker({
             </Tooltip>
           </TooltipProvider>
           <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
-        </div>
+                  </div>
       </div>
       {/* Divider */}
       <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
@@ -145,18 +145,20 @@ export default function BalanceTracker({
               style={{
                 width: `${Math.min(percentOfPeak, 100)}%`,
                 background: isGrowing || isStable
-                  ? 'linear-gradient(90deg, #10B981, #34D399)'
+                  ? 'repeating-linear-gradient(90deg, #10B981, #34D399 16%, #6EE7B7 33%, #34D399 50%, #10B981 66%, #34D399 83%, #6EE7B7 100%)'
                   : isDipping
                   ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
                   : 'linear-gradient(90deg, #EF4444, #F87171)',
-                animation: 'shimmer 3s ease-in-out infinite',
+                animation: isGrowing || isStable
+                  ? 'waves 3s linear infinite'
+                  : 'shimmer 3s ease-in-out infinite',
               }}
             />
           </div>
         ) : (
           <div className="relative w-full h-3 bg-[#E5E7EB] rounded-full overflow-hidden opacity-20" />
         )}
-        <div className="flex justify-between text-[10px] text-[#9CA3AF] mt-1">
+        <div className="flex justify-between text-sm text-[#6B7280] mt-2 font-medium">
           <span>0 ₴</span>
           <span>{hasBets ? `${allTimeHigh.toLocaleString('uk-UA')} ₴` : '—'}</span>
         </div>
@@ -169,24 +171,24 @@ export default function BalanceTracker({
 
       {/* Section 4 — Game summary */}
       <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#F3F4F6]">
+        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB]">
           <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">CS2</p>
           {cs2Bets > 0 ? (
             <p className="text-sm font-semibold text-[#111827]">
               {cs2Bets} ставок · <span className={cs2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
             </p>
           ) : (
-            <p className="text-sm text-[#D1D5DB]">—</p>
+            <p className="text-xs text-[#9CA3AF]">Немає даних</p>
           )}
         </div>
-        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#F3F4F6]">
+        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB]">
           <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">Dota 2</p>
           {dota2Bets > 0 ? (
             <p className="text-sm font-semibold text-[#111827]">
               {dota2Bets} ставок · <span className={dota2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
             </p>
           ) : (
-            <p className="text-sm text-[#D1D5DB]">—</p>
+            <p className="text-xs text-[#9CA3AF]">Немає даних</p>
           )}
         </div>
       </div>

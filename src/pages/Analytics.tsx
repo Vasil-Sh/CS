@@ -486,16 +486,16 @@ export default function Analytics() {
     };
   }, [bets]);
 
-  // All-time high/low for balance tracker — based on actual bet history, not current bank
+  // All-time high/low for balance tracker — always reflects current bank as minimum
   const allTimeHigh = useMemo(() => {
-    if (completedBets.length === 0) return 0; // no history yet
     // Include initial bank as potential peak (before any bet was placed)
     const initialPeak = bankrollStats.initialBank || bankrollStats.currentBank;
+    if (completedBets.length === 0) return initialPeak || 0;
     return Math.max(initialPeak, ...balanceData.map(d => d.balance), bankrollStats.currentBank);
   }, [balanceData, bankrollStats, completedBets.length]);
 
   const allTimeLow = useMemo(() => {
-    if (completedBets.length === 0) return 0;
+    if (completedBets.length === 0) return bankrollStats.currentBank || 0;
     return Math.min(...balanceData.map(d => d.balance), bankrollStats.currentBank);
   }, [balanceData, bankrollStats.currentBank, completedBets.length]);
 
