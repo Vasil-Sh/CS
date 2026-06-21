@@ -481,7 +481,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </div>
           </div>
-          <div className="h-px w-full bg-[#F3F4F6]" />
           {activeStrategy ? (
             <div className="space-y-5 flex-1">
               <div>
