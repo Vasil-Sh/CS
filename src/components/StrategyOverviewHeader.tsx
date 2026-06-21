@@ -470,7 +470,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="px-7 pt-7 pb-5">
+          <div className="pb-5">
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
                 <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
