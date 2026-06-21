@@ -470,7 +470,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="mb-6 pb-5 border-b border-[#F3F4F6]">
+          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
@@ -540,27 +540,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   </p>
                 </div>
               </div>
-
-              {activeStrategy.criteria && activeStrategy.criteria.length > 0 && (
-                <div className="pt-2">
-                  <p className="text-2xl font-bold text-[#374151] tracking-tight mb-4">
-                    Ключові критерії
-                  </p>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {activeStrategy.criteria.map((c, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#D1D5DB] hover:shadow-md transition-all duration-200"
-                      >
-                        <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
-                          {idx + 1}
-                        </span>
-                        <span className="text-sm text-[#374151] font-semibold leading-snug">{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
@@ -587,7 +566,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="mb-6 pb-5 border-b border-[#F3F4F6]">
+          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4]">
@@ -742,27 +721,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   </>
                 )}
               </div>
-
-              {goalCriteria.length > 0 && (
-                <div className="pt-2">
-                  <p className="text-2xl font-bold text-[#374151] tracking-tight mb-4">
-                    Ключові критерії
-                  </p>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {goalCriteria.map((c, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] rounded-2xl hover:border-[#D1D5DB] hover:shadow-md transition-all duration-200"
-                      >
-                        <span className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white text-sm font-bold rounded-xl flex-shrink-0 shadow-sm">
-                          {idx + 1}
-                        </span>
-                        <span className="text-sm text-[#374151] font-semibold leading-snug">{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
