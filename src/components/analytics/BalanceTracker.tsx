@@ -1,4 +1,6 @@
-import { Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Info, Sparkles } from 'lucide-react';
+import { getBalanceAdvice } from '@/lib/deepSeekService';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface BalanceTrackerProps {
@@ -45,6 +47,34 @@ export default function BalanceTracker({
   const isStable = hasBets && percentOfPeak >= 85 && percentOfPeak < 98;
   const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
   const isFalling = hasBets && percentOfPeak < 50;
+
+  // AI advice state
+  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  useEffect(() => {
+    if (!hasBets) {
+      setAiAdvice(null);
+      return;
+    }
+    const state: 'growing' | 'stable' | 'dipping' | 'falling' = isGrowing
+      ? 'growing' : isStable ? 'stable' : isDipping ? 'dipping' : 'falling';
+    setAiLoading(true);
+    let cancelled = false;
+    getBalanceAdvice({
+      state,
+      percentOfPeak,
+      currentBank,
+      allTimeHigh,
+      bets: cs2Bets + dota2Bets,
+      profit: cs2Profit + dota2Profit,
+    }).then((advice) => {
+      if (!cancelled) {
+        setAiAdvice(advice);
+        setAiLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [currentBank, allTimeHigh, hasBets, isGrowing, isStable, isDipping, percentOfPeak, cs2Bets, dota2Bets, cs2Profit, dota2Profit]);
 
   const statusText = !hasBets
     ? 'Поки немає завершених ставок'
@@ -166,7 +196,19 @@ export default function BalanceTracker({
 
       {/* Section 3 — Advice */}
       <div className="rounded-2xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3 mb-3">
-        <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
+        <div className="flex items-center gap-1.5 mb-1">
+          <Sparkles className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
+          <span className="text-[11px] text-[#447afc] font-semibold uppercase tracking-wider">AI порада</span>
+        </div>
+        {aiLoading ? (
+          <p className="text-sm text-[#9CA3AF] leading-relaxed animate-pulse">Аналізую стан банку...</p>
+        ) : aiAdvice ? (
+          <p className="text-sm text-[#111827] leading-relaxed font-medium">{aiAdvice}</p>
+        ) : hasBets ? (
+          <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
+        ) : (
+          <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
+        )}
       </div>
 
       {/* Section 4 — Game summary */}
