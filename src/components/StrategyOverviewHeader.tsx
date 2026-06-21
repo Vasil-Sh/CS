@@ -332,7 +332,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 ) : (
                   <span className="text-sm text-[#9CA3AF]">Немає ставок</span>
                 </div>
-              </div>
             </>
           ) : (
             <div className="py-1">
