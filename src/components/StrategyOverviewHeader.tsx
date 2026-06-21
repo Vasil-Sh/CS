@@ -470,28 +470,18 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
-                  <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна стратегія</h3>
-                  <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
-                </div>
+          <div className="px-7 pt-7 pb-5">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
+                <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
               </div>
-              {activeStrategy && (
-                <Badge
-                  className={`${riskBadgeClass(
-                    activeStrategy.riskLevel,
-                  )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
-                >
-                  {riskLabel(activeStrategy.riskLevel)} ризик
-                </Badge>
-              )}
+              <div className="min-w-0 flex-1 min-h-[3.5rem] flex flex-col justify-center">
+                <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна стратегія</h3>
+                <p className="text-sm text-[#6B7280] mt-0.5">Правила, яких ви дотримуєтесь</p>
+              </div>
             </div>
           </div>
+          <div className="h-px w-full bg-[#F3F4F6] -mx-7" />
 
           {activeStrategy ? (
             <div className="space-y-5 flex-1">
@@ -540,6 +530,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   </p>
                 </div>
               </div>
+
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
@@ -721,6 +712,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   </>
                 )}
               </div>
+
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
