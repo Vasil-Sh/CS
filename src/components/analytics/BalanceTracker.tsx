@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Info, Sparkles } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { getBalanceAdvice } from '@/lib/deepSeekService';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
@@ -144,7 +144,7 @@ export default function BalanceTracker({
       <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
 
       {/* Section 1 — Status */}
-      <div className="rounded-2xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3 mb-3">
+      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
         <p className="text-sm text-[#111827] font-medium">{statusText}</p>
       </div>
 
@@ -195,11 +195,8 @@ export default function BalanceTracker({
       </div>
 
       {/* Section 3 — Advice */}
-      <div className="rounded-2xl bg-[#F9FAFB] border border-[#F3F4F6] px-4 py-3 mb-3">
-        <div className="flex items-center gap-1.5 mb-1">
-          <Sparkles className="h-3.5 w-3.5 text-[#447afc]" strokeWidth={2} />
-          <span className="text-[11px] text-[#447afc] font-semibold uppercase tracking-wider">AI порада</span>
-        </div>
+      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
+        <p className="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider mb-1">Поради до банку</p>
         {aiLoading ? (
           <p className="text-sm text-[#9CA3AF] leading-relaxed animate-pulse">Аналізую стан банку...</p>
         ) : aiAdvice ? (
