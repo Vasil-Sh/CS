@@ -199,7 +199,7 @@ export default function BalanceTracker({
             <button
               key={g}
               onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 gameFilter === g
                   ? 'bg-[#447afc] text-white shadow-[0_1px_4px_rgba(68,122,252,0.3)]'
                   : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6]'
