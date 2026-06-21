@@ -134,13 +134,18 @@ export default function MyBets() {
     catch { setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)); }
   }, [currentUser]);
 
+  const syncBankrollStats = useCallback(() => {
+    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
+  }, [currentUser]);
+
   const loadRecentBets = useCallback(async () => {
     try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
     catch { setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', [])); }
   }, [currentUser]);
 
   // ── Handlers ──
-  const handleRecordAdded = useCallback(() => { loadStats(); loadRecentBets(); bumpBets(); bumpBankroll(); }, [loadStats, loadRecentBets, bumpBets, bumpBankroll]);
+  const handleRecordAdded = useCallback(() => { loadStats(); loadRecentBets(); syncBankrollStats(); bumpBets(); bumpBankroll(); }, [loadStats, loadRecentBets, bumpBets, bumpBankroll, syncBankrollStats]);
 
   const clearRecentBets = useCallback(async () => {
     if (!window.confirm('Ви впевнені, що хочете очистити всі дані?')) return;
@@ -177,9 +182,10 @@ export default function MyBets() {
       toast.success(`Запис позначено як ${result === 'Win' ? 'виграшний' : 'програшний'}`);
       if (note.trim()) toast('Нотатку додано до запису', { description: note.trim() });
       loadStats();
+      syncBankrollStats();
       bumpBankroll();
     } catch { toast.error('Помилка при оновленні результату'); }
-  }, [currentUser, loadStats, bumpBankroll]);
+  }, [currentUser, loadStats, bumpBankroll, syncBankrollStats]);
 
   const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
     if (result === 'Loss') {
@@ -238,12 +244,13 @@ export default function MyBets() {
     const bet = deleteDialogBet;
     setDeleteDialogBet(null);
     await realGoogleSheetsService.deleteRecord(bet);
+    syncBankrollStats();
     setRecentBets(prev => prev.filter(b => b.id !== bet.id && !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount)));
     loadStats();
     bumpBets();
     bumpBankroll();
     toast.success('Ставку видалено');
-  }, [deleteDialogBet, loadStats, bumpBets, bumpBankroll]);
+  }, [deleteDialogBet, loadStats, bumpBets, bumpBankroll, syncBankrollStats]);
 
   // ── UI ──
   const tabs = [
