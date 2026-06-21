@@ -139,13 +139,30 @@ export default function MyBets() {
     setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
   }, [currentUser]);
 
+  const syncStats = useCallback(() => {
+    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    const completed = allBets.filter((b: any) => b.result === 'Win' || b.result === 'Loss');
+    const wins = completed.filter((b: any) => b.result === 'Win').length;
+    const totalProfit = completed.reduce((sum: number, b: any) => sum + (b.profit || 0), 0);
+    setStats({
+      totalBets: allBets.length,
+      winRate: completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
+      totalProfit: Math.round(totalProfit * 100) / 100,
+      averageROI: completed.length > 0
+        ? Math.round((completed.reduce((sum: number, b: any) => sum + (b.roi || 0), 0) / completed.length) * 100) / 100
+        : 0,
+      profitByMonth: [],
+      profitByStrategy: [],
+    });
+  }, [currentUser]);
+
   const loadRecentBets = useCallback(async () => {
     try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
     catch { setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', [])); }
   }, [currentUser]);
 
   // ── Handlers ──
-  const handleRecordAdded = useCallback(() => { loadStats(); loadRecentBets(); syncBankrollStats(); bumpBets(); bumpBankroll(); }, [loadStats, loadRecentBets, bumpBets, bumpBankroll, syncBankrollStats]);
+  const handleRecordAdded = useCallback(() => { syncStats(); loadRecentBets(); syncBankrollStats(); bumpBets(); bumpBankroll(); }, [loadRecentBets, bumpBets, bumpBankroll, syncBankrollStats, syncStats]);
 
   const clearRecentBets = useCallback(async () => {
     if (!window.confirm('Ви впевнені, що хочете очистити всі дані?')) return;
@@ -183,9 +200,10 @@ export default function MyBets() {
       if (note.trim()) toast('Нотатку додано до запису', { description: note.trim() });
       loadStats();
       syncBankrollStats();
+      syncStats();
       bumpBankroll();
     } catch { toast.error('Помилка при оновленні результату'); }
-  }, [currentUser, loadStats, bumpBankroll, syncBankrollStats]);
+  }, [currentUser, bumpBankroll, syncBankrollStats, syncStats]);
 
   const updateBetResult = useCallback(async (bet: Bet, result: 'Win' | 'Loss') => {
     if (result === 'Loss') {
@@ -245,12 +263,12 @@ export default function MyBets() {
     setDeleteDialogBet(null);
     await realGoogleSheetsService.deleteRecord(bet);
     syncBankrollStats();
+    syncStats();
     setRecentBets(prev => prev.filter(b => b.id !== bet.id && !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount)));
-    loadStats();
     bumpBets();
     bumpBankroll();
     toast.success('Ставку видалено');
-  }, [deleteDialogBet, loadStats, bumpBets, bumpBankroll, syncBankrollStats]);
+  }, [deleteDialogBet, bumpBets, bumpBankroll, syncBankrollStats, syncStats]);
 
   // ── UI ──
   const tabs = [
