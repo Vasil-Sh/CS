@@ -331,7 +331,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   </>
                 ) : (
                   <span className="text-sm text-[#9CA3AF]">Немає ставок</span>
-                )}
+                </div>
               </div>
             </>
           ) : (
@@ -339,7 +339,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
               <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
             </div>
-          )}
+          </div>
         </button>
 
         {/* 2. Головна ціль */}
@@ -375,7 +375,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
               <span className="text-sm text-[#9CA3AF]">Оберіть головну ціль</span>
             </div>
-          )}
+          </div>
         </button>
 
         {/* 3. Рівень ризику */}
@@ -426,7 +426,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
               <span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span>
             </div>
-          )}
+          </div>
         </button>
 
         {/* 4. Вінрейт 30 днів */}
@@ -457,7 +457,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">—</div>
               <span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -492,7 +492,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   <p className="text-base text-[#4B5563] mt-2 leading-relaxed">
                     {activeStrategy.description}
                   </p>
-                )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -546,7 +546,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 Обрати стратегію
               </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Current goal details card — mirrors strategy card structure */}
@@ -565,17 +565,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 <div>
                   <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна ціль</h3>
                   <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
-                </div>
               </div>
-              {primaryGoal && (
-                <Badge
-                  className={`${goalTypeBadgeClass(
-                    primaryGoal.type,
-                  )} text-sm font-semibold px-3 py-1 border-0 rounded-full hover:opacity-100`}
-                >
-                  {goalTypeLabel(primaryGoal.type)}
-                </Badge>
-              )}
             </div>
           </div>
 
@@ -622,7 +612,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                       </p>
                     </div>
                   </>
-                )}
+                </div>
 
                 {primaryGoal.type === 'ladder' && (
                   <>
@@ -651,7 +641,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                       </p>
                     </div>
                   </>
-                )}
+                </div>
 
                 {primaryGoal.type === 'roi' && (
                   <>
@@ -680,7 +670,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                       </p>
                     </div>
                   </>
-                )}
+                </div>
 
                 {primaryGoal.type === 'winrate' && (
                   <>
@@ -709,7 +699,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                       </p>
                     </div>
                   </>
-                )}
+                </div>
               </div>
 
             </div>
@@ -727,7 +717,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 Створити ціль
               </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
