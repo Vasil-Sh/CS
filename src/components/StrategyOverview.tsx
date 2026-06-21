@@ -966,9 +966,7 @@ export default function StrategyOverview() {
                             <div className="flex gap-2 mt-auto">
                               <Button
                                 onClick={() => openDetailsDialog(strategy)}
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]"
+                                className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold"
                               >
                                 <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                                 Деталі
