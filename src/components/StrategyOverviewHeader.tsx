@@ -470,7 +470,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
-          <div className="px-7 pt-7 pb-5">
+          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
                 <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
@@ -481,8 +481,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
             </div>
           </div>
-          <div className="h-px w-full bg-[#F3F4F6] -mx-7" />
-
           {activeStrategy ? (
             <div className="space-y-5 flex-1">
               <div>
@@ -497,7 +495,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                   <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">
                     Мін. коеф.
                   </p>
@@ -505,7 +503,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                     {activeStrategy.minOdds ?? '—'}
                   </p>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                   <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">
                     Макс. коеф.
                   </p>
@@ -513,7 +511,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                     {activeStrategy.maxOdds ?? '—'}
                   </p>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0] flex flex-col items-center justify-center text-center">
+                <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
                   <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">
                     Формати
                   </p>
@@ -521,7 +519,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                     {activeStrategy.allowedFormats?.join(', ') || 'Усі'}
                   </p>
                 </div>
-                <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A] flex flex-col items-center justify-center text-center">
+                <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
                   <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">
                     Типи ставок
                   </p>
@@ -531,7 +529,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 </div>
               </div>
 
-              
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
@@ -569,7 +566,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                   <p className="text-sm text-[#6B7280] mt-0.5">Ціль, над якою ви працюєте</p>
                 </div>
               </div>
-              
             </div>
           </div>
 
@@ -591,25 +587,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {primaryGoal.type === 'amount' && (
                   <>
-                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                       <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль</p>
                       <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                         {(primaryGoal.targetAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
                       <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Накоп.</p>
                       <p className="text-2xl font-bold text-[#15803D] mt-1.5">
                         {(primaryGoal.currentAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
                       <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Залиш.</p>
                       <p className="text-2xl font-bold text-[#B45309] mt-1.5">
                         {Math.max(0, (primaryGoal.targetAmount ?? 0) - (primaryGoal.currentAmount ?? 0)).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
                       <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
                       <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
                         {primaryGoal.betsPerDay || 'Усі'}
@@ -620,25 +616,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'ladder' && (
                   <>
-                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                       <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Старт</p>
                       <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                         {(primaryGoal.startAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                       <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль</p>
                       <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                         {(primaryGoal.targetLadderAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
                       <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Коеф.</p>
                       <p className="text-lg font-bold text-[#15803D] mt-1.5 truncate">
                         {primaryGoal.minOdds ?? '—'} – {primaryGoal.maxOdds ?? '—'}
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
                       <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Крок</p>
                       <p className="text-lg font-bold text-[#B45309] mt-1.5 truncate">
                         {primaryGoal.currentStep ?? 0} / {primaryGoal.totalSteps ?? 0}
@@ -649,25 +645,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'roi' && (
                   <>
-                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                       <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль ROI</p>
                       <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                         {(primaryGoal.targetROI ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
                       <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Поточн.</p>
                       <p className="text-2xl font-bold text-[#15803D] mt-1.5">
                         {(primaryGoal.currentROI ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
                       <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Різниця</p>
                       <p className="text-2xl font-bold text-[#B45309] mt-1.5">
                         {((primaryGoal.currentROI ?? 0) - (primaryGoal.targetROI ?? 0)).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
                       <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
                       <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
                         {primaryGoal.betsPerDay || 'Усі'}
@@ -678,25 +674,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'winrate' && (
                   <>
-                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE] rounded-2xl border border-[#DBEAFE]">
                       <p className="text-xs text-[#3B82F6] font-semibold uppercase tracking-wider">Ціль WR</p>
                       <p className="text-2xl font-bold text-[#1E40AF] mt-1.5">
                         {(primaryGoal.targetWinRate ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] rounded-2xl border border-[#BBF7D0]">
                       <p className="text-xs text-[#16A34A] font-semibold uppercase tracking-wider">Поточн.</p>
                       <p className="text-2xl font-bold text-[#15803D] mt-1.5">
                         {(primaryGoal.currentWinRate ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] rounded-2xl border border-[#FDE68A]">
                       <p className="text-xs text-[#D97706] font-semibold uppercase tracking-wider">Різниця</p>
                       <p className="text-2xl font-bold text-[#B45309] mt-1.5">
                         {((primaryGoal.currentWinRate ?? 0) - (primaryGoal.targetWinRate ?? 0)).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE] flex flex-col items-center justify-center text-center">
+                    <div className="p-4 bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] rounded-2xl border border-[#DDD6FE]">
                       <p className="text-xs text-[#6D28D9] font-semibold uppercase tracking-wider">Ставок/день</p>
                       <p className="text-lg font-bold text-[#5B21B6] mt-1.5 truncate">
                         {primaryGoal.betsPerDay || 'Усі'}
@@ -706,7 +702,6 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 )}
               </div>
 
-              
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
