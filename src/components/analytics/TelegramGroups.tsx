@@ -870,8 +870,8 @@ export default function TelegramGroups() {
               return g?.link ? (
                 <div className="px-7 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4] flex-shrink-0">
-                      <ExternalLink className="h-5 w-5 text-[#9CA3AF]" strokeWidth={1.5} />
+                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
+                      <ExternalLink className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                     </div>
                     <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-[#447afc] hover:underline truncate flex-1">
                       {tgHandle(g.link)}
@@ -960,7 +960,7 @@ export default function TelegramGroups() {
                 <div className="h-px w-full bg-[#F3F4F6]" />
               </div>
 
-              {/* Bottom row: add bet + edit/delete */}
+              {/* Bottom row: add bet + delete */}
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => openAddBet(gs.groupId)}
@@ -969,16 +969,6 @@ export default function TelegramGroups() {
                   <Plus className="h-4 w-4 mr-1.5" strokeWidth={2} />
                   Додати ставку
                 </Button>
-                <button
-                  onClick={() => {
-                    const g = groups.find(x => x.id === gs.groupId);
-                    if (g) openEditGroup(g);
-                  }}
-                  className="p-2 rounded-xl border border-[#E5E7EB] hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors flex-shrink-0"
-                  title="Редагувати групу"
-                >
-                  <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                </button>
                 <button
                   onClick={() => setDeleteGroupConfirm(gs.groupId)}
                   className="p-2 rounded-xl border border-[#FEE2E2] hover:bg-[#FEF2F2] text-[#EF4444] hover:text-[#DC2626] transition-colors flex-shrink-0"

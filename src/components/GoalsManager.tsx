@@ -665,8 +665,7 @@ export default function GoalsManager() {
                         <div className="flex gap-2 mt-3">
                           {goal.type === 'ladder' ? (
                             <Button onClick={() => openDetailsDialog(goal)}
-                              variant="outline"
-                              className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]">
+                              className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold">
                               <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                               Деталі
                             </Button>
@@ -840,8 +839,7 @@ export default function GoalsManager() {
                         <div className="flex gap-2 mt-auto">
                           <Button
                             onClick={() => openCompletedGoalResult(goal)}
-                            variant="outline"
-                            className="flex-1 rounded-xl border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium text-[#374151]"
+                            className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold"
                           >
                             <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                             Деталі
