@@ -18,10 +18,7 @@ import {
   Globe,
   Sun,
   Moon,
-  Calculator,
-  Trash2,
 } from 'lucide-react';
-import BankrollSimulator from '@/components/BankrollSimulator';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
@@ -428,7 +425,6 @@ export default function Profile() {
           {[
             { id: 'interface', label: 'Інтерфейс' },
             { id: 'backup', label: 'Бекап' },
-            { id: 'simulator', label: 'Симулятор банкролу' },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -671,32 +667,6 @@ export default function Profile() {
       </Card>
       )}
 
-      {/* Bankroll Simulator */}
-      {(activeTab === null || activeTab === 'simulator') && (
-      <Card id="simulator" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
-        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-          <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
-            <span className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#FFF7ED] rounded-xl">
-              <Calculator className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
-            </div>
-            Симулятор банкролу
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSimResetKey(k => k + 1)}
-              className="gap-1 border-[#DC2626] text-[#DC2626] hover:bg-[#FEF2F2] text-xs rounded-xl"
-            >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} /> Скинути
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <BankrollSimulator resetKey={simResetKey} />
-        </CardContent>
-      </Card>
-      )}
       </div>
     </div>
   );
