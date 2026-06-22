@@ -1038,7 +1038,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
               {/* Form Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
                     <Plus className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                   </div>
                   <span className="text-lg font-semibold text-[#111827]">Новий запис</span>
