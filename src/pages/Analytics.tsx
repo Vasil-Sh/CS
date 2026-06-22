@@ -750,10 +750,6 @@ export default function Analytics() {
                       <BalanceChart data={balanceData} />
                     </div>
                     
-                    <div className="mb-8">
-                      <PeriodComparison bets={bets} />
-                    </div>
-                    
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <MonthlyProfitChartCard data={monthlyProfit} chartCardShadow={chartCardShadow} />
                       <OddsVsProfitScatterCard data={scatterData} winCount={winningBets.length} lossCount={losingBets.length} chartCardShadow={chartCardShadow} />
@@ -814,6 +810,8 @@ export default function Analytics() {
             {activeTab === 'comparison' && (
               <TooltipProvider>
                 <div className="flex flex-col flex-1 space-y-8">
+                <PeriodComparison bets={bets} />
+                
                 {/* Risk Metrics + Drawdown Periods (moved from Strategy page) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <Card 
