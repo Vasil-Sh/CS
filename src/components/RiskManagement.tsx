@@ -1271,13 +1271,24 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
               <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                  <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                  <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                 </div>
                 Детальні ризик-метрики
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
+              {bets.filter(b => b.result !== 'Pending').length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                    <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних для метрик</h3>
+                  <p className="text-[#6B7280] text-sm">
+                    Додайте завершені ставки для розрахунку ризик-метрик
+                  </p>
+                </div>
+              ) : (<>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-[#6B7280]">Поточна просадка:</span>
                 <span className="text-sm font-semibold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
@@ -1359,6 +1370,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <span className="text-sm text-[#6B7280]">Ризик виграшних серій:</span>
                 <span className="text-sm font-semibold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
               </div>
+              )}
             </CardContent>
           </Card>
 
@@ -1368,14 +1380,24 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           >
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
               <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                  <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                  <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                 </div>
                 Періоди просадок
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {drawdownPeriods.length > 0 ? (
+              {bets.filter(b => b.result !== 'Pending').length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                    <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних про просадки</h3>
+                  <p className="text-[#6B7280] text-sm">
+                    Додайте завершені ставки для відстеження періодів просадок
+                  </p>
+                </div>
+              ) : drawdownPeriods.length > 0 ? (
                 <div className="space-y-3">
                   {drawdownPeriods.map((period, index) => (
                     <div key={index} className="p-4 border border-[#F3F4F6] rounded-2xl hover:border-[#E5E7EB] transition-colors">
