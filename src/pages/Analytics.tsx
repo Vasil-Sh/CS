@@ -551,7 +551,7 @@ export default function Analytics() {
           
           {/* 1. Поточний банк */}
           <div 
-            className="stat-card bg-white border border-transparent rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#D1D5DB]"
+            className="stat-card bg-white border border-[#E5E7EB] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#9CA3AF]"
             onClick={handleBankCardClick}
             style={cardBaseStyle}
             onMouseEnter={(e) => {
@@ -590,7 +590,7 @@ export default function Analytics() {
 
           {/* 2. Загальний профіт */}
           <div 
-            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -623,7 +623,7 @@ export default function Analytics() {
 
           {/* 3. Всього ставок — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -669,7 +669,7 @@ export default function Analytics() {
 
           {/* 4. Win Rate — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-transparent hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
