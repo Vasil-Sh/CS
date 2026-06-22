@@ -290,11 +290,9 @@ export default function MyBets() {
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Всього записів" value={String(stats.totalBets)} subtext={activeBets.length > 0 ? `${activeBets.length} активних` : 'Немає активних'} />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Вінрейт" value={`${stats.winRate}%`} subtext={`${winningBets.length}W / ${losingBets.length}L`} />
         </div>
-        </div>
 
         {/* Stats Row 2 */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Активні" value={String(activeBets.length)} valueColor="text-[#3B82F6]" subtext="Очікують результату" />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Виграші" value={String(winningBets.length)} valueColor="text-[#22C55E]" subtext="Успішних записів" trend="up" />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Програші" value={String(losingBets.length)} valueColor="text-[#EF4444]" subtext="Невдалих записів" trend="down" />
