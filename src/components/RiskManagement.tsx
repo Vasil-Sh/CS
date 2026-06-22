@@ -1,19 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Shield, 
   AlertTriangle, 
   TrendingDown,
-  TrendingUp,
   Target,
-  BarChart3,
   Plus,
   Trash2,
   Search,
@@ -21,15 +18,12 @@ import {
   RefreshCw,
   RotateCcw,
   Download,
-  Calendar,
   Pencil,
   Check,
   X,
   ArrowRightLeft,
-  ArrowDownRight,
-  DollarSign,
-  Clock,
 } from 'lucide-react';
+import { useRiskMetrics } from '@/hooks/useRiskMetrics';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
@@ -40,30 +34,6 @@ import { INITIAL_RISKY_TEAMS, type RiskyTeam } from '@/data/riskyTeams';
 
 interface RiskManagementProps {
   bets: Bet[];
-}
-
-interface RiskMetrics {
-  maxDrawdown: number;
-  currentDrawdown: number;
-  sharpeRatio: number;
-  volatility: number;
-  valueAtRisk: number;
-  kellyPercentage: number;
-  riskOfRuin: number;
-  consecutiveLosses: number;
-  averageStake: number;
-  maxStake: number;
-  bankrollGrowth: number;
-  largestLoss: number;
-  winStreakRisk: number;
-}
-
-interface DrawdownPeriod {
-  start: string;
-  end: string;
-  duration: number;
-  maxDrawdown: number;
-  recovery: boolean;
 }
 
 const ALL_STATUSES = ['БАН', 'Нестабільні', 'Обережно', 'Рідко', 'Надійна', 'Без статусу'] as const;
@@ -317,190 +287,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     team.notes.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const completedBets = useMemo(() => 
-    bets.filter(bet => bet.result && bet.result !== 'Pending'), 
-    [bets]
-  );
-
-  const riskMetrics = useMemo((): RiskMetrics => {
-    if (completedBets.length === 0) {
-      return {
-        maxDrawdown: 0,
-        currentDrawdown: 0,
-        sharpeRatio: 0,
-        volatility: 0,
-        valueAtRisk: 0,
-        kellyPercentage: 0,
-        riskOfRuin: 0,
-        consecutiveLosses: 0,
-        averageStake: 0,
-        maxStake: 0,
-        bankrollGrowth: 0,
-        largestLoss: 0,
-        winStreakRisk: 0
-      };
-    }
-
-    const bankroll = 10000;
-    let runningBalance = bankroll;
-    let peak = bankroll;
-    let maxDrawdown = 0;
-    let currentDrawdown = 0;
-    let maxConsecutiveLosses = 0;
-    let currentLossStreak = 0;
-
-    const returns: number[] = [];
-    const stakes: number[] = [];
-
-    completedBets.forEach(bet => {
-      const profit = bet.profit || 0;
-      const stake = bet.stake || 0;
-      
-      runningBalance += profit;
-      
-      if (stake > 0) {
-        returns.push(profit / stake);
-        stakes.push(stake);
-      }
-
-      if (runningBalance > peak) {
-        peak = runningBalance;
-      }
-      
-      const currentDD = (peak - runningBalance) / peak * 100;
-      if (currentDD > maxDrawdown) {
-        maxDrawdown = currentDD;
-      }
-
-      if (bet.result === 'Loss') {
-        currentLossStreak++;
-        maxConsecutiveLosses = Math.max(maxConsecutiveLosses, currentLossStreak);
-      } else {
-        currentLossStreak = 0;
-      }
-    });
-
-    currentDrawdown = (peak - runningBalance) / peak * 100;
-
-    const avgReturn = returns.length > 0 ? returns.reduce((a, b) => a + b, 0) / returns.length : 0;
-    const variance = returns.length > 0 ? 
-      returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length : 0;
-    const volatility = Math.sqrt(variance) * 100;
-
-    const riskFreeRate = 0.02;
-    const sharpeRatio = volatility > 0 ? (avgReturn - riskFreeRate) / (volatility / 100) : 0;
-
-    const sortedReturns = [...returns].sort((a, b) => a - b);
-    const varIndex = Math.floor(sortedReturns.length * 0.05);
-    const valueAtRisk = sortedReturns.length > 0 ? Math.abs(sortedReturns[varIndex] || 0) * 100 : 0;
-
-    const winRate = completedBets.filter(bet => bet.result === 'Win').length / completedBets.length;
-    const avgWinReturn = returns.filter(r => r > 0).reduce((a, b) => a + b, 0) / returns.filter(r => r > 0).length || 0;
-    const avgLossReturn = Math.abs(returns.filter(r => r < 0).reduce((a, b) => a + b, 0) / returns.filter(r => r < 0).length || 0);
-    
-    const kellyPercentage = avgLossReturn > 0 ? 
-      Math.max(0, (winRate * avgWinReturn - (1 - winRate) * avgLossReturn) / avgWinReturn * 100) : 0;
-
-    const riskOfRuin = winRate < 0.5 ? 
-      Math.min(100, Math.pow((1 - winRate) / winRate, bankroll / (stakes.reduce((a, b) => a + b, 0) / stakes.length || 1)) * 100) : 0;
-
-    const largestLoss = Math.abs(Math.min(...returns.map(r => r * (stakes.reduce((a, b) => a + b, 0) / stakes.length || 0))));
-
-    const winStreaks: number[] = [];
-    let currentWinStreak = 0;
-    completedBets.forEach(bet => {
-      if (bet.result === 'Win') {
-        currentWinStreak++;
-      } else {
-        if (currentWinStreak > 0) {
-          winStreaks.push(currentWinStreak);
-          currentWinStreak = 0;
-        }
-      }
-    });
-    const avgWinStreak = winStreaks.length > 0 ? winStreaks.reduce((a, b) => a + b, 0) / winStreaks.length : 0;
-    const winStreakRisk = avgWinStreak > 5 ? Math.min(100, avgWinStreak * 10) : 0;
-
-    return {
-      maxDrawdown: isFinite(maxDrawdown) ? Number(maxDrawdown.toFixed(2)) : 0,
-      currentDrawdown: isFinite(currentDrawdown) ? Number(Math.max(0, currentDrawdown).toFixed(2)) : 0,
-      sharpeRatio: isFinite(sharpeRatio) ? Number(sharpeRatio.toFixed(2)) : 0,
-      volatility: isFinite(volatility) ? Number(volatility.toFixed(2)) : 0,
-      valueAtRisk: isFinite(valueAtRisk) ? Number(valueAtRisk.toFixed(2)) : 0,
-      kellyPercentage: isFinite(kellyPercentage) ? Number(kellyPercentage.toFixed(2)) : 0,
-      riskOfRuin: isFinite(riskOfRuin) ? Number(riskOfRuin.toFixed(2)) : 0,
-      consecutiveLosses: maxConsecutiveLosses,
-      averageStake: stakes.length > 0 ? Number((stakes.reduce((a, b) => a + b, 0) / stakes.length).toFixed(2)) : 0,
-      maxStake: stakes.length > 0 ? Math.max(...stakes) : 0,
-      bankrollGrowth: isFinite((runningBalance - bankroll) / bankroll * 100) ? Number(((runningBalance - bankroll) / bankroll * 100).toFixed(2)) : 0,
-      largestLoss: isFinite(largestLoss) ? Number(largestLoss.toFixed(2)) : 0,
-      winStreakRisk: isFinite(winStreakRisk) ? Number(winStreakRisk.toFixed(2)) : 0
-    };
-  }, [completedBets]);
-
-  const drawdownPeriods = useMemo((): DrawdownPeriod[] => {
-    if (completedBets.length === 0) return [];
-
-    const bankroll = 10000;
-    let runningBalance = bankroll;
-    let peak = bankroll;
-    let drawdownStart: string | null = null;
-    let maxDrawdownInPeriod = 0;
-    const periods: DrawdownPeriod[] = [];
-
-    completedBets.forEach((bet, index) => {
-      const profit = bet.profit || 0;
-      runningBalance += profit;
-
-      if (runningBalance > peak) {
-        if (drawdownStart) {
-          periods.push({
-            start: drawdownStart,
-            end: bet.date,
-            duration: index - completedBets.findIndex(b => b.date === drawdownStart),
-            maxDrawdown: maxDrawdownInPeriod,
-            recovery: true
-          });
-          drawdownStart = null;
-          maxDrawdownInPeriod = 0;
-        }
-        peak = runningBalance;
-      } else if (runningBalance < peak) {
-        if (!drawdownStart) {
-          drawdownStart = bet.date;
-        }
-        const currentDD = (peak - runningBalance) / peak * 100;
-        maxDrawdownInPeriod = Math.max(maxDrawdownInPeriod, currentDD);
-      }
-    });
-
-    if (drawdownStart) {
-      periods.push({
-        start: drawdownStart,
-        end: completedBets[completedBets.length - 1]?.date || '',
-        duration: completedBets.length - completedBets.findIndex(b => b.date === drawdownStart),
-        maxDrawdown: maxDrawdownInPeriod,
-        recovery: false
-      });
-    }
-
-    return periods.sort((a, b) => b.maxDrawdown - a.maxDrawdown).slice(0, 5);
-  }, [completedBets]);
-
-  const getRiskLevel = () => {
-    const { maxDrawdown, volatility, riskOfRuin } = riskMetrics;
-    
-    if (maxDrawdown > 20 || volatility > 30 || riskOfRuin > 10) {
-      return { level: 'high', color: 'text-[#EF4444]', bgColor: 'bg-[#FEF2F2]' };
-    } else if (maxDrawdown > 10 || volatility > 20 || riskOfRuin > 5) {
-      return { level: 'medium', color: 'text-[#F59E0B]', bgColor: 'bg-[#FFFBEB]' };
-    } else {
-      return { level: 'low', color: 'text-[#22C55E]', bgColor: 'bg-[#F0FDF4]' };
-    }
-  };
-
-  const riskLevel = getRiskLevel();
-  const volatilityLevel = riskMetrics.volatility > 30 ? 'high' : riskMetrics.volatility > 20 ? 'medium' : 'low';
+  const { completedBets, riskMetrics } = useRiskMetrics(bets);
 
   // Team-based statistics for overview cards
   const teamStats = useMemo(() => {
@@ -1371,235 +1158,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </CardContent>
             </Card>
           )}
-        </div>
-
-        {/* Detailed Risk Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card 
-            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
-            style={{ boxShadow: chartCardShadow }}
-          >
-            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                  <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
-                </div>
-                Детальні ризик-метрики
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-6">
-              {bets.filter(b => b.result !== 'Pending').length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                    <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних для метрик</h3>
-                  <p className="text-[#6B7280] text-sm">
-                    Додайте завершені ставки для розрахунку ризик-метрик
-                  </p>
-                </div>
-              ) : (<div className="grid grid-cols-2 gap-3">
-              {/* Current Drawdown */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Поточна просадка</span>
-                </div>
-                <span className="text-xl font-bold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
-                <Progress value={Math.min(riskMetrics.currentDrawdown, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#EF4444]" />
-              </div>
-
-              {/* Consecutive Losses */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Послідовні програші</span>
-                </div>
-                <span className="text-xl font-bold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
-                <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#F59E0B] rounded-full transition-all" style={{ width: `${Math.min(riskMetrics.consecutiveLosses * 20, 100)}%` }} />
-                </div>
-              </div>
-
-              {/* Average Stake */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Середня ставка</span>
-                </div>
-                <span className="text-xl font-bold text-[#111827]">{riskMetrics.averageStake} ₴</span>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 h-1.5 bg-[#E5E7EB] rounded-full">
-                    <div className="h-full bg-[#447afc] rounded-full" style={{ width: `${Math.min((riskMetrics.averageStake / (riskMetrics.maxStake || 1)) * 100, 100)}%` }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Largest Loss */}
-              <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#991B1B] uppercase tracking-wider">Найбільший програш</span>
-                </div>
-                <span className="text-xl font-bold text-[#DC2626]">{riskMetrics.largestLoss} ₴</span>
-              </div>
-
-              {/* Kelly % */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] col-span-2">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
-                    <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Kelly %</span>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="inline-flex items-center">
-                          <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                        <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
-                        <p className="text-xs text-[#6B7280] mb-2">
-                          Розраховано на основі win rate та середніх коефіцієнтів.
-                        </p>
-                        <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
-                          <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                          <p className="text-xs text-[#92400E]">
-                            Рекомендовано використовувати 25–50% від Kelly для зниження ризику
-                          </p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-lg font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                      {riskMetrics.kellyPercentage}%
-                    </span>
-                    {riskMetrics.kellyPercentage > 5 && (
-                      <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">
-                        Aggressive
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <Progress value={Math.min(Math.abs(riskMetrics.kellyPercentage) * 4, 100)} className="h-2 bg-[#E5E7EB] [&>div]:bg-[#22C55E]" />
-              </div>
-
-              {/* Risk of Ruin + Win Streak Risk side by side */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Risk of Ruin</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="inline-flex items-center">
-                        <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                      <p className="text-sm font-medium text-[#111827] mb-2">Як розраховується:</p>
-                      <p className="text-xs text-[#6B7280]">
-                        Ймовірність втрати всього банкролу. Розраховано на основі win rate, середнього коефіцієнта та розміру ставок відносно банкролу.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <span className={`text-xl font-bold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
-                  {riskMetrics.riskOfRuin}%
-                </span>
-                <Progress value={Math.min(riskMetrics.riskOfRuin * 5, 100)} className={`h-1.5 mt-2 bg-[#E5E7EB] ${riskMetrics.riskOfRuin > 10 ? '[&>div]:bg-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? '[&>div]:bg-[#F59E0B]' : '[&>div]:bg-[#22C55E]'}`} />
-              </div>
-
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
-                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Ризик вигр. серій</span>
-                </div>
-                <span className="text-xl font-bold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
-                <Progress value={Math.min(riskMetrics.winStreakRisk * 5, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#447afc]" />
-              </div>
-              </div>)}
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
-            style={{ boxShadow: chartCardShadow }}
-          >
-            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                  <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
-                </div>
-                Періоди просадок
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              {bets.filter(b => b.result !== 'Pending').length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                    <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних про просадки</h3>
-                  <p className="text-[#6B7280] text-sm">
-                    Додайте завершені ставки для відстеження періодів просадок
-                  </p>
-                </div>
-              ) : drawdownPeriods.length > 0 ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {drawdownPeriods.map((period, index) => (
-                    <div key={index} className={`p-4 rounded-2xl border transition-all ${period.recovery ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`p-1.5 rounded-lg ${period.recovery ? 'bg-[#DCFCE7]' : 'bg-[#FEE2E2]'}`}>
-                            {period.recovery ? (
-                              <TrendingUp className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
-                            ) : (
-                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                            )}
-                          </div>
-                          <span className="text-sm font-medium text-[#111827]">
-                            {new Date(period.start).toLocaleDateString('uk-UA')} — {new Date(period.end).toLocaleDateString('uk-UA')}
-                          </span>
-                        </div>
-                        <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
-                          {period.recovery ? 'Відновлено' : 'Поточна'}
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Clock className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
-                            <span className="text-xs text-[#6B7280]">Тривалість</span>
-                          </div>
-                          <span className="text-lg font-bold text-[#111827]">{period.duration} дн.</span>
-                        </div>
-                        <div className="p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <ArrowDownRight className="h-3.5 w-3.5 text-[#EF4444]" strokeWidth={1.5} />
-                            <span className="text-xs text-[#6B7280]">Макс. просадка</span>
-                          </div>
-                          <span className="text-lg font-bold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-[#22C55E]' : '[&>div]:bg-[#EF4444]'}`} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                    <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає значних просадок</h3>
-                  <p className="text-[#6B7280] text-sm">
-                    {completedBets.length === 1
-                      ? 'Додайте більше завершених ставок для виявлення періодів просадок'
-                      : 'За поточний період не виявлено значних просадок банку'}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
 
         {/* Risk Alerts */}

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
 import MonthlyProfitChartCard from '@/components/analytics/MonthlyProfitChartCard';
@@ -24,6 +25,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
 import { AnalyticsSkeleton } from '@/components/PageSkeleton';
+import { useRiskMetrics } from '@/hooks/useRiskMetrics';
 import { 
   Target, 
   DollarSign,
@@ -44,7 +46,11 @@ import {
   Sun,
   Moon,
   MoreHorizontal,
-  Pencil
+  Pencil,
+  TrendingDown,
+  TrendingUp,
+  Info,
+  Clock,
 } from 'lucide-react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -94,6 +100,8 @@ export default function Analytics() {
   const isDarkTheme = theme === 'dark';
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('CS2');
+
+  const { completedBets, riskMetrics, drawdownPeriods } = useRiskMetrics(bets);
 
   useEffect(() => {
     loadAnalyticsData();
@@ -799,7 +807,218 @@ export default function Analytics() {
               </div>
             )}
 
-            {activeTab === 'comparison' && <div className="flex flex-col flex-1"><PeriodComparison bets={bets} /></div>}
+            {activeTab === 'comparison' && (
+              <TooltipProvider>
+                <div className="flex flex-col flex-1 space-y-8">
+                <PeriodComparison bets={bets} />
+                
+                {/* Risk Metrics + Drawdown Periods (moved from Strategy page) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <Card 
+                    className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    style={{ boxShadow: chartCardShadow }}
+                  >
+                    <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+                        <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                          <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                        </div>
+                        Детальні ризик-метрики
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      {completedBets.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                            <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          </div>
+                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних для метрик</h3>
+                          <p className="text-[#6B7280] text-sm">Додайте завершені ставки для розрахунку ризик-метрик</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Поточна просадка</span>
+                            </div>
+                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
+                            <Progress value={Math.min(riskMetrics.currentDrawdown, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#EF4444]" />
+                          </div>
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <TrendingDown className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Послідовні програші</span>
+                            </div>
+                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
+                            <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+                              <div className="h-full bg-[#F59E0B] rounded-full transition-all" style={{ width: `${Math.min(riskMetrics.consecutiveLosses * 20, 100)}%` }} />
+                            </div>
+                          </div>
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <DollarSign className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Середня ставка</span>
+                            </div>
+                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.averageStake} ₴</span>
+                            <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+                              <div className="h-full bg-[#447afc] rounded-full" style={{ width: `${Math.min((riskMetrics.averageStake / (riskMetrics.maxStake || 1)) * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                          <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#991B1B] uppercase tracking-wider">Найбільший програш</span>
+                            </div>
+                            <span className="text-xl font-bold text-[#DC2626]">{riskMetrics.largestLoss} ₴</span>
+                          </div>
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] col-span-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <BarChart3 className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                                <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Kelly %</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button className="inline-flex items-center">
+                                      <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                                    <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
+                                    <p className="text-xs text-[#6B7280] mb-2">Розраховано на основі win rate та середніх коефіцієнтів.</p>
+                                    <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
+                                      <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                                      <p className="text-xs text-[#92400E]">Рекомендовано використовувати 25–50% від Kelly для зниження ризику</p>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-lg font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                                  {riskMetrics.kellyPercentage}%
+                                </span>
+                                {riskMetrics.kellyPercentage > 5 && (
+                                  <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">Aggressive</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Progress value={Math.min(Math.abs(riskMetrics.kellyPercentage) * 4, 100)} className="h-2 bg-[#E5E7EB] [&>div]:bg-[#22C55E]" />
+                          </div>
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Risk of Ruin</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button className="inline-flex items-center">
+                                    <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                                  <p className="text-sm font-medium text-[#111827] mb-2">Як розраховується:</p>
+                                  <p className="text-xs text-[#6B7280]">Ймовірність втрати всього банкролу. Розраховано на основі win rate, середнього коефіцієнта та розміру ставок відносно банкролу.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <span className={`text-xl font-bold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
+                              {riskMetrics.riskOfRuin}%
+                            </span>
+                            <Progress value={Math.min(riskMetrics.riskOfRuin * 5, 100)} className={`h-1.5 mt-2 bg-[#E5E7EB] ${riskMetrics.riskOfRuin > 10 ? '[&>div]:bg-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? '[&>div]:bg-[#F59E0B]' : '[&>div]:bg-[#22C55E]'}`} />
+                          </div>
+                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <TrendingUp className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Ризик вигр. серій</span>
+                            </div>
+                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
+                            <Progress value={Math.min(riskMetrics.winStreakRisk * 5, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#447afc]" />
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    style={{ boxShadow: chartCardShadow }}
+                  >
+                    <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+                        <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                          <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                        </div>
+                        Періоди просадок
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      {completedBets.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                            <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          </div>
+                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних про просадки</h3>
+                          <p className="text-[#6B7280] text-sm">Додайте завершені ставки для відстеження періодів просадок</p>
+                        </div>
+                      ) : drawdownPeriods.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-3">
+                          {drawdownPeriods.map((period, index) => (
+                            <div key={index} className={`p-4 rounded-2xl border transition-all ${period.recovery ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className={`p-1.5 rounded-lg ${period.recovery ? 'bg-[#DCFCE7]' : 'bg-[#FEE2E2]'}`}>
+                                    {period.recovery ? (
+                                      <TrendingUp className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                                    ) : (
+                                      <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                                    )}
+                                  </div>
+                                  <span className="text-sm font-medium text-[#111827]">
+                                    {new Date(period.start).toLocaleDateString('uk-UA')} — {new Date(period.end).toLocaleDateString('uk-UA')}
+                                  </span>
+                                </div>
+                                <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
+                                  {period.recovery ? 'Відновлено' : 'Поточна'}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-white/60 rounded-xl">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <Clock className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
+                                    <span className="text-xs text-[#6B7280]">Тривалість</span>
+                                  </div>
+                                  <span className="text-lg font-bold text-[#111827]">{period.duration} дн.</span>
+                                </div>
+                                <div className="p-3 bg-white/60 rounded-xl">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <ArrowDownRight className="h-3.5 w-3.5 text-[#EF4444]" strokeWidth={1.5} />
+                                    <span className="text-xs text-[#6B7280]">Макс. просадка</span>
+                                  </div>
+                                  <span className="text-lg font-bold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
+                                </div>
+                              </div>
+                              <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-[#22C55E]' : '[&>div]:bg-[#EF4444]'}`} />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                            <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          </div>
+                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає значних просадок</h3>
+                          <p className="text-[#6B7280] text-sm">
+                            {completedBets.length === 1
+                              ? 'Додайте більше завершених ставок для виявлення періодів просадок'
+                              : 'За поточний період не виявлено значних просадок банку'}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              </TooltipProvider>
+            )}
             {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
         </div>
