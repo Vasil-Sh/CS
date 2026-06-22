@@ -561,16 +561,15 @@ export default function Analytics() {
               Object.assign(e.currentTarget.style, cardBaseStyle);
             }}
           >
-            <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-[#F3F4F6] group-hover:bg-[#111827] px-3 py-1.5 rounded-full transition-all duration-300">
-              <Pencil className="h-3.5 w-3.5 text-[#6B7280] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
-              <span className="text-xs font-medium text-[#6B7280] group-hover:text-white transition-colors duration-300">Редагувати</span>
-            </div>
-
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
                 <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
+              <div className="ml-auto flex items-center gap-1.5 bg-[#F3F4F6] group-hover:bg-[#111827] px-3 py-1.5 rounded-full transition-all duration-300">
+                <Pencil className="h-3.5 w-3.5 text-[#6B7280] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                <span className="text-xs font-medium text-[#6B7280] group-hover:text-white transition-colors duration-300">Редагувати</span>
+              </div>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
               {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
