@@ -38,7 +38,7 @@ export default function Profile() {
   const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string | null>('interface');
   
   const { theme, toggleTheme } = useTheme();
 
