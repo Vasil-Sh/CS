@@ -221,11 +221,11 @@ class GoogleSheetsRiskyTeamsService {
             }
           }
         } else if (parseAsCleanSheet) {
-          // Clean teams sheet: A=team name, B=status emoji+game, C=notes
+          // Clean teams sheet: A=team name, B=status emoji+game+comment (all in one cell)
+          // Format: "Vitality | 🟩 CS У фіналах часто вимикаються..."
           if (values.length > 0 && values[0]) {
             const teamName = values[0].trim();
             const colB = values.length > 1 ? (values[1] || '').trim() : '';
-            const colC = values.length > 2 ? (values[2] || '').trim() : '';
             
             if (!teamName || teamName.length < 2) continue;
             if (/^📅|Ризикована|^[📅⛔⚠️]/.test(teamName)) continue;
@@ -236,27 +236,25 @@ class GoogleSheetsRiskyTeamsService {
             else if (colB.includes('🟨')) status = 'Нестабільні';
             else if (colB.includes('🟩')) status = 'Обережно';
             
-            // Parse game from colB text
+            // Parse game from colB
             let game = 'CS';
             const gameMatch = colB.match(/(?:CS2|CS|Дота|Dota2|Dota)/i);
             if (gameMatch) {
               const g = gameMatch[0].toLowerCase();
               game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
             }
-            // Also check colC for game info
-            if (!gameMatch) {
-              const gameMatch2 = colC.match(/(?:CS2|CS|Дота|Dota2|Dota)/i);
-              if (gameMatch2) {
-                const g2 = gameMatch2[0].toLowerCase();
-                game = g2.includes('дота') || g2.includes('dota') ? 'Дота' : 'CS';
-              }
-            }
+            
+            // Extract notes: everything after status emoji + game keyword
+            let notes = colB;
+            notes = notes.replace(/[🟩🟨🟥]\s*/g, ''); // Remove status emoji
+            notes = notes.replace(/^(?:CS2|CS|Дота|Dota2|Dota)[:\s]*\s*/i, ''); // Remove game prefix
+            notes = notes.trim();
             
             const teamData: RiskyTeamFromSheet = {
               name: teamName,
               game,
               status,
-              notes: colC,
+              notes,
             };
             riskyTeams.push(teamData);
           }
