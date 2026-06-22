@@ -1,8 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line } from 'recharts';
-import MonthlyProfitBar from '@/components/analytics/MonthlyProfitBar';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line } from 'recharts';
 
 interface MonthlyData {
   month: string;
@@ -68,7 +67,11 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
               }}
             />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
-            <Bar dataKey="profit" name="profit" maxBarSize={48} shape={<MonthlyProfitBar />} />
+            <Bar dataKey="profit" name="profit" maxBarSize={48} radius={[4, 4, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#16A34A' : '#DC2626'} />
+              ))}
+            </Bar>
             <Line
               type="monotone"
               dataKey="cumulative"
