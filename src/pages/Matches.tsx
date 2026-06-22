@@ -1146,7 +1146,9 @@ export default function Matches() {
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                </div>
                 <span className="text-lg font-semibold text-[#111827]">Всього матчів</span>
               </div>
               <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">{sortedMatches.length}</div>
@@ -1163,7 +1165,9 @@ export default function Matches() {
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Radio className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <Radio className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                </div>
                 <span className="text-lg font-semibold text-[#111827]">LIVE</span>
               </div>
               <div className="text-4xl font-bold text-[#EF4444] tracking-tight mb-2">{liveCount}</div>
@@ -1179,7 +1183,9 @@ export default function Matches() {
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="h-5 w-5 text-[#2563EB]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                </div>
                 <span className="text-lg font-semibold text-[#111827]">Очікуються</span>
               </div>
               <div className="text-4xl font-bold text-[#2563EB] tracking-tight mb-2">{upcomingCount}</div>
@@ -1195,7 +1201,9 @@ export default function Matches() {
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <CheckCircle2 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                </div>
                 <span className="text-lg font-semibold text-[#111827]">Завершені</span>
               </div>
               <div className="text-4xl font-bold text-[#22C55E] tracking-tight mb-2">{finishedCount}</div>
@@ -1211,7 +1219,9 @@ export default function Matches() {
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <Brain className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <Brain className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                </div>
                 <span className="text-lg font-semibold text-[#111827]">Середній Прогноз</span>
               </div>
               <div className="text-4xl font-bold text-[#8B5CF6] tracking-tight mb-2">{avgConfidence}%</div>
