@@ -66,7 +66,7 @@ class GoogleSheetsRiskyTeamsService {
 
     // Detect game
     let game = 'CS';
-    const gameMatch = clean.match(/(?:CS2|Dota2|CS|Дота)/i);
+    const gameMatch = clean.match(/(?:CS2|Dota2|Dota|CS|Дота)/i);
     if (gameMatch) {
       const g = gameMatch[0].toLowerCase();
       game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
@@ -123,10 +123,10 @@ class GoogleSheetsRiskyTeamsService {
 
     // Detect game (CS or Dota)
     let game = 'CS'; // default
-    const gameMatch = cleanNotes.match(/(?:СS|CS|Дота)/i);
+    const gameMatch = cleanNotes.match(/(?:СS|CS|CS2|Дота|Dota2|Dota)/i);
     if (gameMatch) {
       const gameStr = gameMatch[0].toLowerCase();
-      game = gameStr.includes('дота') ? 'Дота' : 'CS';
+      game = gameStr.includes('дота') || gameStr.includes('dota') ? 'Дота' : 'CS';
     }
 
     // Detect status from emoji in notes first (new format), then from text
@@ -146,7 +146,7 @@ class GoogleSheetsRiskyTeamsService {
     // Clean up notes
     const finalNotes = cleanNotes
       .replace(/[🟩🟨🟥]/g, '') // Remove status emoji
-      .replace(/^\s*\(?\s*(?:СS|CS|Дота|Dota2):\s*/i, '') // Remove game indicator
+      .replace(/^\s*\(?\s*(?:СS|CS|CS2|Дота|Dota2|Dota)\s*[:.]?\s*/i, '') // Remove game indicator
       .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status text
       .replace(/^\s*\(/, '') // Remove opening parenthesis
       .replace(/\)\s*$/, '') // Remove closing parenthesis
@@ -215,19 +215,23 @@ class GoogleSheetsRiskyTeamsService {
             }
           }
         } else {
-          // Default sheet: columns L (11), M (12), N (13), O (14) each contain a full team entry
-          // (name + optional status emoji + game + notes)
-          const teamColumns = [11, 12, 13, 14]; // L, M, N, O (0-indexed)
+          // Default sheet: columns L/M (11/12) and N/O (13/14)
+          // L=team name, M=notes (may contain emoji status + game info)
+          // N=team name, O=notes
+          const pairs: [number, number][] = [[11, 12], [13, 14]]; // [nameCol, notesCol]
           
-          for (const colIdx of teamColumns) {
-            if (values.length > colIdx && values[colIdx]) {
-              const cellValue = values[colIdx].trim();
-              if (cellValue) {
-                // First try: parse as single-cell format (all info in one cell)
-                const teamData = this.parseTeamDataFromSingleCell(cellValue);
-                if (teamData) {
-                  riskyTeams.push(teamData);
-                }
+          for (const [nameCol, notesCol] of pairs) {
+            if (values.length > nameCol && values[nameCol]) {
+              const teamName = values[nameCol].trim();
+              const teamNotes = values.length > notesCol ? (values[notesCol] || '').trim() : '';
+              
+              // Skip header row entries (dates, "Команда", etc.)
+              if (teamName.includes('📅') || teamName.includes('Ризикована') || teamName === '') continue;
+              
+              // Try parsing as name + notes pair
+              const teamData = this.parseTeamData(teamName, teamNotes);
+              if (teamData) {
+                riskyTeams.push(teamData);
               }
             }
           }
