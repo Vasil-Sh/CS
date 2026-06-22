@@ -9,8 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { 
   Shield, 
   AlertTriangle, 
-  TrendingDown, 
-  TrendingUp, 
+  TrendingDown,
   Target,
   BarChart3,
   Plus,
@@ -1524,8 +1523,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                  <div className="p-8 bg-[#F0FDF4] rounded-2xl inline-block mb-6">
-                    <TrendingUp className="h-16 w-16 text-[#16A34A]" strokeWidth={1.5} />
+                  <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                    <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає значних просадок</h3>
                   <p className="text-[#6B7280] text-sm">
