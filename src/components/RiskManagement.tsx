@@ -73,16 +73,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       try {
         const parsed = JSON.parse(saved) as Array<{name: string; game: string; status: string; notes: string}>;
         // Migration: if ANY team has game longer than 10 chars, it's corrupted — reset
-        const hasCorrupted = parsed.some(t => {
-          if (!t.game || t.game.length > 10) return true;
-          return t.game !== 'CS' && t.game !== 'Дота';
-        });
+        const hasCorrupted = parsed.some(t => !t.game || t.game.length > 10);
         if (hasCorrupted) {
           console.log('[RiskMgmt] Detected corrupted localStorage data — resetting');
           localStorage.removeItem('admin_risky_teams');
           return INITIAL_RISKY_TEAMS;
         }
-        return parsed;
+        // Normalize unknown games to empty string — they'll show in "Без категорії"
+        return parsed.map(t => ({
+          ...t,
+          game: (t.game === 'CS' || t.game === 'Дота') ? t.game : (t.game || ''),
+        }));
       } catch {
         return INITIAL_RISKY_TEAMS;
       }
@@ -235,8 +236,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditingIndex(null);
     
     if (oldGame !== editGame) {
-      const targetLabel = editGame === 'CS' ? 'CS' : 'Dota 2';
-      toast.success(`Команду "${editName.trim()}" перенесено в блок ${targetLabel}`);
+      if (!editGame) {
+        toast.success(`Команду "${editName.trim()}" оновлено`);
+      } else {
+        const targetLabel = editGame === 'CS' ? 'CS' : 'Dota 2';
+        toast.success(`Команду "${editName.trim()}" перенесено в блок ${targetLabel}`);
+      }
     } else {
       toast.success('Команду оновлено');
     }
@@ -287,7 +292,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const getGameEmoji = (game: string) => {
-    return game === 'CS' ? 'CS:' : 'Дота:';
+    if (game === 'CS') return 'CS:';
+    if (game === 'Дота') return 'Дота:';
+    return '';
   };
 
   const filteredTeams = riskyTeams.filter(team => 
@@ -518,6 +525,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   // Apply both search and status filters
   const csTeams = filteredTeams.filter(t => t.game === 'CS' && (csStatusFilter === 'all' || t.status === csStatusFilter));
   const dotaTeams = filteredTeams.filter(t => t.game === 'Дота' && (dotaStatusFilter === 'all' || t.status === dotaStatusFilter));
+  const uncategorizedTeams = filteredTeams.filter(t => t.game !== 'CS' && t.game !== 'Дота');
 
   const teamsByStatus = {
     'БАН': filteredTeams.filter(t => t.status === 'БАН'),
@@ -625,14 +633,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 Перенести в блок
               </label>
               <select
-                value={editGame}
+                value={editGame || ''}
                 onChange={(e) => setEditGame(e.target.value)}
                 className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
               >
+                {(!editGame || (editGame !== 'CS' && editGame !== 'Дота')) && (
+                  <option value="" disabled>Оберіть гру...</option>
+                )}
                 <option value="CS">🎯 CS</option>
                 <option value="Дота">🛡️ Дота</option>
               </select>
-              {editGame !== team.game && (
+              {editGame && editGame !== team.game && (
                 <p className="text-xs text-[#2563EB] mt-1 flex items-center gap-1">
                   <ArrowRightLeft className="h-3 w-3" strokeWidth={1.5} />
                   Команду буде перенесено в блок {editGame === 'CS' ? 'CS' : 'Dota 2'}
@@ -1265,6 +1276,40 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Uncategorized Teams — teams without game/status for editing */}
+          {uncategorizedTeams.length > 0 && (
+            <Card 
+              className="border border-[#FDE68A] rounded-2xl bg-white overflow-hidden lg:col-span-2"
+              style={{ boxShadow: chartCardShadow }}
+            >
+              <CardHeader className="bg-[#FFFBEB] border-b border-[#FDE68A] p-6">
+                <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                  <span className="flex items-center gap-3">
+                    <div className="p-2.5 bg-[#FEF3C7] rounded-xl">
+                      <Pencil className="h-5 w-5 text-[#D97706]" strokeWidth={1.5} />
+                    </div>
+                    Без категорії
+                  </span>
+                  <Badge className="bg-[#FEF3C7] text-[#92400E] hover:bg-[#FEF3C7] px-3 py-1.5 rounded-lg border border-[#FDE68A] font-semibold text-sm">
+                    {uncategorizedTeams.length}
+                  </Badge>
+                </CardTitle>
+                <p className="text-sm text-[#92400E] mt-2 flex items-center gap-1.5">
+                  <Info className="h-4 w-4" strokeWidth={1.5} />
+                  Команди без визначеної гри або статусу. Натисніть <Pencil className="h-3.5 w-3.5 inline" strokeWidth={1.5} /> щоб відредагувати.
+                </p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {uncategorizedTeams.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Detailed Risk Metrics */}
