@@ -51,7 +51,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 11, fill: '#9CA3AF' }}

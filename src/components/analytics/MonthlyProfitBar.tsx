@@ -16,8 +16,8 @@ interface MonthlyBarProps {
 export default function MonthlyProfitBar(props: MonthlyBarProps) {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props;
   const isPositive = (payload?.profit || 0) >= 0;
-  const fillColor = isPositive ? '#10B981' : '#F87171';
-  const fillOpacity = isPositive ? 0.85 : 0.75;
+  const fillColor = isPositive ? '#16A34A' : '#DC2626';
+  const fillOpacity = 1;
 
   return (
     <rect

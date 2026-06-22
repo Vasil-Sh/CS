@@ -44,7 +44,7 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} barCategoryGap="20%">
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" />
             <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
             <Tooltip

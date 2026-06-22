@@ -41,7 +41,7 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount, cha
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis
               dataKey="odds"
               name="Коефіцієнт"

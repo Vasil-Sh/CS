@@ -241,7 +241,7 @@ export default function BankrollSimulator() {
               </div>
               <ResponsiveContainer width="100%" height={280}>
                 <ReLineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="step" tick={{ fontSize: 11, fill: '#9CA3AF' }} />
                   <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
                   <Tooltip

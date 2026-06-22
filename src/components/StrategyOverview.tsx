@@ -1144,7 +1144,7 @@ export default function StrategyOverview() {
                     <div className="p-4">
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={roiChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
                           <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
@@ -1173,7 +1173,7 @@ export default function StrategyOverview() {
                     <div className="p-4">
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={winRateChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Вінрейт (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
                           <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Вінрейт']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
@@ -1198,7 +1198,7 @@ export default function StrategyOverview() {
                     <div className="p-4">
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={profitChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                           <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
                           <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
                           <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
