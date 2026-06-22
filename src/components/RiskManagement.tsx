@@ -1288,7 +1288,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     Додайте завершені ставки для розрахунку ризик-метрик
                   </p>
                 </div>
-              ) : (<>
+              ) : (<div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-[#6B7280]">Поточна просадка:</span>
                 <span className="text-sm font-semibold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
@@ -1370,7 +1370,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <span className="text-sm text-[#6B7280]">Ризик виграшних серій:</span>
                 <span className="text-sm font-semibold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
               </div>
-              )}
+              </div>)}
             </CardContent>
           </Card>
 
