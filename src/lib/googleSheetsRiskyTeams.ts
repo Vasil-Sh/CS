@@ -34,6 +34,57 @@ class GoogleSheetsRiskyTeamsService {
   }
 
   /**
+   * Parse team data from a single cell containing name+status+game+notes.
+   * Format examples (new style — all in one cell):
+   *   "Vitality 🟩 CS У фіналах часто вимикаються..."
+   *   "Virtus Pro Dota2:в якій би не були вони формі..."
+   *   "Spirit 🟩 CS2: Не на загальну перемогу..."
+   *
+   * Status emoji mapping:
+   *   🟩 → Обережно (green square)
+   *   🟨 → Нестабільні (yellow square)
+   *   🟥 → БАН (red square)
+   */
+  private parseTeamDataFromSingleCell(cell: string): RiskyTeamFromSheet | null {
+    if (!cell || cell.trim() === '') return null;
+
+    const clean = cell.trim();
+
+    // Detect status from emoji
+    let status = 'Без статусу';
+    if (clean.includes('🟥')) status = 'БАН';
+    else if (clean.includes('🟨')) status = 'Нестабільні';
+    else if (clean.includes('🟩')) status = 'Обережно';
+
+    // Detect game
+    let game = 'CS';
+    const gameMatch = clean.match(/(?:CS2|СS|CS|Дота|Dota2)/i);
+    if (gameMatch) {
+      const g = gameMatch[0].toLowerCase();
+      game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
+    }
+
+    // Extract team name (first word(s) before emoji or game keyword)
+    // Pattern: "TeamName 🟩 CS notes..."
+    const nameMatch = clean.match(/^([\w\s.-]+?)(?:\s*[🟩🟨🟥]|\s+(?:CS2|СS|CS|Дота|Dota2)[:\s]|\s*$)/i);
+    const name = nameMatch ? nameMatch[1].trim() : clean.split(/\s+/)[0];
+
+    if (!name || name.length < 2) return null;
+
+    // Extract notes: everything after name + optional status emoji + optional game keyword
+    let notes = clean;
+    // Remove the team name from the beginning
+    notes = notes.replace(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
+    // Remove status emoji
+    notes = notes.replace(/[🟩🟨🟥]\s*/g, '');
+    // Remove game indicator
+    notes = notes.replace(/^(?:CS2|СS|CS|Дота|Dota2)[:\s]*/i, '');
+    notes = notes.trim();
+
+    return { name, game, status, notes };
+  }
+
+  /**
    * Parse team data from name and notes
    * Name is in one column, notes in the next column
    * Notes format examples:
@@ -48,7 +99,12 @@ class GoogleSheetsRiskyTeamsService {
 
     const cleanName = name.trim();
     const cleanNotes = notes ? notes.trim() : '';
-    
+
+    // If notes are empty, try parsing the name as a single-cell format
+    if (!cleanNotes) {
+      return this.parseTeamDataFromSingleCell(cleanName);
+    }
+
     // Detect game (CS or Dota)
     let game = 'CS'; // default
     const gameMatch = cleanNotes.match(/(?:СS|CS|Дота)/i);
@@ -57,22 +113,21 @@ class GoogleSheetsRiskyTeamsService {
       game = gameStr.includes('дота') ? 'Дота' : 'CS';
     }
 
-    // Detect status. If nothing matches, fall back to "Без статусу" (no status yet)
+    // Detect status from emoji in notes first (new format)
     let status = 'Без статусу';
-    if (cleanNotes.includes('БАН')) {
-      status = 'БАН';
-    } else if (cleanNotes.includes('Нестабільні') || cleanNotes.includes('нестабільн')) {
-      status = 'Нестабільні';
-    } else if (cleanNotes.includes('Рідко') || cleanNotes.includes('рідко')) {
-      status = 'Рідко';
-    } else if (cleanNotes.includes('Обережно') || cleanNotes.includes('обережно')) {
-      status = 'Обережно';
-    } else if (cleanNotes.includes('Надійна') || cleanNotes.includes('надійн')) {
-      status = 'Надійна';
-    }
+    if (cleanNotes.includes('🟥')) status = 'БАН';
+    else if (cleanNotes.includes('🟨')) status = 'Нестабільні';
+    else if (cleanNotes.includes('🟩')) status = 'Обережно';
+    // Fall back to text-based detection
+    else if (cleanNotes.includes('БАН')) status = 'БАН';
+    else if (cleanNotes.includes('Нестабільні') || cleanNotes.includes('нестабільн')) status = 'Нестабільні';
+    else if (cleanNotes.includes('Рідко') || cleanNotes.includes('рідко')) status = 'Рідко';
+    else if (cleanNotes.includes('Обережно') || cleanNotes.includes('обережно')) status = 'Обережно';
+    else if (cleanNotes.includes('Надійна') || cleanNotes.includes('надійн')) status = 'Надійна';
 
-    // Clean up notes - remove game indicator and status from the beginning
+    // Clean up notes - remove game indicator, status emoji, and status text from the beginning
     const finalNotes = cleanNotes
+      .replace(/[🟩🟨🟥]/g, '') // Remove status emoji
       .replace(/^\s*\(?\s*(?:СS|CS|Дота):\s*/i, '') // Remove game indicator
       .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status
       .replace(/^\s*\(/, '') // Remove opening parenthesis
@@ -131,23 +186,20 @@ class GoogleSheetsRiskyTeamsService {
             }
           }
         } else {
-          // Default sheet: columns L/M (11/12) and N/O (13/14)
-          if (values.length > 11 && values[11]) {
-            const teamName = values[11];
-            const teamNotes = values.length > 12 ? values[12] : '';
-            const teamData = this.parseTeamData(teamName, teamNotes);
-            if (teamData) {
-              riskyTeams.push(teamData);
-            }
-          }
+          // Default sheet: columns L (11), M (12), N (13), O (14) each contain a full team entry
+          // (name + optional status emoji + game + notes)
+          const teamColumns = [11, 12, 13, 14]; // L, M, N, O (0-indexed)
           
-          // Process columns N and O (indices 13 and 14)
-          if (values.length > 13 && values[13]) {
-            const teamName = values[13];
-            const teamNotes = values.length > 14 ? values[14] : '';
-            const teamData = this.parseTeamData(teamName, teamNotes);
-            if (teamData) {
-              riskyTeams.push(teamData);
+          for (const colIdx of teamColumns) {
+            if (values.length > colIdx && values[colIdx]) {
+              const cellValue = values[colIdx].trim();
+              if (cellValue) {
+                // First try: parse as single-cell format (all info in one cell)
+                const teamData = this.parseTeamDataFromSingleCell(cellValue);
+                if (teamData) {
+                  riskyTeams.push(teamData);
+                }
+              }
             }
           }
         }
