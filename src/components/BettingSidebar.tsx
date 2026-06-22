@@ -92,10 +92,10 @@ export function BettingSidebar({
   const hasFormData = stake && (odds || (betCategory === 'Експрес' && expressEventsCount > 0));
 
   return (
-    <div className="xl:col-span-2 space-y-6 relative">
-      <div className="sticky top-6 space-y-6 xl:grid xl:grid-cols-2 xl:gap-6 xl:space-y-0">
+    <div className="xl:col-span-2 relative h-full flex flex-col">
+      <div className="flex flex-col xl:grid xl:grid-cols-2 xl:gap-6 flex-1 min-h-0">
         {/* Calculations Card */}
-        <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
+        <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden flex flex-col"
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
@@ -104,9 +104,10 @@ export function BettingSidebar({
             </div>
             <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-4 flex-1 flex flex-col">
             {hasFormData ? (
               <>
+{/* Potential profit, EV, Kelly, etc stay compact */}
                 {betCategory === 'Експрес' && expressEventsCount > 0 && (
                   <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
                     <div className="flex justify-between items-center">
