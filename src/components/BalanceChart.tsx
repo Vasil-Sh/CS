@@ -54,14 +54,18 @@ export default function BalanceChart({ data }: BalanceChartProps) {
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: '#9CA3AF' }}
+              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }}
+              tickLine={{ stroke: '#9CA3AF' }}
               tickFormatter={(value) => {
                 const d = new Date(value);
                 return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
               }}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#9CA3AF' }}
+              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }}
+              tickLine={{ stroke: '#9CA3AF' }}
               tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
               label={{ value: 'Баланс (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#9CA3AF' } }}
             />
