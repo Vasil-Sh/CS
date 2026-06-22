@@ -348,7 +348,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Головна ціль</span>
@@ -384,8 +384,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FFF7ED]">
-              <ShieldAlert className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
+              <ShieldAlert className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
           </div>
@@ -433,7 +433,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           onMouseLeave={(e) => resetHover(e.currentTarget)}
         >
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4]">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <TrendingUp className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Вінрейт 30 днів</span>
@@ -554,8 +554,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#F0FDF4]">
-                  <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={2} />
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
+                  <Flag className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-[#374151] tracking-tight">Поточна ціль</h3>
