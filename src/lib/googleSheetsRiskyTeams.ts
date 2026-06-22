@@ -209,54 +209,13 @@ class GoogleSheetsRiskyTeamsService {
         const values = rows[i];
 
         if (parseAsCleanSheet) {
-          // Clean teams sheet: A=team name, B=status emoji+game, C=notes
+          // Clean teams sheet: A=everything (name + emoji + game + notes in one cell)
+          // Format: "Vitality 🟩 CS У фіналах часто вимикаються..."
           if (values.length > 0 && values[0]) {
-            const teamName = values[0];
-            const teamGame = values.length > 1 ? values[1] : '';
-            const teamStatus = values.length > 2 ? values[2] : '';
-            const teamComment = values.length > 3 ? values[3] : '';
-            const teamData = this.parseTeamDataStructured(teamName, teamGame, teamStatus, teamComment);
+            const teamData = this.parseTeamDataFromSingleCell(values[0]);
             if (teamData) {
               riskyTeams.push(teamData);
             }
-          }
-        } else if (parseAsCleanSheet) {
-          // Clean teams sheet: A=team name, B=status emoji+game+comment (all in one cell)
-          // Format: "Vitality | 🟩 CS У фіналах часто вимикаються..."
-          if (values.length > 0 && values[0]) {
-            const teamName = values[0].trim();
-            const colB = values.length > 1 ? (values[1] || '').trim() : '';
-            
-            if (!teamName || teamName.length < 2) continue;
-            if (/^📅|Ризикована|^[📅⛔⚠️]/.test(teamName)) continue;
-            
-            // Parse status from colB emoji
-            let status = 'Без статусу';
-            if (colB.includes('🟥')) status = 'БАН';
-            else if (colB.includes('🟨')) status = 'Нестабільні';
-            else if (colB.includes('🟩')) status = 'Обережно';
-            
-            // Parse game from colB
-            let game = 'CS';
-            const gameMatch = colB.match(/(?:CS2|CS|Дота|Dota2|Dota)/i);
-            if (gameMatch) {
-              const g = gameMatch[0].toLowerCase();
-              game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
-            }
-            
-            // Extract notes: everything after status emoji + game keyword
-            let notes = colB;
-            notes = notes.replace(/[🟩🟨🟥]\s*/g, ''); // Remove status emoji
-            notes = notes.replace(/^(?:CS2|CS|Дота|Dota2|Dota)[:\s]*\s*/i, ''); // Remove game prefix
-            notes = notes.trim();
-            
-            const teamData: RiskyTeamFromSheet = {
-              name: teamName,
-              game,
-              status,
-              notes,
-            };
-            riskyTeams.push(teamData);
           }
         } else if (isCustomSheet) {
           // Custom sheet: columns A=team name, B=game, C=status, D=comment
