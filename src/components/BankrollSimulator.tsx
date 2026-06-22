@@ -380,11 +380,11 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
       {/* ── Stop-loss / Take-profit ── */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2 flex flex-col">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end text-center justify-center">💰 Макс. втрати (₴) <span className="text-[#9CA3AF] font-normal">(0 = без ліміту)</span></Label>
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Макс. втрати (₴) <span className="text-[#9CA3AF] font-normal ml-1">(0 = без ліміту)</span></Label>
           <Input type="number" value={stopLoss} onChange={e => { setStopLoss(Number(e.target.value)); setActiveScenario(null); }} min={0} step={100} />
         </div>
         <div className="space-y-2 flex flex-col">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end text-center justify-center">🎯 Цільовий прибуток (₴) <span className="text-[#9CA3AF] font-normal">(0 = без ліміту)</span></Label>
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Цільовий прибуток (₴) <span className="text-[#9CA3AF] font-normal ml-1">(0 = без ліміту)</span></Label>
           <Input type="number" value={takeProfit} onChange={e => { setTakeProfit(Number(e.target.value)); setActiveScenario(null); }} min={0} step={100} />
         </div>
       </div>
