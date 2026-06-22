@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
@@ -32,7 +30,6 @@ import {
   Filter,
   RefreshCw,
   Trash2,
-  AlertTriangle,
   BarChart3,
   Calendar,
   ArrowUpRight,
@@ -46,8 +43,7 @@ import {
   Sun,
   Moon,
   MoreHorizontal,
-  Pencil,
-  Plus
+  Pencil
 } from 'lucide-react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -64,7 +60,6 @@ interface MonthlyData {
 
 export default function Analytics() {
   logRender('Analytics');
-  const navigate = useNavigate();
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const isAdmin = user?.role === 'admin';
@@ -525,23 +520,13 @@ export default function Analytics() {
             className="rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
-            <CardContent className="py-10 text-center px-6">
-              <div className="p-6 bg-[#F3F4F6] rounded-2xl inline-block mb-5">
-                <BarChart3 className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-              </div>
-              <h3 className="text-lg font-semibold text-[#111827] mb-1.5">
+            <CardContent className="py-5 px-6 text-center">
+              <p className="text-sm font-semibold text-[#111827] mb-1">
                 Немає даних для аналізу
-              </h3>
-              <p className="text-[#6B7280] text-sm mb-5">
-                Додайте записи на сторінці «Додати запис» для перегляду аналітики
               </p>
-              <Button
-                onClick={() => navigate('/app/my-bets')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
-              >
-                <Plus className="h-4 w-4" strokeWidth={2} />
-                Додати запис
-              </Button>
+              <p className="text-xs text-[#6B7280]">
+                Додайте записи на сторінці «Додати запис»
+              </p>
             </CardContent>
           </Card>
         )}
