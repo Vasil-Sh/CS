@@ -738,7 +738,9 @@ export default function Analytics() {
               <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
                   <div>
-                    <BalanceChart data={balanceData} />
+                    <div className="mb-8">
+                      <BalanceChart data={balanceData} />
+                    </div>
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <MonthlyProfitChartCard data={monthlyProfit} chartCardShadow={chartCardShadow} />
