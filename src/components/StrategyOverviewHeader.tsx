@@ -4,16 +4,13 @@ import {
   Flag,
   TrendingUp,
   ShieldAlert,
-  Star,
   Activity,
-  ArrowUpRight,
-  ArrowDownRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { UserDataService } from '@/lib/userDataService';
 import type { Bet } from '@/types/betting';
-import { CARD_BASE_STYLE, CARD_HOVER_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
+import { CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
@@ -71,7 +68,6 @@ interface StoredGoal {
 
 // Shared card style — identical to Analytics KPI cards
 const cardBaseStyle = CARD_BASE_STYLE;
-const cardHoverStyle = CARD_HOVER_STYLE;
 
 const applyHover = applyCardHover;
 const resetHover = resetCardHover;
