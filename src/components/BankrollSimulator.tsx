@@ -11,6 +11,7 @@ import {
   BarChart as ReBarChart, Bar, Cell,
 } from 'recharts';
 import { toast } from 'sonner';
+import { UserDataService } from '@/lib/userDataService';
 
 /* ============ Types ============ */
 
@@ -121,8 +122,39 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
   const [results, setResults] = useState<SimResult[]>([]);
   const [compareResults, setCompareResults] = useState<StrategyResult[] | null>(null);
 
+  /* ----- Load user-defined strategies ----- */
+  interface UserScenario { label: string; initialBank: number; betAmount: number; avgOdds: number; estimatedWinRate: number; totalBets: number; description: string; isCustom: boolean; }
+
+  const userScenarios = useMemo((): UserScenario[] => {
+    try {
+      const username = localStorage.getItem('username') || 'default';
+      const raw = UserDataService.getUserData<any[]>(username, 'strategies_data', []) || [];
+      return raw
+        .filter((s: any) => s.minOdds != null || s.maxOdds != null)
+        .map((s: any) => {
+          const avgOdds = s.minOdds && s.maxOdds ? (Number(s.minOdds) + Number(s.maxOdds)) / 2 : 1.8;
+          const wr = s.riskLevel === 'Low' ? 58 : s.riskLevel === 'Medium' ? 52 : 45;
+          return {
+            label: s.name || 'Стратегія',
+            initialBank: 10000,
+            betAmount: 500,
+            avgOdds,
+            estimatedWinRate: wr,
+            totalBets: 200,
+            description: `${s.riskLevel === 'Low' ? 'Низький' : s.riskLevel === 'Medium' ? 'Середній' : 'Високий'} ризик, коеф. ${avgOdds.toFixed(1)}`,
+            isCustom: true,
+          };
+        });
+    } catch { return []; }
+  }, []);
+
+  const allScenarios = useMemo(() => {
+    const presets = SCENARIOS.map(s => ({ ...s, isCustom: false }));
+    return [...presets, ...userScenarios];
+  }, [userScenarios]);
+
   const applyScenario = (label: string) => {
-    const s = SCENARIOS.find(sc => sc.label === label);
+    const s = allScenarios.find(sc => sc.label === label);
     if (!s) return;
     setInitialBank(s.initialBank); setBetAmount(s.betAmount);
     setAvgOdds(s.avgOdds); setEstimatedWinRate(s.estimatedWinRate);
@@ -279,11 +311,14 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
       <div>
         <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider mb-3 block">Готові сценарії</Label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-          {SCENARIOS.map(s => {
+          {allScenarios.map(s => {
             const isActive = activeScenario === s.label;
-            return (<button key={s.label} onClick={() => applyScenario(s.label)} className={`text-left p-3 rounded-2xl border transition-all ${isActive ? 'border-[#447afc] bg-[#EFF6FF] ring-1 ring-[#447afc]' : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'}`} title={s.description}><p className={`text-xs font-semibold ${isActive ? 'text-[#447afc]' : 'text-[#111827]'}`}>{s.label}</p><p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-tight">{s.description}</p></button>);
+            return (<button key={s.label} onClick={() => applyScenario(s.label)} className={`text-left p-3 rounded-2xl border transition-all ${isActive ? 'border-[#447afc] bg-[#EFF6FF] ring-1 ring-[#447afc]' : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'}`} title={s.description}><p className={`text-xs font-semibold ${isActive ? 'text-[#447afc]' : 'text-[#111827]'}`}>{s.label}{s.isCustom ? ' ⚡' : ''}</p><p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-tight">{s.description}</p></button>);
           })}
         </div>
+        {userScenarios.length === 0 && (
+          <p className="text-[10px] text-[#9CA3AF] mt-1">Створіть стратегію на сторінці «Стратегії» — вона з{"'"}явиться тут</p>
+        )}
       </div>
 
       {/* ── Strategy selector ── */}
