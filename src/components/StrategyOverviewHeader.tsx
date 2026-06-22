@@ -310,7 +310,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           </div>
           {activeStrategy ? (
             <>
-              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate" title={activeStrategy.name}>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 break-words" title={activeStrategy.name}>
                 {activeStrategy.name}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -355,7 +355,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           </div>
           {primaryGoal && goalInfo ? (
             <>
-              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 truncate" title={primaryGoal.name}>
+              <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 break-words" title={primaryGoal.name}>
                 {primaryGoal.name}
               </div>
               <div className="space-y-1.5">
