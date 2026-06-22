@@ -101,7 +101,7 @@ export default function Analytics() {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('CS2');
 
-  const { completedBets, riskMetrics, drawdownPeriods } = useRiskMetrics(bets);
+  const { completedBets: completedBetsForMetrics, riskMetrics, drawdownPeriods } = useRiskMetrics(bets);
 
   useEffect(() => {
     loadAnalyticsData();
@@ -827,7 +827,7 @@ export default function Analytics() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                      {completedBets.length === 0 ? (
+                      {completedBetsForMetrics.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                           <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
                             <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -951,7 +951,7 @@ export default function Analytics() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                      {completedBets.length === 0 ? (
+                      {completedBetsForMetrics.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                           <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
                             <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -1007,7 +1007,7 @@ export default function Analytics() {
                           </div>
                           <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає значних просадок</h3>
                           <p className="text-[#6B7280] text-sm">
-                            {completedBets.length === 1
+                            {completedBetsForMetrics.length === 1
                               ? 'Додайте більше завершених ставок для виявлення періодів просадок'
                               : 'За поточний період не виявлено значних просадок банку'}
                           </p>
