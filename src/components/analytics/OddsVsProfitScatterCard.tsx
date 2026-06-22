@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Target, CheckCircle, AlertTriangle } from 'lucide-react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import ScatterTooltip from '@/components/analytics/ScatterTooltip';
 
 interface Props {
@@ -59,10 +59,6 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount, cha
               tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
             />
             <Tooltip content={<ScatterTooltip />} />
-            <Legend
-              iconType="plainline"
-              wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
-            />
             <ReferenceLine
               y={0}
               stroke="#9CA3AF"
@@ -71,11 +67,13 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount, cha
             />
             <Scatter
               data={data}
-              fill="#447afc"
-              shape={(props: { cx?: number; cy?: number }) => {
-                const { cx, cy } = props;
-                return <circle cx={cx} cy={cy} r={5} fill="#447afc" opacity={0.6} stroke="#fff" strokeWidth={1.5} />;
+              shape={(props: Record<string, unknown>) => {
+                const { cx, cy, payload } = props as { cx?: number; cy?: number; payload?: { fill?: string; result?: string } };
+                const isWin = (payload?.result || 'Win') === 'Win';
+                const color = isWin ? '#16A34A' : '#DC2626';
+                return <circle cx={cx} cy={cy} r={5} fill={color} opacity={0.85} stroke={color} strokeWidth={0.5} />;
               }}
+              legendType="none"
             />
           </ScatterChart>
         </ResponsiveContainer>
