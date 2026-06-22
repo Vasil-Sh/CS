@@ -44,23 +44,17 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} barCategoryGap="20%">
-            <defs>
-              <linearGradient id="cumulativeLineGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#111827" stopOpacity={0.5} />
-                <stop offset="50%" stopColor="#111827" stopOpacity={1} />
-                <stop offset="100%" stopColor="#111827" stopOpacity={0.7} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6B7280' }} stroke="#E5E7EB" />
-            <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" />
+            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
             <Tooltip
               cursor={{ fill: 'transparent' }}
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 border: '1px solid #E5E7EB',
                 borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                padding: '8px 12px',
+                fontSize: '12px',
               }}
               formatter={(value: number | string, name: string) => {
                 if (name === 'profit') return [`${value} ₴`, 'Прибуток за місяць'];
@@ -75,22 +69,23 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
             />
             <Legend
               wrapperStyle={{ paddingTop: '20px' }}
+              iconType="plainline"
               formatter={(value: string) => {
-                if (value === 'profit') return <span style={{ color: '#374151', fontSize: '13px' }}>Прибуток за місяць</span>;
-                if (value === 'cumulative') return <span style={{ color: '#374151', fontSize: '13px' }}>Загальний прибуток</span>;
+                if (value === 'profit') return 'Прибуток за місяць';
+                if (value === 'cumulative') return 'Загальний прибуток';
                 return value;
               }}
             />
-            <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
+            <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1} strokeDasharray="6 4" />
             <Bar dataKey="profit" name="profit" maxBarSize={48} shape={<MonthlyProfitBar />} />
             <Line
               type="monotone"
               dataKey="cumulative"
-              stroke="url(#cumulativeLineGrad)"
+              stroke="#447afc"
               strokeWidth={2.5}
               name="cumulative"
-              dot={{ fill: '#111827', r: 4, strokeWidth: 2, stroke: '#fff' }}
-              activeDot={{ r: 6 }}
+              dot={false}
+              activeDot={{ r: 5, fill: '#447afc', stroke: '#fff', strokeWidth: 2 }}
             />
           </BarChart>
         </ResponsiveContainer>
