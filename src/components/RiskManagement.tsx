@@ -1241,7 +1241,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       </Button>
                     )}
                   </div>
-                  </p>
                 ) : (
                   dotaTeams.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
