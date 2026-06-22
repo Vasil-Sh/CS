@@ -568,7 +568,7 @@ export default function Analytics() {
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
               <button
                 onClick={(e) => { e.stopPropagation(); handleBankCardClick(); }}
-                className="ml-auto flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] hover:bg-[#447afc] text-[#447afc] hover:text-white transition-all duration-200"
+                className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-[#447afc] hover:bg-[#3568d4] text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
                 title="Редагувати банк"
               >
                 <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
