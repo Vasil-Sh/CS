@@ -434,48 +434,73 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Період</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Ставок</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Win Rate</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Прибуток</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">ROI</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Серія ↑</th>
-                    <th className="text-center py-4 px-6 text-sm font-semibold text-[#6B7280] uppercase tracking-wider">Серія ↓</th>
+                  <tr className="border-b-2 border-[#D1D5DB] bg-[#F3F4F6]">
+                    <th className="text-left py-5 px-6 text-xs font-semibold text-[#6B7280] uppercase tracking-wider w-40">Період</th>
+                    <th className="text-center py-5 px-5 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Ставок</th>
+                    <th className="text-center py-5 px-5 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Win Rate</th>
+                    <th className="text-center py-5 px-5 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Прибуток</th>
+                    <th className="text-center py-5 px-5 text-xs font-semibold text-[#6B7280] uppercase tracking-wider">ROI</th>
+                    <th className="text-center py-5 px-4 text-xs font-semibold text-[#22C55E] uppercase tracking-wider">Серія ↑</th>
+                    <th className="text-center py-5 px-4 text-xs font-semibold text-[#EF4444] uppercase tracking-wider">Серія ↓</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedPeriods.map((period, index) => (
+                  {selectedPeriods.map((period, index) => {
+                    const isCurrent = index === selectedPeriods.length - 1;
+                    const isLast = index === selectedPeriods.length - 1;
+                    return (
                     <tr 
                       key={period.period} 
-                      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors ${index === selectedPeriods.length - 1 ? 'bg-[#F9FAFB]' : ''}`}
+                      className={`border-b border-[#E5E7EB] transition-colors ${isCurrent ? 'bg-[#F0F7FF]' : 'hover:bg-[#F9FAFB]'}`}
                     >
-                      <td className="py-4 px-6">
+                      <td className="py-5 px-6">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-[#111827]">{formatPeriodName(period.period)}</span>
-                          {index === selectedPeriods.length - 1 && (
-                            <Badge className="rounded-lg bg-[#111827] text-white border-0 font-medium px-2.5 py-0.5 text-xs">
+                          <span className={`font-semibold text-[#111827] ${isCurrent ? 'text-base' : 'text-sm'}`}>{formatPeriodName(period.period)}</span>
+                          {isCurrent && (
+                            <Badge className="rounded-lg bg-[#111827] text-white hover:bg-[#111827] border-0 font-semibold px-3 py-1 text-xs">
                               Поточний
                             </Badge>
                           )}
                         </div>
                       </td>
-                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#111827]">{period.totalBets}</td>
-                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#111827]">{period.winRate.toFixed(1)}%</td>
-                      <td className="text-center py-4 px-6">
-                        <span className={`text-sm font-semibold ${period.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                      <td className="text-center py-5 px-5">
+                        <span className={`font-semibold text-[#111827] ${isCurrent ? 'text-lg' : 'text-base'}`}>{period.totalBets}</span>
+                      </td>
+                      <td className="text-center py-5 px-5">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className={`font-semibold ${period.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'} ${isCurrent ? 'text-lg' : 'text-base'}`}>
+                            {period.winRate.toFixed(1)}%
+                          </span>
+                          {period.winRate >= 50 ? (
+                            <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2} />
+                          ) : (
+                            <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2} />
+                          )}
+                        </div>
+                      </td>
+                      <td className="text-center py-5 px-5">
+                        <Badge className={`rounded-xl font-semibold text-sm px-4 py-1.5 border ${period.totalProfit >= 0 ? 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'}`}>
                           {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="text-center py-4 px-6">
-                        <span className={`text-sm font-semibold ${period.averageROI >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                      <td className="text-center py-5 px-5">
+                        <Badge className={`rounded-xl font-semibold text-sm px-4 py-1.5 border ${period.averageROI >= 0 ? 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'}`}>
                           {period.averageROI >= 0 ? '+' : ''}{period.averageROI.toFixed(1)}%
+                        </Badge>
+                      </td>
+                      <td className="text-center py-5 px-4">
+                        <span className="inline-flex items-center gap-1 text-base font-bold text-[#22C55E]">
+                          +{period.bestStreak}
                         </span>
                       </td>
-                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#22C55E]">+{period.bestStreak}</td>
-                      <td className="text-center py-4 px-6 text-sm font-semibold text-[#EF4444]">-{period.worstStreak}</td>
+                      <td className="text-center py-5 px-4">
+                        <span className="inline-flex items-center gap-1 text-base font-bold text-[#EF4444]">
+                          −{period.worstStreak}
+                        </span>
+                      </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
