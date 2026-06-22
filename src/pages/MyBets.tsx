@@ -292,10 +292,10 @@ export default function MyBets() {
 
         {/* Stats Row 2 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <StatCard icon={<Clock className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />} label="Активні" value={String(activeBets.length)} valueColor="text-[#3B82F6]" subtext="Очікують результату" />
-          <StatCard icon={<Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />} label="Виграші" value={String(winningBets.length)} valueColor="text-[#22C55E]" subtext="Успішних записів" trend="up" />
-          <StatCard icon={<AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />} label="Програші" value={String(losingBets.length)} valueColor="text-[#EF4444]" subtext="Невдалих записів" trend="down" />
-          <StatCard icon={<TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />} label="Середній ROI" value={`${stats.averageROI >= 0 ? '+' : ''}${stats.averageROI}%`} valueColor={stats.averageROI >= 0 ? 'text-[#111827]' : 'text-[#EF4444]'} subtext={stats.averageROI >= 0 ? 'Позитивний' : 'Негативний'} subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />} trend={stats.averageROI >= 0 ? 'up' : 'down'} />
+          <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Активні" value={String(activeBets.length)} valueColor="text-[#3B82F6]" subtext="Очікують результату" />
+          <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Виграші" value={String(winningBets.length)} valueColor="text-[#22C55E]" subtext="Успішних записів" trend="up" />
+          <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Програші" value={String(losingBets.length)} valueColor="text-[#EF4444]" subtext="Невдалих записів" trend="down" />
+          <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Середній ROI" value={`${stats.averageROI >= 0 ? '+' : ''}${stats.averageROI}%`} valueColor={stats.averageROI >= 0 ? 'text-[#111827]' : 'text-[#EF4444]'} subtext={stats.averageROI >= 0 ? 'Позитивний' : 'Негативний'} subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />} trend={stats.averageROI >= 0 ? 'up' : 'down'} />
         </div>
 
         {/* Tabs */}
