@@ -249,10 +249,6 @@ class GoogleSheetsRiskyTeamsService {
           } else {
             skippedEmpty++;
           }
-            if (teamData) {
-              riskyTeams.push(teamData);
-            }
-          }
         } else if (isCustomSheet) {
           // Custom sheet: columns A=team name, B=game, C=status, D=comment
           if (values.length > 0 && values[0]) {
