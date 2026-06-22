@@ -816,7 +816,8 @@ export default function Analytics() {
                 <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col flex-1 space-y-6">
                 <PeriodComparison bets={bets} />
                 
-                {/* Risk Metrics + Drawdown Periods (moved from Strategy page) */}
+                {/* Risk Metrics + Drawdown Periods — only show when there's data */}
+                {completedBetsForMetrics.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card 
                     className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
@@ -1020,6 +1021,7 @@ export default function Analytics() {
                     </CardContent>
                   </Card>
                 </div>
+                )}
               </div>
               </TooltipProvider>
             )}
