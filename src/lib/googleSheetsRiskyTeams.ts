@@ -185,6 +185,14 @@ class GoogleSheetsRiskyTeamsService {
       // Parse CSV properly handling multiline values in quotes
       const rows = this.parseCSV(csvText);
       
+      // Debug: log first 3 rows to console
+      console.log('[RiskyTeams] Sheet GID:', gid, 'Total rows:', rows.length);
+      if (rows.length > 1) {
+        console.log('[RiskyTeams] Row 1 (header):', rows[0].slice(0, 15));
+        if (rows.length > 2) console.log('[RiskyTeams] Row 2:', rows[1].slice(0, 15));
+        if (rows.length > 3) console.log('[RiskyTeams] Row 3:', rows[2].slice(0, 15));
+      }
+      
       const riskyTeams: RiskyTeamFromSheet[] = [];
       
       // Skip header row, start from row 2 (index 1)
@@ -221,6 +229,11 @@ class GoogleSheetsRiskyTeamsService {
             }
           }
         }
+      }
+      
+      console.log('[RiskyTeams] Parsed teams count:', riskyTeams.length);
+      if (riskyTeams.length > 0 && riskyTeams.length < 10) {
+        riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
       }
       
       return riskyTeams;
