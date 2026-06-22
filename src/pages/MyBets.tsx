@@ -283,19 +283,23 @@ export default function MyBets() {
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Stats Row 1 */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Поточний банк" value={`${bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴`} subtext={`${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(2)} ₴ за весь час`} subIcon={stats.totalProfit >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />} trend={stats.totalProfit >= 0 ? 'up' : 'down'} />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Профіт" value={`${(stats.totalProfit || 0) >= 0 ? '+' : ''}${(stats.totalProfit || 0).toFixed(2)} ₴`} valueColor={(stats.totalProfit || 0) >= 0 ? 'text-[#111827]' : 'text-[#EF4444]'} subtext={(stats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'} subIcon={(stats.totalProfit || 0) >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />} trend={(stats.totalProfit || 0) >= 0 ? 'up' : 'down'} />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Всього записів" value={String(stats.totalBets)} subtext={activeBets.length > 0 ? `${activeBets.length} активних` : 'Немає активних'} />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Вінрейт" value={`${stats.winRate}%`} subtext={`${winningBets.length}W / ${losingBets.length}L`} />
         </div>
+        </div>
 
         {/* Stats Row 2 */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Активні" value={String(activeBets.length)} valueColor="text-[#3B82F6]" subtext="Очікують результату" />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Виграші" value={String(winningBets.length)} valueColor="text-[#22C55E]" subtext="Успішних записів" trend="up" />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Програші" value={String(losingBets.length)} valueColor="text-[#EF4444]" subtext="Невдалих записів" trend="down" />
           <StatCard icon={<div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]"><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>} label="Середній ROI" value={`${stats.averageROI >= 0 ? '+' : ''}${stats.averageROI}%`} valueColor={stats.averageROI >= 0 ? 'text-[#111827]' : 'text-[#EF4444]'} subtext={stats.averageROI >= 0 ? 'Позитивний' : 'Негативний'} subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />} trend={stats.averageROI >= 0 ? 'up' : 'down'} />
+        </div>
         </div>
 
         {/* Tabs */}
@@ -311,6 +315,7 @@ export default function MyBets() {
           </div>
 
           {activeTab === 'records' && (
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <BetTable bets={recentBets} activeBets={activeBets} currentUser={currentUser} isAdmin={isAdmin}
               onNavigateToAdd={() => setActiveTab('add')}
               tableFilter={tableFilter} onTableFilterChange={setTableFilter}
@@ -322,14 +327,21 @@ export default function MyBets() {
               searchText={searchText} onSearchTextChange={setSearchText}
               onShareBet={handleShareBet} onBetDetails={handleBetDetails}
               onExpressDetails={handleExpressDetails} onUpdateResult={updateBetResult} onDeleteBet={handleDeleteBet} />
+            </div>
           )}
           {activeTab === 'add' && (
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <CS2BettingForm onRecordAdded={handleRecordAdded} prefillData={prefillData}
               onPrefillConsumed={() => setPrefillData(null)}
               expressMatchesData={expressMatchesData}
               onExpressMatchesConsumed={() => setExpressMatchesData(null)} />
+            </div>
           )}
-          {activeTab === 'strategies' && <StrategyOverview />}
+          {activeTab === 'strategies' && (
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <StrategyOverview />
+            </div>
+          )}
         </div>
 
         <InitialBankModal open={bankModalOpen} onClose={handleBankModalClose} mode={isBankrollInitialized ? 'edit' : 'setup'} />
