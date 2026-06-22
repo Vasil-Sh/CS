@@ -67,7 +67,7 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
               }}
             />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
-            <Bar dataKey="profit" name="profit" maxBarSize={12} radius={[6, 6, 6, 6]}>
+            <Bar dataKey="profit" name="profit" maxBarSize={8} radius={[8, 8, 8, 8]}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#16A34A' : '#DC2626'} />
               ))}
