@@ -413,20 +413,20 @@ export default function TelegramGroups() {
   const renderKPICards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
-      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#F0FDF4]" iconColor="text-[#16A34A]" />
+      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard 
         label="Win Rate" 
         value={`${overallStats.winRate.toFixed(0)}%`} 
         icon={overallStats.winRate >= 50 ? TrendingUp : TrendingDown} 
-        color="bg-[#FEF3C7]" 
-        iconColor={overallStats.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
+        color="bg-[#EFF6FF]" 
+        iconColor="text-[#447afc]"
       />
       <StatCard 
         label="Прибуток" 
         value={`${overallStats.totalProfit >= 0 ? '+' : ''}${overallStats.totalProfit.toFixed(0)}`} 
         icon={Target} 
-        color="bg-[#F0FDF4]" 
-        iconColor={overallStats.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}
+        color="bg-[#EFF6FF]" 
+        iconColor="text-[#447afc]"
       />
     </div>
   );
