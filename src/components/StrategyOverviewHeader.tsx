@@ -349,7 +349,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         >
           <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
-              <Flag className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
+              <Flag className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Головна ціль</span>
           </div>
@@ -434,7 +434,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         >
           <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
-              <TrendingUp className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
+              <TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Вінрейт 30 днів</span>
           </div>
