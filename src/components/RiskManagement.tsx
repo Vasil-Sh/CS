@@ -951,7 +951,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <p className="text-xs text-[#6B7280] mt-1">
                       ℹ️ Колонка <span className="font-semibold text-[#111827]">B</span> — все в одній комірці: емодзі статусу (<Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟥 БАН</Badge> <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟨 Нестабільні</Badge> <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟩 Обережно</Badge>), потім гра (<Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS</Badge>, <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Dota2</Badge>), потім коментар.
                     </p>
-                    </p>
                   </div>
                 </div>
               </div>
