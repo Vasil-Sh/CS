@@ -1165,8 +1165,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
               <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                 <span className="flex items-center gap-3">
-                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                    <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                   </div>
                   CS команди
                 </span>
@@ -1179,9 +1179,21 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {csTeams.length === 0 ? (
-                  <p className="text-center text-[#9CA3AF] py-8 text-sm">
-                    {csStatusFilter !== 'all' ? `Немає CS команд зі статусом "${csStatusFilter}"` : 'Немає команд CS'}
-                  </p>
+                  <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <Target className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає команд CS</h3>
+                    <p className="text-[#6B7280] text-sm mb-6">
+                      {csStatusFilter !== 'all' ? `Немає CS команд зі статусом "${csStatusFilter}"` : 'Додайте ризиковані команди CS для відстеження'}
+                    </p>
+                    {csStatusFilter !== 'all' && (
+                      <Button onClick={() => setCsStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                        Скинути фільтр
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   csTeams.map((team) => {
                     const globalIndex = riskyTeams.findIndex(t => t === team);
@@ -1200,8 +1212,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
               <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                 <span className="flex items-center gap-3">
-                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-                    <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+                  <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <Shield className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                   </div>
                   Dota 2 команди
                 </span>
@@ -1214,8 +1226,21 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <CardContent className="p-6">
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {dotaTeams.length === 0 ? (
-                  <p className="text-center text-[#9CA3AF] py-8 text-sm">
-                    {dotaStatusFilter !== 'all' ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"` : 'Немає команд Dota 2'}
+                  <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <Shield className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає команд Dota 2</h3>
+                    <p className="text-[#6B7280] text-sm mb-6">
+                      {dotaStatusFilter !== 'all' ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"` : 'Додайте ризиковані команди Dota 2 для відстеження'}
+                    </p>
+                    {dotaStatusFilter !== 'all' && (
+                      <Button onClick={() => setDotaStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                        Скинути фільтр
+                      </Button>
+                    )}
+                  </div>
                   </p>
                 ) : (
                   dotaTeams.map((team) => {
