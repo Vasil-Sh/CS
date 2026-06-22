@@ -580,7 +580,9 @@ export default function Analytics() {
             </div>
 
             <div className="flex items-center gap-2 mb-3">
-              <Wallet className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
@@ -611,7 +613,9 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
@@ -642,7 +646,9 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-lg font-semibold text-[#111827]">Всього записів</span>
             </div>
             <div className="flex items-center justify-between">
@@ -686,7 +692,9 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
             </div>
             <div className="flex items-center justify-between">
