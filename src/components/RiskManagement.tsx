@@ -103,6 +103,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSheetsGuideOpen, setIsSheetsGuideOpen] = useState(false);
+  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
   const [customSheetUrl, setCustomSheetUrl] = useState('');
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -202,6 +203,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       setEditingIndex(null);
     }
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
+  };
+
+  const deleteAllTeams = () => {
+    setRiskyTeams([]);
+    setEditingIndex(null);
+    localStorage.removeItem('admin_risky_teams');
+    toast.success('Усі команди видалено');
+    setIsDeleteAllOpen(false);
   };
 
   const startEditing = (globalIndex: number, team: RiskyTeam) => {
@@ -758,6 +767,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <Search className="h-4 w-4" strokeWidth={2} />
             </button>
 
+            {/* Delete all — only shown when teams exist */}
+            {riskyTeams.length > 0 && (
+              <button
+                onClick={() => setIsDeleteAllOpen(true)}
+                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors"
+                title="Видалити всі команди"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2} />
+              </button>
+            )}
+
             {/* Google Sheets button — opens guide modal */}
             <button
               onClick={() => setIsSheetsGuideOpen(true)}
@@ -1166,6 +1186,43 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               >
                 <Plus className="mr-2 h-4 w-4" strokeWidth={2} />
                 Додати команду
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Confirmation Dialog */}
+        <Dialog open={isDeleteAllOpen} onOpenChange={setIsDeleteAllOpen}>
+          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] bg-white">
+            <DialogHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FEF2F2] rounded-xl flex-shrink-0">
+                  <Trash2 className="h-5 w-5 text-[#EF4444]" strokeWidth={1.75} />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-semibold text-[#111827]">
+                    Видалити всі команди?
+                  </DialogTitle>
+                  <DialogDescription className="text-[#6B7280] mt-0.5">
+                    Ця дія незворотна — усі {riskyTeams.length} команд будуть видалені назавжди.
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+            <DialogFooter className="gap-2 pt-3 border-t border-[#E5E7EB]">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteAllOpen(false)}
+                className="rounded-xl border-[#E5E7EB] font-medium"
+              >
+                Скасувати
+              </Button>
+              <Button
+                onClick={deleteAllTeams}
+                className="bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-xl text-sm px-6 font-semibold"
+              >
+                <Trash2 className="mr-2 h-4 w-4" strokeWidth={2} />
+                Видалити всі
               </Button>
             </DialogFooter>
           </DialogContent>
