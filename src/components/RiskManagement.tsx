@@ -782,7 +782,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         )}
 
         {/* Team-focused Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Total risky teams */}
           <div 
             className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
@@ -791,7 +792,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Shield className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Всього команд</span>
             </div>
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
@@ -810,7 +813,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <TrendingDown className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <TrendingDown className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Заборонені</span>
             </div>
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
@@ -829,7 +834,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Високий ризик</span>
             </div>
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
@@ -848,7 +855,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Target className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
               <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Основна гра</span>
             </div>
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
@@ -857,6 +866,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
               {teamStats.dominantGameCount} команд у списку
             </Badge>
+          </div>
           </div>
         </div>
 
