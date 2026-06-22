@@ -673,11 +673,13 @@ export default function Profile() {
       {(activeTab === null || activeTab === 'simulator') && (
       <Card id="simulator" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+          <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+            <span className="flex items-center gap-3">
             <div className="p-2.5 bg-[#FFF7ED] rounded-xl">
               <Calculator className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
             </div>
             Симулятор банкролу
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">

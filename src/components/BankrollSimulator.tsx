@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { RefreshCw, Sliders, Target, LineChart, BarChart3, Percent, Download, GitCompare } from 'lucide-react';
+import { RefreshCw, Sliders, Target, LineChart, BarChart3, Percent, Download, GitCompare, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -174,6 +174,23 @@ export default function BankrollSimulator() {
     toast.success(`CSV експортовано! (${results.length} симуляцій)`);
   };
 
+  /* ----- Reset all data ----- */
+  const handleReset = () => {
+    setResults([]);
+    setCompareResults(null);
+    setActiveScenario(null);
+    setInitialBank(10000);
+    setBetAmount(500);
+    setBetPercent(5);
+    setAvgOdds(1.8);
+    setEstimatedWinRate(55);
+    setTotalBets(100);
+    setStrategy('flat');
+    setStopLoss(0);
+    setTakeProfit(0);
+    toast.success('Дані симулятора скинуто');
+  };
+
   const averageResult = useMemo(() => {
     if (results.length === 0) return null;
     const c = results.length;
@@ -333,15 +350,20 @@ export default function BankrollSimulator() {
       </div>
 
       {/* ── Run buttons ── */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <Button onClick={() => handleSimulate(1)} className="gap-2 bg-[#447afc] hover:bg-[#3568d4]"><RefreshCw className="h-4 w-4" /> Симулювати 1 раз</Button>
-        <Button onClick={() => handleSimulate(100)} variant="outline" className="gap-2"><Sliders className="h-4 w-4" /> Симулювати 100 разів</Button>
-        <Button onClick={() => handleSimulate(1000)} variant="outline" className="gap-2"><Target className="h-4 w-4" /> Симулювати 1000 разів</Button>
-        <Button onClick={handleCompareStrategies} variant="outline" className="gap-2 border-[#D97706] text-[#D97706] hover:bg-[#FFF7ED]">
+      <div className="flex items-center gap-3 flex-wrap">
+        <Button onClick={() => handleSimulate(1)} className="gap-2 bg-[#447afc] hover:bg-[#3568d4]" size="sm"><RefreshCw className="h-4 w-4" /> Симулювати 1 раз</Button>
+        <Button onClick={() => handleSimulate(100)} variant="outline" className="gap-2" size="sm"><Sliders className="h-4 w-4" /> Симулювати 100 разів</Button>
+        <Button onClick={() => handleSimulate(1000)} variant="outline" className="gap-2" size="sm"><Target className="h-4 w-4" /> Симулювати 1000 разів</Button>
+        <Button onClick={handleCompareStrategies} variant="outline" className="gap-2 border-[#D97706] text-[#D97706] hover:bg-[#FFF7ED]" size="sm">
           <GitCompare className="h-4 w-4" /> Порівняти стратегії
         </Button>
         {results.length > 0 && (
-          <Button onClick={handleExportCSV} variant="outline" className="gap-2"><Download className="h-4 w-4" /> Експорт CSV</Button>
+          <Button onClick={handleExportCSV} variant="outline" className="gap-2" size="sm"><Download className="h-4 w-4" /> Експорт CSV</Button>
+        )}
+        {(results.length > 0 || compareResults) && (
+          <Button onClick={handleReset} variant="outline" className="gap-2 border-[#DC2626] text-[#DC2626] hover:bg-[#FEF2F2]" size="sm">
+            <Trash2 className="h-4 w-4" /> Скинути
+          </Button>
         )}
         <span className="text-xs text-[#9CA3AF] ml-auto">{strategyLabel(strategy)}</span>
       </div>
