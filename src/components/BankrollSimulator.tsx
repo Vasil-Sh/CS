@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { RefreshCw, Sliders, Target, LineChart, BarChart3, Percent, Download, GitCompare, Trash2, Save, TrendingUp } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { RefreshCw, Sliders, Target, LineChart, BarChart3, Percent, Download, GitCompare, Trash2, Save, Play, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -113,7 +113,12 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
   const [activeScenario, setActiveScenario] = useState<string | null>(null);
   const [results, setResults] = useState<SimResult[]>([]);
   const [compareResults, setCompareResults] = useState<{ label: string; finalBank: number; totalProfit: number; roi: number; winRate: number; bankruptcies: number; history: { step: number; bank: number }[] }[] | null>(null);
-  const [compareResults
+  const [animating, setAnimating] = useState(false);
+  const [animBank, setAnimBank] = useState<number | null>(null);
+  const animRef = useRef<number | null>(null);
+
+  /* ----- Load user strategies + saved scenarios ----- */
+  const userScenarios = useMemo((): SavedScenario[] => {
     try {
       const username = localStorage.getItem('username') || 'default';
       const raw = UserDataService.getUserData<any[]>(username, 'strategies_data', []) || [];
@@ -188,6 +193,34 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
     setResults(newResults); setCompareResults(null);
   };
 
+  /* ----- Animate single simulation ----- */
+  const handleAnimate = () => {
+    setAnimating(true); setAnimBank(initialBank); setResults([]);
+    let bank = initialBank, step = 0;
+    const params: SimParams = { initialBank, betAmount, betPercent, minOdds, maxOdds, estimatedWinRate, totalBets, stopLoss, takeProfit, strategy };
+    const kellyFrac = calcKelly(estimatedWinRate, (minOdds + maxOdds) / 2);
+
+    const tick = () => {
+      if (step >= totalBets || bank <= 0 || (stopLoss > 0 && bank <= initialBank - stopLoss) || (takeProfit > 0 && bank >= initialBank + takeProfit)) {
+        setAnimating(false); setAnimBank(null); handleSimulate(1); return;
+      }
+      let currentBet: number;
+      if (strategy === 'flatPercent') currentBet = bank * betPercent / 100;
+      else if (strategy === 'kelly') currentBet = bank * kellyFrac;
+      else currentBet = betAmount;
+      if (currentBet <= 0 || bank < currentBet) { setAnimating(false); setAnimBank(null); handleSimulate(1); return; }
+      const odds = minOdds + Math.random() * (maxOdds - minOdds);
+      if (Math.random() * 100 < estimatedWinRate) bank += currentBet * (odds - 1);
+      else bank -= currentBet;
+      setAnimBank(Math.round(bank * 100) / 100);
+      step++;
+      animRef.current = window.setTimeout(tick, 30);
+    };
+    tick();
+  };
+
+  useEffect(() => () => { if (animRef.current) clearTimeout(animRef.current); }, []);
+
   /* ----- Strategy comparison ----- */
   const handleCompareStrategies = () => {
     const strategies: StrategyType[] = ['flat', 'flatPercent', 'kelly'];
@@ -235,6 +268,8 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
   };
 
   const handleReset = () => {
+    if (animRef.current) clearTimeout(animRef.current);
+    setAnimating(false); setAnimBank(null);
     setResults([]); setCompareResults(null); setActiveScenario(null);
     setInitialBank(10000); setBetAmount(500); setBetPercent(5);
     setMinOdds(1.5); setMaxOdds(2.2); setEstimatedWinRate(55); setTotalBets(100);
@@ -385,9 +420,18 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
         <Button onClick={() => handleSimulate(100)} variant="outline" className="gap-2" size="sm"><Sliders className="h-4 w-4" /> 100 разів</Button>
         <Button onClick={() => handleSimulate(1000)} variant="outline" className="gap-2" size="sm"><Target className="h-4 w-4" /> 1000 разів</Button>
         <Button onClick={handleCompareStrategies} variant="outline" className="gap-2 border-[#D97706] text-[#D97706] hover:bg-[#FFF7ED]" size="sm"><GitCompare className="h-4 w-4" /> Порівняти стратегії</Button>
+        <Button onClick={handleAnimate} disabled={animating} variant="outline" className="gap-2 border-[#16A34A] text-[#16A34A] hover:bg-[#F0FDF4]" size="sm"><Play className="h-4 w-4" /> Анімація</Button>
         {results.length > 0 && (<Button onClick={handleExportCSV} variant="outline" className="gap-2" size="sm"><Download className="h-4 w-4" /> CSV</Button>)}
         <span className="text-xs text-[#9CA3AF] ml-auto">{strategyLabel(strategy)}</span>
       </div>
+
+      {/* ── Animated bank display ── */}
+      {animating && animBank !== null && (
+        <Card className="p-4 bg-[#EFF6FF] border border-[#447afc] rounded-2xl text-center">
+          <p className="text-xs text-[#6B7280] uppercase tracking-wider">Банк (анімація)</p>
+          <p className="text-3xl font-bold text-[#447afc]">{animBank.toLocaleString()} ₴</p>
+        </Card>
+      )}
 
       {/* ── Strategy Comparison (line chart) ── */}
       {compareResults && (
