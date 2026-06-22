@@ -69,7 +69,22 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   logRender('RiskManagement');
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>(() => {
     const saved = localStorage.getItem('admin_risky_teams');
-    return saved ? JSON.parse(saved) : INITIAL_RISKY_TEAMS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Array<{name: string; game: string; status: string; notes: string}>;
+        // Migration: if ANY team has game longer than 10 chars, it's corrupted — reset
+        const hasCorrupted = parsed.some(t => t.game && t.game.length > 10);
+        if (hasCorrupted) {
+          console.log('[RiskMgmt] Detected corrupted localStorage data — resetting');
+          localStorage.removeItem('admin_risky_teams');
+          return INITIAL_RISKY_TEAMS;
+        }
+        return parsed;
+      } catch {
+        return INITIAL_RISKY_TEAMS;
+      }
+    }
+    return INITIAL_RISKY_TEAMS;
   });
   
   const [newTeam, setNewTeam] = useState<RiskyTeam>({
@@ -139,41 +154,18 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return;
       }
 
-      const existingTeams = riskyTeams;
-      const newTeamsToAdd: RiskyTeam[] = [];
-      
-      teamsFromSheet.forEach(sheetTeam => {
-        const normalizedSheetTeam = normalizeTeamName(sheetTeam.name);
-        
-        const exists = existingTeams.some(existingTeam => 
-          normalizeTeamName(existingTeam.name) === normalizedSheetTeam && 
-          existingTeam.game === sheetTeam.game
-        );
-        
-        if (!exists) {
-          newTeamsToAdd.push(sheetTeam);
-        }
-      });
-
-      if (newTeamsToAdd.length === 0) {
-        toast.info('Немає нових команд для додавання', {
-          description: 'Всі команди з Google Sheets вже присутні у списку'
-        });
-        return;
-      }
-
-      const mergedTeams = [...existingTeams, ...newTeamsToAdd];
-      setRiskyTeams(mergedTeams);
+      // Replace ALL teams (not merge) — Google Sheets is the source of truth
+      setRiskyTeams(teamsFromSheet);
       
       // Debug: show sample of parsed team games
-      const sampleGames = mergedTeams.slice(0, 5).map(t => `${t.name}=${t.game}`);
+      const sampleGames = teamsFromSheet.slice(0, 5).map(t => `${t.name}=${t.game}`);
       console.log('[RiskMgmt] Sample teams (name=game):', sampleGames);
-      console.log('[RiskMgmt] Total:', mergedTeams.length, 'CS:', mergedTeams.filter(t => t.game === 'CS').length, 'Дота:', mergedTeams.filter(t => t.game === 'Дота').length);
+      console.log('[RiskMgmt] Total:', teamsFromSheet.length, 'CS:', teamsFromSheet.filter(t => t.game === 'CS').length, 'Дота:', teamsFromSheet.filter(t => t.game === 'Дота').length);
       
-      localStorage.setItem('admin_risky_teams', JSON.stringify(mergedTeams));
+      localStorage.setItem('admin_risky_teams', JSON.stringify(teamsFromSheet));
       
-      toast.success(`Успішно додано ${newTeamsToAdd.length} нових команд з Google Sheets!`, {
-        description: `Всього команд: ${mergedTeams.length}`
+      toast.success(`Завантажено ${teamsFromSheet.length} команд з Google Sheets!`, {
+        description: `CS: ${teamsFromSheet.filter(t => t.game === 'CS').length} · Дота: ${teamsFromSheet.filter(t => t.game === 'Дота').length}`
       });
     } catch (error) {
       console.error('Error updating from Google Sheets:', error);
@@ -519,11 +511,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   // Apply both search and status filters
   const csTeams = filteredTeams.filter(t => t.game === 'CS' && (csStatusFilter === 'all' || t.status === csStatusFilter));
   const dotaTeams = filteredTeams.filter(t => t.game === 'Дота' && (dotaStatusFilter === 'all' || t.status === dotaStatusFilter));
-
-  // Debug rendering
-  console.log('[RiskMgmt] Render - filteredTeams:', filteredTeams.length, 'csTeams:', csTeams.length, 'dotaTeams:', dotaTeams.length);
-  console.log('[RiskMgmt] csStatusFilter:', csStatusFilter, 'dotaStatusFilter:', dotaStatusFilter);
-  if (filteredTeams.length > 0) console.log('[RiskMgmt] Sample game values:', filteredTeams.slice(0, 3).map(t => `${t.name}=${t.game}`));
 
   const teamsByStatus = {
     'БАН': filteredTeams.filter(t => t.status === 'БАН'),
