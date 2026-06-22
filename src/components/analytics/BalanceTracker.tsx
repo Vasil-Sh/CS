@@ -44,28 +44,6 @@ export default function BalanceTracker({
   const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
   const isFalling = hasBets && percentOfPeak < 50;
 
-  const statusColor = !hasBets ? 'gray'
-    : isGrowing ? 'green'
-    : isStable ? 'blue'
-    : isDipping ? 'amber'
-    : 'red';
-
-  const statusDotColor = {
-    gray: 'bg-[#9CA3AF]',
-    green: 'bg-[#10B981]',
-    blue: 'bg-[#3B82F6]',
-    amber: 'bg-[#F59E0B]',
-    red: 'bg-[#EF4444]',
-  }[statusColor];
-
-  const statusRingColor = {
-    gray: 'ring-[#9CA3AF]/20',
-    green: 'ring-[#10B981]/20',
-    blue: 'ring-[#3B82F6]/20',
-    amber: 'ring-[#F59E0B]/20',
-    red: 'ring-[#EF4444]/20',
-  }[statusColor];
-
   // AI advice
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -111,41 +89,34 @@ export default function BalanceTracker({
       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, { transform: 'translateY(0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }); }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-5 pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#111827]">
-            <BarChart3 className="h-4.5 w-4.5 text-white" strokeWidth={1.5} />
+      <div className="px-6 pt-5 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]">
+              <BarChart3 className="h-5 w-5 text-white" strokeWidth={1.5} />
+            </div>
+            <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
           </div>
-          <div>
-            <span className="text-base font-semibold text-[#111827]">Трекер балансу</span>
-            {hasBets && (
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor} ring-2 ${statusRingColor} animate-pulse`} />
-                <span className="text-xs text-[#6B7280]">
-                  {isGrowing ? 'Зростає' : isStable ? 'Стабільний' : isDipping ? 'Просідає' : 'Падає'}
-                </span>
-              </div>
-            )}
-          </div>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] hover:text-[#2563EB] transition-colors flex-shrink-0">
+                  <Info className="h-4 w-4" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
+                <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
+                  <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
+                  <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав.</span>
+                  <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму.</span>
+                  <span className="block">💡 <strong>Порада</strong> — підказка що робити далі, залежно від твого стану.</span>
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB] hover:text-[#6B7280] transition-colors flex-shrink-0">
-                <Info className="h-4 w-4" strokeWidth={1.5} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
-              <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
-              <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
-                <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
-                <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав.</span>
-                <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму.</span>
-                <span className="block">💡 <strong>Порада</strong> — підказка що робити далі, залежно від твого стану.</span>
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="border-b border-[#E5E7EB] mt-3" />
       </div>
 
       {/* Status banner */}
@@ -157,31 +128,24 @@ export default function BalanceTracker({
 
       {/* Bank cards */}
       <div className="grid grid-cols-2 gap-3 px-6 mb-4">
-        <div className="rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6] border border-[#E5E7EB] px-4 py-3.5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-5"
-            style={{ background: hasBets && isGrowing ? '#10B981' : hasBets && isFalling ? '#EF4444' : '#3B82F6' }} />
-          <div className="relative z-10">
-            <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Поточний банк</p>
-            <p className="text-2xl font-bold text-[#111827] tracking-tight">
-              {hasBets ? currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 }) : '0'} ₴
-            </p>
-            {hasBets && (
-              <div className="flex items-center gap-1 mt-1">
-                {isGrowing || isStable ? <TrendingUp className="h-3 w-3 text-[#10B981]" strokeWidth={2.5} /> : <TrendingDown className="h-3 w-3 text-[#EF4444]" strokeWidth={2.5} />}
-                <span className={`text-xs font-medium ${isGrowing || isStable ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>{percentOfPeak.toFixed(1)}% від піку</span>
-              </div>
-            )}
-          </div>
+        <div className="rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6] border border-[#E5E7EB] px-4 py-3.5">
+          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Поточний банк</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">
+            {hasBets ? currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 }) : '0'} ₴
+          </p>
+          {hasBets && (
+            <div className="flex items-center gap-1 mt-1">
+              {isGrowing || isStable ? <TrendingUp className="h-3 w-3 text-[#10B981]" strokeWidth={2.5} /> : <TrendingDown className="h-3 w-3 text-[#EF4444]" strokeWidth={2.5} />}
+              <span className={`text-xs font-medium ${isGrowing || isStable ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>{percentOfPeak.toFixed(1)}% від піку</span>
+            </div>
+          )}
         </div>
-        <div className="rounded-2xl bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7]/50 border border-[#FDE68A] px-4 py-3.5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-10" style={{ background: '#F59E0B' }} />
-          <div className="relative z-10">
-            <p className="text-[11px] text-[#92400E]/70 font-medium uppercase tracking-wider mb-1">🏆 Найкращий результат</p>
-            <p className="text-2xl font-bold text-[#111827] tracking-tight">
-              {hasBets ? allTimeHigh.toLocaleString('uk-UA') : '—'} ₴
-            </p>
-            <p className="text-xs text-[#92400E]/60 mt-0.5">Твій орієнтир</p>
-          </div>
+        <div className="rounded-2xl bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7]/50 border border-[#FDE68A] px-4 py-3.5">
+          <p className="text-[11px] text-[#92400E]/70 font-medium uppercase tracking-wider mb-1">🏆 Найкращий результат</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">
+            {hasBets ? allTimeHigh.toLocaleString('uk-UA') : '—'} ₴
+          </p>
+          <p className="text-xs text-[#92400E]/60 mt-0.5">Твій орієнтир</p>
         </div>
       </div>
 
