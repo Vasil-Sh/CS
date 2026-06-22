@@ -466,7 +466,7 @@ export default function Analytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative">
+    <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
       {loading ? <AnalyticsSkeleton /> : (<>
       <InitialBankModal 
         open={bankModalOpen} 
@@ -515,7 +515,7 @@ export default function Analytics() {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
+      <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
         {gameFilteredBets.length === 0 && (
           <Alert className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5">
@@ -693,7 +693,7 @@ export default function Analytics() {
         </div>
 
         {/* Custom Tabs Navigation */}
-        <div className="space-y-6">
+        <div className="flex flex-col flex-1 min-h-0 space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
@@ -722,21 +722,21 @@ export default function Analytics() {
           </div>
 
           {/* Tab Content */}
-          <div>
+          <div className="flex flex-col flex-1 min-h-0">
             {activeTab === 'profit' && (
-              <div className="grid grid-cols-1 gap-6">
+              <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <>
+                  <div>
                     <BalanceChart data={balanceData} />
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <MonthlyProfitChartCard data={monthlyProfit} chartCardShadow={chartCardShadow} />
                       <OddsVsProfitScatterCard data={scatterData} winCount={winningBets.length} lossCount={losingBets.length} chartCardShadow={chartCardShadow} />
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <Card 
-                    className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
@@ -757,17 +757,17 @@ export default function Analytics() {
 
             {activeTab === 'goals' && <GoalsManager />}
 
-            {/* ===== КОЕФІЦІЄНТИ TAB — GREEN CHARTS ===== */}
+            {/* ===== КОЕФІЦІЄНТИ TAB ===== */}
             {activeTab === 'odds' && (
-              <div className="space-y-6">
+              <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <>
+                  <div className="space-y-6">
                     <OddsWinRateChartCard data={oddsChartData} chartCardShadow={chartCardShadow} />
                     <OddsCategoryCards data={oddsData} labels={oddsCategoryLabels} />
-                  </>
+                  </div>
                 ) : (
                   <Card 
-                    className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
