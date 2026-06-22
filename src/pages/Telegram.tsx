@@ -11,7 +11,7 @@ export default function Telegram() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
       {/* ===== HEADER ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-2">
+      <div className="px-6 lg:px-8 pt-6 pb-4 border-b border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
         <div className="flex items-center justify-between">
           <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
             Telegram
@@ -34,7 +34,7 @@ export default function Telegram() {
       </div>
 
       {/* ===== CONTENT ===== */}
-      <div className="relative z-10 px-6 lg:px-8 pb-8 pt-4 flex-1 flex flex-col">
+      <div className="relative z-10 px-6 lg:px-8 pb-8 pt-6 flex-1 flex flex-col">
         <TelegramGroups />
       </div>
     </div>
