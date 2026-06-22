@@ -390,19 +390,12 @@ export default function GoalsManager() {
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {
-      // Знімаємо основну — передаємо першій іншій активній цілі
-      const otherActive = goals.filter(g => g.id !== goalId && g.status === 'active');
-      if (otherActive.length > 0) {
-        updated = goals.map(g => {
-          if (g.id === goalId) return { ...g, isPrimary: false };
-          if (g.id === otherActive[0].id) return { ...g, isPrimary: true };
-          return g;
-        });
-        toast.success(`Головну ціль змінено на "${otherActive[0].name}"`);
-      } else {
-        updated = goals.map(g => ({ ...g, isPrimary: false }));
-        toast.success('Головну ціль скасовано');
-      }
+      // Знімаємо основну — просто прибираємо позначку
+      updated = goals.map(g => {
+        if (g.id === goalId) return { ...g, isPrimary: false };
+        return g;
+      });
+      toast.success('Головну ціль скасовано');
     } else {
       updated = goals.map(g => ({ ...g, isPrimary: g.id === goalId }));
       toast.success('Головна ціль змінена');
