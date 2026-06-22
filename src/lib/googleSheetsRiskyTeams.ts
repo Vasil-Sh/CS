@@ -1,4 +1,4 @@
-import { SPREADSHEET_ID_DATA } from './sheetsConfig';
+import { SPREADSHEET_ID_DATA, SHEET_GID_RISKY_TEAMS } from './sheetsConfig';
 
 // Service for fetching risky teams from Google Sheets
 export interface RiskyTeamFromSheet {
@@ -91,14 +91,16 @@ class GoogleSheetsRiskyTeamsService {
    * Fetch risky teams from CSV export
    * @param customSheetId - If provided, uses this spreadsheet ID and parses columns A-D (structured format).
    *                        If not provided, uses the default sheet and parses columns L/M and N/O.
+   * @param sheetGid - The gid of the sheet to export. Defaults to SHEET_GID_RISKY_TEAMS for default sheet.
    */
-  async fetchRiskyTeamsFromCSV(customSheetId?: string): Promise<RiskyTeamFromSheet[]> {
+  async fetchRiskyTeamsFromCSV(customSheetId?: string, sheetGid?: string): Promise<RiskyTeamFromSheet[]> {
     try {
       const sheetId = customSheetId || this.SHEET_ID;
       const isCustomSheet = !!customSheetId;
 
-      // Export as CSV
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+      // Export as CSV — use explicit gid if provided, otherwise default
+      const gid = sheetGid || (isCustomSheet ? '0' : SHEET_GID_RISKY_TEAMS);
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
       
       const response = await fetch(url);
       if (!response.ok) {
@@ -215,9 +217,10 @@ class GoogleSheetsRiskyTeamsService {
   /**
    * Main method to fetch risky teams
    * @param customSheetId - If provided, uses this spreadsheet ID instead of the default one
+   * @param sheetGid - If provided, exports this specific sheet instead of the default
    */
-  async fetchRiskyTeams(customSheetId?: string): Promise<RiskyTeamFromSheet[]> {
-    return await this.fetchRiskyTeamsFromCSV(customSheetId);
+  async fetchRiskyTeams(customSheetId?: string, sheetGid?: string): Promise<RiskyTeamFromSheet[]> {
+    return await this.fetchRiskyTeamsFromCSV(customSheetId, sheetGid);
   }
 }
 
