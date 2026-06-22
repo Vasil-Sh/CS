@@ -706,7 +706,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => startEditing(globalIndex, team)}
-              className="text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-xl"
+              className="text-[#447afc] hover:text-[#447afc] hover:bg-[#EFF6FF] rounded-xl"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -714,7 +714,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => deleteRiskyTeam(globalIndex)}
-              className="text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] rounded-xl"
+              className="text-[#EF4444] hover:text-[#EF4444] hover:bg-[#FEF2F2] rounded-xl"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} />
             </Button>
