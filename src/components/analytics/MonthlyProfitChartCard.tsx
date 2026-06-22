@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
 interface MonthlyData {
@@ -31,10 +31,12 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
             Прибуток по місяцях
           </span>
           <div className="flex gap-2">
-            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+            <Badge className="bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-medium text-xs">
+              <TrendingUp className="h-3 w-3 mr-1" strokeWidth={2} />
               Прибуток за місяць
             </Badge>
-            <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
+            <Badge className="bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-medium text-xs">
+              <BarChart3 className="h-3 w-3 mr-1" strokeWidth={2} />
               Загальний прибуток
             </Badge>
           </div>
