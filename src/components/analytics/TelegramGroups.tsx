@@ -35,7 +35,8 @@ import {
   ShieldCheck,
   Eye,
   Sparkles,
-  Link
+  Link,
+  RefreshCw,
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
@@ -966,8 +967,8 @@ export default function TelegramGroups() {
                   onClick={() => openAddBet(gs.groupId)}
                   className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-semibold transition-colors"
                 >
-                  <Plus className="h-4 w-4 mr-1.5" strokeWidth={2} />
-                  Додати ставку
+                  <RefreshCw className="h-4 w-4 mr-1.5" strokeWidth={2} />
+                  Отримати данні
                 </Button>
                 <button
                   onClick={() => setDeleteGroupConfirm(gs.groupId)}
