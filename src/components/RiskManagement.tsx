@@ -28,6 +28,7 @@ import {
   ArrowRightLeft,
   ArrowDownRight,
   DollarSign,
+  Clock,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Bet } from '@/types/betting';
@@ -1544,21 +1545,43 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </p>
                 </div>
               ) : drawdownPeriods.length > 0 ? (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-3">
                   {drawdownPeriods.map((period, index) => (
-                    <div key={index} className="p-4 border border-[#F3F4F6] rounded-2xl hover:border-[#E5E7EB] transition-colors">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-[#111827]">
-                          {new Date(period.start).toLocaleDateString('uk-UA')} - {new Date(period.end).toLocaleDateString('uk-UA')}
-                        </span>
+                    <div key={index} className={`p-4 rounded-2xl border transition-all ${period.recovery ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1.5 rounded-lg ${period.recovery ? 'bg-[#DCFCE7]' : 'bg-[#FEE2E2]'}`}>
+                            {period.recovery ? (
+                              <TrendingUp className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                            ) : (
+                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                            )}
+                          </div>
+                          <span className="text-sm font-medium text-[#111827]">
+                            {new Date(period.start).toLocaleDateString('uk-UA')} — {new Date(period.end).toLocaleDateString('uk-UA')}
+                          </span>
+                        </div>
                         <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
                           {period.recovery ? 'Відновлено' : 'Поточна'}
                         </Badge>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-[#9CA3AF]">Тривалість: {period.duration} днів</span>
-                        <span className="font-semibold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Clock className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
+                            <span className="text-xs text-[#6B7280]">Тривалість</span>
+                          </div>
+                          <span className="text-lg font-bold text-[#111827]">{period.duration} дн.</span>
+                        </div>
+                        <div className="p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <ArrowDownRight className="h-3.5 w-3.5 text-[#EF4444]" strokeWidth={1.5} />
+                            <span className="text-xs text-[#6B7280]">Макс. просадка</span>
+                          </div>
+                          <span className="text-lg font-bold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
+                        </div>
                       </div>
+                      <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-[#22C55E]' : '[&>div]:bg-[#EF4444]'}`} />
                     </div>
                   ))}
                 </div>
