@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
@@ -45,7 +45,8 @@ import {
   Sun,
   Moon,
   MoreHorizontal,
-  Pencil
+  Pencil,
+  Plus
 } from 'lucide-react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
@@ -62,6 +63,7 @@ interface MonthlyData {
 
 export default function Analytics() {
   logRender('Analytics');
+  const navigate = useNavigate();
   const { user } = useAuth();
   const currentUser = user?.username || '';
   const isAdmin = user?.role === 'admin';
@@ -518,12 +520,29 @@ export default function Analytics() {
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
         {gameFilteredBets.length === 0 && (
-          <Alert className="rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] p-5">
-            <AlertTriangle className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
-            <AlertDescription className="text-sm text-[#1E40AF] ml-2">
-              <strong className="font-medium">Немає даних для аналізу.</strong> Додайте данні на сторінці "Додати запис" для перегляду аналітики.
-            </AlertDescription>
-          </Alert>
+          <Card 
+            className="rounded-2xl bg-white overflow-hidden flex items-center justify-center"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardContent className="py-16 text-center">
+              <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                Немає даних для аналізу
+              </h3>
+              <p className="text-[#6B7280] text-sm mb-6">
+                Додайте записи на сторінці «Додати запис» для перегляду аналітики
+              </p>
+              <Button
+                onClick={() => navigate('/app/my-bets')}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2} />
+                Додати запис
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* ===== QUICK STATS ===== */}
