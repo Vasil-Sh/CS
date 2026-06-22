@@ -565,7 +565,7 @@ export default function GoalsManager() {
 
                   return (
                     <Card key={goal.id}
-                      className={`rounded-3xl bg-[#F8FAFC] transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
+                      className={`rounded-3xl bg-[#F8FAFC] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
                       style={cardBaseStyle}
                       onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -737,7 +737,7 @@ export default function GoalsManager() {
 
                   return (
                     <Card key={goal.id}
-                      className="border border-[#BBF7D0] rounded-3xl bg-[#F8FAFC]"
+                      className="border border-[#BBF7D0] rounded-3xl bg-[#F8FAFC] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all"
                       style={cardBaseStyle}
                       onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
                       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
