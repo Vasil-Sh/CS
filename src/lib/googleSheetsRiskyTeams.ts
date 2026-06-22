@@ -55,7 +55,7 @@ class GoogleSheetsRiskyTeamsService {
 
     // Must contain either a status emoji or an explicit game keyword to be a valid team entry
     const hasStatusEmoji = /[🟩🟨🟥]/.test(clean);
-    const hasGameKeyword = /\b(?:CS2|Dota2|CS|Дота)\b\s*[:.]?\s+\S/i.test(clean); // game keyword must be followed by content
+    const hasGameKeyword = /\b(?:CS2|Dota2|CS|Дота)\b/i.test(clean); // game keyword present anywhere
     if (!hasStatusEmoji && !hasGameKeyword) return null;
 
     // Detect status from emoji
@@ -202,7 +202,18 @@ class GoogleSheetsRiskyTeamsService {
       // Parse CSV properly handling multiline values in quotes
       const rows = this.parseCSV(csvText);
       
+      console.log('[RiskyTeams] CSV rows total:', rows.length);
+      if (rows.length > 0) {
+        console.log('[RiskyTeams] Header row:', JSON.stringify(rows[0]));
+        console.log('[RiskyTeams] First 5 data rows:', rows.slice(1, Math.min(6, rows.length)).map(r => JSON.stringify(r)));
+      }
+      
       const riskyTeams: RiskyTeamFromSheet[] = [];
+      
+      let skippedNoGameNoEmoji = 0;
+      let skippedShortName = 0;
+      let skippedDate = 0;
+      let skippedEmpty = 0;
       
       // Skip header row, start from row 2 (index 1)
       for (let i = 1; i < rows.length; i++) {
@@ -212,7 +223,32 @@ class GoogleSheetsRiskyTeamsService {
           // Clean teams sheet: A=everything (name + emoji + game + notes in one cell)
           // Format: "Vitality 🟩 CS У фіналах часто вимикаються..."
           if (values.length > 0 && values[0]) {
-            const teamData = this.parseTeamDataFromSingleCell(values[0]);
+            const cell = values[0];
+            const hasEmoji = /[🟩🟨🟥]/.test(cell);
+            const hasGame = /\b(?:CS2|Dota2|CS|Дота)\b/i.test(cell);
+            
+            if (!hasEmoji && !hasGame) {
+              skippedNoGameNoEmoji++;
+              if (skippedNoGameNoEmoji <= 5) {
+                console.log(`[RiskyTeams] Row ${i} skipped (no emoji, no game): "${cell.substring(0, 80)}"`);
+              }
+            }
+            
+            const teamData = this.parseTeamDataFromSingleCell(cell);
+            if (teamData) {
+              riskyTeams.push(teamData);
+            } else if (cell.length > 0) {
+              // Track why parse failed
+              if (cell.length < 3) skippedShortName++;
+              else if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(cell.trim())) skippedDate++;
+              else if (!hasEmoji && !hasGame) {} // already counted
+              else {
+                console.log(`[RiskyTeams] Row ${i} parse FAILED: "${cell.substring(0, 80)}" (hasEmoji:${hasEmoji}, hasGame:${hasGame})`);
+              }
+            }
+          } else {
+            skippedEmpty++;
+          }
             if (teamData) {
               riskyTeams.push(teamData);
             }
@@ -252,6 +288,11 @@ class GoogleSheetsRiskyTeamsService {
       }
       if (riskyTeams.length > 0 && riskyTeams.length < 10) {
         riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
+      }
+      
+      // Summary of why rows were skipped (only for clean sheet)
+      if (parseAsCleanSheet) {
+        console.log(`[RiskyTeams] Parsed: ${riskyTeams.length} teams | Skipped: noGameNoEmoji=${skippedNoGameNoEmoji} shortName=${skippedShortName} date=${skippedDate} empty=${skippedEmpty}`);
       }
       
       return riskyTeams;
