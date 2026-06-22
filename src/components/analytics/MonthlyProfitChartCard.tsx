@@ -25,8 +25,8 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
         <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
           <span className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-              <Calendar className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+              <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             Прибуток по місяцях
           </span>
