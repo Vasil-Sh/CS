@@ -32,10 +32,10 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
           </span>
           <div className="flex gap-2">
             <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-              Прибуток
+              Прибуток за місяць
             </Badge>
             <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-              Кумулятивний
+              Загальний прибуток
             </Badge>
           </div>
         </CardTitle>
