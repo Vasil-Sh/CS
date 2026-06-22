@@ -158,6 +158,8 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
 
   const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
+  const completedBetsCount = bets.filter(bet => bet.result !== 'Pending').length;
+
   // Custom bar shape for profit — green for positive, red for negative
   interface ProfitBarProps {
     x?: number;
@@ -185,6 +187,25 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
   };
 
   return (
+    <>
+      {completedBetsCount === 0 ? (
+        <Card 
+          className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
+          style={{ boxShadow: chartCardShadow }}
+        >
+          <CardContent className="py-16 text-center">
+            <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+              <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-xl font-semibold text-[#111827] mb-2">
+              Немає даних для порівняння
+            </h3>
+            <p className="text-[#6B7280] text-sm">
+              Додайте завершені ставки для перегляду статистики по періодах
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
     <TooltipProvider>
       <div className="space-y-6">
         {/* Header with filter — info button moved to the right, before the select */}
@@ -462,5 +483,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
         </Card>
       </div>
     </TooltipProvider>
+      )}
+    </>
   );
 }

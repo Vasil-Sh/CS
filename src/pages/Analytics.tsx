@@ -786,7 +786,7 @@ export default function Analytics() {
               </div>
             )}
 
-            {activeTab === 'comparison' && <PeriodComparison bets={bets} />}
+            {activeTab === 'comparison' && <div className="flex flex-col flex-1"><PeriodComparison bets={bets} /></div>}
             {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
         </div>
