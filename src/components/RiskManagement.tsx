@@ -826,9 +826,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
               {teamStats.total}
             </div>
-            <span className="text-sm text-[#9CA3AF]">
+            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
               CS: {teamStats.csCount} · Dota: {teamStats.dotaCount}
-            </span>
+            </Badge>
           </div>
 
           {/* БАН — forbidden teams */}
@@ -868,9 +868,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
               {teamStats.attentionCount}
             </div>
-            <span className="text-sm text-[#9CA3AF]">
+            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
               БАН: {teamStats.banCount} · Нестабільні: {teamStats.unstableCount}
-            </span>
+            </Badge>
           </div>
 
           {/* Game dominance */}
