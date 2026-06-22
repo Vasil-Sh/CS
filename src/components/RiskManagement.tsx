@@ -686,7 +686,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     }
 
     return (
-      <div key={globalIndex} className="p-4 border border-[#F3F4F6] rounded-2xl hover:bg-[#F9FAFB] hover:border-[#E5E7EB] transition-all">
+      <div key={globalIndex} className="p-4 border border-[#D1D5DB] rounded-2xl bg-[#F9FAFB] hover:bg-[#F3F4F6] hover:border-[#9CA3AF] transition-all">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
