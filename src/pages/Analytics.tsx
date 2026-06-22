@@ -11,7 +11,6 @@ import MonthlyProfitChartCard from '@/components/analytics/MonthlyProfitChartCar
 import OddsVsProfitScatterCard from '@/components/analytics/OddsVsProfitScatterCard';
 import OddsWinRateChartCard from '@/components/analytics/OddsWinRateChartCard';
 import OddsCategoryCards from '@/components/analytics/OddsCategoryCards';
-import BalanceTracker from '@/components/analytics/BalanceTracker';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
 import { PageHeader } from '@/components/PageHeader';
@@ -466,38 +465,6 @@ export default function Analytics() {
     { label: 'Високі', sublabel: '> 3.0' }
   ];
 
-  // Game-specific stats for BalanceTracker
-  const cs2Stats = useMemo(() => {
-    const cs2 = bets.filter((bet: Bet) => (bet.game || '') === 'CS2' || (bet.game || '') === 'CS');
-    const completedCS2 = cs2.filter((b: Bet) => b.result !== 'Pending');
-    return {
-      bets: completedCS2.length,
-      profit: completedCS2.reduce((sum: number, b: Bet) => sum + (b.profit || 0), 0),
-    };
-  }, [bets]);
-
-  const dota2Stats = useMemo(() => {
-    const dota = bets.filter((bet: Bet) => (bet.game || '') === 'Dota2' || (bet.game || '') === 'Dota');
-    const completedDota = dota.filter((b: Bet) => b.result !== 'Pending');
-    return {
-      bets: completedDota.length,
-      profit: completedDota.reduce((sum: number, b: Bet) => sum + (b.profit || 0), 0),
-    };
-  }, [bets]);
-
-  // All-time high/low for balance tracker — always reflects current bank as minimum
-  const allTimeHigh = useMemo(() => {
-    // Include initial bank as potential peak (before any bet was placed)
-    const initialPeak = bankrollStats.initialBank || bankrollStats.currentBank;
-    if (completedBets.length === 0) return initialPeak || 0;
-    return Math.max(initialPeak, ...balanceData.map(d => d.balance), bankrollStats.currentBank);
-  }, [balanceData, bankrollStats, completedBets.length]);
-
-  const allTimeLow = useMemo(() => {
-    if (completedBets.length === 0) return bankrollStats.currentBank || 0;
-    return Math.min(...balanceData.map(d => d.balance), bankrollStats.currentBank);
-  }, [balanceData, bankrollStats.currentBank, completedBets.length]);
-
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
       {loading ? <AnalyticsSkeleton /> : (<>
@@ -727,18 +694,6 @@ export default function Analytics() {
 
         {/* Custom Tabs Navigation */}
         <div className="space-y-6">
-          <BalanceTracker
-            currentBank={bankrollStats.currentBank}
-            allTimeHigh={allTimeHigh}
-            allTimeLow={allTimeLow}
-            gameFilter={gameFilter}
-            onGameFilterChange={setGameFilter}
-            cs2Bets={cs2Stats.bets}
-            dota2Bets={dota2Stats.bets}
-            cs2Profit={cs2Stats.profit}
-            dota2Profit={dota2Stats.profit}
-          />
-
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
