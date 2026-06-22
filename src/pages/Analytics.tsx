@@ -546,7 +546,8 @@ export default function Analytics() {
         )}
 
         {/* ===== QUICK STATS ===== */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           
           {/* 1. Поточний банк */}
           <div 
@@ -710,6 +711,7 @@ export default function Analytics() {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Custom Tabs Navigation */}
         <div className="flex flex-col flex-1 min-h-0 space-y-6">
@@ -745,12 +747,12 @@ export default function Analytics() {
             {activeTab === 'profit' && (
               <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <div>
-                    <div className="mb-8">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                    <div className="mb-6">
                       <BalanceChart data={balanceData} />
                     </div>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <MonthlyProfitChartCard data={monthlyProfit} chartCardShadow={chartCardShadow} />
                       <OddsVsProfitScatterCard data={scatterData} winCount={winningBets.length} lossCount={losingBets.length} chartCardShadow={chartCardShadow} />
                     </div>
@@ -782,7 +784,7 @@ export default function Analytics() {
             {activeTab === 'odds' && (
               <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
                     <OddsWinRateChartCard data={oddsChartData} chartCardShadow={chartCardShadow} />
                     <OddsCategoryCards data={oddsData} labels={oddsCategoryLabels} />
                   </div>
@@ -809,11 +811,11 @@ export default function Analytics() {
 
             {activeTab === 'comparison' && (
               <TooltipProvider>
-                <div className="flex flex-col flex-1 space-y-8">
+                <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col flex-1 space-y-6">
                 <PeriodComparison bets={bets} />
                 
                 {/* Risk Metrics + Drawdown Periods (moved from Strategy page) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card 
                     className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
