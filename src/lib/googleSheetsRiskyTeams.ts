@@ -1,4 +1,4 @@
-import { SPREADSHEET_ID_DATA, SHEET_GID_RISKY_TEAMS } from './sheetsConfig';
+import { SPREADSHEET_ID_DATA, SHEET_GID_RISKY_TEAMS, SHEET_GID_RISKY_TEAMS_CLEAN } from './sheetsConfig';
 
 // Service for fetching risky teams from Google Sheets
 export interface RiskyTeamFromSheet {
@@ -172,10 +172,22 @@ class GoogleSheetsRiskyTeamsService {
       const isCustomSheet = !!customSheetId;
 
       // Export as CSV — use explicit gid if provided, otherwise default
-      // If using the default spreadsheet, always use the risky teams gid
+      // If using the default spreadsheet without manual URL, use clean teams sheet
       const isDefaultSheet = sheetId === this.SHEET_ID;
-      const gid = sheetGid || (isDefaultSheet ? SHEET_GID_RISKY_TEAMS : '0');
-      console.log('[RiskyTeams] Using sheetId:', sheetId, 'gid:', gid, 'isCustomSheet:', isCustomSheet);
+      let gid: string;
+      let parseAsCleanSheet = false;
+      
+      if (sheetGid) {
+        gid = sheetGid;
+      } else if (isDefaultSheet) {
+        // Default sheet → use the clean teams sheet
+        gid = SHEET_GID_RISKY_TEAMS_CLEAN;
+        parseAsCleanSheet = true;
+      } else {
+        gid = '0';
+      }
+      
+      console.log('[RiskyTeams] Using sheetId:', sheetId, 'gid:', gid, 'isCustomSheet:', isCustomSheet, 'parseAsCleanSheet:', parseAsCleanSheet);
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
       
       const response = await fetch(url);
@@ -213,6 +225,46 @@ class GoogleSheetsRiskyTeamsService {
             if (teamData) {
               riskyTeams.push(teamData);
             }
+          }
+        } else if (parseAsCleanSheet) {
+          // Clean teams sheet: A=team name, B=status emoji+game, C=notes
+          if (values.length > 0 && values[0]) {
+            const teamName = values[0].trim();
+            const colB = values.length > 1 ? (values[1] || '').trim() : '';
+            const colC = values.length > 2 ? (values[2] || '').trim() : '';
+            
+            if (!teamName || teamName.length < 2) continue;
+            if (/^📅|Ризикована|^[📅⛔⚠️]/.test(teamName)) continue;
+            
+            // Parse status from colB emoji
+            let status = 'Без статусу';
+            if (colB.includes('🟥')) status = 'БАН';
+            else if (colB.includes('🟨')) status = 'Нестабільні';
+            else if (colB.includes('🟩')) status = 'Обережно';
+            
+            // Parse game from colB text
+            let game = 'CS';
+            const gameMatch = colB.match(/(?:CS2|CS|Дота|Dota2|Dota)/i);
+            if (gameMatch) {
+              const g = gameMatch[0].toLowerCase();
+              game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
+            }
+            // Also check colC for game info
+            if (!gameMatch) {
+              const gameMatch2 = colC.match(/(?:CS2|CS|Дота|Dota2|Dota)/i);
+              if (gameMatch2) {
+                const g2 = gameMatch2[0].toLowerCase();
+                game = g2.includes('дота') || g2.includes('dota') ? 'Дота' : 'CS';
+              }
+            }
+            
+            const teamData: RiskyTeamFromSheet = {
+              name: teamName,
+              game,
+              status,
+              notes: colC,
+            };
+            riskyTeams.push(teamData);
           }
         } else {
           // Default sheet: columns L/M (11/12) and N/O (13/14)
