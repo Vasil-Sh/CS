@@ -350,6 +350,25 @@ export default function Profile() {
 
       <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
 
+      {/* Quick Navigation Tabs */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          {[
+            { id: 'interface', label: 'Інтерфейс' },
+            { id: 'backup', label: 'Бекап' },
+            { id: 'simulator', label: 'Симулятор банкролу' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => document.getElementById(tab.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB] hover:bg-[#F5F5F3]"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Data Statistics - 5 cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
         <div
@@ -420,7 +439,7 @@ export default function Profile() {
       </Card>
 
       {/* Theme & Language Settings */}
-      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
+      <Card id="interface" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -513,7 +532,7 @@ export default function Profile() {
       </Card>
 
       {/* Backup Section */}
-      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
+      <Card id="backup" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
@@ -637,7 +656,7 @@ export default function Profile() {
       </Card>
 
       {/* Bankroll Simulator */}
-      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
+      <Card id="simulator" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
             <div className="p-2.5 bg-[#FFF7ED] rounded-xl">
