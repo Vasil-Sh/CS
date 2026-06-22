@@ -926,29 +926,25 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                         <thead className="bg-[#F3F4F6]">
                           <tr>
                             <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">A — Назва команди</th>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">B — Гра</th>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">C — Статус</th>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">D — Коментар</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">B — Статус + Гра</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#E5E7EB]">C — Коментар</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr className="border-b border-[#F3F4F6]">
-                            <td className="px-3 py-2 text-[#374151]">Liquid</td>
-                            <td className="px-3 py-2 text-[#374151]">CS</td>
-                            <td className="px-3 py-2 text-[#374151]">БАН</td>
-                            <td className="px-3 py-2 text-[#374151]">Нестабільна форма</td>
+                            <td className="px-3 py-2 text-[#374151]">Vitality</td>
+                            <td className="px-3 py-2 text-[#374151]">🟩 CS</td>
+                            <td className="px-3 py-2 text-[#374151]">У фіналах часто вимикаються</td>
                           </tr>
                           <tr className="border-b border-[#F3F4F6]">
                             <td className="px-3 py-2 text-[#374151]">Team Spirit</td>
-                            <td className="px-3 py-2 text-[#374151]">Дота</td>
-                            <td className="px-3 py-2 text-[#374151]">Обережно</td>
-                            <td className="px-3 py-2 text-[#374151]">Тільки на +1.5</td>
+                            <td className="px-3 py-2 text-[#374151]">🟨 Dota2</td>
+                            <td className="px-3 py-2 text-[#374151]">Тільки на +1.5, часто заливають</td>
                           </tr>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151]">Nova Esports</td>
-                            <td className="px-3 py-2 text-[#374151]">CS</td>
-                            <td className="px-3 py-2 text-[#9CA3AF] italic">(порожньо)</td>
-                            <td className="px-3 py-2 text-[#374151]">Нова команда — статус ще не визначено</td>
+                            <td className="px-3 py-2 text-[#374151]">Virtus Pro</td>
+                            <td className="px-3 py-2 text-[#374151]">🟥 CS</td>
+                            <td className="px-3 py-2 text-[#374151]">Раки — дуже рідко на них варто щось ставити</td>
                           </tr>
                         </tbody>
                       </table>
@@ -957,7 +953,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       💡 Перший рядок може бути заголовком — він буде автоматично проігнорований.
                     </p>
                     <p className="text-xs text-[#6B7280] mt-1">
-                      ℹ️ Колонка <span className="font-semibold text-[#111827]">C (Статус)</span> — необов'язкова. Якщо залишити комірку порожньою, команда додається зі статусом <Badge className="bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs ml-1">Без статусу</Badge> і ви зможете виставити його вручну пізніше.
+                      ℹ️ Колонка <span className="font-semibold text-[#111827]">B (Статус + Гра)</span> — використовуйте емодзі для статусу: <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟥 БАН</Badge> <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟨 Нестабільні</Badge> <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] border-0 rounded-lg font-medium text-xs ml-1 px-1.5 py-0">🟩 Обережно</Badge> та вкажіть гру <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS</Badge> або <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Dota2</Badge>.
                     </p>
                   </div>
                 </div>
@@ -974,20 +970,22 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <div className="space-y-1.5 text-sm">
                       <div>
                         <span className="text-[#6B7280]">Колонка </span>
-                        <span className="font-semibold text-[#111827]">B (Гра):</span>
-                        <span className="text-[#374151]"> </span>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS</Badge>
-                        <span className="text-[#6B7280] mx-1">або</span>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Дота</Badge>
-                      </div>
-                      <div>
-                        <span className="text-[#6B7280]">Колонка </span>
-                        <span className="font-semibold text-[#111827]">C (Статус):</span>
+                        <span className="font-semibold text-[#111827]">B (Статус + Гра):</span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
-                          {ALL_STATUSES.map(s => (
-                            <Badge key={s} className={getStatusBadge(s)}>{s}</Badge>
-                          ))}
+                          <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">🟥 БАН</Badge>
+                          <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">🟨 Нестабільні</Badge>
+                          <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">🟩 Обережно</Badge>
                         </div>
+                      </div>
+                      <div className="mt-2">
+                        <span className="text-[#6B7280]">Гра: вкажіть </span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS</Badge>
+                        <span className="text-[#6B7280]">, </span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">CS2</Badge>
+                        <span className="text-[#6B7280]">, </span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Dota2</Badge>
+                        <span className="text-[#6B7280]"> або </span>
+                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium">Дота</Badge>
                       </div>
                     </div>
                   </div>
@@ -1044,7 +1042,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                 <div className="text-sm text-[#92400E]">
-                  <span className="font-semibold">Важливо:</span> дублікати команд (за назвою та грою) автоматично пропускаються — додаються лише нові записи.
+                  <span className="font-semibold">Важливо:</span> при оновленні <strong>всі команди замінюються</strong> даними з Google Sheets. Документ є джерелом правди — локальні зміни будуть перезаписані.
                 </div>
               </div>
             </div>
