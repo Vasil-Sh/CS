@@ -179,6 +179,8 @@ class GoogleSheetsRiskyTeamsService {
       
       if (sheetGid) {
         gid = sheetGid;
+        // If the GID matches the clean teams sheet, use that parser
+        parseAsCleanSheet = (gid === SHEET_GID_RISKY_TEAMS_CLEAN);
       } else if (isDefaultSheet) {
         // Default sheet → use the clean teams sheet
         gid = SHEET_GID_RISKY_TEAMS_CLEAN;
@@ -200,22 +202,14 @@ class GoogleSheetsRiskyTeamsService {
       // Parse CSV properly handling multiline values in quotes
       const rows = this.parseCSV(csvText);
       
-      // Debug: log first 3 rows to console
-      console.log('[RiskyTeams] Sheet GID:', gid, 'Total rows:', rows.length);
-      if (rows.length > 1) {
-        console.log('[RiskyTeams] Row 1 (header):', rows[0].slice(0, 15));
-        if (rows.length > 2) console.log('[RiskyTeams] Row 2:', rows[1].slice(0, 15));
-        if (rows.length > 3) console.log('[RiskyTeams] Row 3:', rows[2].slice(0, 15));
-      }
-      
       const riskyTeams: RiskyTeamFromSheet[] = [];
       
       // Skip header row, start from row 2 (index 1)
       for (let i = 1; i < rows.length; i++) {
         const values = rows[i];
 
-        if (isCustomSheet) {
-          // Custom sheet: columns A=team name, B=game, C=status, D=comment
+        if (parseAsCleanSheet) {
+          // Clean teams sheet: A=team name, B=status emoji+game, C=notes
           if (values.length > 0 && values[0]) {
             const teamName = values[0];
             const teamGame = values.length > 1 ? values[1] : '';
@@ -266,21 +260,31 @@ class GoogleSheetsRiskyTeamsService {
             };
             riskyTeams.push(teamData);
           }
+        } else if (isCustomSheet) {
+          // Custom sheet: columns A=team name, B=game, C=status, D=comment
+          if (values.length > 0 && values[0]) {
+            const teamName = values[0];
+            const teamGame = values.length > 1 ? values[1] : '';
+            const teamStatus = values.length > 2 ? values[2] : '';
+            const teamComment = values.length > 3 ? values[3] : '';
+            const teamData = this.parseTeamDataStructured(teamName, teamGame, teamStatus, teamComment);
+            if (teamData) {
+              riskyTeams.push(teamData);
+            }
+          }
         } else {
-          // Default sheet: columns L/M (11/12) and N/O (13/14)
+          // Default sheet (old format): columns L/M (11/12) and N/O (13/14)
           // L=team name, M=notes (may contain emoji status + game info)
           // N=team name, O=notes
-          const pairs: [number, number][] = [[11, 12], [13, 14]]; // [nameCol, notesCol]
+          const pairs: [number, number][] = [[11, 12], [13, 14]];
           
           for (const [nameCol, notesCol] of pairs) {
             if (values.length > nameCol && values[nameCol]) {
               const teamName = values[nameCol].trim();
               const teamNotes = values.length > notesCol ? (values[notesCol] || '').trim() : '';
               
-              // Skip header row entries (dates, "Команда", etc.)
               if (teamName.includes('📅') || teamName.includes('Ризикована') || teamName === '') continue;
               
-              // Try parsing as name + notes pair
               const teamData = this.parseTeamData(teamName, teamNotes);
               if (teamData) {
                 riskyTeams.push(teamData);
@@ -289,8 +293,6 @@ class GoogleSheetsRiskyTeamsService {
           }
         }
       }
-      
-      console.log('[RiskyTeams] Parsed teams count:', riskyTeams.length);
       if (riskyTeams.length > 0 && riskyTeams.length < 10) {
         riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
       }
@@ -362,6 +364,11 @@ class GoogleSheetsRiskyTeamsService {
    * @param sheetGid - If provided, exports this specific sheet instead of the default
    */
   async fetchRiskyTeams(customSheetId?: string, sheetGid?: string): Promise<RiskyTeamFromSheet[]> {
+    // If a custom URL is provided, try to extract GID from it
+    if (customSheetId && !sheetGid) {
+      // Check if the custom URL contains a gid parameter
+      // The fetchRiskyTeamsFromCSV will handle it
+    }
     return await this.fetchRiskyTeamsFromCSV(customSheetId, sheetGid);
   }
 }

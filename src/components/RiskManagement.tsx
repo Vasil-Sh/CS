@@ -110,9 +110,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       .replace(/[^a-z0-9]/g, '');
   };
 
-  /** Extract spreadsheet ID from Google Sheets URL */
+  /** Extract spreadsheet ID and gid from Google Sheets URL */
   const extractSheetId = (url: string): string | null => {
     const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : null;
+  };
+
+  /** Extract gid from Google Sheets URL */
+  const extractSheetGid = (url: string): string | null => {
+    const match = url.match(/[?&]gid=(\d+)/);
     return match ? match[1] : null;
   };
 
@@ -121,8 +127,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     try {
       // Якщо користувач ввів посилання на свій документ — використовуємо його
       const customId = customSheetUrl.trim() ? extractSheetId(customSheetUrl.trim()) : null;
+      const customGid = customSheetUrl.trim() ? extractSheetGid(customSheetUrl.trim()) : null;
       
-      const teamsFromSheet = await googleSheetsRiskyTeamsService.fetchRiskyTeams(customId || undefined);
+      const teamsFromSheet = await googleSheetsRiskyTeamsService.fetchRiskyTeams(
+        customId || undefined,
+        customGid || undefined
+      );
       
       if (teamsFromSheet.length === 0) {
         toast.error('Не знайдено команд у документі');
