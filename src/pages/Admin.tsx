@@ -541,6 +541,7 @@ export default function Admin() {
 
       {/* Main Content */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
 
         {error && (
           <Alert className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-5">
@@ -644,7 +645,7 @@ export default function Admin() {
           
           {/* 1. Всього користувачів */}
           <div 
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -663,7 +664,7 @@ export default function Admin() {
 
           {/* 2. Активні підписки */}
           <div 
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -684,7 +685,7 @@ export default function Admin() {
 
           {/* 3. Адміністратори */}
           <div 
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -703,7 +704,7 @@ export default function Admin() {
 
           {/* 4. Неактивні підписки */}
           <div 
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
@@ -954,6 +955,7 @@ export default function Admin() {
               </TableBody>
             </Table>
           </div>
+        </div>
         </div>
       </div>
 
