@@ -190,26 +190,26 @@ export default function BankrollSimulator() {
 
       {/* Parameters */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="space-y-2">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Початковий банк (₴)</Label>
+        <div className="space-y-2 flex flex-col">
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Початковий банк (₴)</Label>
           <Input type="number" value={initialBank} onChange={(e) => { setInitialBank(Number(e.target.value)); setActiveScenario(null); }} min={100} />
         </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+        <div className="space-y-2 flex flex-col">
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">
             Розмір ставки (₴) <span className="text-[#9CA3AF] font-normal">({profitPercent.toFixed(0)}% банку)</span>
           </Label>
           <Input type="number" value={betAmount} onChange={(e) => { setBetAmount(Number(e.target.value)); setActiveScenario(null); }} min={10} />
         </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Середній коефіцієнт</Label>
+        <div className="space-y-2 flex flex-col">
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Середній коефіцієнт</Label>
           <Input type="number" value={avgOdds} onChange={(e) => { setAvgOdds(Number(e.target.value)); setActiveScenario(null); }} min={1.01} step={0.05} />
         </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Очікуваний вінрейт (%)</Label>
+        <div className="space-y-2 flex flex-col">
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Очікуваний вінрейт (%)</Label>
           <Input type="number" value={estimatedWinRate} onChange={(e) => { setEstimatedWinRate(Number(e.target.value)); setActiveScenario(null); }} min={1} max={99} />
         </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Кількість ставок</Label>
+        <div className="space-y-2 flex flex-col">
+          <Label className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider h-8 flex items-end">Кількість ставок</Label>
           <Input type="number" value={totalBets} onChange={(e) => { setTotalBets(Number(e.target.value)); setActiveScenario(null); }} min={1} max={10000} />
         </div>
       </div>
