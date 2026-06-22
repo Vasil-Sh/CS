@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
 interface MonthlyData {
@@ -32,10 +32,10 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
           </span>
           <div className="flex gap-2">
             <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-              Прибуток
+              Прибуток за місяць
             </Badge>
             <Badge className="bg-[#F9FAFB] text-[#374151] hover:bg-[#F9FAFB] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-medium text-xs">
-              Кумулятивний
+              Загальний прибуток
             </Badge>
           </div>
         </CardTitle>
@@ -95,30 +95,6 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
             />
           </LineChart>
         </ResponsiveContainer>
-
-        <div className="mt-5 flex items-center justify-between gap-4 px-2">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#16A34A]" strokeWidth={1.5} />
-            <span className="text-sm text-[#9CA3AF]">Макс:</span>
-            <span className="text-sm font-semibold text-[#111827]">
-              +{Math.max(...data.map(m => m.profit)).toFixed(0)} ₴
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-            <span className="text-sm text-[#9CA3AF]">Мін:</span>
-            <span className="text-sm font-semibold text-[#111827]">
-              {Math.min(...data.map(m => m.profit)).toFixed(0)} ₴
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-            <span className="text-sm text-[#9CA3AF]">Сер:</span>
-            <span className="text-sm font-semibold text-[#111827]">
-              {(data.reduce((sum, m) => sum + m.profit, 0) / data.length).toFixed(0)} ₴
-            </span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
