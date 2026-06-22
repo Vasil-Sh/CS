@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface MonthlyData {
   month: string;
@@ -65,15 +65,6 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
                 const monthData = data.find(m => m.month === label);
                 if (monthData) return `${label} (${monthData.totalBets} ставок)`;
                 return label;
-              }}
-            />
-            <Legend
-              iconType="plainline"
-              wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
-              formatter={(value: string) => {
-                if (value === 'profit') return 'Прибуток за місяць';
-                if (value === 'cumulative') return 'Загальний прибуток';
-                return value;
               }}
             />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
