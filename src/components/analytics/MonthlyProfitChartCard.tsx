@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line } from 'recharts';
 import MonthlyProfitBar from '@/components/analytics/MonthlyProfitBar';
 
 interface MonthlyData {
@@ -45,8 +45,8 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} stroke="#D1D5DB" />
-            <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} stroke="#D1D5DB" tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} />
+            <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
             <Tooltip
               cursor={{ fill: 'transparent' }}
               contentStyle={{
@@ -65,15 +65,6 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
                 const monthData = data.find(m => m.month === label);
                 if (monthData) return `${label} (${monthData.totalBets} ставок)`;
                 return label;
-              }}
-            />
-            <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="plainline"
-              formatter={(value: string) => {
-                if (value === 'profit') return 'Прибуток за місяць';
-                if (value === 'cumulative') return 'Загальний прибуток';
-                return value;
               }}
             />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
