@@ -92,8 +92,8 @@ export default function BalanceTracker({
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]">
-              <BarChart3 className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
+              <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
           </div>
