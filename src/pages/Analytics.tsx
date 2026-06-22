@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BalanceChart from '@/components/BalanceChart';
 import MiniDonut from '@/components/MiniDonut';
@@ -521,17 +522,17 @@ export default function Analytics() {
 
         {gameFilteredBets.length === 0 && (
           <Card 
-            className="rounded-2xl bg-white overflow-hidden flex items-center justify-center"
+            className="rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
-            <CardContent className="py-16 text-center">
-              <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+            <CardContent className="py-10 text-center px-6">
+              <div className="p-6 bg-[#F3F4F6] rounded-2xl inline-block mb-5">
+                <BarChart3 className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-semibold text-[#111827] mb-2">
+              <h3 className="text-lg font-semibold text-[#111827] mb-1.5">
                 Немає даних для аналізу
               </h3>
-              <p className="text-[#6B7280] text-sm mb-6">
+              <p className="text-[#6B7280] text-sm mb-5">
                 Додайте записи на сторінці «Додати запис» для перегляду аналітики
               </p>
               <Button
