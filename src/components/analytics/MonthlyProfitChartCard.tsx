@@ -42,7 +42,7 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       </CardHeader>
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} barCategoryGap="20%">
+          <BarChart data={data} barCategoryGap="60%" barGap={0}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} />
             <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
@@ -67,7 +67,7 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
               }}
             />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
-            <Bar dataKey="profit" name="profit" maxBarSize={48} radius={[4, 4, 0, 0]}>
+            <Bar dataKey="profit" name="profit" maxBarSize={12} radius={[6, 6, 6, 6]}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#16A34A' : '#DC2626'} />
               ))}
