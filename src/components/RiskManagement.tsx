@@ -165,6 +165,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       const mergedTeams = [...existingTeams, ...newTeamsToAdd];
       setRiskyTeams(mergedTeams);
       
+      // Debug: show sample of parsed team games
+      const sampleGames = mergedTeams.slice(0, 5).map(t => `${t.name}=${t.game}`);
+      console.log('[RiskMgmt] Sample teams (name=game):', sampleGames);
+      console.log('[RiskMgmt] Total:', mergedTeams.length, 'CS:', mergedTeams.filter(t => t.game === 'CS').length, 'Дота:', mergedTeams.filter(t => t.game === 'Дота').length);
+      
       localStorage.setItem('admin_risky_teams', JSON.stringify(mergedTeams));
       
       toast.success(`Успішно додано ${newTeamsToAdd.length} нових команд з Google Sheets!`, {
@@ -514,6 +519,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   // Apply both search and status filters
   const csTeams = filteredTeams.filter(t => t.game === 'CS' && (csStatusFilter === 'all' || t.status === csStatusFilter));
   const dotaTeams = filteredTeams.filter(t => t.game === 'Дота' && (dotaStatusFilter === 'all' || t.status === dotaStatusFilter));
+
+  // Debug rendering
+  console.log('[RiskMgmt] Render - filteredTeams:', filteredTeams.length, 'csTeams:', csTeams.length, 'dotaTeams:', dotaTeams.length);
+  console.log('[RiskMgmt] csStatusFilter:', csStatusFilter, 'dotaStatusFilter:', dotaStatusFilter);
+  if (filteredTeams.length > 0) console.log('[RiskMgmt] Sample game values:', filteredTeams.slice(0, 3).map(t => `${t.name}=${t.game}`));
 
   const teamsByStatus = {
     'БАН': filteredTeams.filter(t => t.status === 'БАН'),
