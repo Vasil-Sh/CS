@@ -73,7 +73,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       try {
         const parsed = JSON.parse(saved) as Array<{name: string; game: string; status: string; notes: string}>;
         // Migration: if ANY team has game longer than 10 chars, it's corrupted — reset
-        const hasCorrupted = parsed.some(t => t.game && t.game.length > 10);
+        const hasCorrupted = parsed.some(t => {
+          if (!t.game || t.game.length > 10) return true;
+          return t.game !== 'CS' && t.game !== 'Дота';
+        });
         if (hasCorrupted) {
           console.log('[RiskMgmt] Detected corrupted localStorage data — resetting');
           localStorage.removeItem('admin_risky_teams');
@@ -155,6 +158,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       }
 
       // Replace ALL teams (not merge) — Google Sheets is the source of truth
+      // Log sample data to verify correct parsing
+      console.log('[RiskMgmt] Loaded from sheet:', teamsFromSheet.length, 'teams');
+      console.log('[RiskMgmt] Sample:', teamsFromSheet.slice(0, 3).map(t => `${t.name}[${t.game}/${t.status}]`).join(', '));
+      
       setRiskyTeams(teamsFromSheet);
       
       // Debug: show sample of parsed team games
