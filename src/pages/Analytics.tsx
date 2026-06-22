@@ -566,10 +566,13 @@ export default function Analytics() {
                 <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
-              <div className="ml-auto flex items-center gap-1.5 bg-[#EFF6FF] group-hover:bg-[#447afc] px-3 py-1.5 rounded-full transition-all duration-300">
-                <Pencil className="h-3.5 w-3.5 text-[#447afc] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
-                <span className="text-xs font-medium text-[#447afc] group-hover:text-white transition-colors duration-300">Редагувати</span>
-              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleBankCardClick(); }}
+                className="ml-auto flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] hover:bg-[#447afc] text-[#447afc] hover:text-white transition-all duration-200"
+                title="Редагувати банк"
+              >
+                <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+              </button>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
               {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
