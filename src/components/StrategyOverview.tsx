@@ -116,6 +116,7 @@ export default function StrategyOverview() {
   const [sortBy, setSortBy] = useState<'roi' | 'profit' | 'name'>('roi');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
+  const [navExpanded, setNavExpanded] = useState(false);
 
   // Helper to get primary strategy name from id
   const getPrimaryStrategyName = (): string | null => {
@@ -754,9 +755,18 @@ export default function StrategyOverview() {
   return (
     <div className="space-y-6">
       <div className="space-y-6">
-        {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
+        {/* Collapsible Navigation Pill-Bar */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          {!navExpanded ? (
+            <button
+              onClick={() => setNavExpanded(true)}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out text-base"
+            >
+              <ChevronDown className="h-4 w-4" strokeWidth={2} />
+              Навігація стратегій
+            </button>
+          ) : (
+            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)] animate-in fade-in slide-in-from-top-2 duration-200">
             {/* Info tooltip */}
             <TooltipProvider>
               <UITooltip>
@@ -820,7 +830,20 @@ export default function StrategyOverview() {
               <Plus className="h-4 w-4" strokeWidth={2} />
               Створити нову
             </button>
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+
+            {/* Hide navigation */}
+            <button
+              onClick={() => setNavExpanded(false)}
+              className="flex items-center justify-center px-3 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827] transition-colors"
+              title="Згорнути навігацію"
+            >
+              <X className="h-4 w-4" strokeWidth={2} />
+            </button>
           </div>
+          )}
         </div>
 
         {/* Tab Content */}
