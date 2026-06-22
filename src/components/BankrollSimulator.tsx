@@ -365,11 +365,6 @@ export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
         {results.length > 0 && (
           <Button onClick={handleExportCSV} variant="outline" className="gap-2" size="sm"><Download className="h-4 w-4" /> Експорт CSV</Button>
         )}
-        {(results.length > 0 || compareResults) && (
-          <Button onClick={handleReset} variant="outline" className="gap-2 border-[#DC2626] text-[#DC2626] hover:bg-[#FEF2F2]" size="sm">
-            <Trash2 className="h-4 w-4" /> Скинути
-          </Button>
-        )}
         <span className="text-xs text-[#9CA3AF] ml-auto">{strategyLabel(strategy)}</span>
       </div>
 
