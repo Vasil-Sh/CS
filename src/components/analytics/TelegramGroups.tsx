@@ -787,7 +787,7 @@ function StatCard({ label, value, icon: Icon, color, iconColor }: {
         <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${color}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={1.5} />
         </div>
-        <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">{label}</span>
+        <span className="text-sm font-bold text-[#6B7280] uppercase tracking-wider">{label}</span>
       </div>
       <p className="text-3xl font-bold text-[#111827] tracking-tight">{value}</p>
     </div>
