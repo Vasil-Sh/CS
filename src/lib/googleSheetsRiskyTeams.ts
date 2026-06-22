@@ -210,44 +210,24 @@ class GoogleSheetsRiskyTeamsService {
       
       const riskyTeams: RiskyTeamFromSheet[] = [];
       
-      let skippedNoGameNoEmoji = 0;
-      let skippedShortName = 0;
-      let skippedDate = 0;
-      let skippedEmpty = 0;
-      
       // Skip header row, start from row 2 (index 1)
       for (let i = 1; i < rows.length; i++) {
         const values = rows[i];
 
         if (parseAsCleanSheet) {
-          // Clean teams sheet: A=everything (name + emoji + game + notes in one cell)
-          // Format: "Vitality 🟩 CS У фіналах часто вимикаються..."
-          if (values.length > 0 && values[0]) {
-            const cell = values[0];
-            const hasEmoji = /[🟩🟨🟥]/.test(cell);
-            const hasGame = /\b(?:CS2|Dota2|CS|Дота)\b/i.test(cell);
+          // Clean teams sheet: pairs of columns — A=team name, B=notes (emoji+game+comment), C=name, D=notes, etc.
+          // Example: A="Vitality", B="🟩 CS У фіналах часто вимикаються..."
+          //          C="Virtus Pro", D="Dota2:в якій би не були вони формі..."
+          for (let col = 0; col + 1 < values.length; col += 2) {
+            const nameCell = values[col]?.trim();
+            const notesCell = values[col + 1]?.trim();
             
-            if (!hasEmoji && !hasGame) {
-              skippedNoGameNoEmoji++;
-              if (skippedNoGameNoEmoji <= 5) {
-                console.log(`[RiskyTeams] Row ${i} skipped (no emoji, no game): "${cell.substring(0, 80)}"`);
-              }
-            }
+            if (!nameCell) continue;
             
-            const teamData = this.parseTeamDataFromSingleCell(cell);
+            const teamData = this.parseTeamData(nameCell, notesCell || '');
             if (teamData) {
               riskyTeams.push(teamData);
-            } else if (cell.length > 0) {
-              // Track why parse failed
-              if (cell.length < 3) skippedShortName++;
-              else if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(cell.trim())) skippedDate++;
-              else if (!hasEmoji && !hasGame) {} // already counted
-              else {
-                console.log(`[RiskyTeams] Row ${i} parse FAILED: "${cell.substring(0, 80)}" (hasEmoji:${hasEmoji}, hasGame:${hasGame})`);
-              }
             }
-          } else {
-            skippedEmpty++;
           }
         } else if (isCustomSheet) {
           // Custom sheet: columns A=team name, B=game, C=status, D=comment
@@ -284,11 +264,6 @@ class GoogleSheetsRiskyTeamsService {
       }
       if (riskyTeams.length > 0 && riskyTeams.length < 10) {
         riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
-      }
-      
-      // Summary of why rows were skipped (only for clean sheet)
-      if (parseAsCleanSheet) {
-        console.log(`[RiskyTeams] Parsed: ${riskyTeams.length} teams | Skipped: noGameNoEmoji=${skippedNoGameNoEmoji} shortName=${skippedShortName} date=${skippedDate} empty=${skippedEmpty}`);
       }
       
       return riskyTeams;
