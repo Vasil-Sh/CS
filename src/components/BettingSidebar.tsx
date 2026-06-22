@@ -99,8 +99,8 @@ export function BettingSidebar({
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-              <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
+              <Calculator className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
           </div>
@@ -307,8 +307,8 @@ export function BettingSidebar({
         <div className="bg-white border border-[#D1D5DB] rounded-3xl flex flex-col"
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-              <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF]">
+              <AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
           </div>
