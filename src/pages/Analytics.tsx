@@ -566,9 +566,9 @@ export default function Analytics() {
                 <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
-              <div className="ml-auto flex items-center gap-1.5 bg-[#F3F4F6] group-hover:bg-[#111827] px-3 py-1.5 rounded-full transition-all duration-300">
-                <Pencil className="h-3.5 w-3.5 text-[#6B7280] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
-                <span className="text-xs font-medium text-[#6B7280] group-hover:text-white transition-colors duration-300">Редагувати</span>
+              <div className="ml-auto flex items-center gap-1.5 bg-[#EFF6FF] group-hover:bg-[#447afc] px-3 py-1.5 rounded-full transition-all duration-300">
+                <Pencil className="h-3.5 w-3.5 text-[#447afc] group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                <span className="text-xs font-medium text-[#447afc] group-hover:text-white transition-colors duration-300">Редагувати</span>
               </div>
             </div>
             <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
