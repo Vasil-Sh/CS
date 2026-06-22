@@ -520,13 +520,18 @@ export default function Analytics() {
             className="rounded-2xl bg-white overflow-hidden"
             style={{ boxShadow: chartCardShadow }}
           >
-            <CardContent className="py-5 px-6 text-center">
-              <p className="text-sm font-semibold text-[#111827] mb-1">
-                Немає даних для аналізу
-              </p>
-              <p className="text-xs text-[#6B7280]">
-                Додайте записи на сторінці «Додати запис»
-              </p>
+            <CardContent className="py-5 px-6 flex items-center gap-4">
+              <div className="p-3 bg-[#F3F4F6] rounded-xl flex-shrink-0">
+                <BarChart3 className="h-6 w-6 text-[#9CA3AF]" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-[#111827]">
+                  Немає даних для аналізу
+                </p>
+                <p className="text-sm text-[#6B7280] mt-0.5">
+                  Додайте записи на сторінці «Додати запис»
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
