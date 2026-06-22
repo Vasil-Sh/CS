@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Info } from 'lucide-react';
+import { Info, TrendingUp, TrendingDown, Sparkles, Crosshair, Shield, BarChart3 } from 'lucide-react';
 import { getBalanceAdvice } from '@/lib/deepSeekService';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
@@ -15,10 +15,6 @@ interface BalanceTrackerProps {
   dota2Profit: number;
 }
 
-/**
- * Стан банку — зрозуміла картка для новачків.
- * Пояснює простими словами: скільки грошей у банку, чи зростає він, чи падає.
- */
 export default function BalanceTracker({
   currentBank,
   allTimeHigh,
@@ -48,220 +44,257 @@ export default function BalanceTracker({
   const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
   const isFalling = hasBets && percentOfPeak < 50;
 
-  // AI advice state
+  const statusColor = !hasBets ? 'gray'
+    : isGrowing ? 'green'
+    : isStable ? 'blue'
+    : isDipping ? 'amber'
+    : 'red';
+
+  const statusDotColor = {
+    gray: 'bg-[#9CA3AF]',
+    green: 'bg-[#10B981]',
+    blue: 'bg-[#3B82F6]',
+    amber: 'bg-[#F59E0B]',
+    red: 'bg-[#EF4444]',
+  }[statusColor];
+
+  const statusRingColor = {
+    gray: 'ring-[#9CA3AF]/20',
+    green: 'ring-[#10B981]/20',
+    blue: 'ring-[#3B82F6]/20',
+    amber: 'ring-[#F59E0B]/20',
+    red: 'ring-[#EF4444]/20',
+  }[statusColor];
+
+  // AI advice
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   useEffect(() => {
-    if (!hasBets) {
-      setAiAdvice(null);
-      return;
-    }
+    if (!hasBets) { setAiAdvice(null); return; }
     const state: 'growing' | 'stable' | 'dipping' | 'falling' = isGrowing
       ? 'growing' : isStable ? 'stable' : isDipping ? 'dipping' : 'falling';
     setAiLoading(true);
     let cancelled = false;
-    getBalanceAdvice({
-      state,
-      percentOfPeak,
-      currentBank,
-      allTimeHigh,
-      bets: cs2Bets + dota2Bets,
-      profit: cs2Profit + dota2Profit,
-    }).then((advice) => {
-      if (!cancelled) {
-        setAiAdvice(advice);
-        setAiLoading(false);
-      }
-    });
+    getBalanceAdvice({ state, percentOfPeak, currentBank, allTimeHigh, bets: cs2Bets + dota2Bets, profit: cs2Profit + dota2Profit })
+      .then((advice) => { if (!cancelled) { setAiAdvice(advice); setAiLoading(false); } });
     return () => { cancelled = true; };
   }, [currentBank, allTimeHigh, hasBets, isGrowing, isStable, isDipping, percentOfPeak, cs2Bets, dota2Bets, cs2Profit, dota2Profit]);
 
-  const statusText = !hasBets
-    ? 'Поки немає завершених ставок'
-    : isGrowing
-    ? 'Банк на максимумі — це найкращий результат! 🔥'
-    : isStable
-    ? 'Банк стабільний, близько до найкращого результату'
-    : isDipping
-    ? `Банк зменшився на ${(100 - percentOfPeak).toFixed(0)}% від найкращого`
+  const statusText = !hasBets ? 'Поки немає завершених ставок'
+    : isGrowing ? 'Банк на максимумі — це найкращий результат! 🔥'
+    : isStable ? 'Банк стабільний, близько до найкращого результату'
+    : isDipping ? `Банк зменшився на ${(100 - percentOfPeak).toFixed(0)}% від найкращого`
     : `Банк значно просів — на ${(100 - percentOfPeak).toFixed(0)}% від максимуму`;
 
-  const advice = !hasBets
-    ? 'Додавай записи про ставки — цей блок покаже твій прогрес'
-    : isGrowing
-    ? 'Ти на правильному шляху. Продовжуй!'
-    : isStable
-    ? 'Усе добре. Дотримуйся стратегії.'
-    : isDipping
-    ? 'Можливо варто зменшити ставки або зробити паузу'
+  const advice = !hasBets ? 'Додавай записи про ставки — цей блок покаже твій прогрес'
+    : isGrowing ? 'Ти на правильному шляху. Продовжуй!'
+    : isStable ? 'Усе добре. Дотримуйся стратегії.'
+    : isDipping ? 'Можливо варто зменшити ставки або зробити паузу'
     : 'Радимо зменшити ставки та переглянути стратегію';
 
+  const progressGradient = !hasBets ? 'linear-gradient(90deg, #E5E7EB, #F3F4F6)'
+    : isGrowing ? 'linear-gradient(90deg, #10B981, #34D399, #6EE7B7)'
+    : isStable ? 'linear-gradient(90deg, #3B82F6, #60A5FA, #93C5FD)'
+    : isDipping ? 'linear-gradient(90deg, #F59E0B, #FBBF24, #FDE68A)'
+    : 'linear-gradient(90deg, #EF4444, #F87171, #FCA5A5)';
+
+  const progressGlow = !hasBets ? 'rgba(156,163,175,0.1)'
+    : isGrowing ? 'rgba(16,185,129,0.2)'
+    : isStable ? 'rgba(59,130,246,0.2)'
+    : isDipping ? 'rgba(245,158,11,0.2)'
+    : 'rgba(239,68,68,0.2)';
+
   return (
-    <div
-      className="bg-white border border-[#D1D5DB] rounded-3xl px-6 py-5 group transition-all duration-300 ease-out overflow-hidden"
-      style={{
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-        transform: 'translateY(0)',
-      }}
-      onMouseEnter={(e) => {
-        Object.assign(e.currentTarget.style, {
-          transform: 'translateY(-3px)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-        });
-      }}
-      onMouseLeave={(e) => {
-        Object.assign(e.currentTarget.style, {
-          transform: 'translateY(0)',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-        });
-      }}
+    <div className="bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden group transition-all duration-300 ease-out"
+      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transform: 'translateY(0)' }}
+      onMouseEnter={(e) => { Object.assign(e.currentTarget.style, { transform: 'translateY(-2px)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }); }}
+      onMouseLeave={(e) => { Object.assign(e.currentTarget.style, { transform: 'translateY(0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }); }}
     >
-      {/* Title row */}
-      <div className="flex items-center justify-between pb-3">
-        <div className="flex items-center gap-2">
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors flex-shrink-0">
-                  <Info className="h-5 w-5" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
-                <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
-                <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
-                  <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
-                  <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав. Це твій орієнтир.</span>
-                  <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму. Якщо смужка зелена — ти близько до рекорду. Якщо жовта чи червона — ти просів і варто зменшити ставки.</span>
-                  <span className="block">💡 <strong>Порада</strong> — підказка що робити далі, залежно від твого стану.</span>
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
-                  </div>
-      </div>
-      {/* Divider */}
-      <div className="border-b border-[#E5E7EB] -mx-6 mb-3"></div>
-
-      {/* Section 1 — Status */}
-      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
-        <p className="text-sm text-[#111827] font-medium">{statusText}</p>
-      </div>
-
-      {/* Section 2 — Progress bar + amounts */}
-      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
-        {/* Amounts row — current bank on left, best result on right */}
-        {hasBets && (
-          <div className="flex justify-between items-baseline mb-2">
-            <div>
-              <p className="text-xs text-[#9CA3AF]">Поточний банк</p>
-              <p className="text-xl font-semibold text-[#111827]">
-                {currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-[#9CA3AF]">Найкращий результат</p>
-              <p className="text-xl font-semibold text-[#111827]">
-                {allTimeHigh.toLocaleString('uk-UA')} ₴
-              </p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#111827]">
+            <BarChart3 className="h-4.5 w-4.5 text-white" strokeWidth={1.5} />
           </div>
-        )}
-        {hasBets ? (
-          <div className="relative w-full h-3 bg-[#E5E7EB] rounded-full overflow-hidden">
-            {/* Filled bar with shimmer */}
-            <div
-              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
-              style={{
-                width: `${Math.min(percentOfPeak, 100)}%`,
-                background: isGrowing || isStable
-                  ? 'repeating-linear-gradient(90deg, #10B981, #34D399 16%, #6EE7B7 33%, #34D399 50%, #10B981 66%, #34D399 83%, #6EE7B7 100%)'
-                  : isDipping
-                  ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
-                  : 'linear-gradient(90deg, #EF4444, #F87171)',
-                animation: isGrowing || isStable
-                  ? 'waves 3s linear infinite'
-                  : 'shimmer 3s ease-in-out infinite',
-              }}
-            />
+          <div>
+            <span className="text-base font-semibold text-[#111827]">Трекер балансу</span>
+            {hasBets && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={`inline-block w-2 h-2 rounded-full ${statusDotColor} ring-2 ${statusRingColor} animate-pulse`} />
+                <span className="text-xs text-[#6B7280]">
+                  {isGrowing ? 'Зростає' : isStable ? 'Стабільний' : isDipping ? 'Просідає' : 'Падає'}
+                </span>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="relative w-full h-3 bg-[#E5E7EB] rounded-full overflow-hidden opacity-20" />
-        )}
-        <div className="flex justify-between text-sm text-[#6B7280] mt-2 font-medium">
+        </div>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB] hover:text-[#6B7280] transition-colors flex-shrink-0">
+                <Info className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="end" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+              <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
+              <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
+                <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
+                <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав.</span>
+                <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму.</span>
+                <span className="block">💡 <strong>Порада</strong> — підказка що робити далі, залежно від твого стану.</span>
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      {/* Status banner */}
+      <div className="px-6 mb-4">
+        <div className={`rounded-2xl px-4 py-2.5 border ${!hasBets ? 'bg-[#F9FAFB] border-[#E5E7EB]' : isGrowing ? 'bg-[#F0FDF4] border-[#BBF7D0]' : isStable ? 'bg-[#EFF6FF] border-[#BFDBFE]' : isDipping ? 'bg-[#FFFBEB] border-[#FDE68A]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
+          <p className={`text-sm font-medium ${!hasBets ? 'text-[#6B7280]' : isGrowing ? 'text-[#166534]' : isStable ? 'text-[#1E40AF]' : isDipping ? 'text-[#92400E]' : 'text-[#991B1B]'}`}>{statusText}</p>
+        </div>
+      </div>
+
+      {/* Bank cards */}
+      <div className="grid grid-cols-2 gap-3 px-6 mb-4">
+        <div className="rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6] border border-[#E5E7EB] px-4 py-3.5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-5"
+            style={{ background: hasBets && isGrowing ? '#10B981' : hasBets && isFalling ? '#EF4444' : '#3B82F6' }} />
+          <div className="relative z-10">
+            <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Поточний банк</p>
+            <p className="text-2xl font-bold text-[#111827] tracking-tight">
+              {hasBets ? currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 }) : '0'} ₴
+            </p>
+            {hasBets && (
+              <div className="flex items-center gap-1 mt-1">
+                {isGrowing || isStable ? <TrendingUp className="h-3 w-3 text-[#10B981]" strokeWidth={2.5} /> : <TrendingDown className="h-3 w-3 text-[#EF4444]" strokeWidth={2.5} />}
+                <span className={`text-xs font-medium ${isGrowing || isStable ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>{percentOfPeak.toFixed(1)}% від піку</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7]/50 border border-[#FDE68A] px-4 py-3.5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-10" style={{ background: '#F59E0B' }} />
+          <div className="relative z-10">
+            <p className="text-[11px] text-[#92400E]/70 font-medium uppercase tracking-wider mb-1">🏆 Найкращий результат</p>
+            <p className="text-2xl font-bold text-[#111827] tracking-tight">
+              {hasBets ? allTimeHigh.toLocaleString('uk-UA') : '—'} ₴
+            </p>
+            <p className="text-xs text-[#92400E]/60 mt-0.5">Твій орієнтир</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="px-6 mb-4">
+        <div className="relative w-full h-4 bg-[#F3F4F6] rounded-full overflow-hidden" style={{ boxShadow: `0 0 14px ${progressGlow}` }}>
+          <div className="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${Math.min(percentOfPeak, 100)}%`, background: progressGradient }} />
+          {hasBets && (
+            <div className="absolute top-0 left-0 h-full w-full opacity-30"
+              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'shimmer 2s ease-in-out infinite' }} />
+          )}
+        </div>
+        <div className="flex justify-between text-[11px] text-[#9CA3AF] mt-1.5 font-medium">
           <span>0 ₴</span>
           <span>{hasBets ? `${allTimeHigh.toLocaleString('uk-UA')} ₴` : '—'}</span>
         </div>
       </div>
 
-      {/* Section 3 — Advice */}
-      <div className="rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] px-4 py-3 mb-3">
-        <p className="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider mb-1">Поради до банку</p>
-        {aiLoading ? (
-          <p className="text-sm text-[#9CA3AF] leading-relaxed animate-pulse">Аналізую стан банку...</p>
-        ) : aiAdvice ? (
-          <p className="text-sm text-[#111827] leading-relaxed font-medium">{aiAdvice}</p>
-        ) : hasBets ? (
-          <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
-        ) : (
-          <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
-        )}
-      </div>
-
-      {/* Section 4 — Game summary */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB]">
-          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">CS2</p>
-          {cs2Bets > 0 ? (
-            <p className="text-sm font-semibold text-[#111827]">
-              {cs2Bets} ставок · <span className={cs2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
-            </p>
+      {/* AI Advice */}
+      <div className="px-6 mb-4">
+        <div className="rounded-2xl bg-gradient-to-br from-[#F3F4F6] to-[#F9FAFB] border border-[#E5E7EB] px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-[#6366F1]" strokeWidth={1.5} />
+            <p className="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">AI-порада</p>
+          </div>
+          {aiLoading ? (
+            <div className="space-y-2">
+              <div className="h-3 bg-[#E5E7EB] rounded-full w-3/4 animate-pulse" />
+              <div className="h-3 bg-[#E5E7EB] rounded-full w-1/2 animate-pulse" />
+            </div>
+          ) : aiAdvice ? (
+            <p className="text-sm text-[#111827] leading-relaxed font-medium">«{aiAdvice}»</p>
           ) : (
-            <p className="text-xs text-[#9CA3AF]">Немає даних</p>
-          )}
-        </div>
-        <div className="rounded-xl px-3 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB]">
-          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide mb-0.5">Dota 2</p>
-          {dota2Bets > 0 ? (
-            <p className="text-sm font-semibold text-[#111827]">
-              {dota2Bets} ставок · <span className={dota2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
-            </p>
-          ) : (
-            <p className="text-xs text-[#9CA3AF]">Немає даних</p>
+            <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
           )}
         </div>
       </div>
 
-      {/* Section 5 — Game filter */}
-      <div className="border-t border-[#F3F4F6] pt-3 flex items-center gap-2">
-        <span className="text-xs text-[#9CA3AF]">Дивитись на сторінці:</span>
-        <div className="flex items-center gap-1">
+      {/* Game cards */}
+      <div className="grid grid-cols-2 gap-3 px-6 mb-4">
+        {/* CS2 */}
+        <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden">
+          <div className={`h-1 ${cs2Bets > 0 ? 'bg-gradient-to-r from-[#F59E0B] to-[#EF4444]' : 'bg-[#E5E7EB]'}`} />
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-[#FFF7ED]">
+                <Crosshair className="h-3.5 w-3.5 text-[#F97316]" strokeWidth={2} />
+              </div>
+              <span className="text-xs font-semibold text-[#111827]">CS2</span>
+            </div>
+            {cs2Bets > 0 ? (
+              <>
+                <p className="text-lg font-bold text-[#111827]">
+                  <span className={cs2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
+                </p>
+                <p className="text-[11px] text-[#9CA3AF]">{cs2Bets} ставк{cs2Bets === 1 ? 'а' : cs2Bets < 5 ? 'и' : 'ок'}</p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-end gap-1 h-8 mb-0.5">
+                  {[30, 50, 25, 60, 35, 45].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-[#F3F4F6]" style={{ height: `${h}%` }} />))}
+                </div>
+                <p className="text-[11px] text-[#9CA3AF]">Немає даних</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Dota 2 */}
+        <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden">
+          <div className={`h-1 ${dota2Bets > 0 ? 'bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]' : 'bg-[#E5E7EB]'}`} />
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-[#F5F3FF]">
+                <Shield className="h-3.5 w-3.5 text-[#8B5CF6]" strokeWidth={2} />
+              </div>
+              <span className="text-xs font-semibold text-[#111827]">Dota 2</span>
+            </div>
+            {dota2Bets > 0 ? (
+              <>
+                <p className="text-lg font-bold text-[#111827]">
+                  <span className={dota2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
+                </p>
+                <p className="text-[11px] text-[#9CA3AF]">{dota2Bets} ставк{dota2Bets === 1 ? 'а' : dota2Bets < 5 ? 'и' : 'ок'}</p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-end gap-1 h-8 mb-0.5">
+                  {[40, 20, 55, 30, 50, 25].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-[#F3F4F6]" style={{ height: `${h}%` }} />))}
+                </div>
+                <p className="text-[11px] text-[#9CA3AF]">Немає даних</p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Game filter */}
+      <div className="border-t border-[#F3F4F6] px-6 py-3 flex items-center gap-2">
+        <span className="text-xs text-[#9CA3AF] font-medium">Фільтр сторінки:</span>
+        <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-full p-1">
           {(['CS2', 'Dota2'] as const).map((g) => (
-            <button
-              key={g}
-              onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                gameFilter === g
-                  ? 'bg-[#447afc] text-white shadow-[0_1px_4px_rgba(68,122,252,0.3)]'
-                  : 'text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6]'
-              }`}
-            >
-              {g === 'CS2' ? 'CS2' : 'Dota 2'}
+            <button key={g} onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${gameFilter === g ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
+              {g === 'CS2' ? '🎯 CS2' : '🛡️ Dota 2'}
             </button>
           ))}
         </div>
-        {gameFilter !== 'all' && !gameHasData && (
-          <span className="text-xs text-[#EF4444] ml-1">Немає даних</span>
-        )}
         {gameFilter !== 'all' && gameHasData && (
-          <span className="text-xs text-[#9CA3AF] ml-1">
-            {gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴
-          </span>
+          <span className="text-xs text-[#9CA3AF] ml-auto">{gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴</span>
         )}
       </div>
     </div>
   );
 }
-
-
-
