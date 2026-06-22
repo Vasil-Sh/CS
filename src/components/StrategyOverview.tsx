@@ -912,7 +912,7 @@ export default function StrategyOverview() {
                         return (
                           <div
                             key={index}
-                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all flex flex-col ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
+                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all flex flex-col ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
                           >
                           <div className="p-5 flex flex-col flex-1">
                             {/* Card Header */}
