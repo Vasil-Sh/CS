@@ -18,6 +18,7 @@ import {
   Search,
   Info,
   RefreshCw,
+  RotateCcw,
   Download,
   Calendar,
   Pencil,
@@ -1187,10 +1188,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <p className="text-[#6B7280] text-sm mb-6">
                       {csStatusFilter !== 'all' ? `Немає CS команд зі статусом "${csStatusFilter}"` : 'Додайте ризиковані команди CS для відстеження'}
                     </p>
-                    {csStatusFilter !== 'all' && (
+                    {csStatusFilter !== 'all' ? (
                       <Button onClick={() => setCsStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
                         <RotateCcw className="h-4 w-4" strokeWidth={2} />
                         Скинути фільтр
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setIsAddTeamOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        Додати команду
                       </Button>
                     )}
                   </div>
@@ -1234,10 +1240,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <p className="text-[#6B7280] text-sm mb-6">
                       {dotaStatusFilter !== 'all' ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"` : 'Додайте ризиковані команди Dota 2 для відстеження'}
                     </p>
-                    {dotaStatusFilter !== 'all' && (
+                    {dotaStatusFilter !== 'all' ? (
                       <Button onClick={() => setDotaStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
                         <RotateCcw className="h-4 w-4" strokeWidth={2} />
                         Скинути фільтр
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setIsAddTeamOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        Додати команду
                       </Button>
                     )}
                   </div>
