@@ -21,44 +21,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-
-interface ParsedEvent {
-  number: string;
-  match: string;
-  betType: string;
-  selection: string;
-  odds: string;
-}
-
-/** Копія parseExpressEvents з MyBets.tsx */
-function parseExpressEvents(betType: string): ParsedEvent[] {
-  if (!betType.includes('|')) return [];
-
-  const fullString = betType.split('|').slice(1).join('|').trim();
-  const eventStrings = fullString.split('•').map(e => e.trim());
-
-  return eventStrings.map(eventStr => {
-    const parts = eventStr.split('|').map(p => p.trim());
-
-    if (parts.length >= 2) {
-      const matchPart = parts[0];
-      const betPart = parts[1];
-
-      const numberMatch = matchPart.match(/^(\d+)\.\s*(.+)$/);
-      const number = numberMatch ? numberMatch[1] : '';
-      const match = numberMatch ? numberMatch[2] : matchPart;
-
-      const betMatch = betPart.match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
-      const parsedBetType = betMatch ? betMatch[1] : '';
-      const selection = betMatch ? betMatch[2] : '';
-      const odds = betMatch ? betMatch[3] : '';
-
-      return { number, match, betType: parsedBetType, selection, odds };
-    }
-
-    return { number: '', match: eventStr, betType: '', selection: '', odds: '' };
-  });
-}
+import { parseExpressEvents } from '@/lib/parser/expressParser';
+import type { ParsedEvent } from '@/lib/parser/expressParser';
 
 describe('parseExpressEvents (Express-парсинг)', () => {
   it('[1] звичайна ставка "П1" (без |) → порожній масив', () => {

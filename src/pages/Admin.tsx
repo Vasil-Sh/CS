@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
+import { PageHeader } from '@/components/PageHeader';
 import { logRender } from '@/lib/devLogger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +45,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { authService } from '@/lib/authService';
 
 interface UserData {
   telegram: string;
@@ -200,50 +201,30 @@ export default function Admin() {
     setError('');
     
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AUTH}/gviz/tq?tqx=out:csv`;
-      
-      const response = await fetch(url);
-      const text = await response.text();
-      
-      const rows = text.split('\n').slice(1);
-      const edits = loadUserEdits();
-      const deletedList: string[] = JSON.parse(localStorage.getItem('adminDeletedUsers') || '[]');
+      const allUsers = await authService.fetchUsers();
 
-      const parsedUsers: UserData[] = rows
-        .filter(row => row.trim())
-        .map(row => {
-          const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 7) return null;
-          
-          const telegram = matches[0].replace(/"/g, '').trim();
-          const username = matches[1].replace(/"/g, '').trim();
-          const password = matches[2].replace(/"/g, '').trim();
-          const priceMonth = cleanPrice(matches[3].replace(/"/g, '').trim());
-          const startDate = matches[4].replace(/"/g, '').trim();
-          const endDate = matches[5].replace(/"/g, '').trim();
-          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
-          
+      const parsedUsers: UserData[] = allUsers
+        .map(user => {
+          const isAdminVal = user.isAdmin === 'так' || user.isAdmin === 'yes' || user.isAdmin === 'true' || user.isAdmin === '1';
+          const endDate = user.endDate || '';
           const daysLeft = getDaysUntilExpiry(endDate);
           
-          const user: UserData = {
-            telegram,
-            username,
-            password,
-            priceMonth,
-            startDate,
+          return {
+            telegram: user.telegram || '',
+            username: user.username || '',
+            password: user.password || '',
+            priceMonth: cleanPrice(user.priceMonth || ''),
+            startDate: user.startDate || '',
             endDate,
             isActive: isSubscriptionActive(endDate),
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes',
+            isAdmin: isAdminVal,
             daysUntilExpiry: daysLeft,
             isLocal: false,
           };
-
-          return applyEditsToUser(user, edits);
         })
-        .filter((user): user is UserData => user !== null)
-        .filter(u => !deletedList.includes(u.username));
-      
-      // Merge with local users
+        .filter(u => u.username);
+
+      // Merge with local users (not managed by authService)
       const localUsers = loadLocalUsers().map(u => ({
         ...u,
         isActive: isSubscriptionActive(u.endDate),
@@ -550,27 +531,13 @@ export default function Admin() {
     <div className="min-h-screen bg-[#f3f3f3] relative">
 
       {/* ===== HEADER ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Адмін панель
-          </h1>
-
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
-              <User className="h-4 w-4 text-white" strokeWidth={2} />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium text-[#111827] leading-tight">
-                {currentUser || 'User'}
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
-                Активний
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Адмін панель"
+        currentUser={currentUser || 'User'}
+        isDarkTheme={false}
+        onToggleTheme={() => {}}
+        showThemeToggle={false}
+      />
 
       {/* Main Content */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">

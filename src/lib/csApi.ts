@@ -167,3 +167,12 @@ export function getMatchStatus(match: ApiMatch): 'upcoming' | 'live' | 'finished
   if (matchDate <= now) return 'live';
   return 'upcoming';
 }
+
+const HLTV_BASE_URL = 'https://www.hltv.org';
+
+/** Build a full HLTV URL from an API link (which may be relative) */
+export function buildHltvUrl(link: string): string {
+  if (!link) return '';
+  if (link.startsWith('http://') || link.startsWith('https://')) return link;
+  return `${HLTV_BASE_URL}${link.startsWith('/') ? '' : '/'}${link}`;
+}

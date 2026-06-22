@@ -58,6 +58,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PageHeader } from '@/components/PageHeader';
 import AIRecommendationModal from '@/components/AIRecommendationModal';
 import CommentModal from '@/components/CommentModal';
 import { deepSeekService, type AIRecommendation } from '@/lib/deepSeekService';
@@ -68,6 +69,7 @@ import {
   determineTier,
   determineFavorite,
   getMatchStatus,
+  buildHltvUrl,
   type ApiMatch
 } from '@/lib/csApi';
 
@@ -140,17 +142,6 @@ const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
     console.error('Error saving match ratings:', e);
   }
 };
-
-const HLTV_BASE_URL = 'https://www.hltv.org';
-
-/** Build a full HLTV URL from an API link (which may be relative) */
-function buildHltvUrl(link: string): string {
-  if (!link) return '';
-  // Already a full URL
-  if (link.startsWith('http://') || link.startsWith('https://')) return link;
-  // Relative path — prepend HLTV base
-  return `${HLTV_BASE_URL}${link.startsWith('/') ? '' : '/'}${link}`;
-}
 
 function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const matchType = parseMatchType(apiMatch.type);
@@ -1136,56 +1127,15 @@ export default function Matches() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-[#f3f3f3] relative">
+      <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
         {/* ===== HEADER ===== */}
-        <div className="px-6 lg:px-8 pt-6 pb-2">
-          <div className="flex items-center justify-between">
-            <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-              Матчі
-            </h1>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
-                <button
-                  onClick={() => { if (isDarkTheme) toggleTheme(); }}
-                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                    !isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
-                  }`}
-                  title="Світла тема"
-                >
-                  <Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#6B7280]'}`} strokeWidth={1.5} />
-                </button>
-                <button
-                  onClick={() => { if (!isDarkTheme) toggleTheme(); }}
-                  className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                    isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
-                  }`}
-                  title="Темна тема"
-                >
-                  <Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#6B7280]'}`} strokeWidth={1.5} />
-                </button>
-              </div>
-
-              <div className="w-px h-8 bg-[#D1D5DB]" />
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
-                  <User className="h-4 w-4 text-white" strokeWidth={2} />
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-[#111827] leading-tight">
-                    {currentUser || 'User'}
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
-                    Активний
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 space-y-6 px-3 lg:px-4 pb-8 pt-4">
+        <PageHeader
+          title="Матчі"
+          currentUser={currentUser || 'User'}
+          isDarkTheme={isDarkTheme}
+          onToggleTheme={toggleTheme}
+        />
+        <div className="relative z-10 space-y-6 px-3 lg:px-4 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
           {/* ===== QUICK STATS ===== */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -1452,27 +1402,44 @@ export default function Matches() {
             </div>
           </div>
 
-                    {/* ===== LOADING / EMPTY STATE ===== */}
+                    {/* ===== LOADING STATE ===== */}
           {initialLoading && (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-10 w-10 animate-spin text-[#2563EB] mx-auto" />
-                <p className="text-[#4B5563] text-sm">Завантаження матчів...</p>
-              </div>
-            </div>
+            <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: chartCardShadow }}>
+              <CardContent className="py-16 text-center">
+                <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                  <Loader2 className="h-16 w-16 text-[#2563EB] animate-spin" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                  Завантаження матчів
+                </h3>
+                <p className="text-[#6B7280] text-sm">
+                  Отримання актуальних даних з API...
+                </p>
+              </CardContent>
+            </Card>
           )}
 
           {!initialLoading && sortedMatches.length === 0 && (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center space-y-4">
-                <Trophy className="h-10 w-10 text-[#9CA3AF] mx-auto" />
-                <p className="text-[#4B5563] text-sm">Матчів не знайдено</p>
-                <Button onClick={refreshMatches} variant="outline" size="sm" className="rounded-xl">
-                  <RefreshCw className="h-4 w-4 mr-2" />
+            <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: chartCardShadow }}>
+              <CardContent className="py-16 text-center">
+                <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                  <Trophy className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                  Матчів не знайдено
+                </h3>
+                <p className="text-[#6B7280] text-sm mb-6">
+                  Оновіть дані або змініть фільтри для пошуку матчів
+                </p>
+                <Button
+                  onClick={refreshMatches}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4" strokeWidth={2} />
                   Спробувати знову
                 </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* ===== DATE GROUP CARDS — today and future dates ===== */}

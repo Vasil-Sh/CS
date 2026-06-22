@@ -1,38 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useLogin } from '@/hooks/useLogin';
 import { Loader2, LogIn, Sparkles } from 'lucide-react';
 
 export default function LoginDigestoDemo() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await login(username, password);
-      if (result.success) {
-        navigate('/app/analytics');
-      } else {
-        setError(result.error || 'Невірний логін або пароль');
-      }
-    } catch (err) {
-      setError('Помилка входу. Спробуйте ще раз.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { username, setUsername, password, setPassword, isLoading, error, handleSubmit } = useLogin();
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">

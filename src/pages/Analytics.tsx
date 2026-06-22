@@ -14,6 +14,7 @@ import OddsCategoryCards from '@/components/analytics/OddsCategoryCards';
 import BalanceTracker from '@/components/analytics/BalanceTracker';
 import RiskManagement from '@/components/RiskManagement';
 import PeriodComparison from '@/components/PeriodComparison';
+import { PageHeader } from '@/components/PageHeader';
 import GoalsManager from '@/components/GoalsManager';
 import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
@@ -21,6 +22,7 @@ import { BankrollService } from '@/lib/bankrollService';
 import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { useTheme } from '@/hooks/useTheme';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
 import { AnalyticsSkeleton } from '@/components/PageSkeleton';
@@ -90,7 +92,8 @@ export default function Analytics() {
     roi: 0
   });
   const [activeTab, setActiveTab] = useState('profit');
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDarkTheme = theme === 'dark';
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('CS2');
 
@@ -234,10 +237,6 @@ export default function Analytics() {
       bumpBankroll();
     }
   }, [updateBankrollStats, bumpBankroll]);
-
-  const toggleTheme = useCallback(() => {
-    setIsDarkTheme(prev => !prev);
-  }, []);
 
   // Filter bets by game
   const gameFilteredBets = useMemo(() => {
@@ -509,95 +508,44 @@ export default function Analytics() {
       />
 
       {/* ===== HEADER ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Аналітика
-          </h1>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActionsMenu(!showActionsMenu);
-                }}
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200"
-                title="Дії"
-              >
-                <MoreHorizontal className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
-              </button>
-              
-              {showActionsMenu && (
-                <div 
-                  className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50"
-                  style={{
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)'
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      loadAnalyticsData();
-                      setShowActionsMenu(false);
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    <RefreshCw className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-                    Оновити дані
-                  </button>
-                  <button
-                    onClick={() => {
-                      clearAllData();
-                      setShowActionsMenu(false);
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                    Очистити дані
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
-              <button
-                onClick={() => { if (isDarkTheme) toggleTheme(); }}
-                className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                  !isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
-                }`}
-                title="Світла тема"
-              >
-                <Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
-              </button>
-              <button
-                onClick={() => { if (!isDarkTheme) toggleTheme(); }}
-                className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                  isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
-                }`}
-                title="Темна тема"
-              >
-                <Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
-              </button>
-            </div>
-
-            <div className="w-px h-8 bg-[#D1D5DB]" />
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
-                <User className="h-4 w-4 text-white" strokeWidth={2} />
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-medium text-[#111827] leading-tight">
-                  {currentUser || 'User'}
-                </p>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
-                  Активний
-                </span>
-              </div>
-            </div>
+      <PageHeader
+        title="Аналітика"
+        currentUser={currentUser || 'User'}
+        isDarkTheme={isDarkTheme}
+        onToggleTheme={toggleTheme}
+        showActionsMenu
+        actionsMenuOpen={showActionsMenu}
+        onToggleActionsMenu={() => setShowActionsMenu(!showActionsMenu)}
+        actionsMenuContent={
+          <div 
+            className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50"
+            style={{
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)'
+            }}
+          >
+            <button
+              onClick={() => {
+                loadAnalyticsData();
+                setShowActionsMenu(false);
+              }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
+            >
+              <RefreshCw className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+              Оновити дані
+            </button>
+            <button
+              onClick={() => {
+                clearAllData();
+                setShowActionsMenu(false);
+              }}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+              Очистити дані
+            </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Main Content */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">

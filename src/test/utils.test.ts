@@ -93,24 +93,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { normalizeDateStr } from '@/lib/utils';
 
-// ═══════════════════════════════════════════════════════════════════
-// Inline-копія normalizeDateStr з BetTable.tsx
-// (тестуємо ізольовано, без залежності від React/jsdom)
-// ═══════════════════════════════════════════════════════════════════
-
-/** Normalize bet date string (DD.MM.YYYY or YYYY-MM-DD) → YYYY-MM-DD */
-function normalizeDateStr(dateStr: string): string {
-  if (!dateStr) return '';
-  const dotMatch = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (dotMatch) return `${dotMatch[3]}-${dotMatch[2].padStart(2, '0')}-${dotMatch[1].padStart(2, '0')}`;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (slashMatch) return `${slashMatch[3]}-${slashMatch[2].padStart(2, '0')}-${slashMatch[1].padStart(2, '0')}`;
-  return dateStr;
-}
-
-describe('normalizeDateStr (з BetTable.tsx)', () => {
+describe('normalizeDateStr', () => {
   it('[1] "18.06.2026" (DD.MM.YYYY) → "2026-06-18"', () => {
     expect(normalizeDateStr('18.06.2026')).toBe('2026-06-18');
   });

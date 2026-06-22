@@ -13,9 +13,12 @@ import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
+import { authService } from '@/lib/authService';
+import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/useTheme';
 import { logRender } from '@/lib/devLogger';
+import { PageHeader } from '@/components/PageHeader';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,
   AlertTriangle, Clock, Plus, ArrowUpRight, ArrowDownRight,
@@ -24,11 +27,8 @@ import {
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
 
-import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
-
 // ── Types ──
 interface UserRecord { telegram: string; username: string; isAdmin?: boolean; }
-interface ParsedEvent { number: string; match: string; betType: string; selection: string; odds: string; }
 interface BetStats { totalBets: number; winRate: number; totalProfit: number; averageROI: number; profitByMonth: { month: string; profit: number }[]; profitByStrategy: { strategy: string; profit: number }[]; }
 type TableFilterMode = 'today' | 'all';
 type ResultFilter = 'all' | 'Win' | 'Loss' | 'Pending';
@@ -118,13 +118,14 @@ export default function MyBets() {
   // ── Data fetching ──
   const fetchUsers = async () => {
     try {
-      const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AUTH}/gviz/tq?tqx=out:csv`);
-      const text = await resp.text();
-      const parsed: UserRecord[] = text.split('\n').slice(1).filter(r => r.trim()).map(row => {
-        const m = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        if (!m || m.length < 7) return null;
-        return { telegram: m[0].replace(/"/g, '').trim(), username: m[1].replace(/"/g, '').trim(), isAdmin: ['true','1','yes','так'].includes(m[6]?.replace(/"/g,'').trim().toLowerCase()) };
-      }).filter((u): u is UserRecord => u !== null);
+      const allUsers = await authService.fetchUsers();
+      const parsed: UserRecord[] = allUsers
+        .filter(u => u.username)
+        .map(u => ({
+          telegram: u.telegram,
+          username: u.username,
+          isAdmin: u.isAdmin === 'так' || u.isAdmin === 'yes' || u.isAdmin === 'true' || u.isAdmin === '1',
+        }));
       setUsers(parsed);
     } catch (err) { console.error('Error fetching users:', err); }
   };
@@ -237,19 +238,6 @@ export default function MyBets() {
   const handleShareBet = useCallback((bet: Bet) => { setSelectedBet(bet); setShareModalOpen(true); }, []);
   const handleBankModalClose = useCallback((success: boolean) => { setBankModalOpen(false); if (success) { setBankrollRefreshKey(p => p + 1); bumpBankroll(); } }, [bumpBankroll]);
 
-  const parseExpressEvents = (betType: string): ParsedEvent[] => {
-    if (!betType.includes('|')) return [];
-    return betType.split('|').slice(1).join('|').trim().split('•').map(e => {
-      const parts = e.trim().split('|').map(p => p.trim());
-      if (parts.length >= 2) {
-        const nm = parts[0].match(/^(\d+)\.\s*(.+)$/);
-        const bm = parts[1].match(/^(.+?):\s*(.+?)\s*@([\d.]+)$/);
-        return { number: nm?.[1] || '', match: nm?.[2] || parts[0], betType: bm?.[1] || '', selection: bm?.[2] || '', odds: bm?.[3] || '' };
-      }
-      return { number: '', match: e.trim(), betType: '', selection: '', odds: '' };
-    });
-  };
-
   const handleExpressDetails = useCallback((bet: Bet) => { setSelectedExpressBet(bet); setSelectedExpressEvents(parseExpressEvents(bet.betType)); setExpressModalOpen(true); }, []);
   const handleBetDetails = useCallback((bet: Bet) => { setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
 
@@ -278,30 +266,20 @@ export default function MyBets() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
-      <div className="px-6 lg:px-8 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">Додати запис</h1>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button onClick={(e) => { e.stopPropagation(); setShowActionsMenu(!showActionsMenu); }} className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5" title="Дії"><MoreHorizontal className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} /></button>
-              {showActionsMenu && (
-                <div className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
-                  <button onClick={() => { clearRecentBets(); setShowActionsMenu(false); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2]"><Trash2 className="h-4 w-4" strokeWidth={1.5} />Очистити всі дані</button>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
-              <button onClick={() => { if (isDarkTheme) toggleTheme(); }} className={`relative flex items-center justify-center w-8 h-8 rounded-full ${!isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'}`} title="Світла тема"><Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} /></button>
-              <button onClick={() => { if (!isDarkTheme) toggleTheme(); }} className={`relative flex items-center justify-center w-8 h-8 rounded-full ${isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'}`} title="Темна тема"><Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} /></button>
-            </div>
-            <div className="w-px h-8 bg-[#D1D5DB]" />
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]"><User className="h-4 w-4 text-white" strokeWidth={2} /></div>
-              <div className="hidden sm:block"><p className="text-sm font-medium text-[#111827] leading-tight">{currentUser || 'User'}</p><span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5">Активний</span></div>
-            </div>
+      <PageHeader
+        title="Додати запис"
+        currentUser={currentUser || 'User'}
+        isDarkTheme={isDarkTheme}
+        onToggleTheme={toggleTheme}
+        showActionsMenu
+        actionsMenuOpen={showActionsMenu}
+        onToggleActionsMenu={() => setShowActionsMenu(!showActionsMenu)}
+        actionsMenuContent={
+          <div className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+            <button onClick={() => { clearRecentBets(); setShowActionsMenu(false); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2]"><Trash2 className="h-4 w-4" strokeWidth={1.5} />Очистити всі дані</button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Stats Row 1 */}
@@ -334,6 +312,7 @@ export default function MyBets() {
 
           {activeTab === 'records' && (
             <BetTable bets={recentBets} activeBets={activeBets} currentUser={currentUser} isAdmin={isAdmin}
+              onNavigateToAdd={() => setActiveTab('add')}
               tableFilter={tableFilter} onTableFilterChange={setTableFilter}
               showAdvancedFilters={showAdvancedFilters} onToggleAdvancedFilters={() => setShowAdvancedFilters(!showAdvancedFilters)}
               resultFilter={resultFilter} onResultFilterChange={setResultFilter}

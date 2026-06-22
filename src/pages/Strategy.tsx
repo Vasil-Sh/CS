@@ -6,8 +6,7 @@ import RiskManagement from '@/components/RiskManagement';
 import StrategyOverviewHeader from '@/components/StrategyOverviewHeader';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppStore } from '@/stores/appStore';
-import { logRender } from '@/lib/devLogger';
+import { useAppStore } from '@/stores/appStore';import { logRender } from '@/lib/devLogger';import { PageHeader } from '@/components/PageHeader';
 import type { Bet } from '@/types/betting';
 
 export default function Strategy() {
@@ -33,27 +32,13 @@ export default function Strategy() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
       {/* ===== HEADER ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
-            Стратегії та Цілі
-          </h1>
-          {/* User Info */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
-              <User className="h-4 w-4 text-white" strokeWidth={2} />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium text-[#111827] leading-tight">
-                {currentUser || 'User'}
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
-                Активний
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Стратегії та Цілі"
+        currentUser={currentUser || 'User'}
+        isDarkTheme={false}
+        onToggleTheme={() => {}}
+        showThemeToggle={false}
+      />
 
       {/* ===== CONTENT ===== */}
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">

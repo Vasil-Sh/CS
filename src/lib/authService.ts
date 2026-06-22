@@ -8,6 +8,13 @@ interface AdminUser {
   isAdmin: string;
 }
 
+/** Simplified user info for consumers that only need public fields */
+export interface SimpleUser {
+  telegram: string;
+  username: string;
+  isAdmin: boolean;
+}
+
 interface LoginResult {
   success: boolean;
   error?: string;
@@ -21,35 +28,63 @@ class AuthService {
   private apiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || '';
 
   async fetchUsers(): Promise<AdminUser[]> {
-    try {
-      const range = 'Доступи!A2:G100';
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}?key=${this.apiKey}`;
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Failed to fetch users from Google Sheets:', errorData);
-        return [];
+    // Try Sheets v4 API first (requires API key)
+    if (this.apiKey) {
+      try {
+        const range = 'Доступи!A2:G100';
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/${encodeURIComponent(range)}?key=${this.apiKey}`;
+        
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const rows = data.values || [];
+          const users = rows.map((row: string[]) => ({
+            telegram: row[0] || '',
+            username: row[1] || '',
+            password: row[2] || '',
+            priceMonth: row[3] || '',
+            startDate: row[4] || '',
+            endDate: row[5] || '',
+            isAdmin: row[6] || ''
+          })).filter((user: AdminUser) => user.username && user.password);
+          return this.applyLocalOverrides(users);
+        }
+        console.warn('Sheets v4 API failed, falling back to CSV');
+      } catch (e) {
+        console.warn('Sheets v4 API error, falling back to CSV:', e);
       }
+    }
 
-      const data = await response.json();
-      const rows = data.values || [];
+    // Fallback: fetch via gviz CSV export (no API key needed)
+    return this.fetchUsersFromCsv();
+  }
 
-      const users = rows.map((row: string[]) => ({
-        telegram: row[0] || '',
-        username: row[1] || '',
-        password: row[2] || '',
-        priceMonth: row[3] || '',
-        startDate: row[4] || '',
-        endDate: row[5] || '',
-        isAdmin: row[6] || ''
-      })).filter((user: AdminUser) => user.username && user.password);
+  /** Fetch users via Google Sheets CSV export (gviz) — no API key required */
+  private async fetchUsersFromCsv(): Promise<AdminUser[]> {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/gviz/tq?tqx=out:csv`;
+      const response = await fetch(url);
+      const text = await response.text();
 
-      // Apply local admin edits + local users + deleted list
+      const rows = text.split('\n').slice(1).filter(r => r.trim());
+      const users = rows.map(row => {
+        const m = row.match(/("(?:[^"]|"")*"|[^",\s]+)(?=\s*,|\s*$)/g);
+        if (!m || m.length < 7) return null;
+        return {
+          telegram: m[0].replace(/"/g, '').trim(),
+          username: m[1].replace(/"/g, '').trim(),
+          password: m[2].replace(/"/g, '').trim(),
+          priceMonth: m[3].replace(/"/g, '').trim(),
+          startDate: m[4].replace(/"/g, '').trim(),
+          endDate: m[5].replace(/"/g, '').trim(),
+          isAdmin: m[6]?.replace(/"/g, '').trim() || '',
+        };
+      }).filter((u): u is AdminUser => u !== null && !!u.username);
+
       return this.applyLocalOverrides(users);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching users from CSV:', error);
       return [];
     }
   }

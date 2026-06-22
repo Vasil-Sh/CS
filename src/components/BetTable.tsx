@@ -9,6 +9,7 @@ import {
   ArrowUpDown, CheckCircle, XCircle, Share2, Eye, Flag, FileText, Search, X, Trash2,
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
+import { normalizeDateStr } from '@/lib/utils';
 
 interface Goal {
   id: string;
@@ -23,17 +24,6 @@ type PeriodFilter = 'all' | 'week' | 'month' | 'quarter';
 type SortBy = 'date' | 'profit' | 'odds';
 
 const ITEMS_PER_PAGE = 10;
-
-/** Normalize a bet.date string (DD.MM.YYYY or YYYY-MM-DD) → YYYY-MM-DD */
-function normalizeDateStr(dateStr: string): string {
-  if (!dateStr) return '';
-  const dotMatch = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (dotMatch) return `${dotMatch[3]}-${dotMatch[2].padStart(2, '0')}-${dotMatch[1].padStart(2, '0')}`;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (slashMatch) return `${slashMatch[3]}-${slashMatch[2].padStart(2, '0')}-${slashMatch[1].padStart(2, '0')}`;
-  return dateStr;
-}
 
 function getTodayStr(): string {
   const now = new Date();
@@ -65,6 +55,8 @@ interface BetTableProps {
   onExpressDetails: (bet: Bet) => void;
   onUpdateResult: (bet: Bet, result: 'Win' | 'Loss') => void;
   onDeleteBet: (bet: Bet) => void;
+  /** Navigate to the "add" tab (parent-level tab switch) */
+  onNavigateToAdd?: () => void;
 }
 
 export default function BetTable({
@@ -76,7 +68,7 @@ export default function BetTable({
   sortBy, onSortByChange,
   sortOrder, currentPage, onPageChange,
   searchText, onSearchTextChange,
-  onShareBet, onBetDetails, onExpressDetails, onUpdateResult, onDeleteBet,
+  onShareBet, onBetDetails, onExpressDetails, onUpdateResult, onDeleteBet, onNavigateToAdd,
 }: BetTableProps) {
   const [notesDialogBet, setNotesDialogBet] = useState<string>('');
   const hasActiveAdvancedFilters = resultFilter !== 'all' || periodFilter !== 'all' || sortBy !== 'date';
@@ -432,22 +424,28 @@ export default function BetTable({
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#F3F4F6] mx-auto mb-4">
-              <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
-            </div>
+          <div className="flex-1 flex items-center justify-center py-16 text-center">
+            <div>
+              <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+              </div>
             {tableFilter === 'today' ? (<>
-              <p className="text-[#111827] font-semibold text-lg">Немає записів за сьогодні</p>
-              <p className="text-base text-[#9CA3AF] mt-1">Додайте новий запис або перегляньте всі матчі</p>
-              <button onClick={() => onTableFilterChange('all')} className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors">Показати всі матчі</button>
+              <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає записів за сьогодні</h3>
+              <p className="text-[#6B7280] text-sm mb-6">Додайте новий запис або перегляньте всі матчі</p>
+              <Button onClick={() => onTableFilterChange('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">Показати всі матчі</Button>
             </>) : hasActiveAdvancedFilters ? (<>
-              <p className="text-[#111827] font-semibold text-lg">Немає записів за обраними фільтрами</p>
-              <p className="text-base text-[#9CA3AF] mt-1">Спробуйте змінити параметри фільтрації</p>
-              <button onClick={resetAdvancedFilters} className="mt-4 px-5 py-2.5 rounded-xl bg-[#111827] text-white text-sm font-medium hover:bg-[#1F2937] transition-colors">Скинути фільтри</button>
+              <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає записів за обраними фільтрами</h3>
+              <p className="text-[#6B7280] text-sm mb-6">Спробуйте змінити параметри фільтрації</p>
+              <Button onClick={resetAdvancedFilters} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">Скинути фільтри</Button>
             </>) : (<>
-              <p className="text-[#111827] font-semibold text-lg">Поки що немає записів</p>
-              <p className="text-base text-[#9CA3AF] mt-1">Додайте свій перший запис, щоб почати відстеження</p>
+              <h3 className="text-xl font-semibold text-[#111827] mb-2">Поки що немає записів</h3>
+              <p className="text-[#6B7280] text-sm mb-6">Додайте свій перший запис, щоб почати відстеження</p>
+              <Button onClick={() => onNavigateToAdd?.()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                <Flag className="h-4 w-4" strokeWidth={2} />
+                Додати запис
+              </Button>
             </>)}
+            </div>
           </div>
         )}
       </div>

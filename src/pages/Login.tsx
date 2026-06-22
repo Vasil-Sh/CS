@@ -1,41 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useLogin } from '@/hooks/useLogin';
 import { Loader2, LogIn, TrendingUp, User, Lock, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  const { username, setUsername, password, setPassword, isLoading, error, handleSubmit } = useLogin();
 
   // Check if current input looks like admin credentials
-  const isAdminInput = username.toLowerCase() === 'admin' || username.toLowerCase() === 'super_gus23_7482';
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await login(username, password);
-      if (result.success) {
-        navigate('/app/analytics');
-      } else {
-        setError(result.error || 'Невірний логін або пароль');
-      }
-    } catch (err) {
-      setError('Помилка входу. Спробуйте ще раз.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isAdminInput = username.toLowerCase() === 'admin';
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F5F5F0]">

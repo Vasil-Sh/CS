@@ -53,6 +53,7 @@ import {
   determineFavorite,
   isMatchFinished,
   getMatchStatus,
+  buildHltvUrl,
 } from '@/lib/csApi';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -226,15 +227,8 @@ describe('getMatchStatus', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// buildHltvUrl (inline-копія з Matches.tsx)
-// ═══════════════════════════════════════════════════════════════════
-function buildHltvUrl(link: string): string {
-  if (!link) return '';
-  if (link.startsWith('http://') || link.startsWith('https://')) return link;
-  return `https://www.hltv.org${link.startsWith('/') ? '' : '/'}${link}`;
-}
-
-describe('buildHltvUrl (з Matches.tsx)', () => {
+// buildHltvUrl
+describe('buildHltvUrl', () => {
   it('[29] відносний шлях "/matches/123/team1-vs-team2" → повний HLTV URL', () => {
     expect(buildHltvUrl('/matches/123/team1-vs-team2')).toBe(
       'https://www.hltv.org/matches/123/team1-vs-team2'

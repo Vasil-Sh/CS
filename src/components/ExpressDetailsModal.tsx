@@ -4,14 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Trophy, Zap, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import type { Bet } from '@/types/betting';
-
-interface ParsedEvent {
-  number: string;
-  match: string;
-  betType: string;
-  selection: string;
-  odds: string;
-}
+import type { ParsedEvent } from '@/lib/parser/expressParser';
 
 interface ExpressDetailsModalProps {
   bet: Bet | null;
