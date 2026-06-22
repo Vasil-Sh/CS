@@ -44,9 +44,9 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} barCategoryGap="20%">
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" />
-            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} stroke="#E5E7EB" tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} stroke="#D1D5DB" />
+            <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} stroke="#D1D5DB" tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
             <Tooltip
               cursor={{ fill: 'transparent' }}
               contentStyle={{
@@ -76,7 +76,7 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
                 return value;
               }}
             />
-            <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1} strokeDasharray="6 4" />
+            <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
             <Bar dataKey="profit" name="profit" maxBarSize={48} shape={<MonthlyProfitBar />} />
             <Line
               type="monotone"

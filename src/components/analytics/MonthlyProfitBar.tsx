@@ -17,7 +17,7 @@ export default function MonthlyProfitBar(props: MonthlyBarProps) {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props;
   const isPositive = (payload?.profit || 0) >= 0;
   const fillColor = isPositive ? '#16A34A' : '#DC2626';
-  const fillOpacity = 1;
+  const strokeColor = isPositive ? '#15803D' : '#B91C1C';
 
   return (
     <rect
@@ -26,7 +26,8 @@ export default function MonthlyProfitBar(props: MonthlyBarProps) {
       width={width}
       height={height}
       fill={fillColor}
-      opacity={fillOpacity}
+      stroke={strokeColor}
+      strokeWidth={1}
       rx={4}
       ry={4}
     />
