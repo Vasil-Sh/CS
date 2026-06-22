@@ -32,11 +32,11 @@ export default function OddsWinRateChartCard({ data, chartCardShadow }: Props) {
           </span>
           <div className="flex gap-2">
             <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#10B981] mr-1.5" />
+              <div className="w-2.5 h-2.5 rounded-sm bg-[#16A34A] mr-1.5" />
               Вінрейт
             </Badge>
-            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#6EE7B7] mr-1.5" />
+            <Badge className="bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-medium text-xs">
+              <div className="w-2.5 h-2.5 rounded-sm bg-[#447afc] mr-1.5" />
               ROI
             </Badge>
           </div>
@@ -67,8 +67,8 @@ export default function OddsWinRateChartCard({ data, chartCardShadow }: Props) {
               }}
             />
             <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
-            <Bar dataKey="winRate" fill="#10B981" name="winRate" radius={[6, 6, 0, 0]} maxBarSize={80} opacity={0.85} />
-            <Bar dataKey="roi" fill="#6EE7B7" name="roi" radius={[6, 6, 0, 0]} maxBarSize={80} />
+            <Bar dataKey="winRate" fill="#16A34A" name="winRate" radius={[6, 6, 0, 0]} maxBarSize={80} opacity={0.9} />
+            <Bar dataKey="roi" fill="#447afc" name="roi" radius={[6, 6, 0, 0]} maxBarSize={80} opacity={0.9} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
