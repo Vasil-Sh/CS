@@ -83,7 +83,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
               label={{ value: `Початковий`, position: 'insideTopRight', style: { fontSize: 10, fill: '#9CA3AF', fontWeight: 500 } }}
             />
             <Line
-              type="stepAfter"
+              type="linear"
               dataKey="balance"
               stroke="#447afc"
               strokeWidth={2.5}
