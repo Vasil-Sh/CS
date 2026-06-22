@@ -306,7 +306,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
-            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Активна стратегія</span>
+            <span className="text-lg font-semibold text-[#111827]">Активна стратегія</span>
           </div>
           {activeStrategy ? (
             <>
@@ -351,7 +351,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <Flag className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
-            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Головна ціль</span>
+            <span className="text-lg font-semibold text-[#111827]">Головна ціль</span>
           </div>
           {primaryGoal && goalInfo ? (
             <>
@@ -387,7 +387,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <ShieldAlert className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
-            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Рівень ризику</span>
+            <span className="text-lg font-semibold text-[#111827]">Рівень ризику</span>
           </div>
           {todayRisk.level ? (
             <>
@@ -436,7 +436,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
               <TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
-            <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Вінрейт 30 днів</span>
+            <span className="text-lg font-semibold text-[#111827]">Вінрейт 30 днів</span>
           </div>
           {winRate30d.winRate !== null ? (
             <>
