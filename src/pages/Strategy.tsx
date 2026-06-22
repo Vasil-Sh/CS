@@ -75,7 +75,7 @@ export default function Strategy() {
                       relative rounded-[24px] px-6 py-4 font-light text-base
                       transition-all duration-300 ease-in-out
                       ${isActive
-                        ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB]'
+                        ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent'
                         : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent'
                       }
                     `}
