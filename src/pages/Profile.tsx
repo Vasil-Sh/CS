@@ -350,6 +350,9 @@ export default function Profile() {
 
       <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
 
+      {/* Data Statistics + User Info — unified card */}
+      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
+
       {/* Data Statistics - 5 cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
         <div
@@ -419,6 +422,8 @@ export default function Profile() {
         </CardContent>
       </Card>
 
+      </div>
+
       {/* Quick Navigation Tabs */}
       <div className="flex justify-center">
         <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
@@ -448,6 +453,7 @@ export default function Profile() {
 
       {/* Theme & Language Settings */}
       {(activeTab === null || activeTab === 'interface') && (
+      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <Card id="interface" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
@@ -539,10 +545,12 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+      </div>
       )}
 
       {/* Backup Section */}
       {(activeTab === null || activeTab === 'backup') && (
+      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <Card id="backup" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
@@ -665,6 +673,7 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+      </div>
       )}
 
       </div>
