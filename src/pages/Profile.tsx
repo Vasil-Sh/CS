@@ -38,6 +38,7 @@ export default function Profile() {
   const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   
   const { theme, toggleTheme } = useTheme();
 
@@ -350,25 +351,6 @@ export default function Profile() {
 
       <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
 
-      {/* Quick Navigation Tabs */}
-      <div className="flex justify-center">
-        <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          {[
-            { id: 'interface', label: 'Інтерфейс' },
-            { id: 'backup', label: 'Бекап' },
-            { id: 'simulator', label: 'Симулятор банкролу' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => document.getElementById(tab.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB] hover:bg-[#F5F5F3]"
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Data Statistics - 5 cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
         <div
@@ -438,7 +420,36 @@ export default function Profile() {
         </CardContent>
       </Card>
 
+      {/* Quick Navigation Tabs */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          {[
+            { id: 'interface', label: 'Інтерфейс' },
+            { id: 'backup', label: 'Бекап' },
+            { id: 'simulator', label: 'Симулятор банкролу' },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(isActive ? null : tab.id)}
+                className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out ${
+                  isActive
+                    ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
+                    : activeTab === null
+                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB] hover:bg-[#F5F5F3]'
+                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Theme & Language Settings */}
+      {(activeTab === null || activeTab === 'interface') && (
       <Card id="interface" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
@@ -530,8 +541,10 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Backup Section */}
+      {(activeTab === null || activeTab === 'backup') && (
       <Card id="backup" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
@@ -654,8 +667,10 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Bankroll Simulator */}
+      {(activeTab === null || activeTab === 'simulator') && (
       <Card id="simulator" className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
         <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
@@ -669,6 +684,7 @@ export default function Profile() {
           <BankrollSimulator />
         </CardContent>
       </Card>
+      )}
       </div>
     </div>
   );
