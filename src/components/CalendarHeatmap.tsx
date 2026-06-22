@@ -55,7 +55,9 @@ export default function CalendarHeatmap({ data }: CalendarHeatmapProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+          <div className="p-2 bg-[#EFF6FF] rounded-xl">
+            <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+          </div>
           Календар активності
         </CardTitle>
       </CardHeader>
