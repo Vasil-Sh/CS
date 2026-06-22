@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { RefreshCw, Sliders, Target, LineChart, BarChart3, Percent, Download, GitCompare, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,7 +107,7 @@ interface StrategyResult {
 
 /* ============ Component ============ */
 
-export default function BankrollSimulator() {
+export default function BankrollSimulator({ resetKey }: { resetKey?: number }) {
   const [initialBank, setInitialBank] = useState(10000);
   const [betAmount, setBetAmount] = useState(500);
   const [betPercent, setBetPercent] = useState(5);
@@ -190,6 +190,11 @@ export default function BankrollSimulator() {
     setTakeProfit(0);
     toast.success('Дані симулятора скинуто');
   };
+
+  // Watch resetKey from parent (Profile page header button)
+  useEffect(() => {
+    if (resetKey && resetKey > 0) handleReset();
+  }, [resetKey]);
 
   const averageResult = useMemo(() => {
     if (results.length === 0) return null;

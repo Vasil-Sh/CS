@@ -19,6 +19,7 @@ import {
   Sun,
   Moon,
   Calculator,
+  Trash2,
 } from 'lucide-react';
 import BankrollSimulator from '@/components/BankrollSimulator';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
@@ -39,6 +40,7 @@ export default function Profile() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>('interface');
+  const [simResetKey, setSimResetKey] = useState(0);
   
   const { theme, toggleTheme } = useTheme();
 
@@ -680,10 +682,18 @@ export default function Profile() {
             </div>
             Симулятор банкролу
             </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSimResetKey(k => k + 1)}
+              className="gap-1 border-[#DC2626] text-[#DC2626] hover:bg-[#FEF2F2] text-xs rounded-xl"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} /> Скинути
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <BankrollSimulator />
+          <BankrollSimulator resetKey={simResetKey} />
         </CardContent>
       </Card>
       )}
