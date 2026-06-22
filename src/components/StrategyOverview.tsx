@@ -919,7 +919,7 @@ export default function StrategyOverview() {
                             <div className="flex items-center justify-between mb-4">
                               <span className="flex items-center gap-2">
                                 {getRiskIcon(strategy.riskLevel)}
-                                <span className="font-semibold text-[#111827] truncate max-w-[150px]" title={strategy.name}>{strategy.name}</span>
+                                <span className="font-semibold text-[#111827] break-words" title={strategy.name}>{strategy.name}</span>
                                 {isPrimary && (
                                   <Badge className="bg-[#EFF6FF] text-[#3B82F6] border-0 rounded-full text-xs px-2 py-0.5 font-medium hover:bg-[#EFF6FF]">
                                     <Star className="h-2.5 w-2.5 mr-0.5 fill-[#3B82F6]" strokeWidth={1.5} />
