@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
 interface MonthlyData {
   month: string;
@@ -15,7 +15,7 @@ interface Props {
   chartCardShadow: string;
 }
 
-/** Monthly profit bar chart with cumulative line */
+/** Monthly profit line chart with cumulative line — matching BalanceChart style */
 export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props) {
   return (
     <Card
@@ -42,12 +42,11 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
       </CardHeader>
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} barCategoryGap="80%" barGap={4}>
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D1D5DB" />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} />
             <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }} tickLine={{ stroke: '#9CA3AF' }} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
             <Tooltip
-              cursor={{ fill: 'transparent' }}
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 border: '1px solid #E5E7EB',
@@ -66,12 +65,25 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
                 return label;
               }}
             />
+            <Legend
+              iconType="plainline"
+              wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+              formatter={(value: string) => {
+                if (value === 'profit') return 'Прибуток за місяць';
+                if (value === 'cumulative') return 'Загальний прибуток';
+                return value;
+              }}
+            />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={1.5} strokeDasharray="6 4" />
-            <Bar dataKey="profit" name="profit" barSize={6} radius={[8, 8, 8, 8]}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.profit >= 0 ? '#16A34A' : '#DC2626'} />
-              ))}
-            </Bar>
+            <Line
+              type="monotone"
+              dataKey="profit"
+              stroke="#16A34A"
+              strokeWidth={2}
+              name="profit"
+              dot={{ r: 3, fill: '#16A34A', stroke: '#fff', strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: '#16A34A', stroke: '#fff', strokeWidth: 2 }}
+            />
             <Line
               type="monotone"
               dataKey="cumulative"
@@ -81,12 +93,12 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
               dot={false}
               activeDot={{ r: 5, fill: '#447afc', stroke: '#fff', strokeWidth: 2 }}
             />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
 
         <div className="mt-5 flex items-center justify-between gap-4 px-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#10B981]" strokeWidth={1.5} />
+            <TrendingUp className="h-4 w-4 text-[#16A34A]" strokeWidth={1.5} />
             <span className="text-sm text-[#9CA3AF]">Макс:</span>
             <span className="text-sm font-semibold text-[#111827]">
               +{Math.max(...data.map(m => m.profit)).toFixed(0)} ₴
