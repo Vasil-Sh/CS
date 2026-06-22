@@ -10,7 +10,6 @@ import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 
 // Lazy-loaded (heavy pages — code split per route)
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const LoginDigestoDemo = lazy(() => import('@/pages/LoginDigestoDemo'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Matches = lazy(() => import('@/pages/Matches'));
@@ -61,7 +60,7 @@ function App() {
             element={
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
-                  <Dashboard />
+                  <Navigate to="/app/analytics" replace />
                 </Suspense>
               </ErrorBoundary>
             }
