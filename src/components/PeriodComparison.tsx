@@ -234,7 +234,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
                     Прибуток
                   </Badge>
-                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
+                  <Badge className="bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-medium text-xs">
                     Ставки
                   </Badge>
                 </div>
@@ -289,19 +289,20 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Bar 
                     yAxisId="bets" 
                     dataKey="bets" 
-                    fill="#6EE7B7" 
+                    fill="#447afc" 
                     name="bets"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={48}
+                    opacity={0.8}
                   />
                   <Line 
                     yAxisId="profit" 
                     type="monotone" 
                     dataKey="profit" 
-                    stroke="#10B981" 
+                    stroke="#16A34A" 
                     strokeWidth={2.5} 
                     name="profit"
-                    dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#16A34A', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                 </ComposedChart>
@@ -324,11 +325,11 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                 </span>
                 <div className="flex gap-2">
                   <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-[#10B981] mr-1.5" />
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#16A34A] mr-1.5" />
                     Win Rate
                   </Badge>
-                  <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-[#6EE7B7] mr-1.5" />
+                  <Badge className="bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-medium text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-[#447afc] mr-1.5" />
                     ROI
                   </Badge>
                 </div>
@@ -374,19 +375,19 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
                   <Line 
                     type="monotone" 
                     dataKey="winRate" 
-                    stroke="#10B981" 
+                    stroke="#16A34A" 
                     strokeWidth={2.5} 
                     name="winRate"
-                    dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#16A34A', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="roi" 
-                    stroke="#6EE7B7" 
+                    stroke="#447afc" 
                     strokeWidth={2.5} 
                     name="roi"
-                    dot={{ fill: '#6EE7B7', r: 4, strokeWidth: 2, stroke: '#fff' }}
+                    dot={{ fill: '#447afc', r: 4, strokeWidth: 2, stroke: '#fff' }}
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
