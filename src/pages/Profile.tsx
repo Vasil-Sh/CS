@@ -17,8 +17,10 @@ import {
   Palette,
   Globe,
   Sun,
-  Moon
+  Moon,
+  Calculator,
 } from 'lucide-react';
+import BankrollSimulator from '@/components/BankrollSimulator';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
@@ -631,6 +633,21 @@ export default function Profile() {
               Рекомендуємо робити бекап щотижня або після великих змін у даних. Файл бекапу можна зберігати на Google Drive, Dropbox або будь-якому хмарному сховищі.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Bankroll Simulator */}
+      <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
+        <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+            <div className="p-2.5 bg-[#FFF7ED] rounded-xl">
+              <Calculator className="h-5 w-5 text-[#EA580C]" strokeWidth={1.5} />
+            </div>
+            Симулятор банкролу
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <BankrollSimulator />
         </CardContent>
       </Card>
       </div>

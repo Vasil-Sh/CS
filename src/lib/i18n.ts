@@ -18,6 +18,7 @@ const T: TranslationMap = {
   'app.active': { uk: 'Активний', en: 'Active' },
 
   // ── Navigation ──
+  'nav.dashboard': { uk: 'Дашборд', en: 'Dashboard' },
   'nav.analytics': { uk: 'Аналітика', en: 'Analytics' },
   'nav.addRecord': { uk: 'Додати запис', en: 'Add Record' },
   'nav.strategies': { uk: 'Стратегії та Цілі', en: 'Strategies & Goals' },

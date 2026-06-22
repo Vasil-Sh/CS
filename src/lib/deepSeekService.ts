@@ -6,10 +6,48 @@ import {
   getMockRecommendation,
 } from './ai/shared';
 
+// ── AI Response Cache ──
+interface CacheEntry {
+  recommendation: AIRecommendation;
+  timestamp: number;
+}
+
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_KEY_PREFIX = 'ds_cache_';
+
+function getCached(key: string): AIRecommendation | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY_PREFIX + key);
+    if (!raw) return null;
+    const entry: CacheEntry = JSON.parse(raw);
+    if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY_PREFIX + key);
+      return null;
+    }
+    return entry.recommendation;
+  } catch {
+    return null;
+  }
+}
+
+function setCache(key: string, recommendation: AIRecommendation): void {
+  try {
+    const entry: CacheEntry = { recommendation, timestamp: Date.now() };
+    localStorage.setItem(CACHE_KEY_PREFIX + key, JSON.stringify(entry));
+  } catch {
+    // localStorage full — silently ignore
+  }
+}
+
+function buildCacheKey(matchData: MatchData): string {
+  return `${matchData.team1}_vs_${matchData.team2}_${matchData.format}_${matchData.tier}`;
+}
+
 class DeepSeekService {
   private apiKey: string | null = null;
   private baseUrl = 'https://api.deepseek.com/v1';
   private model = 'deepseek-chat';
+  private pendingRequests = new Map<string, Promise<AIRecommendation>>();
 
   constructor() {
     this.apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
@@ -22,8 +60,33 @@ class DeepSeekService {
   }
 
   async getMatchRecommendation(matchData: MatchData): Promise<AIRecommendation> {
+    const cacheKey = buildCacheKey(matchData);
+
+    // 1. Check cache
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
+    // 2. Deduplicate concurrent requests for same match
+    const pending = this.pendingRequests.get(cacheKey);
+    if (pending) return pending;
+
+    // 3. Create new request
+    const promise = this._fetchRecommendation(matchData, cacheKey);
+    this.pendingRequests.set(cacheKey, promise);
+
+    try {
+      const result = await promise;
+      return result;
+    } finally {
+      this.pendingRequests.delete(cacheKey);
+    }
+  }
+
+  private async _fetchRecommendation(matchData: MatchData, cacheKey: string): Promise<AIRecommendation> {
     if (!this.apiKey || this.apiKey === 'your_deepseek_api_key_here') {
-      return getMockRecommendation(matchData, 'DeepSeek');
+      const mock = getMockRecommendation(matchData, 'DeepSeek');
+      setCache(cacheKey, mock);
+      return mock;
     }
 
     try {
@@ -59,10 +122,14 @@ class DeepSeekService {
         throw new Error('No response from API');
       }
 
-      return parseAIResponse(text);
+      const recommendation = parseAIResponse(text);
+      setCache(cacheKey, recommendation);
+      return recommendation;
     } catch (error) {
       console.error('❌ DeepSeek API error:', error);
-      return getMockRecommendation(matchData, 'DeepSeek');
+      const fallback = getMockRecommendation(matchData, 'DeepSeek');
+      setCache(cacheKey, fallback);
+      return fallback;
     }
   }
 }
