@@ -172,7 +172,10 @@ class GoogleSheetsRiskyTeamsService {
       const isCustomSheet = !!customSheetId;
 
       // Export as CSV — use explicit gid if provided, otherwise default
-      const gid = sheetGid || (isCustomSheet ? '0' : SHEET_GID_RISKY_TEAMS);
+      // If using the default spreadsheet, always use the risky teams gid
+      const isDefaultSheet = sheetId === this.SHEET_ID;
+      const gid = sheetGid || (isDefaultSheet ? SHEET_GID_RISKY_TEAMS : '0');
+      console.log('[RiskyTeams] Using sheetId:', sheetId, 'gid:', gid, 'isCustomSheet:', isCustomSheet);
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
       
       const response = await fetch(url);
