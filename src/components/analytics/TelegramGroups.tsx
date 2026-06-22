@@ -34,7 +34,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   Eye,
-  Sparkles,
   Link,
   RefreshCw,
 } from 'lucide-react';
@@ -56,95 +55,6 @@ function tgHandle(link: string): string {
   if (!link) return '';
   const match = link.match(/t\.me\/(?:s\/)?([^/\s?#]+)/);
   return match ? '@' + match[1] : link;
-}
-
-// ── Smart Parser ──
-
-interface ParsedBet {
-  team1: string;
-  team2: string;
-  odds: string;
-  match: string;
-  prediction: 'team1' | 'team2' | null; // which team was picked
-  confidence: string; // extracted confidence text like "уверен на 90%"
-  notes: string; // remaining text
-}
-
-/** Try to extract betting info from a Telegram message */
-function parseBetMessage(text: string): ParsedBet | null {
-  if (!text.trim()) return null;
-
-  let team1 = '';
-  let team2 = '';
-  let odds = '';
-  let prediction: 'team1' | 'team2' | null = null;
-  let confidence = '';
-
-  // Strip emojis and extra whitespace for cleaner parsing
-  const clean = text.replace(/[\u{1F600}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}]/gu, '').trim();
-
-  // Pattern 1: "Team1 vs Team2" or "Team1 - Team2" or "Team1 — Team2"
-  let vsMatch = clean.match(/(.+?)\s+(?:vs\.?|VS\.?|против|—|–|-)\s+(.+)/i);
-  if (!vsMatch) {
-    // Pattern 2: "Team1 / Team2"
-    vsMatch = clean.match(/(.+?)\s*\/\s*(.+)/);
-  }
-  if (!vsMatch) {
-    // Pattern 3: Just two recognizable team names (capitalized words)
-    vsMatch = clean.match(/([A-Z][\w\s.]{2,25}?)\s{2,}([A-Z][\w\s.]{2,25})/);
-  }
-  if (!vsMatch) {
-    // Pattern 4: Newline-separated teams
-    vsMatch = clean.match(/(.+)\n\s*\n(.+)/);
-  }
-
-  if (vsMatch) {
-    team1 = vsMatch[1].trim();
-    team2 = vsMatch[2].trim();
-  }
-
-  // Extract odds: any number like 1.85, 2.30, 3.5 near "кф", "коеф", "@", "odds:", etc.
-  const oddsMatch = clean.match(/(?:кое?ф|odds?|@|кф\.?)\s*[:=]?\s*(\d+[.,]\d+)|\b(\d+[.,]\d{2})\b(?!\s*(?:%|процент|дней|днів|часов))/i);
-  if (oddsMatch) {
-    odds = (oddsMatch[1] || oddsMatch[2]).replace(',', '.');
-  } else {
-    // Try trailing number pattern like "... 1.85"
-    const lastNum = clean.match(/(\d+[.,]\d{2})\s*$/);
-    if (lastNum && parseFloat(lastNum[1]) >= 1.01 && parseFloat(lastNum[1]) <= 20) {
-      odds = lastNum[1].replace(',', '.');
-    }
-  }
-
-  // Detect prediction: which team is mentioned with "победа", "win", "ставка", "заход", "win", "п1", "п2", "фора"
-  if (team1 && team2) {
-    const afterVs = clean.substring(clean.indexOf(team2) + team2.length).toLowerCase();
-    
-    // Check for "П1" / "П2" markers
-    if (/\bп1\b/.test(afterVs) || afterVs.includes(team1.toLowerCase())) {
-      prediction = 'team1';
-    } else if (/\bп2\b/.test(afterVs) || afterVs.includes(team2.toLowerCase())) {
-      prediction = 'team2';
-    }
-  }
-
-  // Detect confidence like "уверен на 85%", "🔥 90%", "confidence: 80%"
-  const confMatch = clean.match(/(?:уверен|confidence|🔥|ув\.?)\D*(\d{1,3})\s*%/i);
-  if (confMatch) {
-    confidence = confMatch[0].trim();
-  }
-
-  // Build match string
-  const match = team1 && team2 ? `${team1} vs ${team2}` : clean.substring(0, 80);
-
-  return {
-    team1,
-    team2,
-    odds,
-    match,
-    prediction,
-    confidence,
-    notes: clean.substring(0, 200),
-  };
 }
 
 // ── Types ──
@@ -192,20 +102,6 @@ interface GroupStats {
 
 const EMPTY_GROUP: Omit<TelegramGroup, 'id' | 'createdAt'> = { name: '', link: '' };
 
-const EMPTY_BET: Omit<TelegramGroupBet, 'id' | 'createdAt'> = {
-  groupId: '',
-  date: new Date().toISOString().split('T')[0],
-  match: '',
-  team1: '',
-  team2: '',
-  betType: 'Ординар',
-  odds: 0,
-  amount: 0,
-  result: 'Pending',
-  profit: 0,
-  notes: '',
-};
-
 // ── Component ──
 
 export default function TelegramGroups() {
@@ -251,14 +147,6 @@ export default function TelegramGroups() {
   const [editingGroup, setEditingGroup] = useState<TelegramGroup | null>(null);
   const [groupForm, setGroupForm] = useState({ ...EMPTY_GROUP });
   const [deleteGroupConfirm, setDeleteGroupConfirm] = useState<string | null>(null);
-
-  const [betDialogOpen, setBetDialogOpen] = useState(false);
-  const [editingBet, setEditingBet] = useState<TelegramGroupBet | null>(null);
-  const [betForm, setBetForm] = useState({ ...EMPTY_BET });
-
-  // Quick Parse
-  const [quickParseText, setQuickParseText] = useState('');
-  const [quickParseOpen, setQuickParseOpen] = useState(false);
 
   // Filters & sort
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
@@ -318,46 +206,6 @@ export default function TelegramGroups() {
     setGroupDialogOpen(true);
   };
 
-  // ── Bet CRUD ──
-
-  const handleSaveBet = () => {
-    if (!betForm.groupId) {
-      toast.error('Оберіть групу');
-      return;
-    }
-    if (!betForm.match.trim()) {
-      toast.error('Введіть назву матчу');
-      return;
-    }
-    if (!betForm.odds || betForm.odds <= 0) {
-      toast.error('Введіть коефіцієнт');
-      return;
-    }
-
-    let newBets: TelegramGroupBet[];
-    if (editingBet) {
-      newBets = betsRef.current.map(b => b.id === editingBet.id
-        ? { ...betForm, id: editingBet.id, createdAt: editingBet.createdAt }
-        : b
-      );
-      toast.success('Ставку оновлено');
-    } else {
-      const newBet: TelegramGroupBet = {
-        ...betForm,
-        id: crypto.randomUUID(),
-        createdAt: Date.now(),
-      };
-      newBets = [...betsRef.current, newBet];
-      toast.success('Ставку додано!');
-    }
-    setBets(newBets);
-    if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
-
-    setBetDialogOpen(false);
-    setEditingBet(null);
-    setBetForm({ ...EMPTY_BET, date: new Date().toISOString().split('T')[0] });
-  };
-
   const handleDeleteBet = (betId: string) => {
     const newBets = betsRef.current.filter(b => b.id !== betId);
     setBets(newBets);
@@ -366,48 +214,7 @@ export default function TelegramGroups() {
   };
 
   const openEditBet = (bet: TelegramGroupBet) => {
-    setEditingBet(bet);
-    setBetForm({
-      groupId: bet.groupId,
-      date: bet.date,
-      match: bet.match,
-      team1: bet.team1,
-      team2: bet.team2,
-      betType: bet.betType,
-      odds: bet.odds,
-      amount: bet.amount,
-      result: bet.result,
-      profit: bet.profit,
-      notes: bet.notes,
-    });
-    setBetDialogOpen(true);
-  };
-
-  const openAddBet = (groupId?: string) => {
-    setEditingBet(null);
-    setBetForm({ ...EMPTY_BET, groupId: groupId || '', date: new Date().toISOString().split('T')[0] });
-    setQuickParseText('');
-    setQuickParseOpen(false);
-    setBetDialogOpen(true);
-  };
-
-  const handleQuickParse = () => {
-    const parsed = parseBetMessage(quickParseText);
-    if (!parsed) {
-      toast.warning('Не вдалося розпізнати ставку', { description: 'Спробуйте скопіювати повідомлення повністю або заповнити форму вручну' });
-      return;
-    }
-    setBetForm(p => ({
-      ...p,
-      match: parsed.match,
-      team1: parsed.team1,
-      team2: parsed.team2,
-      odds: parsed.odds ? parseFloat(parsed.odds) : p.odds,
-    }));
-    if (parsed.confidence) {
-      setBetForm(p => ({ ...p, notes: `[Авто] ${parsed.confidence} — ${parsed.notes.substring(0, 80)}` }));
-    }
-    toast.success('Ставку розпізнано!', { description: parsed.match && parsed.odds ? `${parsed.match} @ ${parsed.odds}` : 'Перевірте заповнені поля' });
+    toast.info('Редагування ставок з Telegram буде доступне в наступних оновленнях');
   };
 
   // ── Stats calculation ──
@@ -572,183 +379,6 @@ export default function TelegramGroups() {
             <Button onClick={handleSaveGroup} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
               <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
               {editingGroup ? 'Зберегти' : 'Додати'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ===== Bet Dialog ===== */}
-      <Dialog open={betDialogOpen} onOpenChange={setBetDialogOpen}>
-        <DialogContent className="rounded-2xl max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingBet ? 'Редагувати ставку' : 'Нова ставка з Telegram'}</DialogTitle>
-            <DialogDescription>
-              Додайте інформацію про ставку з Telegram-групи
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Quick Parse — only for new bets, not edits */}
-          {!editingBet && (
-            <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setQuickParseOpen(!quickParseOpen)}
-                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors ${quickParseOpen ? 'bg-[#EFF6FF] text-[#447afc]' : 'bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F3F4F6]'}`}
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" strokeWidth={1.5} />
-                  Швидке розпізнавання (Quick Parse)
-                </span>
-                <span className="text-xs text-[#9CA3AF]">{quickParseOpen ? 'Згорнути' : 'Розгорнути'}</span>
-              </button>
-              {quickParseOpen && (
-                <div className="px-4 py-3 space-y-2 border-t border-[#E5E7EB]">
-                  <p className="text-xs text-[#9CA3AF]">
-                    Вставте текст ставки з Telegram-каналу — система автоматично розпізнає команди, коефіцієнт та прогноз.
-                  </p>
-                  <textarea
-                    value={quickParseText}
-                    onChange={e => setQuickParseText(e.target.value)}
-                    placeholder={`Наприклад:\nNaVi vs FaZe @ 1.85\nСтавка на NaVi — уверен на 80%\n...або будь-який інший формат`}
-                    rows={4}
-                    className="w-full rounded-xl border border-[#E5E7EB] px-3 py-2 text-sm focus:border-[#447afc] focus:ring-1 focus:ring-[#447afc] outline-none resize-none"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleQuickParse}
-                    disabled={!quickParseText.trim()}
-                    className="w-full rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-medium transition-colors disabled:opacity-50"
-                  >
-                    <Sparkles className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-                    Розпізнати ставку
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Група *</Label>
-              <Select value={betForm.groupId} onValueChange={v => setBetForm(p => ({ ...p, groupId: v }))}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                  <SelectValue placeholder="Оберіть групу" />
-                </SelectTrigger>
-                <SelectContent>
-                  {groups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Дата</Label>
-              <Input
-                type="date"
-                value={betForm.date}
-                onChange={e => setBetForm(p => ({ ...p, date: e.target.value }))}
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Матч *</Label>
-                <Input
-                  value={betForm.match}
-                  onChange={e => setBetForm(p => ({ ...p, match: e.target.value }))}
-                  placeholder="NaVi vs FaZe"
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Тип ставки</Label>
-                <Select value={betForm.betType} onValueChange={v => setBetForm(p => ({ ...p, betType: v }))}>
-                  <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ординар">Ординар</SelectItem>
-                    <SelectItem value="Експрес">Експрес</SelectItem>
-                    <SelectItem value="Live">Live</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Команда 1</Label>
-                <Input
-                  value={betForm.team1}
-                  onChange={e => setBetForm(p => ({ ...p, team1: e.target.value }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Команда 2</Label>
-                <Input
-                  value={betForm.team2}
-                  onChange={e => setBetForm(p => ({ ...p, team2: e.target.value }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Коефіцієнт *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="1"
-                  value={betForm.odds || ''}
-                  onChange={e => setBetForm(p => ({ ...p, odds: parseFloat(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Сума</Label>
-                <Input
-                  type="number"
-                  value={betForm.amount || ''}
-                  onChange={e => setBetForm(p => ({ ...p, amount: parseInt(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium mb-1.5 block">Прибуток</Label>
-                <Input
-                  type="number"
-                  value={betForm.profit || ''}
-                  onChange={e => setBetForm(p => ({ ...p, profit: parseInt(e.target.value) || 0 }))}
-                  className="rounded-xl border-[#E5E7EB]"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Результат</Label>
-              <Select value={betForm.result} onValueChange={v => setBetForm(p => ({ ...p, result: v as TelegramGroupBet['result'] }))}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Win">Виграш</SelectItem>
-                  <SelectItem value="Loss">Програш</SelectItem>
-                  <SelectItem value="Pending">Очікує</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1.5 block">Нотатки</Label>
-              <Input
-                value={betForm.notes}
-                onChange={e => setBetForm(p => ({ ...p, notes: e.target.value }))}
-                placeholder="Додаткові нотатки..."
-                className="rounded-xl border-[#E5E7EB]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBetDialogOpen(false)} className="rounded-xl">Скасувати</Button>
-            <Button onClick={handleSaveBet} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
-              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-              {editingBet ? 'Зберегти' : 'Додати'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -964,7 +594,7 @@ export default function TelegramGroups() {
               {/* Bottom row: add bet + delete */}
               <div className="flex items-center gap-2">
                 <Button
-                  onClick={() => openAddBet(gs.groupId)}
+                  onClick={() => toast.info('Парсер даних з Telegram з\'явиться в наступних оновленнях', { description: 'Ми працюємо над автоматичним отриманням ставок з відкритих TG-груп' })}
                   className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-semibold transition-colors"
                 >
                   <RefreshCw className="h-4 w-4 mr-1.5" strokeWidth={2} />
@@ -1026,11 +656,11 @@ export default function TelegramGroups() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => openAddBet()}
+                  onClick={() => toast.info('Парсер даних з Telegram з\'явиться в наступних оновленнях')}
                   className="rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-xs font-medium"
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
-                  Додати
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
+                  Отримати данні
                 </Button>
               </div>
             </div>
