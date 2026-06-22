@@ -293,7 +293,7 @@ export function BettingSidebar({
                 </div>
               </>
             ) : (
-              <div className="text-center py-10">
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
                 <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
                   <Calculator className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
                 </div>
