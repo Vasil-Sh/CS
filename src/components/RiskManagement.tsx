@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Shield, 
   AlertTriangle, 
   TrendingDown,
+  TrendingUp,
   Target,
   BarChart3,
   Plus,
@@ -23,7 +25,9 @@ import {
   Pencil,
   Check,
   X,
-  ArrowRightLeft
+  ArrowRightLeft,
+  ArrowDownRight,
+  DollarSign,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Bet } from '@/types/betting';
@@ -1393,69 +1397,101 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     Додайте завершені ставки для розрахунку ризик-метрик
                   </p>
                 </div>
-              ) : (<div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-[#6B7280]">Поточна просадка:</span>
-                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
+              ) : (<div className="grid grid-cols-2 gap-3">
+              {/* Current Drawdown */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Поточна просадка</span>
+                </div>
+                <span className="text-xl font-bold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
+                <Progress value={Math.min(riskMetrics.currentDrawdown, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#EF4444]" />
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-[#6B7280]">Послідовні програші:</span>
-                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
+
+              {/* Consecutive Losses */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Послідовні програші</span>
+                </div>
+                <span className="text-xl font-bold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
+                <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#F59E0B] rounded-full transition-all" style={{ width: `${Math.min(riskMetrics.consecutiveLosses * 20, 100)}%` }} />
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-[#6B7280]">Середня ставка:</span>
-                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.averageStake} ₴</span>
+
+              {/* Average Stake */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Середня ставка</span>
+                </div>
+                <span className="text-xl font-bold text-[#111827]">{riskMetrics.averageStake} ₴</span>
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex-1 h-1.5 bg-[#E5E7EB] rounded-full">
+                    <div className="h-full bg-[#447afc] rounded-full" style={{ width: `${Math.min((riskMetrics.averageStake / (riskMetrics.maxStake || 1)) * 100, 100)}%` }} />
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-[#6B7280]">Найбільший програш:</span>
-                <span className="text-sm font-semibold text-[#EF4444]">{riskMetrics.largestLoss} ₴</span>
+
+              {/* Largest Loss */}
+              <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#991B1B] uppercase tracking-wider">Найбільший програш</span>
+                </div>
+                <span className="text-xl font-bold text-[#DC2626]">{riskMetrics.largestLoss} ₴</span>
               </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#6B7280]">Келлі %:</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="inline-flex items-center">
-                        <Info className="h-4 w-4 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                      <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
-                      <p className="text-xs text-[#6B7280] mb-2">
-                        Розраховано на основі win rate та середніх коефіцієнтів.
-                      </p>
-                      <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
-                        <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                        <p className="text-xs text-[#92400E]">
-                          Рекомендовано використовувати 25–50% від Kelly для зниження ризику
+
+              {/* Kelly % */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                    <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Kelly %</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="inline-flex items-center">
+                          <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
+                        <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
+                        <p className="text-xs text-[#6B7280] mb-2">
+                          Розраховано на основі win rate та середніх коефіцієнтів.
                         </p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
+                        <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
+                          <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                          <p className="text-xs text-[#92400E]">
+                            Рекомендовано використовувати 25–50% від Kelly для зниження ризику
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-lg font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                      {riskMetrics.kellyPercentage}%
+                    </span>
+                    {riskMetrics.kellyPercentage > 5 && (
+                      <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">
+                        Aggressive
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-semibold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                    {riskMetrics.kellyPercentage}%
-                  </span>
-                  {riskMetrics.kellyPercentage > 5 && (
-                    <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">
-                      Aggressive
-                    </Badge>
-                  )}
-                </div>
+                <Progress value={Math.min(Math.abs(riskMetrics.kellyPercentage) * 4, 100)} className="h-2 bg-[#E5E7EB] [&>div]:bg-[#22C55E]" />
               </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#6B7280]">Risk of Ruin:</span>
+
+              {/* Risk of Ruin + Win Streak Risk side by side */}
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Risk of Ruin</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button className="inline-flex items-center">
-                        <Info className="h-4 w-4 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                        <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
@@ -1466,14 +1502,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <span className={`text-sm font-semibold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
+                <span className={`text-xl font-bold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
                   {riskMetrics.riskOfRuin}%
                 </span>
+                <Progress value={Math.min(riskMetrics.riskOfRuin * 5, 100)} className={`h-1.5 mt-2 bg-[#E5E7EB] ${riskMetrics.riskOfRuin > 10 ? '[&>div]:bg-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? '[&>div]:bg-[#F59E0B]' : '[&>div]:bg-[#22C55E]'}`} />
               </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-[#6B7280]">Ризик виграшних серій:</span>
-                <span className="text-sm font-semibold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
+
+              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Ризик вигр. серій</span>
+                </div>
+                <span className="text-xl font-bold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
+                <Progress value={Math.min(riskMetrics.winStreakRisk * 5, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#447afc]" />
               </div>
               </div>)}
             </CardContent>
