@@ -49,15 +49,14 @@ class GoogleSheetsRiskyTeamsService {
 
     const clean = cell.trim();
 
+    // Skip date-only or game+date entries
+    if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(clean)) return null;
+    if (/^(?:(?:CS2|Dota2|CS|Дота)\s*[:.-]?\s*)?\d{1,2}[./]\d{1,2}[./]\d{2,4}\s*$/i.test(clean)) return null;
+
     // Must contain either a status emoji or an explicit game keyword to be a valid team entry
     const hasStatusEmoji = /[🟩🟨🟥]/.test(clean);
-    const hasGameKeyword = /\b(?:CS2|Dota2)\b|\b(?:CS|Дота)\b/i.test(clean);
+    const hasGameKeyword = /\b(?:CS2|Dota2|CS|Дота)\b\s*[:.]?\s+\S/i.test(clean); // game keyword must be followed by content
     if (!hasStatusEmoji && !hasGameKeyword) return null;
-
-    // Skip date-only entries (e.g. "CS: 07/05/2026")
-    if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(clean)) return null;
-    // Skip entries that are just dates with game prefix
-    if (/^(?:CS|Дота|Dota2|CS2)\s*[:.]\s*\d{1,2}[./]\d{1,2}[./]\d{2,4}$/i.test(clean)) return null;
 
     // Detect status from emoji
     let status = 'Без статусу';
@@ -84,15 +83,19 @@ class GoogleSheetsRiskyTeamsService {
       name = gameIdx > 0 ? clean.substring(0, gameIdx).trim() : clean;
     }
 
-    if (!name || name.length < 2) return null;
-    // Don't allow names that look like dates or generic words
-    if (/^\d+$/.test(name) || name.length > 50) return null;
+    // Reject entries where name is just "CS", "Dota2", a date, or too short
+    if (!name || name.length < 3) return null;
+    if (/^(?:CS2|Dota2|CS|Дота)$/i.test(name)) return null;
+    if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(name)) return null;
 
     // Extract notes: everything after name + optional status emoji + optional game keyword
     let notes = clean.replace(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
     notes = notes.replace(/[🟩🟨🟥]\s*/g, '');
     notes = notes.replace(/^(?:CS2|CS|Дота|Dota2)[:\s]*\s*/i, '');
     notes = notes.trim();
+
+    // Reject if notes are just a date with optional prefix
+    if (notes && /^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(notes)) return null;
 
     return { name, game, status, notes };
   }
