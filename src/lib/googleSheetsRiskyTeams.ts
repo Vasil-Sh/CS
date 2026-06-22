@@ -38,7 +38,6 @@ class GoogleSheetsRiskyTeamsService {
    * Format examples (new style — all in one cell):
    *   "Vitality 🟩 CS У фіналах часто вимикаються..."
    *   "Virtus Pro Dota2:в якій би не були вони формі..."
-   *   "Spirit 🟩 CS2: Не на загальну перемогу..."
    *
    * Status emoji mapping:
    *   🟩 → Обережно (green square)
@@ -50,6 +49,16 @@ class GoogleSheetsRiskyTeamsService {
 
     const clean = cell.trim();
 
+    // Must contain either a status emoji or an explicit game keyword to be a valid team entry
+    const hasStatusEmoji = /[🟩🟨🟥]/.test(clean);
+    const hasGameKeyword = /\b(?:CS2|Dota2)\b|\b(?:CS|Дота)\b/i.test(clean);
+    if (!hasStatusEmoji && !hasGameKeyword) return null;
+
+    // Skip date-only entries (e.g. "CS: 07/05/2026")
+    if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(clean)) return null;
+    // Skip entries that are just dates with game prefix
+    if (/^(?:CS|Дота|Dota2|CS2)\s*[:.]\s*\d{1,2}[./]\d{1,2}[./]\d{2,4}$/i.test(clean)) return null;
+
     // Detect status from emoji
     let status = 'Без статусу';
     if (clean.includes('🟥')) status = 'БАН';
@@ -58,27 +67,31 @@ class GoogleSheetsRiskyTeamsService {
 
     // Detect game
     let game = 'CS';
-    const gameMatch = clean.match(/(?:CS2|СS|CS|Дота|Dota2)/i);
+    const gameMatch = clean.match(/(?:CS2|Dota2|CS|Дота)/i);
     if (gameMatch) {
       const g = gameMatch[0].toLowerCase();
       game = g.includes('дота') || g.includes('dota') ? 'Дота' : 'CS';
     }
 
-    // Extract team name (first word(s) before emoji or game keyword)
-    // Pattern: "TeamName 🟩 CS notes..."
-    const nameMatch = clean.match(/^([\w\s.-]+?)(?:\s*[🟩🟨🟥]|\s+(?:CS2|СS|CS|Дота|Dota2)[:\s]|\s*$)/i);
-    const name = nameMatch ? nameMatch[1].trim() : clean.split(/\s+/)[0];
+    // Extract team name: everything from start until we hit a status emoji or game: pattern
+    let name = '';
+    const emojiOrGameIdx = clean.search(/[🟩🟨🟥]|\s+(?:CS2|CS|Дота|Dota2)[:\s]/i);
+    if (emojiOrGameIdx > 0) {
+      name = clean.substring(0, emojiOrGameIdx).trim();
+    } else {
+      // Fallback: take up to first game keyword
+      const gameIdx = clean.search(/\b(?:CS2|CS|Дота|Dota2)\b/i);
+      name = gameIdx > 0 ? clean.substring(0, gameIdx).trim() : clean;
+    }
 
     if (!name || name.length < 2) return null;
+    // Don't allow names that look like dates or generic words
+    if (/^\d+$/.test(name) || name.length > 50) return null;
 
     // Extract notes: everything after name + optional status emoji + optional game keyword
-    let notes = clean;
-    // Remove the team name from the beginning
-    notes = notes.replace(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
-    // Remove status emoji
+    let notes = clean.replace(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
     notes = notes.replace(/[🟩🟨🟥]\s*/g, '');
-    // Remove game indicator
-    notes = notes.replace(/^(?:CS2|СS|CS|Дота|Dota2)[:\s]*/i, '');
+    notes = notes.replace(/^(?:CS2|CS|Дота|Dota2)[:\s]*\s*/i, '');
     notes = notes.trim();
 
     return { name, game, status, notes };
@@ -113,23 +126,25 @@ class GoogleSheetsRiskyTeamsService {
       game = gameStr.includes('дота') ? 'Дота' : 'CS';
     }
 
-    // Detect status from emoji in notes first (new format)
+    // Detect status from emoji in notes first (new format), then from text
     let status = 'Без статусу';
-    if (cleanNotes.includes('🟥')) status = 'БАН';
-    else if (cleanNotes.includes('🟨')) status = 'Нестабільні';
-    else if (cleanNotes.includes('🟩')) status = 'Обережно';
+    // Also check in cleanName (in case emoji is in the name cell)
+    const combinedForEmoji = cleanName + ' ' + cleanNotes;
+    if (combinedForEmoji.includes('🟥')) status = 'БАН';
+    else if (combinedForEmoji.includes('🟨')) status = 'Нестабільні';
+    else if (combinedForEmoji.includes('🟩')) status = 'Обережно';
     // Fall back to text-based detection
-    else if (cleanNotes.includes('БАН')) status = 'БАН';
+    else if (cleanNotes.includes('БАН') || cleanName.includes('БАН')) status = 'БАН';
     else if (cleanNotes.includes('Нестабільні') || cleanNotes.includes('нестабільн')) status = 'Нестабільні';
     else if (cleanNotes.includes('Рідко') || cleanNotes.includes('рідко')) status = 'Рідко';
     else if (cleanNotes.includes('Обережно') || cleanNotes.includes('обережно')) status = 'Обережно';
     else if (cleanNotes.includes('Надійна') || cleanNotes.includes('надійн')) status = 'Надійна';
 
-    // Clean up notes - remove game indicator, status emoji, and status text from the beginning
+    // Clean up notes
     const finalNotes = cleanNotes
       .replace(/[🟩🟨🟥]/g, '') // Remove status emoji
-      .replace(/^\s*\(?\s*(?:СS|CS|Дота):\s*/i, '') // Remove game indicator
-      .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status
+      .replace(/^\s*\(?\s*(?:СS|CS|Дота|Dota2):\s*/i, '') // Remove game indicator
+      .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status text
       .replace(/^\s*\(/, '') // Remove opening parenthesis
       .replace(/\)\s*$/, '') // Remove closing parenthesis
       .trim();
