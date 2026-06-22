@@ -17,6 +17,8 @@ import { parseDota2MatchFromUrl, parseCS2MatchFromUrl, type ParsedMatchResult } 
 import StrategyViolationDialog from './StrategyViolationDialog';
 import { calcTotalExpressOdds, calcExpectedValue, calcPotentialProfit, getValueBetAnalysis, getOverconfidenceWarning, calcKellyCriterion, getExpressRiskLevel, getEVVerdict } from '@/lib/betCalculations';
 import { logRender } from '@/lib/devLogger';
+import { BettingSidebar } from './BettingSidebar';
+import { ExpressEventBuilder } from './ExpressEventBuilder';
 
 export interface MatchPrefillData {
   team1: string;
@@ -132,9 +134,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
-  const [showEVDetails, setShowEVDetails] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
-  const [showKellyDetails, setShowKellyDetails] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
   const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
     const saved = UserDataService.getUserData<number>(currentUser, 'max_stake_percent', 0);
@@ -1419,169 +1419,19 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
 
             {/* Express Events Display */}
             {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-              <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-              >
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
-                  <div className="flex items-center gap-3">
-                    <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                    <span className="text-base font-semibold text-[#111827]">
-                      Події експресу ({expressEvents.length}/10)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-[#111827] text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-[#111827]">
-                      Коеф: {totalExpressOdds.toFixed(2)}
-                    </Badge>
-                    <button
-                      type="button"
-                      onClick={clearExpressEvents}
-                      className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                    </button>
-                  </div>
-                </div>
-                <div className="p-6 space-y-3">
-                  {/* Express Risk */}
-                  <div className={`p-4 rounded-2xl border ${
-                    expressRisk.color === 'green' ? 'bg-[#F0FDF4] border-[#BBF7D0]' :
-                    expressRisk.color === 'orange' ? 'bg-[#FFFBEB] border-[#FDE68A]' :
-                    'bg-[#FEF2F2] border-[#FECACA]'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-sm font-medium ${
-                        expressRisk.color === 'green' ? 'text-[#166534]' :
-                        expressRisk.color === 'orange' ? 'text-[#92400E]' :
-                        'text-[#991B1B]'
-                      }`}>
-                        {expressRisk.color === 'green' ? '🟢' : expressRisk.color === 'orange' ? '🟠' : '🔴'} {expressRisk.text}
-                      </span>
-                      <span className={`text-xs ${
-                        expressRisk.color === 'green' ? 'text-[#15803D]' :
-                        expressRisk.color === 'orange' ? 'text-[#B45309]' :
-                        'text-[#B91C1C]'
-                      }`}>
-                        {expressEvents.length} {expressEvents.length === 1 ? 'подія' : expressEvents.length < 5 ? 'події' : 'подій'}
-                      </span>
-                    </div>
-                    <Progress 
-                      value={expressRisk.progress} 
-                      className={`h-1.5 rounded-full ${
-                        expressRisk.color === 'green' ? '[&>div]:bg-[#22C55E]' :
-                        expressRisk.color === 'orange' ? '[&>div]:bg-[#F59E0B]' :
-                        '[&>div]:bg-[#EF4444]'
-                      }`}
-                    />
-                    <p className={`text-xs mt-2 ${
-                      expressRisk.color === 'green' ? 'text-[#15803D]' :
-                      expressRisk.color === 'orange' ? 'text-[#B45309]' :
-                      'text-[#B91C1C]'
-                    }`}>
-                      {expressRisk.color === 'green' && 'Оптимальна кількість подій для контролю ризику'}
-                      {expressRisk.color === 'orange' && 'Збільшений ризик через кількість подій. Рекомендуємо обережність.'}
-                      {expressRisk.color === 'red' && 'Дуже високий ризик! Кожна додаткова подія знижує ймовірність виграшу.'}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                    {expressEvents.map((event, index) => {
-                      const teams = event.match.split(' vs ');
-                      const team1Name = teams[0] || '';
-                      const team2Name = teams[1] || '';
-                      const needsOdds = !event.odds || parseFloat(event.odds) <= 0;
-                      const needsSelection = !event.selection;
-
-                      return (
-                        <div key={index} className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors ${
-                          needsOdds || needsSelection
-                            ? 'bg-[#FFFBEB] border-[#FDE68A]'
-                            : 'bg-[#FAFAFA] border-[#F3F4F6] hover:border-[#E5E7EB]'
-                        }`}>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 space-y-1.5">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-[#111827] text-white border-0 rounded-full text-xs font-medium px-2 py-0.5 hover:bg-[#111827]">
-                                  #{index + 1}
-                                </Badge>
-                                <span className="font-medium text-[#111827] text-sm">{event.match}</span>
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeExpressEvent(index)}
-                              className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors flex-shrink-0"
-                            >
-                              <X className="h-4 w-4" strokeWidth={1.5} />
-                            </button>
-                          </div>
-                          
-                          <div className="grid grid-cols-3 gap-2">
-                            <Select
-                              value={event.betType}
-                              onValueChange={(val) => updateExpressEvent(index, 'betType', val)}
-                            >
-                              <SelectTrigger className="rounded-xl border-[#E5E7EB] bg-white h-9 text-xs">
-                                <SelectValue placeholder="Тип" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {getBetTypeOptions(formData.game).map(opt => (
-                                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-
-                            <Select
-                              value={event.selection}
-                              onValueChange={(val) => updateExpressEvent(index, 'selection', val)}
-                            >
-                              <SelectTrigger className={`rounded-xl bg-white h-9 text-xs ${needsSelection ? 'border-[#F59E0B]' : 'border-[#E5E7EB]'}`}>
-                                <SelectValue placeholder="Вибір" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {team1Name && <SelectItem value={team1Name}>{team1Name}</SelectItem>}
-                                {team2Name && <SelectItem value={team2Name}>{team2Name}</SelectItem>}
-                              </SelectContent>
-                            </Select>
-
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="1.01"
-                              value={event.odds}
-                              onChange={(e) => updateExpressEvent(index, 'odds', e.target.value)}
-                              placeholder="Коеф."
-                              className={`rounded-xl bg-white h-9 text-xs ${needsOdds ? 'border-[#F59E0B]' : 'border-[#E5E7EB]'}`}
-                            />
-                          </div>
-
-                          {!needsOdds && !needsSelection && (
-                            <div className="flex items-center gap-2 text-xs text-[#6B7280]">
-                              <span>{event.betType}:</span>
-                              <span className="font-medium text-[#111827]">{event.selection}</span>
-                              <Badge className="bg-[#F0FDF4] text-[#16A34A] border-0 rounded-full text-xs font-medium hover:bg-[#F0FDF4] ml-auto">
-                                Коеф {event.odds}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {!allExpressEventsComplete && (
-                    <div className="p-3 bg-[#FFFBEB] rounded-2xl border border-[#FDE68A]">
-                      <p className="text-xs text-[#92400E] flex items-center gap-1.5">
-                        <Info className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
-                        Заповніть вибір та коефіцієнт для кожної події, щоб зберегти експрес
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ExpressEventBuilder
+                expressEvents={expressEvents}
+                totalExpressOdds={totalExpressOdds}
+                expressRisk={expressRisk}
+                allExpressEventsComplete={allExpressEventsComplete}
+                game={formData.game}
+                onUpdateEvent={updateExpressEvent}
+                onRemoveEvent={removeExpressEvent}
+                onClearAll={clearExpressEvents}
+              />
             )}
 
-            {/* Submit Button */}
+{/* Submit Button */}
             {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
               <Button 
                 type="submit" 
@@ -1604,331 +1454,32 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
           </form>
         </div>
 
+
         {/* Right Sidebar */}
-        <div className="xl:col-span-2 space-y-6 relative">
-          <div className="sticky top-6 space-y-6 xl:grid xl:grid-cols-2 xl:gap-6 xl:space-y-0">
-            {/* Calculations Card */}
-            <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
-              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-            >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                  <Calculator className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                </div>
-                <span className="text-lg font-semibold text-[#111827]">Розрахунки</span>
-              </div>
-              <div className="p-6 space-y-4">
-                {formData.stake && (formData.odds || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) ? (
-                  <>
-                    {formData.betCategory === 'Експрес' && expressEvents.length > 0 && (
-                      <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#6B7280]">Загальний коефіцієнт:</span>
-                          <Badge className="bg-[#111827] text-white border-0 rounded-full text-base px-4 py-1 font-semibold hover:bg-[#111827]">
-                            {totalExpressOdds.toFixed(2)}
-                          </Badge>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Potential profit - green accent */}
-                    <div className="p-4 bg-white rounded-2xl border border-[#86EFAC]">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#6B7280]">Потенційний прибуток:</span>
-                        <span className="font-semibold text-[#16A34A] text-xl">+{potentialProfitInCurrency} {getCurrencySymbol()}</span>
-                      </div>
-                    </div>
-
-                    {/* Overconfidence Warning */}
-                    {overconfidenceWarning && (
-                      <div className="p-4 rounded-2xl border border-[#FCA5A5] bg-white">
-                        <div className="flex items-start gap-2.5">
-                          <AlertTriangle className="h-4 w-4 text-[#EF4444] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                          <div>
-                            <p className="text-sm font-medium text-[#991B1B] mb-1">⚠️ Можливий Overconfidence</p>
-                            <p className="text-xs text-[#6B7280] leading-relaxed">
-                              {overconfidenceWarning}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Value Bet Analysis */}
-                    {hasConfidence && valueBetAnalysis && (
-                      <div className={`p-5 rounded-2xl border bg-white ${valueBetAnalysis.isValueBet ? 'border-[#86EFAC]' : 'border-[#FCA5A5]'}`}>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <TrendingUp className={`h-5 w-5 ${valueBetAnalysis.isValueBet ? 'text-[#16A34A]' : 'text-[#EF4444]'}`} strokeWidth={1.5} />
-                            <span className={`text-base font-semibold ${valueBetAnalysis.isValueBet ? 'text-[#16A34A]' : 'text-[#EF4444]'}`}>
-                              {valueBetAnalysis.isValueBet ? '💎 Value Bet' : '⚠️ Не Value Bet'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-[#6B7280]">
-                            {valueBetAnalysis.message}
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-3 mt-3">
-                            <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6]">
-                              <p className="text-xs text-[#9CA3AF] uppercase tracking-wider mb-1">Букмекер</p>
-                              <p className="text-lg font-bold text-[#111827]">
-                                {valueBetAnalysis.bookmakerProb}%
-                              </p>
-                            </div>
-                            <div className="p-3 rounded-xl bg-[#F9FAFB] border border-[#F3F4F6]">
-                              <p className="text-xs text-[#9CA3AF] uppercase tracking-wider mb-1">Ваша оцінка</p>
-                              <p className="text-lg font-bold text-[#111827]">
-                                {valueBetAnalysis.userProb}%
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium ${
-                            valueBetAnalysis.isValueBet 
-                              ? 'bg-[#F0FDF4] text-[#16A34A]' 
-                              : 'bg-[#FEF2F2] text-[#EF4444]'
-                          }`}>
-                            {valueBetAnalysis.isValueBet ? '↑' : '↓'} Різниця: {valueBetAnalysis.diff}%
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* EV Display */}
-                    {hasConfidence && (
-                      <div className={`p-5 rounded-2xl border bg-white ${
-                        evVerdict.color === 'green' ? 'border-[#86EFAC]' :
-                        evVerdict.color === 'yellow' ? 'border-[#FDE68A]' :
-                        'border-[#FCA5A5]'
-                      }`}>
-                        <div className="space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <span className={`text-base font-semibold ${
-                              evVerdict.color === 'green' ? 'text-[#16A34A]' :
-                              evVerdict.color === 'yellow' ? 'text-[#D97706]' :
-                              'text-[#EF4444]'
-                            }`}>
-                              {evVerdict.icon} {evVerdict.text}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setShowEVDetails(!showEVDetails)}
-                              className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-[#F3F4F6] transition-colors"
-                            >
-                              {showEVDetails ? <ChevronUp className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />}
-                            </button>
-                          </div>
-                          <p className="text-sm text-[#6B7280]">
-                            {evVerdict.description}
-                          </p>
-                          
-                          {showEVDetails && (
-                            <div className="mt-3 pt-3 border-t border-[#F3F4F6]">
-                              <div className="space-y-2.5">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-[#6B7280]">Expected Value:</span>
-                                  <Badge className={`rounded-full border-0 text-sm px-3 py-1 font-medium ${
-                                    isValuePositive ? 'bg-[#16A34A] text-white hover:bg-[#16A34A]' : 'bg-[#EF4444] text-white hover:bg-[#EF4444]'
-                                  }`}>
-                                    {isValuePositive ? '+' : ''}{expectedValue}%
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-[#9CA3AF]">
-                                  EV показує математичну вигідність прогнозу з урахуванням вашої впевненості та коефіцієнта.
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Kelly Criterion */}
-                    {hasConfidence && kellyData && (
-                      <div className="p-5 rounded-2xl border border-[#93C5FD] bg-white">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-base font-semibold text-[#111827]">
-                                📊 Критерій Келлі
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setShowKellyDetails(!showKellyDetails)}
-                              className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-[#F3F4F6] transition-colors"
-                            >
-                              {showKellyDetails ? <ChevronUp className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} /> : <ChevronDown className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />}
-                            </button>
-                          </div>
-                          
-                          <p className="text-sm text-[#6B7280]">
-                            {kellyData.recommendation}
-                          </p>
-
-                          {kellyData.isCapped && !kellyData.isNegative && (
-                            <div className="flex items-center gap-1.5 px-3 py-2 bg-[#F9FAFB] rounded-xl border border-[#F3F4F6]">
-                              <Shield className="h-3.5 w-3.5 flex-shrink-0 text-[#6B7280]" strokeWidth={1.5} />
-                              <p className="text-xs text-[#6B7280]">
-                                Ліміт {maxStakePercent}% банку захищає від надмірного ризику
-                              </p>
-                            </div>
-                          )}
-
-                          {!kellyData.isNegative && kellyData.recommendedAmount > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => applyKellyAmount(kellyData.recommendedAmount)}
-                              className="w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all bg-[#111827] text-white hover:bg-[#1F2937]"
-                            >
-                              Застосувати {kellyData.recommendedAmount} ₴ ({kellyData.recommendedBankrollPercent}% банку)
-                            </button>
-                          )}
-
-                          {showKellyDetails && (
-                            <div className="mt-3 pt-3 border-t border-[#F3F4F6] space-y-3">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-[#6B7280]">Поточний банк:</span>
-                                <span className="text-sm font-semibold text-[#111827]">{kellyData.currentBankroll} ₴</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-[#6B7280]">Макс. ставка ({maxStakePercent}%):</span>
-                                <span className="text-sm font-semibold text-[#111827]">{kellyData.maxAllowedAmount} ₴</span>
-                              </div>
-                              {!kellyData.isNegative && (
-                                <>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">Повний Келлі ({kellyData.fullKelly}%):</span>
-                                    <span className="text-sm font-semibold text-[#111827]">{kellyData.fullKellyAmount} ₴</span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-[#6B7280]">½ Келлі ({kellyData.halfKelly}%):</span>
-                                    <Badge className="bg-[#16A34A] text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-[#16A34A]">
-                                      {kellyData.halfKellyAmount} ₴
-                                    </Badge>
-                                  </div>
-                                </>
-                              )}
-
-                              {/* Max Stake % setting */}
-                              <div className="pt-3 border-t border-dashed border-[#E5E7EB]">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-[#6B7280] uppercase tracking-wider font-medium">Max Stake %</span>
-                                  <div className="flex items-center gap-2">
-                                    {[3, 5, 7, 10].map(pct => (
-                                      <button
-                                        key={pct}
-                                        type="button"
-                                        onClick={() => setMaxStakePercent(pct)}
-                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                                          maxStakePercent === pct
-                                            ? 'bg-[#111827] text-white'
-                                            : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
-                                        }`}
-                                      >
-                                        {pct}%
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <p className="text-xs text-[#9CA3AF] leading-relaxed mt-2">
-                                Критерій Келлі — математична формула для оптимального розміру ставки. 
-                                Ліміт Max Stake % захищає від ситуацій, коли Келлі рекомендує занадто велику частку банку.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {!hasConfidence && (
-                      <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
-                        <p className="text-sm text-[#9CA3AF] flex items-center gap-2">
-                          <Info className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
-                          Вкажіть впевненість для розрахунку Value Bet, EV та рекомендації Келлі
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Max loss - red accent */}
-                    <div className="p-4 bg-white rounded-2xl border border-[#FCA5A5]">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#6B7280]">Макс. програш:</span>
-                        <span className="font-semibold text-[#EF4444] text-xl">-{formData.stake} {getCurrencySymbol()}</span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-10">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
-                      <Calculator className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
-                    </div>
-                    <p className="text-sm font-semibold text-[#111827] mb-1">Заповніть форму для розрахунків</p>
-                    <p className="text-xs text-[#9CA3AF]">
-                      Введіть суму та коефіцієнт
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Risky Teams Card */}
-            <div className="bg-white border border-[#D1D5DB] rounded-3xl flex flex-col"
-              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-            >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#F3F4F6]">
-                  <AlertTriangle className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                </div>
-                <span className="text-lg font-semibold text-[#111827]">Ризиковані команди</span>
-              </div>
-              <div className="p-6 flex flex-col flex-1">
-                {formData.riskyTeams.length > 0 ? (
-                  <div className="space-y-3">
-                    {formData.riskyTeams.map((riskyTeam, index) => (
-                      <div key={index} className="p-4 border border-[#3B82F6] rounded-2xl bg-white space-y-2.5 hover:border-[#3B82F6] transition-colors">
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-base font-semibold text-[#111827]">
-                                {getGameEmoji(riskyTeam.game)} {riskyTeam.name}
-                              </span>
-                            </div>
-                            <Badge className={getStatusBadge(riskyTeam.status)}>
-                              {riskyTeam.status}
-                            </Badge>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeRiskyTeam(index)}
-                            className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-[#FEE2E2] text-[#9CA3AF] hover:text-[#EF4444] transition-colors flex-shrink-0"
-                          >
-                            <X className="h-4 w-4" strokeWidth={1.5} />
-                          </button>
-                        </div>
-                        {riskyTeam.notes && (
-                          <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap bg-white/60 p-3 rounded-xl">{riskyTeam.notes}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
-                    <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#F3F4F6] mx-auto mb-3">
-                      <AlertTriangle className="h-7 w-7 text-[#9CA3AF]" strokeWidth={1.5} />
-                    </div>
-                    <p className="text-sm font-semibold text-[#111827] mb-1">Ризикових команд не знайдено</p>
-                    <p className="text-xs text-[#9CA3AF]">
-                      Почніть заповнювати форму або додайте команди у розділі Управління ризиками
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <BettingSidebar
+          stake={formData.stake}
+          odds={formData.odds}
+          confidence={formData.confidence}
+          betCategory={formData.betCategory}
+          currency={formData.currency}
+          totalExpressOdds={totalExpressOdds}
+          expressEventsCount={expressEvents.length}
+          potentialProfit={potentialProfit}
+          potentialProfitInCurrency={potentialProfitInCurrency}
+          expectedValue={expectedValue}
+          evVerdict={evVerdict}
+          isValuePositive={isValuePositive}
+          valueBetAnalysis={valueBetAnalysis}
+          kellyData={kellyData}
+          overconfidenceWarning={overconfidenceWarning}
+          hasConfidence={hasConfidence}
+          isHighConfidence={isHighConfidence}
+          riskyTeams={formData.riskyTeams}
+          maxStakePercent={maxStakePercent}
+          onMaxStakePercentChange={setMaxStakePercent}
+          onApplyKellyAmount={applyKellyAmount}
+          onRemoveRiskyTeam={removeRiskyTeam}
+        />
       </div>
     </div>
   );
