@@ -603,7 +603,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <Wallet className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                <DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
             </div>
@@ -682,7 +682,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
             </div>
