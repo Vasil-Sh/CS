@@ -1459,10 +1459,9 @@ export default function Matches() {
           {!initialLoading && sortedDateKeys.map((dateKey) => {
             const dateMatches = groupedByDate[dateKey];
             return (
-              <Card 
+              <div 
                 key={dateKey}
                 className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-               
               >
                 <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
                   <CardTitle>
@@ -1487,7 +1486,7 @@ export default function Matches() {
                     </table>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
             );
           })}
 
