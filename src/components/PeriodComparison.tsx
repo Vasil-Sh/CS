@@ -190,17 +190,15 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
     <>
       {completedBetsCount === 0 ? (
         <div className="flex-1 flex items-center justify-center py-16 text-center">
-          <div>
-            <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-              <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-            </div>
-            <h3 className="text-xl font-semibold text-[#111827] mb-2">
-              Немає даних для порівняння
-            </h3>
-            <p className="text-[#6B7280] text-sm">
-              Додайте завершені ставки для перегляду статистики по періодах
-            </p>
+          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+            <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
           </div>
+          <h3 className="text-xl font-semibold text-[#111827] mb-2">
+            Немає даних для порівняння
+          </h3>
+          <p className="text-[#6B7280] text-sm">
+            Додайте завершені ставки для перегляду статистики по періодах
+          </p>
         </div>
       ) : (
     <TooltipProvider>
