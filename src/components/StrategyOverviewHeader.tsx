@@ -527,12 +527,11 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
-              <div className="flex items-center justify-center w-16 h-16 rounded-[20px] bg-[#EFF6FF] mb-4">
-                <Target className="h-8 w-8 text-[#447afc]" strokeWidth={1.5} />
+              <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
-              <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
-                Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб
-                відстежувати результати.
+              <p className="text-base text-[#6B7280] max-w-xs leading-relaxed">
+                Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб відстежувати результати.
               </p>
             </div>
           )}
@@ -692,10 +691,10 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
-              <div className="flex items-center justify-center w-16 h-16 rounded-[20px] bg-[#EFF6FF] mb-4">
-                <Flag className="h-8 w-8 text-[#447afc]" strokeWidth={1.5} />
+              <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                <Flag className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
-              <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
+              <p className="text-base text-[#6B7280] max-w-xs leading-relaxed">
                 У вас ще немає активної цілі. Створіть її у вкладці &quot;Цілі&quot;, щоб відстежувати прогрес.
               </p>
             </div>
