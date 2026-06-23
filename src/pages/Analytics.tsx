@@ -819,7 +819,7 @@ export default function Analytics() {
                 
                 {/* Risk Metrics + Drawdown Periods — only show when there's data */}
                 {completedBetsForMetrics.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
                   <Card 
                     className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
