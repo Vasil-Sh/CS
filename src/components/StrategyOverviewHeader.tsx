@@ -527,18 +527,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
-              <p className="text-base text-[#4B5563] mb-4">
+              <div className="flex items-center justify-center w-16 h-16 rounded-[20px] bg-[#EFF6FF] mb-4">
+                <Target className="h-8 w-8 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
                 Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб
                 відстежувати результати.
               </p>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('strategies')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
-              >
-                <Target className="h-4 w-4" strokeWidth={2} />
-                Обрати стратегію
-              </button>
             </div>
           )}
         </div>
@@ -697,17 +692,12 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
-              <p className="text-base text-[#4B5563] mb-4">
+              <div className="flex items-center justify-center w-16 h-16 rounded-[20px] bg-[#EFF6FF] mb-4">
+                <Flag className="h-8 w-8 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm text-[#6B7280] max-w-xs leading-relaxed">
                 У вас ще немає активної цілі. Створіть її у вкладці &quot;Цілі&quot;, щоб відстежувати прогрес.
               </p>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('goals')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
-              >
-                <Flag className="h-4 w-4" strokeWidth={2} />
-                Створити ціль
-              </button>
             </div>
           )}
         </div>
