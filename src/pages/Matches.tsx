@@ -1417,7 +1417,7 @@ export default function Matches() {
 
                     {/* ===== LOADING STATE ===== */}
           {initialLoading && (
-            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CardContent className="py-16 text-center">
                 <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
                   <Loader2 className="h-16 w-16 text-[#2563EB] animate-spin" strokeWidth={1.5} />
@@ -1433,7 +1433,7 @@ export default function Matches() {
           )}
 
           {!initialLoading && sortedMatches.length === 0 && (
-            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CardContent className="py-16 text-center">
                 <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
                   <Trophy className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -1461,7 +1461,7 @@ export default function Matches() {
             return (
               <Card 
                 key={dateKey}
-                className="border-2 border-[#E8E6DC] rounded-[32px] bg-white overflow-hidden transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
+                className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
                
               >
                 <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
