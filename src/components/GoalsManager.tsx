@@ -541,7 +541,7 @@ export default function GoalsManager() {
 
         {/* Active Tab */}
         {activeTab === 'active' && (
-          <div className="bg-white border border-[#D1D5DB] rounded-3xl p-6">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {activeGoals.length === 0 ? (
               <div className="py-12 text-center">
                 <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
@@ -693,7 +693,7 @@ export default function GoalsManager() {
 
         {/* Completed Tab */}
         {activeTab === 'completed' && (
-          <div className="bg-white border border-[#D1D5DB] rounded-3xl p-6">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {completedGoals.length === 0 ? (
               <div className="py-12 text-center">
                 <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
