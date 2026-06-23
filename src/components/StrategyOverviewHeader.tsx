@@ -393,8 +393,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
-              <div className="flex items-center justify-center w-28 h-28 rounded-2xl bg-[#F3F4F6] mb-4">
-                <Activity className="h-14 w-14 text-[#9CA3AF]" strokeWidth={1.5} />
+              <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                <Activity className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
               <p className="text-base font-semibold text-[#374151] mb-2">
                 Ви ще не обрали основну стратегію
@@ -562,8 +562,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
-              <div className="flex items-center justify-center w-28 h-28 rounded-2xl bg-[#F3F4F6] mb-4">
-                <Flag className="h-14 w-14 text-[#9CA3AF]" strokeWidth={1.5} />
+              <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                <Flag className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
               <p className="text-base font-semibold text-[#374151] mb-2">
                 У вас ще немає активної цілі
