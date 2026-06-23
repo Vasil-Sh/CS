@@ -314,7 +314,11 @@ export default function Profile() {
             return;
           }
 
-          const strValue = typeof value === 'string' ? value : JSON.stringify(value);
+          // User-scoped keys MUST be JSON-encoded (UserDataService.getUserData always does JSON.parse)
+          // Other keys are read directly via localStorage.getItem() — store raw strings
+          const strValue = key.startsWith('user_')
+            ? JSON.stringify(value)
+            : (typeof value === 'string' ? value : JSON.stringify(value));
           localStorage.setItem(key, strValue);
           restoredCount++;
         });

@@ -117,10 +117,10 @@ export default function StrategyOverview() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Helper to get primary strategy name from id
+  // Helper to get primary strategy name from id (works with both UUIDs and legacy names)
   const getPrimaryStrategyName = (): string | null => {
     if (!primaryStrategy) return null;
-    const found = strategies.find(s => (s.id || s.name) === primaryStrategy);
+    const found = strategies.find(s => s.id === primaryStrategy || s.name === primaryStrategy);
     return found ? found.name : primaryStrategy;
   };
 
@@ -157,7 +157,11 @@ export default function StrategyOverview() {
         || localStorage.getItem('primaryStrategy') || '';
       if (saved) {
         setPrimaryStrategy(saved);
+        // Also sync to Zustand store so StrategyOverviewHeader can read it
+        useAppStore.getState().setPrimaryStrategyId(saved);
       }
+      // Force SOH to reload strategies (which may have been loaded async from localStorage)
+      useAppStore.getState().bumpStrategy();
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -180,6 +184,16 @@ export default function StrategyOverview() {
         });
         if (needsSave) {
           UserDataService.setUserDataSync(currentUser, 'strategies_data', migrated);
+          // Also migrate primary_strategy from name to UUID if needed
+          const savedPrimary = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '')
+            || localStorage.getItem('primaryStrategy') || '';
+          if (savedPrimary) {
+            const matched = migrated.find((s: CS2Strategy) => s.name === savedPrimary);
+            if (matched && matched.id && matched.id !== savedPrimary) {
+              UserDataService.setUserDataSync(currentUser, 'primary_strategy', matched.id);
+              localStorage.setItem('primaryStrategy', matched.id);
+            }
+          }
         }
         return migrated;
       }
@@ -198,6 +212,18 @@ export default function StrategyOverview() {
         // Auto-migrate to user-scoped key (only if currentUser is set)
         if (currentUser) {
           UserDataService.setUserDataSync(currentUser, 'strategies_data', migrated);
+          // Also migrate primary_strategy from name to UUID if needed
+          if (needsSave) {
+            const savedPrimary = UserDataService.getUserData<string>(currentUser, 'primary_strategy', '')
+              || localStorage.getItem('primaryStrategy') || '';
+            if (savedPrimary) {
+              const matched = migrated.find((s: CS2Strategy) => s.name === savedPrimary);
+              if (matched && matched.id && matched.id !== savedPrimary) {
+                UserDataService.setUserDataSync(currentUser, 'primary_strategy', matched.id);
+                localStorage.setItem('primaryStrategy', matched.id);
+              }
+            }
+          }
         }
         return migrated;
       }
@@ -524,15 +550,18 @@ export default function StrategyOverview() {
 
   const togglePrimaryStrategy = (strategy: CS2Strategy) => {
     const strategyId = strategy.id || strategy.name;
+    const store = useAppStore.getState();
     if (primaryStrategy === strategyId) {
       setPrimaryStrategy(null);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', '');
       localStorage.setItem('primaryStrategy', '');
+      store.setPrimaryStrategyId('');
       toast.success('Основну стратегію скасовано');
     } else {
       setPrimaryStrategy(strategyId);
       UserDataService.setUserDataSync(currentUser, 'primary_strategy', strategyId);
       localStorage.setItem('primaryStrategy', strategyId);
+      store.setPrimaryStrategyId(strategyId);
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();

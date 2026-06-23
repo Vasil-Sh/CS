@@ -8,12 +8,53 @@ export class UserDataService {
     return `user_${username}_${key}`;
   }
 
+  /**
+   * Startup migration: scan ALL user_* keys and re-encode any that are not valid JSON.
+   * Fixes data corrupted by old backup import (pre-v1.14.7) where user-scoped keys
+   * were stored as raw strings instead of JSON.
+   * Call once in main.tsx before app renders.
+   */
+  static repairAllUserKeys(): void {
+    try {
+      let fixed = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('user_')) continue;
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        try {
+          JSON.parse(raw);
+        } catch {
+          // Not valid JSON — re-encode
+          const healed = JSON.stringify(raw);
+          localStorage.setItem(key, healed);
+          fixed++;
+          console.warn(`[UserDataService] Repaired corrupted key: ${key}`);
+        }
+      }
+      if (fixed > 0) {
+        console.warn(`[UserDataService] Repaired ${fixed} corrupted user_* keys`);
+      }
+    } catch (e) {
+      console.error('[UserDataService] repairAllUserKeys failed:', e);
+    }
+  }
+
   // Get user-specific data
   static getUserData<T>(username: string, key: string, defaultValue: T): T {
     try {
       const userKey = this.getUserKey(username, key);
       const data = localStorage.getItem(userKey);
-      return data ? JSON.parse(data) : defaultValue;
+      if (!data) return defaultValue;
+      try {
+        return JSON.parse(data);
+      } catch {
+        // Data is not JSON — may be a raw string (e.g. from old backup import).
+        // Return as-is if it looks like a string; self-heal by re-encoding.
+        const healed = JSON.stringify(data);
+        localStorage.setItem(userKey, healed);
+        return data as unknown as T;
+      }
     } catch (error) {
       console.error('Error getting user data:', error);
       return defaultValue;

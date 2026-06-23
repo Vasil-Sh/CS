@@ -2,7 +2,11 @@ import { createRoot } from 'react-dom/client';
 import { Component, type ReactNode } from 'react';
 import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthContext';
+import { UserDataService } from './lib/userDataService';
 import './index.css';
+
+// Repair any user-scoped keys corrupted by old backup import
+UserDataService.repairAllUserKeys();
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
