@@ -460,6 +460,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
       </div>
 
       {/* ===== CURRENT STRATEGY + CURRENT GOAL ROW — equal size ===== */}
+      <div className="bg-white rounded-[32px] p-5 border-2 border-[#D1D5DB] shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
@@ -698,6 +699,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
