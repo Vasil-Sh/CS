@@ -353,13 +353,13 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
       {/* ===== HEADER - stays left-aligned ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-4">
+      <div className="px-6 lg:px-8 pt-6 pb-6">
         <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
           Профіль
         </h1>
       </div>
 
-      <div className="px-6 lg:px-8 pb-8 space-y-8">
+      <div className="px-6 lg:px-8 pb-8 pt-4 space-y-8">
 
       {/* Data Statistics + User Info — unified card */}
       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
