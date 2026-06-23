@@ -348,57 +348,57 @@ export default function Profile() {
         </h1>
       </div>
 
-      <div className="px-6 lg:px-8 pb-8 space-y-8 max-w-4xl mx-auto">
+      <div className="px-6 lg:px-8 pb-8 space-y-8">
 
       {/* Data Statistics + User Info — unified card */}
       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
 
       {/* Data Statistics - 5 cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Ваші ставки</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.bets}</p>
+          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Ваші ставки</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.bets}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Ризикові команди</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.riskyTeams}</p>
+          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Ризикові команди</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.riskyTeams}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Стратегії</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.strategies}</p>
+          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Стратегії</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.strategies}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Цілі</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.goals}</p>
+          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Цілі</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.goals}</p>
         </div>
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-4 py-7 text-center min-w-0"
+          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-3">Telegram Групи</p>
-          <p className="text-5xl font-bold text-[#111827]">{stats.tgGroups}</p>
+          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Telegram Групи</p>
+          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.tgGroups}</p>
         </div>
       </div>
 
