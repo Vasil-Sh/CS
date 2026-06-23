@@ -813,7 +813,8 @@ export default function Analytics() {
 
             {activeTab === 'comparison' && (
               <TooltipProvider>
-                <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col flex-1 space-y-6">
+                <div className="flex flex-col flex-1">
+                <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1">
                 <PeriodComparison bets={bets} />
                 
                 {/* Risk Metrics + Drawdown Periods — only show when there's data */}
@@ -1022,6 +1023,7 @@ export default function Analytics() {
                   </Card>
                 </div>
                 )}
+              </div>
               </div>
               </TooltipProvider>
             )}
