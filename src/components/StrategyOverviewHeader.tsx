@@ -465,7 +465,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <div
           className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
         >
-          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
+          <div className="pb-4 border-b border-[#F3F4F6]">
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
                 <Activity className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
@@ -547,7 +547,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <div
           className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
         >
-          <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
+          <div className="pb-4 border-b border-[#F3F4F6]">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF]">
