@@ -528,7 +528,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           ) : (
             <div className="py-10 text-center flex-1 flex flex-col items-center justify-center">
               <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+                <Activity className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
               <h3 className="text-xl font-semibold text-[#111827] mb-1">Ви ще не обрали основну стратегію.</h3>
               <p className="text-base text-[#6B7280] max-w-xs">Оберіть її у вкладці &quot;Стратегії&quot;, щоб відстежувати результати.</p>
