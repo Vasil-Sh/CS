@@ -1146,9 +1146,7 @@ export default function Matches() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -1165,9 +1163,7 @@ export default function Matches() {
 
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -1183,9 +1179,7 @@ export default function Matches() {
 
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -1201,9 +1195,7 @@ export default function Matches() {
 
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -1219,9 +1211,7 @@ export default function Matches() {
 
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-              onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
