@@ -342,7 +342,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
       {/* ===== HEADER - stays left-aligned ===== */}
-      <div className="px-6 lg:px-8 pt-6 pb-2">
+      <div className="px-6 lg:px-8 pt-6 pb-4">
         <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
           Профіль
         </h1>
@@ -354,7 +354,7 @@ export default function Profile() {
       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
 
       {/* Data Statistics - 5 cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
         <div
           className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
           style={cardBaseStyle}
