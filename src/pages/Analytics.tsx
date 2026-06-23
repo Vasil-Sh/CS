@@ -603,7 +603,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <TrendingUp className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                <Wallet className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
               <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
             </div>
@@ -766,7 +766,7 @@ export default function Analytics() {
                   >
                     <CardContent className="py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <TrendingUp className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                        <Wallet className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
                         Немає даних про прибуток
