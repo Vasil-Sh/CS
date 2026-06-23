@@ -530,9 +530,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
                 <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
-              <p className="text-base text-[#6B7280] max-w-xs leading-relaxed">
-                Ви ще не обрали основну стратегію. Оберіть її у вкладці &quot;Стратегії&quot;, щоб відстежувати результати.
-              </p>
+              <h3 className="text-xl font-semibold text-[#111827] mb-1">Ви ще не обрали основну стратегію.</h3>
+              <p className="text-base text-[#6B7280] max-w-xs">Оберіть її у вкладці &quot;Стратегії&quot;, щоб відстежувати результати.</p>
             </div>
           )}
         </div>
@@ -694,9 +693,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
               <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
                 <Flag className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
               </div>
-              <p className="text-base text-[#6B7280] max-w-xs leading-relaxed">
-                У вас ще немає активної цілі. Створіть її у вкладці &quot;Цілі&quot;, щоб відстежувати прогрес.
-              </p>
+              <h3 className="text-xl font-semibold text-[#111827] mb-1">У вас ще немає активної цілі.</h3>
+              <p className="text-base text-[#6B7280] max-w-xs">Створіть її у вкладці &quot;Цілі&quot;, щоб відстежувати прогрес.</p>
             </div>
           )}
         </div>
