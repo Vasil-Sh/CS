@@ -292,12 +292,12 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
   return (
     <div className="space-y-6">
       {/* ===== KPI CARDS — matches Analytics style 1:1 ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* 1. Активна стратегія */}
         <button
           type="button"
           onClick={() => onNavigateTab('strategies')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
+          className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -342,7 +342,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('goals')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
+          className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -378,7 +378,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
         <button
           type="button"
           onClick={() => onNavigateTab('risks')}
-          className="text-left bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
+          className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -427,7 +427,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* 4. Вінрейт 30 днів */}
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group relative flex flex-col justify-between"
+          className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group relative flex flex-col justify-between"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -461,7 +461,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl p-7 h-full flex flex-col"
+          className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
@@ -546,7 +546,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* Current goal details card — mirrors strategy card structure */}
         <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl p-7 h-full flex flex-col"
+          className="bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl p-7 h-full flex flex-col"
           style={cardBaseStyle}
           onMouseEnter={(e) => applyHover(e.currentTarget)}
           onMouseLeave={(e) => resetHover(e.currentTarget)}
