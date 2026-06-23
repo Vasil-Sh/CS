@@ -1139,6 +1139,7 @@ export default function Matches() {
         <div className="relative z-10 space-y-6 px-3 lg:px-4 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
           {/* ===== QUICK STATS ===== */}
+          <div className="bg-white rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
@@ -1237,6 +1238,7 @@ export default function Matches() {
                 </span>
               </div>
             </div>
+          </div>
           </div>
 
           {/* ===== PILL FILTER BAR — Analytics-style ===== */}
@@ -1459,7 +1461,7 @@ export default function Matches() {
             return (
               <Card 
                 key={dateKey}
-                className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-2xl bg-white overflow-hidden transition-all duration-300"
+                className="border-2 border-[#E8E6DC] rounded-[32px] bg-white overflow-hidden transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
                 style={{ boxShadow: chartCardShadow }}
               >
                 <CardHeader className="bg-white border-b border-[#E5E7EB] px-6 py-5">
