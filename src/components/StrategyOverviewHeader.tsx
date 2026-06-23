@@ -319,11 +319,12 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
       </div>
       </div>
 
-      {/* ===== CURRENT STRATEGY + CURRENT GOAL ROW — equal size, Telegram card style ===== */}
+      {/* ===== CURRENT STRATEGY + CURRENT GOAL ROW — wrapped in Analytics-style container ===== */}
+      <div className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
-          className="bg-white rounded-[32px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
+          className="bg-white rounded-[24px] h-full flex flex-col overflow-hidden"
         >
           {/* Header: icon + name */}
           <div className="px-5 pt-5 pb-4">
@@ -408,7 +409,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* Current goal details card — mirrors strategy card structure */}
         <div
-          className="bg-white rounded-[32px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
+          className="bg-white rounded-[24px] h-full flex flex-col overflow-hidden"
         >
           {/* Header: icon + title */}
           <div className="px-5 pt-5 pb-4">
@@ -574,6 +575,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
