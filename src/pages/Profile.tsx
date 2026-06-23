@@ -147,8 +147,19 @@ export default function Profile() {
     };
   };
 
-  const stats = getDataStats();
-  const storageSize = getStorageSize();
+  const [stats, setStats] = useState(getDataStats());
+  const [storageSize, setStorageSize] = useState(getStorageSize());
+
+  useEffect(() => {
+    const refresh = () => { setStats(getDataStats()); setStorageSize(getStorageSize()); };
+    refresh();
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, [username]);
 
   const exportBetsCSV = () => {
     const bets = UserDataService.getUserData(username, 'mybets_data', []);
