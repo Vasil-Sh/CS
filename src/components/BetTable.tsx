@@ -392,7 +392,7 @@ export default function BetTable({
                             {!isPending && (
                               <button onClick={() => onDeleteBet(bet)} className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#FEE2E2] hover:border-[#FCA5A5] text-[#DC2626] transition-all duration-200" title="Видалити"><Trash2 className="h-4 w-4" strokeWidth={2} /></button>
                             )}
-                            <button onClick={() => onBetDetails(bet)} className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#7C3AED] transition-all duration-200" title="Деталі"><Eye className="h-4 w-4" strokeWidth={2} /></button>
+                            <button onClick={() => { console.log('Eye clicked', bet.team1, bet.team2); onBetDetails(bet); }} className="flex items-center justify-center w-9 h-9 rounded-xl border border-[#E5E7EB] hover:bg-[#F3E8FF] hover:border-[#C4B5FD] text-[#7C3AED] transition-all duration-200" title="Деталі"><Eye className="h-4 w-4" strokeWidth={2} /></button>
                           </div>
                         </td>
                       </tr>
