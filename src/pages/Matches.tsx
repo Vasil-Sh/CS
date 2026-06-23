@@ -729,16 +729,17 @@ export default function Matches() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  // Group matches by date, filtering out past days. Live matches go into today's group.
+  // Group matches by date. Show today + future by default, but if ALL matches are in the past, still show them.
   const todayKey = getTodayDateKey();
   const groupedByDate: Record<string, Match[]> = {};
   sortedMatches.forEach(match => {
     const key = getDateKey(match.date);
-    if (key < todayKey) return;
     if (!groupedByDate[key]) groupedByDate[key] = [];
     groupedByDate[key].push(match);
   });
-  const sortedDateKeys = Object.keys(groupedByDate).sort();
+  // Only filter out past days if there are today/future matches to show
+  const futureDateKeys = Object.keys(groupedByDate).filter(k => k >= todayKey).sort();
+  const sortedDateKeys = futureDateKeys.length > 0 ? futureDateKeys : Object.keys(groupedByDate).sort();
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
