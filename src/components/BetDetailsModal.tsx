@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/lib/authService';
 import type { Bet } from '@/types/betting';
 import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
+import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
 
 interface BetDetailsModalProps {
   bet: Bet | null;
