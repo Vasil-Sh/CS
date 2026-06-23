@@ -427,7 +427,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
           <div className="h-px w-full bg-[#F3F4F6]" />
 
           {primaryGoal && goalInfo ? (
-            <div className="space-y-5 flex-1 px-7 pb-7 pt-6">
+            <div className="flex flex-col flex-1 px-7 pb-7 pt-6">
               <div>
                 <p className="text-2xl font-bold text-[#374151] tracking-tight">
                   {primaryGoal.name}
@@ -441,7 +441,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-[10%]">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-auto">
                 {primaryGoal.type === 'amount' && (
                   <>
                     <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
@@ -451,13 +451,13 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                       </p>
                     </div>
                     <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Накоп.</p>
+                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Накопичено</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.currentAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
                     <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Залиш.</p>
+                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Залишилось</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {Math.max(0, (primaryGoal.targetAmount ?? 0) - (primaryGoal.currentAmount ?? 0)).toFixed(0)}
                       </p>
