@@ -463,7 +463,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Current strategy details card */}
         <div
-          className="bg-white rounded-[32px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
+          className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
         >
           <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start gap-3">
@@ -545,7 +545,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
         {/* Current goal details card — mirrors strategy card structure */}
         <div
-          className="bg-white rounded-[32px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
+          className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden"
         >
           <div className="mb-6 pb-5 border-b border-[#F3F4F6] -mx-7 px-7">
             <div className="flex items-start justify-between">
