@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Flag,
   TrendingUp,
@@ -355,7 +355,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 </p>
               )}
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-[10%]">
                 <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                   <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
                     Мін. коеф.
@@ -441,30 +441,30 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-[10%]">
                 {primaryGoal.type === 'amount' && (
                   <>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ціль</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.targetAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Накоп.</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.currentAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Залиш.</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {Math.max(0, (primaryGoal.targetAmount ?? 0) - (primaryGoal.currentAmount ?? 0)).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ставок/день</p>
-                      <p className="text-lg font-bold text-[#111827] mt-1.5 truncate">
+                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {primaryGoal.betsPerDay || 'Усі'}
                       </p>
                     </div>
@@ -473,25 +473,25 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'ladder' && (
                   <>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Старт</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.startAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ціль</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.targetLadderAmount ?? 0).toFixed(0)}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Коеф.</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5 whitespace-nowrap">
                         {primaryGoal.minOdds ?? '—'} – {primaryGoal.maxOdds ?? '—'}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Крок</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5 whitespace-nowrap">
                         {primaryGoal.currentStep ?? 0} / {primaryGoal.totalSteps ?? 0}
@@ -502,27 +502,27 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'roi' && (
                   <>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ціль ROI</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.targetROI ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Поточн.</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.currentROI ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Різниця</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {((primaryGoal.currentROI ?? 0) - (primaryGoal.targetROI ?? 0)).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ставок/день</p>
-                      <p className="text-lg font-bold text-[#111827] mt-1.5 truncate">
+                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {primaryGoal.betsPerDay || 'Усі'}
                       </p>
                     </div>
@@ -531,27 +531,27 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
                 {primaryGoal.type === 'winrate' && (
                   <>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ціль WR</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.targetWinRate ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Поточн.</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {(primaryGoal.currentWinRate ?? 0).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Різниця</p>
                       <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {((primaryGoal.currentWinRate ?? 0) - (primaryGoal.targetWinRate ?? 0)).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
                       <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ставок/день</p>
-                      <p className="text-lg font-bold text-[#111827] mt-1.5 truncate">
+                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
                         {primaryGoal.betsPerDay || 'Усі'}
                       </p>
                     </div>
