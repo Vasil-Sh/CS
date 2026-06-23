@@ -1142,7 +1142,7 @@ export default function Matches() {
         <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
           {/* ===== QUICK STATS ===== */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div 
               className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
@@ -1464,7 +1464,7 @@ export default function Matches() {
             return (
               <div 
                 key={dateKey}
-                className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
+                className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden"
               >
                 <CardHeader className="bg-white/60 backdrop-blur-sm rounded-t-[32px] border-b border-[#E5E7EB] px-6 py-5">
                   <CardTitle>
@@ -1479,7 +1479,7 @@ export default function Matches() {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-0 rounded-b-[32px] overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       {renderTableHeader()}
