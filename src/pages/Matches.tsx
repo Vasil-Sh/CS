@@ -1464,9 +1464,9 @@ export default function Matches() {
             return (
               <div 
                 key={dateKey}
-                className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden"
+                className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
               >
-                <CardHeader className="bg-white/60 backdrop-blur-sm border-b border-[#E5E7EB] px-6 py-5">
+                <CardHeader className="bg-white/60 backdrop-blur-sm rounded-t-[32px] border-b border-[#E5E7EB] px-6 py-5">
                   <CardTitle>
                     <div className="flex items-center gap-4">
                       <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
