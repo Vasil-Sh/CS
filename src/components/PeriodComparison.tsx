@@ -189,11 +189,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
   return (
     <>
       {completedBetsCount === 0 ? (
-        <Card 
-          className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
-          style={{ boxShadow: chartCardShadow }}
-        >
-          <CardContent className="py-16 text-center">
+        <div className="flex-1 flex items-center justify-center py-16 text-center">
             <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
               <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
             </div>
@@ -203,8 +199,7 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
             <p className="text-[#6B7280] text-sm">
               Додайте завершені ставки для перегляду статистики по періодах
             </p>
-          </CardContent>
-        </Card>
+        </div>
       ) : (
     <TooltipProvider>
       <div className="space-y-6">
