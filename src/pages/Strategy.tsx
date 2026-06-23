@@ -78,14 +78,10 @@ export default function Strategy() {
           {/* Tab content */}
           <div>
             {activeTab === 'strategies' && (
-              <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <StrategyOverview />
-              </div>
             )}
             {activeTab === 'goals' && (
-              <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <GoalsManager />
-              </div>
             )}
             {activeTab === 'risks' && <RiskManagement bets={bets} />}
           </div>
