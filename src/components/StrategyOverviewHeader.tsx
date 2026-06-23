@@ -292,6 +292,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
   return (
     <div className="space-y-6">
       {/* ===== KPI CARDS — matches Analytics style 1:1 ===== */}
+      <div className="bg-white rounded-[32px] p-5 border border-[#E5E7EB] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* 1. Активна стратегія */}
         <button
@@ -455,6 +456,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* ===== CURRENT STRATEGY + CURRENT GOAL ROW — equal size ===== */}
