@@ -749,9 +749,12 @@ export default function Matches() {
     return date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const liveCount = sortedMatches.filter(m => m.matchStatus === 'live').length;
-  const upcomingCount = sortedMatches.filter(m => m.matchStatus === 'upcoming').length;
-  const finishedCount = sortedMatches.filter(m => m.matchStatus === 'finished').length;
+  // Displayed matches — only those actually shown on screen (today+future, or all if only past)
+  const displayedMatches = sortedDateKeys.flatMap(k => groupedByDate[k] || []);
+  const displayCount = displayedMatches.length;
+  const liveCount = displayedMatches.filter(m => m.matchStatus === 'live').length;
+  const upcomingCount = displayedMatches.filter(m => m.matchStatus === 'upcoming').length;
+  const finishedCount = displayedMatches.filter(m => m.matchStatus === 'finished').length;
 
   const toggleSort = (column: 'date' | 'confidence' | 'risk' | 'upset' | 'status') => {
     if (sortBy === column) {
@@ -785,8 +788,8 @@ export default function Matches() {
     }
   };
 
-  const avgConfidence = sortedMatches.length > 0 
-    ? Math.round(sortedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / sortedMatches.length)
+  const avgConfidence = displayCount > 0 
+    ? Math.round(displayedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) / displayCount)
     : 0;
 
   const renderSortIndicator = (column: 'date' | 'confidence' | 'risk' | 'upset' | 'status') => {
@@ -1153,7 +1156,7 @@ export default function Matches() {
                 </div>
                 <span className="text-lg font-semibold text-[#111827]">Всього матчів</span>
               </div>
-              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">{sortedMatches.length}</div>
+              <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">{displayCount}</div>
               <div className="flex items-center gap-2">
                 <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
                 <span className="text-sm text-[#4B5563]">на сьогодні</span>
