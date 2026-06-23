@@ -1466,7 +1466,8 @@ export default function Matches() {
                 key={dateKey}
                 className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden"
               >
-                <CardHeader className="bg-white rounded-t-[32px] border-b border-[#E5E7EB] px-6 py-5 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+                <div className="bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.10)]">
+                <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
                   <CardTitle>
                     <div className="flex items-center gap-4">
                       <Calendar className="h-8 w-8 text-[#9CA3AF]" strokeWidth={1.5} />
@@ -1479,7 +1480,7 @@ export default function Matches() {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 rounded-b-[32px] overflow-hidden">
+                <CardContent className="p-0 rounded-b-[24px] overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       {renderTableHeader()}
@@ -1489,6 +1490,7 @@ export default function Matches() {
                     </table>
                   </div>
                 </CardContent>
+                </div>
               </div>
             );
           })}
