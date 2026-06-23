@@ -756,7 +756,7 @@ export default function StrategyOverview() {
       <div className="space-y-6">
         {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="inline-flex items-center gap-3 p-3 flex-wrap justify-center">
             {/* Info tooltip */}
             <TooltipProvider>
               <UITooltip>
