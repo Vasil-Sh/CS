@@ -239,7 +239,7 @@ export default function MyBets() {
   const handleBankModalClose = useCallback((success: boolean) => { setBankModalOpen(false); if (success) { setBankrollRefreshKey(p => p + 1); bumpBankroll(); } }, [bumpBankroll]);
 
   const handleExpressDetails = useCallback((bet: Bet) => { setSelectedExpressBet(bet); setSelectedExpressEvents(parseExpressEvents(bet.betType)); setExpressModalOpen(true); }, []);
-  const handleBetDetails = useCallback((bet: Bet) => { setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
+  const handleBetDetails = useCallback((bet: Bet) => { console.log('handleBetDetails called', bet.team1, bet.team2); setSelectedDetailsBet(bet); setBetDetailsModalOpen(true); }, []);
 
   const handleDeleteBet = useCallback((bet: Bet) => {
     setDeleteDialogBet(bet);
