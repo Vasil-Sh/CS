@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   User, 
   Download, 
@@ -39,6 +40,7 @@ export default function Profile() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>('interface');
   const [simResetKey, setSimResetKey] = useState(0);
   
@@ -55,8 +57,8 @@ export default function Profile() {
 
   // ── Clear all data ──
   const clearAllData = () => {
-    if (!window.confirm('Ви впевнені? Усі дані будуть видалені назавжди. Це неможливо скасувати.')) return;
     setIsClearing(true);
+    setClearConfirmOpen(false);
     try {
       const keysToKeep = ['authToken', 'userRole', 'username', 'matchiq_theme', 'matchiq_lang'];
       const keysToRemove: string[] = [];
@@ -769,7 +771,7 @@ export default function Profile() {
                   </p>
                 </div>
                 <Button
-                  onClick={clearAllData}
+                  onClick={() => setClearConfirmOpen(true)}
                   disabled={isClearing}
                   className="bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-sm px-6 font-semibold"
                 >
@@ -783,6 +785,50 @@ export default function Profile() {
       </Card>
       </div>
       )}
+
+      </div>
+
+      {/* ===== Clear data confirmation dialog ===== */}
+      <Dialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+        <DialogContent className="sm:max-w-[440px] rounded-3xl border border-[#F3F4F6] bg-white p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-0">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#FEF2F2]">
+                <AlertTriangle className="h-5 w-5 text-[#DC2626]" strokeWidth={2} />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold text-[#111827]">Очистити всі дані</DialogTitle>
+                <DialogDescription className="text-sm text-[#6B7280] mt-0.5">
+                  Цю дію неможливо скасувати
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="px-6 py-5">
+            <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl">
+              <p className="text-sm text-[#92400E] leading-relaxed">
+                Усі ваші дані будуть видалені назавжди: ставки, стратегії, цілі, ризиковані команди та Telegram-групи.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="flex items-center gap-3 px-6 pb-6">
+            <button
+              type="button"
+              onClick={() => setClearConfirmOpen(false)}
+              className="flex-1 h-11 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-semibold text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all duration-200"
+            >
+              Скасувати
+            </button>
+            <button
+              type="button"
+              onClick={clearAllData}
+              className="flex-1 h-11 rounded-2xl bg-[#DC2626] text-sm font-semibold text-white hover:bg-[#B91C1C] transition-all duration-200"
+            >
+              Видалити
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       </div>
     </div>
