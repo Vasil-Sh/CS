@@ -414,17 +414,21 @@ export default function TelegramGroups() {
 
   const renderKPICards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard label="Груп" value={String(groups.length)} icon={<Users className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />} />
-      <StatCard label="Ставок" value={String(overallStats.totalBets)} icon={<BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />} />
+      <StatCard label="Груп" value={String(groups.length)} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+      <StatCard label="Ставок" value={String(overallStats.totalBets)} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard 
         label="Win Rate" 
         value={`${overallStats.winRate.toFixed(0)}%`} 
-        icon={overallStats.winRate >= 50 ? <TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /> : <TrendingDown className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />}
+        icon={overallStats.winRate >= 50 ? TrendingUp : TrendingDown} 
+        color="bg-[#EFF6FF]" 
+        iconColor="text-[#447afc]"
       />
       <StatCard 
         label="Прибуток" 
         value={`${overallStats.totalProfit >= 0 ? '+' : ''}${overallStats.totalProfit.toFixed(0)}`} 
-        icon={<Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />}
+        icon={Target} 
+        color="bg-[#EFF6FF]" 
+        iconColor="text-[#447afc]"
       />
     </div>
   );
