@@ -123,8 +123,8 @@ function TeamIcon({ logo, name, style, size }: {
 }) {
   if (!name) return null;
 
-  const sharedClass = 'flex items-center justify-center flex-shrink-0 rounded-full bg-white border-2';
-  const sharedStyle = { width: size, height: size, borderColor: style.border };
+  const sharedClass = 'flex items-center justify-center flex-shrink-0 rounded-full bg-white';
+  const sharedStyle = { width: size, height: size };
 
   if (logo) {
     return (
