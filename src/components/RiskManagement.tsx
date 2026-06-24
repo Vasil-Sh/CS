@@ -367,7 +367,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setFilter: (val: string) => void,
     statusCounts: Record<string, number>
   ) => (
-    <div className="flex flex-wrap items-center gap-1.5 my-4">
+    <div className="flex flex-wrap items-center gap-1.5 my-4 mt-8">
       <button
         onClick={() => setFilter('all')}
         className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
