@@ -22,6 +22,7 @@ interface BetShareCardProps {
     exchangeRate?: number;
     logoTeam1?: string | null;
     logoTeam2?: string | null;
+    game?: string;
   };
   compact?: boolean;
 }
@@ -114,14 +115,19 @@ const themes = {
   },
 };
 
-/** Single team icon (logo or CS2 placeholder fallback) */
-function TeamIcon({ logo, name, style, size }: {
+/** Single team icon (logo or CS2/Dota placeholder fallback) */
+function TeamIcon({ logo, name, style, size, game }: {
   logo?: string | null;
   name?: string;
   style: { border: string; fallback: string };
   size: number;
+  game?: string;
 }) {
   if (!name) return null;
+
+  const isDota = game?.toLowerCase() === 'dota2';
+  const placeholderSrc = isDota ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg';
+  const placeholderColor = isDota ? '#F97316' : style.fallback;
 
   const sharedClass = 'flex items-center justify-center flex-shrink-0 rounded-full bg-white';
   const sharedStyle = { width: size, height: size };
@@ -134,16 +140,15 @@ function TeamIcon({ logo, name, style, size }: {
           alt={name}
           className="w-3/5 h-3/5 object-contain"
           onError={(e) => {
-            // On broken logo, replace with CS2 placeholder
             const el = e.target as HTMLImageElement;
             el.style.display = 'none';
             const parent = el.parentElement!;
             parent.innerHTML = '';
             const img = document.createElement('img');
-            img.src = '/assets/team-placeholder.svg';
+            img.src = placeholderSrc;
             img.alt = name;
             img.className = 'w-3/5 h-3/5 object-contain opacity-70';
-            img.style.color = style.fallback;
+            img.style.color = placeholderColor;
             parent.appendChild(img);
           }}
         />
@@ -151,14 +156,13 @@ function TeamIcon({ logo, name, style, size }: {
     );
   }
 
-  // No logo → CS2 placeholder
   return (
     <div className={sharedClass} style={sharedStyle}>
       <img
-        src="/assets/team-placeholder.svg"
+        src={placeholderSrc}
         alt={name}
         className="w-3/5 h-3/5 object-contain opacity-70"
-        style={{ color: style.fallback }}
+        style={{ color: placeholderColor }}
       />
     </div>
   );
@@ -192,6 +196,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   };
   const logoStyle = isWin ? logoSettings.win : isLoss ? logoSettings.loss : logoSettings.pending;
   const logoSize = compact ? 56 : 72;
+  const game = bet.game || 'CS2';
   
   interface ParsedEvent {
     number: string;
@@ -317,6 +322,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 name={bet.team1}
                 style={logoStyle}
                 size={logoSize}
+                game={game}
               />
               <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
                 {matchName}
@@ -327,6 +333,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 name={bet.team2}
                 style={logoStyle}
                 size={logoSize}
+                game={game}
               />
             </div>
             <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
