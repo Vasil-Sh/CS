@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1138,6 +1138,7 @@ export default function Matches() {
           currentUser={currentUser || 'User'}
           isDarkTheme={isDarkTheme}
           onToggleTheme={toggleTheme}
+          showThemeToggle={false}
         />
         <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
 
