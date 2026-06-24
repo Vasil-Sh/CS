@@ -410,7 +410,7 @@ export default function Profile() {
       >
         <CardContent className="py-5 px-6 flex items-center gap-4">
           <div className="p-3 rounded-xl flex-shrink-0 relative">
-            <AlertTriangle className="h-6 w-6 text-[#EF4444] animate-pulse" strokeWidth={1.5} />
+            <AlertTriangle className="h-6 w-6 text-[#EF4444]" strokeWidth={1.5} />
           </div>
           <div>
             <p className="text-base font-semibold text-[#111827]">Останній бекап</p>
