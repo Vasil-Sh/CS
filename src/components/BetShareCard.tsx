@@ -115,17 +115,16 @@ const themes = {
 };
 
 /** Single team icon (logo or CS2 placeholder fallback) */
-function TeamIcon({ logo, name, style, size, round }: {
+function TeamIcon({ logo, name, style, size }: {
   logo?: string | null;
   name?: string;
-  style: { bg: string; fallback: string };
+  style: { border: string; fallback: string };
   size: number;
-  round: string;
 }) {
   if (!name) return null;
 
-  const sharedClass = `flex items-center justify-center flex-shrink-0 ${round}`;
-  const sharedStyle = { width: size, height: size, backgroundColor: style.bg };
+  const sharedClass = 'flex items-center justify-center flex-shrink-0 rounded-full bg-white border-2';
+  const sharedStyle = { width: size, height: size, borderColor: style.border };
 
   if (logo) {
     return (
@@ -133,7 +132,7 @@ function TeamIcon({ logo, name, style, size, round }: {
         <img
           src={logo}
           alt={name}
-          className="w-full h-full object-contain"
+          className="w-3/5 h-3/5 object-contain"
           onError={(e) => {
             // On broken logo, replace with CS2 placeholder
             const el = e.target as HTMLImageElement;
@@ -143,7 +142,7 @@ function TeamIcon({ logo, name, style, size, round }: {
             const img = document.createElement('img');
             img.src = '/assets/team-placeholder.svg';
             img.alt = name;
-            img.className = 'w-2/3 h-2/3 object-contain opacity-60';
+            img.className = 'w-3/5 h-3/5 object-contain opacity-70';
             img.style.color = style.fallback;
             parent.appendChild(img);
           }}
@@ -158,7 +157,7 @@ function TeamIcon({ logo, name, style, size, round }: {
       <img
         src="/assets/team-placeholder.svg"
         alt={name}
-        className="w-2/3 h-2/3 object-contain opacity-60"
+        className="w-3/5 h-3/5 object-contain opacity-70"
         style={{ color: style.fallback }}
       />
     </div>
@@ -187,13 +186,12 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
 
   const logoSettings = {
-    win:  { bg: '#D1FAE5', fallback: '#059669' },
-    loss: { bg: '#FEE2E2', fallback: '#DC2626' },
-    pending: { bg: '#F3F4F6', fallback: '#6B7280' },
+    win:  { border: '#059669', fallback: '#059669' },
+    loss: { border: '#DC2626', fallback: '#DC2626' },
+    pending: { border: '#3B82F6', fallback: '#3B82F6' },
   };
   const logoStyle = isWin ? logoSettings.win : isLoss ? logoSettings.loss : logoSettings.pending;
-  const logoSize = compact ? 28 : 36;
-  const logoRound = compact ? 'rounded-lg' : 'rounded-xl';
+  const logoSize = compact ? 56 : 72;
   
   interface ParsedEvent {
     number: string;
@@ -319,7 +317,6 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 name={bet.team1}
                 style={logoStyle}
                 size={logoSize}
-                round={logoRound}
               />
               <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
                 {matchName}
@@ -330,7 +327,6 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 name={bet.team2}
                 style={logoStyle}
                 size={logoSize}
-                round={logoRound}
               />
             </div>
             <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
