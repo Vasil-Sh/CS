@@ -36,6 +36,7 @@ import {
   Eye,
   Link,
   RefreshCw,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
@@ -112,6 +113,7 @@ export default function TelegramGroups() {
   const [groups, setGroups] = useState<TelegramGroup[]>([]);
   const [bets, setBets] = useState<TelegramGroupBet[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [activeTool, setActiveTool] = useState<string | null>(null);
 
   // Load user data when username becomes available
   useEffect(() => {
@@ -411,7 +413,8 @@ export default function TelegramGroups() {
   // ── Render ──
 
   const renderKPICards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard 
@@ -429,6 +432,7 @@ export default function TelegramGroups() {
         iconColor="text-[#447afc]"
       />
     </div>
+    </div>
   );
 
   // ── Render ──
@@ -441,6 +445,31 @@ export default function TelegramGroups() {
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
+
+      {/* ===== TOOLBAR ===== */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-[#111827] text-white hover:bg-[#1F2937]"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          Додати групу
+        </button>
+        <button
+          onClick={() => setActiveTool(activeTool === 'info' ? null : 'info')}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${activeTool === 'info' ? 'bg-[#111827] text-white hover:bg-[#1F2937]' : 'bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] hover:bg-[#E5E7EB]'}`}
+        >
+          <Info className="h-4 w-4" strokeWidth={2} />
+          Інфо
+        </button>
+        <button
+          onClick={() => setActiveTool(activeTool === 'filter' ? null : 'filter')}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${activeTool === 'filter' ? 'bg-[#111827] text-white hover:bg-[#1F2937]' : 'bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] hover:bg-[#E5E7EB]'}`}
+        >
+          <SlidersHorizontal className="h-4 w-4" strokeWidth={2} />
+          Фільтр
+        </button>
+      </div>
 
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
