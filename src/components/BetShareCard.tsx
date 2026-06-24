@@ -246,8 +246,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const statusText = isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується';
   
   const expressLabel = isExpress ? `Експрес ${bet.format}` : '';
-  const gameLabel = `${game} • ${bet.format}`;
-  const gameIconSrc = game.toLowerCase() === 'dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg';
+  
   const theme = isWin ? themes.Win : isLoss ? themes.Loss : themes.Pending;
 
   // Sizing: compact (used in modal) vs full
@@ -303,17 +302,8 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           </div>
         </div>
         <div className={`flex items-center gap-1.5 ${badgeFont} font-medium text-white/80 bg-white/15 ${badgePx} rounded-2xl backdrop-blur-sm`}>
-          {isExpress ? (
-            <>
-              <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
-              <span>{expressLabel}</span>
-            </>
-          ) : (
-            <>
-              <img src={gameIconSrc} alt={game} className="h-3.5 w-3.5 object-contain opacity-80" />
-              <span>{gameLabel}</span>
-            </>
-          )}
+          <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <span>{isExpress ? expressLabel : bet.format}</span>
         </div>
       </div>
 

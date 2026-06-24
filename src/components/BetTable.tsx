@@ -328,7 +328,14 @@ export default function BetTable({
                               {bet.match || `${bet.team1} vs ${bet.team2}`}
                             </div>
                             {!isExpress && <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>}
-                            <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6]">
+                            <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6] flex items-center gap-1">
+                              {bet.game && (
+                                <img
+                                  src={bet.game.toLowerCase() === 'dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg'}
+                                  alt={bet.game}
+                                  className="h-3.5 w-3.5 object-contain opacity-80 flex-shrink-0"
+                                />
+                              )}
                               {bet.game ? `${bet.game} • ${bet.format}` : bet.format}
                             </Badge>
                           </div>
