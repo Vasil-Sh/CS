@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import CS2BettingForm from '@/components/CS2BettingForm';
 import type { MatchPrefillData } from '@/components/CS2BettingForm';
@@ -22,7 +22,7 @@ import { PageHeader } from '@/components/PageHeader';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,
   AlertTriangle, Clock, Plus, ArrowUpRight, ArrowDownRight,
-  MoreHorizontal, Sun, Moon, User, Trash2, Wallet, ClipboardList,
+  User, Trash2, Wallet, ClipboardList,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -64,7 +64,6 @@ export default function MyBets() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [activeTab, setActiveTab] = useState('add');
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === 'dark';
   const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
@@ -113,7 +112,6 @@ export default function MyBets() {
   useEffect(() => { loadStats(); loadRecentBets(); }, []);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
   useEffect(() => { setCurrentPage(1); }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
-  useEffect(() => { const h = () => setShowActionsMenu(false); if (showActionsMenu) { document.addEventListener('click', h); return () => document.removeEventListener('click', h); } }, [showActionsMenu]);
 
   // ── Data fetching ──
   const fetchUsers = async () => {
@@ -271,14 +269,7 @@ export default function MyBets() {
         currentUser={currentUser || 'User'}
         isDarkTheme={isDarkTheme}
         onToggleTheme={toggleTheme}
-        showActionsMenu
-        actionsMenuOpen={showActionsMenu}
-        onToggleActionsMenu={() => setShowActionsMenu(!showActionsMenu)}
-        actionsMenuContent={
-          <div className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
-            <button onClick={() => { clearRecentBets(); setShowActionsMenu(false); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2]"><Trash2 className="h-4 w-4" strokeWidth={1.5} />Очистити всі дані</button>
-          </div>
-        }
+        showThemeToggle={false}
       />
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
