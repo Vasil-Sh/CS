@@ -3,7 +3,7 @@ import { Target, Flag, AlertTriangle, ShieldAlert, TrendingUp, Activity } from '
 import { Progress } from '@/components/ui/progress';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
-import RiskManagement from '@/components/RiskManagement';
+import RiskManagementV4 from '@/components/RiskManagementV4';
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';import { logRender } from '@/lib/devLogger';import { PageHeader } from '@/components/PageHeader';
@@ -191,7 +191,7 @@ export default function Strategy() {
             {activeTab === 'goals' && (
               <GoalsManager />
             )}
-            {activeTab === 'risks' && <RiskManagement bets={bets} />}
+            {activeTab === 'risks' && <RiskManagementV4 bets={bets} />}
           </div>
         </div>
       </div>
