@@ -114,7 +114,7 @@ const themes = {
   },
 };
 
-/** Single team icon (logo or first-letter fallback) */
+/** Single team icon (logo or CS2 placeholder fallback) */
 function TeamIcon({ logo, name, style, size, round }: {
   logo?: string | null;
   name?: string;
@@ -124,32 +124,43 @@ function TeamIcon({ logo, name, style, size, round }: {
 }) {
   if (!name) return null;
 
+  const sharedClass = `flex items-center justify-center flex-shrink-0 ${round}`;
+  const sharedStyle = { width: size, height: size, backgroundColor: style.bg };
+
   if (logo) {
     return (
-      <div
-        className={`flex items-center justify-center flex-shrink-0 ${round} overflow-hidden`}
-        style={{ width: size, height: size, backgroundColor: style.bg }}
-      >
+      <div className={`${sharedClass} overflow-hidden`} style={sharedStyle}>
         <img
           src={logo}
           alt={name}
           className="w-full h-full object-contain"
           onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-            (e.target as HTMLImageElement).parentElement!.innerHTML =
-              `<span style="color:${style.fallback};font-weight:700;font-size:${size > 30 ? '14' : '11'}px">${name.charAt(0).toUpperCase()}</span>`;
+            // On broken logo, replace with CS2 placeholder
+            const el = e.target as HTMLImageElement;
+            el.style.display = 'none';
+            const parent = el.parentElement!;
+            parent.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = '/assets/team-placeholder.svg';
+            img.alt = name;
+            img.className = 'w-2/3 h-2/3 object-contain opacity-60';
+            img.style.color = style.fallback;
+            parent.appendChild(img);
           }}
         />
       </div>
     );
   }
 
+  // No logo → CS2 placeholder
   return (
-    <div
-      className={`flex items-center justify-center flex-shrink-0 ${round} font-bold`}
-      style={{ width: size, height: size, backgroundColor: style.bg, color: style.fallback, fontSize: size > 30 ? '14px' : '11px' }}
-    >
-      {name.charAt(0).toUpperCase()}
+    <div className={sharedClass} style={sharedStyle}>
+      <img
+        src="/assets/team-placeholder.svg"
+        alt={name}
+        className="w-2/3 h-2/3 object-contain opacity-60"
+        style={{ color: style.fallback }}
+      />
     </div>
   );
 }
