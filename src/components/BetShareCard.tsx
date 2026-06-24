@@ -114,6 +114,46 @@ const themes = {
   },
 };
 
+/** Single team icon (logo or first-letter fallback) */
+function TeamIcon({ logo, name, style, size, round }: {
+  logo?: string | null;
+  name?: string;
+  style: { bg: string; fallback: string };
+  size: number;
+  round: string;
+}) {
+  if (!name) return null;
+
+  if (logo) {
+    return (
+      <div
+        className={`flex items-center justify-center flex-shrink-0 ${round} overflow-hidden`}
+        style={{ width: size, height: size, backgroundColor: style.bg }}
+      >
+        <img
+          src={logo}
+          alt={name}
+          className="w-full h-full object-contain"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+            (e.target as HTMLImageElement).parentElement!.innerHTML =
+              `<span style="color:${style.fallback};font-weight:700;font-size:${size > 30 ? '14' : '11'}px">${name.charAt(0).toUpperCase()}</span>`;
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`flex items-center justify-center flex-shrink-0 ${round} font-bold`}
+      style={{ width: size, height: size, backgroundColor: style.bg, color: style.fallback, fontSize: size > 30 ? '14px' : '11px' }}
+    >
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
 export default function BetShareCard({ bet, compact = false }: BetShareCardProps) {
   const [isEventsOpen, setIsEventsOpen] = useState(false);
   
@@ -135,8 +175,6 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
 
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
 
-  const hasLogos = !!bet.logoTeam1 || !!bet.logoTeam2;
-  const hasTeams = !!bet.team1 || !!bet.team2;
   const logoSettings = {
     win:  { bg: '#D1FAE5', fallback: '#059669' },
     loss: { bg: '#FEE2E2', fallback: '#DC2626' },
@@ -263,68 +301,26 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {/* Match Name — only for non-express */}
         {!isExpress && (
           <>
-            <div className="text-center py-1">
-              {/* Team indicators row (logo or first letter) */}
-              {hasTeams ? (
-                <div className="flex items-center justify-center gap-3 mb-1.5">
-                  {/* Team 1 Logo */}
-                  {bet.logoTeam1 ? (
-                    <div
-                      className={`flex items-center justify-center flex-shrink-0 ${logoRound} overflow-hidden`}
-                      style={{ width: logoSize, height: logoSize, backgroundColor: logoStyle.bg }}
-                    >
-                      <img
-                        src={bet.logoTeam1}
-                        alt={bet.team1 || 'Team 1'}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).parentElement!.innerHTML =
-                            `<span style="color:${logoStyle.fallback};font-weight:700;font-size:${logoSize > 30 ? '14' : '11'}px">${(bet.team1 || 'T').charAt(0).toUpperCase()}</span>`;
-                        }}
-                      />
-                    </div>
-                  ) : bet.team1 ? (
-                    <div
-                      className={`flex items-center justify-center flex-shrink-0 ${logoRound} font-bold`}
-                      style={{ width: logoSize, height: logoSize, backgroundColor: logoStyle.bg, color: logoStyle.fallback, fontSize: logoSize > 30 ? '14px' : '11px' }}
-                    >
-                      {bet.team1.charAt(0).toUpperCase()}
-                    </div>
-                  ) : null}
-
-                  <span className="text-[#9CA3AF] text-xs font-medium">VS</span>
-
-                  {/* Team 2 Logo */}
-                  {bet.logoTeam2 ? (
-                    <div
-                      className={`flex items-center justify-center flex-shrink-0 ${logoRound} overflow-hidden`}
-                      style={{ width: logoSize, height: logoSize, backgroundColor: logoStyle.bg }}
-                    >
-                      <img
-                        src={bet.logoTeam2}
-                        alt={bet.team2 || 'Team 2'}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).parentElement!.innerHTML =
-                            `<span style="color:${logoStyle.fallback};font-weight:700;font-size:${logoSize > 30 ? '14' : '11'}px">${(bet.team2 || 'T').charAt(0).toUpperCase()}</span>`;
-                        }}
-                      />
-                    </div>
-                  ) : bet.team2 ? (
-                    <div
-                      className={`flex items-center justify-center flex-shrink-0 ${logoRound} font-bold`}
-                      style={{ width: logoSize, height: logoSize, backgroundColor: logoStyle.bg, color: logoStyle.fallback, fontSize: logoSize > 30 ? '14px' : '11px' }}
-                    >
-                      {bet.team2.charAt(0).toUpperCase()}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
+            <div className="flex items-center justify-center py-1 gap-2.5 flex-wrap">
+              {/* Team 1 icon */}
+              <TeamIcon
+                logo={bet.logoTeam1}
+                name={bet.team1}
+                style={logoStyle}
+                size={logoSize}
+                round={logoRound}
+              />
               <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
                 {matchName}
               </h3>
+              {/* Team 2 icon */}
+              <TeamIcon
+                logo={bet.logoTeam2}
+                name={bet.team2}
+                style={logoStyle}
+                size={logoSize}
+                round={logoRound}
+              />
             </div>
             <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
           </>
