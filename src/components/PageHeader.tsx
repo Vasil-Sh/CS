@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Sun, Moon, MoreHorizontal } from 'lucide-react';
 
 export interface PageHeaderProps {
@@ -37,6 +38,8 @@ export function PageHeader({
   onToggleActionsMenu,
   actionsMenuContent,
 }: PageHeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="px-6 lg:px-8 pt-6 pb-2">
       <div className="flex items-center justify-between">
@@ -89,8 +92,12 @@ export function PageHeader({
 
           <div className="w-px h-8 bg-[#D1D5DB]" />
 
-          {/* User info */}
-          <div className="flex items-center gap-3">
+          {/* User info — clickable to Profile */}
+          <button
+            onClick={() => navigate('/app/profile')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+            title="Перейти до профілю"
+          >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
               <User className="h-4 w-4 text-white" strokeWidth={2} />
             </div>
@@ -102,7 +109,7 @@ export function PageHeader({
                 Активний
               </span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>
