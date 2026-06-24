@@ -83,6 +83,22 @@
 | AI | DeepSeek Chat API |
 | Збірка | Vite 5 |
 | Тести | Vitest (unit) + Playwright (E2E на гілці `AQA`) |
+| SEO | react-helmet-async + JSON-LD + Sitemap + OG/Twitter Cards |
+
+---
+
+## 🔍 SEO
+
+Повна SEO-оптимізація для пошукових систем та соцмереж:
+
+- **Динамічні мета-теги** — `title`, `description`, `canonical`, `robots` через `react-helmet-async`
+- **Open Graph** + **Twitter Cards** — `summary_large_image` для гарних прев'ю
+- **hreflang** — мовні альтернативи `uk` / `en` / `x-default`
+- **JSON-LD структуровані дані** — `WebApplication`, `Organization`, `FAQPage`, `BreadcrumbList`
+- **Sitemap.xml** — з пріоритетами та hreflang
+- **Семантичний HTML** — `<main>`, `<section aria-label>`, `<header>`, `<footer>`
+
+Деталі: [`docs/seo.md`](docs/seo.md)
 
 ---
 
@@ -117,6 +133,8 @@ src/
 │   ├── RiskManagement.tsx     # Ризиковані команди + метрики
 │   ├── MatchCard.tsx          # Картка матчу
 │   ├── InitialBankModal.tsx   # Початковий банк
+│   ├── SEO.tsx                # Мета-теги, OG, hreflang
+│   ├── StructuredData.tsx     # JSON-LD (WebApp, FAQ, Organization)
 │   └── ...
 ├── pages/
 │   ├── Analytics.tsx          # Дашборд

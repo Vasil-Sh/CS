@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { HelmetProvider } from 'react-helmet-async';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -30,6 +31,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <HelmetProvider>
     <Router>
       <Routes>
         {/* Public routes */}
@@ -151,6 +153,7 @@ function App() {
       </Routes>
       <Toaster position="top-center" richColors closeButton duration={4000} />
     </Router>
+    </HelmetProvider>
   );
 }
 

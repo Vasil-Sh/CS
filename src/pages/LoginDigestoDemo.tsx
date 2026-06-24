@@ -5,11 +5,18 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useLogin } from '@/hooks/useLogin';
 import { Loader2, LogIn, Sparkles } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 export default function LoginDigestoDemo() {
   const { username, setUsername, password, setPassword, isLoading, error, handleSubmit } = useLogin();
 
   return (
+    <>
+      <SEO
+        title="Демо доступ"
+        description="Отримайте демо-доступ до MatchIQ — платформи аналітики ставок на CS2. Спробуйте EV-детектор, алгоритм Келлі та AI-рекомендації безкоштовно."
+        canonical="https://matchiq.pro/login-digesto-demo"
+      />
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse" />
@@ -106,5 +113,6 @@ export default function LoginDigestoDemo() {
       <div className="absolute top-20 left-20 w-20 h-20 rounded-full bg-gradient-to-br from-purple-400/20 to-pink-400/20 blur-xl animate-bounce" />
       <div className="absolute bottom-20 right-20 w-16 h-16 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-xl animate-bounce delay-300" />
     </div>
+    </>
   );
 }

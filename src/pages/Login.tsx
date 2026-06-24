@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useLogin } from '@/hooks/useLogin';
 import { Loader2, LogIn, TrendingUp, User, Lock, ArrowLeft } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 export default function Login() {
   const { username, setUsername, password, setPassword, isLoading, error, handleSubmit } = useLogin();
@@ -14,6 +15,12 @@ export default function Login() {
   const isAdminInput = username.toLowerCase() === 'admin';
 
   return (
+    <>
+      <SEO
+        title="Увійти"
+        description="Увійдіть до MatchIQ — професійної платформи аналітики ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу."
+        canonical="https://matchiq.pro/login"
+      />
     <div className="min-h-screen relative overflow-hidden bg-[#F5F5F0]">
       {/* Subtle grid pattern overlay */}
       <svg className="absolute top-0 left-0 w-full h-full opacity-[0.02] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
@@ -179,5 +186,6 @@ export default function Login() {
         </Card>
       </div>
     </div>
+    </>
   );
 }

@@ -15,11 +15,11 @@ export default defineConfig(({ mode }) => ({
       ? [
           VitePWA({
             registerType: "autoUpdate",
-            includeAssets: ["favicon.ico", "robots.txt"],
+            includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "sitemap.xml", "assets/og-image.svg"],
             manifest: {
               name: "MatchIQ — Betting Analytics",
               short_name: "MatchIQ",
-              description: "Розумна аналітика ставок на кіберспорт. Трекінг, стратегії, AI-рекомендації.",
+              description: "Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації.",
               theme_color: "#111827",
               background_color: "#f3f3f3",
               display: "standalone",

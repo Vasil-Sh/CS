@@ -1,2 +1,16 @@
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://matchiq.pro/sitemap.xml
+
+# Disallow authenticated/admin routes (no value for crawlers)
+Disallow: /app/admin
+Disallow: /app/profile
+Disallow: /api/
+
+# Crawl delay (polite crawling)
+Crawl-delay: 5
+
+# Host
+Host: https://matchiq.pro

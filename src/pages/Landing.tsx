@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useTheme } from '@/hooks/useTheme';
 import { t, setLang, getLang, type Lang } from '@/lib/i18n';
+import { SEO } from '@/components/SEO';
+import { OrganizationStructuredData, WebAppStructuredData, FAQStructuredData } from '@/components/StructuredData';
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -74,7 +76,31 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0]">
+    <>
+      {/* ═══ SEO ═══ */}
+      <SEO
+        title="Аналітика ставок на CS2"
+        description="MatchIQ — професійний інструмент для аналітики ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу, AI-рекомендації та контроль ризиків."
+        canonical="https://matchiq.pro/"
+        ukHref="https://matchiq.pro/"
+        enHref="https://matchiq.pro/"
+      />
+      <OrganizationStructuredData
+        name="MatchIQ"
+        description="CS2 Match Analytics and Betting Intelligence Platform"
+        url="https://matchiq.pro"
+      />
+      <WebAppStructuredData
+        offers={{ price: '0', priceCurrency: 'USD' }}
+      />
+      <FAQStructuredData
+        questions={faqItems.map((item) => ({
+          question: item.q,
+          answer: item.a,
+        }))}
+      />
+
+    <main className="min-h-screen bg-[#F5F5F0]">
       {/* Header / Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-[#E8E6DC]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -228,7 +254,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden">
+      <section aria-label="Головний екран" className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden">
         {/* Background Pattern */}
         <svg className="absolute top-0 left-0 w-full h-full opacity-[0.02] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -302,7 +328,7 @@ export default function Landing() {
       </section>
 
       {/* Mini Demo - Validation Layer */}
-      <section id="features" className="py-20 lg:py-28 mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[112px] pr-[0px] pb-[112px] pl-[0px] rounded-none text-[16px] font-normal text-[#020817] bg-[#FFFFFF] opacity-100">
+      <section id="features" aria-label="Можливості та демонстрація" className="py-20 lg:py-28 mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[112px] pr-[0px] pb-[112px] pl-[0px] rounded-none text-[16px] font-normal text-[#020817] bg-[#FFFFFF] opacity-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
@@ -375,7 +401,7 @@ export default function Landing() {
       </section>
 
       {/* Excel vs MatchIQ Comparison */}
-      <section id="risks" className="py-20 lg:py-28 bg-[#F5F5F0]">
+      <section id="risks" aria-label="Порівняння Excel та MatchIQ" className="py-20 lg:py-28 bg-[#F5F5F0]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
@@ -441,7 +467,7 @@ export default function Landing() {
       </section>
 
       {/* How it works - Execution Flow */}
-      <section id="how-it-works" className="py-20 lg:py-28 bg-white">
+      <section id="how-it-works" aria-label="Як це працює" className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
@@ -494,7 +520,7 @@ export default function Landing() {
       </section>
 
       {/* Philosophy Section */}
-      <section id="philosophy" className="py-20 lg:py-28 bg-[#F5F5F0]">
+      <section id="philosophy" aria-label="Філософія та підхід" className="py-20 lg:py-28 bg-[#F5F5F0]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -557,7 +583,7 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 lg:py-28 bg-white">
+      <section id="faq" aria-label="Часті запитання" className="py-20 lg:py-28 bg-white">
         <div className="max-w-3xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold text-[#1a1a2e] tracking-tight mb-4">
@@ -606,7 +632,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 lg:py-28 bg-[#1a1a2e] relative overflow-hidden">
+      <section aria-label="Заклик до дії" className="py-20 lg:py-28 bg-[#1a1a2e] relative overflow-hidden">
         <div className="absolute top-0 left-[-10%] w-[400px] h-[400px] bg-[#3e75ff]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-[-10%] w-[300px] h-[300px] bg-[#5b8cff]/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -677,6 +703,7 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
+    </>
   );
 }
