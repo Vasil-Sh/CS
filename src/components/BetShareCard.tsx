@@ -312,7 +312,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {/* Match Name — only for non-express */}
         {!isExpress && (
           <>
-            <div className="flex items-center justify-center py-1 gap-2.5 flex-wrap">
+            <div className="flex items-center justify-center py-1 gap-2.5 flex-nowrap">
               {/* Team 1 icon */}
               <TeamIcon
                 logo={bet.logoTeam1}
@@ -321,7 +321,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 size={logoSize}
                 game={game}
               />
-              <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
+              <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}>
                 {matchName}
               </h3>
               {/* Team 2 icon */}
@@ -407,7 +407,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             <div className="text-center py-1.5">
               <div className="flex items-center justify-center gap-2">
                 {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
-                <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight`}>
+                <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}>
                   {matchName}
                 </h3>
               </div>

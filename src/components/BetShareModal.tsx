@@ -11,7 +11,7 @@ interface BetShareModalProps {
 export default function BetShareModal({ bet, open, onClose }: BetShareModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm min-h-[420px] p-0 gap-0 bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden"
+      <DialogContent className="max-w-md min-h-[420px] p-0 gap-0 bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)' }}
       >
         {/* Header */}
