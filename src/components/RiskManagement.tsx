@@ -1037,6 +1037,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {csTeams.length}
                 </Badge>
               </CardTitle>
+              <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
               {renderStatusFilter(csStatusFilter, setCsStatusFilter, csStatusCounts)}
             </CardHeader>
             <CardContent className="p-6">
@@ -1089,6 +1090,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {dotaTeams.length}
                 </Badge>
               </CardTitle>
+              <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
               {renderStatusFilter(dotaStatusFilter, setDotaStatusFilter, dotaStatusCounts)}
             </CardHeader>
             <CardContent className="p-6">
