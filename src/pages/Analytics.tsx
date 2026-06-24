@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -45,7 +45,6 @@ import {
   User,
   Sun,
   Moon,
-  MoreHorizontal,
   Pencil,
   TrendingDown,
   TrendingUp,
@@ -98,7 +97,6 @@ export default function Analytics() {
   const [activeTab, setActiveTab] = useState('profit');
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === 'dark';
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [gameFilter, setGameFilter] = useState<'all' | 'CS2' | 'Dota2'>('CS2');
 
   const { completedBets: completedBetsForMetrics, riskMetrics, drawdownPeriods } = useRiskMetrics(bets);
@@ -124,13 +122,6 @@ export default function Analytics() {
     updateBankrollStats();
   }, [bankrollVersion]);
 
-  useEffect(() => {
-    const handleClickOutside = () => setShowActionsMenu(false);
-    if (showActionsMenu) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [showActionsMenu]);
 
   const updateBankrollStats = useCallback(() => {
     const allBets = realGoogleSheetsService.getAllRecords();
@@ -487,38 +478,7 @@ export default function Analytics() {
         currentUser={currentUser || 'User'}
         isDarkTheme={isDarkTheme}
         onToggleTheme={toggleTheme}
-        showActionsMenu
-        actionsMenuOpen={showActionsMenu}
-        onToggleActionsMenu={() => setShowActionsMenu(!showActionsMenu)}
-        actionsMenuContent={
-          <div 
-            className="absolute right-0 top-11 bg-white rounded-xl border border-[#E5E7EB] py-1 min-w-[180px] z-50"
-            style={{
-              boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)'
-            }}
-          >
-            <button
-              onClick={() => {
-                loadAnalyticsData();
-                setShowActionsMenu(false);
-              }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
-            >
-              <RefreshCw className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-              Оновити дані
-            </button>
-            <button
-              onClick={() => {
-                clearAllData();
-                setShowActionsMenu(false);
-              }}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
-            >
-              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-              Очистити дані
-            </button>
-          </div>
-        }
+        showThemeToggle={false}
       />
 
       {/* Main Content */}
