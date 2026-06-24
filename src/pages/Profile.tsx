@@ -409,7 +409,7 @@ export default function Profile() {
         style={{ boxShadow: chartCardShadow }}
       >
         <CardContent className="py-5 px-6 flex items-center gap-4">
-          <div className="p-3 rounded-xl flex-shrink-0 relative">
+          <div className="p-3 bg-[#FEF2F2] rounded-xl flex-shrink-0">
             <AlertTriangle className="h-6 w-6 text-[#EF4444]" strokeWidth={1.5} />
           </div>
           <div>
