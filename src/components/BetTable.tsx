@@ -176,7 +176,7 @@ export default function BetTable({
           {activeBets.length > 0 && (
             <Badge className="rounded-full bg-[#FEF3C7] text-[#D97706] border-0 text-sm font-medium px-3 py-0.5 hover:bg-[#FEF3C7]">
               {activeBets.length} активних
-            </Badge>
+            </div>
           )}
         </div>
       </div>
@@ -328,7 +328,7 @@ export default function BetTable({
                               {bet.match || `${bet.team1} vs ${bet.team2}`}
                             </div>
                             {!isExpress && <div className="text-sm text-[#9CA3AF] truncate mt-0.5" title={bet.betType}>{bet.betType}</div>}
-                            <Badge className="text-xs rounded-md bg-[#F3F4F6] text-[#6B7280] border-0 font-medium mt-1.5 hover:bg-[#F3F4F6] flex items-center gap-1">
+                            <div className="text-xs text-[#6B7280] font-medium mt-1.5 flex items-center gap-1">
                               {bet.game && (
                                 <img
                                   src={bet.game.toLowerCase() === 'dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg'}
@@ -337,19 +337,19 @@ export default function BetTable({
                                 />
                               )}
                               {bet.game ? `${bet.game} • ${bet.format}` : bet.format}
-                            </Badge>
+                            </div>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           {isExpress ? (
                             <div className="flex flex-col items-center gap-1.5">
-                              <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">Express {expressEventCount}×</Badge>
+                              <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">Express {expressEventCount}×</div>
                               <button onClick={() => onExpressDetails(bet)} className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200">Деталі</button>
                             </div>
                           ) : (
                             <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                               {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
-                            </Badge>
+                            </div>
                           )}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
@@ -366,13 +366,13 @@ export default function BetTable({
                           {goalName ? (
                             <Badge className="font-medium px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-sm max-w-[130px] truncate hover:bg-[#EFF6FF]" title={goalName}>
                               <Flag className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" strokeWidth={1.5} /><span className="truncate">{goalName}</span>
-                            </Badge>
+                            </div>
                           ) : <span className="text-[#D1D5DB] text-sm">—</span>}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           <Badge className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' : isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' : 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'}`}>
                             {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
-                          </Badge>
+                          </div>
                         </td>
                         <td className="px-3 py-4 text-center border-l border-[#F3F4F6]">
                           {bet.notes ? (
