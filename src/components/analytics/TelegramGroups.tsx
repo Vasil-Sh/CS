@@ -29,6 +29,7 @@ import {
   X,
   Search,
   ArrowUpDown,
+  Info,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -410,9 +411,9 @@ export default function TelegramGroups() {
   // ── Render ──
 
   const renderKPICards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard label="Груп" value={String(groups.length)} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
-      <StatCard label="Ставок" value={String(overallStats.totalBets)} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard 
         label="Win Rate" 
         value={`${overallStats.winRate.toFixed(0)}%`} 
@@ -438,10 +439,8 @@ export default function TelegramGroups() {
     <>
       {renderDialogs()}
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
-      {/* ===== KPI CARDS in container ===== */}
-      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-        {renderKPICards()}
-      </div>
+      {/* ===== KPI Cards — always visible ===== */}
+      {renderKPICards()}
 
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
