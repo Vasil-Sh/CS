@@ -1033,9 +1033,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </div>
                   CS команди
                 </span>
-                <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
-                  {csTeams.length}
-                </Badge>
+                
               </CardTitle>
               <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
               {renderStatusFilter(csStatusFilter, setCsStatusFilter, csStatusCounts)}
@@ -1086,9 +1084,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </div>
                   Dota 2 команди
                 </span>
-                <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
-                  {dotaTeams.length}
-                </Badge>
+                
               </CardTitle>
               <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
               {renderStatusFilter(dotaStatusFilter, setDotaStatusFilter, dotaStatusCounts)}
