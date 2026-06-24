@@ -441,10 +441,12 @@ export default function TelegramGroups() {
     <>
       {renderDialogs()}
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
-      {/* ===== KPI Cards — always visible ===== */}
-      {renderKPICards()}
+      {/* ===== 1. KPI CARDS in container ===== */}
+      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
+        {renderKPICards()}
+      </div>
 
-      {/* ===== TOOLBAR ===== */}
+      {/* ===== 2. TOOLBAR — no container ===== */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
@@ -469,6 +471,8 @@ export default function TelegramGroups() {
         </button>
       </div>
 
+      {/* ===== 3. GROUP CARDS in container ===== */}
+      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="py-16 text-center">
@@ -769,6 +773,7 @@ export default function TelegramGroups() {
 
         </>
       )}
+      </div>
     </div>
     </>
   );
