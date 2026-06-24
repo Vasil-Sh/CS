@@ -370,7 +370,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     <div className="flex flex-wrap items-center gap-1.5 my-4 mt-8">
       <button
         onClick={() => setFilter('all')}
-        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
           currentFilter === 'all'
             ? 'bg-[#111827] text-white ring-2 ring-offset-1 ring-[#111827]'
             : 'bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] opacity-70 hover:opacity-100'
@@ -385,7 +385,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <button
             key={status}
             onClick={() => setFilter(currentFilter === status ? 'all' : status)}
-            className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${getStatusFilterBadge(status, currentFilter === status)}`}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${getStatusFilterBadge(status, currentFilter === status)}`}
           >
             {status} ({count})
           </button>
