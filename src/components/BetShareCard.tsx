@@ -136,6 +136,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const isExpress = bet.betType.includes('Експрес') || bet.format.includes('x');
 
   const hasLogos = !!bet.logoTeam1 || !!bet.logoTeam2;
+  const hasTeams = !!bet.team1 || !!bet.team2;
   const logoSettings = {
     win:  { bg: '#D1FAE5', fallback: '#059669' },
     loss: { bg: '#FEE2E2', fallback: '#DC2626' },
@@ -263,8 +264,8 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isExpress && (
           <>
             <div className="text-center py-1">
-              {/* Team logos row (only if logos from Matches page) */}
-              {hasLogos ? (
+              {/* Team indicators row (logo or first letter) */}
+              {hasTeams ? (
                 <div className="flex items-center justify-center gap-3 mb-1.5">
                   {/* Team 1 Logo */}
                   {bet.logoTeam1 ? (
