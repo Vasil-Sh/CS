@@ -30,7 +30,7 @@ import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
 import { logRender } from '@/lib/devLogger';
 import { toast } from 'sonner';
 
-import { INITIAL_RISKY_TEAMS, type RiskyTeam } from '@/data/riskyTeams';
+import { type RiskyTeam } from '@/data/riskyTeams';
 
 interface RiskManagementProps {
   bets: Bet[];
@@ -46,23 +46,21 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as Array<{name: string; game: string; status: string; notes: string}>;
-        // Migration: if ANY team has game longer than 10 chars, it's corrupted — reset
         const hasCorrupted = parsed.some(t => !t.game || t.game.length > 10);
         if (hasCorrupted) {
           console.log('[RiskMgmt] Detected corrupted localStorage data — resetting');
           localStorage.removeItem('admin_risky_teams');
-          return INITIAL_RISKY_TEAMS;
+          return [];
         }
-        // Normalize unknown games to empty string — they'll show in "Без категорії"
         return parsed.map(t => ({
           ...t,
           game: (t.game === 'CS' || t.game === 'Дота') ? t.game : (t.game || ''),
         }));
       } catch {
-        return INITIAL_RISKY_TEAMS;
+        return [];
       }
     }
-    return INITIAL_RISKY_TEAMS;
+    return [];
   });
   
   const [newTeam, setNewTeam] = useState<RiskyTeam>({
