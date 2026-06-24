@@ -404,8 +404,8 @@ export default function Profile() {
       <div className="px-6 lg:px-8 pb-8 pt-4 space-y-8">
 
       {/* ===== Backup status card — always visible ===== */}
-      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-[#E5E7EB]">
+      <div className="bg-white rounded-[32px] p-6 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-4 bg-[#F3F4F6] rounded-2xl">
               <Clock className="h-8 w-8 text-[#6B7280]" strokeWidth={1.5} />
