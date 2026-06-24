@@ -127,7 +127,6 @@ function TeamIcon({ logo, name, style, size, game }: {
 
   const isDota = game?.toLowerCase() === 'dota2';
   const placeholderSrc = isDota ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg';
-  const placeholderColor = isDota ? '#F97316' : style.fallback;
 
   const sharedClass = 'flex items-center justify-center flex-shrink-0 rounded-full bg-white';
   const sharedStyle = { width: size, height: size };
@@ -148,7 +147,6 @@ function TeamIcon({ logo, name, style, size, game }: {
             img.src = placeholderSrc;
             img.alt = name;
             img.className = 'w-3/5 h-3/5 object-contain opacity-70';
-            img.style.color = placeholderColor;
             parent.appendChild(img);
           }}
         />
@@ -162,7 +160,6 @@ function TeamIcon({ logo, name, style, size, game }: {
         src={placeholderSrc}
         alt={name}
         className="w-3/5 h-3/5 object-contain opacity-70"
-        style={{ color: placeholderColor }}
       />
     </div>
   );
