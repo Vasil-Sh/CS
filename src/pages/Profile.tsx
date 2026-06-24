@@ -404,25 +404,30 @@ export default function Profile() {
       <div className="px-6 lg:px-8 pb-8 pt-4 space-y-8">
 
       {/* ===== Backup status card — always visible ===== */}
-      <div className="bg-white rounded-2xl py-4 px-6 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <Clock className="h-4 w-4 text-[#9CA3AF] flex-shrink-0" strokeWidth={1.5} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-[#111827]">Останній бекап</p>
-              <p className="text-xs text-[#9CA3AF] truncate">
-                {lastBackupDate ? lastBackupDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Бекап ще не робився'}
-              </p>
-            </div>
+      <Card 
+        className="rounded-2xl bg-white overflow-hidden"
+        style={{ boxShadow: chartCardShadow }}
+      >
+        <CardContent className="py-5 px-6 flex items-center gap-4">
+          <div className="p-3 bg-[#FEF3C7] rounded-xl flex-shrink-0">
+            <Clock className="h-6 w-6 text-[#D97706]" strokeWidth={1.5} />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-[#111827]">Останній бекап</p>
+            <p className="text-sm text-[#6B7280] mt-0.5">
+              {lastBackupDate
+                ? lastBackupDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : 'Бекап ще не робився'}
+            </p>
           </div>
           {needsBackupReminder && (
-            <Badge className="bg-[#FEF3C7] text-[#D97706] border border-[#FED7AA] rounded-lg font-semibold text-xs px-3 py-1 flex-shrink-0">
+            <Badge className="ml-auto bg-[#FEF3C7] text-[#D97706] border border-[#FED7AA] rounded-lg font-semibold text-xs px-3 py-1 flex-shrink-0">
               <AlertTriangle className="h-3 w-3 mr-1" strokeWidth={2} />
               {lastBackupDate ? `${daysSinceBackup} дн.` : 'Зробіть'}
             </Badge>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Data Statistics + User Info — unified card */}
       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
