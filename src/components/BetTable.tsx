@@ -176,7 +176,7 @@ export default function BetTable({
           {activeBets.length > 0 && (
             <Badge className="rounded-full bg-[#FEF3C7] text-[#D97706] border-0 text-sm font-medium px-3 py-0.5 hover:bg-[#FEF3C7]">
               {activeBets.length} активних
-            </div>
+            </Badge>
           )}
         </div>
       </div>
@@ -343,7 +343,7 @@ export default function BetTable({
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           {isExpress ? (
                             <div className="flex flex-col items-center gap-1.5">
-                              <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">Express {expressEventCount}×</div>
+                              <Badge className="rounded-md bg-[#FEF3C7] text-[#D97706] border-0 font-semibold text-sm px-2.5 py-1 hover:bg-[#FEF3C7]">Express {expressEventCount}×</Badge>
                               <button onClick={() => onExpressDetails(bet)} className="text-sm text-[#3B82F6] hover:text-[#2563EB] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3 py-1 rounded-md transition-colors duration-200">Деталі</button>
                             </div>
                           ) : (
