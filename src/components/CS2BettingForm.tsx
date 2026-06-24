@@ -28,6 +28,8 @@ export interface MatchPrefillData {
   date: string;
   matchUrl?: string;
   odds?: string;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 interface CS2BettingFormProps {
@@ -75,6 +77,8 @@ interface BetRecord {
   notes: string;
   goalId?: string;
   winProbability?: number;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 interface StrategyViolation {
@@ -162,6 +166,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     !!(expressMatchesData && expressMatchesData.length >= 2)
   );
   const prefillConsumedRef = useRef(false);
+  const prefillLogosRef = useRef<{ logoTeam1?: string | null; logoTeam2?: string | null }>({});
   const strategyLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -198,6 +203,10 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
   useEffect(() => {
     if (prefillData && !prefillConsumedRef.current) {
       prefillConsumedRef.current = true;
+      prefillLogosRef.current = {
+        logoTeam1: prefillData.logoTeam1,
+        logoTeam2: prefillData.logoTeam2,
+      };
 
       const formatMap: Record<string, string> = {
         'Bo1': 'BO1',
@@ -740,7 +749,9 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         riskyTeams: formData.riskyTeams,
         notes: [formData.reasoning, formData.keyFactors ? `Key Factors: ${formData.keyFactors}` : '', formData.notes ? `Notes: ${formData.notes}` : ''].filter(Boolean).join('\n\n') || '',
         goalId: finalGoalId,
-        winProbability: isNaN(winProbability) ? undefined : winProbability
+        winProbability: isNaN(winProbability) ? undefined : winProbability,
+        logoTeam1: formData.betCategory === 'Експрес' ? undefined : prefillLogosRef.current.logoTeam1,
+        logoTeam2: formData.betCategory === 'Експрес' ? undefined : prefillLogosRef.current.logoTeam2,
       };
 
       await realGoogleSheetsService.addRecord(record);

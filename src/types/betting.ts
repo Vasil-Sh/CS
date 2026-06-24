@@ -31,6 +31,9 @@ export interface Bet {
   riskyTeams?: string[];
   /** Tournament name */
   tournament?: string;
+  /** Team logo URLs (from Matches page) */
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 export interface BettingStats {

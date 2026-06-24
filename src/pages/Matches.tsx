@@ -541,6 +541,8 @@ export default function Matches() {
           format: match.matchType,
           date: match.date,
           matchUrl: match.url || '',
+          logoTeam1: match.logoTeam1,
+          logoTeam2: match.logoTeam2,
         }
       }
     });
@@ -587,6 +589,8 @@ export default function Matches() {
       format: m.matchType,
       date: m.date,
       matchUrl: m.url || '',
+      logoTeam1: m.logoTeam1,
+      logoTeam2: m.logoTeam2,
     }));
 
     navigate('/app/my-bets', {
