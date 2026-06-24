@@ -786,8 +786,6 @@ export default function Profile() {
       </div>
       )}
 
-      </div>
-
       {/* ===== Clear data confirmation dialog ===== */}
       <Dialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
         <DialogContent className="sm:max-w-[440px] rounded-3xl border border-[#F3F4F6] bg-white p-0 gap-0">
