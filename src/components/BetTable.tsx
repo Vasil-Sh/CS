@@ -349,7 +349,7 @@ export default function BetTable({
                           ) : (
                             <Badge className="rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-[#EFF6FF]" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
                               {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
-                            </div>
+                            </Badge>
                           )}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
@@ -366,13 +366,13 @@ export default function BetTable({
                           {goalName ? (
                             <Badge className="font-medium px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#3B82F6] border-0 text-sm max-w-[130px] truncate hover:bg-[#EFF6FF]" title={goalName}>
                               <Flag className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" strokeWidth={1.5} /><span className="truncate">{goalName}</span>
-                            </div>
+                            </Badge>
                           ) : <span className="text-[#D1D5DB] text-sm">—</span>}
                         </td>
                         <td className="px-4 py-4 text-center border-l border-[#F3F4F6]">
                           <Badge className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${isWin ? 'bg-[#DCFCE7] text-[#16A34A] hover:bg-[#DCFCE7]' : isLoss ? 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FEE2E2]' : 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7]'}`}>
                             {isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується'}
-                          </div>
+                          </Badge>
                         </td>
                         <td className="px-3 py-4 text-center border-l border-[#F3F4F6]">
                           {bet.notes ? (
