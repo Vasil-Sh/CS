@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -367,7 +367,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setFilter: (val: string) => void,
     statusCounts: Record<string, number>
   ) => (
-    <div className="flex flex-wrap items-center gap-1.5 my-4 mt-8">
+    <div className="flex flex-wrap items-center gap-1.5 my-4">
       <button
         onClick={() => setFilter('all')}
         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
