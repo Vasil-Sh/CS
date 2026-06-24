@@ -3,10 +3,13 @@ import { Component, type ReactNode } from 'react';
 import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserDataService } from './lib/userDataService';
+import { clearStaleRiskyTeams } from './lib/riskyTeamCleaner';
 import './index.css';
 
 // Repair any user-scoped keys corrupted by old backup import
 UserDataService.repairAllUserKeys();
+// Clear stale risky teams from old RiskManagement
+clearStaleRiskyTeams();
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
