@@ -409,8 +409,8 @@ export default function Profile() {
         style={{ boxShadow: chartCardShadow }}
       >
         <CardContent className="py-5 px-6 flex items-center gap-4">
-          <div className="p-3 bg-[#FEF3C7] rounded-xl flex-shrink-0">
-            <Clock className="h-6 w-6 text-[#D97706]" strokeWidth={1.5} />
+          <div className="p-3 rounded-xl flex-shrink-0 relative">
+            <AlertTriangle className="h-6 w-6 text-[#EF4444] animate-pulse" strokeWidth={1.5} />
           </div>
           <div>
             <p className="text-base font-semibold text-[#111827]">Останній бекап</p>
@@ -421,9 +421,9 @@ export default function Profile() {
             </p>
           </div>
           {needsBackupReminder && (
-            <Badge className="ml-auto bg-[#FEF3C7] text-[#D97706] border border-[#FED7AA] rounded-lg font-semibold text-xs px-3 py-1 flex-shrink-0">
+            <Badge className="ml-auto bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] rounded-lg font-semibold text-xs px-3 py-1 flex-shrink-0 animate-pulse">
               <AlertTriangle className="h-3 w-3 mr-1" strokeWidth={2} />
-              {lastBackupDate ? `${daysSinceBackup} дн.` : 'Зробіть'}
+              Зробіть бекап
             </Badge>
           )}
         </CardContent>
