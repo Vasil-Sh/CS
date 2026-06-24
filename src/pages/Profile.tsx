@@ -18,6 +18,8 @@ import {
   Globe,
   Sun,
   Moon,
+  Trash2,
+  Clock,
 } from 'lucide-react';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
@@ -36,10 +38,43 @@ export default function Profile() {
   const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>('interface');
   const [simResetKey, setSimResetKey] = useState(0);
   
   const { theme, toggleTheme } = useTheme();
+
+  // ── Backup last date ──
+  const BACKUP_REMINDER_DAYS = 7;
+  const lastBackup = localStorage.getItem('matchiq_last_backup_date');
+  const lastBackupDate = lastBackup ? new Date(lastBackup) : null;
+  const daysSinceBackup = lastBackupDate
+    ? Math.floor((Date.now() - lastBackupDate.getTime()) / (1000 * 60 * 60 * 24))
+    : Infinity;
+  const needsBackupReminder = daysSinceBackup > BACKUP_REMINDER_DAYS;
+
+  // ── Clear all data ──
+  const clearAllData = () => {
+    if (!window.confirm('Ви впевнені? Усі дані будуть видалені назавжди. Це неможливо скасувати.')) return;
+    setIsClearing(true);
+    try {
+      const keysToKeep = ['authToken', 'userRole', 'username', 'matchiq_theme', 'matchiq_lang'];
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && !keysToKeep.includes(key)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      toast.success('Усі дані очищено!', { description: `Видалено ${keysToRemove.length} записів.` });
+      setTimeout(() => window.location.reload(), 1000);
+    } catch {
+      toast.error('Помилка очищення');
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
     if (newTheme !== theme) {
@@ -253,6 +288,9 @@ export default function Profile() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Save backup date
+      localStorage.setItem('matchiq_last_backup_date', new Date().toISOString());
 
       toast.success('Повний бекап створено!', {
         description: `Файл: matchiq-backup-${new Date().toISOString().slice(0, 10)}.json`
@@ -685,6 +723,53 @@ export default function Profile() {
             <p className="text-xs text-[#6B7280]">
               Рекомендуємо робити бекап щотижня або після великих змін у даних. Файл бекапу можна зберігати на Google Drive, Dropbox або будь-якому хмарному сховищі.
             </p>
+          </div>
+
+          {/* Last backup date + reminder badge */}
+          <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm font-medium text-[#111827]">Останній бекап</p>
+                <p className="text-xs text-[#9CA3AF]">
+                  {lastBackupDate ? lastBackupDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Бекап ще не робився'}
+                </p>
+              </div>
+            </div>
+            {needsBackupReminder && (
+              <Badge className="bg-[#FEF3C7] text-[#D97706] border border-[#FED7AA] rounded-lg font-semibold text-xs px-3 py-1.5">
+                {lastBackupDate ? `${daysSinceBackup} днів без бекапу` : 'Зробіть бекап'}
+              </Badge>
+            )}
+          </div>
+
+          {/* Clear all data */}
+          <div className="p-5 border border-[#FEE2E2] rounded-2xl hover:border-[#FECACA] transition-colors">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-[#FEF2F2] rounded-xl flex-shrink-0">
+                <Trash2 className="h-6 w-6 text-[#DC2626]" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-[#111827] mb-1">Очистити всі дані</h3>
+                <p className="text-sm text-[#6B7280] mb-3">
+                  Видаляє всі ваші дані (ставки, стратегії, цілі, команди, Telegram-групи). Обліковий запис та налаштування залишаться.
+                </p>
+                <div className="flex items-start gap-2 p-3 bg-[#FFFBEB] rounded-xl border border-[#FDE68A] mb-4">
+                  <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <p className="text-xs text-[#92400E]">
+                    <span className="font-semibold">Увага:</span> цю дію неможливо скасувати. Рекомендуємо спочатку створити бекап.
+                  </p>
+                </div>
+                <Button
+                  onClick={clearAllData}
+                  disabled={isClearing}
+                  className="bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-sm px-6 font-semibold"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" strokeWidth={2} />
+                  {isClearing ? 'Очищення...' : 'Очистити всі дані'}
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
