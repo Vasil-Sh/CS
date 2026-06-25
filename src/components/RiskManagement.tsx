@@ -28,9 +28,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { Bet } from '@/types/betting';
 import { googleSheetsRiskyTeamsService } from '@/lib/googleSheetsRiskyTeams';
 import { logRender } from '@/lib/devLogger';
-import RiskToolbar from './risk-management/RiskToolbar';
-import RiskOverviewCards from './risk-management/RiskOverviewCards';
-import RiskTeamTables from './risk-management/RiskTeamTables';
 import { toast } from 'sonner';
 
 import { type RiskyTeam } from '@/data/riskyTeams';
@@ -528,25 +525,186 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <RiskToolbar
-          isUpdating={isUpdating}
-          searchQuery={searchQuery}
-          isSearchOpen={isSearchOpen}
-          riskyTeamsCount={riskyTeams.length}
-          customSheetUrl={customSheetUrl}
-          onInfoClick={() => {}}
-          onSearchToggle={() => setIsSearchOpen(!isSearchOpen)}
-          onDeleteAll={() => setIsDeleteAllOpen(true)}
-          onGoogleSheetsSync={updateFromGoogleSheets}
-          onAddNew={() => setIsAddTeamOpen(true)}
-          onCustomSheetUrlChange={setCustomSheetUrl}
-          onSearchQueryChange={setSearchQuery}
-          onSearchClose={() => setIsSearchOpen(false)}
-        />
+        {/* Unified pill-bar: info + Google Sheets + Search toggle + Add team */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            {/* Info tooltip */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                  <Info className="h-4 w-4" strokeWidth={2} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-[#111827] mb-1">Управління ризиками</p>
+                <p className="text-sm text-[#6B7280] leading-relaxed">
+                  Тут ви можете вести список команд, на які не варто ставити або потрібно бути обережним. Кожній команді можна призначити статус (БАН, Обережно, Нестабільні тощо) та додати коментар. При створенні запису на сторінці «Додати запис» ви отримаєте попередження, якщо обрали ризикову команду.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Filter/search toggle — compact icon button */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
+                isSearchOpen
+                  ? 'bg-[#447afc] text-white'
+                  : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]'
+              }`}
+              title="Пошук"
+            >
+              <Search className="h-4 w-4" strokeWidth={2} />
+            </button>
+
+            {/* Delete all — only shown when teams exist */}
+            {riskyTeams.length > 0 && (
+              <button
+                onClick={() => setIsDeleteAllOpen(true)}
+                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors"
+                title="Видалити всі команди"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2} />
+              </button>
+            )}
+
+            {/* Google Sheets button — opens guide modal */}
+            <button
+              onClick={() => setIsSheetsGuideOpen(true)}
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+                  Оновлення...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" strokeWidth={1.5} />
+                    Підтягнути команди з Google Sheets
+                </>
+              )}
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+
+            {/* Add new team — accent blue */}
+            <button
+              onClick={() => setIsAddTeamOpen(true)}
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2} />
+              Додати нову команду
+            </button>
+          </div>
+        </div>
+
+        {/* Inline search input — shown when toggled */}
+        {isSearchOpen && (
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Пошук за назвою, грою, статусом або примітками..."
+                className="pl-10 w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
+
         {/* Team-focused Overview Cards */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <RiskOverviewCards riskyTeams={riskyTeams} />
+          {/* Total risky teams */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Shield className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Всього команд</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.total}
+            </div>
+            <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg font-medium text-xs px-3 py-1.5">
+              CS: {teamStats.csCount} · Dota: {teamStats.dotaCount}
+            </Badge>
+          </div>
+
+          {/* БАН — forbidden teams */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <TrendingDown className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Заборонені</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.banCount}
+            </div>
+            <Badge className="bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs px-3 py-1.5">
+              БАН · {teamStats.banPercentage}% від усіх
+            </Badge>
+          </div>
+
+          {/* Потребують уваги (БАН + Нестабільні) */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Високий ризик</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.attentionCount}
+            </div>
+            <Badge className="bg-[#FFF7ED] text-[#EA580C] hover:bg-[#FFF7ED] border border-[#FED7AA] rounded-lg font-medium text-xs px-3 py-1.5">
+              БАН: {teamStats.banCount} · Нестабільні: {teamStats.unstableCount}
+            </Badge>
+          </div>
+
+          {/* Game dominance */}
+          <div 
+            className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+            style={cardBaseStyle}
+            onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+            onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              </div>
+              <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Основна гра</span>
+            </div>
+            <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              {teamStats.dominantGame}
+            </div>
+            <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
+              {teamStats.dominantGameCount} команд у списку
+            </Badge>
+          </div>
+          </div>
+        </div>
+
         {/* Google Sheets Guide Dialog */}
         <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
           <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] bg-white">
@@ -859,22 +1017,147 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           </DialogContent>
         </Dialog>
 
-              <RiskTeamTables
-                allTeams={riskyTeams}
-                csTeams={csTeams}
-                dotaTeams={dotaTeams}
-                uncategorizedTeams={uncategorizedTeams}
-                csStatusFilter={csStatusFilter}
-                dotaStatusFilter={dotaStatusFilter}
-                csStatusCounts={csStatusCounts}
-                dotaStatusCounts={dotaStatusCounts}
-                chartCardShadow={chartCardShadow}
-                onCsStatusFilterChange={setCsStatusFilter}
-                onDotaStatusFilterChange={setDotaStatusFilter}
-                onAddNew={() => setIsAddTeamOpen(true)}
-                getStatusFilterBadge={getStatusFilterBadge}
-                renderTeamCard={renderTeamCard}
-              />
+        {/* Teams by Game */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* CS Teams */}
+          <Card 
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                  </div>
+                  CS команди
+                </span>
+                
+              </CardTitle>
+              <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
+              {renderStatusFilter(csStatusFilter, setCsStatusFilter, csStatusCounts)}
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {csTeams.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <Target className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає команд CS</h3>
+                    <p className="text-[#6B7280] text-sm mb-6">
+                      {csStatusFilter !== 'all' ? `Немає CS команд зі статусом "${csStatusFilter}"` : 'Додайте ризиковані команди CS для відстеження'}
+                    </p>
+                    {csStatusFilter !== 'all' ? (
+                      <Button onClick={() => setCsStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                        Скинути фільтр
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setIsAddTeamOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        Додати команду
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  csTeams.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dota Teams */}
+          <Card 
+            className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+            style={{ boxShadow: chartCardShadow }}
+          >
+            <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <span className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <Shield className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                  </div>
+                  Dota 2 команди
+                </span>
+                
+              </CardTitle>
+              <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
+              {renderStatusFilter(dotaStatusFilter, setDotaStatusFilter, dotaStatusCounts)}
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {dotaTeams.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <Shield className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає команд Dota 2</h3>
+                    <p className="text-[#6B7280] text-sm mb-6">
+                      {dotaStatusFilter !== 'all' ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"` : 'Додайте ризиковані команди Dota 2 для відстеження'}
+                    </p>
+                    {dotaStatusFilter !== 'all' ? (
+                      <Button onClick={() => setDotaStatusFilter('all')} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                        Скинути фільтр
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setIsAddTeamOpen(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors">
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        Додати команду
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  dotaTeams.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Uncategorized Teams — teams without game/status for editing */}
+          {uncategorizedTeams.length > 0 && (
+            <Card 
+              className="border border-[#FDE68A] rounded-2xl bg-white overflow-hidden lg:col-span-2"
+              style={{ boxShadow: chartCardShadow }}
+            >
+              <CardHeader className="bg-[#FFFBEB] border-b border-[#FDE68A] p-6">
+                <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                  <span className="flex items-center gap-3">
+                    <div className="p-2.5 bg-[#FEF3C7] rounded-xl">
+                      <Pencil className="h-5 w-5 text-[#D97706]" strokeWidth={1.5} />
+                    </div>
+                    Без категорії
+                  </span>
+                  <Badge className="bg-[#FEF3C7] text-[#92400E] hover:bg-[#FEF3C7] px-3 py-1.5 rounded-lg border border-[#FDE68A] font-semibold text-sm">
+                    {uncategorizedTeams.length}
+                  </Badge>
+                </CardTitle>
+                <p className="text-sm text-[#92400E] mt-2 flex items-center gap-1.5">
+                  <Info className="h-4 w-4" strokeWidth={1.5} />
+                  Команди без визначеної гри або статусу. Натисніть <Pencil className="h-3.5 w-3.5 inline" strokeWidth={1.5} /> щоб відредагувати.
+                </p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {uncategorizedTeams.map((team) => {
+                    const globalIndex = riskyTeams.findIndex(t => t === team);
+                    return renderTeamCard(team, globalIndex);
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        </div>
+
         {/* Risk Alerts */}
         {(riskMetrics.currentDrawdown > 15 || riskMetrics.consecutiveLosses > 5) && (
           <Alert className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4">

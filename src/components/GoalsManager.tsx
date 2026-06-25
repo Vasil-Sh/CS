@@ -480,8 +480,6 @@ export default function GoalsManager() {
       />
 
         {/* Active Tab */}
-
-        {/* Active Tab */}
         {activeTab === 'active' && (
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {activeGoals.length === 0 ? (
@@ -796,7 +794,6 @@ export default function GoalsManager() {
             )}
           </div>
         )}
-      </div>
 
       {/* Create Goal Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={(open) => {
