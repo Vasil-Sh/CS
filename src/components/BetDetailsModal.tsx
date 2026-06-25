@@ -197,7 +197,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
           <DialogTitle>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <FileText className="h-4.5 w-4.5 text-[#3B82F6]" strokeWidth={1.5} />
+                <FileText className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
               </div>
               <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Текст для Telegram</h2>
             </div>

@@ -46,7 +46,7 @@ export default function BettingFormFinances({
 
       <div className="space-y-4">
         <h3 className={classes.sectionTitle}>
-          <DollarSign className="h-4.5 w-4.5 text-gray-500" strokeWidth={1.5} />
+          <DollarSign className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
           Фінансові деталі
         </h3>
 

@@ -74,7 +74,7 @@ export default function BettingFormSettings({
         {/* === Section: Basic Settings === */}
         <div className="space-y-4">
           <h3 className={classes.sectionTitle}>
-            <Calendar className="h-4.5 w-4.5 text-gray-500" strokeWidth={1.5} />
+            <Calendar className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
             Основні налаштування
           </h3>
 

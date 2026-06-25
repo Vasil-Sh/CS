@@ -52,7 +52,7 @@ export default function BettingFormMatchSection({
   return (
     <div className="space-y-4">
         <h3 className={classes.sectionTitle}>
-          <Users className="h-4.5 w-4.5 text-gray-500" strokeWidth={1.5} />
+          <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
           Інформація про матч і деталі запису
         </h3>
 

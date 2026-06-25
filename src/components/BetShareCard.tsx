@@ -353,16 +353,16 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
               className="w-full relative flex items-center justify-center py-1.5 hover:opacity-80 transition-opacity cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                {isWin && <CheckCircle2 className="h-4.5 w-4.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
                 <p className={`${expressHeaderFont} font-bold text-[#111827] tracking-tight`}>
                   {parsedEvents.length} {parsedEvents.length === 1 ? 'подія' : parsedEvents.length < 5 ? 'події' : 'подій'}
                 </p>
               </div>
               <span className="absolute right-0 top-1/2 -translate-y-1/2">
                 {isEventsOpen ? (
-                  <ChevronUp className="h-4.5 w-4.5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <ChevronUp className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
                 ) : (
-                  <ChevronDown className="h-4.5 w-4.5 text-[#9CA3AF]" strokeWidth={1.5} />
+                  <ChevronDown className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
                 )}
               </span>
             </button>
