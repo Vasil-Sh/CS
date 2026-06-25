@@ -42,11 +42,13 @@ export function ExpressEventBuilder({
   if (expressEvents.length === 0) return null;
 
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden"
-      style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+    <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden"
+      style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}>
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <Trophy className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
+            <Trophy className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
+          </div>
           <span className="text-base font-semibold text-gray-900">
             Події експресу ({expressEvents.length}/10)
           </span>
@@ -56,7 +58,7 @@ export function ExpressEventBuilder({
             Коеф: {totalExpressOdds.toFixed(2)}
           </Badge>
           <button type="button" onClick={onClearAll} aria-label="Очистити всі події експресу"
-            className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
+            className="flex items-center justify-center w-8 h-8 rounded-xl text-red-500 hover:bg-red-50 transition-colors">
             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
@@ -106,11 +108,8 @@ export function ExpressEventBuilder({
             const needsSelection = !event.selection;
 
             return (
-              <div key={index} className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors ${
-                needsOdds || needsSelection
-                  ? 'bg-amber-50 border-amber-200'
-                  : 'bg-gray-50 border-gray-100 hover:border-gray-200'
-              }`}>
+              <div key={index} className="p-4 rounded-2xl border border-gray-200 bg-white flex flex-col gap-3"
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 space-y-1.5">
                     <div className="flex items-center gap-2">
@@ -139,7 +138,7 @@ export function ExpressEventBuilder({
                     </div>
                   </div>
                   <button type="button" onClick={() => onRemoveEvent(index)}
-                    className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
+                    className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
                     <X className="h-4 w-4" strokeWidth={1.5} />
                   </button>
                 </div>
@@ -156,7 +155,7 @@ export function ExpressEventBuilder({
                     </SelectContent>
                   </Select>
                   <Select value={event.selection} onValueChange={(val) => onUpdateEvent(index, 'selection', val)}>
-                    <SelectTrigger className={`rounded-xl bg-white h-9 text-xs ${needsSelection ? 'border-amber-500' : 'border-gray-200'}`}>
+                    <SelectTrigger className={`rounded-xl bg-white h-9 text-xs ${needsSelection ? 'border-blue-400 focus:border-blue-500' : 'border-gray-200'}`}>
                       <SelectValue placeholder="Вибір" />
                     </SelectTrigger>
                     <SelectContent>
@@ -166,7 +165,7 @@ export function ExpressEventBuilder({
                   </Select>
                   <Input type="number" step="0.01" min="1.01" value={event.odds}
                     onChange={(e) => onUpdateEvent(index, 'odds', e.target.value)} placeholder="Коеф."
-                    className={`rounded-xl bg-white h-9 text-xs ${needsOdds ? 'border-amber-500' : 'border-gray-200'}`} />
+                    className={`rounded-xl bg-white h-9 text-xs ${needsOdds ? 'border-blue-400 focus:border-blue-500' : 'border-gray-200'}`} />
                 </div>
 
                 {!needsOdds && !needsSelection && (
@@ -184,8 +183,8 @@ export function ExpressEventBuilder({
         </div>
 
         {!allExpressEventsComplete && (
-          <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200">
-            <p className="text-xs text-amber-800 flex items-center gap-1.5">
+          <div className="p-3 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-xs text-blue-800 flex items-center gap-1.5">
               <Info className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
               Заповніть вибір та коефіцієнт для кожної події, щоб зберегти експрес
             </p>
