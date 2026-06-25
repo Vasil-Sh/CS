@@ -1578,7 +1578,7 @@ export default function StrategyOverview() {
           {selectedStrategy && (
             <div className="space-y-6 px-6 py-6">
               {/* Strategy Name & Description Card */}
-              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
+              <div className="p-5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -1682,19 +1682,19 @@ export default function StrategyOverview() {
                   <CollapsibleContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 pt-2">
                       {selectedStrategy.minOdds && (
-                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Мінімальний коефіцієнт</p>
                           <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.minOdds}</p>
                         </div>
                       )}
                       {selectedStrategy.maxOdds && (
-                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Максимальний коефіцієнт</p>
                           <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.maxOdds}</p>
                         </div>
                       )}
                       {selectedStrategy.allowedFormats && selectedStrategy.allowedFormats.length > 0 && (
-                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-2">Дозволені формати</p>
                           <div className="flex flex-wrap gap-2">
                             {selectedStrategy.allowedFormats.map((format, idx) => (
@@ -1706,7 +1706,7 @@ export default function StrategyOverview() {
                         </div>
                       )}
                       {selectedStrategy.allowedBetTypes && selectedStrategy.allowedBetTypes.length > 0 && (
-                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-2">Дозволені типи ставок</p>
                           <div className="flex flex-wrap gap-2">
                             {selectedStrategy.allowedBetTypes.map((betType, idx) => (
@@ -1773,7 +1773,7 @@ export default function StrategyOverview() {
                     {selectedStrategy.criteria.map((criterion, idx) => (
                       <div
                         key={idx}
-                        className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6] hover:border-[#3B82F6] transition-all"
+                        className="p-4 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#E5E7EB] transition-all"
                         style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                       >
                         <div className="flex items-start gap-3">
