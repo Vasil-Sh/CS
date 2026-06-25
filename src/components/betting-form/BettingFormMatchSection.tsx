@@ -202,7 +202,6 @@ export default function BettingFormMatchSection({
             Додати подію до експресу ({expressEventsCount}/10)
           </Button>
         )}
-      </div>
     </div>
   );
 }
