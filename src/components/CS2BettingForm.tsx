@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -117,7 +117,7 @@ const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
   odds: '',
   stake: '',
   currency: 'UAH',
-  exchangeRate: '41',
+  exchangeRate: (() => { const r = localStorage.getItem('matchiq_exchange_rate'); return r || '44.60'; })(),
   confidence: '',
   strategy: strategyName || '',
   reasoning: '',
