@@ -1553,32 +1553,30 @@ export default function StrategyOverview() {
       {/* ===== ENHANCED Details Dialog ===== */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent
-          className="max-w-3xl max-h-[90vh] overflow-y-auto border border-[#F3F4F6] rounded-3xl bg-white p-0"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+          className="max-w-3xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl bg-white p-0"
+          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.04)' }}
         >
           {/* Header */}
-          <DialogHeader className="border-b border-[#F3F4F6] px-8 py-6">
-            <DialogTitle>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3F4F6] flex-shrink-0">
-                  <Brain className="h-6 w-6 text-[#111827]" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-[#111827]">Деталі стратегії</h2>
-                  {selectedStrategy && (
-                    <div className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 bg-[#F9FAFB] rounded-xl border border-[#F3F4F6]">
-                      <p className="text-sm text-[#6B7280] font-medium">
-                        {selectedStrategy.criteria.length} {selectedStrategy.criteria.length === 1 ? 'критерій' : selectedStrategy.criteria.length < 5 ? 'критерії' : 'критеріїв'} • Ризик: {getRiskLabel(selectedStrategy.riskLevel)}
-                      </p>
-                    </div>
-                  )}
-                </div>
+          <div className="px-6 pt-6 pb-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 border-2 border-[#3B82F6] bg-[#EFF6FF] rounded-2xl flex-shrink-0">
+                <Brain className="h-6 w-6 text-[#3B82F6]" strokeWidth={1.5} />
               </div>
-            </DialogTitle>
-          </DialogHeader>
+              <div>
+                <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Деталі стратегії</h2>
+                {selectedStrategy && (
+                  <p className="text-sm text-[#6B7280] mt-0.5">
+                    {selectedStrategy.criteria.length} {selectedStrategy.criteria.length === 1 ? 'критерій' : selectedStrategy.criteria.length < 5 ? 'критерії' : 'критеріїв'} • Ризик: {getRiskLabel(selectedStrategy.riskLevel)}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="border-b border-[#E5E7EB]" />
 
           {selectedStrategy && (
-            <div className="space-y-6 p-8">
+            <div className="space-y-6 px-6 py-6">
               {/* Strategy Name & Description Card */}
               <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
                 <div className="flex items-start justify-between gap-4">
