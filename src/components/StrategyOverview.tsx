@@ -1668,8 +1668,8 @@ export default function StrategyOverview() {
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
-                          <Shield className="h-4 w-4 text-[#111827]" strokeWidth={1.5} />
+                        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] border-2 border-[#3B82F6]">
+                          <Shield className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-base font-semibold text-[#111827]">Обмеження стратегії</h3>
                       </div>
@@ -1727,8 +1727,8 @@ export default function StrategyOverview() {
                 <Collapsible open={true} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                   <div className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
-                        <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF2F2] border-2 border-[#EF4444]">
+                        <Shield className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#111827]">🔒 Тілт-захист</h3>
                     </div>
@@ -1757,8 +1757,8 @@ export default function StrategyOverview() {
                 <CollapsibleTrigger className="w-full">
                   <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
-                        <ListChecks className="h-4 w-4 text-[#111827]" strokeWidth={1.5} />
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] border-2 border-[#3B82F6]">
+                        <ListChecks className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#111827]">Критерії стратегії</h3>
                     </div>
