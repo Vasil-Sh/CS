@@ -26,6 +26,7 @@ export interface ApiMatch {
 }
 
 export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
+  try {
   const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
     method: 'GET',
     headers: {
@@ -39,6 +40,10 @@ export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
 
   const data: ApiMatch[] = await response.json();
   return data;
+  } catch (e) {
+    if (import.meta.env.DEV) console.error('csApi: fetchTodaysAndUpcomingMatches failed', e);
+    return [];
+  }
 }
 
 /**

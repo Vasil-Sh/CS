@@ -237,7 +237,7 @@ export default function Profile() {
     }
 
     const headers = ['Дата', 'Матч', 'Команда 1', 'Команда 2', 'Гра', 'Турнір', 'Тип ставки', 'Формат', 'Коефіцієнт', 'Сума (UAH)', 'Результат', 'Прибуток (UAH)', 'ROI %', 'Стратегія', 'Нотатки'];
-    const rows = bets.map((b: any) => [
+    const rows = bets.map((b) => [
       b.date || '',
       b.match || '',
       b.team1 || '',
@@ -463,7 +463,7 @@ export default function Profile() {
       </Card>
 
       {/* Data Statistics + User Info — unified card */}
-      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
+      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
 
       {/* Data Statistics - 5 cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">

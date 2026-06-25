@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useState, memo } from 'react';
 
 interface StatCardProps {
   icon: ReactNode;
@@ -12,7 +12,7 @@ interface StatCardProps {
   trend?: 'up' | 'down' | 'neutral';
 }
 
-export default function StatCard({
+const StatCardMemo = memo(function StatCard({
   icon,
   label,
   value,
@@ -48,4 +48,6 @@ export default function StatCard({
       )}
     </div>
   );
-}
+});
+
+export default StatCardMemo;

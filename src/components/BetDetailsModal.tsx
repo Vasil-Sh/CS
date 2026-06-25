@@ -76,7 +76,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       
       setUsers(parsedUsers);
     } catch (err) {
-      console.error('Error fetching users:', err);
+      if (import.meta.env.DEV) console.error('Error fetching users:', err);
     }
   };
 
@@ -179,7 +179,7 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       }
     } catch (error) {
       toast.error('Помилка при копіюванні');
-      console.error('Copy error:', error);
+      if (import.meta.env.DEV) console.error('Copy error:', error);
     }
   };
 

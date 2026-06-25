@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +32,7 @@ interface TrendDataPoint {
   roi: number;
 }
 
-export default function PeriodComparison({ bets }: PeriodComparisonProps) {
+const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComparisonProps) {
   const [comparisonType, setComparisonType] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [selectedPeriods, setSelectedPeriods] = useState<PeriodStats[]>([]);
   const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
@@ -483,4 +484,6 @@ export default function PeriodComparison({ bets }: PeriodComparisonProps) {
       )}
     </>
   );
-}
+});
+
+export default PeriodComparisonMemo;

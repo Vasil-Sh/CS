@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 interface MiniDonutProps {
@@ -8,7 +9,7 @@ interface MiniDonutProps {
 }
 
 /** Small donut chart — used in stat cards (e.g. winrate, total bets) */
-export default function MiniDonut({
+const MiniDonutMemo = memo(function MiniDonut({
   value,
   total,
   colors,
@@ -45,4 +46,6 @@ export default function MiniDonut({
       </ResponsiveContainer>
     </div>
   );
-}
+});
+
+export default MiniDonutMemo;

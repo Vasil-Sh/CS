@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserDataService } from '@/lib/userDataService';
@@ -59,7 +59,7 @@ interface BetTableProps {
   onNavigateToAdd?: () => void;
 }
 
-export default function BetTable({
+const BetTableMemo = memo(function BetTable({
   bets, activeBets, currentUser, isAdmin,
   tableFilter, onTableFilterChange,
   showAdvancedFilters, onToggleAdvancedFilters,
@@ -516,4 +516,6 @@ export default function BetTable({
       </Dialog>
     </div>
   );
-}
+});
+
+export default BetTableMemo;

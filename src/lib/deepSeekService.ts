@@ -126,7 +126,8 @@ class DeepSeekService {
       setCache(cacheKey, recommendation);
       return recommendation;
     } catch (error) {
-      console.error('❌ DeepSeek API error:', error);
+      if (import.meta.env.DEV) console.error('DeepSeek API error:', error);
+      // toast.warning handled by caller — fall back to mock data
       const fallback = getMockRecommendation(matchData, 'DeepSeek');
       setCache(cacheKey, fallback);
       return fallback;

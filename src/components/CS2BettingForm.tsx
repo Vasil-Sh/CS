@@ -280,7 +280,7 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
     const goals = UserDataService.getUserData(currentUser, 'goals', []);
     const active = goals.filter((g: Goal) => g.status === 'active');
     setActiveGoals(active);
-    console.log('📋 Loaded active goals:', active.length, active);
+    if (import.meta.env.DEV) console.log('Loaded active goals:', active.length, active);
   };
 
   const getLastStakeForGoal = (goalId: string): string => {

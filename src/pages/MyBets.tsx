@@ -125,12 +125,18 @@ export default function MyBets() {
           isAdmin: u.isAdmin === 'так' || u.isAdmin === 'yes' || u.isAdmin === 'true' || u.isAdmin === '1',
         }));
       setUsers(parsed);
-    } catch (err) { console.error('Error fetching users:', err); }
+    } catch (err) {
+      if (import.meta.env.DEV) console.error('Error fetching users:', err);
+      toast.error('Помилка завантаження списку користувачів');
+    }
   };
 
   const loadStats = useCallback(async () => {
     try { const data = await realGoogleSheetsService.getBettingStatistics(); setStats(data.totalBets > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)); }
-    catch { setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS)); }
+    catch {
+      toast.error('Помилка завантаження статистики');
+      setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
+    }
   }, [currentUser]);
 
   const syncBankrollStats = useCallback(() => {
@@ -139,16 +145,16 @@ export default function MyBets() {
   }, [currentUser]);
 
   const syncStats = useCallback(() => {
-    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
-    const completed = allBets.filter((b: any) => b.result === 'Win' || b.result === 'Loss');
-    const wins = completed.filter((b: any) => b.result === 'Win').length;
-    const totalProfit = completed.reduce((sum: number, b: any) => sum + (b.profit || 0), 0);
+    const allBets: Bet[] = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    const completed = allBets.filter((b) => b.result === 'Win' || b.result === 'Loss');
+    const wins = completed.filter((b) => b.result === 'Win').length;
+    const totalProfit = completed.reduce((sum, b) => sum + (b.profit || 0), 0);
     setStats({
       totalBets: allBets.length,
       winRate: completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
       totalProfit: Math.round(totalProfit * 100) / 100,
       averageROI: completed.length > 0
-        ? Math.round((completed.reduce((sum: number, b: any) => sum + (b.roi || 0), 0) / completed.length) * 100) / 100
+        ? Math.round((completed.reduce((sum, b) => sum + (b.roi || 0), 0) / completed.length) * 100) / 100
         : 0,
       profitByMonth: [],
       profitByStrategy: [],
@@ -157,7 +163,10 @@ export default function MyBets() {
 
   const loadRecentBets = useCallback(async () => {
     try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
-    catch { setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', [])); }
+    catch {
+      toast.error('Помилка завантаження ставок');
+      setRecentBets(UserDataService.getUserData(currentUser, 'mybets_data', []));
+    }
   }, [currentUser]);
 
   // ── Handlers ──
@@ -293,7 +302,7 @@ export default function MyBets() {
 
         {/* Tabs */}
         <div className="space-y-6">
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map(tab => { const Icon = tab.icon; return (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ${activeTab === tab.id ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent' : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent'}`}>

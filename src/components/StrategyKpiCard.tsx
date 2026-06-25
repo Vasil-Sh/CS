@@ -1,8 +1,18 @@
+interface StrategyData {
+  id?: string;
+  name: string;
+  riskLevel?: string;
+  description?: string;
+  expectedROI?: number;
+  criteria?: string[];
+}
+
 /**
  * StrategyKpiCard — extracted from StrategyOverviewHeader
  * Displays the primary strategy name on the KPI card.
  * Created as a separate file to bypass Vite caching issue with SOH.
  */
+import { memo } from 'react';
 import { Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { UserDataService } from '@/lib/userDataService';
@@ -32,7 +42,7 @@ const riskLabel = (risk: string) => {
   }
 };
 
-export default function StrategyKpiCard({ onNavigate }: StrategyKpiCardProps) {
+const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: StrategyKpiCardProps) {
   const { user } = useAuth();
   const resolvedUser = user?.username || localStorage.getItem('username') || 'default';
   useAppStore((s) => s.strategyVersion); // re-render on changes
@@ -41,8 +51,8 @@ export default function StrategyKpiCard({ onNavigate }: StrategyKpiCardProps) {
   const pid = UserDataService.getUserData<string>(resolvedUser, 'primary_strategy', '')
     || (() => { const r = localStorage.getItem('primaryStrategy'); if (r) try { return JSON.parse(r); } catch { return r; } return ''; })();
 
-  const strategies = UserDataService.getUserData<any[]>(resolvedUser, 'strategies_data', []);
-  const active = pid ? strategies.find((s: any) => s.id === pid || s.name === pid) : null;
+  const strategies = UserDataService.getUserData<StrategyData[]>(resolvedUser, 'strategies_data', []);
+  const active = pid ? strategies.find((s) => s.id === pid || s.name === pid) : null;
 
   const roi = 0; // computed by parent
 
@@ -87,4 +97,6 @@ export default function StrategyKpiCard({ onNavigate }: StrategyKpiCardProps) {
       )}
     </button>
   );
-}
+});
+
+export default StrategyKpiCardMemo;

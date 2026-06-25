@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+﻿import { memo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import type { BalanceData } from '@/types/betting';
@@ -7,7 +8,7 @@ interface BalanceChartProps {
   data: BalanceData[];
 }
 
-export default function BalanceChart({ data }: BalanceChartProps) {
+const BalanceChartMemo = memo(function BalanceChart({ data }: BalanceChartProps) {
   if (!data || data.length === 0) {
     return null;
   }
@@ -96,4 +97,6 @@ export default function BalanceChart({ data }: BalanceChartProps) {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default BalanceChartMemo;

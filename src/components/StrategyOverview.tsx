@@ -1607,23 +1607,23 @@ export default function StrategyOverview() {
                 const hasStats = stats && stats.totalBets > 0;
                 return (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Всього ставок</p>
                       <p className="text-3xl font-semibold text-[#111827]">{hasStats ? stats.totalBets : 0}</p>
                     </div>
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Вінрейт</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? stats.winRate.toFixed(1) : 0}%
                       </p>
                     </div>
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">ROI</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.roi >= 0 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}` : '0'}%
                       </p>
                     </div>
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Прибуток</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.totalProfit >= 0 ? 'text-[#16A34A]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(0)}` : '0'}₴
@@ -1639,21 +1639,21 @@ export default function StrategyOverview() {
                 if (!stats || stats.totalBets === 0) return null;
                 return (
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#DCFCE7] mx-auto mb-2">
                         <CheckCircle2 className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
                       </div>
                       <p className="text-2xl font-semibold text-[#16A34A]">{stats.wins}</p>
                       <p className="text-xs text-[#6B7280] font-medium mt-1">Перемог</p>
                     </div>
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FEE2E2] mx-auto mb-2">
                         <X className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
                       </div>
                       <p className="text-2xl font-semibold text-[#EF4444]">{stats.losses}</p>
                       <p className="text-xs text-[#6B7280] font-medium mt-1">Поразок</p>
                     </div>
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FEF3C7] mx-auto mb-2">
                         <Activity className="h-5 w-5 text-[#D97706]" strokeWidth={1.5} />
                       </div>
