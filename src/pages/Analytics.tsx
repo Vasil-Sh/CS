@@ -490,14 +490,14 @@ export default function Analytics() {
             style={{ boxShadow: chartCardShadow }}
           >
             <CardContent className="py-5 px-6 flex items-center gap-4">
-              <div className="p-3 bg-[#FEF2F2] rounded-xl flex-shrink-0">
-                <AlertTriangle className="h-6 w-6 text-[#EF4444]" strokeWidth={1.5} />
+              <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
+                <AlertTriangle className="h-6 w-6 text-red-500" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-base font-semibold text-[#111827]">
+                <p className="text-base font-semibold text-gray-900">
                   Немає даних для аналізу
                 </p>
-                <p className="text-sm text-[#6B7280] mt-0.5">
+                <p className="text-sm text-gray-500 mt-0.5">
                   Додайте записи на сторінці «Додати запис»
                 </p>
               </div>
@@ -506,12 +506,12 @@ export default function Analytics() {
         )}
 
         {/* ===== QUICK STATS ===== */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           
           {/* 1. Поточний банк */}
           <div 
-            className="stat-card bg-white border border-[#E5E7EB] rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-[#9CA3AF]"
+            className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-gray-400"
             onClick={handleBankCardClick}
             style={cardBaseStyle}
             onMouseEnter={(e) => {
@@ -522,37 +522,37 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+                <Wallet className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
               </div>
-              <span className="text-lg font-semibold text-[#111827]">Поточний банк</span>
+              <span className="text-lg font-semibold text-gray-900">Поточний банк</span>
               <button
                 onClick={(e) => { e.stopPropagation(); handleBankCardClick(); }}
-                className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-[#447afc] hover:bg-[#3568d4] text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
+                className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
                 title="Редагувати банк"
               >
                 <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
               </button>
             </div>
-            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+            <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
               {bankrollStats.currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 })} ₴
             </div>
             <div className="flex items-center gap-2">
               {filteredStats.totalProfit >= 0 ? (
-                <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
               ) : (
-                <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
               )}
-              <span className={`text-base font-normal ${filteredStats.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+              <span className={`text-base font-normal ${filteredStats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {filteredStats.totalProfit >= 0 ? '+' : ''}{filteredStats.totalProfit.toFixed(2)} ₴
               </span>
-              <span className="text-sm text-[#9CA3AF]">за весь час</span>
+              <span className="text-sm text-gray-400">за весь час</span>
             </div>
           </div>
 
           {/* 2. Загальний профіт */}
           <div 
-            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -562,30 +562,30 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+                <DollarSign className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
               </div>
-              <span className="text-lg font-semibold text-[#111827]">Загальний профіт</span>
+              <span className="text-lg font-semibold text-gray-900">Загальний профіт</span>
             </div>
-            <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+            <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
               {(filteredStats.totalProfit || 0) >= 0 ? '+' : ''}{(filteredStats.totalProfit || 0).toFixed(2)} ₴
             </div>
             <div className="flex items-center gap-2">
               {(filteredStats.totalProfit || 0) >= 0 ? (
-                <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
               ) : (
-                <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
               )}
-              <span className={`text-base font-normal ${(filteredStats.totalProfit || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+              <span className={`text-base font-normal ${(filteredStats.totalProfit || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {(filteredStats.totalProfit || 0) >= 0 ? 'Позитивна динаміка' : 'Негативна динаміка'}
               </span>
-              <span className="text-sm text-[#9CA3AF]">за весь час</span>
+              <span className="text-sm text-gray-400">за весь час</span>
             </div>
           </div>
 
           {/* 3. Всього ставок — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -595,26 +595,26 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+                <BarChart3 className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
               </div>
-              <span className="text-lg font-semibold text-[#111827]">Всього записів</span>
+              <span className="text-lg font-semibold text-gray-900">Всього записів</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">
-                <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
                   {filteredStats.totalBets || 0}
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#10B981' }} />
-                    <span className="text-base font-semibold text-[#111827]">{winningBets.length}</span>
-                    <span className="text-sm text-[#9CA3AF]">виграшів</span>
+                    <span className="text-base font-semibold text-gray-900">{winningBets.length}</span>
+                    <span className="text-sm text-gray-400">виграшів</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#FCA5A5' }} />
-                    <span className="text-base font-semibold text-[#111827]">{losingBets.length}</span>
-                    <span className="text-sm text-[#9CA3AF]">програшів</span>
+                    <span className="text-base font-semibold text-gray-900">{losingBets.length}</span>
+                    <span className="text-sm text-gray-400">програшів</span>
                   </div>
                 </div>
               </div>
@@ -631,7 +631,7 @@ export default function Analytics() {
 
           {/* 4. Win Rate — GREEN donut */}
           <div 
-            className="stat-card bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 group"
+            className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
             onMouseEnter={(e) => {
               Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -641,23 +641,23 @@ export default function Analytics() {
             }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+                <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
               </div>
-              <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
+              <span className="text-lg font-semibold text-gray-900">Вінрейт</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col justify-center">
-                <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
                   {filteredStats.winRate || 0}%
                 </div>
                 <div className="flex items-center gap-2">
                   {(filteredStats.winRate || 0) >= 50 ? (
-                    <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+                    <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
                   ) : (
-                    <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                    <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
                   )}
-                  <span className={`text-sm font-semibold ${(filteredStats.winRate || 0) >= 50 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                  <span className={`text-sm font-semibold ${(filteredStats.winRate || 0) >= 50 ? 'text-green-500' : 'text-red-500'}`}>
                     {(filteredStats.winRate || 0) >= 50 ? 'Вище середнього' : 'Нижче середнього'}
                   </span>
                 </div>
@@ -677,7 +677,7 @@ export default function Analytics() {
 
         {/* Custom Tabs Navigation */}
         <div className="flex flex-col flex-1 min-h-0 space-y-6">
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -689,8 +689,8 @@ export default function Analytics() {
                       relative rounded-[24px] px-6 py-4 font-light text-base
                       transition-all duration-300 ease-in-out
                       ${activeTab === tab.id 
-                        ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent' 
-                        : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent'
+                        ? 'bg-blue-500 text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent' 
+                        : 'bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent'
                       }
                     `}
                   >
@@ -709,7 +709,7 @@ export default function Analytics() {
             {activeTab === 'profit' && (
               <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                     <div className="mb-6">
                       <BalanceChart data={balanceData} />
                     </div>
@@ -725,13 +725,13 @@ export default function Analytics() {
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
-                      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <Wallet className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                      <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                        <Wallet className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
                         Немає даних про прибуток
                       </h3>
-                      <p className="text-[#6B7280] text-sm">
+                      <p className="text-gray-500 text-sm">
                         Додайте ставки для перегляду аналізу прибутку
                       </p>
                     </CardContent>
@@ -746,7 +746,7 @@ export default function Analytics() {
             {activeTab === 'odds' && (
               <div className="flex flex-col flex-1">
                 {gameFilteredBets.length > 0 ? (
-                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
                     <OddsWinRateChartCard data={oddsChartData} chartCardShadow={chartCardShadow} />
                     <OddsCategoryCards data={oddsData} labels={oddsCategoryLabels} />
                   </div>
@@ -756,13 +756,13 @@ export default function Analytics() {
                     style={{ boxShadow: chartCardShadow }}
                   >
                     <CardContent className="py-16 text-center">
-                      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                      <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                        <BarChart3 className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
                         Немає даних для аналізу коефіцієнтів
                       </h3>
-                      <p className="text-[#6B7280] text-sm">
+                      <p className="text-gray-500 text-sm">
                         Додайте ставки для перегляду аналізу по категоріях коефіцієнтів
                       </p>
                     </CardContent>
@@ -774,20 +774,20 @@ export default function Analytics() {
             {activeTab === 'comparison' && (
               <TooltipProvider>
                 <div className="flex flex-col flex-1">
-                <div className="bg-white rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
+                <div className="bg-white rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
                 <PeriodComparison bets={bets} />
                 
                 {/* Risk Metrics + Drawdown Periods — only show when there's data */}
                 {completedBetsForMetrics.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
                   <Card 
-                    className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    className="border border-gray-300 rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
                   >
-                    <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                        <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                          <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                    <CardHeader className="bg-white border-b border-gray-200 p-6">
+                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+                        <div className="p-2.5 bg-blue-50 rounded-xl">
+                          <BarChart3 className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                         </div>
                         Детальні ризик-метрики
                       </CardTitle>
@@ -795,109 +795,109 @@ export default function Analytics() {
                     <CardContent className="p-6">
                       {completedBetsForMetrics.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                            <BarChart3 className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                            <BarChart3 className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
                           </div>
-                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних для метрик</h3>
-                          <p className="text-[#6B7280] text-sm">Додайте завершені ставки для розрахунку ризик-метрик</p>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">Немає даних для метрик</h3>
+                          <p className="text-gray-500 text-sm">Додайте завершені ставки для розрахунку ризик-метрик</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-2">
-                              <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Поточна просадка</span>
+                              <TrendingDown className="h-4 w-4 text-red-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Поточна просадка</span>
                             </div>
-                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.currentDrawdown}%</span>
-                            <Progress value={Math.min(riskMetrics.currentDrawdown, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#EF4444]" />
+                            <span className="text-xl font-bold text-gray-900">{riskMetrics.currentDrawdown}%</span>
+                            <Progress value={Math.min(riskMetrics.currentDrawdown, 100)} className="h-1.5 mt-2 bg-gray-200 [&>div]:bg-red-500" />
                           </div>
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-2">
-                              <TrendingDown className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Послідовні програші</span>
+                              <TrendingDown className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Послідовні програші</span>
                             </div>
-                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.consecutiveLosses}</span>
-                            <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
-                              <div className="h-full bg-[#F59E0B] rounded-full transition-all" style={{ width: `${Math.min(riskMetrics.consecutiveLosses * 20, 100)}%` }} />
-                            </div>
-                          </div>
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
-                            <div className="flex items-center gap-2 mb-2">
-                              <DollarSign className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Середня ставка</span>
-                            </div>
-                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.averageStake} ₴</span>
-                            <div className="h-1.5 mt-2 bg-[#E5E7EB] rounded-full overflow-hidden">
-                              <div className="h-full bg-[#447afc] rounded-full" style={{ width: `${Math.min((riskMetrics.averageStake / (riskMetrics.maxStake || 1)) * 100, 100)}%` }} />
+                            <span className="text-xl font-bold text-gray-900">{riskMetrics.consecutiveLosses}</span>
+                            <div className="h-1.5 mt-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${Math.min(riskMetrics.consecutiveLosses * 20, 100)}%` }} />
                             </div>
                           </div>
-                          <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-2">
-                              <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#991B1B] uppercase tracking-wider">Найбільший програш</span>
+                              <DollarSign className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Середня ставка</span>
                             </div>
-                            <span className="text-xl font-bold text-[#DC2626]">{riskMetrics.largestLoss} ₴</span>
+                            <span className="text-xl font-bold text-gray-900">{riskMetrics.averageStake} ₴</span>
+                            <div className="h-1.5 mt-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min((riskMetrics.averageStake / (riskMetrics.maxStake || 1)) * 100, 100)}%` }} />
+                            </div>
                           </div>
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] col-span-2">
+                          <div className="p-4 bg-red-50 rounded-2xl border border-red-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-red-800 uppercase tracking-wider">Найбільший програш</span>
+                            </div>
+                            <span className="text-xl font-bold text-red-600">{riskMetrics.largestLoss} ₴</span>
+                          </div>
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 col-span-2">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <BarChart3 className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
-                                <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Kelly %</span>
+                                <BarChart3 className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+                                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Kelly %</span>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <button className="inline-flex items-center">
-                                      <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                                      <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" strokeWidth={1.5} />
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                                    <p className="text-sm font-medium text-[#111827] mb-2">Kelly Criterion — агресивна стратегія</p>
-                                    <p className="text-xs text-[#6B7280] mb-2">Розраховано на основі win rate та середніх коефіцієнтів.</p>
-                                    <div className="flex items-start gap-2 p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A]">
-                                      <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                                      <p className="text-xs text-[#92400E]">Рекомендовано використовувати 25–50% від Kelly для зниження ризику</p>
+                                  <TooltipContent className="max-w-xs bg-white border border-gray-200 rounded-xl p-4 shadow-lg">
+                                    <p className="text-sm font-medium text-gray-900 mb-2">Kelly Criterion — агресивна стратегія</p>
+                                    <p className="text-xs text-gray-500 mb-2">Розраховано на основі win rate та середніх коефіцієнтів.</p>
+                                    <div className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200">
+                                      <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                                      <p className="text-xs text-amber-800">Рекомендовано використовувати 25–50% від Kelly для зниження ризику</p>
                                     </div>
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className={`text-lg font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                                <span className={`text-lg font-bold ${riskMetrics.kellyPercentage > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                   {riskMetrics.kellyPercentage}%
                                 </span>
                                 {riskMetrics.kellyPercentage > 5 && (
-                                  <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] font-medium text-xs px-2 py-0.5 rounded-lg">Aggressive</Badge>
+                                  <Badge className="bg-amber-50 text-amber-600 hover:bg-amber-50 border border-amber-200 font-medium text-xs px-2 py-0.5 rounded-lg">Aggressive</Badge>
                                 )}
                               </div>
                             </div>
-                            <Progress value={Math.min(Math.abs(riskMetrics.kellyPercentage) * 4, 100)} className="h-2 bg-[#E5E7EB] [&>div]:bg-[#22C55E]" />
+                            <Progress value={Math.min(Math.abs(riskMetrics.kellyPercentage) * 4, 100)} className="h-2 bg-gray-200 [&>div]:bg-green-500" />
                           </div>
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Risk of Ruin</span>
+                              <AlertTriangle className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Risk of Ruin</span>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <button className="inline-flex items-center">
-                                    <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" strokeWidth={1.5} />
+                                    <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" strokeWidth={1.5} />
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent className="max-w-xs bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-lg">
-                                  <p className="text-sm font-medium text-[#111827] mb-2">Як розраховується:</p>
-                                  <p className="text-xs text-[#6B7280]">Ймовірність втрати всього банкролу. Розраховано на основі win rate, середнього коефіцієнта та розміру ставок відносно банкролу.</p>
+                                <TooltipContent className="max-w-xs bg-white border border-gray-200 rounded-xl p-4 shadow-lg">
+                                  <p className="text-sm font-medium text-gray-900 mb-2">Як розраховується:</p>
+                                  <p className="text-xs text-gray-500">Ймовірність втрати всього банкролу. Розраховано на основі win rate, середнього коефіцієнта та розміру ставок відносно банкролу.</p>
                                 </TooltipContent>
                               </Tooltip>
                             </div>
-                            <span className={`text-xl font-bold ${riskMetrics.riskOfRuin > 10 ? 'text-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? 'text-[#F59E0B]' : 'text-[#22C55E]'}`}>
+                            <span className={`text-xl font-bold ${riskMetrics.riskOfRuin > 10 ? 'text-red-500' : riskMetrics.riskOfRuin > 5 ? 'text-amber-500' : 'text-green-500'}`}>
                               {riskMetrics.riskOfRuin}%
                             </span>
-                            <Progress value={Math.min(riskMetrics.riskOfRuin * 5, 100)} className={`h-1.5 mt-2 bg-[#E5E7EB] ${riskMetrics.riskOfRuin > 10 ? '[&>div]:bg-[#EF4444]' : riskMetrics.riskOfRuin > 5 ? '[&>div]:bg-[#F59E0B]' : '[&>div]:bg-[#22C55E]'}`} />
+                            <Progress value={Math.min(riskMetrics.riskOfRuin * 5, 100)} className={`h-1.5 mt-2 bg-gray-200 ${riskMetrics.riskOfRuin > 10 ? '[&>div]:bg-red-500' : riskMetrics.riskOfRuin > 5 ? '[&>div]:bg-amber-500' : '[&>div]:bg-green-500'}`} />
                           </div>
-                          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-2">
-                              <TrendingUp className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
-                              <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Ризик вигр. серій</span>
+                              <TrendingUp className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Ризик вигр. серій</span>
                             </div>
-                            <span className="text-xl font-bold text-[#111827]">{riskMetrics.winStreakRisk}%</span>
-                            <Progress value={Math.min(riskMetrics.winStreakRisk * 5, 100)} className="h-1.5 mt-2 bg-[#E5E7EB] [&>div]:bg-[#447afc]" />
+                            <span className="text-xl font-bold text-gray-900">{riskMetrics.winStreakRisk}%</span>
+                            <Progress value={Math.min(riskMetrics.winStreakRisk * 5, 100)} className="h-1.5 mt-2 bg-gray-200 [&>div]:bg-blue-500" />
                           </div>
                         </div>
                       )}
@@ -905,13 +905,13 @@ export default function Analytics() {
                   </Card>
 
                   <Card 
-                    className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+                    className="border border-gray-300 rounded-2xl bg-white overflow-hidden"
                     style={{ boxShadow: chartCardShadow }}
                   >
-                    <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                        <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                          <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                    <CardHeader className="bg-white border-b border-gray-200 p-6">
+                      <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+                        <div className="p-2.5 bg-blue-50 rounded-xl">
+                          <Calendar className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                         </div>
                         Періоди просадок
                       </CardTitle>
@@ -919,60 +919,60 @@ export default function Analytics() {
                     <CardContent className="p-6">
                       {completedBetsForMetrics.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                            <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                            <Calendar className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
                           </div>
-                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних про просадки</h3>
-                          <p className="text-[#6B7280] text-sm">Додайте завершені ставки для відстеження періодів просадок</p>
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">Немає даних про просадки</h3>
+                          <p className="text-gray-500 text-sm">Додайте завершені ставки для відстеження періодів просадок</p>
                         </div>
                       ) : drawdownPeriods.length > 0 ? (
                         <div className="grid grid-cols-1 gap-3">
                           {drawdownPeriods.map((period, index) => (
-                            <div key={index} className={`p-4 rounded-2xl border transition-all ${period.recovery ? 'bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
+                            <div key={index} className={`p-4 rounded-2xl border transition-all ${period.recovery ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                  <div className={`p-1.5 rounded-lg ${period.recovery ? 'bg-[#DCFCE7]' : 'bg-[#FEE2E2]'}`}>
+                                  <div className={`p-1.5 rounded-lg ${period.recovery ? 'bg-green-100' : 'bg-red-100'}`}>
                                     {period.recovery ? (
-                                      <TrendingUp className="h-4 w-4 text-[#22C55E]" strokeWidth={1.5} />
+                                      <TrendingUp className="h-4 w-4 text-green-500" strokeWidth={1.5} />
                                     ) : (
-                                      <TrendingDown className="h-4 w-4 text-[#EF4444]" strokeWidth={1.5} />
+                                      <TrendingDown className="h-4 w-4 text-red-500" strokeWidth={1.5} />
                                     )}
                                   </div>
-                                  <span className="text-sm font-medium text-[#111827]">
+                                  <span className="text-sm font-medium text-gray-900">
                                     {new Date(period.start).toLocaleDateString('uk-UA')} — {new Date(period.end).toLocaleDateString('uk-UA')}
                                   </span>
                                 </div>
-                                <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-[#F0FDF4] text-[#22C55E] hover:bg-[#F0FDF4] border-[#BBF7D0]' : 'bg-[#FEF2F2] text-[#EF4444] hover:bg-[#FEF2F2] border-[#FECACA]'}`}>
+                                <Badge className={`rounded-lg font-medium text-xs border ${period.recovery ? 'bg-green-50 text-green-500 hover:bg-green-50 border-green-200' : 'bg-red-50 text-red-500 hover:bg-red-50 border-red-200'}`}>
                                   {period.recovery ? 'Відновлено' : 'Поточна'}
                                 </Badge>
                               </div>
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="p-3 bg-white/60 rounded-xl">
                                   <div className="flex items-center gap-1.5 mb-1">
-                                    <Clock className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
-                                    <span className="text-xs text-[#6B7280]">Тривалість</span>
+                                    <Clock className="h-3.5 w-3.5 text-gray-500" strokeWidth={1.5} />
+                                    <span className="text-xs text-gray-500">Тривалість</span>
                                   </div>
-                                  <span className="text-lg font-bold text-[#111827]">{period.duration} дн.</span>
+                                  <span className="text-lg font-bold text-gray-900">{period.duration} дн.</span>
                                 </div>
                                 <div className="p-3 bg-white/60 rounded-xl">
                                   <div className="flex items-center gap-1.5 mb-1">
-                                    <ArrowDownRight className="h-3.5 w-3.5 text-[#EF4444]" strokeWidth={1.5} />
-                                    <span className="text-xs text-[#6B7280]">Макс. просадка</span>
+                                    <ArrowDownRight className="h-3.5 w-3.5 text-red-500" strokeWidth={1.5} />
+                                    <span className="text-xs text-gray-500">Макс. просадка</span>
                                   </div>
-                                  <span className="text-lg font-bold text-[#EF4444]">-{period.maxDrawdown.toFixed(1)}%</span>
+                                  <span className="text-lg font-bold text-red-500">-{period.maxDrawdown.toFixed(1)}%</span>
                                 </div>
                               </div>
-                              <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-[#22C55E]' : '[&>div]:bg-[#EF4444]'}`} />
+                              <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500'}`} />
                             </div>
                           ))}
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                          <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                            <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+                          <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                            <Calendar className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
                           </div>
-                          <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає значних просадок</h3>
-                          <p className="text-[#6B7280] text-sm">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">Немає значних просадок</h3>
+                          <p className="text-gray-500 text-sm">
                             {completedBetsForMetrics.length === 1
                               ? 'Додайте більше завершених ставок для виявлення періодів просадок'
                               : 'За поточний період не виявлено значних просадок банку'}
