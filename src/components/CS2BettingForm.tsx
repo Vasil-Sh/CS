@@ -1097,8 +1097,8 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="CS2">🎯 CS2</SelectItem>
-                          <SelectItem value="Dota2">🛡️ Dota 2</SelectItem>
+                          <SelectItem value="CS2"><span className="flex items-center gap-2"><img src="/assets/team-placeholder.svg" alt="CS2" className="h-4 w-4 object-contain" />CS2</span></SelectItem>
+                          <SelectItem value="Dota2"><span className="flex items-center gap-2"><img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-4 w-4 object-contain" />Dota 2</span></SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
