@@ -70,8 +70,8 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
             <CollapsibleTrigger className="w-full">
               <div className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-100 transition-colors cursor-pointer">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-200">
-                    <Zap className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
+                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50">
+                    <Zap className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-sm font-semibold text-gray-900">Події в експресі</h3>
                 </div>
@@ -89,8 +89,8 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                   return (
                     <div
                       key={index}
-                      className="p-4 bg-white rounded-2xl border border-gray-100"
-                      style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                      className="p-4 bg-white rounded-2xl border border-gray-200"
+                      style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)' }}
                     >
                       <div className="space-y-2.5">
                         {/* Header with number and odds */}
