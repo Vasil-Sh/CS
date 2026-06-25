@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Trophy, TrendingDown, Target, Calendar, CheckCircle2,
+  Trophy, TrendingDown, Target, Calendar, CheckCircle2, Clock,
   ChevronDown, ChevronUp, DollarSign, Percent
 } from 'lucide-react';
 
@@ -294,7 +294,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             ) : isLoss ? (
               <TrendingDown className="h-8 w-8 text-white" strokeWidth={1.5} />
             ) : (
-              <Target className="h-8 w-8 text-white" strokeWidth={1.5} />
+              <Clock className="h-8 w-8 text-white" strokeWidth={1.5} />
             )}
           </div>
           <div>
@@ -438,13 +438,16 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             <div className="text-center py-1">
               <div className="flex items-center justify-center gap-2 mb-0.5">
                 {isWin && <CheckCircle2 className="h-3.5 w-3.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                {isPending && <Clock className="h-3.5 w-3.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
                 <p className="text-sm font-medium text-gray-400 uppercase tracking-wide">
                   {betCategory}
                 </p>
               </div>
-              <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
-                <BlurReveal isPending={isPending}>{selection}</BlurReveal>
-              </p>
+              {selection !== bet.team1 && selection !== bet.team2 && (
+                <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
+                  <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+                </p>
+              )}
             </div>
             <div className={`${dividerMx} border-t border-gray-100`} />
           </>
