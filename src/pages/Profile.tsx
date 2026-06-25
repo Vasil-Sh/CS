@@ -8,7 +8,6 @@ import {
   Download, 
   Upload,
   Shield,
-  Calendar,
   Database,
   FileDown,
   FileUp,
@@ -745,13 +744,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Info */}
-          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-            <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-            <p className="text-xs text-gray-500">
-              Рекомендуємо робити бекап щотижня або після великих змін у даних. Файл бекапу можна зберігати на Google Drive, Dropbox або будь-якому хмарному сховищі.
-            </p>
-          </div>
         </CardContent>
       </Card>
 
