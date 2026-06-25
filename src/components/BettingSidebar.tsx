@@ -87,7 +87,7 @@ export function BettingSidebar({
 }: BettingSidebarProps) {
   const [showEVDetails, setShowEVDetails] = useState(false);
   const [showKellyDetails, setShowKellyDetails] = useState(false);
-  const getCurrencySymbol = () => '₴';
+  const getCurrencySymbol = () => currency === 'USD' ? '$' : '₴';
 
   const hasFormData = stake && (odds || (betCategory === 'Експрес' && expressEventsCount > 0));
 
@@ -227,28 +227,28 @@ export function BettingSidebar({
                       {!kellyData.isNegative && kellyData.recommendedAmount > 0 && (
                         <button type="button" onClick={() => onApplyKellyAmount(kellyData.recommendedAmount)}
                           className="w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all bg-[#111827] text-white hover:bg-[#1F2937]">
-                          Застосувати {kellyData.recommendedAmount} ₴ ({kellyData.recommendedBankrollPercent}% банку)
+                          Застосувати {kellyData.recommendedAmount} {getCurrencySymbol()} ({kellyData.recommendedBankrollPercent}% банку)
                         </button>
                       )}
                       {showKellyDetails && (
                         <div className="mt-3 pt-3 border-t border-[#F3F4F6] space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-[#6B7280]">Поточний банк:</span>
-                            <span className="text-sm font-semibold text-[#111827]">{kellyData.currentBankroll} ₴</span>
+                            <span className="text-sm font-semibold text-gray-900">{kellyData.currentBankroll} {getCurrencySymbol()}</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-[#6B7280]">Макс. ставка ({maxStakePercent}%):</span>
-                            <span className="text-sm font-semibold text-[#111827]">{kellyData.maxAllowedAmount} ₴</span>
+                            <span className="text-sm font-semibold text-gray-900">{kellyData.maxAllowedAmount} {getCurrencySymbol()}</span>
                           </div>
                           {!kellyData.isNegative && (
                             <>
                               <div className="flex justify-between items-center">
                                 <span className="text-sm text-[#6B7280]">Повний Келлі ({kellyData.fullKelly}%):</span>
-                                <span className="text-sm font-semibold text-[#111827]">{kellyData.fullKellyAmount} ₴</span>
+                                <span className="text-sm font-semibold text-gray-900">{kellyData.fullKellyAmount} {getCurrencySymbol()}</span>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-sm text-[#6B7280]">½ Келлі ({kellyData.halfKelly}%):</span>
-                                <Badge className="bg-[#16A34A] text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-[#16A34A]">{kellyData.halfKellyAmount} ₴</Badge>
+                                <Badge className="bg-green-600 text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-green-600">{kellyData.halfKellyAmount} {getCurrencySymbol()}</Badge>
                               </div>
                             </>
                           )}
