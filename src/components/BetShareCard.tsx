@@ -361,12 +361,12 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             </button>
             
             {isEventsOpen && (
-              <div className="space-y-2 pt-2">
+              <div className="space-y-3 pt-2">
                 {parsedEvents.map((event, index) => (
                   <div 
                     key={index} 
                     className={eventPadding}
-                    style={{ borderRadius: eventRadius, backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}` }}
+                    style={{ borderRadius: eventRadius, backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
                   >
                     <div className="flex items-start gap-2 mb-1.5">
                       <span 
@@ -478,7 +478,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isPending && displayProfit !== undefined && displayProfit !== null && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Профіт
@@ -493,7 +493,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {isPending && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}` }}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Можливий виграш
@@ -510,7 +510,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isLoss && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider text-[#9CA3AF]">
               Загальна сума
