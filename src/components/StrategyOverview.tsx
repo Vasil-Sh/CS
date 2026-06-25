@@ -1577,8 +1577,10 @@ export default function StrategyOverview() {
 
           {selectedStrategy && (
             <div className="space-y-6 px-6 py-6">
-              {/* Strategy Name & Description Card */}
-              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
+              {/* Strategy Info & Stats Container */}
+              <div className="bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6] p-5 space-y-5">
+                {/* Strategy Name & Description Card */}
+                <div className="p-5 bg-white rounded-2xl border border-[#E5E7EB]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -1630,6 +1632,8 @@ export default function StrategyOverview() {
                   </div>
                 );
               })()}
+
+              </div>
 
               {/* Win/Loss/Pending Breakdown */}
               {(() => {
