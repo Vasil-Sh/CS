@@ -237,8 +237,10 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const selection = betTypeParts[1] || '';
   let betCategory = betTypeParts[0] ? translateBetType(betTypeParts[0]) : translateBetType(bet.betType);
 
-  // Default for non-express bets: if category wasn't parsed correctly, show "Переможець матчу"
-  if (!isExpress && selection && betCategory === betTypeParts[0]) {
+  // Detect if betCategory still contains raw data (team name, odds, etc.)
+  // instead of a proper category label — default to "Переможець матчу"
+  const knownCategories = ['Переможець матчу', 'Переможець карти', 'Фора', 'Тотал', 'Більше', 'Менше', 'Переможець', 'Точний рахунок', 'Фора по кілам', 'Тотал кілів', 'Нічія'];
+  if (!isExpress && selection && !knownCategories.includes(betCategory)) {
     betCategory = 'Переможець матчу';
   }
 
