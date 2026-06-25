@@ -106,10 +106,9 @@ export default function MyBets() {
     const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
     setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets)); 
   }, [currentUser, recentBets, bankrollRefreshKey]);
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(); loadStats(); loadRecentBets(); }, []);
   useEffect(() => { if (users.length && currentUser) { const u = users.find(x => x.username.toLowerCase() === currentUser.toLowerCase()); setIsAdmin(u?.isAdmin || false); } }, [users, currentUser]);
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
-  useEffect(() => { loadStats(); loadRecentBets(); }, []);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
   useEffect(() => { setCurrentPage(1); }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
 
