@@ -278,7 +278,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
       style={{ 
         borderRadius: cardRadius,
         border: '1px solid #E5E7EB',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)'
+        boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)'
       }}
     >
       {/* Status Banner */}
