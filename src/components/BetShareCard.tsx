@@ -380,7 +380,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                           <img
                             src={bet.expressLogos[index].logoTeam1!}
                             alt=""
-                            className="h-4.5 w-4.5 rounded-full object-contain bg-white flex-shrink-0"
+                            className="h-5 w-5 rounded-full object-contain bg-white flex-shrink-0"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         )}
@@ -391,7 +391,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                           <img
                             src={bet.expressLogos[index].logoTeam2!}
                             alt=""
-                            className="h-4.5 w-4.5 rounded-full object-contain bg-white flex-shrink-0"
+                            className="h-5 w-5 rounded-full object-contain bg-white flex-shrink-0"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         )}
