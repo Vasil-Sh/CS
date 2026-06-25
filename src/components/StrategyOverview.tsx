@@ -1621,7 +1621,7 @@ export default function StrategyOverview() {
                         {hasStats ? `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}` : '0'}%
                       </p>
                     </div>
-                    <div className={`p-5 rounded-2xl border text-center ${hasStats && stats.totalProfit >= 0 ? 'bg-[#F0FDF4] border-[#BBF7D0]' : hasStats ? 'bg-[#FEF2F2] border-[#FECACA]' : 'bg-[#F9FAFB] border-[#F3F4F6]'}`}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Прибуток</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.totalProfit >= 0 ? 'text-[#16A34A]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(0)}` : '0'}₴
