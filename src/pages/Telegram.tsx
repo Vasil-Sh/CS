@@ -9,7 +9,7 @@ export default function Telegram() {
   const currentUser = user?.username || 'User';
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
+    <div className="min-h-screen bg-gray-100 relative flex flex-col">
       {/* ===== HEADER ===== */}
       <PageHeader
         title="Telegram"
