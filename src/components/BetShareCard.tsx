@@ -193,7 +193,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
     pending: { border: '#3B82F6', fallback: '#3B82F6' },
   };
   const logoStyle = isWin ? logoSettings.win : isLoss ? logoSettings.loss : logoSettings.pending;
-  const logoSize = compact ? 36 : 48;
+  const logoSize = compact ? 58 : 72;
   const game = bet.game || 'CS2';
   
   interface ParsedEvent {
@@ -255,19 +255,19 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const bannerPy = compact ? 'py-3.5' : 'py-5';
   const bodyPadding = compact ? 'p-4' : 'p-6';
   const bodyGap = compact ? 'space-y-3' : 'space-y-4';
-  const iconSize = compact ? 'w-10 h-10' : 'w-11 h-11';
+  const iconSize = compact ? 'w-12 h-12' : 'w-14 h-14';
   const iconRound = compact ? 'rounded-xl' : 'rounded-2xl';
-  const statusFont = compact ? 'text-base' : 'text-lg';
-  const matchFont = compact ? 'text-base' : 'text-lg';
-  const expressHeaderFont = compact ? 'text-base' : 'text-lg';
-  const selectionFont = compact ? 'text-lg' : 'text-xl';
-  const cellPadding = compact ? 'p-3' : 'p-4';
+  const statusFont = compact ? 'text-xl' : 'text-2xl';
+  const matchFont = compact ? 'text-xl' : 'text-2xl';
+  const expressHeaderFont = compact ? 'text-xl' : 'text-2xl';
+  const selectionFont = compact ? 'text-2xl' : 'text-3xl';
+  const cellPadding = compact ? 'p-4' : 'p-5';
   const cellRadius = compact ? '16px' : '20px';
-  const cellValueFont = compact ? 'text-base' : 'text-lg';
-  const profitPadding = compact ? 'p-3.5' : 'p-5';
-  const profitValueFont = compact ? 'text-xl' : 'text-2xl';
-  const badgePx = compact ? 'px-3 py-1.5' : 'px-3.5 py-2';
-  const badgeFont = compact ? 'text-xs' : 'text-sm';
+  const cellValueFont = compact ? 'text-xl' : 'text-2xl';
+  const profitPadding = compact ? 'p-5' : 'p-6';
+  const profitValueFont = compact ? 'text-2xl' : 'text-4xl';
+  const badgePx = compact ? 'px-4 py-2' : 'px-4 py-2.5';
+  const badgeFont = compact ? 'text-sm' : 'text-base';
   const dividerMx = compact ? '-mx-4' : '-mx-6';
   const cardRadius = compact ? '26px' : '32px';
   const eventPadding = compact ? 'p-3' : 'p-3.5';
@@ -290,20 +290,20 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         <div className="flex items-center gap-2.5">
           <div className={`flex items-center justify-center ${iconSize} ${iconRound} bg-white/20 backdrop-blur-sm`}>
             {isWin ? (
-              <Trophy className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <Trophy className="h-8 w-8 text-white" strokeWidth={1.5} />
             ) : isLoss ? (
-              <TrendingDown className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <TrendingDown className="h-8 w-8 text-white" strokeWidth={1.5} />
             ) : (
-              <Target className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <Target className="h-8 w-8 text-white" strokeWidth={1.5} />
             )}
           </div>
           <div>
             <p className={`font-bold ${statusFont} leading-tight`}>{statusText}</p>
-            <p className="text-[11px] text-white/70 font-medium">{bet.date}</p>
+            <p className="text-sm text-white/70 font-medium">{bet.date}</p>
           </div>
         </div>
         <div className={`flex items-center gap-1.5 ${badgeFont} font-medium text-white/80 bg-white/15 ${badgePx} rounded-2xl backdrop-blur-sm`}>
-          <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <Calendar className="h-5 w-5" strokeWidth={1.5} />
           <span>{isExpress ? expressLabel : bet.format}</span>
         </div>
       </div>
@@ -370,7 +370,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                   >
                     <div className="flex items-start gap-2 mb-1.5">
                       <span 
-                        className="flex items-center justify-center min-w-[21px] h-[21px] rounded-full text-[10px] font-bold text-white"
+                        className="flex items-center justify-center min-w-[28px] h-[28px] rounded-full text-sm font-bold text-white"
                         style={{ backgroundColor: theme.accent }}
                       >
                         {event.number}
@@ -380,34 +380,34 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                           <img
                             src={bet.expressLogos[index].logoTeam1!}
                             alt=""
-                            className="h-5 w-5 rounded-full object-contain bg-white flex-shrink-0"
+                            className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         )}
-                        <p className="text-sm font-semibold text-gray-900 leading-tight break-words">
+                        <p className="text-lg font-semibold text-gray-900 leading-tight break-words">
                           {event.match}
                         </p>
                         {bet.expressLogos?.[index]?.logoTeam2 && (
                           <img
                             src={bet.expressLogos[index].logoTeam2!}
                             alt=""
-                            className="h-5 w-5 rounded-full object-contain bg-white flex-shrink-0"
+                            className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         )}
                       </div>
                     </div>
                     
-                    <div className="space-y-0.5 ml-7">
-                      <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide">
+                    <div className="space-y-0.5 ml-9">
+                      <p className="text-sm text-gray-400 font-medium uppercase tracking-wide">
                         {event.betType}
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-bold" style={{ color: theme.accent }}>
+                        <p className="text-base font-bold" style={{ color: theme.accent }}>
                           <BlurReveal isPending={isPending}>{event.selection}</BlurReveal>
                         </p>
                         <span 
-                          className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                          className="text-sm font-bold px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: theme.accentLight, color: theme.accent }}
                         >
                           {event.odds}
@@ -458,7 +458,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`text-center ${cellPadding}`}
             style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Сума</p>
+            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">Сума</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
               {currencySymbol}{displayAmount}
             </p>
@@ -467,7 +467,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`text-center ${cellPadding}`}
             style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
+            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
               {bet.odds.toFixed(2)}
             </p>
@@ -480,7 +480,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`${profitPadding} text-center`}
             style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
+            <p className="text-sm font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Профіт
             </p>
             <p className={`${profitValueFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
@@ -495,7 +495,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`${profitPadding} text-center`}
             style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
+            <p className="text-sm font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Можливий виграш
             </p>
             <p className={`${profitValueFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
@@ -512,7 +512,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             className={`${profitPadding} text-center`}
             style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider text-gray-400">
+            <p className="text-sm font-semibold mb-0.5 uppercase tracking-wider text-gray-400">
               Загальна сума
             </p>
             <p className={`${profitValueFont} font-bold text-gray-900 tracking-tight`}>
