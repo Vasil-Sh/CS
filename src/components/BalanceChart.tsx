@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import type { BalanceData } from '@/types/betting';
@@ -24,7 +24,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
       const d = payload[0].payload;
       const date = new Date(d.date).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
       return (
-        <div className="bg-white/98 p-3 rounded-xl shadow-lg border border-[#E5E7EB] text-xs">
+        <div className="bg-white p-3 rounded-xl shadow-lg border border-[#E5E7EB] text-xs" style={{ backgroundColor: "white", borderRadius: "12px" }}>
           <p className="font-bold text-[#111827] mb-1">Дата: {date}</p>
           {d.betName && <p className="text-[#6B7280]">Прогноз: {d.betName}</p>}
           {d.odds && <p className="text-[#6B7280]">Коеф.: {Number(d.odds).toFixed(2)}</p>}
@@ -69,7 +69,7 @@ export default function BalanceChart({ data }: BalanceChartProps) {
               tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
               label={{ value: 'Баланс (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#9CA3AF' } }}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} contentStyle={{ backgroundColor: "transparent", border: "none", padding: 0 }} />
             <Legend
               formatter={() => 'Баланс'}
               iconType="plainline"
