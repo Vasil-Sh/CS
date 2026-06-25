@@ -14,6 +14,8 @@ interface FormMatchData {
   betType: string;
   selection: string;
   odds: string;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 interface BettingFormMatchSectionProps {
@@ -95,14 +97,24 @@ export default function BettingFormMatchSection({
               Команда 1{' '}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
-            <Input
-              id="team1"
-              value={data.team1}
-              onChange={(e) => onFieldChange('team1', e.target.value)}
-              placeholder={data.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
-              required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={classes.input}
-            />
+            <div className="flex items-center gap-2">
+              {data.logoTeam1 && (
+                <img
+                  src={data.logoTeam1}
+                  alt={data.team1}
+                  className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+              <Input
+                id="team1"
+                value={data.team1}
+                onChange={(e) => onFieldChange('team1', e.target.value)}
+                placeholder={data.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
+                required={!isExpress || (isExpress && expressEventsCount === 0)}
+                className={classes.input}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -110,14 +122,24 @@ export default function BettingFormMatchSection({
               Команда 2{' '}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
-            <Input
-              id="team2"
-              value={data.team2}
-              onChange={(e) => onFieldChange('team2', e.target.value)}
-              placeholder={data.game === 'CS2' ? 'G2' : 'OG'}
-              required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={classes.input}
-            />
+            <div className="flex items-center gap-2">
+              {data.logoTeam2 && (
+                <img
+                  src={data.logoTeam2}
+                  alt={data.team2}
+                  className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+              <Input
+                id="team2"
+                value={data.team2}
+                onChange={(e) => onFieldChange('team2', e.target.value)}
+                placeholder={data.game === 'CS2' ? 'G2' : 'OG'}
+                required={!isExpress || (isExpress && expressEventsCount === 0)}
+                className={classes.input}
+              />
+            </div>
           </div>
         </div>
 

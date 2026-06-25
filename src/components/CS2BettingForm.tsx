@@ -1021,6 +1021,8 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                         betType: formData.betType,
                         selection: formData.selection,
                         odds: formData.odds,
+                        logoTeam1: prefillLogosRef.current.logoTeam1,
+                        logoTeam2: prefillLogosRef.current.logoTeam2,
                       }}
                       isParsing={isParsingMatch}
                       isExpressFromMatches={isExpressFromMatches}
