@@ -756,7 +756,7 @@ export default function Profile() {
       </Card>
 
       {/* Clear all data — outside backup card */}
-      <div className="p-6 border border-red-200 rounded-3xl bg-white" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+      <div className="mt-6 p-6 border border-red-200 rounded-3xl bg-white" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
         <div className="flex items-start gap-4">
           <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
             <Trash2 className="h-6 w-6 text-red-600" strokeWidth={1.5} />
