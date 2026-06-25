@@ -1582,7 +1582,7 @@ export default function StrategyOverview() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF] border-2 border-[#3B82F6] flex-shrink-0">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] border-2 border-[#3B82F6] text-[#3B82F6] flex-shrink-0">
                         {getRiskIcon(selectedStrategy.riskLevel)}
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827]">{selectedStrategy.name}</h3>
