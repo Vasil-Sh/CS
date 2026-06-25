@@ -131,9 +131,7 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
                   <Target className="h-4 w-4 text-[#8B5CF6]" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="
-
-        <div className="border-b border-[#E5E7EB]" />text-sm font-semibold text-[#111827]">{'Планувати лесенки'}</p>
+                  <p className="text-sm font-semibold text-[#111827]">{'Планувати лесенки'}</p>
                   <p className="text-xs text-[#6B7280] mt-0.5">{'Автоматичний розрахунок розміру ставок'}</p>
                 </div>
               </div>
