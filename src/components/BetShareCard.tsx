@@ -443,11 +443,9 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                   {betCategory}
                 </p>
               </div>
-              {selection !== bet.team1 && selection !== bet.team2 && (
-                <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
-                  <BlurReveal isPending={isPending}>{selection}</BlurReveal>
-                </p>
-              )}
+              <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
+                <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+              </p>
             </div>
             <div className={`${dividerMx} border-t border-gray-100`} />
           </>
