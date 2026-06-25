@@ -120,11 +120,26 @@ export function parseAIResponse(text: string): AIRecommendation {
 export function getMockRecommendation(matchData: MatchData, providerName: string): AIRecommendation {
   const { team1, team2, format, tier } = matchData;
 
+  // Generate varied confidence (55-78%) based on match characteristics
+  const hash = `${team1}${team2}${format}`.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const confidence = 55 + (hash % 24); // 55-78 range
+
+  const suggestions = ['П1', 'П2', 'Тотал більше 2.5', 'Фора +1.5'];
+  const suggestion = suggestions[hash % suggestions.length];
+
+  const reasons = [
+    `${team1} показує кращу форму в останніх матчах.`,
+    `${team2} має слабшу статистику на цій карті.`,
+    `Рівень команд близький, але ${team1} має перевагу в досвіді.`,
+    `${team2} нестабільна в Bo${format === 'BO1' ? '1' : '3'} форматі.`,
+  ];
+  const reason = reasons[hash % reasons.length];
+
   return {
     prediction: team1,
-    confidence: 65,
-    reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). Для отримання реальних AI рекомендацій від ${providerName}, будь ласка, перевірте API ключ.`,
-    suggestedBet: 'П1',
-    riskLevel: 'medium',
+    confidence,
+    reasoning: `Аналіз матчу ${team1} vs ${team2} (${format}, ${tier}). ${reason} Для отримання реальних AI рекомендацій від ${providerName}, будь ласка, перевірте API ключ.`,
+    suggestedBet: suggestion,
+    riskLevel: confidence > 70 ? 'low' : confidence > 60 ? 'medium' : 'high',
   };
 }

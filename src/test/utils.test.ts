@@ -170,15 +170,30 @@ RISK_LEVEL: low`;
 });
 
 describe('getMockRecommendation (src/lib/ai/shared.ts)', () => {
-  it('[1] повертає team1 як prediction, confidence=65, risk=medium', () => {
+  it('[1] повертає team1 як prediction, confidence 55-78, risk варіюється', () => {
     const result = getMockRecommendation(
       { team1: 'G2', team2: 'Vitality', format: 'BO3', tier: 'tier1' },
       'TestProvider',
     );
     expect(result.prediction).toBe('G2');
-    expect(result.confidence).toBe(65);
-    expect(result.riskLevel).toBe('medium');
-    // Перевіряємо, що назва провайдера потрапляє в reasoning
+    expect(result.confidence).toBeGreaterThanOrEqual(55);
+    expect(result.confidence).toBeLessThanOrEqual(78);
+    expect(['low', 'medium', 'high']).toContain(result.riskLevel);
     expect(result.reasoning).toContain('TestProvider');
+    expect(result.suggestedBet).toBeTruthy();
+  });
+
+  it('[2] повертає різні confidence для різних матчів', () => {
+    const r1 = getMockRecommendation(
+      { team1: 'NaVi', team2: 'FaZe', format: 'BO3', tier: 'tier1' },
+      'TestProvider',
+    );
+    const r2 = getMockRecommendation(
+      { team1: 'G2', team2: 'Heroic', format: 'BO1', tier: 'tier2' },
+      'TestProvider',
+    );
+    // At least one should differ due to different hash
+    const differs = r1.confidence !== r2.confidence || r1.suggestedBet !== r2.suggestedBet || r1.riskLevel !== r2.riskLevel;
+    expect(differs).toBe(true);
   });
 });
