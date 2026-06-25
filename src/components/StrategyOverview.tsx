@@ -1582,7 +1582,9 @@ export default function StrategyOverview() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      {getRiskIcon(selectedStrategy.riskLevel)}
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF] border-2 border-[#3B82F6] flex-shrink-0">
+                        {getRiskIcon(selectedStrategy.riskLevel)}
+                      </div>
                       <h3 className="text-xl font-semibold text-[#111827]">{selectedStrategy.name}</h3>
                       {primaryStrategy === (selectedStrategy.id || selectedStrategy.name) && (
                         <Badge className="bg-[#EFF6FF] text-[#3B82F6] border-0 rounded-full text-xs px-2.5 py-0.5 font-medium hover:bg-[#EFF6FF]">
@@ -1792,7 +1794,7 @@ export default function StrategyOverview() {
               <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/80">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F0FDF4] border-2 border-[#22C55E]">
                       <Percent className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
                     </div>
                     <div>
