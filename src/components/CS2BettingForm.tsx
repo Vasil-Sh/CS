@@ -19,6 +19,10 @@ import { calcTotalExpressOdds, calcExpectedValue, calcPotentialProfit, getValueB
 import { logRender } from '@/lib/devLogger';
 import { BettingSidebar } from './BettingSidebar';
 import { ExpressEventBuilder } from './ExpressEventBuilder';
+import BettingFormAlerts from './betting-form/BettingFormAlerts';
+import BettingFormSettings from './betting-form/BettingFormSettings';
+import BettingFormMatchSection from './betting-form/BettingFormMatchSection';
+import BettingFormFinances from './betting-form/BettingFormFinances';
 
 export interface MatchPrefillData {
   team1: string;
@@ -958,474 +962,100 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         onCancel={handleViolationCancel}
       />
 
-      {/* Tilt Protection Block */}
-      {tiltBlock.blocked && (
-        <div className="rounded-3xl overflow-hidden border-2 border-[#FCA5A5]" style={{ boxShadow: '0 4px 24px rgba(239,68,68,0.15)' }}>
-          <div className="flex items-start gap-4 px-6 py-5" style={{ background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)' }}>
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FEE2E2] flex-shrink-0">
-              <AlertTriangle className="h-6 w-6 text-[#DC2626]" strokeWidth={2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-base font-semibold text-[#991B1B] mb-1">🔒 Тілт-захист активовано</p>
-              <p className="text-sm text-[#B91C1C] leading-relaxed">{tiltBlock.reason}</p>
-              <p className="text-xs text-[#DC2626] mt-2 font-medium">
-                Залишилось: {tiltBlock.minutesLeft} хв. Форма ставки заблокована до завершення паузи.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Strategy Banner */}
-      {primaryStrategy && (
-        <div className="rounded-3xl overflow-hidden border border-[#BFDBFE]"
-          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-        >
-          <div 
-            className="flex items-center gap-4 px-6 py-5"
-            style={{ background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)' }}
-          >
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm">
-              <Shield className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/80">
-                Активна стратегія: <span className="font-semibold text-white">{primaryStrategy.name}</span>
-              </p>
-              <p className="text-sm text-white/60 mt-0.5 truncate">{primaryStrategy.description}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Strategy Violations */}
-      {strategyViolations.length > 0 && (
-        <div className={`rounded-3xl px-6 py-5 border ${
-          strategyViolations.some(v => v.severity === 'serious') 
-            ? 'border-[#FCA5A5] bg-[#FEF2F2]' 
-            : 'border-[#FDE68A] bg-[#FFFBEB]'
-        }`} style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
-          <div className="flex items-start gap-3">
-            <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-              strategyViolations.some(v => v.severity === 'serious') ? 'text-[#EF4444]' : 'text-[#F59E0B]'
-            }`} strokeWidth={1.5} />
-            <div className="flex-1">
-              <p className={`text-sm font-semibold mb-2 ${
-                strategyViolations.some(v => v.severity === 'serious') ? 'text-[#991B1B]' : 'text-[#92400E]'
-              }`}>
-                Відхилення від стратегії &ldquo;{primaryStrategy?.name}&rdquo;
-              </p>
-              <div className="space-y-2">
-                {strategyViolations.map((violation, index) => (
-                  <div key={index} className={`p-3 rounded-2xl ${
-                    violation.severity === 'serious' ? 'bg-[#FEE2E2]' : 'bg-[#FEF3C7]'
-                  }`}>
-                    <p className={`text-sm ${
-                      violation.severity === 'serious' ? 'text-[#991B1B]' : 'text-[#92400E]'
-                    }`}>
-                      • {violation.message}
-                    </p>
-                    <p className={`text-xs mt-1 flex items-center gap-1 ${
-                      violation.severity === 'serious' ? 'text-[#B91C1C]' : 'text-[#B45309]'
-                    }`}>
-                      <Info className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
-                      {violation.explanation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <BettingFormAlerts
+        tiltBlock={tiltBlock}
+        primaryStrategy={primaryStrategy}
+        strategyViolations={strategyViolations}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div className={`lg:col-span-2 space-y-6 ${tiltBlock.blocked ? 'opacity-50 pointer-events-none select-none' : ''}`}>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Main Form */}
-            <div className="bg-white border border-[#D1D5DB] rounded-3xl overflow-hidden"
+            <div className="bg-white border border-gray-300 rounded-3xl overflow-hidden"
               style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
             >
-              {/* Form Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
-                    <Plus className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <BettingFormSettings
+                data={{
+                  date: formData.date,
+                  game: formData.game,
+                  betCategory: formData.betCategory,
+                  format: formData.format,
+                  goalId: formData.goalId,
+                }}
+                isPrefilled={isPrefilled}
+                isExpressFromMatches={isExpressFromMatches}
+                activeGoals={activeGoals}
+                classes={{ input: inputClass, selectTrigger: selectTriggerClass, label: labelClass, sectionTitle: sectionTitleClass }}
+                onClearForm={clearForm}
+                onFieldChange={(field, value) => setFormData({ ...formData, [field]: value })}
+                onCategoryChange={(value) => {
+                  setFormData({ ...formData, betCategory: value });
+                  if (value === 'Ординар') {
+                    setExpressEvents([]);
+                    setIsExpressFromMatches(false);
+                  }
+                }}
+                onGoalSelect={(goalId) => {
+                  const selectedGoalId = goalId === 'all' ? '' : goalId;
+                  if (selectedGoalId) {
+                    const lastStake = getLastStakeForGoal(selectedGoalId);
+                    if (lastStake) {
+                      setFormData(prev => ({ ...prev, goalId: selectedGoalId, stake: lastStake }));
+                      toast.info('Суму автоматично заповнено з останнього прогнозу цілі: ' + lastStake + ' ₴');
+                      return;
+                    }
+                  }
+                  setFormData(prev => ({ ...prev, goalId: selectedGoalId }));
+                }}
+              />
+
+              {!(isExpressFromMatches && expressEvents.length > 0) && (
+                <>
+                  <div className="border-t border-gray-100" />
+                  <div className="p-6">
+                    <BettingFormMatchSection
+                      data={{
+                        game: formData.game,
+                        betCategory: formData.betCategory,
+                        matchUrl: formData.matchUrl,
+                        team1: formData.team1,
+                        team2: formData.team2,
+                        betType: formData.betType,
+                        selection: formData.selection,
+                        odds: formData.odds,
+                      }}
+                      isParsing={isParsingMatch}
+                      isExpressFromMatches={isExpressFromMatches}
+                      expressEventsCount={expressEvents.length}
+                      classes={{ input: inputClass, selectTrigger: selectTriggerClass, label: labelClass, sectionTitle: sectionTitleClass }}
+                      onFieldChange={(field, value) => setFormData({ ...formData, [field]: value })}
+                      onParseUrl={() => parseMatchFromUrl(formData.matchUrl)}
+                      onUrlChange={(url) => handleUrlChange(url)}
+                      onAddToExpress={addExpressEvent}
+                    />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">Новий запис</span>
-                  {isPrefilled && isExpressFromMatches && (
-                    <Badge className="bg-[#DBEAFE] text-[#2563EB] border-0 rounded-full text-xs font-medium px-2.5 py-0.5 hover:bg-[#DBEAFE]">
-                      Експрес з матчів
-                    </Badge>
-                  )}
+                </>
+              )}
+
+              {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
+                <div className="p-6">
+                  <BettingFormFinances
+                    data={{
+                      stake: formData.stake,
+                      currency: formData.currency,
+                      confidence: formData.confidence,
+                    }}
+                    isSubmitting={isSubmitting}
+                    isBlocked={tiltBlock.blocked}
+                    isHighConfidence={isHighConfidence}
+                    showSection={true}
+                    classes={{ input: inputClass, label: labelClass, sectionTitle: sectionTitleClass }}
+                    onFieldChange={(field, value) => setFormData({ ...formData, [field]: value })}
+                    onConfidenceChange={handleConfidenceChange}
+                  />
                 </div>
-                <button
-                  type="button"
-                  onClick={clearForm}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all duration-200"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
-                  Очистити
-                </button>
-              </div>
-              
-              <div className="p-6 space-y-8">
-                {/* === Section: Basic Settings === */}
-                <div className="space-y-4">
-                  <h3 className={sectionTitleClass}>
-                    <Calendar className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
-                    Основні налаштування
-                  </h3>
-                
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="date" className={labelClass}>Дата матчу</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        required
-                        className={inputClass}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label htmlFor="game" className={labelClass}>Гра</Label>
-                      <Select value={formData.game} onValueChange={(value: 'CS2' | 'Dota2') => setFormData({...formData, game: value})}>
-                        <SelectTrigger className={selectTriggerClass}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="CS2"><span className="flex items-center gap-2"><img src="/assets/team-placeholder.svg" alt="CS2" className="h-4 w-4 object-contain" />CS2</span></SelectItem>
-                          <SelectItem value="Dota2"><span className="flex items-center gap-2"><img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-4 w-4 object-contain" />Dota 2</span></SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <Label htmlFor="betCategory" className={labelClass}>Категорія</Label>
-                      <Select 
-                        key={formData.betCategory}
-                        value={formData.betCategory} 
-                        onValueChange={(value) => {
-                          setFormData({...formData, betCategory: value});
-                          if (value === 'Ординар') {
-                            setExpressEvents([]);
-                            setIsExpressFromMatches(false);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className={selectTriggerClass}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Ординар">Ординар</SelectItem>
-                          <SelectItem value="Експрес">Експрес (до 10 подій)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {formData.betCategory === 'Ординар' && (
-                      <div className="space-y-1.5">
-                        <Label htmlFor="format" className={labelClass}>Формат</Label>
-                        <Select value={formData.format} onValueChange={(value) => setFormData({...formData, format: value})}>
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="BO1">BO1</SelectItem>
-                            <SelectItem value="BO3">BO3</SelectItem>
-                            <SelectItem value="BO5">BO5</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {activeGoals.length > 0 && (
-                      <div className="space-y-1.5">
-                        <Label htmlFor="goalId" className={`${labelClass} flex items-center gap-1.5`}>
-                          <Flag className="h-3.5 w-3.5 text-[#6B7280]" strokeWidth={1.5} />
-                          Ціль
-                        </Label>
-                        <Select 
-                          value={formData.goalId || 'all'} 
-                          onValueChange={(value) => {
-                            const selectedGoalId = value === 'all' ? '' : value;
-                            if (selectedGoalId) {
-                              const lastStake = getLastStakeForGoal(selectedGoalId);
-                              if (lastStake) {
-                                setFormData(prev => ({ ...prev, goalId: selectedGoalId, stake: lastStake }));
-                                toast.info(`Суму автоматично заповнено з останнього прогнозу цілі: ${lastStake} ₴`);
-                                return;
-                              }
-                            }
-                            setFormData(prev => ({ ...prev, goalId: selectedGoalId }));
-                          }}
-                        >
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Без цілі" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Без цілі</SelectItem>
-                            {activeGoals.map((goal) => (
-                              <SelectItem key={goal.id} value={goal.id}>
-                                {goal.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="border-t border-[#F3F4F6]" />
-
-                {/* === Section: Match Info & Bet Details === */}
-                {!(isExpressFromMatches && expressEvents.length > 0) && (
-                  <div className="space-y-4">
-                    <h3 className={sectionTitleClass}>
-                      <Users className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
-                      Інформація про матч і деталі запису
-                    </h3>
-                  
-                    {/* Match URL */}
-                    <div className="space-y-1.5">
-                      <Label htmlFor="matchUrl" className={`${labelClass} flex items-center gap-2`}>
-                        <Link className="h-4 w-4 text-[#6B7280]" strokeWidth={1.5} />
-                        {formData.game === 'CS2' ? 'HLTV URL матчу' : 'Dota 2 URL матчу'} (необов&apos;язково)
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="matchUrl"
-                          value={formData.matchUrl}
-                          onChange={(e) => handleUrlChange(e.target.value)}
-                          placeholder={formData.game === 'CS2' ? 'https://www.hltv.org/matches/...' : 'https://...dota2/.../team1-vs-team2/...'}
-                          className={`flex-1 ${inputClass}`}
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => parseMatchFromUrl(formData.matchUrl)}
-                          disabled={isParsingMatch || !formData.matchUrl}
-                          className="rounded-2xl px-5 border-[#E5E7EB] hover:bg-[#F3F4F6] hover:border-[#D1D5DB] h-11 text-sm font-medium"
-                        >
-                          {isParsingMatch ? 'Оновлення...' : 'Оновити'}
-                        </Button>
-                      </div>
-                      <p className="text-xs text-[#9CA3AF]">
-                        {formData.game === 'CS2' ? 'Вставте посилання з HLTV для автозаповнення' : 'Вставте посилання на Dota 2 матч для автозаповнення'}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="team1" className={labelClass}>
-                          Команда 1 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
-                        </Label>
-                        <Input
-                          id="team1"
-                          value={formData.team1}
-                          onChange={(e) => setFormData({...formData, team1: e.target.value})}
-                          placeholder={formData.game === 'CS2' ? 'NAVI' : 'Team Spirit'}
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className={inputClass}
-                        />
-                      </div>
-                      
-                      <div className="space-y-1.5">
-                        <Label htmlFor="team2" className={labelClass}>
-                          Команда 2 {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
-                        </Label>
-                        <Input
-                          id="team2"
-                          value={formData.team2}
-                          onChange={(e) => setFormData({...formData, team2: e.target.value})}
-                          placeholder={formData.game === 'CS2' ? 'G2' : 'OG'}
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className={inputClass}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="betType" className={labelClass}>
-                          Тип прогнозу {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
-                        </Label>
-                        <Select 
-                          value={formData.betType} 
-                          onValueChange={(value) => setFormData({...formData, betType: value})} 
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                        >
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder="Оберіть тип прогнозу" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getBetTypeOptions(formData.game).map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-1.5">
-                        <Label htmlFor="selection" className={labelClass}>
-                          Вибір {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
-                        </Label>
-                        <Select 
-                          value={formData.selection} 
-                          onValueChange={(value) => setFormData({...formData, selection: value})}
-                          disabled={!formData.team1 || !formData.team2}
-                        >
-                          <SelectTrigger className={selectTriggerClass}>
-                            <SelectValue placeholder={formData.team1 && formData.team2 ? "Оберіть команду" : "Спочатку введіть команди"} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {formData.team1 && <SelectItem value={formData.team1}>{formData.team1}</SelectItem>}
-                            {formData.team2 && <SelectItem value={formData.team2}>{formData.team2}</SelectItem>}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label htmlFor="odds" className={labelClass}>
-                          Коефіцієнт {formData.betCategory === 'Експрес' && expressEvents.length === 0 && <span className="text-[#EF4444]">*</span>}
-                        </Label>
-                        <Input
-                          id="odds"
-                          type="number"
-                          step="0.01"
-                          min="1.01"
-                          value={formData.odds}
-                          onChange={(e) => setFormData({...formData, odds: e.target.value})}
-                          placeholder="1.65"
-                          required={formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length === 0)}
-                          className={inputClass}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Show "Add event to express" button ONLY when NOT pre-filled from matches */}
-                    {formData.betCategory === 'Експрес' && !isExpressFromMatches && (
-                      <Button
-                        type="button"
-                        onClick={addExpressEvent}
-                        disabled={expressEvents.length >= 10}
-                        className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-6 text-base transition-all"
-                      >
-                        <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                        Додати подію до експресу ({expressEvents.length}/10)
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {/* Financial Details */}
-                {(formData.betCategory === 'Ординар' || (formData.betCategory === 'Експрес' && expressEvents.length > 0)) && (
-                  <>
-                    <div className="border-t border-[#F3F4F6]" />
-                    
-                    <div className="space-y-4">
-                      <h3 className={sectionTitleClass}>
-                        <DollarSign className="h-4.5 w-4.5 text-[#6B7280]" strokeWidth={1.5} />
-                        Фінансові деталі
-                      </h3>
-                    
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="stake" className={labelClass}>
-                            Сума прогнозу ({formData.currency === 'USD' ? '$' : '₴'}) <span className="text-[#EF4444]">*</span>
-                          </Label>
-                          <div className="flex gap-2">
-                            <div className="inline-flex items-center rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-1 h-11 flex-shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => setFormData({...formData, currency: 'UAH'})}
-                                className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
-                                  formData.currency === 'UAH'
-                                    ? 'bg-white text-[#111827] shadow-sm'
-                                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
-                                }`}
-                                aria-label="Гривня"
-                                title="Гривня (UAH)"
-                              >
-                                ₴
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setFormData({...formData, currency: 'USD'})}
-                                className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
-                                  formData.currency === 'USD'
-                                    ? 'bg-white text-[#111827] shadow-sm'
-                                    : 'text-[#9CA3AF] hover:text-[#6B7280]'
-                                }`}
-                                aria-label="Долар"
-                                title="Долар США (USD)"
-                              >
-                                $
-                              </button>
-                            </div>
-                            <Input
-                              id="stake"
-                              type="number"
-                              min="1"
-                              step="0.01"
-                              value={formData.stake}
-                              onChange={(e) => setFormData({...formData, stake: e.target.value})}
-                              placeholder="100"
-                              required
-                              className={`flex-1 ${inputClass}`}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-1.5">
-                          <Label htmlFor="confidence" className={`${labelClass} flex items-center gap-1.5`}>
-                            Впевненість (%, макс. {MAX_CONFIDENCE})
-                            <TooltipProvider delayDuration={200}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#E5E7EB] cursor-help">
-                                    <Info className="h-3 w-3 text-[#6B7280]" strokeWidth={2} />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-[280px] text-sm">
-                                  <p className="font-medium mb-1">Ваша оцінка ймовірності виграшу</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Вкажіть від 1 до {MAX_CONFIDENCE}%. У спорті 100% впевненість нереалістична через непередбачувані фактори 
-                                    (травми, помилки суддів, форс-мажори). Максимум обмежено до {MAX_CONFIDENCE}% для реалістичних розрахунків.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </Label>
-                          <Input
-                            id="confidence"
-                            type="number"
-                            min="1"
-                            max={MAX_CONFIDENCE}
-                            value={formData.confidence}
-                            onChange={(e) => handleConfidenceChange(e.target.value)}
-                            placeholder="70"
-                            className={`${inputClass} ${isHighConfidence ? 'border-[#F59E0B] focus:border-[#F59E0B]' : ''}`}
-                          />
-                          {isHighConfidence && (
-                            <p className="text-xs text-[#D97706] flex items-center gap-1.5 mt-1">
-                              <AlertTriangle className="h-3 w-3 flex-shrink-0" strokeWidth={2} />
-                              Впевненість &gt;90% — будьте обережні. У спорті завжди є непередбачувані фактори.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
+              )}
             </div>
 
             {/* Express Events Display */}
