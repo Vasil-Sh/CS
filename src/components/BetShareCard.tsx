@@ -437,7 +437,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           <>
           <div 
             className="text-center py-3 px-4"
-            style={{ borderRadius: '16px', backgroundColor: '#F9FAFB', border: '1.5px solid #86EFAC', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: '16px', backgroundColor: '#F9FAFB', border: `1.5px solid ${theme.accentLight}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-1">
               {betCategory}
