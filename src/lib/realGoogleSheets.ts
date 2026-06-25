@@ -28,6 +28,8 @@ export interface CS2BettingRecord {
   originalProfit?: number;
   createdAt?: number; // ДОДАНО: timestamp для точного сортування
   winProbability?: number; // ДОДАНО: імовірність виграшу
+  logoTeam1?: string | null; // URL логотипу команди 1
+  logoTeam2?: string | null; // URL логотипу команди 2
 }
 
 export type ActionMode = 'warning' | 'block';
@@ -224,7 +226,9 @@ class RealGoogleSheetsService {
         notes: row[11] || '',
         format: row[12] || 'BO3',
         tournament: row[13] || '',
-        matchUrl: row[14] || ''
+        matchUrl: row[14] || '',
+        logoTeam1: row[15] || null,
+        logoTeam2: row[16] || null
       };
       
       records.push(record);
@@ -342,7 +346,9 @@ class RealGoogleSheetsService {
         exchangeRate: record.exchangeRate,
         originalProfit: record.originalProfit,
         createdAt: record.createdAt || timestamp,
-        winProbability: record.winProbability
+        winProbability: record.winProbability,
+        logoTeam1: record.logoTeam1,
+        logoTeam2: record.logoTeam2
       };
       
       const username = localStorage.getItem('username') || '';
