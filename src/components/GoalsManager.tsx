@@ -15,6 +15,7 @@ import { useAppStore } from '@/stores/appStore';
 import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
+import GoalsToolbar from './betting-form/GoalsToolbar';
 import { 
   Target, 
   TrendingUp, 
@@ -467,77 +468,18 @@ export default function GoalsManager() {
 
   return (
     <div className="space-y-6">
-      {/* Unified centered pill bar: info + tabs + action buttons */}
-      <div className="space-y-6">
-        <div className="flex justify-center relative z-50">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            {/* Info tooltip — blue */}
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
-                    <Info className="h-4 w-4" strokeWidth={2} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="max-w-xs rounded-2xl px-4 py-3 bg-white border border-[#E5E7EB] shadow-lg z-[9999]">
-                  <div className="space-y-1.5">
-                    <p className="text-sm font-semibold text-[#111827]">Як працювати з цілями</p>
-                    <p className="text-sm text-[#6B7280]">1. При додаванні запису оберіть ціль в полі "Прив'язати до цілі"</p>
-                    <p className="text-sm text-[#6B7280]">2. Після розрахунку ставки (Win/Loss) поверніться сюди</p>
-                    <p className="text-sm text-[#6B7280]">3. Натисніть "Оновити" — прогрес оновиться автоматично</p>
-                    <p className="text-xs text-[#9CA3AF] mt-1 pt-1 border-t border-[#F3F4F6]">⚠️ Максимум 3 активні цілі одночасно</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      <GoalsToolbar
+        activeTab={activeTab}
+        isUpdating={isUpdating}
+        activeGoalsCount={activeGoals.length}
+        maxGoals={3}
+        tabs={tabs}
+        onTabChange={(id) => setActiveTab(id as 'active' | 'completed')}
+        onUpdate={handleManualUpdate}
+        onCreateGoal={() => setShowCreateDialog(true)}
+      />
 
-            {/* Tabs */}
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'active' | 'completed')}
-                  className={`
-                    relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out
-                    flex items-center gap-2
-                    ${isActive
-                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]'
-                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] font-light'
-                    }
-                  `}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={1.5} />
-                  {tab.label}
-                </button>
-              );
-            })}
-
-            {/* Divider */}
-            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
-
-            {/* Update button */}
-            <button
-              onClick={handleManualUpdate}
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
-              Оновити
-            </button>
-
-            {/* Create goal button — accent blue pill */}
-            <button
-              onClick={() => setShowCreateDialog(true)}
-              disabled={activeGoals.length >= 3}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2} />
-              Створити ціль
-            </button>
-          </div>
-        </div>
+        {/* Active Tab */}
 
         {/* Active Tab */}
         {activeTab === 'active' && (
