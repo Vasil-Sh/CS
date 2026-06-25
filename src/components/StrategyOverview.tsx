@@ -759,7 +759,7 @@ export default function StrategyOverview() {
     return (
       <div
         className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-        style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
       >
         <div className="p-6">
           <div className="text-center py-12">
@@ -879,7 +879,7 @@ export default function StrategyOverview() {
                   {showFilters && (
                   <div
                     className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                   >
                     <div className="p-4">
                       <div className="flex flex-col md:flex-row gap-4">
@@ -1034,7 +1034,7 @@ export default function StrategyOverview() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div
                   className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 >
                   <div className="px-6 py-5 border-b border-[#F3F4F6]">
                     <div className="flex items-center gap-2">
@@ -1081,7 +1081,7 @@ export default function StrategyOverview() {
 
                 <div
                   className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 >
                   <div className="px-6 py-5 border-b border-[#F3F4F6]">
                     <div className="flex items-center gap-2">
@@ -1118,7 +1118,7 @@ export default function StrategyOverview() {
 
                 <div
                   className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 >
                   <div className="px-6 py-5 border-b border-[#F3F4F6]">
                     <div className="flex items-center gap-2">
@@ -1162,7 +1162,7 @@ export default function StrategyOverview() {
                 {roiChartData.length > 0 && (
                   <div
                     className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                   >
                     <div className="px-6 py-5 border-b border-[#F3F4F6]">
                       <div className="flex items-center gap-2">
@@ -1191,7 +1191,7 @@ export default function StrategyOverview() {
                 {winRateChartData.length > 0 && (
                   <div
                     className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                   >
                     <div className="px-6 py-5 border-b border-[#F3F4F6]">
                       <div className="flex items-center gap-2">
@@ -1216,7 +1216,7 @@ export default function StrategyOverview() {
                 {profitChartData.length > 0 && (
                   <div
                     className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                   >
                     <div className="px-6 py-5 border-b border-[#F3F4F6]">
                       <div className="flex items-center gap-2">
@@ -1248,7 +1248,7 @@ export default function StrategyOverview() {
           {activeTab === 'create' && (
             <div
               className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
                 <div className="flex items-center gap-3">
@@ -1578,7 +1578,7 @@ export default function StrategyOverview() {
           {selectedStrategy && (
             <div className="space-y-6 px-6 py-6">
               {/* Strategy Name & Description Card */}
-              <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)' }}>
+              <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -1605,17 +1605,17 @@ export default function StrategyOverview() {
                 const hasStats = stats && stats.totalBets > 0;
                 return (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Всього ставок</p>
                       <p className="text-3xl font-semibold text-[#111827]">{hasStats ? stats.totalBets : 0}</p>
                     </div>
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Вінрейт</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? stats.winRate.toFixed(1) : 0}%
                       </p>
                     </div>
-                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">ROI</p>
                       <p className={`text-3xl font-semibold ${hasStats && stats.roi >= 0 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}` : '0'}%
@@ -1637,21 +1637,21 @@ export default function StrategyOverview() {
                 if (!stats || stats.totalBets === 0) return null;
                 return (
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#DCFCE7] mx-auto mb-2">
                         <CheckCircle2 className="h-5 w-5 text-[#16A34A]" strokeWidth={1.5} />
                       </div>
                       <p className="text-2xl font-semibold text-[#16A34A]">{stats.wins}</p>
                       <p className="text-xs text-[#6B7280] font-medium mt-1">Перемог</p>
                     </div>
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FEE2E2] mx-auto mb-2">
                         <X className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
                       </div>
                       <p className="text-2xl font-semibold text-[#EF4444]">{stats.losses}</p>
                       <p className="text-xs text-[#6B7280] font-medium mt-1">Поразок</p>
                     </div>
-                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                    <div className="p-4 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FEF3C7] mx-auto mb-2">
                         <Activity className="h-5 w-5 text-[#D97706]" strokeWidth={1.5} />
                       </div>
@@ -1664,7 +1664,7 @@ export default function StrategyOverview() {
 
               {/* Constraints Section - Collapsible */}
               {(selectedStrategy.maxOdds || selectedStrategy.minOdds || selectedStrategy.allowedFormats || selectedStrategy.allowedBetTypes) && (
-                <Collapsible open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)' }}>
+                <Collapsible open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
                       <div className="flex items-center gap-3">
@@ -1724,7 +1724,7 @@ export default function StrategyOverview() {
 
               {/* Tilt Protection — shown if strategy has activityLimits */}
               {selectedStrategy.activityLimits?.enabled && (selectedStrategy.activityLimits.blockAfterLosses || selectedStrategy.activityLimits.blockDurationMinutes) && (
-                <Collapsible open={true} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)' }}>
+                <Collapsible open={true} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                   <div className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
@@ -1753,7 +1753,7 @@ export default function StrategyOverview() {
               )}
 
               {/* Criteria Section - Collapsible */}
-              <Collapsible open={isCriteriaOpen} onOpenChange={setIsCriteriaOpen} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)' }}>
+              <Collapsible open={isCriteriaOpen} onOpenChange={setIsCriteriaOpen} className="bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 overflow-hidden" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                 <CollapsibleTrigger className="w-full">
                   <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
                     <div className="flex items-center gap-3">
@@ -1774,7 +1774,7 @@ export default function StrategyOverview() {
                       <div
                         key={idx}
                         className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all"
-                        style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                       >
                         <div className="flex items-start gap-3">
                           <Badge className="rounded-xl bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB] font-medium text-sm px-3 py-1 hover:bg-[#F3F4F6] flex-shrink-0">
@@ -1789,7 +1789,7 @@ export default function StrategyOverview() {
               </Collapsible>
 
               {/* Expected ROI */}
-              <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)' }}>
+              <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/80">
