@@ -434,6 +434,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
           </>
         ) : selection ? (
+          <>
           <div 
             className="text-center py-3 px-4"
             style={{ borderRadius: '16px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
@@ -446,6 +447,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
             </p>
           </div>
           <div className={`${dividerMx} border-t border-gray-100`} />
+          </>
         ) : (
           <div className={`${dividerMx} border-t border-gray-100`} />
         )}
