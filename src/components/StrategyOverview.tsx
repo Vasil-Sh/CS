@@ -1578,7 +1578,7 @@ export default function StrategyOverview() {
           {selectedStrategy && (
             <div className="space-y-6 px-6 py-6">
               {/* Strategy Name & Description Card */}
-              <div className="p-5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
+              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -1664,7 +1664,7 @@ export default function StrategyOverview() {
 
               {/* Constraints Section - Collapsible */}
               {(selectedStrategy.maxOdds || selectedStrategy.minOdds || selectedStrategy.allowedFormats || selectedStrategy.allowedBetTypes) && (
-                <Collapsible open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
+                <Collapsible open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen} className="bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6] overflow-hidden">
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between px-6 py-4 hover:bg-[#EFF6FF] transition-colors cursor-pointer">
                       <div className="flex items-center gap-3">
@@ -1753,7 +1753,7 @@ export default function StrategyOverview() {
               )}
 
               {/* Criteria Section - Collapsible */}
-              <Collapsible open={isCriteriaOpen} onOpenChange={setIsCriteriaOpen} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
+              <Collapsible open={isCriteriaOpen} onOpenChange={setIsCriteriaOpen} className="bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6] overflow-hidden">
                 <CollapsibleTrigger className="w-full">
                   <div className="flex items-center justify-between px-6 py-4 hover:bg-[#EFF6FF] transition-colors cursor-pointer">
                     <div className="flex items-center gap-3">
@@ -1789,7 +1789,7 @@ export default function StrategyOverview() {
               </Collapsible>
 
               {/* Expected ROI */}
-              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
+              <div className="p-5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/80">
