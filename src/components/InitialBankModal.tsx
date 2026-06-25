@@ -21,7 +21,7 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
   const handleSubmit = () => {
     const bankAmount = parseFloat(amount);
 
-    if (!bankAmount || bankAmount < 0) {
+    if (isNaN(bankAmount) || bankAmount < 0) {
       toast.error('Будь ласка, введіть коректну суму');
       return;
     }
@@ -47,6 +47,11 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
 
   const handleClose = () => {
     onClose(false);
+  };
+
+
+  const handleReset = () => {
+    setAmount("0");
   };
 
   return (
@@ -83,6 +88,17 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
               autoFocus
             />
           </div>
+
+          {mode === 'edit' && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              className="w-full rounded-xl border border-[#D1D5DB] hover:bg-[#F9FAFB] font-medium h-10 text-sm text-[#6B7280]"
+            >
+              Скинути до 0
+            </Button>
+          )}
 
           {mode === 'setup' && (
             <>
