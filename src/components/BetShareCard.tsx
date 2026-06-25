@@ -234,8 +234,13 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   }
 
   const betTypeParts = bet.betType.split(' - ');
-  const betCategory = translateBetType(betTypeParts[0] || bet.betType);
   const selection = betTypeParts[1] || '';
+  let betCategory = betTypeParts[0] ? translateBetType(betTypeParts[0]) : translateBetType(bet.betType);
+
+  // Default for non-express bets: if category wasn't parsed correctly, show "Переможець матчу"
+  if (!isExpress && selection && betCategory === betTypeParts[0]) {
+    betCategory = 'Переможець матчу';
+  }
 
   const totalAmount = isPending 
     ? displayAmount * bet.odds 
