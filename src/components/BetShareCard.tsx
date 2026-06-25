@@ -366,7 +366,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                   <div 
                     key={index} 
                     className={eventPadding}
-                    style={{ borderRadius: eventRadius, backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                    style={{ borderRadius: eventRadius, backgroundColor: theme.accentBg, border: `1px solid ${theme.accentLight}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
                   >
                     <div className="flex items-start gap-2 mb-1.5">
                       <span 
@@ -456,7 +456,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         <div className="grid grid-cols-2 gap-2.5">
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Сума</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
@@ -465,7 +465,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           </div>
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
@@ -478,7 +478,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isPending && displayProfit !== undefined && displayProfit !== null && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Профіт
@@ -493,7 +493,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {isPending && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: cellRadius, backgroundColor: theme.accentBg, border: `1.5px solid ${theme.accentMid}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider" style={{ color: theme.accent }}>
               Можливий виграш
@@ -510,12 +510,12 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isLoss && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider text-[#9CA3AF]">
+            <p className="text-[11px] font-semibold mb-0.5 uppercase tracking-wider text-gray-400">
               Загальна сума
             </p>
-            <p className={`${profitValueFont} font-bold text-[#111827] tracking-tight`}>
+            <p className={`${profitValueFont} font-bold text-gray-900 tracking-tight`}>
               {isPending ? (
                 <BlurReveal isPending={isPending}>
                   {totalAmount.toFixed(2)} {currencySymbol}
