@@ -435,18 +435,18 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           </>
         ) : selection ? (
           <>
-          <div 
-            className="text-center py-3 px-4"
-            style={{ borderRadius: '16px', backgroundColor: '#F9FAFB', border: `1.5px solid ${theme.accentLight}`, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
-          >
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-1">
-              {betCategory}
-            </p>
-            <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
-              <BlurReveal isPending={isPending}>{selection}</BlurReveal>
-            </p>
-          </div>
-          <div className={`${dividerMx} border-t border-gray-100`} />
+            <div className="text-center py-1">
+              <div className="flex items-center justify-center gap-2 mb-0.5">
+                {isWin && <CheckCircle2 className="h-3.5 w-3.5" style={{ color: theme.accent }} strokeWidth={1.5} />}
+                <p className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                  {betCategory}
+                </p>
+              </div>
+              <p className={`${selectionFont} font-bold tracking-tight`} style={{ color: theme.accent }}>
+                <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+              </p>
+            </div>
+            <div className={`${dividerMx} border-t border-gray-100`} />
           </>
         ) : (
           <div className={`${dividerMx} border-t border-gray-100`} />
