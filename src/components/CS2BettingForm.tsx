@@ -82,6 +82,7 @@ interface BetRecord {
   winProbability?: number;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
 }
 
 interface StrategyViolation {
@@ -759,6 +760,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
         winProbability: isNaN(winProbability) ? undefined : winProbability,
         logoTeam1: formData.betCategory === 'Експрес' ? undefined : prefillLogosRef.current.logoTeam1,
         logoTeam2: formData.betCategory === 'Експрес' ? undefined : prefillLogosRef.current.logoTeam2,
+        expressLogos: formData.betCategory === 'Експрес' ? expressEvents.map(e => ({ logoTeam1: e.logoTeam1, logoTeam2: e.logoTeam2 })) : undefined,
       };
 
       await realGoogleSheetsService.addRecord(record);

@@ -34,6 +34,8 @@ export interface Bet {
   /** Team logo URLs (from Matches page) */
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  /** Logo URLs for each express event (index-aligned with parsed events) */
+  expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
 }
 
 export interface BettingStats {

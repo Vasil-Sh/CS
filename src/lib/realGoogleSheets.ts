@@ -30,6 +30,7 @@ export interface CS2BettingRecord {
   winProbability?: number; // ДОДАНО: імовірність виграшу
   logoTeam1?: string | null; // URL логотипу команди 1
   logoTeam2?: string | null; // URL логотипу команди 2
+  expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
 }
 
 export type ActionMode = 'warning' | 'block';
@@ -348,7 +349,8 @@ class RealGoogleSheetsService {
         createdAt: record.createdAt || timestamp,
         winProbability: record.winProbability,
         logoTeam1: record.logoTeam1,
-        logoTeam2: record.logoTeam2
+        logoTeam2: record.logoTeam2,
+        expressLogos: record.expressLogos
       };
       
       const username = localStorage.getItem('username') || '';

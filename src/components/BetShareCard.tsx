@@ -22,6 +22,7 @@ interface BetShareCardProps {
     exchangeRate?: number;
     logoTeam1?: string | null;
     logoTeam2?: string | null;
+    expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
     game?: string;
   };
   compact?: boolean;
@@ -374,9 +375,27 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                       >
                         {event.number}
                       </span>
-                      <p className="text-sm font-semibold text-[#111827] leading-tight flex-1">
-                        {event.match}
-                      </p>
+                      <div className="flex items-center gap-1 min-w-0 flex-1 flex-wrap">
+                        {bet.expressLogos?.[index]?.logoTeam1 && (
+                          <img
+                            src={bet.expressLogos[index].logoTeam1!}
+                            alt=""
+                            className="h-4.5 w-4.5 rounded-full object-contain bg-white flex-shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                        <p className="text-sm font-semibold text-gray-900 leading-tight break-words">
+                          {event.match}
+                        </p>
+                        {bet.expressLogos?.[index]?.logoTeam2 && (
+                          <img
+                            src={bet.expressLogos[index].logoTeam2!}
+                            alt=""
+                            className="h-4.5 w-4.5 rounded-full object-contain bg-white flex-shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                      </div>
                     </div>
                     
                     <div className="space-y-0.5 ml-7">
