@@ -344,7 +344,7 @@ const BetTableMemo = memo(function BetTable({
                           {isExpress ? (
                             <div className="flex flex-col items-center gap-1.5">
                               <Badge className="rounded-md bg-amber-100 text-amber-600 border-0 font-semibold text-sm px-2.5 py-1 hover:bg-amber-100">Express {expressEventCount}×</Badge>
-                              <button onClick={() => onExpressDetails(bet)} className="text-sm text-blue-500 hover:text-blue-600 font-medium bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors duration-200">Деталі</button>
+                              <button onClick={() => onExpressDetails(bet)} className="text-sm text-purple-600 hover:text-purple-700 font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors duration-200">Деталі</button>
                             </div>
                           ) : (
                             <Badge className="rounded-md bg-blue-50 text-blue-500 border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-blue-50" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
