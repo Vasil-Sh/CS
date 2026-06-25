@@ -1578,7 +1578,7 @@ export default function StrategyOverview() {
           {selectedStrategy && (
             <div className="space-y-6 px-6 py-6">
               {/* Strategy Name & Description Card */}
-              <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6]">
+              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -1606,24 +1606,24 @@ export default function StrategyOverview() {
                 return (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
-                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Всього ставок</p>
-                      <p className="text-3xl font-semibold text-[#111827]">{hasStats ? stats.totalBets : 0}</p>
+                      <p className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Всього ставок</p>
+                      <p className="text-3xl font-bold text-[#111827]">{hasStats ? stats.totalBets : 0}</p>
                     </div>
                     <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
-                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Вінрейт</p>
-                      <p className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
+                      <p className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Вінрейт</p>
+                      <p className={`text-3xl font-bold ${hasStats && stats.winRate >= 50 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? stats.winRate.toFixed(1) : 0}%
                       </p>
                     </div>
                     <div className="p-5 bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] text-center">
-                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">ROI</p>
-                      <p className={`text-3xl font-semibold ${hasStats && stats.roi >= 0 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
+                      <p className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">ROI</p>
+                      <p className={`text-3xl font-bold ${hasStats && stats.roi >= 0 ? 'text-[#22C55E]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}` : '0'}%
                       </p>
                     </div>
                     <div className={`p-5 rounded-2xl border text-center ${hasStats && stats.totalProfit >= 0 ? 'bg-[#F0FDF4] border-[#BBF7D0]' : hasStats ? 'bg-[#FEF2F2] border-[#FECACA]' : 'bg-[#F9FAFB] border-[#F3F4F6]'}`}>
-                      <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider mb-2">Прибуток</p>
-                      <p className={`text-3xl font-semibold ${hasStats && stats.totalProfit >= 0 ? 'text-[#16A34A]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
+                      <p className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Прибуток</p>
+                      <p className={`text-3xl font-bold ${hasStats && stats.totalProfit >= 0 ? 'text-[#16A34A]' : hasStats ? 'text-[#EF4444]' : 'text-[#111827]'}`}>
                         {hasStats ? `${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(0)}` : '0'}₴
                       </p>
                     </div>
@@ -1666,10 +1666,10 @@ export default function StrategyOverview() {
               {(selectedStrategy.maxOdds || selectedStrategy.minOdds || selectedStrategy.allowedFormats || selectedStrategy.allowedBetTypes) && (
                 <Collapsible open={isConstraintsOpen} onOpenChange={setIsConstraintsOpen} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
+                    <div className="flex items-center justify-between px-6 py-4 hover:bg-[#EFF6FF] transition-colors cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
-                          <Shield className="h-4 w-4 text-[#111827]" strokeWidth={1.5} />
+                        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] border-2 border-[#3B82F6]">
+                          <Shield className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-base font-semibold text-[#111827]">Обмеження стратегії</h3>
                       </div>
@@ -1682,19 +1682,19 @@ export default function StrategyOverview() {
                   <CollapsibleContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 pt-2">
                       {selectedStrategy.minOdds && (
-                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Мінімальний коефіцієнт</p>
                           <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.minOdds}</p>
                         </div>
                       )}
                       {selectedStrategy.maxOdds && (
-                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Максимальний коефіцієнт</p>
                           <p className="text-xl font-semibold text-[#111827]">{selectedStrategy.maxOdds}</p>
                         </div>
                       )}
                       {selectedStrategy.allowedFormats && selectedStrategy.allowedFormats.length > 0 && (
-                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-2">Дозволені формати</p>
                           <div className="flex flex-wrap gap-2">
                             {selectedStrategy.allowedFormats.map((format, idx) => (
@@ -1706,7 +1706,7 @@ export default function StrategyOverview() {
                         </div>
                       )}
                       {selectedStrategy.allowedBetTypes && selectedStrategy.allowedBetTypes.length > 0 && (
-                        <div className="p-4 bg-white rounded-2xl border border-[#F3F4F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                        <div className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6]" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
                           <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wider mb-2">Дозволені типи ставок</p>
                           <div className="flex flex-wrap gap-2">
                             {selectedStrategy.allowedBetTypes.map((betType, idx) => (
@@ -1724,10 +1724,10 @@ export default function StrategyOverview() {
 
               {/* Tilt Protection — shown if strategy has activityLimits */}
               {selectedStrategy.activityLimits?.enabled && (selectedStrategy.activityLimits.blockAfterLosses || selectedStrategy.activityLimits.blockDurationMinutes) && (
-                <Collapsible open={true} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
+                <Collapsible open={true} className="bg-[#FEF2F2] rounded-2xl border-2 border-[#EF4444] overflow-hidden">
                   <div className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEE2E2]">
                         <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#111827]">🔒 Тілт-захист</h3>
@@ -1755,10 +1755,10 @@ export default function StrategyOverview() {
               {/* Criteria Section - Collapsible */}
               <Collapsible open={isCriteriaOpen} onOpenChange={setIsCriteriaOpen} className="bg-[#F9FAFB] rounded-2xl border border-[#F3F4F6] overflow-hidden">
                 <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center justify-between px-6 py-4 hover:bg-[#F3F4F6] transition-colors cursor-pointer">
+                  <div className="flex items-center justify-between px-6 py-4 hover:bg-[#EFF6FF] transition-colors cursor-pointer">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#F3F4F6]">
-                        <ListChecks className="h-4 w-4 text-[#111827]" strokeWidth={1.5} />
+                      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] border-2 border-[#3B82F6]">
+                        <ListChecks className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-base font-semibold text-[#111827]">Критерії стратегії</h3>
                     </div>
@@ -1773,7 +1773,7 @@ export default function StrategyOverview() {
                     {selectedStrategy.criteria.map((criterion, idx) => (
                       <div
                         key={idx}
-                        className="p-4 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#E5E7EB] transition-all"
+                        className="p-4 bg-white rounded-2xl border-2 border-[#3B82F6] hover:border-[#3B82F6] transition-all"
                         style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                       >
                         <div className="flex items-start gap-3">
@@ -1789,7 +1789,7 @@ export default function StrategyOverview() {
               </Collapsible>
 
               {/* Expected ROI */}
-              <div className="p-5 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0]">
+              <div className="p-5 bg-[#EFF6FF] rounded-2xl border-2 border-[#3B82F6]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/80">
