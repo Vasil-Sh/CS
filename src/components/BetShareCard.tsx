@@ -193,7 +193,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
     pending: { border: '#3B82F6', fallback: '#3B82F6' },
   };
   const logoStyle = isWin ? logoSettings.win : isLoss ? logoSettings.loss : logoSettings.pending;
-  const logoSize = compact ? 73 : 94;
+  const logoSize = compact ? 36 : 48;
   const game = bet.game || 'CS2';
   
   interface ParsedEvent {
