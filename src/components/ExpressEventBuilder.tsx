@@ -53,7 +53,7 @@ export function ExpressEventBuilder({
           <Badge className="bg-gray-900 text-white border-0 rounded-full text-sm px-3 py-1 font-medium hover:bg-gray-900">
             Коеф: {totalExpressOdds.toFixed(2)}
           </Badge>
-          <button type="button" onClick={onClearAll}
+          <button type="button" onClick={onClearAll} aria-label="Очистити всі події експресу"
             className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
           </button>

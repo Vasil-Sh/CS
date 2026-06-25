@@ -149,7 +149,7 @@ export class UserDataService {
         // Update last reset date
         localStorage.setItem(lastResetKey, today);
         
-        console.log(`Daily reset performed for ${username} on ${today}`);
+        if (import.meta.env.DEV) console.log(`Daily reset performed for ${username} on ${today}`);
       }
     } catch (error) {
       console.error('Error in daily reset:', error);

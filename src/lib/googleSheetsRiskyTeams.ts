@@ -189,7 +189,7 @@ class GoogleSheetsRiskyTeamsService {
         gid = '0';
       }
       
-      console.log('[RiskyTeams] Using sheetId:', sheetId, 'gid:', gid, 'isCustomSheet:', isCustomSheet, 'parseAsCleanSheet:', parseAsCleanSheet);
+      if (import.meta.env.DEV) console.log('[RiskyTeams] Using sheetId:', sheetId, 'gid:', gid, 'isCustomSheet:', isCustomSheet, 'parseAsCleanSheet:', parseAsCleanSheet);
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
       
       const response = await fetch(url);
@@ -202,10 +202,12 @@ class GoogleSheetsRiskyTeamsService {
       // Parse CSV properly handling multiline values in quotes
       const rows = this.parseCSV(csvText);
       
-      console.log('[RiskyTeams] CSV rows total:', rows.length);
-      if (rows.length > 0) {
-        console.log('[RiskyTeams] Header row:', JSON.stringify(rows[0]));
-        console.log('[RiskyTeams] First 5 data rows:', rows.slice(1, Math.min(6, rows.length)).map(r => JSON.stringify(r)));
+      if (import.meta.env.DEV) {
+        console.log('[RiskyTeams] CSV rows total:', rows.length);
+        if (rows.length > 0) {
+          console.log('[RiskyTeams] Header row:', JSON.stringify(rows[0]));
+          console.log('[RiskyTeams] First 5 data rows:', rows.slice(1, Math.min(6, rows.length)).map(r => JSON.stringify(r)));
+        }
       }
       
       const riskyTeams: RiskyTeamFromSheet[] = [];
@@ -263,7 +265,7 @@ class GoogleSheetsRiskyTeamsService {
         }
       }
       if (riskyTeams.length > 0 && riskyTeams.length < 10) {
-        riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
+        if (import.meta.env.DEV) riskyTeams.forEach((t, i) => console.log(`[RiskyTeams] Team ${i}:`, t.name, t.game, t.status));
       }
       
       return riskyTeams;
