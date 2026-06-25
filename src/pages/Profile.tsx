@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,8 @@ import {
   Moon,
   Trash2,
   Clock,
+  RefreshCw,
+  DollarSign,
 } from 'lucide-react';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
@@ -43,7 +45,36 @@ export default function Profile() {
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>('interface');
   const [simResetKey, setSimResetKey] = useState(0);
-  
+
+  // -- Exchange rate --
+  const [exchangeRate, setExchangeRate] = useState<number>(() => {
+    const stored = localStorage.getItem("matchiq_exchange_rate");
+    return stored ? parseFloat(stored) : 44.60;
+  });
+  const [isFetchingRate, setIsFetchingRate] = useState(false);
+
+  const fetchExchangeRate = async () => {
+    setIsFetchingRate(true);
+    try {
+      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      const rate = data?.rates?.UAH;
+      if (rate && typeof rate === "number") {
+        const rounded = Math.round(rate * 100) / 100;
+        localStorage.setItem("matchiq_exchange_rate", String(rounded));
+        setExchangeRate(rounded);
+        toast.success(`Курс оновлено: 1 USD = ${rounded} UAH`);
+      } else {
+        throw new Error("No UAH rate");
+      }
+    } catch {
+      toast.error("Не вдалося отримати курс. Перевірте інтернет або введіть вручну.");
+    } finally {
+      setIsFetchingRate(false);
+    }
+  };
+
   const { theme, toggleTheme } = useTheme();
 
   // ── Backup last date ──
@@ -624,7 +655,42 @@ export default function Profile() {
               </Button>
             </div>
           </div>
-        </CardContent>
+        
+          {/* Exchange Rate */}
+          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+            <div className="flex items-center gap-3 mb-3">
+              <DollarSign className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm font-medium text-[#111827]">Курс USD -{">"} UAH</p>
+                <p className="text-xs text-[#9CA3AF]">Актуальний курс для конвертації валют</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                step="0.01"
+                value={exchangeRate}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  if (!isNaN(v) && v > 0) {
+                    setExchangeRate(v);
+                    localStorage.setItem("matchiq_exchange_rate", String(v));
+                  }
+                }}
+                className="flex-1 h-10 px-3 rounded-xl border border-[#D1D5DB] hover:border-[#9CA3AF] focus:border-[#111827] focus:ring-1 focus:ring-[#111827] transition-colors text-sm bg-white text-[#111827] outline-none"
+              />
+              <Button
+                onClick={fetchExchangeRate}
+                disabled={isFetchingRate}
+                size="sm"
+                className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-10 px-4 text-sm"
+              >
+                <RefreshCw className={`h-4 w-4 mr-1.5 ${isFetchingRate ? "animate-spin" : ""}`} strokeWidth={2} />
+                Оновити
+              </Button>
+            </div>
+          </div>
+</CardContent>
       </Card>
       </div>
       )}
