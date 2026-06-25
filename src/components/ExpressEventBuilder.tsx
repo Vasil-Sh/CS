@@ -13,6 +13,8 @@ export interface ExpressEvent {
   betType: string;
   selection: string;
   odds: string;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 export interface ExpressRiskInfo {
@@ -115,7 +117,25 @@ export function ExpressEventBuilder({
                       <Badge className="bg-gray-900 text-white border-0 rounded-full text-xs font-medium px-2 py-0.5 hover:bg-gray-900">
                         #{index + 1}
                       </Badge>
-                      <span className="font-medium text-gray-900 text-sm">{event.match}</span>
+                      <div className="flex items-center gap-1.5">
+                        {event.logoTeam1 && (
+                          <img
+                            src={event.logoTeam1}
+                            alt={team1Name}
+                            className="h-5 w-5 rounded-full object-contain bg-gray-100"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                        <span className="font-medium text-gray-900 text-sm">{event.match}</span>
+                        {event.logoTeam2 && (
+                          <img
+                            src={event.logoTeam2}
+                            alt={team2Name}
+                            className="h-5 w-5 rounded-full object-contain bg-gray-100"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button type="button" onClick={() => onRemoveEvent(index)}

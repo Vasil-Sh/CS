@@ -53,6 +53,8 @@ interface ExpressEvent {
   betType: string;
   selection: string;
   odds: string;
+  logoTeam1?: string | null;
+  logoTeam2?: string | null;
 }
 
 interface BetRecord {
@@ -158,6 +160,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         betType: 'Match Winner',
         selection: m.team1,
         odds: '',
+        logoTeam1: m.logoTeam1,
+        logoTeam2: m.logoTeam2,
       }));
     }
     return [];
@@ -246,6 +250,8 @@ export default function CS2BettingForm({ onRecordAdded, prefillData, onPrefillCo
         betType: 'Match Winner',
         selection: m.team1,
         odds: '',
+        logoTeam1: m.logoTeam1,
+        logoTeam2: m.logoTeam2,
       }));
 
       setFormData(prev => ({
