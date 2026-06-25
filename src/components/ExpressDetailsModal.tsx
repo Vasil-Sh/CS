@@ -47,26 +47,26 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
         <div className="space-y-4 p-6">
           {/* Summary Cards — 2×2 grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Кількість подій</p>
               <p className="text-2xl font-bold text-gray-900">{parsedEvents.length}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Сума ставки</p>
               <p className="text-2xl font-bold text-gray-900">{amount}{currencySymbol}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Загальний коефіцієнт</p>
               <p className="text-2xl font-bold text-gray-900">{totalOdds.toFixed(2)}</p>
             </div>
-            <div className="p-4 bg-green-50 rounded-2xl border border-green-200">
+            <div className="p-4 bg-green-50 rounded-2xl border border-green-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Можливий виграш</p>
               <p className="text-2xl font-bold text-green-600">{potentialWin}{currencySymbol}</p>
             </div>
           </div>
 
           {/* Events Section — Collapsible */}
-          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
             <CollapsibleTrigger className="w-full">
               <div className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-100 transition-colors cursor-pointer">
                 <div className="flex items-center gap-2.5">
