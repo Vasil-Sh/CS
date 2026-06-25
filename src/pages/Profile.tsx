@@ -746,43 +746,43 @@ export default function Profile() {
           </div>
 
           {/* Info */}
-          <div className="flex items-start gap-3 p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
-            <Calendar className="h-4 w-4 text-[#9CA3AF] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-            <p className="text-xs text-[#6B7280]">
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+            <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+            <p className="text-xs text-gray-500">
               Рекомендуємо робити бекап щотижня або після великих змін у даних. Файл бекапу можна зберігати на Google Drive, Dropbox або будь-якому хмарному сховищі.
             </p>
           </div>
-
-          {/* Clear all data */}
-          <div className="p-5 border border-[#FEE2E2] rounded-2xl hover:border-[#FECACA] transition-colors">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-[#FEF2F2] rounded-xl flex-shrink-0">
-                <Trash2 className="h-6 w-6 text-[#DC2626]" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-[#111827] mb-1">Очистити всі дані</h3>
-                <p className="text-sm text-[#6B7280] mb-3">
-                  Видаляє всі ваші дані (ставки, стратегії, цілі, команди, Telegram-групи). Обліковий запис та налаштування залишаться.
-                </p>
-                <div className="flex items-start gap-2 p-3 bg-[#FFFBEB] rounded-xl border border-[#FDE68A] mb-4">
-                  <AlertTriangle className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5" strokeWidth={1.75} />
-                  <p className="text-xs text-[#92400E]">
-                    <span className="font-semibold">Увага:</span> цю дію неможливо скасувати. Рекомендуємо спочатку створити бекап.
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setClearConfirmOpen(true)}
-                  disabled={isClearing}
-                  className="bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-xl text-sm px-6 font-semibold"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" strokeWidth={2} />
-                  {isClearing ? 'Очищення...' : 'Очистити всі дані'}
-                </Button>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Clear all data — outside backup card */}
+      <div className="p-6 border border-red-200 rounded-3xl bg-white" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
+            <Trash2 className="h-6 w-6 text-red-600" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Очистити всі дані</h3>
+            <p className="text-sm text-gray-500 mb-3">
+              Видаляє всі ваші дані (ставки, стратегії, цілі, команди, Telegram-групи). Обліковий запис та налаштування залишаться.
+            </p>
+            <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4">
+              <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+              <p className="text-xs text-amber-800">
+                <span className="font-semibold">Увага:</span> цю дію неможливо скасувати. Рекомендуємо спочатку створити бекап.
+              </p>
+            </div>
+            <Button
+              onClick={() => setClearConfirmOpen(true)}
+              disabled={isClearing}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm px-6 font-semibold"
+            >
+              <Trash2 className="mr-2 h-4 w-4" strokeWidth={2} />
+              {isClearing ? 'Очищення...' : 'Очистити всі дані'}
+            </Button>
+          </div>
+        </div>
+      </div>
       </div>
       )}
 
