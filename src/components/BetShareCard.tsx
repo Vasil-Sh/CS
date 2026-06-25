@@ -456,19 +456,19 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         <div className="grid grid-cols-2 gap-2.5">
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-0.5">Сума</p>
-            <p className={`${cellValueFont} font-bold text-[#111827]`}>
+            <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Сума</p>
+            <p className={`${cellValueFont} font-bold text-gray-900`}>
               {currencySymbol}{displayAmount}
             </p>
           </div>
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#F9FAFB', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
           >
-            <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider mb-0.5">Коефіцієнт</p>
-            <p className={`${cellValueFont} font-bold text-[#111827]`}>
+            <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
+            <p className={`${cellValueFont} font-bold text-gray-900`}>
               {bet.odds.toFixed(2)}
             </p>
           </div>
