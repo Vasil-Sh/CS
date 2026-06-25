@@ -75,6 +75,8 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
           </div>
         </div>
 
+        <div className="border-b border-[#E5E7EB]" />
+
         {/* Body */}
         <div className="px-6 pb-6 space-y-4">
           <div className="space-y-2">
@@ -129,7 +131,9 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
                   <Target className="h-4 w-4 text-[#8B5CF6]" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#111827]">{'Планувати лесенки'}</p>
+                  <p className="
+
+        <div className="border-b border-[#E5E7EB]" />text-sm font-semibold text-[#111827]">{'Планувати лесенки'}</p>
                   <p className="text-xs text-[#6B7280] mt-0.5">{'Автоматичний розрахунок розміру ставок'}</p>
                 </div>
               </div>
@@ -141,18 +145,18 @@ export default function InitialBankModal({ open, onClose, mode = 'setup' }: Init
         <div className="px-6 py-5 border-t border-[#F3F4F6] bg-[#FAFAFA] flex items-center gap-3">
           {mode === 'setup' && (
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={handleSkip}
-              className="flex-1 rounded-2xl font-semibold h-12 text-sm text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all duration-200"
+              className="flex-1 rounded-2xl border border-[#D1D5DB] font-semibold h-12 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-all duration-200"
             >
               {'Пропустити'}
             </Button>
           )}
           {mode === 'edit' && (
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={handleClose}
-              className="flex-1 rounded-2xl font-semibold h-12 text-sm text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all duration-200"
+              className="flex-1 rounded-2xl border border-[#D1D5DB] font-semibold h-12 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-all duration-200"
             >
               {'Скасувати'}
             </Button>
