@@ -768,19 +768,7 @@ export default function StrategyOverview() {
     });
 
   if (loading) {
-    return (
-      <div
-        className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-      >
-        <div className="p-6">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#111827] mx-auto mb-4"></div>
-            <p className="text-[#6B7280] font-medium">Завантаження стратегій...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <StrategyLoadingSkeleton />;
   }
 
   const roiChartData = getRoiChartData();
