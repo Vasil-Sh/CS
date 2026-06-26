@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Target, Flag, AlertTriangle, ShieldAlert, TrendingUp, Activity, DollarSign } from 'lucide-react';
+import { Target, Flag, AlertTriangle, ShieldAlert, TrendingUp, Activity, DollarSign, Trophy } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
@@ -47,6 +47,34 @@ const computeTodayPnL = (bets: Bet[]) => {
   const pending = todayBets.filter(b => b.result === 'Pending').length;
   return { profit, count: todayBets.length, pending };
 };
+const compute7DayProfit = (bets: Bet[]): number[] => {
+  const days: number[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const dayBets = bets.filter(b => { try { return new Date(b.date).toISOString().split('T')[0] === key; } catch { return false; } });
+    days.push(dayBets.reduce((sum, b) => sum + (b.profit || 0) + (b.originalProfit || 0), 0));
+  }
+  return days;
+};
+const computeBestStrategy = (bets: Bet[]) => {
+  const byStrat: Record<string, { profit: number; stake: number; count: number }> = {};
+  bets.forEach(b => {
+    const name = (b as any).strategy || (b as any).strategyName || '';
+    if (!name) return;
+    if (!byStrat[name]) byStrat[name] = { profit: 0, stake: 0, count: 0 };
+    byStrat[name].profit += (b.profit || 0) + (b.originalProfit || 0);
+    byStrat[name].stake += (b.originalAmount || b.amount || 0);
+    byStrat[name].count++;
+  });
+  let best: { name: string; roi: number; count: number } | null = null;
+  Object.entries(byStrat).forEach(([name, s]) => {
+    if (s.count < 3) return;
+    const roi = s.stake > 0 ? (s.profit / s.stake) * 100 : 0;
+    if (!best || roi > best.roi) best = { name, roi, count: s.count };
+  });
+  return best;
+};
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal|null => {
   const active = goals.filter(g=>g.status==='active');
   return active.find(g=>g.isPrimary) || null;
@@ -90,6 +118,14 @@ export default function Strategy() {
   const todayRisk = useMemo(() => computeTodayRisk(bets), [bets]);
   const winRate30d = useMemo(() => compute30dWinRate(bets), [bets]);
   const todayPnL = useMemo(() => computeTodayPnL(bets), [bets]);
+  const sevenDayProfit = useMemo(() => compute7DayProfit(bets), [bets]);
+  const bestStrategy = useMemo(() => computeBestStrategy(bets), [bets]);
+  const stratsAndGoals = useMemo(() => {
+    const strats = UserDataService.getUserData<StoredStrategy[]>(resolvedUser, 'strategies_data', []) || [];
+    const goals = UserDataService.getUserData<StoredGoal[]>(resolvedUser, 'goals', []) || [];
+    return { strategies: strats.length, goals: goals.length };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedUser, strategyVersion]);
 
   useEffect(() => {
     const goals = UserDataService.getUserData<StoredGoal[]>(resolvedUser, 'goals', []) || [];
@@ -124,21 +160,50 @@ export default function Strategy() {
             <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
               <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Прибуток сьогодні</span></div>
               {todayPnL.count > 0 ? <><div className={`text-3xl font-bold mb-1 ${todayPnL.profit > 0 ? 'text-[#22C55E]' : todayPnL.profit < 0 ? 'text-[#EF4444]' : 'text-[#111827]'}`}>{todayPnL.profit > 0 ? '+' : ''}{todayPnL.profit.toFixed(0)} ₴</div><span className="text-sm text-[#6B7280]">{todayPnL.count} став{todayPnL.count === 1 ? 'ка' : todayPnL.count < 5 ? 'ки' : 'ок'}{todayPnL.pending > 0 ? `, ${todayPnL.pending} очікує` : ''}</span></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Сьогодні ставок немає</span></>}
+              <div className="mt-2" style={{ height: 28 }}>
+                <svg width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none">
+                  {(() => {
+                    const arr = sevenDayProfit;
+                    const max = Math.max(...arr.map(Math.abs));
+                    const rng = max || 1;
+                    const ys = arr.map(v => 14 - (v / rng) * 12);
+                    const d = ys.map((y, i) => `${i === 0 ? 'M' : 'L'} ${(i / 6) * 100} ${y}`).join(' ');
+                    const area = d + ` L 100 28 L 0 28 Z`;
+                    const lastUp = arr[6] >= 0;
+                    return <><path d={area} fill={lastUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'} /><path d={d} fill="none" stroke={lastUp ? '#22C55E' : '#EF4444'} strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" /></>;
+                  })()}
+                </svg>
+              </div>
             </div>
-            {/* Головна ціль */}
-            <button onClick={() => setActiveTab('goals')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
-              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Flag className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Головна ціль</span></div>
-              {primaryGoal && goalInfo ? <><div className="text-3xl font-bold text-[#111827] mb-1 break-words" title={primaryGoal.name}>{primaryGoal.name}</div><div className="space-y-1"><Progress value={Math.max(goalInfo.percent,2)} className="h-2 shimmer-bar" /><div className="flex items-center justify-between"><span className="text-sm text-[#6B7280]">{goalInfo.label}</span><span className="text-sm font-semibold text-[#111827]">{goalInfo.percent.toFixed(0)}%</span></div></div></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">Не обрано</div><span className="text-sm text-[#9CA3AF]">Оберіть головну ціль</span></>}
+            {/* Найкраща стратегія */}
+            <button onClick={() => setActiveTab('strategies')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Найкраща стратегія</span></div>
+              {bestStrategy ? <><div className="text-3xl font-bold text-[#111827] mb-1 break-words" title={bestStrategy.name}>{bestStrategy.name}</div><span className={`text-sm font-semibold ${bestStrategy.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>ROI {bestStrategy.roi >= 0 ? '+' : ''}{bestStrategy.roi.toFixed(1)}%</span><span className="text-sm text-[#9CA3AF] ml-1">({bestStrategy.count} ставок)</span></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Потрібно мін. 3 ставки</span></>}
             </button>
             {/* Рівень ризику */}
             <button onClick={() => setActiveTab('risks')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
               <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><ShieldAlert className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Рівень ризику</span></div>
               {todayRisk.level ? <><div className={`text-3xl font-bold mb-1 ${todayRisk.level==='High'?'text-[#DC2626]':todayRisk.level==='Medium'?'text-[#D97706]':'text-[#16A34A]'}`}>{riskLabel(todayRisk.level)}</div><div className="flex items-center gap-1 mb-1"><div className="flex-1 h-2 rounded-full bg-[#DCFCE7] relative">{todayRisk.level==='Low'&&<div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#16A34A] shadow-sm"/>}</div><div className="flex-1 h-2 rounded-full bg-[#FEF3C7] relative">{todayRisk.level==='Medium'&&<div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#D97706] shadow-sm"/>}</div><div className="flex-1 h-2 rounded-full bg-[#FEE2E2] relative">{todayRisk.level==='High'&&<div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#DC2626] shadow-sm"/>}</div></div><span className={`text-sm font-semibold ${(todayRisk.winRate??0)>=50?'text-[#22C55E]':'text-[#EF4444]'}`}>Вінрейт {todayRisk.winRate?.toFixed(0)}%</span><span className="text-sm text-[#9CA3AF] ml-2">за 7 днів</span></> : <div className="py-1"><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><div className="flex items-center gap-1 mb-1 opacity-30"><div className="flex-1 h-2 rounded-full bg-[#DCFCE7]"/><div className="flex-1 h-2 rounded-full bg-[#FEF3C7]"/><div className="flex-1 h-2 rounded-full bg-[#FEE2E2]"/></div><span className="text-sm text-[#9CA3AF]">Мін. 3 ставки за тиждень</span></div>}
             </button>
-            {/* Вінрейт 30 днів */}
+            {/* Стратегій / Цілей */}
             <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
-              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Вінрейт 30 днів</span></div>
-              {winRate30d.winRate!==null ? <><div className="text-3xl font-bold text-[#111827] mb-1">{winRate30d.winRate.toFixed(1)}%</div><span className={`text-sm font-semibold ${winRate30d.winRate>=50?'text-[#22C55E]':'text-[#EF4444]'}`}>{winRate30d.winRate>=50?'Вище середнього':'Нижче середнього'}</span><span className="text-sm text-[#9CA3AF] ml-1">({winRate30d.totalBets} ставок)</span></> : <div className="py-1"><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Немає завершених ставок</span></div>}
+              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Стратегій / Цілей</span></div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#6B7280]">Створено стратегій</span>
+                  <span className="text-2xl font-bold text-[#447afc]">{stratsAndGoals.strategies}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#6B7280]">Створено цілей</span>
+                  <span className="text-2xl font-bold text-[#22C55E]">{stratsAndGoals.goals}</span>
+                </div>
+                {(stratsAndGoals.strategies + stratsAndGoals.goals) > 0 && (
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#DBEAFE]" />
+                    <div className="flex-1 h-1.5 rounded-full bg-[#DCFCE7]" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
