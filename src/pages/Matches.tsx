@@ -807,6 +807,7 @@ export default function Matches() {
       onShowComment={handleShowComment}
       onAddToBets={handleAddToBets}
       onToggleSelect={toggleMatchSelection}
+      hasRiskyTeam={!!getMatchRiskComments(match.team1, match.team2)}
     />
   );
 
