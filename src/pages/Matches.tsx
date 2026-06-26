@@ -475,6 +475,7 @@ export default function Matches() {
   const [selectedCommentMatch, setSelectedCommentMatch] = useState<Match | null>(null);
   
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Match ratings state
   const [matchRatings, setMatchRatings] = useState<Record<string, MatchRating>>(loadMatchRatings);
@@ -587,8 +588,11 @@ export default function Matches() {
         const converted = apiMatches.map(apiMatchToMatch);
         setMatches(converted);
       }
+      setApiError(null);
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Не вдалося завантажити матчі з API';
       console.error('Error loading matches from API:', error);
+      setApiError(msg);
       toast.error('⚠️ Помилка завантаження', {
         description: 'Не вдалося завантажити матчі з API'
       });
