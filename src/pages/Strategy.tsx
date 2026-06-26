@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Target, Flag, AlertTriangle, ShieldAlert, TrendingUp, Activity } from 'lucide-react';
+import { Target, Flag, AlertTriangle, ShieldAlert, TrendingUp, Activity, DollarSign } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
@@ -39,6 +39,13 @@ const compute30dWinRate = (bets: Bet[]) => {
   const recent = bets.filter((b) => { const t = b.date ? new Date(b.date).getTime() : NaN; return !Number.isNaN(t) && t >= monthAgo && (b.result === 'Win' || b.result === 'Loss'); });
   if (recent.length === 0) return { winRate: null as number|null, totalBets: 0 };
   return { winRate: (recent.filter(b=>b.result==='Win').length/recent.length)*100, totalBets: recent.length };
+};
+const computeTodayPnL = (bets: Bet[]) => {
+  const today = new Date().toISOString().split('T')[0];
+  const todayBets = bets.filter((b) => { try { return new Date(b.date).toISOString().split('T')[0] === today; } catch { return false; } });
+  const profit = todayBets.reduce((sum, b) => sum + (b.profit || 0) + (b.originalProfit || 0), 0);
+  const pending = todayBets.filter(b => b.result === 'Pending').length;
+  return { profit, count: todayBets.length, pending };
 };
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal|null => {
   const active = goals.filter(g=>g.status==='active');
@@ -82,6 +89,7 @@ export default function Strategy() {
   const [primaryGoal, setPrimaryGoal] = useState<StoredGoal | null>(null);
   const todayRisk = useMemo(() => computeTodayRisk(bets), [bets]);
   const winRate30d = useMemo(() => compute30dWinRate(bets), [bets]);
+  const todayPnL = useMemo(() => computeTodayPnL(bets), [bets]);
 
   useEffect(() => {
     const goals = UserDataService.getUserData<StoredGoal[]>(resolvedUser, 'goals', []) || [];
@@ -112,11 +120,11 @@ export default function Strategy() {
         {/* ===== KPI CARDS ===== */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Активна стратегія */}
-            <button onClick={() => setActiveTab('strategies')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
-              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Активна стратегія</span></div>
-              {activeStrategy ? <><div className="text-3xl font-bold text-[#111827] mb-1 break-words" title={activeStrategy.name}>{activeStrategy.name}</div><span className="text-sm text-[#6B7280]">{activeStrategy.riskLevel ? riskLabel(activeStrategy.riskLevel) + ' ризик' : ''}</span></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">Не обрано</div><span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span></>}
-            </button>
+            {/* Сьогоднішній P&L */}
+            <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+              <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Прибуток сьогодні</span></div>
+              {todayPnL.count > 0 ? <><div className={`text-3xl font-bold mb-1 ${todayPnL.profit > 0 ? 'text-[#22C55E]' : todayPnL.profit < 0 ? 'text-[#EF4444]' : 'text-[#111827]'}`}>{todayPnL.profit > 0 ? '+' : ''}{todayPnL.profit.toFixed(0)} ₴</div><span className="text-sm text-[#6B7280]">{todayPnL.count} став{todayPnL.count === 1 ? 'ка' : todayPnL.count < 5 ? 'ки' : 'ок'}{todayPnL.pending > 0 ? `, ${todayPnL.pending} очікує` : ''}</span></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Сьогодні ставок немає</span></>}
+            </div>
             {/* Головна ціль */}
             <button onClick={() => setActiveTab('goals')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
               <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Flag className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Головна ціль</span></div>
