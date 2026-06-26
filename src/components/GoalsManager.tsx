@@ -355,7 +355,7 @@ export default function GoalsManager() {
     }
 
     const active = goals.filter(g => g.status === 'active');
-    if (active.length >= 3) { toast.error('Максимум 3 активні цілі'); return; }
+    if (active.length >= 25) { toast.error('Максимум 25 активних цілей'); return; }
     const goal: Goal = { id: Date.now().toString(), name: goalData.name, type: goalData.type, status: 'active', createdAt: new Date().toISOString(), isPrimary: active.length === 0, betsPerDay: goalData.betsPerDay };
     switch (goalData.type) {
       case 'amount': goal.targetAmount = goalData.targetAmount; goal.currentAmount = 0; break;

@@ -1,11 +1,12 @@
 import { TooltipProvider, Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Filter, Info, Eye, BarChart3 } from 'lucide-react';
+import { Filter, Info, Eye, BarChart3, Plus } from 'lucide-react';
 
 interface Props {
   activeTab: string;
   showFilters: boolean;
   onTabChange: (tab: string) => void;
   onFilterToggle: () => void;
+  onCreateClick: () => void;
 }
 
 const tabs = [
@@ -13,8 +14,8 @@ const tabs = [
   { id: 'performance', label: 'Ефективність', icon: BarChart3 },
 ] as const;
 
-/** Pure component: tab navigation + filter + info tooltip */
-export default function StrategyTabNav({ activeTab, showFilters, onTabChange, onFilterToggle }: Props) {
+/** Pure component: tab navigation + filter + info tooltip + create button */
+export default function StrategyTabNav({ activeTab, showFilters, onTabChange, onFilterToggle, onCreateClick }: Props) {
   return (
     <div className="flex justify-center">
       <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
@@ -57,6 +58,18 @@ export default function StrategyTabNav({ activeTab, showFilters, onTabChange, on
             </button>
           );
         })}
+
+        {/* Divider */}
+        <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+
+        {/* Create strategy button */}
+        <button
+          onClick={onCreateClick}
+          className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          Створити нову
+        </button>
       </div>
     </div>
   );

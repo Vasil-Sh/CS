@@ -675,17 +675,8 @@ export default function StrategyOverview() {
           showFilters={showFilters}
           onTabChange={setActiveTab}
           onFilterToggle={() => setShowFilters(!showFilters)}
+          onCreateClick={() => setActiveTab('create')}
         />
-        {/* Create strategy button */}
-        <div className="flex justify-center">
-          <button
-            onClick={() => setActiveTab('create')}
-            className="inline-flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2} />
-            Створити нову
-          </button>
-        </div>
 
         {/* Tab Content */}
         <div>
