@@ -54,7 +54,7 @@ class GoogleSheetsRiskyTeamsService {
     if (/^(?:(?:CS2|Dota2|CS|Дота)\s*[:.-]?\s*)?\d{1,2}[./]\d{1,2}[./]\d{2,4}\s*$/i.test(clean)) return null;
 
     // Must contain either a status emoji or an explicit game keyword to be a valid team entry
-    const hasStatusEmoji = /[🟩🟨🟥]/.test(clean);
+    const hasStatusEmoji = /[🟩🟨🟥]/u.test(clean);
     const hasGameKeyword = /\b(?:CS2|Dota2|CS|Дота)\b/i.test(clean); // game keyword present anywhere
     if (!hasStatusEmoji && !hasGameKeyword) return null;
 
@@ -74,7 +74,7 @@ class GoogleSheetsRiskyTeamsService {
 
     // Extract team name: everything from start until we hit a status emoji or game: pattern
     let name = '';
-    const emojiOrGameIdx = clean.search(/[🟩🟨🟥]|\s+(?:CS2|CS|Дота|Dota2)[:\s]/i);
+    const emojiOrGameIdx = clean.search(/[🟩🟨🟥]|\s+(?:CS2|CS|Дота|Dota2)[:\s]/iu);
     if (emojiOrGameIdx > 0) {
       name = clean.substring(0, emojiOrGameIdx).trim();
     } else {
@@ -90,7 +90,7 @@ class GoogleSheetsRiskyTeamsService {
 
     // Extract notes: everything after name + optional status emoji + optional game keyword
     let notes = clean.replace(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
-    notes = notes.replace(/[🟩🟨🟥]\s*/g, '');
+    notes = notes.replace(/[🟩🟨🟥]\s*/gu, '');
     notes = notes.replace(/^(?:CS2|CS|Дота|Dota2)[:\s]*\s*/i, '');
     notes = notes.trim();
 
@@ -145,7 +145,7 @@ class GoogleSheetsRiskyTeamsService {
 
     // Clean up notes
     const finalNotes = cleanNotes
-      .replace(/[🟩🟨🟥]/g, '') // Remove status emoji
+      .replace(/[🟩🟨🟥]/gu, '') // Remove status emoji
       .replace(/^\s*\(?\s*(?:СS|CS|CS2|Дота|Dota2|Dota)\s*[:.]?\s*/i, '') // Remove game indicator
       .replace(/^(?:БАН|Нестабільні|Рідко|Обережно)\s*-?\s*/i, '') // Remove status text
       .replace(/^\s*\(/, '') // Remove opening parenthesis

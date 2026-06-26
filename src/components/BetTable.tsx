@@ -233,7 +233,7 @@ const BetTableMemo = memo(function BetTable({
           <div className="px-6 py-4 border-t border-gray-100 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Результат:</label>
+                <label htmlFor="result-filter" className="text-sm font-medium text-gray-700 mb-2 block">Результат:</label>
                 <Select value={resultFilter} onValueChange={(v) => onResultFilterChange(v as ResultFilter)}>
                   <SelectTrigger className="rounded-xl border-gray-200 bg-white h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -245,7 +245,7 @@ const BetTableMemo = memo(function BetTable({
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
+                <label htmlFor="period-filter" className="text-sm font-medium text-gray-700 mb-2 block">Період:</label>
                 <Select value={periodFilter} onValueChange={(v) => onPeriodFilterChange(v as PeriodFilter)}>
                   <SelectTrigger className="rounded-xl border-gray-200 bg-white h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -257,7 +257,7 @@ const BetTableMemo = memo(function BetTable({
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Сортування:</label>
+                <label htmlFor="sort-filter" className="text-sm font-medium text-gray-700 mb-2 block">Сортування:</label>
                 <Select value={sortBy} onValueChange={(v) => onSortByChange(v as SortBy)}>
                   <SelectTrigger className="rounded-xl border-gray-200 bg-white h-10"><SelectValue /></SelectTrigger>
                   <SelectContent>
