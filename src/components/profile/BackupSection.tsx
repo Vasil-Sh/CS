@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Download, Upload, Database, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Download, Upload, Database, Trash2 } from 'lucide-react';
 
 interface Props {
   storageSize: string;

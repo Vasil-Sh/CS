@@ -3,13 +3,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   TrendingUp, TrendingDown, AlertTriangle, AlertCircle,
-  ThumbsUp, ThumbsDown, Lightbulb, Eye, Info, PlusCircle,
+  ThumbsUp, ThumbsDown, Lightbulb, Eye, PlusCircle,
   Clock, CheckCircle2, Radio, Brain, Flame, Shield, Layers, CircleCheck,
 } from 'lucide-react';
 
-interface RiskyTeam { name: string; game: string; status: string; notes: string; }
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
 type MatchRating = 'like' | 'dislike' | null;
+
+import React from 'react';
 
 interface Match {
   id: string; date: string; team1: string; team2: string; favorite: string;
@@ -26,7 +27,6 @@ interface AIRecommendation { prediction?: string; confidence?: number; }
 
 interface Props {
   match: Match;
-  matchRatings: Record<string, MatchRating>;
   aiPredictions: Record<string, AIRecommendation>;
   isSelected: boolean;
   currentRating: MatchRating;
@@ -106,7 +106,7 @@ export default function MatchRow({
       <td className={`py-3 px-2 text-center ${colDivider}`}><Tooltip><TooltipTrigger asChild><button onClick={() => onAIRecommend(match)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all"><Lightbulb className="h-4 w-4 text-[#7C3AED]" strokeWidth={1.5} /></button></TooltipTrigger><TooltipContent className="bg-[#111827] text-white p-2 rounded-lg"><p className="text-sm">AI рекомендація</p></TooltipContent></Tooltip></td>
       <td className={`py-3 px-2 text-center ${colDivider}`}>{showPrediction ? <PredictionBar percent1={match.predictionPercentTeam1 ?? 0} percent2={match.predictionPercentTeam2 ?? 0} team1={match.team1} team2={match.team2} aiPrediction={aiPredictions[match.id]} /> : <Tooltip><TooltipTrigger asChild><span className="inline-flex items-center justify-center cursor-help"><Info className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} /></span></TooltipTrigger><TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl"><p className="text-sm">Прогноз ще недоступний</p></TooltipContent></Tooltip>}</td>
       <td className={`py-3 px-2 text-center ${colDivider}`}>{hasCoeffs ? <div className="space-y-1"><div className="flex items-center justify-center gap-1.5 text-xs"><TeamLogo src={match.logoTeam1} teamName={match.team1} size={16} /><span className={`font-bold ${(match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0) ? 'text-[#22C55E]' : 'text-[#111827]'}`}>{formatCoeff(match.bettingCoefficientTeam1)}</span></div><div className="flex items-center justify-center gap-1.5 text-xs"><TeamLogo src={match.logoTeam2} teamName={match.team2} size={16} /><span className={`font-bold ${(match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0) ? 'text-[#22C55E]' : 'text-[#111827]'}`}>{formatCoeff(match.bettingCoefficientTeam2)}</span></div></div> : <Tooltip><TooltipTrigger asChild><span className="inline-flex items-center justify-center cursor-help"><Info className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} /></span></TooltipTrigger><TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl"><p className="text-sm">Коефіцієнти ще не виставлені</p></TooltipContent></Tooltip>}</td>
-      <td className={`py-3 px-2 text-center ${colDivider}`}>{true ? <Tooltip><TooltipTrigger asChild><button onClick={() => onShowComment(match)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all"><Eye className="h-4 w-4 text-[#2563EB]" strokeWidth={1.5} /></button></TooltipTrigger><TooltipContent className="bg-[#111827] text-white p-2 rounded-lg"><p className="text-sm">Коментар</p></TooltipContent></Tooltip> : <Tooltip><TooltipTrigger asChild><span className="inline-flex items-center justify-center cursor-help"><Info className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" strokeWidth={1.5} /></span></TooltipTrigger><TooltipContent className="max-w-[200px] bg-[#111827] text-white p-2 rounded-lg"><p className="text-sm">Немає нотаток</p></TooltipContent></Tooltip>}</td>
+      <td className={`py-3 px-2 text-center ${colDivider}`}><Tooltip><TooltipTrigger asChild><button onClick={() => onShowComment(match)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all"><Eye className="h-4 w-4 text-[#2563EB]" strokeWidth={1.5} /></button></TooltipTrigger><TooltipContent className="bg-[#111827] text-white p-2 rounded-lg"><p className="text-sm">Коментар</p></TooltipContent></Tooltip></td>
       <td className="py-4 px-3 text-center">
         <div className="flex items-center justify-center gap-1.5">
           <Tooltip><TooltipTrigger asChild><button onClick={() => onAddToBets(match)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all"><PlusCircle className="h-4 w-4" strokeWidth={1.5} /></button></TooltipTrigger><TooltipContent className="bg-[#111827] text-white p-2 rounded-lg"><p className="text-sm">Додати до Записів</p></TooltipContent></Tooltip>

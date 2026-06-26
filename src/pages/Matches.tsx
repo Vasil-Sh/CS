@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,8 +18,6 @@ import {
   Flame,
   Shield,
   AlertCircle,
-  Eye,
-  Lightbulb,
   Brain,
   ArrowUpRight,
   ArrowDownRight,
@@ -28,12 +26,7 @@ import {
   Radio,
   ArrowUp,
   ArrowDown,
-  Info,
-  Filter,
-  ThumbsUp,
-  ThumbsDown,
   PlusCircle,
-  CircleCheck,
   Layers,
   X,
   ChevronDown
@@ -415,8 +408,6 @@ const cardBaseStyle = CARD_BASE_STYLE;
 
 const cardHoverStyle = CARD_HOVER_STYLE;
 
-const chartCardShadow = CHART_CARD_SHADOW;
-
 /** Column divider style — right border */
 const colDivider = 'border-r border-[#E5E7EB]';
 
@@ -426,24 +417,10 @@ const getDayOfWeek = (date: Date): string => {
   return days[date.getDay()];
 };
 
-/** Truncate tournament name to a max length, adding ellipsis */
-const truncateTournament = (name: string, maxLen = 28): string => {
-  if (name.length <= maxLen) return name;
-  return name.slice(0, maxLen).trimEnd() + '…';
-};
-
 /** Format date key for grouping: "YYYY-MM-DD" */
 const getDateKey = (dateStr: string): string => {
   const d = new Date(dateStr);
   return d.toISOString().split('T')[0];
-};
-
-/** Format date group header: "Ср, 01.04.2026" */
-const formatDateGroupHeader = (dateKey: string): string => {
-  const d = new Date(dateKey + 'T12:00:00');
-  const dayShort = getDayOfWeek(d);
-  const formatted = d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  return `${dayShort}, ${formatted}`;
 };
 
 /** Format full date title: "Counter-Strike matches (Четвер, 18.06.2026)" */
@@ -468,7 +445,6 @@ export default function Matches() {
   logRender('Matches');
   const { user } = useAuth();
   const currentUser = user?.username || '';
-  const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
 
   const [matches, setMatches] = useState<Match[]>([]);
