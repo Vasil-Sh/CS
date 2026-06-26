@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
-import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Zap, Percent, CheckCircle2, Sparkles, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Zap, Percent, CheckCircle2, Sparkles, ChevronDown, Shield, ListChecks, Activity, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/contexts/AuthContext';

@@ -4,13 +4,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   TrendingUp, TrendingDown, AlertTriangle, AlertCircle,
   ThumbsUp, ThumbsDown, Lightbulb, Eye, PlusCircle,
-  Clock, CheckCircle2, Radio, Brain, Flame, Shield, Layers, CircleCheck,
+  Clock, CheckCircle2, Radio, Brain, Flame, Shield, Layers, CircleCheck, Info,
 } from 'lucide-react';
 
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
 type MatchRating = 'like' | 'dislike' | null;
-
-import React from 'react';
 
 interface Match {
   id: string; date: string; team1: string; team2: string; favorite: string;
