@@ -3,10 +3,22 @@ import { Component, type ReactNode } from 'react';
 import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserDataService } from './lib/userDataService';
+import { validateEnv, getMissingEnvVars } from './lib/envValidation';
+import { initErrorMonitoring } from './lib/errorMonitor';
 import './index.css';
+
+// Validate environment variables
+const env = validateEnv();
+if (import.meta.env.DEV) {
+  const missing = getMissingEnvVars(env);
+  if (missing.length > 0) console.warn('[Env] Missing optional vars:', missing);
+}
 
 // Repair any user-scoped keys corrupted by old backup import
 UserDataService.repairAllUserKeys();
+
+// Initialize error monitoring in production
+if (import.meta.env.PROD) initErrorMonitoring();
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
