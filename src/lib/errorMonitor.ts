@@ -14,7 +14,7 @@ interface ErrorReport {
 const MAX_BATCH = 10;
 const FLUSH_INTERVAL = 30_000; // 30s
 
-let queue: ErrorReport[] = [];
+const queue: ErrorReport[] = [];
 let timer: ReturnType<typeof setInterval> | null = null;
 
 function createReport(error: Error): ErrorReport {
