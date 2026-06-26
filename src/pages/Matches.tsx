@@ -57,6 +57,7 @@ import {
 import { PageHeader } from '@/components/PageHeader';
 import AIRecommendationModal from '@/components/AIRecommendationModal';
 import CommentModal from '@/components/CommentModal';
+import { MatchesLoadingState, MatchesEmptyState } from '@/components/matches/MatchStates';
 import { deepSeekService, type AIRecommendation } from '@/lib/deepSeekService';
 import {
   fetchTodaysAndUpcomingMatches,
@@ -1423,15 +1424,7 @@ export default function Matches() {
           {initialLoading && (
             <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CardContent className="py-16 text-center">
-                <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                  <Loader2 className="h-16 w-16 text-[#2563EB] animate-spin" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">
-                  Завантаження матчів
-                </h3>
-                <p className="text-[#6B7280] text-sm">
-                  Отримання актуальних даних з API...
-                </p>
+                <MatchesLoadingState />
               </CardContent>
             </Card>
           )}
@@ -1439,18 +1432,10 @@ export default function Matches() {
           {!initialLoading && sortedMatches.length === 0 && (
             <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CardContent className="py-16 text-center">
-                <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                  <Trophy className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">
-                  Матчів не знайдено
-                </h3>
-                <p className="text-[#6B7280] text-sm mb-6">
-                  Оновіть дані або змініть фільтри для пошуку матчів
-                </p>
+                <MatchesEmptyState error={apiError || undefined} />
                 <Button
                   onClick={refreshMatches}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors mt-4"
                 >
                   <RefreshCw className="h-4 w-4" strokeWidth={2} />
                   Спробувати знову

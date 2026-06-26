@@ -8,15 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip as UITooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { realGoogleSheetsService, CS2Strategy } from '@/lib/realGoogleSheets';
-import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Info, Search, ArrowUpDown, Filter, Eye, Zap, TrendingDown, Percent, CheckCircle2, Sparkles, DollarSign, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Zap, Percent, CheckCircle2, Sparkles, ChevronDown, Shield, ListChecks, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserDataService } from '@/lib/userDataService';
 import { logRender } from '@/lib/devLogger';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 // Extracted sub-components
 import StrategyTabNav from '@/components/strategy/StrategyTabNav';
 import StrategyEmptyState from '@/components/strategy/StrategyEmptyState';
@@ -27,8 +25,6 @@ import StrategyOverallStats from '@/components/strategy/StrategyOverallStats';
 import StrategyTopRoiList from '@/components/strategy/StrategyTopRoiList';
 import StrategyRecommendations from '@/components/strategy/StrategyRecommendations';
 import StrategyPerformanceCharts from '@/components/strategy/StrategyPerformanceCharts';
-import StrategySparkline from '@/components/strategy/StrategySparkline';
-import TrendIndicator from '@/components/strategy/TrendIndicator';
 
 interface BetData {
   strategy?: string;
@@ -359,15 +355,6 @@ export default function StrategyOverview() {
     }
   };
 
-  const getRiskBarColor = (risk: string) => {
-    switch (risk) {
-      case 'Low': return '#22C55E';
-      case 'Medium': return '#F59E0B';
-      case 'High': return '#EF4444';
-      default: return '#6B7280';
-    }
-  };
-
   const getRiskIcon = (risk: string) => {
     switch (risk) {
       case 'Low': return <Target className="h-4 w-4" strokeWidth={1.5} />;
@@ -586,108 +573,6 @@ export default function StrategyOverview() {
     setDetailsDialogOpen(true);
   };
 
-  const renderSparkline = (profitHistory?: number[]) => {
-    if (!profitHistory || profitHistory.length < 2) {
-      return <div className="h-10 flex items-center justify-center text-xs text-[#9CA3AF]">Немає даних</div>;
-    }
-
-    const max = Math.max(...profitHistory);
-    const min = Math.min(...profitHistory);
-    const range = max - min || 1;
-    const padding = 4; // padding in pixel-like units for the SVG
-    const width = 200;
-    const height = 40;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
-
-    const points = profitHistory.map((value, index) => {
-      const x = padding + (index / (profitHistory.length - 1)) * chartWidth;
-      const y = padding + (1 - (value - min) / range) * chartHeight;
-      return { x, y };
-    });
-
-    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-
-    // Create area fill path (closed shape under the line)
-    const areaD = pathD + ` L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
-
-    const lastValue = profitHistory[profitHistory.length - 1];
-    const firstValue = profitHistory[0];
-    const trend = lastValue >= firstValue ? 'up' : 'down';
-    const strokeColor = trend === 'up' ? '#22C55E' : '#EF4444';
-    const fillColor = trend === 'up' ? '#22C55E' : '#EF4444';
-    const gradientId = `sparkline-gradient-${Math.random().toString(36).substr(2, 9)}`;
-
-    // Last point for the dot indicator
-    const lastPoint = points[points.length - 1];
-
-    return (
-      <div className="relative h-10">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-full"
-          preserveAspectRatio="none"
-          style={{ overflow: 'visible' }}
-        >
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={fillColor} stopOpacity="0.2" />
-              <stop offset="100%" stopColor={fillColor} stopOpacity="0.02" />
-            </linearGradient>
-          </defs>
-          {/* Area fill */}
-          <path
-            d={areaD}
-            fill={`url(#${gradientId})`}
-          />
-          {/* Main line */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke={strokeColor}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          {/* End dot */}
-          <circle
-            cx={lastPoint.x}
-            cy={lastPoint.y}
-            r="3"
-            fill={strokeColor}
-            vectorEffect="non-scaling-stroke"
-          />
-          <circle
-            cx={lastPoint.x}
-            cy={lastPoint.y}
-            r="5"
-            fill={strokeColor}
-            opacity="0.3"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      </div>
-    );
-  };
-
-  const getTrendIndicator = (stats: StrategyStats) => {
-    if (!stats.profitHistory || stats.profitHistory.length < 2) return null;
-    
-    const lastValue = stats.profitHistory[stats.profitHistory.length - 1];
-    const prevValue = stats.profitHistory[stats.profitHistory.length - 2];
-    const change = ((lastValue - prevValue) / Math.abs(prevValue)) * 100;
-
-    if (Math.abs(change) < 1) return null;
-
-    return (
-      <div className={`flex items-center justify-center gap-1 text-xs font-medium ${change > 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-        {change > 0 ? <TrendingUp className="h-3 w-3" strokeWidth={1.5} /> : <TrendingDown className="h-3 w-3" strokeWidth={1.5} />}
-        {change > 0 ? '+' : ''}{change.toFixed(1)}%
-      </div>
-    );
-  };
-
   const generateDynamicRecommendations = () => {
     const recommendations: { type: 'info' | 'warning' | 'success'; message: string }[] = [];
 
@@ -775,81 +660,25 @@ export default function StrategyOverview() {
   const winRateChartData = getWinRateChartData();
   const profitChartData = getProfitChartData();
 
-  const tabs = [
-    { id: 'overview', label: 'Огляд стратегій', icon: Eye },
-    { id: 'performance', label: 'Ефективність', icon: BarChart3 },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="space-y-6">
-        {/* Sub-tabs Navigation — unified pill bar with tabs + action button */}
+        {/* Sub-tabs Navigation */}
+        <StrategyTabNav
+          activeTab={activeTab}
+          showFilters={showFilters}
+          onTabChange={setActiveTab}
+          onFilterToggle={() => setShowFilters(!showFilters)}
+        />
+        {/* Create strategy button */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            {/* Info tooltip */}
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger asChild>
-                  <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
-                    <Info className="h-4 w-4" strokeWidth={2} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
-                  <p className="text-sm font-semibold text-[#111827] mb-1">Стратегії</p>
-                  <p className="text-sm text-[#6B7280] leading-relaxed">
-                    Тут ви можете створювати та застосовувати стратегії ставок. Стратегія містить правила — які коефіцієнти, суми, формати матчів обирати. При створенні запису на сторінці «Додати запис» система перевірить, чи не порушуєте ви правила активної стратегії.
-                  </p>
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-
-            {/* Filter toggle button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
-                showFilters
-                  ? 'bg-[#447afc] text-white'
-                  : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]'
-              }`}
-              title="Фільтри"
-            >
-              <Filter className="h-4 w-4" strokeWidth={2} />
-            </button>
-
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out
-                    flex items-center gap-2
-                    ${isActive
-                      ? 'bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)]'
-                      : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] font-light'
-                    }
-                  `}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={1.5} />
-                  {tab.label}
-                </button>
-              );
-            })}
-
-            {/* Divider */}
-            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
-
-            {/* Create strategy button — accent blue pill inside the bar */}
-            <button
-              onClick={() => setActiveTab('create')}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2} />
-              Створити нову
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('create')}
+            className="inline-flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            Створити нову
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -858,77 +687,22 @@ export default function StrategyOverview() {
             <div className="space-y-6">
               {strategies.length === 0 ? (
                 <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                  <div className="py-12 text-center">
-                    <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                      <Brain className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає стратегій</h3>
-                    <p className="text-base text-[#6B7280] mb-4">Створіть свою першу стратегію для ставок на CS2</p>
-                    <Button 
-                      onClick={() => setActiveTab('create')} 
-                      className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
-                    >
-                      <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                      Створити стратегію
-                    </Button>
-                  </div>
+                  <StrategyEmptyState onCreateStrategy={() => setActiveTab('create')} />
                 </div>
               ) : (
                 <>
                   {/* Filters and Search */}
                   {showFilters && (
-                  <div
-                    className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  >
-                    <div className="p-4">
-                      <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1 relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-                          <Input
-                            placeholder="Пошук стратегій..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 rounded-xl border-[#E5E7EB]"
-                          />
-                        </div>
-                        
-                        <Select value={riskFilter} onValueChange={setRiskFilter}>
-                          <SelectTrigger className="w-full md:w-48 rounded-xl border-[#E5E7EB]">
-                            <Filter className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                            <SelectValue placeholder="Фільтр за ризиком" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Всі рівні ризику</SelectItem>
-                            <SelectItem value="Low">Низький ризик</SelectItem>
-                            <SelectItem value="Medium">Середній ризик</SelectItem>
-                            <SelectItem value="High">Високий ризик</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select value={sortBy} onValueChange={(value: 'roi' | 'profit' | 'name') => setSortBy(value)}>
-                          <SelectTrigger className="w-full md:w-48 rounded-xl border-[#E5E7EB]">
-                            <ArrowUpDown className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                            <SelectValue placeholder="Сортування" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="roi">За ROI</SelectItem>
-                            <SelectItem value="profit">За прибутком</SelectItem>
-                            <SelectItem value="name">За назвою</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                          className="rounded-xl border-[#E5E7EB]"
-                        >
-                          {sortOrder === 'desc' ? '↓' : '↑'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                    <StrategyFilters
+                      searchQuery={searchQuery}
+                      riskFilter={riskFilter}
+                      sortBy={sortBy}
+                      sortOrder={sortOrder}
+                      onSearchChange={setSearchQuery}
+                      onRiskFilterChange={setRiskFilter}
+                      onSortByChange={setSortBy}
+                      onSortOrderToggle={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    />
                   )}
 
                   {/* Strategy Cards — wrapped in a white container like GoalsManager */}
@@ -937,88 +711,18 @@ export default function StrategyOverview() {
                       {filteredAndSortedStrategies.map((strategy, index) => {
                         const stats = strategyStats[strategy.name] || {} as StrategyStats;
                         const isPrimary = primaryStrategy === (strategy.id || strategy.name);
-                        
                         return (
-                          <div
-                            key={index}
-                            className={`bg-[#F8FAFC] border rounded-3xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] transition-all flex flex-col ${isPrimary ? 'border-2 border-[#3B82F6]' : 'border border-[#E2E8F0]'}`}
-                          >
-                          <div className="p-5 flex flex-col flex-1">
-                            {/* Card Header */}
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="flex items-center gap-2">
-                                {getRiskIcon(strategy.riskLevel)}
-                                <span className="font-semibold text-[#111827] break-words" title={strategy.name}>{strategy.name}</span>
-                                {isPrimary && (
-                                  <Badge className="bg-[#EFF6FF] text-[#3B82F6] border-0 rounded-full text-xs px-2 py-0.5 font-medium hover:bg-[#EFF6FF]">
-                                    <Star className="h-2.5 w-2.5 mr-0.5 fill-[#3B82F6]" strokeWidth={1.5} />
-                                    Основна
-                                  </Badge>
-                                )}
-                              </span>
-                              <Badge className={getRiskColor(strategy.riskLevel) + ' text-xs px-2.5 py-0.5 font-medium hover:opacity-100'}>
-                                {strategy.riskLevel}
-                              </Badge>
-                            </div>
-                            
-                            {/* Main Stats */}
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="flex flex-col items-center justify-center p-3 bg-white border border-[#E5E7EB] rounded-2xl">
-                                <div className={`text-2xl font-bold ${(stats.roi || 0) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                                  {(stats.roi || 0) >= 0 ? '+' : ''}{stats.roi?.toFixed(1) || 0}%
-                                </div>
-                                <div className="text-xs text-[#6B7280] font-medium mt-1">ROI</div>
-                                {getTrendIndicator(stats)}
-                              </div>
-                              <div className="flex flex-col items-center justify-center p-3 bg-white border border-[#E5E7EB] rounded-2xl">
-                                <div className={`text-2xl font-bold ${(stats.winRate || 0) >= 50 ? 'text-[#3B82F6]' : 'text-[#6B7280]'}`}>
-                                  {stats.winRate?.toFixed(0) || 0}%
-                                </div>
-                                <div className="text-xs text-[#6B7280] font-medium mt-1">Вінрейт</div>
-                                <div className="text-xs text-[#9CA3AF] mt-1">{stats.totalBets || 0} ставок</div>
-                              </div>
-                            </div>
-
-                            {/* Sparkline — always rendered to keep consistent card height */}
-                            <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl mb-4">
-                              <div className="text-xs text-[#6B7280] font-medium mb-2">Тренд прибутку</div>
-                              {(stats.totalBets || 0) > 0 ? (
-                                renderSparkline(stats.profitHistory)
-                              ) : (
-                                <div className="h-10 flex items-center justify-center text-xs text-[#9CA3AF]">
-                                  Немає ставок для цієї стратегії
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Action Buttons — pushed to the bottom */}
-                            <div className="flex gap-2 mt-auto">
-                              <Button
-                                onClick={() => openDetailsDialog(strategy)}
-                                className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold"
-                              >
-                                <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
-                                Деталі
-                              </Button>
-                              <Button
-                                onClick={() => togglePrimaryStrategy(strategy)}
-                                variant="outline"
-                                size="sm"
-                                className={`rounded-xl font-medium ${isPrimary ? 'border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF] hover:bg-[#DBEAFE]' : 'border-[#E5E7EB] hover:bg-[#F9FAFB]'}`}
-                              >
-                                <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#3B82F6]' : ''}`} strokeWidth={1.5} />
-                              </Button>
-                              <Button
-                                onClick={() => confirmDeleteStrategy(strategy.id || strategy.name)}
-                                variant="outline"
-                                size="sm"
-                                className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
-                              >
-                                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                              </Button>
-                            </div>
-                            </div>
-                          </div>
+                          <StrategyCard
+                            key={strategy.id || strategy.name || index}
+                            strategy={strategy}
+                            stats={stats}
+                            isPrimary={isPrimary}
+                            getRiskIcon={getRiskIcon}
+                            getRiskColor={getRiskColor}
+                            onDetails={openDetailsDialog}
+                            onTogglePrimary={togglePrimaryStrategy}
+                            onDelete={confirmDeleteStrategy}
+                          />
                         );
                       })}
                     </div>
@@ -1032,216 +736,27 @@ export default function StrategyOverview() {
             <div className="space-y-6">
               {/* Top Row - 3 Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div
-                  className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                >
-                  <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                      <span className="text-lg font-semibold text-[#111827]">Загальна статистика</span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-[#6B7280]">Всього стратегій:</span>
-                        <span className="font-semibold text-[#111827]">{strategies.length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-[#6B7280]">Всього ставок:</span>
-                        <span className="font-semibold text-[#111827]">{bettingData.length}</span>
-                      </div>
-                      {Object.keys(strategyStats).length > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-sm text-[#6B7280]">Найкраща стратегія:</span>
-                          <span className="font-semibold text-[#22C55E] truncate max-w-[150px]" title={Object.keys(strategyStats).reduce((best, current) => 
-                            (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
-                            Object.keys(strategyStats)[0] || 'Немає'
-                          )}>
-                            {Object.keys(strategyStats).reduce((best, current) => 
-                              (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, 
-                              Object.keys(strategyStats)[0] || 'Немає'
-                            )}
-                          </span>
-                        </div>
-                      )}
-                      {primaryStrategy && (
-                        <div className="flex justify-between">
-                          <span className="text-sm text-[#6B7280]">Основна стратегія:</span>
-                          <span className="font-semibold text-[#111827] flex items-center gap-1 truncate max-w-[150px]" title={getPrimaryStrategyName() || ''}>
-                            <Star className="h-3 w-3 fill-[#3B82F6] text-[#3B82F6] flex-shrink-0" strokeWidth={1.5} />
-                            <span className="truncate">{getPrimaryStrategyName()}</span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                >
-                  <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                    <div className="flex items-center gap-2">
-                      <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                      <span className="text-lg font-semibold text-[#111827]">Топ по ROI</span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="space-y-3">
-                      {Object.entries(strategyStats).length > 0 ? (
-                        Object.entries(strategyStats)
-                          .sort(([,a], [,b]) => (b as StrategyStats).roi - (a as StrategyStats).roi)
-                          .slice(0, 5)
-                          .map(([name, stats]: [string, StrategyStats], index) => (
-                            <div key={name} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <span className="text-sm font-semibold text-[#9CA3AF] flex-shrink-0">#{index + 1}</span>
-                                <span className="text-sm truncate text-[#111827] flex items-center gap-1 font-medium" title={name}>
-                                  <span className="truncate">{name}</span>
-                                  {getPrimaryStrategyName() === name && <Star className="h-3 w-3 fill-[#3B82F6] text-[#3B82F6] flex-shrink-0" strokeWidth={1.5} />}
-                                </span>
-                              </div>
-                              <span className={`text-sm font-bold flex-shrink-0 ml-2 ${stats.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                                {stats.roi >= 0 ? '+' : ''}{stats.roi.toFixed(1)}%
-                              </span>
-                            </div>
-                          ))
-                      ) : (
-                        <p className="text-sm text-[#9CA3AF] text-center py-4">Немає даних для відображення</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                >
-                  <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                    <div className="flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                      <span className="text-lg font-semibold text-[#111827]">Рекомендації</span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="space-y-3 text-sm">
-                      {generateDynamicRecommendations().map((rec, index) => (
-                        <div key={index} className={`p-3 rounded-2xl ${
-                          rec.type === 'info' ? 'bg-[#EFF6FF]' :
-                          rec.type === 'warning' ? 'bg-[#FEF3C7]' :
-                          'bg-[#DCFCE7]'
-                        }`}>
-                          <div className={`font-semibold text-xs mb-1 ${
-                            rec.type === 'info' ? 'text-[#3B82F6]' :
-                            rec.type === 'warning' ? 'text-[#D97706]' :
-                            'text-[#16A34A]'
-                          }`}>
-                            {rec.type === 'info' ? '💡 Порада' :
-                             rec.type === 'warning' ? '⚠️ Увага' :
-                             '✅ Успіх'}
-                          </div>
-                          <div className={`text-sm ${
-                            rec.type === 'info' ? 'text-[#3B82F6]' :
-                            rec.type === 'warning' ? 'text-[#D97706]' :
-                            'text-[#16A34A]'
-                          }`}>
-                            {rec.message}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <StrategyOverallStats
+                  strategiesCount={strategies.length}
+                  betsCount={bettingData.length}
+                  bestStrategy={Object.keys(strategyStats).length > 0 ? Object.keys(strategyStats).reduce((best, current) => (strategyStats[current]?.roi || 0) > (strategyStats[best]?.roi || 0) ? current : best, Object.keys(strategyStats)[0] || 'Немає') : 'Немає'}
+                  primaryStrategyName={getPrimaryStrategyName()}
+                />
+                <StrategyTopRoiList
+                  stats={strategyStats}
+                  primaryStrategyName={getPrimaryStrategyName()}
+                />
+                <StrategyRecommendations
+                  recommendations={generateDynamicRecommendations()}
+                />
               </div>
 
-              {/* Three Separate Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {roiChartData.length > 0 && (
-                  <div
-                    className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  >
-                    <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                      <div className="flex items-center gap-2">
-                        <Percent className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                        <span className="text-base font-semibold text-[#111827]">ROI стратегій</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={roiChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                          <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
-                          <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(1)}%`, 'ROI']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
-                          <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={30}>
-                            {roiChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={getRiskBarColor(entry.riskLevel)} opacity={0.9} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-
-                {winRateChartData.length > 0 && (
-                  <div
-                    className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  >
-                    <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                        <span className="text-base font-semibold text-[#111827]">Вінрейт стратегій</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={winRateChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                          <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
-                          <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Вінрейт (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Вінрейт']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
-                          <Bar dataKey="value" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={30} opacity={0.9} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-
-                {profitChartData.length > 0 && (
-                  <div
-                    className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
-                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                  >
-                    <div className="px-6 py-5 border-b border-[#F3F4F6]">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                        <span className="text-base font-semibold text-[#111827]">Прибуток стратегій</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={profitChartData} margin={{ top: 10, right: 10, left: 10, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                          <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#6B7280', fontWeight: 500 }} />
-                          <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} label={{ value: 'Прибуток (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#6B7280' } }} />
-                          <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' }} formatter={(value: number) => [`${value > 0 ? '+' : ''}${value}₴`, 'Прибуток']} labelFormatter={(label, payload) => { if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; } return label; }} />
-                          <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={30}>
-                            {profitChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.value >= 0 ? '#22C55E' : '#EF4444'} opacity={0.9} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Charts */}
+              <StrategyPerformanceCharts
+                roiData={roiChartData}
+                winRateData={winRateChartData}
+                profitData={profitChartData}
+              />
             </div>
           )}
 

@@ -16,6 +16,8 @@ import CompletedGoalResultModal from '@/components/CompletedGoalResultModal';
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from '@/lib/cardStyles';
 import { logRender } from '@/lib/devLogger';
 import GoalsToolbar from './betting-form/GoalsToolbar';
+import GoalsEmptyState from '@/components/goals/GoalsEmptyState';
+import DeleteGoalDialog from '@/components/goals/DeleteGoalDialog';
 import { 
   Target, 
   TrendingUp, 
@@ -483,17 +485,7 @@ export default function GoalsManager() {
         {activeTab === 'active' && (
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {activeGoals.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                  <Target className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає активних цілей</h3>
-                <p className="text-base text-[#6B7280] mb-4">Створіть першу ціль для відстеження прогресу</p>
-                <Button onClick={() => setShowCreateDialog(true)} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
-                  <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Створити ціль
-                </Button>
-              </div>
+              <GoalsEmptyState type="active" onCreateGoal={() => setShowCreateDialog(true)} />
             ) : (
               <div className="grid grid-cols-3 gap-6">
                 {activeGoals.map(goal => {
@@ -635,13 +627,7 @@ export default function GoalsManager() {
         {activeTab === 'completed' && (
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {completedGoals.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-                  <Trophy className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-1">Немає завершених цілей</h3>
-                <p className="text-base text-[#6B7280]">Завершені цілі з'являться тут</p>
-              </div>
+              <GoalsEmptyState type="completed" onCreateGoal={() => setShowCreateDialog(true)} />
             ) : (
               <div className="grid grid-cols-3 gap-6">
                 {completedGoals.map(goal => {
@@ -945,24 +931,12 @@ export default function GoalsManager() {
       </Dialog>
 
       {/* Delete Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="rounded-3xl border border-[#E5E7EB]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-[#EF4444]">
-              <AlertCircle className="h-5 w-5" strokeWidth={1.5} />
-              Видалити ціль?
-            </DialogTitle>
-            <DialogDescription className="text-base text-[#6B7280]">Ця дія незворотна. Всі дані про прогрес будуть втрачені.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base">Скасувати</Button>
-            <Button onClick={deleteGoal} className="rounded-3xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-medium h-11 px-5 text-base">
-              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Видалити
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteGoalDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        goalName={goals.find(g => g.id === goalToDelete)?.name || ''}
+        onDelete={deleteGoal}
+      />
 
       {/* Details Dialog — ladder */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>

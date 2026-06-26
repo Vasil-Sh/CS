@@ -1,28 +1,32 @@
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Trophy } from 'lucide-react';
 
 export function MatchesLoadingState() {
   return (
-    <div className="py-20 text-center">
-      <div className="flex items-center justify-center gap-2">
-        <RefreshCw className="h-5 w-5 text-[#447afc] animate-spin" strokeWidth={1.5} />
-        <span className="text-base text-[#6B7280] font-medium">Завантаження матчів...</span>
+    <div>
+      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+        <RefreshCw className="h-16 w-16 text-[#3B82F6] animate-spin" strokeWidth={1.5} />
       </div>
-      <p className="text-sm text-[#9CA3AF] mt-2">Отримання актуальних даних з API</p>
+      <h3 className="text-xl font-semibold text-[#111827] mb-2">Завантаження матчів</h3>
+      <p className="text-[#6B7280] text-sm">Отримання актуальних даних з API...</p>
     </div>
   );
 }
 
 export function MatchesEmptyState({ error }: { error?: string }) {
   return (
-    <div className="py-20 text-center">
-      <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
-        <RefreshCw className="h-12 w-12 text-[#9CA3AF]" strokeWidth={1.5} />
+    <div>
+      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+        {error ? (
+          <RefreshCw className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+        ) : (
+          <Trophy className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+        )}
       </div>
-      <h3 className="text-xl font-semibold text-[#111827] mb-1">
-        {error ? 'Помилка завантаження' : 'Немає матчів'}
+      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+        {error ? 'Помилка завантаження' : 'Матчів не знайдено'}
       </h3>
-      <p className="text-base text-[#6B7280]">
-        {error || 'Матчі не знайдені для вибраних фільтрів'}
+      <p className="text-[#6B7280] text-sm">
+        {error || 'Оновіть дані або змініть фільтри для пошуку матчів'}
       </p>
     </div>
   );
