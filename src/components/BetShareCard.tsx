@@ -251,6 +251,13 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
     : 0;
 
   const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
+  const matchTitle = (() => {
+    const parts = matchName.split(' vs ');
+    if (parts.length === 2) {
+      return <>{parts[0]} <span className={isPending ? 'text-[#3B82F6]' : ''}>vs</span> {parts[1]}</>;
+    }
+    return matchName;
+  })();
   const statusText = isWin ? 'Виграш' : isLoss ? 'Програш' : 'Очікується';
   
   const expressLabel = isExpress ? `Експрес ${bet.format}` : '';
@@ -329,7 +336,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 game={game}
               />
               <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}>
-                {matchName}
+                {matchTitle}
               </h3>
               {/* Team 2 icon */}
               <TeamIcon
@@ -433,7 +440,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
               <div className="flex items-center justify-center gap-2">
                 {isWin && <CheckCircle2 className="h-4 w-4" style={{ color: theme.accent }} strokeWidth={1.5} />}
                 <h3 className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}>
-                  {matchName}
+                  {matchTitle}
                 </h3>
               </div>
             </div>
