@@ -30,6 +30,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { t, setLang, getLang, type Lang } from '@/lib/i18n';
 import { useTheme } from '@/hooks/useTheme';
 import { logRender } from '@/lib/devLogger';
+import BackupStatusCard from '@/components/profile/BackupStatusCard';
+import DataStatsCards from '@/components/profile/DataStatsCards';
+import InterfaceSettings from '@/components/profile/InterfaceSettings';
+import BackupSection from '@/components/profile/BackupSection';
 
 export default function Profile() {
   logRender('Profile');
@@ -393,82 +397,13 @@ export default function Profile() {
       <div className="px-6 lg:px-8 pb-8 pt-4 space-y-8">
 
       {/* ===== Backup status card — always visible ===== */}
-      <Card 
-        className="rounded-2xl bg-white overflow-hidden"
-        style={{ boxShadow: chartCardShadow }}
-      >
-        <CardContent className="py-5 px-6 flex items-center gap-4">
-          <div className="p-3 bg-[#FEF2F2] rounded-xl flex-shrink-0">
-            <AlertTriangle className="h-6 w-6 text-[#EF4444]" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="text-base font-semibold text-[#111827]">Останній бекап</p>
-            <p className="text-sm text-[#6B7280] mt-0.5">
-              {lastBackupDate
-                ? lastBackupDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                : 'Бекап ще не робився'}
-            </p>
-          </div>
-          {needsBackupReminder && (
-            <Badge className="ml-auto bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] rounded-lg font-semibold text-xs px-3 py-1 flex-shrink-0 animate-pulse">
-              <AlertTriangle className="h-3 w-3 mr-1" strokeWidth={2} />
-              Зробіть бекап
-            </Badge>
-          )}
-        </CardContent>
-      </Card>
+      <BackupStatusCard lastBackupDate={lastBackupDate} needsBackupReminder={needsBackupReminder} chartCardShadow={chartCardShadow} />
 
       {/* Data Statistics + User Info — unified card */}
       <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
 
       {/* Data Statistics - 5 cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-        <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Ваші ставки</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.bets}</p>
-        </div>
-        <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Ризикові команди</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.riskyTeams}</p>
-        </div>
-        <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Стратегії</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.strategies}</p>
-        </div>
-        <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Цілі</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.goals}</p>
-        </div>
-        <div
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
-          style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
-        >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">Telegram Групи</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats.tgGroups}</p>
-        </div>
-      </div>
+      <DataStatsCards stats={stats} cardBaseStyle={cardBaseStyle} cardHoverStyle={cardHoverStyle} />
 
       {/* User Info Card */}
       <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
