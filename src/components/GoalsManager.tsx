@@ -474,7 +474,7 @@ export default function GoalsManager() {
         activeTab={activeTab}
         isUpdating={isUpdating}
         activeGoalsCount={activeGoals.length}
-        maxGoals={3}
+        maxGoals={25}
         tabs={tabs}
         onTabChange={(id) => setActiveTab(id as 'active' | 'completed')}
         onUpdate={handleManualUpdate}

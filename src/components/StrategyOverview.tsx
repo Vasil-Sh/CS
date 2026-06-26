@@ -485,6 +485,12 @@ export default function StrategyOverview() {
     };
 
     const customStrategies = loadCustomStrategiesFromStorage();
+    if (customStrategies.length >= 25) {
+      toast.error('Досягнуто ліміту стратегій', {
+        description: 'Максимум 25 стратегій. Видаліть непотрібні перед створенням нової.',
+      });
+      return;
+    }
     customStrategies.push(strategy);
     saveCustomStrategiesToStorage(customStrategies);
     
