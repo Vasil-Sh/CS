@@ -17,6 +17,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserDataService } from '@/lib/userDataService';
 import { logRender } from '@/lib/devLogger';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+// Extracted sub-components
+import StrategyTabNav from '@/components/strategy/StrategyTabNav';
+import StrategyEmptyState from '@/components/strategy/StrategyEmptyState';
+import StrategyLoadingSkeleton from '@/components/strategy/StrategyLoadingSkeleton';
+import StrategyFilters from '@/components/strategy/StrategyFilters';
+import StrategyCard from '@/components/strategy/StrategyCard';
+import StrategyOverallStats from '@/components/strategy/StrategyOverallStats';
+import StrategyTopRoiList from '@/components/strategy/StrategyTopRoiList';
+import StrategyRecommendations from '@/components/strategy/StrategyRecommendations';
+import StrategyPerformanceCharts from '@/components/strategy/StrategyPerformanceCharts';
+import StrategySparkline from '@/components/strategy/StrategySparkline';
+import TrendIndicator from '@/components/strategy/TrendIndicator';
 
 interface BetData {
   strategy?: string;
