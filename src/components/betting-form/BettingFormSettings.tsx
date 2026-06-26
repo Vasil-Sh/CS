@@ -1,4 +1,4 @@
-import { Calendar, Flag, Plus, RotateCcw } from 'lucide-react';
+import { Calendar, Plus, RotateCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -159,8 +159,7 @@ export default function BettingFormSettings({
 
             {activeGoals.length > 0 && (
               <div className="space-y-1.5">
-                <Label htmlFor="goalId" className={`${classes.label} flex items-center gap-1.5`}>
-                  <Flag className="h-3.5 w-3.5 text-gray-500" strokeWidth={1.5} />
+                <Label htmlFor="goalId" className={classes.label}>
                   Ціль
                 </Label>
                 <Select value={data.goalId || 'all'} onValueChange={onGoalSelect}>
