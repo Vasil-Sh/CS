@@ -14,6 +14,7 @@ interface Match {
   id: string; date: string; team1: string; team2: string; favorite: string;
   aiConfidence: number; risk: number; matchType: 'Bo1' | 'Bo3' | 'Bo5';
   tier: 'tier1' | 'tier2' | 'tier3'; formStability: FormStability;
+  context?: string;
   matchStatus?: 'upcoming' | 'live' | 'finished';
   score1?: number; score2?: number;
   predictionPercentTeam1?: number | null; predictionPercentTeam2?: number | null;
@@ -88,7 +89,12 @@ export default function MatchRow({
         </div>
       </td>
       <td className={`py-4 px-4 ${colDivider}`}>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
+          {match.context && (
+            <div className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px]" title={match.context}>
+              {match.context}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5"><TeamLogo src={match.logoTeam1} teamName={match.team1} size={28} /><span className="font-semibold text-[#111827] text-base">{match.team1}</span></div>
             <span className="text-[#9CA3AF] text-xs font-medium">vs</span>
