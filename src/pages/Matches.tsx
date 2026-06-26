@@ -110,6 +110,7 @@ interface Match {
   predictionPercentTeam2?: number | null;
   bettingCoefficientTeam1?: number | null;
   bettingCoefficientTeam2?: number | null;
+  stars?: number;
 }
 
 type MatchRating = 'like' | 'dislike' | null;
@@ -214,6 +215,7 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     predictionPercentTeam2: apiMatch.predictionPercentTeam2,
     bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
     bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
+    stars: apiMatch.stars,
   };
 }
 

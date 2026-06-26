@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import {
   TrendingUp, TrendingDown, AlertTriangle, AlertCircle,
   ThumbsUp, ThumbsDown, Lightbulb, Eye, PlusCircle,
-  Clock, CheckCircle2, Radio, Brain, Flame, Shield, Layers, CircleCheck, Info,
+  Clock, CheckCircle2, Radio, Brain, Flame, Shield, Layers, CircleCheck, Info, Star,
 } from 'lucide-react';
 
 type FormStability = 'hot_streak' | 'stable' | 'momentum' | 'falling' | 'slump' | 'inconsistent';
@@ -20,6 +20,7 @@ interface Match {
   predictionPercentTeam1?: number | null; predictionPercentTeam2?: number | null;
   bettingCoefficientTeam1?: number | null; bettingCoefficientTeam2?: number | null;
   logoTeam1?: string | null; logoTeam2?: string | null;
+  stars?: number;
 }
 
 interface AIRecommendation { prediction?: string; confidence?: number; }
@@ -91,7 +92,8 @@ export default function MatchRow({
       <td className={`py-4 px-4 ${colDivider}`}>
         <div className="space-y-1">
           {match.context && (
-            <div className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px]" title={match.context}>
+            <div className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px] flex items-center gap-1" title={match.context}>
+              {(match.stars ?? 0) >= 4 && <Star className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0" strokeWidth={1} />}
               {match.context}
             </div>
           )}
