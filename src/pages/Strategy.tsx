@@ -67,12 +67,14 @@ const computeBestStrategy = (bets: Bet[]) => {
     byStrat[name].stake += (b.originalAmount || b.amount || 0);
     byStrat[name].count++;
   });
-  let best: { name: string; roi: number; count: number } | null = null;
+  let best: { name: string; roi: number; count: number; avgRoi: number } | null = null;
+  let totalRoi = 0; let stratCount = 0;
   Object.entries(byStrat).forEach(([name, s]) => {
-    if (s.count < 3) return;
     const roi = s.stake > 0 ? (s.profit / s.stake) * 100 : 0;
-    if (!best || roi > best.roi) best = { name, roi, count: s.count };
+    if (s.count >= 3) { totalRoi += roi; stratCount++; }
+    if (!best || roi > best.roi) best = { name, roi, count: s.count, avgRoi: 0 };
   });
+  if (best) best.avgRoi = stratCount > 1 ? (totalRoi - best.roi) / (stratCount - 1) : 0;
   return best;
 };
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal|null => {
@@ -178,7 +180,9 @@ export default function Strategy() {
             {/* Найкраща стратегія */}
             <button onClick={() => setActiveTab('strategies')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
               <div className="flex items-center gap-2 mb-2"><div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center"><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div><span className="text-xl font-semibold text-[#111827]">Найкраща стратегія</span></div>
-              {bestStrategy ? <><div className="text-3xl font-bold text-[#111827] mb-1 break-words" title={bestStrategy.name}>{bestStrategy.name}</div><span className={`text-sm font-semibold ${bestStrategy.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>ROI {bestStrategy.roi >= 0 ? '+' : ''}{bestStrategy.roi.toFixed(1)}%</span><span className="text-sm text-[#9CA3AF] ml-1">({bestStrategy.count} ставок)</span></> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Потрібно мін. 3 ставки</span></>}
+              {bestStrategy ? <><div className="text-3xl font-bold text-[#111827] mb-1 break-words" title={bestStrategy.name}>{bestStrategy.name}</div><span className={`text-sm font-semibold ${bestStrategy.roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>ROI {bestStrategy.roi >= 0 ? '+' : ''}{bestStrategy.roi.toFixed(1)}%</span><span className="text-sm text-[#9CA3AF] ml-1">({bestStrategy.count} ставок)</span>
+                {bestStrategy.avgRoi !== 0 && (<div className="mt-2" style={{ height: 22 }}><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><rect x="0" y="4" width={Math.min(100, Math.abs(bestStrategy.roi) * 2.5)} height="14" rx="3" fill={bestStrategy.roi >= 0 ? '#22C55E' : '#EF4444'} opacity="0.85"/><rect x="0" y="4" width={Math.min(100, Math.abs(bestStrategy.avgRoi) * 2.5)} height="14" rx="3" fill="#D1D5DB" opacity="0.6"/><text x="5" y="15" fontSize="8" fill="#fff" fontWeight="bold">{bestStrategy.roi >= 0 ? '+' : ''}{bestStrategy.roi.toFixed(0)}%</text></svg><div className="flex items-center justify-between text-[10px] text-[#9CA3AF] mt-0.5"><span>Найкраща</span><span>Середня</span></div></div>)}
+              </> : <><div className="text-3xl font-bold text-[#9CA3AF] mb-1">—</div><span className="text-sm text-[#9CA3AF]">Потрібно мін. 3 ставки</span></>}
             </button>
             {/* Рівень ризику */}
             <button onClick={() => setActiveTab('risks')} className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
