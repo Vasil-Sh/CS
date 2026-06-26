@@ -275,7 +275,6 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
   const profitValueFont = compact ? 'text-2xl' : 'text-4xl';
   const badgePx = compact ? 'px-4 py-2' : 'px-4 py-2.5';
   const badgeFont = compact ? 'text-sm' : 'text-base';
-  const dividerMx = compact ? '-mx-4' : '-mx-6';
   const cardRadius = compact ? '26px' : '32px';
   const eventPadding = compact ? 'p-3' : 'p-3.5';
   const eventRadius = compact ? '16px' : '20px';
@@ -341,7 +340,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 game={game}
               />
             </div>
-            <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
+            <div className="border-t border-[#F3F4F6]" />
           </>
         )}
 
@@ -426,7 +425,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
               </div>
             )}
 
-            <div className={`${dividerMx} border-t border-[#F3F4F6] mt-3`} />
+            <div className="border-t border-[#F3F4F6] mt-3" />
           </div>
         ) : isExpress && parsedEvents.length === 0 ? (
           <>
@@ -438,7 +437,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 </h3>
               </div>
             </div>
-            <div className={`${dividerMx} border-t border-[#F3F4F6]`} />
+            <div className="border-t border-[#F3F4F6]" />
           </>
         ) : selection ? (
           <>
@@ -455,10 +454,10 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 <BlurReveal isPending={isPending}>{selection}</BlurReveal>
               </p>
             </div>
-            <div className={`${dividerMx} border-t border-gray-100`} />
+            <div className="border-t border-gray-100" />
           </>
         ) : (
-          <div className={`${dividerMx} border-t border-gray-100`} />
+          <div className="border-t border-gray-100" />
         )}
 
         {/* Amount & Odds */}
