@@ -3,6 +3,7 @@ import {
   Trophy, TrendingDown, Calendar, CheckCircle2, Clock, XCircle,
   ChevronDown, ChevronUp, DollarSign, Percent
 } from 'lucide-react';
+import { getBetTypeLabel } from '@/lib/displayHelpers';
 
 interface BetShareCardProps {
   bet: {
@@ -382,31 +383,27 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                         {event.number}
                       </span>
                       <div className="flex items-center gap-1 min-w-0 flex-1 flex-wrap">
-                        {bet.expressLogos?.[index]?.logoTeam1 && (
-                          <img
-                            src={bet.expressLogos[index].logoTeam1!}
-                            alt=""
-                            className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
+                        <img
+                          src={bet.expressLogos?.[index]?.logoTeam1 || (game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                          alt=""
+                          className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
                         <p className="text-lg font-semibold text-gray-900 leading-tight break-words">
                           {event.match}
                         </p>
-                        {bet.expressLogos?.[index]?.logoTeam2 && (
-                          <img
-                            src={bet.expressLogos[index].logoTeam2!}
-                            alt=""
-                            className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
+                        <img
+                          src={bet.expressLogos?.[index]?.logoTeam2 || (game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                          alt=""
+                          className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
                       </div>
                     </div>
                     
                     <div className="space-y-0.5 ml-9">
                       <p className="text-sm text-gray-400 font-medium uppercase tracking-wide">
-                        {event.betType}
+                        {getBetTypeLabel(event.betType, bet.format)}
                       </p>
                       <div className="flex items-center justify-between">
                         <p className="text-base font-bold" style={{ color: theme.accent }}>
