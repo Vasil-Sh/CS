@@ -70,7 +70,7 @@ export default function BettingFormSettings({
         </button>
       </div>
 
-      <div className="p-6 space-y-8">
+      <div className="px-6 pb-6 space-y-8">
         {/* === Section: Basic Settings === */}
         <div className="space-y-4">
           <h3 className={classes.sectionTitle}>
