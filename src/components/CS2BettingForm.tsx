@@ -1000,11 +1000,6 @@ export default function CS2BettingForm({
       }
     }
 
-    if (!formValid) {
-      toast.error("Заповніть усі обов'язкові поля (позначені *)");
-      return;
-    }
-
     const bets = realGoogleSheetsService.getAllRecords();
     const validation = BankrollService.validateBetAmount(
       currentUser,
@@ -1145,20 +1140,6 @@ export default function CS2BettingForm({
   const potentialProfitInCurrency = potentialProfit;
   const stakeInCurrency = formData.stake;
 
-  const formValid =
-    formData.betCategory === "Експрес"
-      ? formData.stake && parseFloat(formData.stake) > 0 && allExpressEventsComplete
-      : !!(
-          formData.team1 &&
-          formData.team2 &&
-          formData.betType &&
-          formData.selection &&
-          formData.odds &&
-          parseFloat(formData.odds) > 1 &&
-          formData.stake &&
-          parseFloat(formData.stake) > 0
-        );
-
   const getCurrencySymbol = () => {
     return "₴";
   };
@@ -1240,6 +1221,20 @@ export default function CS2BettingForm({
     expressEvents.every(
       (e) => e.odds && parseFloat(e.odds) > 0 && e.selection && e.betType,
     );
+
+  const formValid =
+    formData.betCategory === "Експрес"
+      ? formData.stake && parseFloat(formData.stake) > 0 && allExpressEventsComplete
+      : !!(
+          formData.team1 &&
+          formData.team2 &&
+          formData.betType &&
+          formData.selection &&
+          formData.odds &&
+          parseFloat(formData.odds) > 1 &&
+          formData.stake &&
+          parseFloat(formData.stake) > 0
+        );
 
   return (
     <div className="space-y-6">
