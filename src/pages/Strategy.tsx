@@ -171,7 +171,7 @@ export default function Strategy() {
                     const ys = arr.map(v => 14 - (v / rng) * 12);
                     const d = ys.map((y, i) => `${i === 0 ? 'M' : 'L'} ${(i / 6) * 100} ${y}`).join(' ');
                     const area = d + ` L 100 28 L 0 28 Z`;
-                    const lastUp = arr[6] >= 0;
+                    const lastUp = todayPnL.profit >= 0;
                     return <><path d={area} fill={lastUp ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'} /><path d={d} fill="none" stroke={lastUp ? '#22C55E' : '#EF4444'} strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" /></>;
                   })()}
                 </svg>

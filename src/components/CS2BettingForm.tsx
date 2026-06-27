@@ -915,10 +915,16 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
     if (stored) {
       const block = JSON.parse(stored) as { until: number; reason: string };
       if (Date.now() < block.until) {
-        return { blocked: true, reason: block.reason, minutesLeft: Math.ceil((block.until - Date.now()) / 60000) };
+        // If primary strategy was removed or disabled, clear the block
+        if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled) {
+          localStorage.removeItem(blockKey);
+        } else {
+          return { blocked: true, reason: block.reason, minutesLeft: Math.ceil((block.until - Date.now()) / 60000) };
+        }
+      } else {
+        // Block expired — remove
+        localStorage.removeItem(blockKey);
       }
-      // Block expired — remove
-      localStorage.removeItem(blockKey);
     }
 
     const blockAfter = primaryStrategy?.activityLimits?.enabled
