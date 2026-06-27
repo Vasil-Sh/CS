@@ -94,7 +94,10 @@ const BASIC_BET_TYPES: BetTypeGroup[] = [
   },
   {
     category: 'Тотал карт',
-    options: [{ value: 'Total Maps', label: 'Тотал карт' }],
+    options: [
+      { value: 'Total Maps Over 2.5', label: 'Більше 2.5' },
+      { value: 'Total Maps Under 2.5', label: 'Менше 2.5' },
+    ],
   },
   {
     category: 'Фора',

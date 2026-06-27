@@ -111,7 +111,7 @@ export default function BettingFormMatchSection({
         </div>
       );
     }
-    if (group.category.includes("Тотал") && group.options.length > 2) {
+    if (group.category.includes("Тотал")) {
       const unders = group.options.filter((o) => o.label.includes("Менше"));
       const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
