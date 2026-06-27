@@ -87,7 +87,6 @@ export default function BettingFormMatchSection({
     category: string;
     options: { value: string; label: string }[];
   }) => {
-    const isGroupSelected = group.options.some((o) => o.value === tempBetType);
     if (group.category === "Фора") {
       const seen = new Set<string>();
       const negs = group.options.filter(
@@ -96,102 +95,73 @@ export default function BettingFormMatchSection({
       const poss = group.options.filter(
         (o) => o.label.includes("+") && !seen.has(o.label) && seen.add(o.label),
       );
-      const btn = (opt: { value: string; label: string }) => {
-        const isSelected = tempBetType === opt.value;
-        const isAnySelected = !!tempBetType;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setTempBetType(opt.value)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm border ${isSelected ? "bg-[#447afc] text-white border-[#447afc] shadow-md" : isAnySelected ? "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] opacity-60" : "bg-white text-[#111827] border-gray-200 hover:border-[#447afc] hover:text-[#447afc] hover:shadow-md"}`}
-          >
-            {opt.label}
-          </button>
-        );
-      };
+      const opts = [
+        { value: '', label: 'Оберіть фору', disabled: true },
+        ...negs.map(o => ({ ...o, label: `[Мінус] ${o.label}` })),
+        ...poss.map(o => ({ ...o, label: `[Плюс] ${o.label}` })),
+      ];
       return (
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md transition-shadow p-4">
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-3">
-            {group.category}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Мінус
-              </div>
-              {negs.map(btn)}
-            </div>
-            <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Плюс
-              </div>
-              {poss.map(btn)}
-            </div>
-          </div>
+        <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+            <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть фору" /></SelectTrigger>
+            <SelectContent>
+              {opts.map(opt => (
+                <SelectItem key={opt.value || '__empty'} value={opt.value} disabled={opt.value === ''}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       );
     }
     if (group.category === "Тотал") {
-      const unders = group.options.filter((o) => o.label.includes("Менше"));
-      const overs = group.options.filter((o) => o.label.includes("Більше"));
-      const btn = (opt: { value: string; label: string }) => {
-        const isSelected = tempBetType === opt.value;
-        const isAnySelected = !!tempBetType;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setTempBetType(opt.value)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm border ${isSelected ? "bg-[#447afc] text-white border-[#447afc] shadow-md" : isAnySelected ? "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] opacity-60" : "bg-white text-[#111827] border-gray-200 hover:border-[#447afc] hover:text-[#447afc] hover:shadow-md"}`}
-          >
-            {opt.label}
-          </button>
-        );
-      };
       return (
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md transition-shadow p-4">
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-3">
-            {group.category}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Менше
-              </div>
-              {unders.map(btn)}
-            </div>
-            <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Більше
-              </div>
-              {overs.map(btn)}
-            </div>
+        <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+            <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть тотал" /></SelectTrigger>
+            <SelectContent>
+              {group.options.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+    // Small groups (1-3 options) stay as buttons
+    if (group.options.length <= 3) {
+      return (
+        <div className={"bg-white rounded-xl border border-gray-200/80 shadow-sm p-3 " + (tempBetType && group.options.some(o => o.value === tempBetType) ? "border-[#447afc] bg-[#EFF6FF]" : "")}>
+          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="flex flex-wrap gap-1.5">
+            {group.options.map((opt) => {
+              const isSelected = tempBetType === opt.value;
+              return (
+                <button key={opt.value} type="button" onClick={() => setTempBetType(opt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  {opt.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       );
     }
+    // Larger groups get a Select dropdown
     return (
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md transition-shadow p-4">
-        <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-3">
-          {group.category}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {group.options.map((opt) => {
-            const isSelected = tempBetType === opt.value;
-            const isAnySelected = !!tempBetType;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setTempBetType(opt.value)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm border ${isSelected ? "bg-[#447afc] text-white border-[#447afc] shadow-md" : isAnySelected ? "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] opacity-60" : "bg-white text-[#111827] border-gray-200 hover:border-[#447afc] hover:text-[#447afc] hover:shadow-md"}`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+        <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+        <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+          <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
+          <SelectContent>
+            {group.options.map(opt => (
+              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     );
   };
