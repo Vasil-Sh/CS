@@ -55,6 +55,46 @@ export default function BettingFormMatchSection({
   const grouped = getGroupedBetTypeOptions(data.format);
   const maxMaps = data.format === 'BO5' ? 5 : data.format === 'BO3' ? 3 : data.format === 'BO1' ? 1 : 3;
 
+  const renderGroup = (group: { category: string; options: { value: string; label: string }[] }) => {
+    if (group.category === 'Фора') {
+      const lines = ['-2.5','+2.5','-3.5','+3.5','-4.5','+4.5','-5.5','+5.5'];
+      const find = (t: string, s: string) => group.options.find(o => o.label.includes(t) && o.label.includes(s));
+      const hcBtn = (val?: string, lbl?: string) => val
+        ? <button key={val} onClick={() => { onFieldChange('betType', val); setBetModalOpen(false); }} className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${data.betType === val ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{lbl}</button>
+        : <span className="w-full" />;
+      return (
+        <div className="mb-4">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <div className="grid grid-cols-3 text-[10px] font-semibold text-gray-400 bg-gray-50 px-3 py-2">
+              <span>Фора</span><span className="text-center">{data.team1 || 'К1'}</span><span className="text-right">{data.team2 || 'К2'}</span>
+            </div>
+            {lines.map((line, i) => {
+              const isNeg = line.startsWith('-');
+              const absVal = line.substring(1);
+              const oppLine = (isNeg ? '+' : '-') + absVal;
+              return (
+                <div key={line} className={`grid grid-cols-3 items-center px-3 py-2 text-[10px] ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <span className="font-medium text-gray-500">{line} раундів</span>
+                  <span className="text-center">{isNeg ? hcBtn(find('1', line)?.value, line) : hcBtn(find('2', line)?.value, line)}</span>
+                  <span className="text-right">{isNeg ? hcBtn(find('2', line)?.value, line) : hcBtn(find('1', line)?.value, line)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="mb-4">
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{group.category}</div>
+        <div className="flex flex-wrap gap-1.5">{group.options.map(opt => (
+          <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
+        ))}</div>
+      </div>
+    );
+  };
+
   return (<>
     <div className="space-y-4">
         <h3 className={classes.sectionTitle}>
@@ -222,27 +262,9 @@ export default function BettingFormMatchSection({
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
             {/* Tab: Основне */}
-            {betTab === 1 && grouped.main.map(group => (
-              <div key={group.category} className="mb-3">
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{group.category}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {group.options.map(opt => (
-                    <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {betTab === 1 && grouped.main.map(group => renderGroup(group))}
             {/* Tab: Карта N */}
-            {betTab >= 2 && grouped.maps.find(m => m.mapNumber === betTab - 1)?.groups.map(group => (
-              <div key={group.category} className="mb-3">
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{group.category}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {group.options.map(opt => (
-                    <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {betTab >= 2 && (grouped.maps.find(m => m.mapNumber === betTab - 1)?.groups ?? []).map(group => renderGroup(group))}
           </div>
         </div>
       </div>
