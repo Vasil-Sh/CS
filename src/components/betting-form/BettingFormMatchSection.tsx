@@ -214,6 +214,8 @@ export default function BettingFormMatchSection({
           </p>
         </div>
 
+        <div className="border-t border-gray-100" />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="team1" className={classes.label}>
@@ -269,6 +271,8 @@ export default function BettingFormMatchSection({
             </div>
           </div>
         </div>
+
+        <div className="border-t border-gray-100" />
 
         {/* Bet type: button that opens modal */}
         <div className="flex items-end gap-3">
