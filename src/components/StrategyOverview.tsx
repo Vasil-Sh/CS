@@ -1084,10 +1084,10 @@ export default function StrategyOverview() {
             </div>
           </div>
 
-          <div className="border-b border-[#E5E7EB]" />
+          <div className="border-b border-[#E5E7EB] -mx-6" />
 
           {selectedStrategy && (
-            <div className="space-y-6 px-6 py-6">
+            <div className="space-y-6 px-6 py-6 bg-[#F3F4F6] -mx-6">
               {/* Strategy Name & Description Card */}
               <div className="p-5 bg-white rounded-3xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
                 <div className="flex items-start justify-between gap-4">
