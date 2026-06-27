@@ -95,36 +95,38 @@ export default function BettingFormMatchSection({
       const poss = group.options.filter(
         (o) => o.label.includes("+") && !seen.has(o.label) && seen.add(o.label),
       );
-      const opts = [
-        ...negs.map(o => ({ ...o, label: `[Мінус] ${o.label}` })),
-        ...poss.map(o => ({ ...o, label: `[Плюс] ${o.label}` })),
-      ];
       return (
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-          <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
-            <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть фору" /></SelectTrigger>
-            <SelectContent>
-              {opts.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Мінус" /></SelectTrigger>
+              <SelectContent>{negs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+            </Select>
+            <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Плюс" /></SelectTrigger>
+              <SelectContent>{poss.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+            </Select>
+          </div>
         </div>
       );
     }
     if (group.category === "Тотал") {
+      const unders = group.options.filter((o) => o.label.includes("Менше"));
+      const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-          <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
-            <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть тотал" /></SelectTrigger>
-            <SelectContent>
-              {group.options.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Менше" /></SelectTrigger>
+              <SelectContent>{unders.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+            </Select>
+            <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Більше" /></SelectTrigger>
+              <SelectContent>{overs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+            </Select>
+          </div>
         </div>
       );
     }
