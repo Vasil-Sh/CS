@@ -106,7 +106,14 @@ export default function MyBets() {
     const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
     setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets)); 
   }, [currentUser, recentBets, bankrollRefreshKey]);
-  useEffect(() => { fetchUsers(); loadStats(); loadRecentBets(); }, []);
+  useEffect(() => { 
+    const init = async () => {
+      await Promise.all([fetchUsers(), loadRecentBets()]);
+      syncStats();
+      try { const data = await realGoogleSheetsService.getBettingStatistics(); if (data.totalBets > 0) setStats(data); } catch { /* use syncStats result */ }
+    };
+    init();
+  }, []);
   useEffect(() => { if (users.length && currentUser) { const u = users.find(x => x.username.toLowerCase() === currentUser.toLowerCase()); setIsAdmin(u?.isAdmin || false); } }, [users, currentUser]);
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
