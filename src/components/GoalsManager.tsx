@@ -787,7 +787,7 @@ export default function GoalsManager() {
         if (!open) resetNewGoalForm();
       }}>
         <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0">
-          <DialogHeader className="pb-3 px-6">
+          <DialogHeader className="pt-4 pb-3 px-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-[#EFF6FF] rounded-2xl">
                 <Plus className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
@@ -924,7 +924,7 @@ export default function GoalsManager() {
 
           <div className="border-t border-[#E5E7EB]" />
 
-          <DialogFooter className="gap-2 pt-3 px-6">
+          <DialogFooter className="gap-2 pt-3 pb-4 px-6">
             <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base">Скасувати</Button>
             <Button onClick={createGoal} className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
               <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
