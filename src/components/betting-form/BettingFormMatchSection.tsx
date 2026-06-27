@@ -58,29 +58,36 @@ export default function BettingFormMatchSection({
   const renderGroup = (group: { category: string; options: { value: string; label: string }[] }) => {
     if (group.category === 'Фора') {
       const lines = ['-2.5','+2.5','-3.5','+3.5','-4.5','+4.5','-5.5','+5.5'];
-      const find = (t: string, s: string) => group.options.find(o => o.label.includes(t) && o.label.includes(s));
       const hcBtn = (val?: string, lbl?: string) => val
-        ? <button key={val} onClick={() => { onFieldChange('betType', val); setBetModalOpen(false); }} className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${data.betType === val ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{lbl}</button>
+        ? <button key={val} onClick={() => { onFieldChange('betType', val); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === val ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{lbl}</button>
         : <span className="w-full" />;
       return (
         <div className="mb-4">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{group.category}</div>
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <div className="grid grid-cols-3 text-[10px] font-semibold text-gray-400 bg-gray-50 px-3 py-2">
-              <span>Фора</span><span className="text-center">{data.team1 || 'К1'}</span><span className="text-right">{data.team2 || 'К2'}</span>
+          <div className="flex flex-wrap gap-1.5">
+            {lines.map(line => hcBtn(group.options.find(o => o.label.includes(line))?.value, line))}
+          </div>
+        </div>
+      );
+    }
+    if (group.category === 'Тотал') {
+      const unders = group.options.filter(o => o.label.includes('Менше'));
+      const overs = group.options.filter(o => o.label.includes('Більше'));
+      const btn = (opt: { value: string; label: string }) => (
+        <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
+      );
+      return (
+        <div className="mb-4">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-gray-400 uppercase">Менше</div>
+              {unders.map(btn)}
             </div>
-            {lines.map((line, i) => {
-              const isNeg = line.startsWith('-');
-              const absVal = line.substring(1);
-              const oppLine = (isNeg ? '+' : '-') + absVal;
-              return (
-                <div key={line} className={`grid grid-cols-3 items-center px-3 py-2 text-[10px] ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <span className="font-medium text-gray-500">{line} раундів</span>
-                  <span className="text-center">{isNeg ? hcBtn(find('1', line)?.value, line) : hcBtn(find('2', line)?.value, line)}</span>
-                  <span className="text-right">{isNeg ? hcBtn(find('2', line)?.value, line) : hcBtn(find('1', line)?.value, line)}</span>
-                </div>
-              );
-            })}
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-gray-400 uppercase">Більше</div>
+              {overs.map(btn)}
+            </div>
           </div>
         </div>
       );
