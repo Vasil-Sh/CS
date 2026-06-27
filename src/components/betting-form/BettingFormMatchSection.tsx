@@ -130,17 +130,17 @@ export default function BettingFormMatchSection({
         </div>
       );
     }
-    // Small groups (1-3 options) — inline buttons
+    // Small groups (1-3 options) stay as buttons
     if (group.options.length <= 3) {
       return (
-        <div className={"bg-white rounded-xl border border-gray-200/80 shadow-sm p-3 flex items-center justify-between gap-2 " + (tempBetType && group.options.some(o => o.value === tempBetType) ? "border-[#447afc] bg-[#EFF6FF]" : "")}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider shrink-0">{group.category}</div>
-          <div className="flex gap-1 flex-wrap justify-end">
+        <div className={"bg-white rounded-xl border border-gray-200/80 shadow-sm p-3 " + (tempBetType && group.options.some(o => o.value === tempBetType) ? "border-[#447afc] bg-[#EFF6FF]" : "")}>
+          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="flex flex-wrap gap-1.5">
             {group.options.map((opt) => {
               const isSelected = tempBetType === opt.value;
               return (
                 <button key={opt.value} type="button" onClick={() => setTempBetType(opt.value)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
               );
@@ -398,14 +398,15 @@ export default function BettingFormMatchSection({
               ))}
             </div>
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {/* Tab: Основне */}
-              {betTab === 1 && <div className="grid grid-cols-2 gap-2">{grouped.main.map((group) => renderGroup(group))}</div>}
+              {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
               {/* Tab: Карта N */}
               {betTab >= 2 &&
-                <div className="grid grid-cols-2 gap-2">
-                  {(grouped.maps.find((m) => m.mapNumber === betTab - 1)?.groups ?? []).map((group) => renderGroup(group))}
-                </div>}
+                (
+                  grouped.maps.find((m) => m.mapNumber === betTab - 1)
+                    ?.groups ?? []
+                ).map((group) => renderGroup(group))}
             </div>
             {/* Footer with Clear / Cancel / Save buttons */}
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
