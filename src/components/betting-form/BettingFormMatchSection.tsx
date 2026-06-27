@@ -382,7 +382,7 @@ export default function BettingFormMatchSection({
               </button>
             </div>
             {/* Tabs */}
-            <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto">
+            <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto justify-center">
               {[
                 { label: "Основне", idx: 1 },
                 ...Array.from({ length: maxMaps }, (_, i) => ({
