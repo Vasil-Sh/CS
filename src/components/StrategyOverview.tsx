@@ -959,6 +959,8 @@ export default function StrategyOverview() {
               </DialogDescription>
             </div>
           </DialogHeader>
+
+          <div className="border-t border-gray-100 -mx-6" />
           
           {newlyCreatedStrategy && (
             <div className="space-y-4 py-4">
@@ -1046,6 +1048,8 @@ export default function StrategyOverview() {
               </div>
             </div>
           )}
+
+          <div className="border-t border-gray-100 -mx-6 mb-4" />
 
           <DialogFooter className="gap-2">
             <Button
