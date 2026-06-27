@@ -140,8 +140,7 @@ export default function BettingFormMatchSection({
               const isSelected = tempBetType === opt.value;
               return (
                 <button key={opt.value} type="button"
-                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setTempBetType(opt.value); }}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setTempBetType(opt.value); }}
+                  onClick={(e) => { e.stopPropagation(); setTempBetType(opt.value); }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
@@ -363,15 +362,14 @@ export default function BettingFormMatchSection({
 
       {/* Bet Type Modal */}
       {betModalOpen && (
-        <>
-          {/* Backdrop */}
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center"
+          onClick={() => setBetModalOpen(false)}
+        >
           <div
-            className="fixed inset-0 z-50 bg-black/40"
-            onClick={() => setBetModalOpen(false)}
-          />
-          {/* Modal wrapper — pointer-events-none so clicks pass through to backdrop */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-xl mx-4 max-h-[80vh] flex flex-col pointer-events-auto">
+            className="relative bg-white rounded-3xl shadow-xl w-full max-w-xl mx-4 max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
@@ -448,8 +446,7 @@ export default function BettingFormMatchSection({
               </button>
             </div>
           </div>
-          </div>
-        </>
+        </div>
       )}
     </>
   );
