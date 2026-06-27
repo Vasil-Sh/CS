@@ -308,25 +308,21 @@ export default function BettingFormMatchSection({
             </Label>
             <button
               type="button"
-              disabled={!data.team1 || !data.team2 || !data.selection}
+              disabled={!data.team1 || !data.team2}
               onClick={openBetModal}
               className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
                 !data.team1 || !data.team2
                   ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                  : !data.selection
-                    ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                    : data.betType
-                      ? "border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE]"
-                      : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
+                  : data.betType
+                    ? "border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE]"
+                    : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
               }`}
             >
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
-                : !data.selection
-                  ? "Спочатку оберіть команду"
-                  : data.betType
-                    ? `${data.betType} → ${data.selection}`
-                    : "Оберіть тип прогнозу"}
+                : data.betType
+                  ? `${data.betType} → ${data.selection || '?'}`
+                  : "Оберіть тип прогнозу"}
             </button>
           </div>
           <div className="flex-[2] space-y-1.5">
@@ -443,8 +439,20 @@ export default function BettingFormMatchSection({
                     ?.groups ?? []
                 ).map((group) => renderGroup(group))}
             </div>
-            {/* Footer with Save button */}
+            {/* Footer with Clear / Cancel / Save buttons */}
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setTempBetType('')}
+                className={`px-4 h-11 rounded-2xl border font-medium text-sm transition-colors ${
+                  tempBetType
+                    ? 'border-red-200 text-red-500 hover:bg-red-50'
+                    : 'border-gray-200 text-gray-300 cursor-not-allowed'
+                }`}
+                disabled={!tempBetType}
+              >
+                Очистити
+              </button>
               <button
                 type="button"
                 onClick={() => setBetModalOpen(false)}
