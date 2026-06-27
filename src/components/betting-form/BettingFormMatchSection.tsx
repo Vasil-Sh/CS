@@ -87,6 +87,11 @@ export default function BettingFormMatchSection({
     setBetModalOpen(true);
   };
 
+  const cancelBetType = () => {
+    onFieldChange("betType", "");
+    setBetModalOpen(false);
+  };
+
   const saveBetType = () => {
     onFieldChange("betType", tempBetType);
     setBetModalOpen(false);
@@ -374,7 +379,7 @@ export default function BettingFormMatchSection({
       </div>
 
       {/* Bet Type Modal */}
-      <Dialog open={betModalOpen} onOpenChange={setBetModalOpen}>
+      <Dialog open={betModalOpen} onOpenChange={(open) => { if (!open) cancelBetType(); else setBetModalOpen(true); }}>
         <DialogContent
           className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-[#E5E7EB] p-0 gap-0"
           hideCloseButton
@@ -389,7 +394,7 @@ export default function BettingFormMatchSection({
               </div>
               <button
                 type="button"
-                onClick={() => setBetModalOpen(false)}
+                onClick={cancelBetType}
                 className="p-1 hover:bg-gray-100 rounded-lg"
               >
                 <X className="h-5 w-5 text-gray-400" />
@@ -443,7 +448,7 @@ export default function BettingFormMatchSection({
             </button>
             <button
               type="button"
-              onClick={() => setBetModalOpen(false)}
+              onClick={cancelBetType}
               className="flex-1 h-11 rounded-2xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
             >
               Скасувати
