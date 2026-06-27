@@ -940,7 +940,7 @@ export default function StrategyOverview() {
 
       {/* Success Dialog */}
       <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB]">
+        <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB] gap-0">
           <DialogHeader>
             <div className="flex flex-col items-center text-center space-y-4 py-4">
               <div className="relative">
@@ -964,7 +964,7 @@ export default function StrategyOverview() {
           
           {newlyCreatedStrategy && (
             <div className="space-y-4 py-4 bg-[#F3F4F6] -mx-6 px-6">
-              <div className="p-6 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+              <div className="p-6 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-white rounded-xl shadow-sm">
@@ -982,14 +982,14 @@ export default function StrategyOverview() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-[#DCFCE7] rounded-2xl">
+                <div className="p-4 bg-[#DCFCE7] rounded-2xl border border-[#BBF7D0] shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <Percent className="h-4 w-4 text-[#16A34A]" strokeWidth={1.5} />
                     <span className="text-sm font-medium text-[#16A34A]">Очікуваний ROI</span>
                   </div>
                   <div className="text-2xl font-bold text-[#16A34A]">+{newlyCreatedStrategy.expectedROI}%</div>
                 </div>
-                <div className="p-4 bg-[#EFF6FF] rounded-2xl">
+                <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE] shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="h-4 w-4 text-[#3B82F6]" strokeWidth={1.5} />
                     <span className="text-sm font-medium text-[#3B82F6]">Критеріїв</span>
@@ -998,7 +998,7 @@ export default function StrategyOverview() {
                 </div>
               </div>
 
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB]">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <h4 className="font-semibold mb-3 flex items-center gap-2 text-[#111827]">
                   <Lightbulb className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} />
                   Критерії стратегії:
@@ -1016,7 +1016,7 @@ export default function StrategyOverview() {
               {/* Tilt Protection — shown if strategy has activityLimits */}
               {newlyCreatedStrategy.activityLimits?.enabled && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#FEF2F2] rounded-2xl">
+                  <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA] shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
                       <span className="text-sm font-medium text-[#DC2626]">🔒 Блокування після</span>
@@ -1024,7 +1024,7 @@ export default function StrategyOverview() {
                     <div className="text-2xl font-bold text-[#DC2626]">{newlyCreatedStrategy.activityLimits.blockAfterLosses} програшів</div>
                     <p className="text-xs text-[#B91C1C] mt-1">поспіль</p>
                   </div>
-                  <div className="p-4 bg-[#FEF2F2] rounded-2xl">
+                  <div className="p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA] shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={1.5} />
                       <span className="text-sm font-medium text-[#DC2626]">Пауза</span>
@@ -1035,7 +1035,7 @@ export default function StrategyOverview() {
                 </div>
               )}
 
-              <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#DBEAFE]">
+              <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE] shadow-sm">
                 <h4 className="font-semibold mb-2 flex items-center gap-2 text-[#3B82F6] text-sm">
                   <Info className="h-4 w-4" strokeWidth={1.5} />
                   Наступні кроки:
