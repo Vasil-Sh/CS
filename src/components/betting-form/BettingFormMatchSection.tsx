@@ -394,8 +394,9 @@ export default function BettingFormMatchSection({
                   key={tab.idx}
                   type="button"
                   onClick={() => setBetTab(tab.idx)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
+                  {tab.label === "Основне" && <Target className="h-3.5 w-3.5" strokeWidth={2} />}
                   {tab.label}
                 </button>
               ))}
