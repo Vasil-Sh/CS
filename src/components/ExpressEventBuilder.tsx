@@ -217,23 +217,19 @@ export function ExpressEventBuilder({
                         #{index + 1}
                       </Badge>
                       <div className="flex items-center gap-1.5">
-                        {event.logoTeam1 && (
-                          <img
-                            src={event.logoTeam1}
-                            alt={team1Name}
-                            className="h-5 w-5 rounded-full object-contain bg-gray-100"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
+                        <img
+                          src={event.logoTeam1 || (game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                          alt={team1Name}
+                          className="h-5 w-5 rounded-full object-contain bg-gray-100"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
                         <span className="font-medium text-gray-900 text-sm">{event.match}</span>
-                        {event.logoTeam2 && (
-                          <img
-                            src={event.logoTeam2}
-                            alt={team2Name}
-                            className="h-5 w-5 rounded-full object-contain bg-gray-100"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
+                        <img
+                          src={event.logoTeam2 || (game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                          alt={team2Name}
+                          className="h-5 w-5 rounded-full object-contain bg-gray-100"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
                       </div>
                     </div>
                   </div>

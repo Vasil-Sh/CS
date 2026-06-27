@@ -107,23 +107,19 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
 
                         {/* Match name with logos */}
                         <div className="flex items-center gap-1.5">
-                          {logos?.logoTeam1 && (
-                            <img
-                              src={logos.logoTeam1}
-                              alt=""
-                              className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                          )}
+                          <img
+                            src={logos?.logoTeam1 || (bet.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                            alt=""
+                            className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
                           <h4 className="font-semibold text-sm text-gray-900 leading-tight">{event.match}</h4>
-                          {logos?.logoTeam2 && (
-                            <img
-                              src={logos.logoTeam2}
-                              alt=""
-                              className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                          )}
+                          <img
+                            src={logos?.logoTeam2 || (bet.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                            alt=""
+                            className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
                         </div>
 
                         {/* Bet details */}

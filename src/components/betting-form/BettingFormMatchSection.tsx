@@ -240,16 +240,14 @@ export default function BettingFormMatchSection({
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
             <div className="flex items-center gap-2">
-              {data.logoTeam1 && (
-                <img
-                  src={data.logoTeam1}
-                  alt={data.team1}
-                  className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              )}
+              <img
+                src={data.logoTeam1 || (data.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                alt={data.team1 || 'Team 1'}
+                className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
               <Input
                 id="team1"
                 value={data.team1}
@@ -267,16 +265,14 @@ export default function BettingFormMatchSection({
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
             <div className="flex items-center gap-2">
-              {data.logoTeam2 && (
-                <img
-                  src={data.logoTeam2}
-                  alt={data.team2}
-                  className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              )}
+              <img
+                src={data.logoTeam2 || (data.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
+                alt={data.team2 || 'Team 2'}
+                className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
               <Input
                 id="team2"
                 value={data.team2}
