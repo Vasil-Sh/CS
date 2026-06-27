@@ -236,7 +236,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
 
   const betTypeParts = bet.betType.split(' - ');
   const selection = betTypeParts[1] || '';
-  let betCategory = betTypeParts[0] ? translateBetType(betTypeParts[0]) : translateBetType(bet.betType);
+  let betCategory = getBetTypeLabel(betTypeParts[0] || bet.betType, bet.format) || translateBetType(betTypeParts[0]) || translateBetType(bet.betType);
 
   const totalAmount = isPending 
     ? displayAmount * bet.odds 

@@ -181,10 +181,18 @@ export function getGroupedBetTypeOptions(format?: string): SectionedBetTypes {
 /** Reverse-lookup: find the display label for a saved betType value */
 export function getBetTypeLabel(betType: string, format?: string): string {
   if (!betType) return '';
+  // Check flat options first
   const opts = getBetTypeOptions('CS2', format);
   const found = opts.find(o => o.value === betType);
   if (found) return found.label;
+  // Check grouped options (main + maps)
   const grouped = getGroupedBetTypeOptions(format);
+  // Search main groups
+  for (const g of grouped.main) {
+    const f = g.options.find(o => o.value === betType);
+    if (f) return f.label;
+  }
+  // Search map groups
   for (const mg of grouped.maps) {
     for (const g of mg.groups) {
       const f = g.options.find(o => o.value === betType);
