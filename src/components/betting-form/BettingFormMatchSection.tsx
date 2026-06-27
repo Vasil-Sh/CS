@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Plus, Users, X, Target } from "lucide-react";
+import { Link, Plus, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -279,7 +279,7 @@ export default function BettingFormMatchSection({
               type="button"
               disabled={!data.team1 || !data.team2}
               onClick={openBetModal}
-              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-left px-4 flex items-center gap-2 ${
+              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-left px-4 ${
                 !data.team1 || !data.team2
                   ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
                   : data.betType
@@ -287,7 +287,6 @@ export default function BettingFormMatchSection({
                     : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
               }`}
             >
-              <Target className="h-4 w-4 flex-shrink-0" strokeWidth={1.5} />
               <span className="truncate">
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
@@ -394,9 +393,8 @@ export default function BettingFormMatchSection({
                   key={tab.idx}
                   type="button"
                   onClick={() => setBetTab(tab.idx)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
-                  {tab.label === "Основне" && <Target className="h-3.5 w-3.5" strokeWidth={2} />}
                   {tab.label}
                 </button>
               ))}
