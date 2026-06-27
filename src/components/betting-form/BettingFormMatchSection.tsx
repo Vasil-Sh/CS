@@ -279,7 +279,7 @@ export default function BettingFormMatchSection({
               type="button"
               disabled={!data.team1 || !data.team2}
               onClick={openBetModal}
-              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-left px-4 ${
+              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
                 !data.team1 || !data.team2
                   ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
                   : data.betType
@@ -287,13 +287,11 @@ export default function BettingFormMatchSection({
                     : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
               }`}
             >
-              <span className="truncate">
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
                 : data.betType
                   ? `${getBetTypeLabel(data.betType, data.format)} → ${data.selection || '?'}`
                   : "Оберіть тип прогнозу"}
-              </span>
             </button>
           </div>
           <div className="flex-[2] space-y-1.5">
