@@ -140,7 +140,7 @@ export default function BettingFormMatchSection({
               const isSelected = tempBetType === opt.value;
               return (
                 <button key={opt.value} type="button" onClick={() => setTempBetType(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
               );
