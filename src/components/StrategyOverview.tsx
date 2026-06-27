@@ -965,9 +965,8 @@ export default function StrategyOverview() {
           {newlyCreatedStrategy && (
             <div className="space-y-4 py-4 bg-[#F3F4F6] -mx-6 px-6">
               <div className="p-6 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-white rounded-xl shadow-sm">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
                       {getRiskIcon(newlyCreatedStrategy.riskLevel)}
                     </div>
                     <div>
@@ -975,10 +974,6 @@ export default function StrategyOverview() {
                       <p className="text-sm text-[#6B7280] mt-0.5">{newlyCreatedStrategy.description}</p>
                     </div>
                   </div>
-                  <Badge className={getRiskColor(newlyCreatedStrategy.riskLevel) + ' text-xs px-1.5 py-0.5 font-medium hover:opacity-100'}>
-                    {newlyCreatedStrategy.riskLevel} Risk
-                  </Badge>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
