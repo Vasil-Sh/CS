@@ -101,11 +101,11 @@ export default function BettingFormMatchSection({
           <div className="grid grid-cols-2 gap-2">
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Мінус" /></SelectTrigger>
-              <SelectContent>{negs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent onClick={(e) => e.stopPropagation()}>{negs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Плюс" /></SelectTrigger>
-              <SelectContent>{poss.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent onClick={(e) => e.stopPropagation()}>{poss.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
           </div>
         </div>
@@ -120,11 +120,11 @@ export default function BettingFormMatchSection({
           <div className="grid grid-cols-2 gap-2">
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Менше" /></SelectTrigger>
-              <SelectContent>{unders.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent onClick={(e) => e.stopPropagation()}>{unders.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Більше" /></SelectTrigger>
-              <SelectContent>{overs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent onClick={(e) => e.stopPropagation()}>{overs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
           </div>
         </div>
@@ -139,7 +139,9 @@ export default function BettingFormMatchSection({
             {group.options.map((opt) => {
               const isSelected = tempBetType === opt.value;
               return (
-                <button key={opt.value} type="button" onClick={() => setTempBetType(opt.value)}
+                <button key={opt.value} type="button"
+                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setTempBetType(opt.value); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setTempBetType(opt.value); }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
@@ -155,7 +157,7 @@ export default function BettingFormMatchSection({
         <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
         <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
-          <SelectContent>
+          <SelectContent onClick={(e) => e.stopPropagation()}>
             {group.options.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
