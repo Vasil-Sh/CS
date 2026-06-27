@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getGroupedBetTypeOptions } from "@/lib/displayHelpers";
+import { getGroupedBetTypeOptions, getBetTypeLabel } from "@/lib/displayHelpers";
 
 interface FormMatchData {
   game: "CS2" | "Dota2";
@@ -290,7 +290,7 @@ export default function BettingFormMatchSection({
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
                 : data.betType
-                  ? `${data.betType} → ${data.selection || '?'}`
+                  ? `${getBetTypeLabel(data.betType, data.format)} → ${data.selection || '?'}`
                   : "Оберіть тип прогнозу"}
             </button>
           </div>

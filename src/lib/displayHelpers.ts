@@ -167,10 +167,29 @@ export function getGroupedBetTypeOptions(format?: string): SectionedBetTypes {
     maps.push({
       mapNumber: m,
       groups: MAP_BET_TYPES.map(g => ({
-        category: g.category,
+        category: `Карта ${m}: ${g.category}`,
         options: g.options.map(o => ({ value: `Map${m}_${o.value}`, label: o.label })),
       })),
     });
   }
   return { main: BASIC_BET_TYPES, maps };
+}
+
+/** Reverse-lookup: find the display label for a saved betType value */
+export function getBetTypeLabel(betType: string, format?: string): string {
+  if (!betType) return '';
+  const opts = getBetTypeOptions('CS2', format);
+  const found = opts.find(o => o.value === betType);
+  if (found) return found.label;
+  const grouped = getGroupedBetTypeOptions(format);
+  for (const mg of grouped.maps) {
+    for (const g of mg.groups) {
+      const f = g.options.find(o => o.value === betType);
+      if (f) {
+        const catName = g.category.split(': ').slice(1).join(': ') || g.category;
+        return `Карта ${mg.mapNumber}: ${catName}`;
+      }
+    }
+  }
+  return betType;
 }
