@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link, Plus, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,10 +49,6 @@ export default function BettingFormMatchSection({
 }: BettingFormMatchSectionProps) {
   const isExpress = data.betCategory === 'Експрес';
   const showRequired = isExpress && expressEventsCount === 0;
-  const [openMain, setOpenMain] = useState(true);
-  const [openMap, setOpenMap] = useState<number | null>(null);
-  const [openCategory, setOpenCategory] = useState<string | null>(null);
-  const { main, maps } = getGroupedBetTypeOptions(data.format);
 
   return (
     <div className="space-y-4">
