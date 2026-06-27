@@ -401,7 +401,7 @@ export default function BettingFormMatchSection({
               ))}
             </div>
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F3F4F6]">
               {/* Tab: Основне */}
               {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
               {/* Tab: Карта N */}
