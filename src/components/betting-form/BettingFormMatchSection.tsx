@@ -51,13 +51,9 @@ export default function BettingFormMatchSection({
   const isExpress = data.betCategory === 'Експрес';
   const showRequired = isExpress && expressEventsCount === 0;
   const [betModalOpen, setBetModalOpen] = useState(false);
-  const [betTab, setBetTab] = useState(0); // 0=Всі, 1=Основне, 2+=Карта N
+  const [betTab, setBetTab] = useState(1); // 1=Основне, 2+=Карта N
   const grouped = getGroupedBetTypeOptions(data.format);
   const maxMaps = data.format === 'BO5' ? 5 : data.format === 'BO3' ? 3 : data.format === 'BO1' ? 1 : 3;
-  const allTabOptions = [
-    ...grouped.main.flatMap(g => g.options).map(o => ({ ...o, section: 'Основне' })),
-    ...grouped.maps.flatMap(m => m.groups.flatMap(g => g.options).map(o => ({ ...o, section: `Карта ${m.mapNumber}` }))),
-  ];
 
   return (<>
     <div className="space-y-4">
@@ -159,7 +155,7 @@ export default function BettingFormMatchSection({
             <Label className={classes.label}>Тип прогнозу{' '}{showRequired && <span className="text-red-500">*</span>}</Label>
             <button
               type="button"
-              onClick={() => setBetModalOpen(true)}
+              onClick={() => { setBetTab(1); setBetModalOpen(true); }}
               className="w-full h-11 rounded-2xl border border-[#447afc] bg-[#EFF6FF] text-[#447afc] font-medium text-sm hover:bg-[#DBEAFE] transition-colors text-left px-4"
             >
               {data.betType ? data.betType : 'Оберіть тип прогнозу'}
@@ -208,19 +204,12 @@ export default function BettingFormMatchSection({
           </div>
           {/* Tabs */}
           <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto">
-            {[{ label: 'Всі', idx: 0 }, { label: 'Основне', idx: 1 }, ...Array.from({ length: maxMaps }, (_, i) => ({ label: `Карта ${i + 1}`, idx: i + 2 }))].map(tab => (
+            {[{ label: 'Основне', idx: 1 }, ...Array.from({ length: maxMaps }, (_, i) => ({ label: `Карта ${i + 1}`, idx: i + 2 }))].map(tab => (
               <button key={tab.idx} onClick={() => setBetTab(tab.idx)} className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{tab.label}</button>
             ))}
           </div>
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {/* Tab: Всі */}
-            {betTab === 0 && allTabOptions.map(opt => (
-              <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl border transition-colors ${data.betType === opt.value ? 'border-[#447afc] bg-[#EFF6FF]' : 'border-gray-100 hover:bg-gray-50'}`}>
-                <div className="text-sm font-medium text-[#111827]">{opt.label}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{opt.section}</div>
-              </button>
-            ))}
             {/* Tab: Основне */}
             {betTab === 1 && grouped.main.map(group => (
               <div key={group.category} className="mb-3">
