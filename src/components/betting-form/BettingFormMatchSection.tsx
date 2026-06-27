@@ -210,34 +210,41 @@ export default function BettingFormMatchSection({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="selection" className={classes.label}>
+        {/* Selection & Odds in one line */}
+        <div className="flex items-end gap-3">
+          <div className="flex-1 space-y-1.5">
+            <Label className={classes.label}>
               Вибір{' '}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
-            <Select
-              value={data.selection}
-              onValueChange={(value) => onFieldChange('selection', value)}
-              disabled={!data.team1 || !data.team2}
-            >
-              <SelectTrigger className={classes.selectTrigger}>
-                <SelectValue
-                  placeholder={
-                    data.team1 && data.team2
-                      ? 'Оберіть команду'
-                      : 'Спочатку введіть команди'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {data.team1 && <SelectItem value={data.team1}>{data.team1}</SelectItem>}
-                {data.team2 && <SelectItem value={data.team2}>{data.team2}</SelectItem>}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onFieldChange('selection', data.team1)}
+                className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                  data.selection === data.team1
+                    ? 'bg-[#447afc] text-white border-[#447afc]'
+                    : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'
+                }`}
+                disabled={!data.team1}
+              >
+                {data.team1 || 'Команда 1'}
+              </button>
+              <button
+                type="button"
+                onClick={() => onFieldChange('selection', data.team2)}
+                className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                  data.selection === data.team2
+                    ? 'bg-[#447afc] text-white border-[#447afc]'
+                    : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'
+                }`}
+                disabled={!data.team2}
+              >
+                {data.team2 || 'Команда 2'}
+              </button>
+            </div>
           </div>
-
-          <div className="space-y-1.5">
+          <div className="w-32 space-y-1.5">
             <Label htmlFor="odds" className={classes.label}>
               Коефіцієнт{' '}
               {showRequired && <span className="text-red-500">*</span>}
