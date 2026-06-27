@@ -1,9 +1,10 @@
-import { Link, Plus, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Link, Plus, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getBetTypeOptions } from '@/lib/displayHelpers';
+import { getGroupedBetTypeOptions } from '@/lib/displayHelpers';
 
 interface FormMatchData {
   game: 'CS2' | 'Dota2';
@@ -49,6 +50,9 @@ export default function BettingFormMatchSection({
 }: BettingFormMatchSectionProps) {
   const isExpress = data.betCategory === 'Експрес';
   const showRequired = isExpress && expressEventsCount === 0;
+  const [openMap, setOpenMap] = useState<number | null>(1);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const mapGroups = getGroupedBetTypeOptions(data.format);
 
   return (
     <div className="space-y-4">
@@ -144,30 +148,69 @@ export default function BettingFormMatchSection({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="betType" className={classes.label}>
-              Тип прогнозу{' '}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <Select
-              value={data.betType}
-              onValueChange={(value) => onFieldChange('betType', value)}
-              required={!isExpress || (isExpress && expressEventsCount === 0)}
-            >
-              <SelectTrigger className={classes.selectTrigger}>
-                <SelectValue placeholder="Оберіть тип прогнозу" />
-              </SelectTrigger>
-              <SelectContent>
-                {getBetTypeOptions(data.game, data.format).map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Bet type: button groups by map + category */}
+        <div className="space-y-3">
+          <Label className={classes.label}>
+            Тип прогнозу{' '}
+            {showRequired && <span className="text-red-500">*</span>}
+          </Label>
+          {data.betType && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#447afc] bg-[#EFF6FF] px-3 py-1 rounded-lg">{data.betType}</span>
+              <button onClick={() => onFieldChange('betType', '')} className="text-xs text-[#9CA3AF] hover:text-[#EF4444]">× очистити</button>
+            </div>
+          )}
+          <div className="border border-[#E5E7EB] rounded-2xl divide-y divide-[#F3F4F6]">
+            {mapGroups.map((mapGroup) => (
+              <div key={mapGroup.mapNumber}>
+                <button
+                  type="button"
+                  onClick={() => setOpenMap(openMap === mapGroup.mapNumber ? null : mapGroup.mapNumber)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#F9FAFB] transition-colors"
+                >
+                  <span className="text-sm font-semibold text-[#111827]">Карта {mapGroup.mapNumber}</span>
+                  {openMap === mapGroup.mapNumber ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" />}
+                </button>
+                {openMap === mapGroup.mapNumber && (
+                  <div className="px-4 pb-3 space-y-3">
+                    {mapGroup.groups.map((group) => (
+                      <div key={group.category}>
+                        <button
+                          type="button"
+                          onClick={() => setOpenCategory(openCategory === `${mapGroup.mapNumber}-${group.category}` ? null : `${mapGroup.mapNumber}-${group.category}`)}
+                          className="w-full flex items-center gap-2 text-xs font-medium text-[#6B7280] uppercase tracking-wider py-1 hover:text-[#111827]"
+                        >
+                          {openCategory === `${mapGroup.mapNumber}-${group.category}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          {group.category}
+                        </button>
+                        {(openCategory === `${mapGroup.mapNumber}-${group.category}` || group.options.length <= 3) && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {group.options.map((opt) => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => onFieldChange('betType', opt.value)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                  data.betType === opt.value
+                                    ? 'bg-[#447afc] text-white'
+                                    : 'bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB]'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="selection" className={classes.label}>
               Вибір{' '}
