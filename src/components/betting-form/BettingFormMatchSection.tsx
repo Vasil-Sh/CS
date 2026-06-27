@@ -3,7 +3,6 @@ import { Link, Plus, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getGroupedBetTypeOptions } from '@/lib/displayHelpers';
 
 interface FormMatchData {
@@ -50,9 +49,10 @@ export default function BettingFormMatchSection({
 }: BettingFormMatchSectionProps) {
   const isExpress = data.betCategory === 'Експрес';
   const showRequired = isExpress && expressEventsCount === 0;
-  const [openMap, setOpenMap] = useState<number | null>(1);
+  const [openMain, setOpenMain] = useState(true);
+  const [openMap, setOpenMap] = useState<number | null>(null);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
-  const mapGroups = getGroupedBetTypeOptions(data.format);
+  const { main, maps } = getGroupedBetTypeOptions(data.format);
 
   return (
     <div className="space-y-4">
@@ -148,7 +148,7 @@ export default function BettingFormMatchSection({
           </div>
         </div>
 
-        {/* Bet type: button groups by map + category */}
+        {/* Bet type: accordion — Основне + Карта 1/2/3 */}
         <div className="space-y-3">
           <Label className={classes.label}>
             Тип прогнозу{' '}
@@ -161,43 +161,38 @@ export default function BettingFormMatchSection({
             </div>
           )}
           <div className="border border-[#E5E7EB] rounded-2xl divide-y divide-[#F3F4F6]">
-            {mapGroups.map((mapGroup) => (
-              <div key={mapGroup.mapNumber}>
-                <button
-                  type="button"
-                  onClick={() => setOpenMap(openMap === mapGroup.mapNumber ? null : mapGroup.mapNumber)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#F9FAFB] transition-colors"
-                >
-                  <span className="text-sm font-semibold text-[#111827]">Карта {mapGroup.mapNumber}</span>
-                  {openMap === mapGroup.mapNumber ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" />}
+            {/* ── Основне ── */}
+            <div>
+              <button type="button" onClick={() => setOpenMain(!openMain)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#F9FAFB] transition-colors">
+                <span className="text-sm font-semibold text-[#111827]">Основне</span>
+                {openMain ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" />}
+              </button>
+              {openMain && (
+                <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+                  {main.flatMap(g => g.options).map(opt => (
+                    <button key={opt.value} type="button" onClick={() => onFieldChange('betType', opt.value)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB]'}`}>{opt.label}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* ── Карта 1/2/3 ── */}
+            {maps.map((mg) => (
+              <div key={mg.mapNumber}>
+                <button type="button" onClick={() => setOpenMap(openMap === mg.mapNumber ? null : mg.mapNumber)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#F9FAFB] transition-colors">
+                  <span className="text-sm font-semibold text-[#111827]">Карта {mg.mapNumber}</span>
+                  {openMap === mg.mapNumber ? <ChevronUp className="h-4 w-4 text-[#9CA3AF]" /> : <ChevronDown className="h-4 w-4 text-[#9CA3AF]" />}
                 </button>
-                {openMap === mapGroup.mapNumber && (
+                {openMap === mg.mapNumber && (
                   <div className="px-4 pb-3 space-y-3">
-                    {mapGroup.groups.map((group) => (
+                    {mg.groups.map(group => (
                       <div key={group.category}>
-                        <button
-                          type="button"
-                          onClick={() => setOpenCategory(openCategory === `${mapGroup.mapNumber}-${group.category}` ? null : `${mapGroup.mapNumber}-${group.category}`)}
-                          className="w-full flex items-center gap-2 text-xs font-medium text-[#6B7280] uppercase tracking-wider py-1 hover:text-[#111827]"
-                        >
-                          {openCategory === `${mapGroup.mapNumber}-${group.category}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                          {group.category}
+                        <button type="button" onClick={() => setOpenCategory(openCategory === `${mg.mapNumber}-${group.category}` ? null : `${mg.mapNumber}-${group.category}`)} className="w-full flex items-center gap-2 text-xs font-medium text-[#6B7280] uppercase tracking-wider py-1 hover:text-[#111827]">
+                          {openCategory === `${mg.mapNumber}-${group.category}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}{group.category}
                         </button>
-                        {(openCategory === `${mapGroup.mapNumber}-${group.category}` || group.options.length <= 3) && (
+                        {(openCategory === `${mg.mapNumber}-${group.category}` || group.options.length <= 3) && (
                           <div className="flex flex-wrap gap-1.5">
-                            {group.options.map((opt) => (
-                              <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => onFieldChange('betType', opt.value)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                  data.betType === opt.value
-                                    ? 'bg-[#447afc] text-white'
-                                    : 'bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB]'
-                                }`}
-                              >
-                                {opt.label}
-                              </button>
+                            {group.options.map(opt => (
+                              <button key={opt.value} type="button" onClick={() => onFieldChange('betType', opt.value)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB]'}`}>{opt.label}</button>
                             ))}
                           </div>
                         )}
@@ -213,53 +208,15 @@ export default function BettingFormMatchSection({
         {/* Selection & Odds in one line */}
         <div className="flex items-end gap-3">
           <div className="flex-1 space-y-1.5">
-            <Label className={classes.label}>
-              Вибір{' '}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
+            <Label className={classes.label}>Вибір{' '}{showRequired && <span className="text-red-500">*</span>}</Label>
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => onFieldChange('selection', data.team1)}
-                className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                  data.selection === data.team1
-                    ? 'bg-[#447afc] text-white border-[#447afc]'
-                    : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'
-                }`}
-                disabled={!data.team1}
-              >
-                {data.team1 || 'Команда 1'}
-              </button>
-              <button
-                type="button"
-                onClick={() => onFieldChange('selection', data.team2)}
-                className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                  data.selection === data.team2
-                    ? 'bg-[#447afc] text-white border-[#447afc]'
-                    : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'
-                }`}
-                disabled={!data.team2}
-              >
-                {data.team2 || 'Команда 2'}
-              </button>
+              <button type="button" onClick={() => onFieldChange('selection', data.team1)} disabled={!data.team1} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${data.selection === data.team1 ? 'bg-[#447afc] text-white border-[#447afc]' : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'}`}>{data.team1 || 'Команда 1'}</button>
+              <button type="button" onClick={() => onFieldChange('selection', data.team2)} disabled={!data.team2} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${data.selection === data.team2 ? 'bg-[#447afc] text-white border-[#447afc]' : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'}`}>{data.team2 || 'Команда 2'}</button>
             </div>
           </div>
           <div className="w-32 space-y-1.5">
-            <Label htmlFor="odds" className={classes.label}>
-              Коефіцієнт{' '}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <Input
-              id="odds"
-              type="number"
-              step="0.01"
-              min="1.01"
-              value={data.odds}
-              onChange={(e) => onFieldChange('odds', e.target.value)}
-              placeholder="1.65"
-              required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={classes.input}
-            />
+            <Label htmlFor="odds" className={classes.label}>Коефіцієнт{' '}{showRequired && <span className="text-red-500">*</span>}</Label>
+            <Input id="odds" type="number" step="0.01" min="1.01" value={data.odds} onChange={(e) => onFieldChange('odds', e.target.value)} placeholder="1.65" required={!isExpress || (isExpress && expressEventsCount === 0)} className={classes.input} />
           </div>
         </div>
 

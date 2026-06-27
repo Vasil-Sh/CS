@@ -82,68 +82,111 @@ export interface MapBetTypeGroup {
   groups: BetTypeGroup[];
 }
 
-/** Grouped bet type options by map + category — for button-based selection UI */
-export function getGroupedBetTypeOptions(format?: string): MapBetTypeGroup[] {
-  const maxMaps = format === 'BO5' ? 5 : format === 'BO3' ? 3 : format === 'BO1' ? 1 : 5;
+export interface SectionedBetTypes {
+  main: BetTypeGroup[];
+  maps: MapBetTypeGroup[];
+}
+
+const BASIC_BET_TYPES: BetTypeGroup[] = [
+  {
+    category: 'Переможець',
+    options: [{ value: 'Match Winner', label: 'Переможець матчу' }],
+  },
+  {
+    category: 'Тотал карт',
+    options: [{ value: 'Total Maps', label: 'Тотал карт' }],
+  },
+  {
+    category: 'Фора',
+    options: [
+      { value: 'Handicap +1.5', label: 'Фора +1.5' },
+      { value: 'Handicap -1.5', label: 'Фора -1.5' },
+      { value: 'Handicap +2.5', label: 'Фора +2.5' },
+      { value: 'Handicap -2.5', label: 'Фора -2.5' },
+      { value: 'Handicap +3.5', label: 'Фора +3.5' },
+      { value: 'Handicap -3.5', label: 'Фора -3.5' },
+      { value: 'Handicap +4.5', label: 'Фора +4.5' },
+      { value: 'Handicap -4.5', label: 'Фора -4.5' },
+      { value: 'Handicap +5.5', label: 'Фора +5.5' },
+      { value: 'Handicap -5.5', label: 'Фора -5.5' },
+    ],
+  },
+  {
+    category: 'Раунди',
+    options: [
+      { value: 'Pistol Round', label: 'Пістолетний раунд' },
+      { value: 'Total Rounds', label: 'Тотал раундів' },
+    ],
+  },
+];
+
+const MAP_BET_TYPES: BetTypeGroup[] = [
+  {
+    category: 'Переможець',
+    options: [{ value: 'MapWinner', label: 'Переможець' }],
+  },
+  {
+    category: 'Подвійний результат',
+    options: [
+      { value: 'DC_1X', label: '1 Або Нічия' },
+      { value: 'DC_12', label: '1 Або 2' },
+      { value: 'DC_X2', label: '2 Або Нічия' },
+    ],
+  },
+  {
+    category: 'Фора',
+    options: [
+      { value: 'HC_T1-2.5', label: '1 -2.5' },
+      { value: 'HC_T2+2.5', label: '2 +2.5' },
+      { value: 'HC_T1+2.5', label: '1 +2.5' },
+      { value: 'HC_T2-2.5', label: '2 -2.5' },
+      { value: 'HC_T1-3.5', label: '1 -3.5' },
+      { value: 'HC_T2+3.5', label: '2 +3.5' },
+      { value: 'HC_T1+3.5', label: '1 +3.5' },
+      { value: 'HC_T2-3.5', label: '2 -3.5' },
+      { value: 'HC_T1-4.5', label: '1 -4.5' },
+      { value: 'HC_T2+4.5', label: '2 +4.5' },
+      { value: 'HC_T1+4.5', label: '1 +4.5' },
+      { value: 'HC_T2-4.5', label: '2 -4.5' },
+      { value: 'HC_T1-5.5', label: '1 -5.5' },
+      { value: 'HC_T2+5.5', label: '2 +5.5' },
+      { value: 'HC_T1+5.5', label: '1 +5.5' },
+      { value: 'HC_T2-5.5', label: '2 -5.5' },
+    ],
+  },
+  {
+    category: 'Тотал',
+    options: [
+      { value: 'TOT_U19.5', label: 'Менше 19.5' },
+      { value: 'TOT_O19.5', label: 'Більше 19.5' },
+      { value: 'TOT_U20.5', label: 'Менше 20.5' },
+      { value: 'TOT_O20.5', label: 'Більше 20.5' },
+      { value: 'TOT_U21.5', label: 'Менше 21.5' },
+      { value: 'TOT_O21.5', label: 'Більше 21.5' },
+      { value: 'TOT_U22.5', label: 'Менше 22.5' },
+      { value: 'TOT_O22.5', label: 'Більше 22.5' },
+      { value: 'TOT_U23.5', label: 'Менше 23.5' },
+      { value: 'TOT_O23.5', label: 'Більше 23.5' },
+    ],
+  },
+  {
+    category: 'Переможець (без ОТ)',
+    options: [{ value: 'MapW_NoOT', label: 'Переможець (без ОТ)' }],
+  },
+];
+
+/** Sectioned bet types: Основне + Карта 1/2/3 */
+export function getGroupedBetTypeOptions(format?: string): SectionedBetTypes {
+  const maxMaps = format === 'BO5' ? 5 : format === 'BO3' ? 3 : format === 'BO1' ? 1 : 3;
   const maps: MapBetTypeGroup[] = [];
   for (let m = 1; m <= maxMaps; m++) {
     maps.push({
       mapNumber: m,
-      groups: [
-        {
-          category: 'Переможець',
-          options: [{ value: `Map ${m} Winner`, label: 'Переможець' }],
-        },
-        {
-          category: 'Подвійний результат',
-          options: [
-            { value: `Map ${m} Double Chance 1X`, label: '1 Або Нічия' },
-            { value: `Map ${m} Double Chance 12`, label: '1 Або 2' },
-            { value: `Map ${m} Double Chance X2`, label: '2 Або Нічия' },
-          ],
-        },
-        {
-          category: 'Фора',
-          options: [
-            { value: `Map ${m} Handicap T1 -2.5`, label: (m === 1 ? '1' : '2') + ' -2.5' },
-            { value: `Map ${m} Handicap T2 +2.5`, label: (m === 1 ? '2' : '1') + ' +2.5' },
-            { value: `Map ${m} Handicap T1 +2.5`, label: (m === 1 ? '1' : '2') + ' +2.5' },
-            { value: `Map ${m} Handicap T2 -2.5`, label: (m === 1 ? '2' : '1') + ' -2.5' },
-            { value: `Map ${m} Handicap T1 -3.5`, label: (m === 1 ? '1' : '2') + ' -3.5' },
-            { value: `Map ${m} Handicap T2 +3.5`, label: (m === 1 ? '2' : '1') + ' +3.5' },
-            { value: `Map ${m} Handicap T1 +3.5`, label: (m === 1 ? '1' : '2') + ' +3.5' },
-            { value: `Map ${m} Handicap T2 -3.5`, label: (m === 1 ? '2' : '1') + ' -3.5' },
-            { value: `Map ${m} Handicap T1 -4.5`, label: (m === 1 ? '1' : '2') + ' -4.5' },
-            { value: `Map ${m} Handicap T2 +4.5`, label: (m === 1 ? '2' : '1') + ' +4.5' },
-            { value: `Map ${m} Handicap T1 +4.5`, label: (m === 1 ? '1' : '2') + ' +4.5' },
-            { value: `Map ${m} Handicap T2 -4.5`, label: (m === 1 ? '2' : '1') + ' -4.5' },
-            { value: `Map ${m} Handicap T1 -5.5`, label: (m === 1 ? '1' : '2') + ' -5.5' },
-            { value: `Map ${m} Handicap T2 +5.5`, label: (m === 1 ? '2' : '1') + ' +5.5' },
-            { value: `Map ${m} Handicap T1 +5.5`, label: (m === 1 ? '1' : '2') + ' +5.5' },
-            { value: `Map ${m} Handicap T2 -5.5`, label: (m === 1 ? '2' : '1') + ' -5.5' },
-          ],
-        },
-        {
-          category: 'Тотал',
-          options: [
-            { value: `Map ${m} Total Under 19.5`, label: 'Менше 19.5' },
-            { value: `Map ${m} Total Over 19.5`, label: 'Більше 19.5' },
-            { value: `Map ${m} Total Under 20.5`, label: 'Менше 20.5' },
-            { value: `Map ${m} Total Over 20.5`, label: 'Більше 20.5' },
-            { value: `Map ${m} Total Under 21.5`, label: 'Менше 21.5' },
-            { value: `Map ${m} Total Over 21.5`, label: 'Більше 21.5' },
-            { value: `Map ${m} Total Under 22.5`, label: 'Менше 22.5' },
-            { value: `Map ${m} Total Over 22.5`, label: 'Більше 22.5' },
-            { value: `Map ${m} Total Under 23.5`, label: 'Менше 23.5' },
-            { value: `Map ${m} Total Over 23.5`, label: 'Більше 23.5' },
-          ],
-        },
-        {
-          category: 'Переможець (без ОТ)',
-          options: [{ value: `Map ${m} Winner No OT`, label: 'Переможець (без ОТ)' }],
-        },
-      ],
+      groups: MAP_BET_TYPES.map(g => ({
+        category: g.category,
+        options: g.options.map(o => ({ value: `Map${m}_${o.value}`, label: o.label })),
+      })),
     });
   }
-  return maps;
+  return { main: BASIC_BET_TYPES, maps };
 }
