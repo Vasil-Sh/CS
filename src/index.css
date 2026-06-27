@@ -75,12 +75,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  /* Ensure native date input picker icon is always visible */
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 1;
-    cursor: pointer;
-  }
 }
 
 @keyframes shimmer {

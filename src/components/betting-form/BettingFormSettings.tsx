@@ -1,4 +1,4 @@
-import { Calendar, Plus, RotateCcw } from 'lucide-react';
+import { Calendar, Plus, RotateCcw, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,14 +83,17 @@ export default function BettingFormSettings({
               <Label htmlFor="date" className={classes.label}>
                 Дата матчу
               </Label>
-              <Input
-                id="date"
-                type="date"
-                value={data.date}
-                onChange={(e) => onFieldChange('date', e.target.value)}
-                required
-                className={`${classes.input} [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:dark:invert`}
-              />
+              <div className="relative">
+                <Input
+                  id="date"
+                  type="date"
+                  value={data.date}
+                  onChange={(e) => onFieldChange('date', e.target.value)}
+                  required
+                  className={`${classes.input} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer pr-10`}
+                />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" strokeWidth={1.5} />
+              </div>
             </div>
 
             <div className="space-y-1.5">
