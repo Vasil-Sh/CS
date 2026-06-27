@@ -157,10 +157,15 @@ export default function BettingFormMatchSection({
           </div>
           <div className="flex-[2] space-y-1.5">
             <Label className={classes.label}>Вибір{' '}{showRequired && <span className="text-red-500">*</span>}</Label>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => onFieldChange('selection', data.team1)} disabled={!data.team1} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${data.selection === data.team1 ? 'bg-[#447afc] text-white border-[#447afc]' : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'}`}>{data.team1 || 'Команда 1'}</button>
-              <button type="button" onClick={() => onFieldChange('selection', data.team2)} disabled={!data.team2} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${data.selection === data.team2 ? 'bg-[#447afc] text-white border-[#447afc]' : 'bg-white text-[#374151] border-[#E5E7EB] hover:border-[#D1D5DB]'}`}>{data.team2 || 'Команда 2'}</button>
-            </div>
+            <Select value={data.selection} onValueChange={(value) => onFieldChange('selection', value)} disabled={!data.team1 || !data.team2}>
+              <SelectTrigger className={classes.selectTrigger}>
+                <SelectValue placeholder={data.team1 && data.team2 ? 'Оберіть команду' : 'Спочатку введіть команди'} />
+              </SelectTrigger>
+              <SelectContent>
+                {data.team1 && <SelectItem value={data.team1}>{data.team1}</SelectItem>}
+                {data.team2 && <SelectItem value={data.team2}>{data.team2}</SelectItem>}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="odds" className={classes.label}>Коефіцієнт{' '}{showRequired && <span className="text-red-500">*</span>}</Label>
