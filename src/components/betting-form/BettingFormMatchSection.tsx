@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -140,7 +147,7 @@ export default function BettingFormMatchSection({
               const isSelected = tempBetType === opt.value;
               return (
                 <button key={opt.value} type="button"
-                  onClick={(e) => { e.stopPropagation(); setTempBetType(opt.value); }}
+                  onClick={() => setTempBetType(opt.value)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
@@ -361,21 +368,18 @@ export default function BettingFormMatchSection({
       </div>
 
       {/* Bet Type Modal */}
-      {betModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center"
-          onClick={() => setBetModalOpen(false)}
+      <Dialog open={betModalOpen} onOpenChange={setBetModalOpen}>
+        <DialogContent
+          className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-[#E5E7EB] p-0 gap-0"
+          hideCloseButton
         >
-          <div
-            className="relative bg-white rounded-3xl shadow-xl w-full max-w-xl mx-4 max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <DialogHeader className="px-6 py-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
                   <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-[#111827]">Тип прогнозу</h3>
+                <DialogTitle className="text-lg font-semibold text-[#111827]">Тип прогнозу</DialogTitle>
               </div>
               <button
                 type="button"
@@ -385,69 +389,69 @@ export default function BettingFormMatchSection({
                 <X className="h-5 w-5 text-gray-400" />
               </button>
             </div>
-            {/* Tabs */}
-            <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto justify-center">
-              {[
-                { label: "Основне", idx: 1 },
-                ...Array.from({ length: maxMaps }, (_, i) => ({
-                  label: `Карта ${i + 1}`,
-                  idx: i + 2,
-                })),
-              ].map((tab) => (
-                <button
-                  key={tab.idx}
-                  type="button"
-                  onClick={() => setBetTab(tab.idx)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F3F4F6]">
-              {/* Tab: Основне */}
-              {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
-              {/* Tab: Карта N */}
-              {betTab >= 2 &&
-                (
-                  grouped.maps.find((m) => m.mapNumber === betTab - 1)
-                    ?.groups ?? []
-                ).map((group) => renderGroup(group))}
-            </div>
-            {/* Footer with Clear / Cancel / Save buttons */}
-            <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+          </DialogHeader>
+          {/* Tabs */}
+          <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto justify-center">
+            {[
+              { label: "Основне", idx: 1 },
+              ...Array.from({ length: maxMaps }, (_, i) => ({
+                label: `Карта ${i + 1}`,
+                idx: i + 2,
+              })),
+            ].map((tab) => (
               <button
+                key={tab.idx}
                 type="button"
-                onClick={() => setTempBetType('')}
-                className={`px-4 h-11 rounded-2xl border font-medium text-sm transition-colors ${
-                  tempBetType
-                    ? 'border-red-200 text-red-500 hover:bg-red-50'
-                    : 'border-gray-200 text-gray-300 cursor-not-allowed'
-                }`}
-                disabled={!tempBetType}
+                onClick={() => setBetTab(tab.idx)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
               >
-                Очистити
+                {tab.label}
               </button>
-              <button
-                type="button"
-                onClick={() => setBetModalOpen(false)}
-                className="flex-1 h-11 rounded-2xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
-              >
-                Скасувати
-              </button>
-              <button
-                type="button"
-                onClick={saveBetType}
-                disabled={!tempBetType}
-                className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${tempBetType ? "bg-[#447afc] text-white hover:bg-[#3568d4] shadow-sm" : "bg-[#F9FAFB] text-[#9CA3AF] border border-[#E5E7EB] cursor-not-allowed"}`}
-              >
-                Зберегти
-              </button>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F3F4F6]">
+            {/* Tab: Основне */}
+            {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
+            {/* Tab: Карта N */}
+            {betTab >= 2 &&
+              (
+                grouped.maps.find((m) => m.mapNumber === betTab - 1)
+                  ?.groups ?? []
+              ).map((group) => renderGroup(group))}
+          </div>
+          {/* Footer with Clear / Cancel / Save buttons */}
+          <DialogFooter className="px-6 py-4 border-t border-gray-100 flex gap-3 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setTempBetType('')}
+              className={`px-4 h-11 rounded-2xl border font-medium text-sm transition-colors ${
+                tempBetType
+                  ? 'border-red-200 text-red-500 hover:bg-red-50'
+                  : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              }`}
+              disabled={!tempBetType}
+            >
+              Очистити
+            </button>
+            <button
+              type="button"
+              onClick={() => setBetModalOpen(false)}
+              className="flex-1 h-11 rounded-2xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
+            >
+              Скасувати
+            </button>
+            <button
+              type="button"
+              onClick={saveBetType}
+              disabled={!tempBetType}
+              className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${tempBetType ? "bg-[#447afc] text-white hover:bg-[#3568d4] shadow-sm" : "bg-[#F9FAFB] text-[#9CA3AF] border border-[#E5E7EB] cursor-not-allowed"}`}
+            >
+              Зберегти
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
