@@ -136,7 +136,7 @@ const MAX_CONFIDENCE = 95;
 const DEFAULT_MAX_STAKE_PERCENT = 7;
 
 const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
-  date: new Date().toISOString().split("T")[0],
+  date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
   game: "CS2" as "CS2" | "Dota2",
   matchUrl: "",
   tournament: "",
