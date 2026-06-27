@@ -96,20 +96,17 @@ export default function BettingFormMatchSection({
         (o) => o.label.includes("+") && !seen.has(o.label) && seen.add(o.label),
       );
       const opts = [
-        { value: '', label: 'Оберіть фору', disabled: true },
         ...negs.map(o => ({ ...o, label: `[Мінус] ${o.label}` })),
         ...poss.map(o => ({ ...o, label: `[Плюс] ${o.label}` })),
       ];
       return (
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-          <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+          <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
             <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть фору" /></SelectTrigger>
             <SelectContent>
               {opts.map(opt => (
-                <SelectItem key={opt.value || '__empty'} value={opt.value} disabled={opt.value === ''}>
-                  {opt.label}
-                </SelectItem>
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -120,7 +117,7 @@ export default function BettingFormMatchSection({
       return (
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-          <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+          <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
             <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть тотал" /></SelectTrigger>
             <SelectContent>
               {group.options.map(opt => (
@@ -154,7 +151,7 @@ export default function BettingFormMatchSection({
     return (
       <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
         <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-        <Select value={tempBetType} onValueChange={(v) => setTempBetType(v)}>
+        <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
           <SelectContent>
             {group.options.map(opt => (
