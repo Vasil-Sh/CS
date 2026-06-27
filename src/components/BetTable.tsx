@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { Bet } from '@/types/betting';
 import { normalizeDateStr } from '@/lib/utils';
+import { getBetTypeLabel } from '@/lib/displayHelpers';
 
 interface Goal {
   id: string;
@@ -327,7 +328,7 @@ const BetTableMemo = memo(function BetTable({
                             <div className="font-semibold text-base text-gray-900 truncate" title={bet.match || `${bet.team1} vs ${bet.team2}`}>
                               {bet.match || `${bet.team1} vs ${bet.team2}`}
                             </div>
-                            {!isExpress && <div className="text-sm text-gray-400 truncate mt-0.5" title={bet.betType}>{bet.betType}</div>}
+                            {!isExpress && <div className="text-sm text-gray-400 truncate mt-0.5" title={getBetTypeLabel(bet.betType.split(' - ')[0], bet.format)}>{getBetTypeLabel(bet.betType.split(' - ')[0], bet.format)} {bet.betType.includes(' - ') ? `- ${bet.betType.split(' - ').slice(1).join(' - ')}` : ''}</div>}
                             <div className="text-xs text-gray-500 font-medium mt-1.5 flex items-center gap-1">
                               {bet.game && (
                                 <img
@@ -347,8 +348,8 @@ const BetTableMemo = memo(function BetTable({
                               <button onClick={() => onExpressDetails(bet)} className="text-sm text-purple-600 hover:text-purple-700 font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors duration-200">Деталі</button>
                             </div>
                           ) : (
-                            <Badge className="rounded-md bg-blue-50 text-blue-500 border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-blue-50" title={bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}>
-                              {bet.betType.split(' - ')[1] || bet.betType.split(' - ')[0]}
+                            <Badge className="rounded-md bg-blue-50 text-blue-500 border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-blue-50" title={bet.betType.split(' - ')[1] || getBetTypeLabel(bet.betType.split(' - ')[0], bet.format)}>
+                              {bet.betType.split(' - ')[1] || getBetTypeLabel(bet.betType.split(' - ')[0], bet.format)}
                             </Badge>
                           )}
                         </td>
