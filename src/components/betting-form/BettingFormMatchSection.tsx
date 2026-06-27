@@ -396,6 +396,7 @@ export default function BettingFormMatchSection({
               </button>
             </div>
           </DialogHeader>
+          <div className="border-t border-gray-100" />
           {/* Tabs */}
           <div className="flex gap-1 px-4 py-3 border-b border-gray-100 overflow-x-auto justify-center">
             {[
