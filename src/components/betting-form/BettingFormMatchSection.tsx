@@ -57,8 +57,9 @@ export default function BettingFormMatchSection({
 
   const renderGroup = (group: { category: string; options: { value: string; label: string }[] }) => {
     if (group.category === 'Фора') {
-      const negs = group.options.filter(o => o.label.startsWith('1 (-') || o.label.startsWith('2 (-'));
-      const poss = group.options.filter(o => o.label.startsWith('1 (+') || o.label.startsWith('2 (+'));
+      const seen = new Set<string>();
+      const negs = group.options.filter(o => o.label.startsWith('-') && !seen.has(o.label) && seen.add(o.label));
+      const poss = group.options.filter(o => o.label.startsWith('+') && !seen.has(o.label) && seen.add(o.label));
       const btn = (opt: { value: string; label: string }) => (
         <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
       );
