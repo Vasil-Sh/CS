@@ -57,15 +57,23 @@ export default function BettingFormMatchSection({
 
   const renderGroup = (group: { category: string; options: { value: string; label: string }[] }) => {
     if (group.category === 'Фора') {
-      const lines = ['-2.5','+2.5','-3.5','+3.5','-4.5','+4.5','-5.5','+5.5'];
-      const hcBtn = (val?: string, lbl?: string) => val
-        ? <button key={val} onClick={() => { onFieldChange('betType', val); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === val ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{lbl}</button>
-        : <span className="w-full" />;
+      const negs = group.options.filter(o => o.label.startsWith('1 (-') || o.label.startsWith('2 (-'));
+      const poss = group.options.filter(o => o.label.startsWith('1 (+') || o.label.startsWith('2 (+'));
+      const btn = (opt: { value: string; label: string }) => (
+        <button key={opt.value} onClick={() => { onFieldChange('betType', opt.value); setBetModalOpen(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${data.betType === opt.value ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{opt.label}</button>
+      );
       return (
         <div className="mb-4">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{group.category}</div>
-          <div className="flex flex-wrap gap-1.5">
-            {lines.map(line => hcBtn(group.options.find(o => o.label.includes(line))?.value, line))}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-gray-400 uppercase">Мінус</div>
+              {negs.map(btn)}
+            </div>
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-gray-400 uppercase">Плюс</div>
+              {poss.map(btn)}
+            </div>
           </div>
         </div>
       );
