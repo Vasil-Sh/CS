@@ -44,7 +44,9 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 p-6">
+        <div className="border-t border-gray-100" />
+
+        <div className="space-y-4 p-6 bg-[#F3F4F6]">
           {/* Summary Cards — 2×2 grid */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
