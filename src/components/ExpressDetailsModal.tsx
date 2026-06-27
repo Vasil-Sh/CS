@@ -69,7 +69,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
           </div>
 
           {/* Events Section — Collapsible */}
-          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+          <Collapsible open={isEventsOpen} onOpenChange={setIsEventsOpen} className="bg-white/90 rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
             <CollapsibleTrigger className="w-full">
               <div className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-100 transition-colors cursor-pointer">
                 <div className="flex items-center gap-2.5">
