@@ -101,14 +101,6 @@ const BASIC_BET_TYPES: BetTypeGroup[] = [
     options: [
       { value: 'Handicap +1.5', label: '+1.5' },
       { value: 'Handicap -1.5', label: '-1.5' },
-      { value: 'Handicap +2.5', label: '+2.5' },
-      { value: 'Handicap -2.5', label: '-2.5' },
-      { value: 'Handicap +3.5', label: '+3.5' },
-      { value: 'Handicap -3.5', label: '-3.5' },
-      { value: 'Handicap +4.5', label: '+4.5' },
-      { value: 'Handicap -4.5', label: '-4.5' },
-      { value: 'Handicap +5.5', label: '+5.5' },
-      { value: 'Handicap -5.5', label: '-5.5' },
     ],
   },
   {
