@@ -49,15 +49,15 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
         <div className="space-y-4 p-6 bg-[#F3F4F6]">
           {/* Summary Cards — 2×2 grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+            <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Кількість подій</p>
               <p className="text-2xl font-bold text-gray-900">{parsedEvents.length}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+            <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Сума ставки</p>
               <p className="text-2xl font-bold text-gray-900">{amount}{currencySymbol}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+            <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Загальний коефіцієнт</p>
               <p className="text-2xl font-bold text-gray-900">{totalOdds.toFixed(2)}</p>
             </div>
