@@ -109,11 +109,12 @@ export default function MyBets() {
   useEffect(() => { 
     const init = async () => {
       await Promise.all([fetchUsers(), loadRecentBets()]);
-      syncStats();
-      try { const data = await realGoogleSheetsService.getBettingStatistics(); if (data.totalBets > 0) setStats(data); } catch { /* use syncStats result */ }
+      try { const data = await realGoogleSheetsService.getBettingStatistics(); if (data.totalBets > 0) setStats(data); } catch { /* fallback */ }
     };
     init();
   }, []);
+  // Recompute stats whenever bets change
+  useEffect(() => { if (recentBets.length > 0) syncStats(); }, [recentBets, syncStats]);
   useEffect(() => { if (users.length && currentUser) { const u = users.find(x => x.username.toLowerCase() === currentUser.toLowerCase()); setIsAdmin(u?.isAdmin || false); } }, [users, currentUser]);
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
