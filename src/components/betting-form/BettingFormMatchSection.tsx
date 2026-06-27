@@ -94,6 +94,7 @@ export default function BettingFormMatchSection({
     category: string;
     options: { value: string; label: string }[];
   }) => {
+    const safeValue = group.options.some(o => o.value === tempBetType) ? tempBetType : undefined;
     if (group.category.includes("Фора")) {
       const seen = new Set<string>();
       const negs = group.options.filter(
@@ -106,11 +107,11 @@ export default function BettingFormMatchSection({
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
-            <Select value={tempBetType || undefined} onValueChange={(v) => setTempBetType(v || '')}>
+            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Мінус" /></SelectTrigger>
               <SelectContent className="text-gray-800">{negs.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
             </Select>
-            <Select value={tempBetType || undefined} onValueChange={(v) => setTempBetType(v || '')}>
+            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Плюс" /></SelectTrigger>
               <SelectContent className="text-gray-800">{poss.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
             </Select>
@@ -125,11 +126,11 @@ export default function BettingFormMatchSection({
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
-            <Select value={tempBetType || undefined} onValueChange={(v) => setTempBetType(v || '')}>
+            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Менше" /></SelectTrigger>
               <SelectContent className="text-gray-800">{unders.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
             </Select>
-            <Select value={tempBetType || undefined} onValueChange={(v) => setTempBetType(v || '')}>
+            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Більше" /></SelectTrigger>
               <SelectContent className="text-gray-800">{overs.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
             </Select>
@@ -161,7 +162,7 @@ export default function BettingFormMatchSection({
     return (
       <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
         <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
-        <Select value={tempBetType || undefined} onValueChange={(v) => setTempBetType(v || '')}>
+        <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
           <SelectContent className="text-gray-800">
             {group.options.map(opt => (
