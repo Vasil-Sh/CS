@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Plus, Users, X } from "lucide-react";
+import { Link, Plus, Users, X, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -367,9 +367,12 @@ export default function BettingFormMatchSection({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-[#111827]">
-                Тип прогнозу
-              </h3>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
+                  <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-lg font-semibold text-[#111827]">Тип прогнозу</h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setBetModalOpen(false)}
