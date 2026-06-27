@@ -87,7 +87,7 @@ export default function BettingFormMatchSection({
     category: string;
     options: { value: string; label: string }[];
   }) => {
-    if (group.category === "Фора") {
+    if (group.category.includes("Фора")) {
       const seen = new Set<string>();
       const negs = group.options.filter(
         (o) => o.label.includes("-") && !seen.has(o.label) && seen.add(o.label),
@@ -111,7 +111,7 @@ export default function BettingFormMatchSection({
         </div>
       );
     }
-    if (group.category === "Тотал") {
+    if (group.category.includes("Тотал")) {
       const unders = group.options.filter((o) => o.label.includes("Менше"));
       const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
