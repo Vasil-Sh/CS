@@ -81,7 +81,9 @@ export default function BettingFormMatchSection({
 
   const openBetModal = () => {
     setTempBetType(data.betType);
-    setBetTab(1);
+    // Auto-detect tab from betType (e.g. Map1_X → tab 2)
+    const mapMatch = data.betType?.match(/^Map(\d+)_/);
+    setBetTab(mapMatch ? parseInt(mapMatch[1], 10) + 1 : 1);
     setBetModalOpen(true);
   };
 
@@ -95,6 +97,9 @@ export default function BettingFormMatchSection({
     options: { value: string; label: string }[];
   }) => {
     const safeValue = group.options.some(o => o.value === tempBetType) ? tempBetType : undefined;
+    const isGroupSelected = tempBetType && group.options.some(o => o.value === tempBetType);
+    const selectedBorder = "border-[#22C55E] bg-[#F0FDF4]";
+    const defaultBorder = "border-gray-200/80 bg-white";
     if (group.category.includes("Фора")) {
       const seen = new Set<string>();
       const negs = group.options.filter(
@@ -104,7 +109,7 @@ export default function BettingFormMatchSection({
         (o) => o.label.includes("+") && !seen.has(o.label) && seen.add(o.label),
       );
       return (
-        <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
@@ -123,7 +128,7 @@ export default function BettingFormMatchSection({
       const unders = group.options.filter((o) => o.label.includes("Менше"));
       const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
-        <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
@@ -141,7 +146,7 @@ export default function BettingFormMatchSection({
     // Small groups (1-3 options) stay as buttons
     if (group.options.length <= 3) {
       return (
-        <div className={"bg-white rounded-xl border border-gray-200/80 shadow-sm p-3 " + (tempBetType && group.options.some(o => o.value === tempBetType) ? "border-[#447afc] bg-[#EFF6FF]" : "")}>
+        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
           <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
           <div className="flex flex-wrap gap-1.5">
             {group.options.map((opt) => {
@@ -160,7 +165,7 @@ export default function BettingFormMatchSection({
     }
     // Larger groups get a Select dropdown
     return (
-      <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm p-3">
+      <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
         <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
         <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
