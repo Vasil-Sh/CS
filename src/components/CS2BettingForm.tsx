@@ -972,6 +972,11 @@ export default function CS2BettingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formValid) {
+      toast.error("Заповніть усі обов'язкові поля (позначені *)");
+      return;
+    }
+
     if (!BankrollService.isInitialized(currentUser)) {
       toast.warning(
         '⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.',
@@ -993,6 +998,11 @@ export default function CS2BettingForm({
         );
         return;
       }
+    }
+
+    if (!formValid) {
+      toast.error("Заповніть усі обов'язкові поля (позначені *)");
+      return;
     }
 
     const bets = realGoogleSheetsService.getAllRecords();
@@ -1134,6 +1144,20 @@ export default function CS2BettingForm({
   const isHighConfidence = hasConfidence && confidenceValue > 90;
   const potentialProfitInCurrency = potentialProfit;
   const stakeInCurrency = formData.stake;
+
+  const formValid =
+    formData.betCategory === "Експрес"
+      ? formData.stake && parseFloat(formData.stake) > 0 && allExpressEventsComplete
+      : !!(
+          formData.team1 &&
+          formData.team2 &&
+          formData.betType &&
+          formData.selection &&
+          formData.odds &&
+          parseFloat(formData.odds) > 1 &&
+          formData.stake &&
+          parseFloat(formData.stake) > 0
+        );
 
   const getCurrencySymbol = () => {
     return "₴";
@@ -1386,7 +1410,8 @@ export default function CS2BettingForm({
                   isSubmitting ||
                   tiltBlock.blocked ||
                   (formData.betCategory === "Експрес" &&
-                    !allExpressEventsComplete)
+                    !allExpressEventsComplete) ||
+                  !formValid
                 }
                 className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
               >
