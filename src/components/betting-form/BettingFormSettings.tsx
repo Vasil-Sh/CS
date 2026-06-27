@@ -89,7 +89,7 @@ export default function BettingFormSettings({
                 value={data.date}
                 onChange={(e) => onFieldChange('date', e.target.value)}
                 required
-                className={classes.input}
+                className={`${classes.input} [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:dark:invert`}
               />
             </div>
 
