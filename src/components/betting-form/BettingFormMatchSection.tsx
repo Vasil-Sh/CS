@@ -303,7 +303,7 @@ export default function BettingFormMatchSection({
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
                 : data.betType
-                  ? `${getBetTypeLabel(data.betType, data.format)} → ${data.selection || '?'}`
+                  ? getBetTypeLabel(data.betType, data.format)
                   : "Оберіть тип прогнозу"}
             </button>
           </div>
