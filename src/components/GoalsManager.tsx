@@ -944,7 +944,7 @@ export default function GoalsManager() {
 
       {/* Details Dialog — ladder */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0"
+        <DialogContent className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0"
           style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.15), 0 12px 24px rgba(0,0,0,0.1)' }}>
           <div className="px-6 py-5 border-b border-[#E5E7EB]">
             <div className="flex items-center gap-3">
@@ -959,7 +959,7 @@ export default function GoalsManager() {
           </div>
 
           {selectedGoal && (
-            <div className="space-y-5 px-6 pb-6 pt-5">
+            <div className="space-y-5 px-6 pb-6 pt-5 bg-[#F3F4F6]">
               {/* Summary */}
               <div className="grid grid-cols-3 gap-6">
                 <div className="p-5 bg-[#F9FAFB] rounded-3xl border border-[#E5E7EB]"
