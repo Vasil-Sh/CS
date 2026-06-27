@@ -101,11 +101,11 @@ export default function BettingFormMatchSection({
           <div className="grid grid-cols-2 gap-2">
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Мінус" /></SelectTrigger>
-              <SelectContent onClick={(e) => e.stopPropagation()}>{negs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent>{negs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Плюс" /></SelectTrigger>
-              <SelectContent onClick={(e) => e.stopPropagation()}>{poss.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent>{poss.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
           </div>
         </div>
@@ -120,11 +120,11 @@ export default function BettingFormMatchSection({
           <div className="grid grid-cols-2 gap-2">
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Менше" /></SelectTrigger>
-              <SelectContent onClick={(e) => e.stopPropagation()}>{unders.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent>{unders.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
             <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Більше" /></SelectTrigger>
-              <SelectContent onClick={(e) => e.stopPropagation()}>{overs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
+              <SelectContent>{overs.map(opt => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
             </Select>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function BettingFormMatchSection({
         <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
         <Select value={tempBetType || ''} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
-          <SelectContent onClick={(e) => e.stopPropagation()}>
+          <SelectContent>
             {group.options.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
@@ -363,15 +363,15 @@ export default function BettingFormMatchSection({
 
       {/* Bet Type Modal */}
       {betModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          onClick={() => setBetModalOpen(false)}
-        >
-          <div className="fixed inset-0 bg-black/40 pointer-events-none" />
+        <>
+          {/* Backdrop */}
           <div
-            className="relative bg-white rounded-3xl shadow-xl w-full max-w-xl mx-4 max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
+            className="fixed inset-0 z-50 bg-black/40"
+            onClick={() => setBetModalOpen(false)}
+          />
+          {/* Modal wrapper — pointer-events-none so clicks pass through to backdrop */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-xl mx-4 max-h-[80vh] flex flex-col pointer-events-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
@@ -448,7 +448,8 @@ export default function BettingFormMatchSection({
               </button>
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
     </>
   );
