@@ -190,7 +190,7 @@ export function getBetTypeLabel(betType: string, format?: string): string {
       const f = g.options.find(o => o.value === betType);
       if (f) {
         const catName = g.category.split(': ').slice(1).join(': ') || g.category;
-        return `Карта ${mg.mapNumber}: ${catName}`;
+        return `Карта ${mg.mapNumber}: ${catName} ${f.label}`;
       }
     }
   }
