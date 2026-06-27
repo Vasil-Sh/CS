@@ -113,8 +113,6 @@ export default function MyBets() {
     };
     init();
   }, []);
-  // Recompute stats whenever bets change
-  useEffect(() => { if (recentBets.length > 0) syncStats(); }, [recentBets, syncStats]);
   useEffect(() => { if (users.length && currentUser) { const u = users.find(x => x.username.toLowerCase() === currentUser.toLowerCase()); setIsAdmin(u?.isAdmin || false); } }, [users, currentUser]);
   useEffect(() => { if (currentUser) UserDataService.checkAndResetDailyBets(currentUser); }, [currentUser]);
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'mybets_stats', stats); UserDataService.setUserData(currentUser, 'mybets_data', recentBets); } }, [stats, recentBets, currentUser]);
@@ -167,6 +165,9 @@ export default function MyBets() {
       profitByStrategy: [],
     });
   }, [currentUser]);
+
+  // Recompute stats whenever bets change
+  useEffect(() => { if (recentBets.length > 0) syncStats(); }, [recentBets, syncStats]);
 
   const loadRecentBets = useCallback(async () => {
     try { const data = await realGoogleSheetsService.fetchUSDTData(); setRecentBets(data.length > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_data', [])); }
