@@ -5,6 +5,7 @@ import { Trophy, Zap, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import type { Bet } from '@/types/betting';
 import type { ParsedEvent } from '@/lib/parser/expressParser';
+import { getBetTypeLabel } from '@/lib/displayHelpers';
 
 interface ExpressDetailsModalProps {
   bet: Bet | null;
@@ -125,7 +126,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                         {/* Bet details */}
                         <div className="space-y-1 bg-gray-50 rounded-xl p-3 border border-gray-100">
                           <p className="text-xs text-gray-900">
-                            <span className="text-gray-400">Тип:</span> <span className="font-medium ml-1">{event.betType}</span>
+                            <span className="text-gray-400">Тип:</span> <span className="font-medium ml-1">{getBetTypeLabel(event.betType, bet.format)}</span>
                           </p>
                           <p className="text-xs text-gray-900">
                             <span className="text-gray-400">Вибір:</span> <span className="font-semibold ml-1">{event.selection}</span>

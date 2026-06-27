@@ -261,7 +261,7 @@ export function ExpressEventBuilder({
 
                 {!needsOdds && !needsSelection && (
                   <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>{event.betType}:</span>
+                    <span>{getBetTypeLabel(event.betType, format)}:</span>
                     <span className="font-medium text-gray-900">{event.selection}</span>
                     <Badge className="bg-green-50 text-green-600 border-0 rounded-full text-xs font-medium hover:bg-green-50 ml-auto">
                       Коеф {event.odds}
