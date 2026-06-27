@@ -1297,7 +1297,7 @@ export default function CS2BettingForm({
               {!(isExpressFromMatches && expressEvents.length > 0) && (
                 <>
                   <div className="border-t border-gray-100" />
-                  <div className="p-6">
+                  <div className="px-6 pb-6">
                     <BettingFormMatchSection
                       data={{
                         game: formData.game,
@@ -1335,7 +1335,7 @@ export default function CS2BettingForm({
               {(formData.betCategory === "Ординар" ||
                 (formData.betCategory === "Експрес" &&
                   expressEvents.length > 0)) && (
-                <div className="p-6">
+                <div className="px-6 pb-6">
                   <BettingFormFinances
                     data={{
                       stake: formData.stake,
