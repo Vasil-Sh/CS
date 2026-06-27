@@ -7,6 +7,7 @@ import { getBetTypeOptions } from '@/lib/displayHelpers';
 
 interface FormMatchData {
   game: 'CS2' | 'Dota2';
+  format: string;
   betCategory: string;
   matchUrl: string;
   team1: string;
@@ -158,7 +159,7 @@ export default function BettingFormMatchSection({
                 <SelectValue placeholder="Оберіть тип прогнозу" />
               </SelectTrigger>
               <SelectContent>
-                {getBetTypeOptions(data.game).map((option) => (
+                {getBetTypeOptions(data.game, data.format).map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

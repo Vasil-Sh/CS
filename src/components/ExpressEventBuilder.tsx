@@ -36,7 +36,7 @@ export interface ExpressEventBuilderProps {
 
 export function ExpressEventBuilder({
   expressEvents, totalExpressOdds, expressRisk,
-  allExpressEventsComplete, game,
+  allExpressEventsComplete, game, format,
   onUpdateEvent, onRemoveEvent, onClearAll,
 }: ExpressEventBuilderProps) {
   if (expressEvents.length === 0) return null;
@@ -149,7 +149,7 @@ export function ExpressEventBuilder({
                       <SelectValue placeholder="Тип" />
                     </SelectTrigger>
                     <SelectContent>
-                      {getBetTypeOptions(game).map(opt => (
+                      {getBetTypeOptions(game, format).map(opt => (
                         <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                       ))}
                     </SelectContent>

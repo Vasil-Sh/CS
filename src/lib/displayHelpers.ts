@@ -30,7 +30,7 @@ export function getGameEmoji(game: string): string {
 }
 
 /** Bet type options by game. Pure function, no component deps. */
-export function getBetTypeOptions(game: string): { value: string; label: string }[] {
+export function getBetTypeOptions(game: string, format?: string): { value: string; label: string }[] {
   if (game === 'Dota2') {
     return [
       { value: 'Match Winner', label: 'Переможець матчу' },
@@ -45,16 +45,29 @@ export function getBetTypeOptions(game: string): { value: string; label: string 
       { value: 'Roshan', label: 'Рошан' },
     ];
   }
-  return [
+  const maxMaps = format === 'BO5' ? 5 : format === 'BO3' ? 3 : format === 'BO1' ? 1 : 5;
+  const allOptions: { value: string; label: string; maxMap?: number }[] = [
     { value: 'Match Winner', label: 'Переможець матчу' },
     { value: 'Map Winner', label: 'Переможець карти' },
+    { value: 'First Map Winner', label: 'Переможець 1-ї карти', maxMap: 1 },
+    { value: 'Second Map Winner', label: 'Переможець 2-ї карти', maxMap: 2 },
+    { value: 'Third Map Winner', label: 'Переможець 3-ї карти', maxMap: 3 },
+    { value: 'Fourth Map Winner', label: 'Переможець 4-ї карти', maxMap: 4 },
+    { value: 'Fifth Map Winner', label: 'Переможець 5-ї карти', maxMap: 5 },
     { value: 'Total Maps', label: 'Тотал карт' },
     { value: 'Handicap +1.5', label: 'Фора +1.5' },
     { value: 'Handicap -1.5', label: 'Фора -1.5' },
     { value: 'Handicap +2.5', label: 'Фора +2.5' },
     { value: 'Handicap -2.5', label: 'Фора -2.5' },
+    { value: 'Handicap +3.5', label: 'Фора +3.5' },
+    { value: 'Handicap -3.5', label: 'Фора -3.5' },
+    { value: 'Handicap +4.5', label: 'Фора +4.5' },
+    { value: 'Handicap -4.5', label: 'Фора -4.5' },
+    { value: 'Handicap +5.5', label: 'Фора +5.5' },
+    { value: 'Handicap -5.5', label: 'Фора -5.5' },
     { value: 'First Map', label: 'Перша карта' },
     { value: 'Pistol Round', label: 'Пістолетний раунд' },
     { value: 'Total Rounds', label: 'Тотал раундів' },
   ];
+  return allOptions.filter(o => o.maxMap === undefined || o.maxMap <= maxMaps);
 }

@@ -1028,6 +1028,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                     <BettingFormMatchSection
                       data={{
                         game: formData.game,
+                        format: formData.format,
                         betCategory: formData.betCategory,
                         matchUrl: formData.matchUrl,
                         team1: formData.team1,
@@ -1063,6 +1064,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                     isBlocked={tiltBlock.blocked}
                     isHighConfidence={isHighConfidence}
                     showSection={true}
+                    format={formData.format}
                     classes={{ input: inputClass, label: labelClass, sectionTitle: sectionTitleClass }}
                     onFieldChange={(field, value) => setFormData({ ...formData, [field]: value })}
                     onConfidenceChange={handleConfidenceChange}
@@ -1079,6 +1081,7 @@ function getGameFilterValue(formGame: 'CS2' | 'Dota2'): string {
                 expressRisk={expressRisk}
                 allExpressEventsComplete={allExpressEventsComplete}
                 game={formData.game}
+                format={formData.format}
                 onUpdateEvent={updateExpressEvent}
                 onRemoveEvent={removeExpressEvent}
                 onClearAll={clearExpressEvents}
