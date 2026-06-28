@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Palette, Globe, DollarSign, Sun, Moon, RefreshCw } from 'lucide-react';
+import { Palette, Globe, DollarSign, Sun, Moon, RefreshCw, BookOpen } from 'lucide-react';
+import { toast } from 'sonner';
+import { resetOnboarding } from '@/components/OnboardingTour';
 import type { Lang } from '@/lib/i18n';
+import { useState } from 'react';
 
 interface Props {
   theme: 'light' | 'dark';
@@ -19,6 +22,16 @@ export default function InterfaceSettings({
   theme, language, exchangeRate, isFetchingRate,
   onThemeChange, onLanguageChange, onExchangeRateChange, onFetchRate, chartCardShadow,
 }: Props) {
+  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
+
+  const handleResetOnboarding = () => {
+    setIsResettingOnboarding(true);
+    resetOnboarding();
+    setTimeout(() => {
+      setIsResettingOnboarding(false);
+      toast.success('Онбординг скинуто — покажеться при наступному вході');
+    }, 300);
+  };
   return (
     <Card className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300" style={{ boxShadow: chartCardShadow }}>
       <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
@@ -83,6 +96,26 @@ export default function InterfaceSettings({
               <RefreshCw className={`h-4 w-4 mr-1.5 ${isFetchingRate ? "animate-spin" : ""}`} strokeWidth={2} />Оновити
             </Button>
           </div>
+        </div>
+
+        {/* Onboarding Reset */}
+        <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-medium text-[#111827]">Онбординг-тур</p>
+              <p className="text-xs text-[#9CA3AF]">Показати ознайомчий тур для нових користувачів</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isResettingOnboarding}
+            onClick={handleResetOnboarding}
+            className="rounded-xl border-[#D1D5DB] text-[#111827] font-medium text-sm h-9 px-4 hover:bg-[#F3F4F6]"
+          >
+            {isResettingOnboarding ? 'Скидання...' : 'Скинути'}
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -4,6 +4,7 @@ import CS2BettingForm from '@/components/CS2BettingForm';
 import type { MatchPrefillData } from '@/components/CS2BettingForm';
 import StrategyOverview from '@/components/StrategyOverview';
 import BetShareModal from '@/components/BetShareModal';
+import OnboardingTour, { useOnboarding } from '@/components/OnboardingTour';
 import ExpressDetailsModal from '@/components/ExpressDetailsModal';
 import BetDetailsModal from '@/components/BetDetailsModal';import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';import InitialBankModal from '@/components/InitialBankModal';
 import StatCard from '@/components/StatCard';
@@ -78,6 +79,7 @@ export default function MyBets() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [bankrollStats, setBankrollStats] = useState({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
+  const { showOnboarding, setShowOnboarding } = useOnboarding();
 
   // ── Derived ──
   const { activeBets, winningBets, losingBets } = useMemo(() => ({
@@ -282,6 +284,11 @@ export default function MyBets() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
+      <OnboardingTour
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
+
       <PageHeader
         title="Додати запис"
         currentUser={currentUser || 'User'}

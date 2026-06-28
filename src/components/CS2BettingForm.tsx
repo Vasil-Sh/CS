@@ -32,7 +32,6 @@ import {
   parseCS2MatchFromUrl,
 } from "@/lib/matchUrlParser";
 import StrategyViolationDialog from "./StrategyViolationDialog";
-import OnboardingTour, { useOnboarding } from "./OnboardingTour";
 import {
   calcTotalExpressOdds,
   calcExpectedValue,
@@ -184,7 +183,6 @@ export default function CS2BettingForm({
   >([]);
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [showViolationDialog, setShowViolationDialog] = useState(false);
-  const { showOnboarding, setShowOnboarding } = useOnboarding();
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
@@ -1247,11 +1245,6 @@ export default function CS2BettingForm({
         violations={strategyViolations}
         onConfirm={handleViolationConfirm}
         onCancel={handleViolationCancel}
-      />
-
-      <OnboardingTour
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
       />
 
       <BettingFormAlerts

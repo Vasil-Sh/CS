@@ -69,6 +69,11 @@ export function useOnboarding() {
   return { showOnboarding, setShowOnboarding };
 }
 
+/** Reset the onboarding so it shows again on the next page load */
+export function resetOnboarding() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 export default function OnboardingTour({
   isOpen,
   onClose,
