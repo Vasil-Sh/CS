@@ -84,13 +84,13 @@ export default function BettingFormAlerts({
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-start gap-3">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-2xl flex-shrink-0 ${
+            <div className={`flex items-center justify-center w-16 h-16 rounded-2xl flex-shrink-0 ${
               strategyViolations.some(v => v.severity === 'serious')
                 ? 'bg-red-100'
                 : 'bg-amber-100'
             }`}>
               <AlertTriangle
-                className={`h-5 w-5 ${
+                className={`h-8 w-8 ${
                   strategyViolations.some(v => v.severity === 'serious')
                     ? 'text-red-500'
                     : 'text-amber-500'
