@@ -96,11 +96,12 @@ export default function BettingFormAlerts({
                     key={index}
                     className="p-3 rounded-2xl bg-white border border-red-200"
                   >
-                    <p className="text-sm text-gray-900">
-                      • {violation.message}
+                    <p className="text-sm text-gray-900 flex items-center gap-1.5">
+                      <Info className="h-3.5 w-3.5 flex-shrink-0 text-red-500" strokeWidth={1.5} />
+                      {violation.message}
                     </p>
                     <p className="text-xs mt-1 flex items-center gap-1 text-gray-500">
-                      <Info className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
+                      <Info className="h-3 w-3 flex-shrink-0 text-red-400" strokeWidth={1.5} />
                       {violation.explanation}
                     </p>
                   </div>
