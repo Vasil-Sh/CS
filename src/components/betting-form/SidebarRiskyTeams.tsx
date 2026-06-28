@@ -22,7 +22,7 @@ export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarR
         <span className="text-lg font-semibold text-gray-900">Ризиковані команди</span>
       </div>
 
-      <div className="p-6 flex flex-col flex-1">
+      <div className={riskyTeams.length > 0 ? "px-6 pb-6 flex flex-col flex-1 bg-[#F3F4F6]" : "p-6 flex flex-col flex-1"}>
         {riskyTeams.length > 0 ? (
           <div className="space-y-3">
             {riskyTeams.map((riskyTeam, index) => (
