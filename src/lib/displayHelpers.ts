@@ -118,7 +118,10 @@ const BASIC_BET_TYPES: BetTypeGroup[] = [
 const MAP_BET_TYPES: BetTypeGroup[] = [
   {
     category: 'Переможець',
-    options: [{ value: 'MapWinner', label: 'Переможець' }],
+    options: [
+      { value: 'MapWinner', label: 'Переможець' },
+      { value: 'MapW_NoOT', label: 'Переможець (без ОТ)' },
+    ],
   },
   {
     category: 'Фора',
@@ -155,10 +158,6 @@ const MAP_BET_TYPES: BetTypeGroup[] = [
       { value: 'TOT_U23.5', label: 'Менше 23.5' },
       { value: 'TOT_O23.5', label: 'Більше 23.5' },
     ],
-  },
-  {
-    category: 'Переможець (без ОТ)',
-    options: [{ value: 'MapW_NoOT', label: 'Переможець (без ОТ)' }],
   },
 ];
 
@@ -198,6 +197,10 @@ export function getBetTypeLabel(betType: string, format?: string): string {
       const f = g.options.find(o => o.value === betType);
       if (f) {
         const catName = g.category.split(': ').slice(1).join(': ') || g.category;
+        // If label already contains the category, just return map + label
+        if (f.label.includes(catName) && f.label !== catName) {
+          return `Карта ${mg.mapNumber}: ${f.label}`;
+        }
         const labelSuffix = f.label !== catName ? ` ${f.label}` : '';
         return `Карта ${mg.mapNumber}: ${catName}${labelSuffix}`;
       }
