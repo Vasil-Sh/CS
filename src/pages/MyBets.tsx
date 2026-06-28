@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { authService } from '@/lib/authService';
 import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
+import { getBetTypeLabel } from '@/lib/displayHelpers';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/useTheme';
 import { logRender } from '@/lib/devLogger';
@@ -414,12 +415,23 @@ export default function MyBets() {
             <div className="border-t border-[#E5E7EB]" />
 
             <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
-              <div className="flex items-center justify-center gap-3 px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
-                <DialogDescription className="text-lg font-bold text-[#111827] text-center">
-                  {deleteDialogBet && deleteDialogBet.match}
-                </DialogDescription>
-                <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-3 px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+                  <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                  <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+                    {deleteDialogBet && deleteDialogBet.match}
+                  </DialogDescription>
+                  <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                </div>
+                {deleteDialogBet && !deleteDialogBet.betType.includes('Експрес') && (
+                  <p className="text-xs text-gray-400 mt-1.5">
+                    {(() => {
+                      const parts = deleteDialogBet.betType.split(' - ');
+                      const typeLabel = getBetTypeLabel(parts[0], deleteDialogBet.format);
+                      return parts.length > 1 ? `${typeLabel} - ${parts.slice(1).join(' - ')}` : typeLabel;
+                    })()}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
