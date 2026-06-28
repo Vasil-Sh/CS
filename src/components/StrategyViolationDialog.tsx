@@ -33,11 +33,11 @@ export default function StrategyViolationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px] rounded-3xl border border-[#F3F4F6] bg-white p-0 gap-0 [&>button]:hidden">
         {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#FDE68A]">
-                <AlertTriangle className="h-5 w-5 text-[#92400E]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-[#111827]">
@@ -75,7 +75,7 @@ export default function StrategyViolationDialog({
 
           {/* Info Banner */}
           <div className="px-4 py-3.5 bg-white border border-[#E5E7EB] rounded-2xl">
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-gray-900 leading-relaxed">
               <span className="text-[#DC2626] mr-1.5 font-bold">⚠</span>
               Ви все одно можете створити ставку, підтвердивши попередження.
             </p>
@@ -96,7 +96,7 @@ export default function StrategyViolationDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 h-11 rounded-2xl bg-[#111827] text-sm font-semibold text-white hover:bg-[#1F2937] transition-all duration-200"
+            className="flex-1 h-11 rounded-2xl bg-[#447afc] text-sm font-semibold text-white hover:bg-[#3568d4] transition-all duration-200"
           >
             Підтвердити і створити
           </button>
