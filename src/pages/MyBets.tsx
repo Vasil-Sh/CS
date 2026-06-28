@@ -425,9 +425,9 @@ export default function MyBets() {
                 className="w-full h-44 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none bg-white"
                 autoFocus
               />
-              <div className="flex items-start gap-2 p-3 bg-white rounded-2xl border border-[#E5E7EB]">
-                <Info className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                <p className="text-xs text-gray-500">
+              <div className="flex items-start gap-2 p-3 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE]">
+                <Info className="h-4 w-4 text-[#447afc] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <p className="text-xs text-[#1E40AF]">
                   Нотатка збережеться з записом. Це допоможе аналізувати помилки в майбутньому.
                 </p>
               </div>
