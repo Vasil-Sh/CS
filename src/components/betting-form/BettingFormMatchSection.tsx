@@ -234,7 +234,7 @@ export default function BettingFormMatchSection({
         <div className="border-t border-gray-100 -mx-6" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" id="team1-wrapper">
             <Label htmlFor="team1" className={classes.label}>
               Команда 1{" "}
               {showRequired && <span className="text-red-500">*</span>}

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,7 @@ import {
   parseCS2MatchFromUrl,
 } from "@/lib/matchUrlParser";
 import StrategyViolationDialog from "./StrategyViolationDialog";
+import OnboardingTour, { useOnboarding } from "./OnboardingTour";
 import {
   calcTotalExpressOdds,
   calcExpectedValue,
@@ -183,6 +184,7 @@ export default function CS2BettingForm({
   >([]);
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [showViolationDialog, setShowViolationDialog] = useState(false);
+  const { showOnboarding, setShowOnboarding } = useOnboarding();
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
@@ -1247,6 +1249,11 @@ export default function CS2BettingForm({
         onCancel={handleViolationCancel}
       />
 
+      <OnboardingTour
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
+
       <BettingFormAlerts
         tiltBlock={tiltBlock}
         primaryStrategy={primaryStrategy}
@@ -1400,7 +1407,7 @@ export default function CS2BettingForm({
               (formData.betCategory === "Експрес" &&
                 expressEvents.length > 0)) && (
               <Button
-                type="submit"
+                type="submit" id="submit-btn"
                 disabled={
                   isSubmitting ||
                   tiltBlock.blocked ||
