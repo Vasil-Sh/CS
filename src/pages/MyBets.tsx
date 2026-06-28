@@ -18,13 +18,14 @@ import { authService } from '@/lib/authService';
 import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
 import { getBetTypeLabel } from '@/lib/displayHelpers';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/hooks/useTheme';
 import { logRender } from '@/lib/devLogger';
 import { PageHeader } from '@/components/PageHeader';
 import {
   TrendingUp, DollarSign, Target, BarChart3, Trophy,
   AlertTriangle, Clock, Plus, ArrowUpRight, ArrowDownRight,
-  User, Trash2, Wallet, ClipboardList,
+  User, Trash2, Wallet, ClipboardList, Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Bet } from '@/types/betting';
@@ -366,39 +367,83 @@ export default function MyBets() {
 
         {/* Result Note Dialog — opens when marking bet result */}
         <Dialog open={resultNoteOpen} onOpenChange={(open) => { if (!open) skipResultNote(); }}>
-          <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB]">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
-                Чому такий результат?
-              </DialogTitle>
-              <DialogDescription className="text-[#6B7280]">
-                {pendingResultAction && (
-                  <>
-                    <strong>{pendingResultAction.bet.match}</strong> —{' '}
-                    <span className={pendingResultAction.result === 'Win' ? 'text-[#22C55E] font-semibold' : 'text-[#EF4444] font-semibold'}>
-                      {pendingResultAction.result === 'Win' ? 'Виграш' : 'Програш'}
-                    </span>
-                  </>
-                )}
-              </DialogDescription>
+          <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB] p-0 gap-0">
+            <DialogHeader className="px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-2xl flex-shrink-0 ${
+                  pendingResultAction?.result === 'Win' ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  {pendingResultAction?.result === 'Win' ? (
+                    <Trophy className="h-5 w-5 text-[#22C55E]" strokeWidth={1.5} />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
+                  )}
+                </div>
+                <DialogTitle className="text-xl font-semibold text-[#111827]">
+                  Чому такий результат?
+                </DialogTitle>
+              </div>
             </DialogHeader>
-            <div className="space-y-3">
+
+            <div className="border-t border-[#E5E7EB]" />
+
+            <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+              {pendingResultAction && (
+                <div className="text-center">
+                  <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+                    <div className="flex items-center justify-center gap-1 w-full">
+                      <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                      <DialogDescription className="text-lg font-bold text-[#111827] text-center flex-1">
+                        {pendingResultAction.bet.match}
+                      </DialogDescription>
+                      <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {!pendingResultAction.bet.betType.includes('Експрес') && (
+                        <p className="text-xs text-gray-400">
+                          {(() => {
+                            const parts = pendingResultAction.bet.betType.split(' - ');
+                            const typeLabel = getBetTypeLabel(parts[0], pendingResultAction.bet.format);
+                            return parts.length > 1 ? `${typeLabel} - ${parts.slice(1).join(' - ')}` : typeLabel;
+                          })()}
+                        </p>
+                      )}
+                      <Badge className={`rounded-full border-0 text-xs font-semibold px-2 py-0.5 ${
+                        pendingResultAction.result === 'Win' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                      }`}>
+                        {pendingResultAction.result === 'Win' ? 'Виграш' : 'Програш'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <textarea
                 value={resultNote}
                 onChange={(e) => setResultNote(e.target.value)}
                 placeholder={`Що спрацювало? Що ні? Це аналіз чи емоції?\n\nНаприклад:\n• Переоцінив форму команди\n• Не врахував заміну гравця\n• Емоційна ставка після серії програшів`}
-                className="w-full h-44 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none"
+                className="w-full h-44 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none bg-white"
                 autoFocus
               />
-              <p className="text-xs text-[#9CA3AF]">
-                💡 Нотатка збережеться з записом. Це допоможе аналізувати помилки в майбутньому.
-              </p>
+              <div className="flex items-start gap-2 p-3 bg-white rounded-2xl border border-[#E5E7EB]">
+                <Info className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <p className="text-xs text-gray-500">
+                  Нотатка збережеться з записом. Це допоможе аналізувати помилки в майбутньому.
+                </p>
+              </div>
             </div>
-            <DialogFooter className="gap-2">
+
+            <div className="border-t border-[#E5E7EB]" />
+
+            <DialogFooter className="px-6 py-4 gap-2">
               <Button variant="outline" onClick={skipResultNote} className="rounded-xl">
                 Пропустити
               </Button>
-              <Button onClick={confirmResultUpdate} className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white">
+              <Button onClick={confirmResultUpdate} className={`rounded-xl text-white ${
+                pendingResultAction?.result === 'Win'
+                  ? 'bg-[#22C55E] hover:bg-[#16A34A]'
+                  : 'bg-[#DC2626] hover:bg-[#B91C1C]'
+              }`}>
                 {pendingResultAction?.result === 'Win' ? '✅ Виграш' : 'Програш'}
               </Button>
             </DialogFooter>
