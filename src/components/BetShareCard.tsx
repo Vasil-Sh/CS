@@ -461,7 +461,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         <div className="grid grid-cols-2 gap-2.5">
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)', border: '1px solid #E5E7EB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">Сума</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
@@ -470,7 +470,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           </div>
           <div 
             className={`text-center ${cellPadding}`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)', border: '1px solid #E5E7EB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
@@ -515,7 +515,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
         {!isLoss && (
           <div 
             className={`${profitPadding} text-center`}
-            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)', border: '1px solid #E5E7EB' }}
+            style={{ borderRadius: cellRadius, backgroundColor: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
           >
             <p className="text-sm font-semibold mb-0.5 uppercase tracking-wider text-gray-400">
               Загальна сума
