@@ -399,8 +399,8 @@ export default function MyBets() {
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={!!deleteDialogBet} onOpenChange={(open) => { if (!open) setDeleteDialogBet(null); }}>
-          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
-            <DialogHeader>
+          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+            <DialogHeader className="px-6 pt-6 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
                   <Trash2 className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
@@ -409,31 +409,36 @@ export default function MyBets() {
                   Видалити ставку?
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-[#6B7280]">
-                {deleteDialogBet && (
-                  <span className="text-base font-semibold text-[#111827] block mt-1 px-4 py-2.5 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
-                    {deleteDialogBet.match || deleteDialogBet.betType}
-                  </span>
-                )}
-              </DialogDescription>
             </DialogHeader>
-            <div className="py-2">
-              <div className="flex items-start gap-3 p-4 bg-[#FEF2F2] rounded-2xl border border-[#FECACA]">
+
+            <div className="border-t border-[#E5E7EB]" />
+
+            <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+              <div className="flex items-center justify-center gap-2">
+                <img src="/assets/team-placeholder.svg" alt="" className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                <DialogDescription className="text-base font-semibold text-[#111827] text-center">
+                  {deleteDialogBet && deleteDialogBet.match}
+                </DialogDescription>
+                <img src="/assets/team-placeholder.svg" alt="" className="h-5 w-5 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+              </div>
+
+              <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
                 <AlertTriangle className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                 <p className="text-sm text-[#991B1B]">
                   Ця дія незворотна. Дані про ставку будуть видалені назавжди.
                 </p>
               </div>
+
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setDeleteDialogBet(null)} className="rounded-xl">
+                  Скасувати
+                </Button>
+                <Button onClick={confirmDeleteBet} className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white">
+                  <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                  Видалити
+                </Button>
+              </DialogFooter>
             </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setDeleteDialogBet(null)} className="rounded-xl">
-                Скасувати
-              </Button>
-              <Button onClick={confirmDeleteBet} className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white">
-                <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                Видалити
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
