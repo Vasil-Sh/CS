@@ -57,31 +57,35 @@ export default function StrategyViolationDialog({
           </div>
         </DialogHeader>
 
-        {/* Violations List */}
-        <div className="px-6 py-5 space-y-3">
+        <div className="border-t border-[#E5E7EB]" />
+
+        {/* Violations + Info — gray background */}
+        <div className="px-6 py-5 space-y-3 bg-[#F3F4F6]">
           {violations.map((violation, index) => (
             <div
               key={index}
-              className="flex items-start gap-3 px-4 py-3.5 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl"
+              className="flex items-start gap-3 px-4 py-3.5 bg-white border border-[#FECACA] rounded-2xl"
             >
-              <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#D97706] mt-2" />
-              <p className="text-sm font-medium text-[#92400E] leading-relaxed">
+              <AlertTriangle className="h-4 w-4 flex-shrink-0 text-[#DC2626] mt-0.5" strokeWidth={1.5} />
+              <p className="text-sm font-medium text-[#991B1B] leading-relaxed">
                 {violation.message}
               </p>
             </div>
           ))}
+
+          {/* Info Banner */}
+          <div className="px-4 py-3.5 bg-white border border-[#E5E7EB] rounded-2xl">
+            <p className="text-sm text-gray-500 leading-relaxed">
+              <span className="text-[#DC2626] mr-1.5 font-bold">⚠</span>
+              Ви все одно можете створити ставку, підтвердивши попередження.
+            </p>
+          </div>
         </div>
 
-        {/* Info Banner */}
-        <div className="mx-6 mb-5 px-4 py-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl">
-          <p className="text-sm text-[#6B7280] leading-relaxed">
-            <span className="text-[#D97706] mr-1.5">⚠</span>
-            Ви все одно можете створити ставку, підтвердивши попередження.
-          </p>
-        </div>
+        <div className="border-t border-[#E5E7EB]" />
 
         {/* Footer Buttons */}
-        <div className="flex items-center gap-3 px-6 pb-6">
+        <div className="flex items-center gap-3 px-6 py-4">
           <button
             type="button"
             onClick={onCancel}
