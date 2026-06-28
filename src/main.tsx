@@ -17,6 +17,27 @@ if (import.meta.env.DEV) {
 // Repair any user-scoped keys corrupted by old backup import
 UserDataService.repairAllUserKeys();
 
+// In dev mode, aggressively unregister any stale service worker to prevent caching issues
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const reg of registrations) {
+      reg.unregister();
+      console.log('[Dev] Unregistered stale SW:', reg.scope);
+    }
+  });
+  // Also clear any Vite-related caches
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      for (const name of names) {
+        if (name.includes('workbox') || name.includes('vite')) {
+          caches.delete(name);
+          console.log('[Dev] Deleted cache:', name);
+        }
+      }
+    });
+  }
+}
+
 // Initialize error monitoring in production
 if (import.meta.env.PROD) initErrorMonitoring();
 
