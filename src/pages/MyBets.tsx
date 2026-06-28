@@ -401,12 +401,19 @@ export default function MyBets() {
         <Dialog open={!!deleteDialogBet} onOpenChange={(open) => { if (!open) setDeleteDialogBet(null); }}>
           <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB]">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
-                Видалити ставку?
-              </DialogTitle>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
+                  <Trash2 className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
+                </div>
+                <DialogTitle className="text-xl font-semibold text-[#111827]">
+                  Видалити ставку?
+                </DialogTitle>
+              </div>
               <DialogDescription className="text-[#6B7280]">
                 {deleteDialogBet && (
-                  <span>{deleteDialogBet.match || deleteDialogBet.betType}</span>
+                  <span className="text-base font-semibold text-[#111827] block mt-1 px-4 py-2.5 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
+                    {deleteDialogBet.match || deleteDialogBet.betType}
+                  </span>
                 )}
               </DialogDescription>
             </DialogHeader>
