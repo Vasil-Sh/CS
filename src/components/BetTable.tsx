@@ -461,20 +461,23 @@ const BetTableMemo = memo(function BetTable({
       {/* Notes Dialog */}
       <Dialog open={!!notesDialogBet} onOpenChange={(open) => { if (!open) setNotesDialogBet(''); }}>
         <DialogContent 
-          className="max-w-xl max-h-[80vh] overflow-y-auto border border-gray-200 rounded-3xl bg-white p-0"
+          className="max-w-xl max-h-[80vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0"
           style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.12)' }}
         >
-          <DialogHeader className="border-b border-gray-100 px-6 py-5 bg-gray-50 rounded-t-3xl">
+          <DialogHeader className="px-6 pt-5 pb-4">
             <DialogTitle>
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                  <FileText className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
+                  <FileText className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Нотатки до запису</h2>
+                <h2 className="text-lg font-semibold text-[#111827] tracking-tight">Нотатки до запису</h2>
               </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="px-6 py-5 space-y-4">
+
+          <div className="border-t border-[#E5E7EB]" />
+
+          <div className="px-6 py-5 space-y-4 bg-[#F3F4F6]">
             <div className="space-y-3">
               {notesDialogBet.split('\n').filter(Boolean).map((line, i) => {
                 const isResult = line.startsWith('Результат:');
@@ -483,7 +486,7 @@ const BetTableMemo = memo(function BetTable({
                   const val = line.replace('Результат:', '').trim();
                   const isWin = val === 'Виграш';
                   return (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={i} className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                       <span className="text-sm text-gray-400">Результат:</span>
                       <span className={`text-sm font-semibold ${isWin ? 'text-green-600' : 'text-red-600'}`}>
                         {val}
@@ -493,9 +496,9 @@ const BetTableMemo = memo(function BetTable({
                 }
                 if (isComment) {
                   return (
-                    <div key={i} className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+                    <div key={i} className="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-4">
                       <span className="text-xs text-gray-400 block mb-1">Коментар:</span>
-                      <p className="text-sm text-amber-800 whitespace-pre-wrap leading-relaxed">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                         {line.replace('Коментар:', '').trim()}
                       </p>
                     </div>
@@ -503,13 +506,13 @@ const BetTableMemo = memo(function BetTable({
                 }
                 if (line.startsWith('Key Factors:') || line.startsWith('Notes:')) return null;
                 return (
-                  <div key={i} className="rounded-2xl bg-gray-50 border border-gray-200 p-3">
+                  <div key={i} className="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-3">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{line}</p>
                   </div>
                 );
               })}
             </div>
-            <Button onClick={() => setNotesDialogBet('')} className="rounded-xl bg-gray-900 hover:bg-gray-800 text-white w-full">
+            <Button onClick={() => setNotesDialogBet('')} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white w-full">
               Закрити
             </Button>
           </div>
