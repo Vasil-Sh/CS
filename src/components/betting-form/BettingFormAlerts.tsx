@@ -78,8 +78,8 @@ export default function BettingFormAlerts({
         <div
           className={`rounded-3xl px-6 py-5 border ${
             strategyViolations.some(v => v.severity === 'serious')
-              ? 'border-red-300 bg-red-50'
-              : 'border-yellow-200 bg-yellow-50'
+              ? 'border-red-300 bg-[#F3F4F6]'
+              : 'border-yellow-200 bg-[#F3F4F6]'
           }`}
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
