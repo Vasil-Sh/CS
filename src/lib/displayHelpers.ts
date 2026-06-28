@@ -106,13 +106,6 @@ const BASIC_BET_TYPES: BetTypeGroup[] = [
       { value: 'Handicap -1.5', label: '-1.5' },
     ],
   },
-  {
-    category: 'Раунди',
-    options: [
-      { value: 'Pistol Round', label: 'Пістолетний раунд' },
-      { value: 'Total Rounds', label: 'Тотал раундів' },
-    ],
-  },
 ];
 
 const MAP_BET_TYPES: BetTypeGroup[] = [
