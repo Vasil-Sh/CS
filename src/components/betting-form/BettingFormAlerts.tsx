@@ -93,35 +93,21 @@ export default function BettingFormAlerts({
               strokeWidth={1.5}
             />
             <div className="flex-1">
-              <p
-                className={`text-sm font-semibold mb-2 ${
-                  strategyViolations.some(v => v.severity === 'serious')
-                    ? 'text-red-800'
-                    : 'text-amber-800'
-                }`}
-              >
+              <p className="text-sm font-semibold mb-2 text-gray-900">
                 Відхилення від стратегії &ldquo;{primaryStrategy?.name}&rdquo;
               </p>
               <div className="space-y-2">
                 {strategyViolations.map((violation, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-2xl ${
-                      violation.severity === 'serious' ? 'bg-red-100' : 'bg-amber-100'
+                    className={`p-3 rounded-2xl bg-white border ${
+                      violation.severity === 'serious' ? 'border-red-200' : 'border-amber-200'
                     }`}
                   >
-                    <p
-                      className={`text-sm ${
-                        violation.severity === 'serious' ? 'text-red-800' : 'text-amber-800'
-                      }`}
-                    >
+                    <p className="text-sm text-gray-900">
                       • {violation.message}
                     </p>
-                    <p
-                      className={`text-xs mt-1 flex items-center gap-1 ${
-                        violation.severity === 'serious' ? 'text-red-700' : 'text-amber-700'
-                      }`}
-                    >
+                    <p className="text-xs mt-1 flex items-center gap-1 text-gray-500">
                       <Info className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
                       {violation.explanation}
                     </p>
