@@ -28,15 +28,13 @@ export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarR
             {riskyTeams.map((riskyTeam, index) => (
               <div
                 key={index}
-                className="p-4 border border-blue-500 rounded-2xl bg-white space-y-2.5 hover:border-blue-500 transition-colors"
+                className="p-4 border border-blue-500 rounded-2xl bg-white hover:border-blue-500 transition-colors"
               >
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-base font-semibold text-gray-900">
-                        {riskyTeam.name}
-                      </span>
-                    </div>
+                <div className="flex justify-between items-center gap-3">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-base font-semibold text-gray-900 truncate">
+                      {riskyTeam.name}
+                    </span>
                     <Badge className={getStatusBadge(riskyTeam.status)}>{riskyTeam.status}</Badge>
                   </div>
                   <button
@@ -48,9 +46,12 @@ export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarR
                   </button>
                 </div>
                 {riskyTeam.notes && (
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white/60 p-3 rounded-xl">
-                    {riskyTeam.notes}
-                  </p>
+                  <>
+                    <div className="border-t border-gray-100 my-3" />
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white/60 p-3 rounded-xl">
+                      {riskyTeam.notes}
+                    </p>
+                  </>
                 )}
               </div>
             ))}
