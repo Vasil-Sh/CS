@@ -726,7 +726,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             <div className="space-y-4 py-3">
               {/* Step 1 */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     1
@@ -741,7 +741,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 2 */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     2
@@ -779,7 +779,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 3 */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     3
@@ -812,7 +812,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 4 */}
-              <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     4
