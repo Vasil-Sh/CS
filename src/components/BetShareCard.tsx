@@ -341,7 +341,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 game={game}
               />
             </div>
-            <div className="border-t border-[#F3F4F6]" />
+            <div className="border-t border-[#F3F4F6] -mx-6" />
           </>
         )}
 
@@ -422,7 +422,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
               </div>
             )}
 
-            <div className="border-t border-[#F3F4F6] mt-3" />
+            <div className="border-t border-[#F3F4F6] mt-3 -mx-6" />
           </div>
         ) : isExpress && parsedEvents.length === 0 ? (
           <>
@@ -434,7 +434,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 </h3>
               </div>
             </div>
-            <div className="border-t border-[#F3F4F6]" />
+            <div className="border-t border-[#F3F4F6] -mx-6" />
           </>
         ) : selection ? (
           <>
@@ -451,10 +451,10 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
                 <BlurReveal isPending={isPending}>{selection}</BlurReveal>
               </p>
             </div>
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-gray-100 -mx-6" />
           </>
         ) : (
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-gray-100 -mx-6" />
         )}
 
         {/* Amount & Odds */}
