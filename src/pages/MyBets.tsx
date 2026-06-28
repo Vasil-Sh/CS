@@ -414,12 +414,12 @@ export default function MyBets() {
             <div className="border-t border-[#E5E7EB]" />
 
             <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
-              <div className="flex items-center justify-center gap-2.5 px-5 py-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <img src="/assets/team-placeholder.svg" alt="" className="h-6 w-6 rounded-full object-contain bg-gray-100 flex-shrink-0" />
-                <DialogDescription className="text-base font-semibold text-[#111827] text-center">
+              <div className="flex items-center justify-center gap-3 px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+                <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                <DialogDescription className="text-lg font-bold text-[#111827] text-center">
                   {deleteDialogBet && deleteDialogBet.match}
                 </DialogDescription>
-                <img src="/assets/team-placeholder.svg" alt="" className="h-6 w-6 rounded-full object-contain bg-gray-100 flex-shrink-0" />
+                <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
               </div>
 
               <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
