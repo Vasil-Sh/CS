@@ -13,7 +13,7 @@ export function getStatusBadge(status: string): string {
     case 'Нестабільні':
       return 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-0 rounded-full font-medium text-sm px-3 py-1';
     case 'Обережно':
-      return 'bg-[#DBEAFE] text-[#2563EB] hover:bg-[#DBEAFE] border-0 rounded-full font-medium text-sm px-3 py-1';
+      return 'bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border-0 rounded-full font-medium text-sm px-3 py-1';
     case 'Рідко':
       return 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] border-0 rounded-full font-medium text-sm px-3 py-1';
     case 'Надійна':
