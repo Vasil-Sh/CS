@@ -84,14 +84,20 @@ export default function BettingFormAlerts({
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle
-              className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-                strategyViolations.some(v => v.severity === 'serious')
-                  ? 'text-red-500'
-                  : 'text-amber-500'
-              }`}
-              strokeWidth={1.5}
-            />
+            <div className={`flex items-center justify-center w-10 h-10 rounded-2xl flex-shrink-0 ${
+              strategyViolations.some(v => v.severity === 'serious')
+                ? 'bg-red-100'
+                : 'bg-amber-100'
+            }`}>
+              <AlertTriangle
+                className={`h-5 w-5 ${
+                  strategyViolations.some(v => v.severity === 'serious')
+                    ? 'text-red-500'
+                    : 'text-amber-500'
+                }`}
+                strokeWidth={1.5}
+              />
+            </div>
             <div className="flex-1">
               <p className="text-sm font-semibold mb-2 text-gray-900">
                 Відхилення від стратегії &ldquo;{primaryStrategy?.name}&rdquo;
