@@ -316,7 +316,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
       </div>
 
       {/* Card body */}
-      <div className={`${bodyPadding} ${bodyGap}`}>
+      <div className={`${bodyPadding} ${bodyGap} bg-white/50`}>
         {/* Match Name — only for non-express */}
         {!isExpress && (
           <>
