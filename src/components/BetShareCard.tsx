@@ -282,7 +282,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
 
   return (
     <div 
-      className="w-full overflow-hidden bg-white/50 backdrop-blur-sm"
+      className="w-full overflow-hidden bg-white"
       style={{ 
         borderRadius: cardRadius,
         border: '1px solid #E5E7EB',
