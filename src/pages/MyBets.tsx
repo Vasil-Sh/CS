@@ -416,19 +416,16 @@ export default function MyBets() {
 
             <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
               <div className="text-center">
-                <div className="flex flex-col items-center gap-1 px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                  <div className="flex items-center justify-center gap-3 w-full">
+                <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+                  <div className="flex items-center justify-between gap-3 w-full">
                     <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
-                    <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+                    <DialogDescription className="text-lg font-bold text-[#111827] text-center flex-1">
                       {deleteDialogBet && deleteDialogBet.match}
                     </DialogDescription>
                     <img src="/assets/team-placeholder.svg" alt="" className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0" />
                   </div>
                   {deleteDialogBet && !deleteDialogBet.betType.includes('Експрес') && (
-                    <div className="border-t border-gray-100 w-3/4 -mx-4" />
-                  )}
-                  {deleteDialogBet && !deleteDialogBet.betType.includes('Експрес') && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 -mt-0.5">
                       {(() => {
                         const parts = deleteDialogBet.betType.split(' - ');
                         const typeLabel = getBetTypeLabel(parts[0], deleteDialogBet.format);
