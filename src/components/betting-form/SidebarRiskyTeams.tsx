@@ -11,7 +11,7 @@ interface SidebarRiskyTeamsProps {
 export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarRiskyTeamsProps) {
   return (
     <div
-      className="bg-white border border-gray-300 rounded-3xl flex flex-col"
+      className="bg-white border border-gray-300 rounded-3xl overflow-hidden flex flex-col"
       style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
     >
       {/* Header */}
@@ -22,7 +22,7 @@ export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarR
         <span className="text-lg font-semibold text-gray-900">Ризиковані команди</span>
       </div>
 
-      <div className={riskyTeams.length > 0 ? "px-6 pb-6 flex flex-col flex-1 bg-[#F3F4F6]" : "p-6 flex flex-col flex-1"}>
+      <div className={riskyTeams.length > 0 ? "p-6 flex flex-col flex-1 bg-[#F3F4F6]" : "p-6 flex flex-col flex-1"}>
         {riskyTeams.length > 0 ? (
           <div className="space-y-3">
             {riskyTeams.map((riskyTeam, index) => (
