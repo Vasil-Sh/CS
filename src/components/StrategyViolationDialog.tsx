@@ -75,8 +75,8 @@ export default function StrategyViolationDialog({
 
           {/* Info Banner */}
           <div className="px-4 py-3.5 bg-white border border-[#E5E7EB] rounded-2xl">
-            <p className="text-sm text-gray-900 leading-relaxed">
-              <span className="text-[#DC2626] mr-1.5 font-bold">⚠</span>
+            <p className="text-sm text-gray-900 leading-relaxed flex items-start gap-1.5">
+              <AlertTriangle className="h-4 w-4 text-[#DC2626] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
               Ви все одно можете створити ставку, підтвердивши попередження.
             </p>
           </div>
