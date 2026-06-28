@@ -1163,20 +1163,24 @@ export default function CS2BettingForm({
     const blockKey = `tilt_block_${currentUser}`;
     const stored = localStorage.getItem(blockKey);
     if (stored) {
-      const block = JSON.parse(stored) as { until: number; reason: string };
-      if (Date.now() < block.until) {
-        // If primary strategy was removed or disabled, clear the block
-        if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled) {
-          localStorage.removeItem(blockKey);
+      try {
+        const block = JSON.parse(stored) as { until: number; reason: string; strategyName?: string };
+        if (Date.now() < block.until) {
+          // Clear block if primary strategy was removed, disabled, or changed
+          if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled || (block.strategyName && block.strategyName !== primaryStrategy.name)) {
+            localStorage.removeItem(blockKey);
+          } else {
+            return {
+              blocked: true,
+              reason: block.reason,
+              minutesLeft: Math.ceil((block.until - Date.now()) / 60000),
+            };
+          }
         } else {
-          return {
-            blocked: true,
-            reason: block.reason,
-            minutesLeft: Math.ceil((block.until - Date.now()) / 60000),
-          };
+          // Block expired — remove
+          localStorage.removeItem(blockKey);
         }
-      } else {
-        // Block expired — remove
+      } catch {
         localStorage.removeItem(blockKey);
       }
     }
@@ -1209,7 +1213,10 @@ export default function CS2BettingForm({
         primaryStrategy?.activityLimits?.blockDurationMinutes ?? 60;
       const until = Date.now() + blockMinutes * 60000;
       const reason = `Ти програв ${consecutiveLosses} раз${consecutiveLosses === 1 ? "" : consecutiveLosses < 5 ? "и" : "ів"} поспіль. Зроби паузу на ${blockMinutes} хв — це допоможе уникнути тілт-ставок.`;
-      localStorage.setItem(blockKey, JSON.stringify({ until, reason }));
+      localStorage.setItem(
+        blockKey,
+        JSON.stringify({ until, reason, strategyName: primaryStrategy?.name }),
+      );
       return { blocked: true, reason, minutesLeft: blockMinutes };
     }
 
