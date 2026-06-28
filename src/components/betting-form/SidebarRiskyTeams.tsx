@@ -47,7 +47,7 @@ export default function SidebarRiskyTeams({ riskyTeams, onRemoveTeam }: SidebarR
                 </div>
                 {riskyTeam.notes && (
                   <>
-                    <div className="border-t border-gray-100 my-3" />
+                    <div className="border-t border-gray-100 my-3 -mx-4" />
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white/60 p-3 rounded-xl">
                       {riskyTeam.notes}
                     </p>
