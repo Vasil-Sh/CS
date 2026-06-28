@@ -76,25 +76,13 @@ export default function BettingFormAlerts({
       {/* Strategy Violations */}
       {strategyViolations.length > 0 && (
         <div
-          className={`rounded-3xl px-6 py-5 border ${
-            strategyViolations.some(v => v.severity === 'serious')
-              ? 'border-red-300 bg-[#F3F4F6]'
-              : 'border-yellow-200 bg-[#F3F4F6]'
-          }`}
+          className="rounded-3xl px-6 py-5 border border-red-300 bg-[#F3F4F6]"
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-start gap-3">
-            <div className={`flex items-center justify-center w-16 h-16 rounded-2xl flex-shrink-0 ${
-              strategyViolations.some(v => v.severity === 'serious')
-                ? 'bg-red-100'
-                : 'bg-amber-100'
-            }`}>
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl flex-shrink-0 bg-red-100">
               <AlertTriangle
-                className={`h-8 w-8 ${
-                  strategyViolations.some(v => v.severity === 'serious')
-                    ? 'text-red-500'
-                    : 'text-amber-500'
-                }`}
+                className="h-8 w-8 text-red-500"
                 strokeWidth={1.5}
               />
             </div>
@@ -106,9 +94,7 @@ export default function BettingFormAlerts({
                 {strategyViolations.map((violation, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-2xl bg-white border ${
-                      violation.severity === 'serious' ? 'border-red-200' : 'border-amber-200'
-                    }`}
+                    className="p-3 rounded-2xl bg-white border border-red-200"
                   >
                     <p className="text-sm text-gray-900">
                       • {violation.message}
