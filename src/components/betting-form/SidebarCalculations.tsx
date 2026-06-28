@@ -66,7 +66,7 @@ export default function SidebarCalculations({
             {/* Potential Profit */}
             <div className="p-4 bg-white rounded-2xl border border-green-300">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Потенційний прибуток:</span>
+                <span className="text-sm font-semibold text-gray-900">Потенційний прибуток:</span>
                 <span className="font-semibold text-green-600 text-xl">
                   +{potentialProfitInCurrency} {getCurrencySymbol()}
                 </span>
@@ -309,7 +309,7 @@ export default function SidebarCalculations({
             {/* Max loss */}
             <div className="p-4 bg-white rounded-2xl border border-red-300">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Макс. програш:</span>
+                <span className="text-sm font-semibold text-gray-900">Макс. програш:</span>
                 <span className="font-semibold text-red-500 text-xl">
                   -{stake} {getCurrencySymbol()}
                 </span>
