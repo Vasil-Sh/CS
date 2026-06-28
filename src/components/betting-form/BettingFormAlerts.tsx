@@ -80,9 +80,9 @@ export default function BettingFormAlerts({
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-start gap-3">
-            <div className="flex items-center justify-center w-20 h-20 rounded-2xl flex-shrink-0 bg-red-100">
+            <div className="flex items-center justify-center w-24 h-24 rounded-2xl flex-shrink-0 bg-red-100">
               <AlertTriangle
-                className="h-14 w-14 text-red-500"
+                className="h-16 w-16 text-red-500"
                 strokeWidth={1.5}
               />
             </div>
