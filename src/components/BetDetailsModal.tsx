@@ -4,8 +4,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { authService } from '@/lib/authService';
 import type { Bet } from '@/types/betting';
 import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
 
@@ -15,53 +13,16 @@ interface BetDetailsModalProps {
   onClose: () => void;
 }
 
-interface User {
-  telegram: string;
-  username: string;
-  isAdmin?: boolean;
-}
-
 export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalProps) {
-  const { user } = useAuth();
-  const currentUser = user?.username || '';
   const [copied, setCopied] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
   const [editableText, setEditableText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (users.length > 0) {
-      const foundUser = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
-      setIsAdmin(foundUser?.isAdmin || false);
-    }
-  }, [users, currentUser]);
 
   useEffect(() => {
     if (bet && open) {
       setEditableText(generateTelegramText());
     }
   }, [bet, open]);
-
-  const fetchUsers = async () => {
-    try {
-      const allUsers = await authService.fetchUsers();
-      const parsedUsers: User[] = allUsers
-        .filter(u => u.username)
-        .map(u => ({
-          telegram: u.telegram || '',
-          username: u.username,
-          isAdmin: (u as { role?: string }).role === 'admin',
-        }));
-      setUsers(parsedUsers);
-    } catch (err) {
-      if (import.meta.env.DEV) console.error('Error fetching users:', err);
-    }
-  };
 
   if (!bet) return null;
 
@@ -165,10 +126,6 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
       if (import.meta.env.DEV) console.error('Copy error:', error);
     }
   };
-
-  if (!isAdmin) {
-    return null;
-  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
