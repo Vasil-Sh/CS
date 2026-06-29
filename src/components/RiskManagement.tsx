@@ -990,34 +990,52 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-base font-semibold text-[#111827] mb-2">
-                      Допустимі значення
+                      Допустимі статуси та ігри
                     </h4>
-                    <div className="space-y-1.5 text-sm">
+                    <div className="space-y-3 text-sm">
+                      {/* Statuses */}
                       <div>
-                        <span className="text-[#6B7280]">
-                          Колонка B — формат:{" "}
-                        </span>
-                        <span className="font-semibold text-[#111827]">
-                          [емодзі] [гра] [коментар]
-                        </span>
+                        <p className="text-[#6B7280] mb-2">Статуси:</p>
+                        <div className="grid grid-cols-1 gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🟥</span>
+                            <Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">БАН</Badge>
+                            <span className="text-xs text-[#6B7280]">— повна заборона на ставки</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🟨</span>
+                            <Badge className="bg-[#FFF7ED] text-[#EA580C] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Нестабільні</Badge>
+                            <span className="text-xs text-[#6B7280]">— високий ризик, можливі сюрпризи</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🟩</span>
+                            <Badge className="bg-[#FFFBEB] text-[#D97706] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Обережно</Badge>
+                            <span className="text-xs text-[#6B7280]">— потрібна обережність при ставках</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">
-                          🟥 = БАН
-                        </Badge>
-                        <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">
-                          🟨 = Нестабільні
-                        </Badge>
-                        <Badge className="bg-[#F3F4F6] text-[#111827] border-0 rounded-lg text-xs px-2 py-0 font-medium">
-                          🟩 = Обережно
-                        </Badge>
+                      {/* Games */}
+                      <div>
+                        <p className="text-[#6B7280] mb-2">Доступні ігри:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          <Badge className="bg-[#EFF6FF] text-[#2563EB] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">CS</Badge>
+                          <Badge className="bg-[#EFF6FF] text-[#2563EB] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">CS2</Badge>
+                          <Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Dota2</Badge>
+                          <Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Дота</Badge>
+                        </div>
                       </div>
-                      <div className="mt-2">
-                        <span className="text-[#6B7280]">Гра:</span>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium ml-1">
-                          CS
-                        </Badge>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium ml-1">
+                      {/* Format */}
+                      <div>
+                        <p className="text-[#6B7280] mb-1">Формат комірки:</p>
+                        <p className="text-xs text-[#374151] bg-[#F9FAFB] rounded-lg px-3 py-2 font-mono">
+                          <span className="text-[#6B7280]">[емодзі] [гра] [коментар]</span>
+                        </p>
+                      </div>
+                      {/* Example */}
+                      <div>
+                        <p className="text-[#6B7280] mb-1">Приклад:</p>
+                        <code className="text-xs bg-[#F9FAFB] px-2 py-1 rounded text-[#374151]">🟩 CS У фіналах часто вимикаються…</code>
+                      </div>
                           CS2
                         </Badge>
                         <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium ml-1">
