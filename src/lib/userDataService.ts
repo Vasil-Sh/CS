@@ -244,7 +244,8 @@ export class UserDataService {
   }
 
   /** Delete a strategy via API */
-  static async deleteStrategy(id: string): Promise<void> {
-    await api.delete(`/strategies/${id}`);
+  static async deleteStrategy(id: string, name?: string): Promise<void> {
+    const query = name ? `?name=${encodeURIComponent(name)}` : '';
+    await api.delete(`/strategies/${id}${query}`);
   }
 }

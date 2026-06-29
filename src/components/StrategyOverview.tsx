@@ -629,8 +629,18 @@ export default function StrategyOverview() {
     }
     customStrategies.push(strategy);
     saveCustomStrategiesToStorage(customStrategies);
-    // Sync new strategy to backend API
-    UserDataService.createStrategy(strategy).catch(() => {});
+    // Sync new strategy to backend API and get backend ID
+    UserDataService.createStrategy(strategy).then((backendStrategy: { id?: string }) => {
+      if (backendStrategy?.id && backendStrategy.id !== strategy.id) {
+        // Update localStorage with backend UUID
+        const all = loadCustomStrategiesFromStorage();
+        const idx = all.findIndex((s: CS2Strategy) => (s.id || s.name) === (strategy.id || strategy.name));
+        if (idx >= 0) {
+          all[idx] = { ...all[idx], _backendId: backendStrategy.id };
+          saveCustomStrategiesToStorage(all);
+        }
+      }
+    }).catch(() => {});
 
     setStrategies((prev) => [...prev, strategy]);
     setNewlyCreatedStrategy(strategy);
@@ -675,6 +685,7 @@ export default function StrategyOverview() {
     if (!strategyToDelete) return;
 
     const customStrategies = loadCustomStrategiesFromStorage();
+    const strategyToRemove = customStrategies.find(s => (s.id || s.name) === strategyToDelete);
     const updatedStrategies = customStrategies.filter(
       (s) => (s.id || s.name) !== strategyToDelete,
     );
@@ -691,8 +702,10 @@ export default function StrategyOverview() {
     toast.success("Стратегія успішно видалена!");
     setDeleteDialogOpen(false);
     setStrategyToDelete(null);
-    // Sync to backend API
-    UserDataService.deleteStrategy(strategyToDelete).catch(() => {});
+    // Sync to backend API (pass name as fallback for UUID mismatch)
+    const backendId = strategyToRemove?._backendId || strategyToDelete;
+    const strategyName = strategyToRemove?.name;
+    UserDataService.deleteStrategy(backendId, strategyName).catch(() => {});
   };
 
   const togglePrimaryStrategy = (strategy: CS2Strategy) => {
