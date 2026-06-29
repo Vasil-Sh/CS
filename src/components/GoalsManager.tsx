@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -165,6 +165,22 @@ export default function GoalsManager() {
   const [betsPerDayStr, setBetsPerDayStr] = useState('5');
 
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); } }, [goals, currentUser]);
+
+  // Sync goal progress to API when it changes
+  const prevProgressRef = useRef('');
+  useEffect(() => {
+    const progress = goals.map(g => `${g.id}:${g.currentAmount ?? g.currentROI ?? g.currentWinRate ?? g.currentStep ?? 0}`).join(',');
+    if (prevProgressRef.current && prevProgressRef.current !== progress) {
+      goals.forEach(g => {
+        const backendId = (g as any)._backendId || g.id;
+        const currentVal = g.type === 'amount' ? g.currentAmount : g.type === 'roi' ? g.currentROI : g.type === 'winrate' ? g.currentWinRate : g.currentStep;
+        if (currentVal !== undefined && currentVal !== null) {
+          UserDataService.updateGoal(backendId, { current: Number(currentVal) }).catch(() => {});
+        }
+      });
+    }
+    prevProgressRef.current = progress;
+  }, [goals]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
     if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0) return 0;
