@@ -890,7 +890,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             <div className="border-t border-[#E5E7EB]" />
 
-            <div className="space-y-3 px-5 pb-5 bg-[#F3F4F6]">
+            <div className="space-y-3 px-5 pt-4 pb-5 bg-[#F3F4F6]">
               {/* Step 1 */}
               <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
@@ -1107,8 +1107,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   className="h-4 w-4 text-[#DC2626] flex-shrink-0 mt-0.5"
                   strokeWidth={1.75}
                 />
-                <div className="text-sm text-[#991B1B]">
-                  <span className="font-semibold">Важливо:</span> при оновленні{" "}
+                <div className="text-sm text-[#111827]">
+                  <span className="font-semibold text-[#DC2626]">Важливо:</span> при оновленні{" "}
                   <strong>всі команди замінюються</strong> даними з Google
                   Sheets. Документ є джерелом правди — локальні зміни будуть
                   перезаписані.
