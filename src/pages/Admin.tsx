@@ -225,9 +225,8 @@ export default function Admin() {
       setAddDialogOpen(false);
       await fetchUsers();
     } catch (err: unknown) {
-      const e = err as { message?: string; status?: number; details?: unknown };
-      console.error('Admin createUser error:', e);
-      toast.error(`${e.message || 'Помилка створення'}${e.details ? ': ' + JSON.stringify(e.details) : ''}`);
+      const e = err as { message?: string };
+      toast.error(e.message || 'Помилка створення користувача');
     } finally {
       setLoading(false);
     }
