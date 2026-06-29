@@ -711,11 +711,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Google Sheets Guide Dialog */}
         <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
-          <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] bg-white">
-            <DialogHeader className="pb-3 border-b border-[#E5E7EB]">
+          <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0">
+            <DialogHeader className="px-6 pt-6 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#EFF6FF] rounded-xl flex-shrink-0">
-                  <Download className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.75} />
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
+                  <Download className="h-5 w-5 text-[#2563EB]" strokeWidth={1.5} />
                 </div>
                 <div>
                   <DialogTitle className="text-xl font-semibold text-[#111827]">
@@ -728,7 +728,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </DialogHeader>
 
-            <div className="space-y-4 py-3">
+            <div className="border-t border-[#E5E7EB]" />
+
+            <div className="space-y-3 p-6 bg-[#F3F4F6]">
               {/* Step 1 */}
               <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
@@ -870,7 +872,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </div>
 
-            <DialogFooter className="gap-2 pt-3 border-t border-[#E5E7EB]">
+            <DialogFooter className="gap-2">
               <Button
                 variant="outline"
                 onClick={() => setIsSheetsGuideOpen(false)}
@@ -885,7 +887,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   setIsSheetsGuideOpen(false);
                 }}
                 disabled={isUpdating}
-                className="bg-[#447afc] hover:bg-[#5b8ffd] text-white rounded-xl text-sm px-6 font-semibold disabled:opacity-60"
+                className="rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-medium"
               >
                 {isUpdating ? (
                   <>
