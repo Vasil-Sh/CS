@@ -586,7 +586,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     return (
       <div
         key={globalIndex}
-        className="p-4 border border-[#D1D5DB] rounded-2xl bg-[#F9FAFB] hover:bg-[#F3F4F6] hover:border-[#9CA3AF] transition-all"
+        className="p-4 border border-[#D1D5DB] rounded-2xl bg-white hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all"
       >
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
@@ -1258,7 +1258,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 )}
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -1324,7 +1324,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 )}
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -1400,7 +1400,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   </p>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
                     {uncategorizedTeams.map((team) => {
                       const globalIndex = riskyTeams.findIndex(
                         (t) => t === team,
