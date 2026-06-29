@@ -1950,7 +1950,7 @@ export default function StrategyOverview() {
                 <DialogDescription className="text-lg font-bold text-[#111827] text-center">
                   {(strategyToDelete &&
                     (() => {
-                      const s = [...customStrategies, ...googleStrategies].find(
+                      const s = strategies.find(
                         (st) => (st.id || st.name) === strategyToDelete,
                       );
                       return s?.name || strategyToDelete;
@@ -1959,7 +1959,7 @@ export default function StrategyOverview() {
                 </DialogDescription>
                 {strategyToDelete &&
                   (() => {
-                    const s = [...customStrategies, ...googleStrategies].find(
+                    const s = strategies.find(
                       (st) => (st.id || st.name) === strategyToDelete,
                     );
                     if (!s) return null;
