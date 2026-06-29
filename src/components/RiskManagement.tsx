@@ -1383,25 +1383,25 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {/* Uncategorized Teams — teams without game/status for editing */}
             {uncategorizedTeams.length > 0 && (
               <Card
-                className="border border-[#FDE68A] rounded-2xl bg-white overflow-hidden lg:col-span-2"
+                className="border border-[#BFDBFE] rounded-2xl bg-white overflow-hidden lg:col-span-2"
                 style={{ boxShadow: chartCardShadow }}
               >
-                <CardHeader className="bg-[#FFFBEB] border-b border-[#FDE68A] p-6">
+                <CardHeader className="bg-[#EFF6FF] border-b border-[#BFDBFE] p-6">
                   <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                     <span className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#FEF3C7] rounded-xl">
+                      <div className="p-2.5 bg-[#DBEAFE] rounded-xl">
                         <Pencil
-                          className="h-5 w-5 text-[#D97706]"
+                          className="h-5 w-5 text-[#2563EB]"
                           strokeWidth={1.5}
                         />
                       </div>
                       Без категорії
                     </span>
-                    <Badge className="bg-[#FEF3C7] text-[#92400E] hover:bg-[#FEF3C7] px-3 py-1.5 rounded-lg border border-[#FDE68A] font-semibold text-sm">
+                    <Badge className="bg-[#DBEAFE] text-[#1E40AF] hover:bg-[#DBEAFE] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-semibold text-sm">
                       {uncategorizedTeams.length}
                     </Badge>
                   </CardTitle>
-                  <p className="text-sm text-[#92400E] mt-2 flex items-center gap-1.5">
+                  <p className="text-sm text-[#1E40AF] mt-2 flex items-center gap-1.5">
                     <Info className="h-4 w-4" strokeWidth={1.5} />
                     Команди без визначеної гри або статусу. Натисніть{" "}
                     <Pencil
