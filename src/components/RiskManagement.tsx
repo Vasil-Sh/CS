@@ -16,6 +16,8 @@ import {
   AlertTriangle,
   TrendingDown,
   Target,
+  Crosshair,
+  Swords,
   Plus,
   Trash2,
   Search,
@@ -1245,7 +1247,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <Target
+                      <Crosshair
                         className="h-5 w-5 text-[#447afc]"
                         strokeWidth={1.5}
                       />
@@ -1265,7 +1267,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <Target
+                        <Crosshair
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1.5}
                         />
@@ -1317,7 +1319,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <Shield
+                      <Swords
                         className="h-5 w-5 text-[#447afc]"
                         strokeWidth={1.5}
                       />
@@ -1337,7 +1339,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <Shield
+                        <Swords
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1.5}
                         />
