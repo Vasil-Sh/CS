@@ -8,19 +8,64 @@ function getToken(): string | null {
   return localStorage.getItem('authToken');
 }
 
+function getRefreshToken(): string | null {
+  return localStorage.getItem('refreshToken');
+}
+
+export function setTokens(accessToken: string, refreshToken: string): void {
+  localStorage.setItem('authToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+}
+
 export function setToken(token: string): void {
   localStorage.setItem('authToken', token);
 }
 
 export function clearToken(): void {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
   localStorage.removeItem('userRole');
   localStorage.removeItem('username');
 }
 
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefresh(): Promise<boolean> {
+  if (isRefreshing && refreshPromise) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) return false;
+
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      setTokens(data.token, data.refreshToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retry = true
 ): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -37,10 +82,13 @@ async function request<T>(
     headers,
   });
 
-  // Handle 401 — token expired or invalid
-  if (res.status === 401) {
+  // Handle 401 — try refresh, then retry once
+  if (res.status === 401 && retry) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      return request<T>(path, options, false);
+    }
     clearToken();
-    // Dispatch custom event so AuthContext can react
     window.dispatchEvent(new CustomEvent('auth:logout'));
     throw new ApiError('Unauthorized', 401);
   }

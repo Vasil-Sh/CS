@@ -3,7 +3,7 @@
 // Replaces the old Google Sheets auth flow.
 // ═══════════════════════════════════════════
 
-import { api, setToken } from './apiClient';
+import { api, setTokens } from './apiClient';
 
 export interface LoginResult {
   success: boolean;
@@ -35,6 +35,7 @@ class AuthService {
         success: boolean;
         isAdmin?: boolean;
         token?: string;
+        refreshToken?: string;
         error?: string;
         user?: { username: string; role: string };
       }>('/auth/login', { username, password });
@@ -44,7 +45,7 @@ class AuthService {
       }
 
       if (data.token) {
-        setToken(data.token);
+        setTokens(data.token, data.refreshToken || '');
         localStorage.setItem('userRole', data.isAdmin ? 'admin' : 'user');
         localStorage.setItem('username', username);
       }
