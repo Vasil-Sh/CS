@@ -16,8 +16,6 @@ import {
   AlertTriangle,
   TrendingDown,
   Target,
-  Crosshair,
-  Swords,
   Plus,
   Trash2,
   Search,
@@ -1247,10 +1245,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <Crosshair
-                        className="h-5 w-5 text-[#447afc]"
-                        strokeWidth={1.5}
-                      />
+                      <img src="/assets/team-placeholder.svg" alt="CS2" className="h-5 w-5 object-contain" />
                     </div>
                     CS команди
                   </span>
@@ -1267,10 +1262,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <Crosshair
-                          className="h-16 w-16 text-[#9CA3AF]"
-                          strokeWidth={1.5}
-                        />
+                        <img src="/assets/team-placeholder.svg" alt="CS2" className="h-16 w-16 object-contain" />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
                         Немає команд CS
@@ -1319,10 +1311,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <Swords
-                        className="h-5 w-5 text-[#447afc]"
-                        strokeWidth={1.5}
-                      />
+                      <img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-5 w-5 object-contain" />
                     </div>
                     Dota 2 команди
                   </span>
@@ -1339,10 +1328,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <Swords
-                          className="h-16 w-16 text-[#9CA3AF]"
-                          strokeWidth={1.5}
-                        />
+                        <img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-16 w-16 object-contain" />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
                         Немає команд Dota 2
