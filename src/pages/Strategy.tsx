@@ -262,13 +262,15 @@ export default function Strategy() {
 
           {/* Tab content */}
           <div>
-            {activeTab === 'strategies' && (
+            <div className={activeTab === 'strategies' ? '' : 'hidden'}>
               <StrategyOverview />
-            )}
-            {activeTab === 'goals' && (
+            </div>
+            <div className={activeTab === 'goals' ? '' : 'hidden'}>
               <GoalsManager />
-            )}
-            {activeTab === 'risks' && <RiskManagement bets={bets} />}
+            </div>
+            <div className={activeTab === 'risks' ? '' : 'hidden'}>
+              <RiskManagement bets={bets} />
+            </div>
           </div>
         </div>
       </div>
