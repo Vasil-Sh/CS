@@ -123,7 +123,15 @@ export default function Analytics() {
   }, [bankrollVersion]);
 
 
-  const updateBankrollStats = useCallback(() => {
+  const updateBankrollStats = useCallback(async () => {
+    try {
+      const apiStats = await BankrollService.fetchBankroll();
+      if (apiStats.initialBank > 0) {
+        setBankrollStats(apiStats);
+        return;
+      }
+    } catch {}
+    // Fallback to localStorage
     const allBets = realGoogleSheetsService.getAllRecords();
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
     setBankrollStats(bankStats);
@@ -133,8 +141,18 @@ export default function Analytics() {
     try {
       setLoading(true);
       
-      const myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
-      const myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
+      // Try API first
+      let myBetsData: Bet[] = [];
+      let myBetsStats = null;
+      try {
+        myBetsData = await realGoogleSheetsService.fetchUSDTData() as unknown as Bet[];
+      } catch {}
+      
+      // Fallback to localStorage
+      if (myBetsData.length === 0) {
+        myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
+        myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
+      }
       
       setBets(myBetsData);
       
@@ -147,13 +165,25 @@ export default function Analytics() {
         const totalProfit = completedBets.reduce((sum: number, bet: Bet) => sum + (bet.profit || 0), 0);
         const averageROI = totalBets > 0 ? Math.round((totalProfit / completedBets.reduce((sum: number, bet: Bet) => sum + bet.amount, 0)) * 100) : 0;
         
+        // Try API stats, fallback to localStorage
+        let profitByMonth: { month: string; profit: number }[] = [];
+        let profitByStrategy: { strategy: string; profit: number }[] = [];
+        try {
+          const apiStats = await UserDataService.fetchBetStats();
+          profitByMonth = apiStats.profitByMonth || [];
+          profitByStrategy = apiStats.profitByStrategy || [];
+        } catch {
+          profitByMonth = myBetsStats?.profitByMonth || [];
+          profitByStrategy = myBetsStats?.profitByStrategy || [];
+        }
+        
         setStats({
           totalBets,
           winRate,
           totalProfit,
           averageROI,
-          profitByMonth: myBetsStats?.profitByMonth || [],
-          profitByStrategy: myBetsStats?.profitByStrategy || []
+          profitByMonth,
+          profitByStrategy
         });
       } else {
         setStats({
@@ -185,8 +215,12 @@ export default function Analytics() {
 
   // Refresh bankroll when user switches back to this tab
   useEffect(() => {
-    const handleVisibility = () => {
+    const handleVisibility = async () => {
       if (document.visibilityState === 'visible') {
+        try {
+          const apiStats = await BankrollService.fetchBankroll();
+          if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
+        } catch {}
         const allBets = realGoogleSheetsService.getAllRecords();
         const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
         setBankrollStats(bankStats);
