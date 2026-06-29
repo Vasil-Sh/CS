@@ -1036,21 +1036,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                         <p className="text-[#6B7280] mb-1">Приклад:</p>
                         <code className="text-xs bg-[#F9FAFB] px-2 py-1 rounded text-[#374151]">🟩 CS У фіналах часто вимикаються…</code>
                       </div>
-                          CS2
-                        </Badge>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium ml-1">
-                          Dota2
-                        </Badge>
-                        <Badge className="bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] rounded-lg text-xs px-2 py-0 font-medium ml-1">
-                          Дота
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-[#9CA3AF] mt-1">
-                        Приклад:{" "}
-                        <code className="bg-[#F3F4F6] px-1 rounded">
-                          🟩 CS У фіналах часто вимикаються…
-                        </code>
-                      </p>
                     </div>
                   </div>
                 </div>
