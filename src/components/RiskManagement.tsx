@@ -1257,8 +1257,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   csStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
+              <CardContent className="p-0">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -1323,8 +1323,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   dotaStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
+              <CardContent className="p-0">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
@@ -1399,8 +1399,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     щоб відредагувати.
                   </p>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-xl p-3">
+                <CardContent className="p-0">
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
                     {uncategorizedTeams.map((team) => {
                       const globalIndex = riskyTeams.findIndex(
                         (t) => t === team,
