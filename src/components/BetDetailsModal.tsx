@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/lib/authService';
 import type { Bet } from '@/types/betting';
 import { parseExpressEvents, type ParsedEvent } from '@/lib/parser/expressParser';
-import { SPREADSHEET_ID_AUTH } from '@/lib/sheetsConfig';
 
 interface BetDetailsModalProps {
   bet: Bet | null;
@@ -50,30 +49,14 @@ export default function BetDetailsModal({ bet, open, onClose }: BetDetailsModalP
 
   const fetchUsers = async () => {
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID_AUTH}/gviz/tq?tqx=out:csv`;
-      
-      const response = await fetch(url);
-      const text = await response.text();
-      
-      const rows = text.split('\n').slice(1);
-      const parsedUsers: User[] = rows
-        .filter(row => row.trim())
-        .map(row => {
-          const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!matches || matches.length < 7) return null;
-          
-          const telegram = matches[0].replace(/"/g, '').trim();
-          const username = matches[1].replace(/"/g, '').trim();
-          const isAdminStr = matches[6]?.replace(/"/g, '').trim().toLowerCase();
-          
-          return {
-            telegram,
-            username,
-            isAdmin: isAdminStr === 'true' || isAdminStr === '1' || isAdminStr === 'yes' || isAdminStr === 'так'
-          };
-        })
-        .filter((user): user is User => user !== null);
-      
+      const allUsers = await authService.fetchUsers();
+      const parsedUsers: User[] = allUsers
+        .filter(u => u.username)
+        .map(u => ({
+          telegram: u.telegram || '',
+          username: u.username,
+          isAdmin: (u as { role?: string }).role === 'admin',
+        }));
       setUsers(parsedUsers);
     } catch (err) {
       if (import.meta.env.DEV) console.error('Error fetching users:', err);

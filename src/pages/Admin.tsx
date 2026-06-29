@@ -205,16 +205,16 @@ export default function Admin() {
 
       const parsedUsers: UserData[] = allUsers
         .map(user => {
-          const isAdminVal = user.isAdmin === 'так' || user.isAdmin === 'yes' || user.isAdmin === 'true' || user.isAdmin === '1';
-          const endDate = user.endDate || '';
+          const isAdminVal = (user as { role?: string }).role === 'admin' || (user as { isAdmin?: string }).isAdmin === 'так' || (user as { isAdmin?: string }).isAdmin === 'yes';
+          const endDate = (user as { endDate?: string }).endDate || '';
           const daysLeft = getDaysUntilExpiry(endDate);
           
           return {
-            telegram: user.telegram || '',
+            telegram: (user as { telegram?: string }).telegram || '',
             username: user.username || '',
-            password: user.password || '',
-            priceMonth: cleanPrice(user.priceMonth || ''),
-            startDate: user.startDate || '',
+            password: '',
+            priceMonth: cleanPrice((user as { priceMonth?: string }).priceMonth || ''),
+            startDate: (user as { startDate?: string }).startDate || '',
             endDate,
             isActive: isSubscriptionActive(endDate),
             isAdmin: isAdminVal,

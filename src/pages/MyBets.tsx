@@ -131,7 +131,7 @@ export default function MyBets() {
         .map(u => ({
           telegram: u.telegram,
           username: u.username,
-          isAdmin: u.isAdmin === 'так' || u.isAdmin === 'yes' || u.isAdmin === 'true' || u.isAdmin === '1',
+          isAdmin: (u as { role?: string }).role === 'admin' || (u as { isAdmin?: string }).isAdmin === 'так',
         }));
       setUsers(parsed);
     } catch (err) {
