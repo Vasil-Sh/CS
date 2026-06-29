@@ -10,6 +10,8 @@ export interface RiskyTeam {
   game: string;
   status: string;
   notes: string;
+  /** API ID from backend (populated after fetch) */
+  _apiId?: number;
 }
 
 export const INITIAL_RISKY_TEAMS: RiskyTeam[] = [

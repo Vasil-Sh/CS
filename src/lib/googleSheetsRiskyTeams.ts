@@ -10,6 +10,7 @@ export interface RiskyTeamFromSheet {
   game: string;
   status: string;
   notes: string;
+  _apiId?: number;
 }
 
 interface ApiRiskyTeam {
@@ -25,12 +26,13 @@ class GoogleSheetsRiskyTeamsService {
    */
   async fetchRiskyTeams(): Promise<RiskyTeamFromSheet[]> {
     try {
-      const teams = await api.get<ApiRiskyTeam[]>('/risky-teams');
+      const teams = await api.get<(ApiRiskyTeam & { id: number })[]>('/risky-teams');
       return teams.map((t) => ({
         name: t.name,
         game: 'CS',
         status: '',
         notes: '',
+        _apiId: t.id,
       }));
     } catch (err: unknown) {
       console.error('[RiskyTeams] Failed to fetch from API:', (err as Error).message);

@@ -158,26 +158,30 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     }
   };
 
-  const addRiskyTeam = () => {
+  const addRiskyTeam = async () => {
     if (!newTeam.name.trim()) return;
     
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
-    setNewTeam({
-      name: '',
-      game: 'CS',
-      status: 'Обережно',
-      notes: ''
-    });
+    setNewTeam({ name: '', game: 'CS', status: 'Обережно', notes: '' });
+    // Sync to backend API
+    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim()).catch(() => {});
   };
 
   const deleteRiskyTeam = (index: number) => {
-    if (editingIndex === index) {
-      setEditingIndex(null);
-    }
+    if (editingIndex === index) setEditingIndex(null);
+    const team = riskyTeams[index];
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
+    // Sync to backend API (by id if available, otherwise by name)
+    if (team._apiId) {
+      googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch(() => {});
+    }
   };
 
   const deleteAllTeams = () => {
+    // Try API delete for each team
+    riskyTeams.forEach(t => {
+      if (t._apiId) googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch(() => {});
+    });
     setRiskyTeams([]);
     setEditingIndex(null);
     localStorage.removeItem('admin_risky_teams');
