@@ -926,28 +926,45 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       <table className="w-full text-sm border-collapse">
                         <thead className="bg-[#F3F4F6]">
                           <tr>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-r border-b border-[#D1D5DB]">A — Назва команди</th>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#D1D5DB]">B — Статус</th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-r border-b border-[#D1D5DB]">
+                              A — Назва команди
+                            </th>
+                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#D1D5DB]">
+                              B — Статус
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">Vitality</td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">🟩 CS: У фіналах часто вимикаються…</td>
+                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                              Vitality
+                            </td>
+                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                              🟩 CS: У фіналах часто вимикаються…
+                            </td>
                           </tr>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">Team Spirit</td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">🟨 Dota2: Тільки на +1.5, часто заливають</td>
+                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                              Team Spirit
+                            </td>
+                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                              🟨 Dota2: Тільки на +1.5, часто заливають
+                            </td>
                           </tr>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">Virtus Pro</td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">🟥 CS: Раки — дуже рідко на них варто щось ставити</td>
+                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                              Virtus Pro
+                            </td>
+                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                              🟥 CS: Раки — дуже рідко на них варто щось ставити
+                            </td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
                     <p className="text-xs text-[#9CA3AF] mt-2">
-                      💡 Перший рядок може бути заголовком — він буде автоматично проігнорований.
+                      💡 Перший рядок може бути заголовком — він буде
+                      автоматично проігнорований.
                     </p>
                   </div>
                 </div>
@@ -1023,10 +1040,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   strokeWidth={1.75}
                 />
                 <div className="text-sm text-[#111827]">
-                  <span className="font-semibold text-[#DC2626]">Важливо:</span> при оновленні{" "}
-                  <strong>всі команди замінюються</strong> даними з Google
-                  Sheets. Документ є джерелом правди — локальні зміни будуть
-                  перезаписані.
+                  <span className="font-semibold text-[#DC2626]">Важливо:</span>{" "}
+                  при оновленні <strong>всі команди замінюються</strong> даними
+                  з Google Sheets. Документ є джерелом правди — локальні зміни
+                  будуть перезаписані.
                 </div>
               </div>
             </div>
@@ -1245,7 +1262,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <img src="/assets/team-placeholder.svg" alt="CS2" className="h-5 w-5 object-contain" />
+                      <img
+                        src="/assets/team-placeholder.svg"
+                        alt="CS2"
+                        className="h-5 w-5 object-contain"
+                      />
                     </div>
                     CS команди
                   </span>
@@ -1262,7 +1283,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <img src="/assets/team-placeholder.svg" alt="CS2" className="h-16 w-16 object-contain" />
+                        <img
+                          src="/assets/team-placeholder.svg"
+                          alt="CS2"
+                          className="h-16 w-16 object-contain"
+                        />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
                         Немає команд CS
@@ -1311,7 +1336,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-5 w-5 object-contain" />
+                      <img
+                        src="/assets/team-placeholder-dota.svg"
+                        alt="Dota2"
+                        className="h-5 w-5 object-contain"
+                      />
                     </div>
                     Dota 2 команди
                   </span>
@@ -1328,7 +1357,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-                        <img src="/assets/team-placeholder-dota.svg" alt="Dota2" className="h-16 w-16 object-contain" />
+                        <img
+                          src="/assets/team-placeholder-dota.svg"
+                          alt="Dota2"
+                          className="h-16 w-16 object-contain"
+                        />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
                         Немає команд Dota 2
@@ -1371,25 +1404,25 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {/* Uncategorized Teams — teams without game/status for editing */}
             {uncategorizedTeams.length > 0 && (
               <Card
-                className="border border-[#BFDBFE] rounded-2xl bg-white overflow-hidden lg:col-span-2"
+                className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden lg:col-span-2"
                 style={{ boxShadow: chartCardShadow }}
               >
-                <CardHeader className="bg-[#EFF6FF] border-b border-[#BFDBFE] p-6">
+                <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
                   <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                     <span className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#DBEAFE] rounded-xl">
+                      <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
                         <Pencil
-                          className="h-5 w-5 text-[#2563EB]"
+                          className="h-5 w-5 text-[#6B7280]"
                           strokeWidth={1.5}
                         />
                       </div>
                       Без категорії
                     </span>
-                    <Badge className="bg-[#DBEAFE] text-[#1E40AF] hover:bg-[#DBEAFE] px-3 py-1.5 rounded-lg border border-[#BFDBFE] font-semibold text-sm">
+                    <Badge className="bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
                       {uncategorizedTeams.length}
                     </Badge>
                   </CardTitle>
-                  <p className="text-sm text-[#1E40AF] mt-2 flex items-center gap-1.5">
+                  <p className="text-sm text-[#6B7280] mt-2 flex items-center gap-1.5">
                     <Info className="h-4 w-4" strokeWidth={1.5} />
                     Команди без визначеної гри або статусу. Натисніть{" "}
                     <Pencil
