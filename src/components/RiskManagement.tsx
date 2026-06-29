@@ -453,7 +453,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setFilter: (val: string) => void,
     statusCounts: Record<string, number>,
   ) => (
-    <div className="flex flex-wrap items-center gap-1.5 my-4">
+    <div className="flex flex-wrap items-center gap-1.5 py-2">
       <button
         onClick={() => setFilter("all")}
         className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -1250,7 +1250,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     CS команди
                   </span>
                 </CardTitle>
-                <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
+                <div className="border-t border-[#E5E7EB] -mx-6 mt-0 mb-0" />
                 {renderStatusFilter(
                   csStatusFilter,
                   setCsStatusFilter,
@@ -1316,7 +1316,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     Dota 2 команди
                   </span>
                 </CardTitle>
-                <div className="border-t border-[#E5E7EB] -mx-6 mt-3 mb-2" />
+                <div className="border-t border-[#E5E7EB] -mx-6 mt-0 mb-0" />
                 {renderStatusFilter(
                   dotaStatusFilter,
                   setDotaStatusFilter,
