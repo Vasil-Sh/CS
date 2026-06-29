@@ -868,8 +868,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Google Sheets Guide Dialog */}
         <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
-          <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0">
-            <DialogHeader className="px-6 pt-6 pb-4">
+          <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB] p-0 gap-0">
+            <DialogHeader className="px-5 pt-5 pb-3">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
                   <Download
@@ -890,9 +890,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             <div className="border-t border-[#E5E7EB]" />
 
-            <div className="space-y-3 p-6 bg-[#F3F4F6]">
+            <div className="space-y-2 px-5 pb-5 bg-[#F3F4F6]">
               {/* Step 1 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     1
@@ -913,7 +913,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 2 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     2
@@ -983,7 +983,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 3 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     3
@@ -1039,7 +1039,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 4 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     4
@@ -1116,7 +1116,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </div>
 
-            <div className="border-t border-[#E5E7EB] px-6 py-4">
+            <div className="border-t border-[#E5E7EB] px-5 py-3">
               <DialogFooter className="gap-2">
                 <Button
                   variant="outline"
