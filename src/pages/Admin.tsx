@@ -209,16 +209,18 @@ export default function Admin() {
 
     setLoading(true);
     try {
-      await authService.createUser({
+      const result = await authService.createUser({
         username: newUser.username.trim(),
-        password: 'default123',
         telegram: newUser.telegram.trim(),
         role: newUser.isAdmin ? 'admin' : 'user',
         priceMonth: cleanPrice(newUser.priceMonth.trim()),
         endDate: newUser.endDate.trim(),
       });
 
-      toast.success(`Користувача "${newUser.username}" додано!`);
+      toast.success(`Користувача "${result.username}" створено!`, {
+        description: `Пароль: ${result.password}`,
+        duration: 15000,
+      });
       setNewUser({ ...EMPTY_USER });
       setAddDialogOpen(false);
       await fetchUsers();

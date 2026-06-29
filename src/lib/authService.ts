@@ -91,9 +91,10 @@ class AuthService {
     }
   }
 
-  /** Create user (admin only) */
-  async createUser(data: { username: string; password: string; telegram?: string; role?: string; priceMonth?: string; endDate?: string }): Promise<void> {
-    await api.post('/auth/register', data);
+  /** Create user (admin only) — returns generated credentials */
+  async createUser(data: { username: string; password?: string; telegram?: string; role?: string; priceMonth?: string; endDate?: string }): Promise<{ username: string; password: string }> {
+    const result = await api.post<{ success: boolean; userId: number; username: string; password: string }>('/auth/register', data);
+    return { username: result.username, password: result.password };
   }
 
   /** Update user (admin only) */
