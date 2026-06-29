@@ -1,6 +1,7 @@
 // Real Google Sheets integration for CS2 Analytics
 import { SPREADSHEET_ID_DATA } from './sheetsConfig';
 import { logServiceCall } from './devLogger';
+import { api } from './apiClient';
 
 export interface CS2BettingRecord {
   date: string;
@@ -138,6 +139,45 @@ class RealGoogleSheetsService {
 
   // Fetch data from your Google Sheets (USDT tab)
   async fetchUSDTData(): Promise<CS2BettingRecord[]> {
+    // Try API first
+    try {
+      const apiBets = await api.get<Record<string, unknown>[]>('/bets');
+      if (apiBets.length > 0) {
+        return apiBets.map((b) => ({
+          date: String(b.date || ''),
+          match: String(b.match || ''),
+          team1: String(b.team1 || ''),
+          team2: String(b.team2 || ''),
+          betType: String(b.betType || ''),
+          odds: Number(b.odds) || 0,
+          amount: Number(b.amount) || 0,
+          result: (b.result as 'Win' | 'Loss' | 'Pending') || 'Pending',
+          profit: Number(b.profit) || 0,
+          roi: Number(b.roi) || 0,
+          strategy: String(b.strategy || ''),
+          notes: String(b.notes || ''),
+          format: String(b.format || ''),
+          game: String(b.game || 'CS2'),
+          tournament: String(b.tournament || ''),
+          matchUrl: String(b.matchUrl || ''),
+          riskyTeams: (b.riskyTeams as string[]) || [],
+          id: String(b.id || ''),
+          currency: String(b.currency || ''),
+          originalAmount: b.originalAmount ? Number(b.originalAmount) : undefined,
+          exchangeRate: b.exchangeRate ? Number(b.exchangeRate) : null,
+          originalProfit: b.originalProfit ? Number(b.originalProfit) : undefined,
+          goalId: String(b.goalId || ''),
+          createdAt: b.createdAt ? Number(b.createdAt) : undefined,
+          winProbability: b.winProbability ? Number(b.winProbability) : undefined,
+          logoTeam1: b.logoTeam1 ? String(b.logoTeam1) : null,
+          logoTeam2: b.logoTeam2 ? String(b.logoTeam2) : null,
+        }));
+      }
+    } catch {
+      // API unavailable — fall through to legacy storage
+    }
+
+    // Fallback to Google Sheets / localStorage
     try {
       if (!this.apiKey) {
         const username = localStorage.getItem('username') || '';
@@ -362,6 +402,38 @@ class RealGoogleSheetsService {
       const userBets: CS2BettingRecord[] = userData ? JSON.parse(userData) : [];
       userBets.push(newRecord);
       localStorage.setItem(userKey, JSON.stringify(userBets));
+
+      // Sync to backend API (fire-and-forget)
+      api.post('/bets', {
+        match: newRecord.match,
+        team1: newRecord.team1,
+        team2: newRecord.team2,
+        betType: newRecord.betType,
+        odds: newRecord.odds,
+        amount: newRecord.amount,
+        date: newRecord.date,
+        result: newRecord.result,
+        profit: newRecord.profit,
+        strategy: newRecord.strategy,
+        notes: newRecord.notes,
+        format: newRecord.format,
+        game: newRecord.game,
+        tournament: newRecord.tournament,
+        matchUrl: newRecord.matchUrl,
+        riskyTeams: newRecord.riskyTeams || [],
+        currency: newRecord.currency,
+        originalAmount: newRecord.originalAmount,
+        exchangeRate: newRecord.exchangeRate,
+        originalProfit: newRecord.originalProfit,
+        roi: newRecord.roi,
+        goalId: newRecord.goalId,
+        winProbability: newRecord.winProbability,
+        logoTeam1: newRecord.logoTeam1,
+        logoTeam2: newRecord.logoTeam2,
+        expressLogos: newRecord.expressLogos || [],
+      }).catch(() => {
+        // Silent fail — localStorage is source of truth for now
+      });
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'addRecord');
       console.error('Error adding record:', error);
