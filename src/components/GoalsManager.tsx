@@ -370,6 +370,7 @@ export default function GoalsManager() {
     const updated = [...goals, goal];
     setGoals(updated);
     UserDataService.setUserDataSync(currentUser, 'goals', updated);
+    UserDataService.createGoal(goal).catch(() => {});
     bumpStrategy();
     setShowCreateDialog(false);
     resetNewGoalForm();

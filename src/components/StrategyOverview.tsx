@@ -556,6 +556,8 @@ export default function StrategyOverview() {
     toast.success('Стратегія успішно видалена!');
     setDeleteDialogOpen(false);
     setStrategyToDelete(null);
+    // Sync to backend API
+    UserDataService.deleteStrategy(strategyToDelete).catch(() => {});
   };
 
   const togglePrimaryStrategy = (strategy: CS2Strategy) => {
