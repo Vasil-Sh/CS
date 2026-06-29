@@ -370,7 +370,12 @@ export default function GoalsManager() {
     const updated = [...goals, goal];
     setGoals(updated);
     UserDataService.setUserDataSync(currentUser, 'goals', updated);
-    UserDataService.createGoal(goal).catch(() => {});
+    // Sync to backend API and save backend UUID
+    UserDataService.createGoal(goal).then((backendGoal: { id?: string }) => {
+      if (backendGoal?.id) {
+        setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, _backendId: backendGoal.id } : g));
+      }
+    }).catch(() => {});
     bumpStrategy();
     setShowCreateDialog(false);
     resetNewGoalForm();
@@ -390,7 +395,7 @@ export default function GoalsManager() {
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
-  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); UserDataService.deleteGoal(goalToDelete).catch(() => {}); };
+  const deleteGoal = () => { if (!goalToDelete) return; const goal = goals.find(g => g.id === goalToDelete); const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); const backendId = (goal as { _backendId?: string })?._backendId || goalToDelete; UserDataService.deleteGoal(backendId).catch(() => {}); };
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {
