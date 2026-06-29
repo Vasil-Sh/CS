@@ -953,44 +953,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 </div>
               </div>
 
-              {/* Step 3 — Statuses & Games */}
+              {/* Step 3 — Open access */}
               <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     3
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-semibold text-[#111827] mb-2">
-                      Допустимі значення
-                    </h4>
-                    <p className="text-sm text-[#6B7280] mb-3">Колонка <strong>B</strong> містить <strong>емодзі статусу</strong>, <strong>назву гри</strong> та <strong>коментар</strong> в одній комірці через пробіл.</p>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
-                        <p className="font-semibold text-[#111827] mb-2">Емодзі статусу</p>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2"><span>🟥</span><Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">БАН</Badge></div>
-                          <div className="flex items-center gap-2"><span>🟨</span><Badge className="bg-[#FFF7ED] text-[#EA580C] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Нестабільні</Badge></div>
-                          <div className="flex items-center gap-2"><span>🟩</span><Badge className="bg-[#FFFBEB] text-[#D97706] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Обережно</Badge></div>
-                        </div>
-                      </div>
-                      <div className="p-3 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
-                        <p className="font-semibold text-[#111827] mb-2">Гра</p>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2"><Badge className="bg-[#EFF6FF] text-[#2563EB] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">CS</Badge><Badge className="bg-[#EFF6FF] text-[#2563EB] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">CS2</Badge></div>
-                          <div className="flex items-center gap-2"><Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Dota2</Badge><Badge className="bg-[#FEF2F2] text-[#DC2626] border-0 rounded-lg text-xs px-2 py-0.5 font-medium">Дота</Badge></div>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#9CA3AF] mt-3">Формат: <code className="bg-[#F3F4F6] px-1 rounded text-[#374151]">[Емодзі] [Гра]: [Коментар]</code></p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 4 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                    4
                   </div>
                   <div className="flex-1">
                     <h4 className="text-base font-semibold text-[#111827] mb-1">
@@ -1007,11 +974,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 </div>
               </div>
 
-              {/* Step 5 */}
+              {/* Step 4 */}
               <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE]">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#2563EB] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                    5
+                    4
                   </div>
                   <div className="flex-1">
                     <h4 className="text-base font-semibold text-[#111827] mb-2">
