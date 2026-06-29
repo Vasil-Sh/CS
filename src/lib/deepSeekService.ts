@@ -1,10 +1,9 @@
 import {
   type MatchData,
   type AIRecommendation,
-  buildPrompt,
-  parseAIResponse,
   getMockRecommendation,
 } from './ai/shared';
+import { api } from './apiClient';
 
 // ── AI Response Cache ──
 interface CacheEntry {
@@ -45,20 +44,7 @@ function buildCacheKey(matchData: MatchData): string {
 }
 
 class DeepSeekService {
-  private apiKey: string | null = null;
-  private baseUrl = 'https://api.deepseek.com/v1';
-  private model = 'deepseek-chat';
   private pendingRequests = new Map<string, Promise<AIRecommendation>>();
-
-  constructor() {
-    this.apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
-
-    if (this.apiKey && this.apiKey.trim() !== '' && this.apiKey !== 'your_deepseek_api_key_here') {
-      // DeepSeek API ready
-    } else {
-      console.warn('⚠️ DeepSeek API key not configured properly');
-    }
-  }
 
   async getMatchRecommendation(matchData: MatchData): Promise<AIRecommendation> {
     const cacheKey = buildCacheKey(matchData);
@@ -71,7 +57,7 @@ class DeepSeekService {
     const pending = this.pendingRequests.get(cacheKey);
     if (pending) return pending;
 
-    // 3. Create new request
+    // 3. Create new request (proxied through backend)
     const promise = this._fetchRecommendation(matchData, cacheKey);
     this.pendingRequests.set(cacheKey, promise);
 
@@ -84,51 +70,12 @@ class DeepSeekService {
   }
 
   private async _fetchRecommendation(matchData: MatchData, cacheKey: string): Promise<AIRecommendation> {
-    if (!this.apiKey || this.apiKey === 'your_deepseek_api_key_here') {
-      const mock = getMockRecommendation(matchData, 'DeepSeek');
-      setCache(cacheKey, mock);
-      return mock;
-    }
-
     try {
-      const prompt = buildPrompt(matchData);
-
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: 'system', content: 'Ти експерт з аналізу матчів CS2 та Dota 2. Відповідай українською мовою.' },
-            { role: 'user', content: prompt },
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ DeepSeek API error:', response.status, errorText);
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const text: string | undefined = data.choices?.[0]?.message?.content;
-
-      if (!text) {
-        throw new Error('No response from API');
-      }
-
-      const recommendation = parseAIResponse(text);
-      setCache(cacheKey, recommendation);
-      return recommendation;
-    } catch (error) {
-      if (import.meta.env.DEV) console.error('DeepSeek API error:', error);
-      // toast.warning handled by caller — fall back to mock data
+      const data = await api.post<AIRecommendation>('/ai/recommend', matchData);
+      setCache(cacheKey, data);
+      return data;
+    } catch {
+      if (import.meta.env.DEV) console.warn('Backend AI unavailable, using mock');
       const fallback = getMockRecommendation(matchData, 'DeepSeek');
       setCache(cacheKey, fallback);
       return fallback;
@@ -149,52 +96,12 @@ export interface BalanceAdvice {
 }
 
 export async function getBalanceAdvice(data: BalanceAdvice): Promise<string> {
-  const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
-  
-  const stateLabels: Record<string, string> = {
-    growing: 'зростає (≥98% від максимуму)',
-    stable: 'стабільний (85-98% від максимуму)',
-    dipping: 'просідає (50-85% від максимуму)',
-    falling: 'сильно падає (<50% від максимуму)',
-  };
-
-  const prompt = `Проаналізуй стан банку гравця в беттінгу (CS2/Dota 2) і дай КОРОТКУ пораду (1-2 речення) українською:
-- Поточний банк: ${data.currentBank.toFixed(0)} ₴
-- Максимальний банк: ${data.allTimeHigh.toFixed(0)} ₴
-- Стан: ${stateLabels[data.state]}
-- Профіт: ${data.profit >= 0 ? '+' : ''}${data.profit.toFixed(0)} ₴
-- Всього ставок: ${data.bets}
-
-Дай практичну рекомендацію: що робити гравцю — продовжувати, зупинитись, зменшити ставки, змінити стратегію. Будь конкретним. Відповідай ТІЛЬКИ текстом поради, без "Ось порада:" чи подібних вступів.`;
-
-  if (apiKey && apiKey !== 'your_deepseek_api_key_here') {
-    try {
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            { role: 'system', content: 'Ти професійний беттінговий радник. Відповідай коротко, українською.' },
-            { role: 'user', content: prompt },
-          ],
-          temperature: 0.7,
-          max_tokens: 150,
-        }),
-      });
-
-      if (response.ok) {
-        const json = await response.json();
-        const text = json.choices?.[0]?.message?.content?.trim();
-        if (text) return text;
-      }
-      console.warn('DeepSeek API failed, using fallback advice');
-    } catch (e) {
-      console.warn('DeepSeek API error:', e);
-    }
+  // Try backend AI proxy first
+  try {
+    const result = await api.post<{ advice: string }>('/ai/advice', data);
+    if (result.advice) return result.advice;
+  } catch {
+    // Fall back to heuristic advice below
   }
 
   // Fallback: heuristic advice

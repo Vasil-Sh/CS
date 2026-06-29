@@ -1,4 +1,11 @@
-// User-specific data isolation service with debounced writes
+// ═══════════════════════════════════════════
+// User Data Service — localStorage + API hybrid
+// Write: API first, localStorage as cache
+// Read: localStorage (instant), API for refresh
+// ═══════════════════════════════════════════
+
+import { api } from './apiClient';
+import type { Bet as ApiBet } from '@/types/betting';
 
 /** Simple debounce: coalesce rapid writes for the same key within 100ms */
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -8,12 +15,7 @@ export class UserDataService {
     return `user_${username}_${key}`;
   }
 
-  /**
-   * Startup migration: scan ALL user_* keys and re-encode any that are not valid JSON.
-   * Fixes data corrupted by old backup import (pre-v1.14.7) where user-scoped keys
-   * were stored as raw strings instead of JSON.
-   * Call once in main.tsx before app renders.
-   */
+  // ═══ Startup migration (localStorage only) ═══
   static repairAllUserKeys(): void {
     try {
       let fixed = 0;
@@ -25,7 +27,6 @@ export class UserDataService {
         try {
           JSON.parse(raw);
         } catch {
-          // Not valid JSON — re-encode
           const healed = JSON.stringify(raw);
           localStorage.setItem(key, healed);
           fixed++;
@@ -40,7 +41,7 @@ export class UserDataService {
     }
   }
 
-  // Get user-specific data
+  // ═══ LocalStorage read (instant, sync) ═══
   static getUserData<T>(username: string, key: string, defaultValue: T): T {
     try {
       const userKey = this.getUserKey(username, key);
@@ -49,8 +50,6 @@ export class UserDataService {
       try {
         return JSON.parse(data);
       } catch {
-        // Data is not JSON — may be a raw string (e.g. from old backup import).
-        // Return as-is if it looks like a string; self-heal by re-encoding.
         const healed = JSON.stringify(data);
         localStorage.setItem(userKey, healed);
         return data as unknown as T;
@@ -61,7 +60,7 @@ export class UserDataService {
     }
   }
 
-  // Set user-specific data (debounced: coalesces rapid writes per key)
+  // ═══ LocalStorage write (debounced) ═══
   static setUserData<T>(username: string, key: string, value: T): void {
     try {
       const userKey = this.getUserKey(username, key);
@@ -84,7 +83,6 @@ export class UserDataService {
     }
   }
 
-  /** Synchronous write — no debounce. Use for data that must be immediately readable. */
   static setUserDataSync<T>(username: string, key: string, value: T): void {
     try {
       const userKey = this.getUserKey(username, key);
@@ -94,7 +92,6 @@ export class UserDataService {
     }
   }
 
-  // Clear user-specific data
   static clearUserData(username: string, key: string): void {
     try {
       const userKey = this.getUserKey(username, key);
@@ -104,7 +101,6 @@ export class UserDataService {
     }
   }
 
-  // Clear all user data
   static clearAllUserData(username: string): void {
     try {
       const keys = Object.keys(localStorage);
@@ -119,7 +115,6 @@ export class UserDataService {
     }
   }
 
-  // Check if user has any data
   static hasUserData(username: string): boolean {
     try {
       const keys = Object.keys(localStorage);
@@ -131,24 +126,18 @@ export class UserDataService {
     }
   }
 
-  // NEW: Daily reset functionality for "My Bets" section
+  // ═══ Daily reset (localStorage only — API handles this server-side) ═══
   static checkAndResetDailyBets(username: string): void {
     try {
       const lastResetKey = this.getUserKey(username, 'last_mybets_reset');
       const lastReset = localStorage.getItem(lastResetKey);
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
 
       if (lastReset !== today) {
-        // Reset the "My Bets" recent bets display (not the full history)
         const currentBets = this.getUserData<Array<{ result: string }>>(username, 'mybets_data', []);
-        
-        // Keep only completed bets (Win/Loss) in history, clear Pending bets
-        const completedBets = currentBets.filter((bet: { result: string }) => bet.result !== 'Pending');
+        const completedBets = currentBets.filter((bet) => bet.result !== 'Pending');
         this.setUserData(username, 'mybets_data', completedBets);
-        
-        // Update last reset date
         localStorage.setItem(lastResetKey, today);
-        
         if (import.meta.env.DEV) console.log(`Daily reset performed for ${username} on ${today}`);
       }
     } catch (error) {
@@ -156,19 +145,106 @@ export class UserDataService {
     }
   }
 
-  // Get today's bets only (for display in My Bets section)
   static getTodayBets(username: string): Array<{ date: string; result: string }> {
     try {
       const allBets = this.getUserData<Array<{ date: string; result: string }>>(username, 'mybets_data', []);
       const today = new Date().toISOString().split('T')[0];
-      
-      return allBets.filter((bet: { date: string }) => {
-        const betDate = bet.date.split(' ')[0]; // Extract date part
+      return allBets.filter((bet) => {
+        const betDate = bet.date.split(' ')[0];
         return betDate === today;
       });
     } catch (error) {
       console.error('Error getting today bets:', error);
       return [];
     }
+  }
+
+  // ═══════════════════════════════════════════
+  // API-backed methods (async — for migration)
+  // ═══════════════════════════════════════════
+
+  /** Fetch bets from API */
+  static async fetchBets(): Promise<ApiBet[]> {
+    const data = await api.get<Record<string, unknown>[]>('/bets');
+    return data.map((b) => ({
+      ...b,
+      id: b.id,
+      odds: parseFloat(b.odds),
+      amount: parseFloat(b.amount),
+      profit: parseFloat(b.profit || '0'),
+      roi: b.roi ? parseFloat(b.roi) : undefined,
+      stake: b.stake ? parseFloat(b.stake) : undefined,
+      originalAmount: b.originalAmount ? parseFloat(b.originalAmount) : undefined,
+      exchangeRate: b.exchangeRate ? parseFloat(b.exchangeRate) : null,
+      originalProfit: b.originalProfit ? parseFloat(b.originalProfit) : undefined,
+      winProbability: b.winProbability ? parseFloat(b.winProbability) : undefined,
+    }));
+  }
+
+  /** Create a bet via API */
+  static async createBet(bet: Omit<ApiBet, 'id'>): Promise<ApiBet> {
+    return api.post<ApiBet>('/bets', bet);
+  }
+
+  /** Update a bet via API */
+  static async updateBet(id: string, bet: Partial<ApiBet>): Promise<ApiBet> {
+    return api.put<ApiBet>(`/bets/${id}`, bet);
+  }
+
+  /** Delete a bet via API */
+  static async deleteBet(id: string): Promise<void> {
+    await api.delete(`/bets/${id}`);
+  }
+
+  /** Fetch bet stats from API */
+  static async fetchBetStats(): Promise<{
+    totalBets: number;
+    winRate: number;
+    totalProfit: number;
+    averageROI: number;
+    profitByMonth: { month: string; profit: number }[];
+    profitByStrategy: { strategy: string; profit: number }[];
+  }> {
+    return api.get('/bets/stats');
+  }
+
+  /** Fetch goals from API */
+  static async fetchGoals(): Promise<Record<string, unknown>[]> {
+    return api.get('/goals');
+  }
+
+  /** Create a goal via API */
+  static async createGoal(goal: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return api.post('/goals', goal);
+  }
+
+  /** Update a goal via API */
+  static async updateGoal(id: string, goal: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return api.put(`/goals/${id}`, goal);
+  }
+
+  /** Delete a goal via API */
+  static async deleteGoal(id: string): Promise<void> {
+    await api.delete(`/goals/${id}`);
+  }
+
+  /** Fetch strategies from API */
+  static async fetchStrategies(): Promise<Record<string, unknown>[]> {
+    return api.get('/strategies');
+  }
+
+  /** Create a strategy via API */
+  static async createStrategy(strategy: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return api.post('/strategies', strategy);
+  }
+
+  /** Update a strategy via API */
+  static async updateStrategy(id: string, strategy: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return api.put(`/strategies/${id}`, strategy);
+  }
+
+  /** Delete a strategy via API */
+  static async deleteStrategy(id: string): Promise<void> {
+    await api.delete(`/strategies/${id}`);
   }
 }

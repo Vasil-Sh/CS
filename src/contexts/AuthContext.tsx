@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authService, type LoginResult } from '@/lib/authService';
+import { clearToken } from '@/lib/apiClient';
 
 interface AuthUser {
   username: string;
@@ -31,15 +32,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Listen for storage changes from other tabs
+  // Listen for storage changes from other tabs + auth:logout events from apiClient
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key === 'authToken' && !e.newValue) {
         setUser(null);
       }
     };
+    const handleLogout = () => setUser(null);
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('auth:logout', handleLogout);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('auth:logout', handleLogout);
+    };
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<LoginResult> => {
@@ -57,9 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('username');
+    clearToken();
     setUser(null);
   }, []);
 
