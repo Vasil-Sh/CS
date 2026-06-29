@@ -243,12 +243,17 @@ export default function StrategyOverview() {
 
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
-      // Always write to shared key (backward compat + instant read)
       localStorage.setItem('customStrategies', JSON.stringify(strategies));
       if (currentUser) {
         UserDataService.setUserDataSync(currentUser, 'strategies_data', strategies);
       }
       bumpStrategy();
+      // Sync to backend API
+      if (currentUser) {
+        strategies.forEach(s => {
+          if (s.id) UserDataService.createStrategy(s).catch(() => {});
+        });
+      }
     } catch (error) {
       console.error('Error saving custom strategies:', error);
     }

@@ -34,6 +34,8 @@ export class BankrollService {
       lastUpdated: new Date().toISOString()
     };
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
+    // Sync to backend API
+    api.post('/bankroll', { initialBank: amount }).catch(() => {});
   }
 
   static getBankrollData(username: string): BankrollData | null {
@@ -72,6 +74,8 @@ export class BankrollService {
     data.manualAdjustments = 0;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
+    // Sync to backend API
+    api.post('/bankroll', { initialBank: newAmount }).catch(() => {});
   }
 
   static validateBetAmount(username: string, bets: Bet[], betAmount: number): {

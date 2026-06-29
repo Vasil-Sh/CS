@@ -389,7 +389,7 @@ export default function GoalsManager() {
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
-  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); };
+  const deleteGoal = () => { if (!goalToDelete) return; const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); UserDataService.deleteGoal(goalToDelete).catch(() => {}); };
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {

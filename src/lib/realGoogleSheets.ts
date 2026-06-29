@@ -336,8 +336,13 @@ class RealGoogleSheetsService {
       return r.date === record.date && r.match === record.match && r.amount === record.amount && r.odds === record.odds;
     });
     if (idx !== -1) {
+      const removed = items[idx];
       items.splice(idx, 1);
       localStorage.setItem(key, JSON.stringify(items));
+      // Sync to backend API
+      if (removed.id) {
+        api.delete(`/bets/${removed.id}`).catch(() => {});
+      }
     }
   }
 
@@ -485,6 +490,11 @@ class RealGoogleSheetsService {
           goalId: userBets[userBetIndex].goalId
         };
         localStorage.setItem(userKey, JSON.stringify(userBets));
+
+        // Sync to backend API
+        if (userBets[userBetIndex].id) {
+          api.put(`/bets/${userBets[userBetIndex].id}`, { result, profit, roi }).catch(() => {});
+        }
         return;
       }
 
