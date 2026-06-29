@@ -48,16 +48,15 @@ import { toast } from 'sonner';
 import { authService } from '@/lib/authService';
 
 interface UserData {
+  id?: number;
   telegram: string;
   username: string;
-  password: string;
   priceMonth: string;
   startDate: string;
   endDate: string;
   isActive: boolean;
   isAdmin: boolean;
   daysUntilExpiry?: number;
-  isLocal?: boolean; // locally added user
 }
 
 type StatusFilter = 'all' | 'active' | 'expired';
@@ -66,12 +65,10 @@ type SortDirection = 'asc' | 'desc' | null;
 const EMPTY_USER: Omit<UserData, 'isActive' | 'daysUntilExpiry'> = {
   telegram: '',
   username: '',
-  password: '',
   priceMonth: '',
   startDate: '',
   endDate: '',
   isAdmin: false,
-  isLocal: true,
 };
 
 /** Strip any currency symbols ($, ₴, €, etc.) from a price string, keep only digits and separators */
@@ -156,46 +153,6 @@ export default function Admin() {
     return daysLeft >= 0;
   };
 
-  const loadLocalUsers = (): UserData[] => {
-    try {
-      const saved = localStorage.getItem('adminLocalUsers');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Error loading local users:', e);
-    }
-    return [];
-  };
-
-  const saveLocalUsers = (localUsers: UserData[]) => {
-    localStorage.setItem('adminLocalUsers', JSON.stringify(localUsers));
-  };
-
-  // Load edits overlay (for editing Google Sheets users locally)
-  const loadUserEdits = (): Record<string, Partial<UserData>> => {
-    try {
-      const saved = localStorage.getItem('adminUserEdits');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Error loading user edits:', e);
-    }
-    return {};
-  };
-
-  const saveUserEdits = (edits: Record<string, Partial<UserData>>) => {
-    localStorage.setItem('adminUserEdits', JSON.stringify(edits));
-  };
-
-  const applyEditsToUser = (user: UserData, edits: Record<string, Partial<UserData>>): UserData => {
-    const key = user.username;
-    if (edits[key]) {
-      const edited = { ...user, ...edits[key] };
-      edited.isActive = isSubscriptionActive(edited.endDate);
-      edited.daysUntilExpiry = getDaysUntilExpiry(edited.endDate);
-      return edited;
-    }
-    return user;
-  };
-
   const fetchUsers = async () => {
     setLoading(true);
     setError('');
@@ -205,33 +162,25 @@ export default function Admin() {
 
       const parsedUsers: UserData[] = allUsers
         .map(user => {
-          const isAdminVal = (user as { role?: string }).role === 'admin' || (user as { isAdmin?: string }).isAdmin === 'так' || (user as { isAdmin?: string }).isAdmin === 'yes';
-          const endDate = (user as { endDate?: string }).endDate || '';
+          const isAdminVal = user.role === 'admin';
+          const endDate = user.endDate || '';
           const daysLeft = getDaysUntilExpiry(endDate);
           
           return {
-            telegram: (user as { telegram?: string }).telegram || '',
+            id: user.id,
+            telegram: user.telegram || '',
             username: user.username || '',
-            password: '',
-            priceMonth: cleanPrice((user as { priceMonth?: string }).priceMonth || ''),
-            startDate: (user as { startDate?: string }).startDate || '',
+            priceMonth: cleanPrice(String(user.priceMonth || '')),
+            startDate: user.startDate || '',
             endDate,
             isActive: isSubscriptionActive(endDate),
             isAdmin: isAdminVal,
             daysUntilExpiry: daysLeft,
-            isLocal: false,
           };
         })
         .filter(u => u.username);
 
-      // Merge with local users (not managed by authService)
-      const localUsers = loadLocalUsers().map(u => ({
-        ...u,
-        isActive: isSubscriptionActive(u.endDate),
-        daysUntilExpiry: getDaysUntilExpiry(u.endDate),
-      }));
-
-      setUsers([...parsedUsers, ...localUsers]);
+      setUsers(parsedUsers);
       setLastUpdate(new Date().toLocaleString('uk-UA'));
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -241,40 +190,39 @@ export default function Admin() {
     }
   };
 
-  // Add new user
-  const handleAddUser = () => {
+  // Add new user via API
+  const handleAddUser = async () => {
     if (!newUser.username.trim() || !newUser.telegram.trim()) {
       toast.error('Заповніть Telegram та Username');
       return;
     }
 
-    // Check duplicate
     if (users.some(u => u.username.toLowerCase() === newUser.username.toLowerCase().trim())) {
       toast.error('Користувач з таким username вже існує');
       return;
     }
 
-    const userData: UserData = {
-      ...newUser,
-      telegram: newUser.telegram.trim(),
-      username: newUser.username.trim(),
-      password: newUser.password.trim(),
-      priceMonth: cleanPrice(newUser.priceMonth.trim()),
-      startDate: newUser.startDate.trim(),
-      endDate: newUser.endDate.trim(),
-      isActive: isSubscriptionActive(newUser.endDate),
-      daysUntilExpiry: getDaysUntilExpiry(newUser.endDate),
-      isLocal: true,
-    };
+    setLoading(true);
+    try {
+      await authService.createUser({
+        username: newUser.username.trim(),
+        password: 'default123',
+        telegram: newUser.telegram.trim(),
+        role: newUser.isAdmin ? 'admin' : 'user',
+        priceMonth: cleanPrice(newUser.priceMonth.trim()),
+        endDate: newUser.endDate.trim(),
+      });
 
-    const localUsers = loadLocalUsers();
-    localUsers.push(userData);
-    saveLocalUsers(localUsers);
-
-    setUsers(prev => [...prev, userData]);
-    setNewUser({ ...EMPTY_USER });
-    setAddDialogOpen(false);
-    toast.success(`Користувача "${userData.username}" додано!`);
+      toast.success(`Користувача "${newUser.username}" додано!`);
+      setNewUser({ ...EMPTY_USER });
+      setAddDialogOpen(false);
+      await fetchUsers();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      toast.error(e.message || 'Помилка створення користувача');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Open edit dialog
@@ -284,116 +232,84 @@ export default function Admin() {
     setEditDialogOpen(true);
   };
 
-  // Save edit
-  const handleSaveEdit = () => {
-    if (!editingUser) return;
+  // Save edit via API
+  const handleSaveEdit = async () => {
+    if (!editingUser || !editingUser.id) return;
 
-    const updated: UserData = {
-      ...editingUser,
-      priceMonth: cleanPrice(editingUser.priceMonth),
-      isActive: isSubscriptionActive(editingUser.endDate),
-      daysUntilExpiry: getDaysUntilExpiry(editingUser.endDate),
-    };
+    setLoading(true);
+    try {
+      await authService.updateUser(editingUser.id, {
+        telegram: editingUser.telegram,
+        username: editingUser.username,
+        role: editingUser.isAdmin ? 'admin' : 'user',
+        priceMonth: cleanPrice(editingUser.priceMonth),
+        startDate: editingUser.startDate,
+        endDate: editingUser.endDate,
+      });
 
-    if (editingUser.isLocal) {
-      // Update local user
-      const localUsers = loadLocalUsers();
-      const localIdx = localUsers.findIndex(u => u.username === users[editingIndex]?.username);
-      if (localIdx >= 0) {
-        localUsers[localIdx] = updated;
-        saveLocalUsers(localUsers);
-      }
-    } else {
-      // Save edit overlay for Google Sheets user
-      const edits = loadUserEdits();
-      const originalUsername = users[editingIndex]?.username;
-      if (originalUsername) {
-        edits[originalUsername] = {
-          telegram: updated.telegram,
-          username: updated.username,
-          password: updated.password,
-          priceMonth: updated.priceMonth,
-          startDate: updated.startDate,
-          endDate: updated.endDate,
-          isAdmin: updated.isAdmin,
-        };
-        saveUserEdits(edits);
-      }
+      toast.success('Дані користувача оновлено!');
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      setEditingIndex(-1);
+      await fetchUsers();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      toast.error(e.message || 'Помилка оновлення');
+    } finally {
+      setLoading(false);
     }
-
-    setUsers(prev => prev.map((u, i) => i === editingIndex ? updated : u));
-    setEditDialogOpen(false);
-    setEditingUser(null);
-    setEditingIndex(-1);
-    toast.success('Дані користувача оновлено!');
   };
 
-  // Extend subscription by 30 days
-  const handleExtend = (index: number) => {
+  // Extend subscription by 30 days via API
+  const handleExtend = async (index: number) => {
     const user = users[index];
-    if (!user) return;
+    if (!user || !user.id) return;
 
-    // Base date: max(today, current endDate)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const currentEnd = parseDate(user.endDate);
     const baseDate = currentEnd && currentEnd > today ? currentEnd : today;
-
     const newEnd = new Date(baseDate);
     newEnd.setDate(newEnd.getDate() + 30);
     const newEndStr = formatDate(newEnd);
 
-    const updated: UserData = {
-      ...user,
-      endDate: newEndStr,
-      isActive: isSubscriptionActive(newEndStr),
-      daysUntilExpiry: getDaysUntilExpiry(newEndStr),
-    };
-
-    if (user.isLocal) {
-      const localUsers = loadLocalUsers();
-      const localIdx = localUsers.findIndex(u => u.username === user.username);
-      if (localIdx >= 0) {
-        localUsers[localIdx] = updated;
-        saveLocalUsers(localUsers);
-      }
-    } else {
-      const edits = loadUserEdits();
-      edits[user.username] = {
-        ...edits[user.username],
-        endDate: newEndStr,
-      };
-      saveUserEdits(edits);
+    setLoading(true);
+    try {
+      await authService.updateUser(user.id, { endDate: newEndStr });
+      toast.success(`Підписку продовжено на 30 днів — до ${newEndStr}`);
+      await fetchUsers();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      toast.error(e.message || 'Помилка продовження');
+    } finally {
+      setLoading(false);
     }
-
-    setUsers(prev => prev.map((u, i) => i === index ? updated : u));
-    toast.success(`Підписку продовжено на 30 днів — до ${newEndStr}`);
   };
 
-  // Delete user
   const confirmDelete = (index: number) => {
     setDeletingIndex(index);
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = () => {
+  // Delete user via API
+  const handleDelete = async () => {
     if (deletingIndex < 0) return;
     const user = users[deletingIndex];
+    if (!user || !user.id) return;
 
-    if (user.isLocal) {
-      const localUsers = loadLocalUsers().filter(u => u.username !== user.username);
-      saveLocalUsers(localUsers);
-    } else {
-      // For Google Sheets users, we just hide them via a "deleted" list
-      const deleted: string[] = JSON.parse(localStorage.getItem('adminDeletedUsers') || '[]');
-      deleted.push(user.username);
-      localStorage.setItem('adminDeletedUsers', JSON.stringify(deleted));
+    setLoading(true);
+    try {
+      await authService.deleteUser(user.id);
+      toast.success(`Користувача "${user.username}" видалено!`);
+      setDeleteDialogOpen(false);
+      setDeletingIndex(-1);
+      await fetchUsers();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      toast.error(e.message || 'Помилка видалення');
+    } finally {
+      setLoading(false);
     }
-
-    setUsers(prev => prev.filter((_, i) => i !== deletingIndex));
-    setDeleteDialogOpen(false);
-    setDeletingIndex(-1);
-    toast.success(`Користувача "${user.username}" видалено!`);
   };
 
   // Toggle sort by end date
@@ -738,7 +654,7 @@ export default function Admin() {
                 <div>
                   <h2 className="text-lg font-semibold text-[#111827]">Список користувачів</h2>
                   <p className="text-sm text-[#6B7280] mt-0.5">
-                    Google Sheets • Оновлено: {lastUpdate || '—'}
+                    API Backend • Оновлено: {lastUpdate || '—'}
                   </p>
                 </div>
               </div>
@@ -880,11 +796,6 @@ export default function Admin() {
                     >
                       <TableCell className={`font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderTelegram(user.telegram)}
-                        {user.isLocal && (
-                          <Badge className="ml-2 bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#EFF6FF] px-1.5 py-0.5 rounded text-[10px] border-0 font-medium">
-                            LOCAL
-                          </Badge>
-                        )}
                       </TableCell>
                       <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderUsername(user.username)}
@@ -996,15 +907,6 @@ export default function Admin() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#111827] font-medium text-sm">Пароль</Label>
-                <Input
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  placeholder="password"
-                  className="rounded-xl border-[#E5E7EB] mt-1.5"
-                />
-              </div>
-              <div>
                 <Label className="text-[#111827] font-medium text-sm">Ціна / місяць (грн)</Label>
                 <Input
                   value={newUser.priceMonth}
@@ -1110,14 +1012,6 @@ export default function Admin() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-[#111827] font-medium text-sm">Пароль</Label>
-                  <Input
-                    value={editingUser.password}
-                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                    className="rounded-xl border-[#E5E7EB] mt-1.5"
-                  />
-                </div>
                 <div>
                   <Label className="text-[#111827] font-medium text-sm">Ціна / місяць (грн)</Label>
                   <Input

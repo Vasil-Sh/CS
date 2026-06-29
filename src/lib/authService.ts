@@ -85,9 +85,25 @@ class AuthService {
     try {
       const result = await this.login(username, password);
       return { isValid: result.success, message: result.error };
-    } catch (err: any) {
-      return { isValid: false, message: err.message || "Помилка з'єднання" };
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      return { isValid: false, message: e.message || "Помилка з'єднання" };
     }
+  }
+
+  /** Create user (admin only) */
+  async createUser(data: { username: string; password: string; telegram?: string; role?: string; priceMonth?: string; endDate?: string }): Promise<void> {
+    await api.post('/auth/register', data);
+  }
+
+  /** Update user (admin only) */
+  async updateUser(id: number, data: Record<string, unknown>): Promise<void> {
+    await api.put(`/auth/users/${id}`, data);
+  }
+
+  /** Delete user (admin only) */
+  async deleteUser(id: number): Promise<void> {
+    await api.delete(`/auth/users/${id}`);
   }
 }
 
