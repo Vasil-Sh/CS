@@ -170,9 +170,9 @@ function parseStatusCell(cell: string): { status: string; game: string; notes: s
   }
 
   // Default game
-  if (!game) game = 'CS';
+  if (!game) game = '';
 
-  return { status: status || 'Без статусу', game, notes };
+  return { status: status || '', game, notes };
 }
 
 export const googleSheetsRiskyTeamsService = new GoogleSheetsRiskyTeamsService();
