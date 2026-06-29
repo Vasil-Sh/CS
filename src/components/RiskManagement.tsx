@@ -890,9 +890,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             <div className="border-t border-[#E5E7EB]" />
 
-            <div className="space-y-2 px-5 pb-5 bg-[#F3F4F6]">
+            <div className="space-y-3 px-5 pb-5 bg-[#F3F4F6]">
               {/* Step 1 */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     1
@@ -913,7 +913,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 2 */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     2
@@ -983,7 +983,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 3 */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     3
@@ -1039,7 +1039,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 4 */}
-              <div className="p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     4
@@ -1102,12 +1102,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Warning */}
-              <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl flex items-start gap-2">
+              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-2xl flex items-start gap-2">
                 <AlertTriangle
-                  className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5"
+                  className="h-4 w-4 text-[#DC2626] flex-shrink-0 mt-0.5"
                   strokeWidth={1.75}
                 />
-                <div className="text-sm text-[#92400E]">
+                <div className="text-sm text-[#991B1B]">
                   <span className="font-semibold">Важливо:</span> при оновленні{" "}
                   <strong>всі команди замінюються</strong> даними з Google
                   Sheets. Документ є джерелом правди — локальні зміни будуть
