@@ -344,12 +344,7 @@ export default function StrategyOverview() {
         );
       }
       bumpStrategy();
-      // Sync to backend API
-      if (currentUser) {
-        strategies.forEach((s) => {
-          if (s.id) UserDataService.createStrategy(s).catch(() => {});
-        });
-      }
+      // API sync now handled on explicit create/delete actions — not on every save
     } catch (error) {
       console.error("Error saving custom strategies:", error);
     }
@@ -634,6 +629,8 @@ export default function StrategyOverview() {
     }
     customStrategies.push(strategy);
     saveCustomStrategiesToStorage(customStrategies);
+    // Sync new strategy to backend API
+    UserDataService.createStrategy(strategy).catch(() => {});
 
     setStrategies((prev) => [...prev, strategy]);
     setNewlyCreatedStrategy(strategy);
