@@ -487,29 +487,29 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       return (
         <div
           key={globalIndex}
-          className="p-4 border border-[#BFDBFE] rounded-2xl bg-[#EFF6FF] transition-all"
+          className="p-4 border border-[#D1D5DB] rounded-2xl bg-[#F9FAFB] transition-all"
         >
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2">
                 <label className="text-xs font-medium text-[#6B7280] mb-1 block">
                   Назва команди
                 </label>
                 <Input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                  className="rounded-xl border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                   placeholder="Назва команди"
                 />
               </div>
-              <div className="w-36">
+              <div>
                 <label className="text-xs font-medium text-[#6B7280] mb-1 block">
                   Статус
                 </label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
+                  className="w-full p-2 border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
                 >
                   {ALL_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -528,7 +528,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <select
                 value={editGame || ""}
                 onChange={(e) => setEditGame(e.target.value)}
-                className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
+                className="w-full p-2 border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
               >
                 {(!editGame || (editGame !== "CS" && editGame !== "Дота")) && (
                   <option value="" disabled>
@@ -553,7 +553,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <Textarea
                 value={editNotes}
                 onChange={(e) => setEditNotes(e.target.value)}
-                className="rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                className="rounded-xl border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
                 placeholder="Додайте коментар..."
                 rows={2}
               />
