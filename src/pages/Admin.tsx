@@ -132,17 +132,22 @@ export default function Admin() {
 
   const getDaysUntilExpiry = (endDateStr: string): number => {
     try {
-      const [day, month, year] = endDateStr.split('/').map(Number);
-      const endDate = new Date(year, month - 1, day);
+      // PostgreSQL returns YYYY-MM-DD, legacy format is DD/MM/YYYY
+      let endDate: Date;
+      if (endDateStr.includes('-')) {
+        endDate = new Date(endDateStr);
+      } else {
+        const [day, month, year] = endDateStr.split('/').map(Number);
+        endDate = new Date(year, month - 1, day);
+      }
+      if (isNaN(endDate.getTime())) return -1;
+
       const today = new Date();
-      
       today.setHours(0, 0, 0, 0);
       endDate.setHours(23, 59, 59, 999);
-      
+
       const diffTime = endDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      return diffDays;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     } catch {
       return -1;
     }
