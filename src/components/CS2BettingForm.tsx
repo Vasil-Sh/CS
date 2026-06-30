@@ -226,6 +226,13 @@ export default function CS2BettingForm({
     logoTeam2?: string | null;
   }>({});
   const strategyLoadedRef = useRef(false);
+  const strategiesRef = useRef<any[]>([]);
+
+  // Load strategies from localStorage on mount
+  useEffect(() => {
+    const stored = UserDataService.getUserData<any[]>(currentUser, 'strategies', []);
+    strategiesRef.current = stored;
+  }, [currentUser]);
 
   useEffect(() => {
     UserDataService.setUserData(
