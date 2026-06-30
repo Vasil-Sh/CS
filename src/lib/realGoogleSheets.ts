@@ -490,9 +490,9 @@ class RealGoogleSheetsService {
         };
         localStorage.setItem(userKey, JSON.stringify(userBets));
 
-        // Sync to backend API
+        // Sync to backend API ( include notes if provided )
         if (userBets[userBetIndex].id) {
-          api.put(`/bets/${userBets[userBetIndex].id}`, { result, profit, roi }).catch(() => {});
+          api.put(`/bets/${userBets[userBetIndex].id}`, { result, profit, roi, notes: bet.notes }).catch(() => {});
         }
         return;
       }
