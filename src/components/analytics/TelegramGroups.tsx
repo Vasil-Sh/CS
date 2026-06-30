@@ -445,12 +445,12 @@ export default function TelegramGroups() {
       {renderKPICards()}
 
       {groups.length === 0 ? (
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex items-center justify-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex">
           <div
-            className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden w-full h-full flex flex-col"
+            className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden flex-1 flex flex-col items-center justify-center"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           >
-          <div className="py-16 text-center flex-1 flex flex-col items-center justify-center">
+          <div className="py-16 text-center">
             <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
               <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
             </div>
