@@ -223,7 +223,26 @@ export default function StrategyOverview() {
         betsData = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []) as unknown[];
       }
 
-      const customStrategies = loadCustomStrategiesFromStorage();
+      // 1. Load strategies — try API first, fallback localStorage
+      let customStrategies = loadCustomStrategiesFromStorage();
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${API_BASE}/strategies`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
+        if (res.ok) {
+          const apiStrats = await res.json();
+          if (apiStrats.length > 0) {
+            // Map API strategies to CS2Strategy format
+            customStrategies = apiStrats.map((s: any) => ({
+              id: s.id,
+              ...(s.config || {}),
+              _backendId: s.id,
+            }));
+            saveCustomStrategiesToStorage(customStrategies);
+          }
+        }
+      } catch { /* fallback to localStorage */ }
       setStrategies(customStrategies);
       setBettingData(betsData);
       calculateStrategyStats(betsData);
