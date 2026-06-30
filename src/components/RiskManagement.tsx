@@ -247,7 +247,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
     setNewTeam({ name: "", game: "CS", status: "Обережно", notes: "" });
     // Sync to backend API
-    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
+    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
   };
 
   const deleteRiskyTeam = (index: number) => {
@@ -256,7 +256,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
     // Sync to backend API (by id if available, otherwise by name)
     if (team._apiId) {
-      googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
+      googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
     }
   };
 
@@ -264,7 +264,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     // Try API delete for each team
     riskyTeams.forEach((t) => {
       if (t._apiId)
-        googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
+        googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
     });
     setRiskyTeams([]);
     setEditingIndex(null);
