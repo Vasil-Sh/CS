@@ -30,9 +30,14 @@ export default function GoalPickerModal({
 }: GoalPickerModalProps) {
   const [search, setSearch] = useState('');
 
-  const filteredGoals = search.trim()
+  const filteredGoals = (search.trim()
     ? goals.filter((g) => g.name.toLowerCase().includes(search.toLowerCase()))
-    : goals;
+    : goals
+  ).sort((a, b) => {
+    if (a.isPrimary && !b.isPrimary) return -1;
+    if (!a.isPrimary && b.isPrimary) return 1;
+    return 0;
+  });
 
   const selectedGoal = goals.find((g) => g.id === selectedGoalId);
 
