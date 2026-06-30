@@ -1,4 +1,4 @@
-import { Calendar, Plus, RotateCcw, ChevronDown, Target } from 'lucide-react';
+import { Calendar, Plus, RotateCcw, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -189,15 +189,9 @@ export default function BettingFormSettings({
                 >
                   <span className="flex items-center gap-2 truncate">
                     {selectedGoal ? (
-                      <>
-                        <Target className="h-4 w-4 text-[#2563EB] flex-shrink-0" strokeWidth={1.5} />
-                        <span className="font-medium text-[#111827] truncate">{selectedGoal.name}</span>
-                      </>
+                      <span className="font-medium text-[#111827] truncate">{selectedGoal.name}</span>
                     ) : (
-                      <>
-                        <Target className="h-4 w-4 text-[#9CA3AF] flex-shrink-0" strokeWidth={1.5} />
-                        Без цілі
-                      </>
+                      'Без цілі'
                     )}
                   </span>
                   <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2 text-[#9CA3AF]" strokeWidth={1.5} />
