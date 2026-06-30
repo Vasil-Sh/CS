@@ -149,9 +149,16 @@ export default function MyBets() {
   }, [currentUser]);
 
   const syncBankrollStats = useCallback(() => {
-    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
-    setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
-  }, [currentUser]);
+    // Use recentBets state (already updated) for immediate UI feedback
+    const localBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    const merged = [...localBets];
+    recentBets.forEach(rb => {
+      if (!merged.find(m => m.id === rb.id || (m.date === rb.date && m.match === rb.match && m.amount === rb.amount))) {
+        merged.push(rb);
+      }
+    });
+    setBankrollStats(BankrollService.getBankrollStats(currentUser, merged));
+  }, [currentUser, recentBets]);
 
   const syncStats = useCallback(() => {
     const allBets: Bet[] = UserDataService.getUserData(currentUser, 'mybets_data', []);
