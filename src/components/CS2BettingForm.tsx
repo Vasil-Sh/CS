@@ -390,11 +390,11 @@ export default function CS2BettingForm({
         return "";
       }
 
-      // For non-ladder goals — pull last bet amount
-      const allRecords = realGoogleSheetsService.getAllRecords();
+      // For non-ladder goals — pull last bet amount from localStorage (not stale Google Sheets)
+      const allRecords = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
       const goalRecords = allRecords
         .filter((r) => r.goalId === goalId)
-        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       if (goalRecords.length > 0) {
         const lastAmount =
