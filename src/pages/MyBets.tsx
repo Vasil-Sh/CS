@@ -681,9 +681,9 @@ export default function MyBets() {
                 </div>
               }
               label="Профіт"
-              value={`${(stats.totalProfit || 0) >= 0 ? "+" : ""}${(stats.totalProfit || 0).toFixed(2)} ₴`}
+              value={`${Number(stats.totalProfit || 0) >= 0 ? "+" : ""}${Number(stats.totalProfit || 0).toFixed(2)} ₴`}
               valueColor={
-                (stats.totalProfit || 0) >= 0
+                Number(stats.totalProfit || 0) >= 0
                   ? "text-[#111827]"
                   : "text-[#EF4444]"
               }

@@ -473,7 +473,7 @@ export default function StrategyOverview() {
         return {
           name: name.length > 15 ? name.substring(0, 15) + "..." : name,
           fullName: name,
-          value: Math.round(Number(stats.totalProfit)),
+          value: parseFloat(String(stats.totalProfit)).toFixed(0),
           totalBets: stats.totalBets,
           riskLevel: strategy?.riskLevel || "Medium",
         };
@@ -794,21 +794,21 @@ export default function StrategyOverview() {
       if (stats.roi < -5 && stats.totalBets > 5) {
         recommendations.push({
           type: "warning",
-          message: `Стратегія "${name}" має ROI ${stats.roi.toFixed(1)}%. Розгляньте можливість перегляду критеріїв.`,
+          message: `Стратегія "${name}" має ROI ${Number(stats.roi).toFixed(1)}%. Розгляньте можливість перегляду критеріїв.`,
         });
       }
 
       if (stats.roi > 10 && stats.totalBets > 10) {
         recommendations.push({
           type: "success",
-          message: `Стратегія "${name}" показує відмінні результати (ROI ${stats.roi.toFixed(1)}%). Продовжуйте використовувати!`,
+          message: `Стратегія "${name}" показує відмінні результати (ROI ${Number(stats.roi).toFixed(1)}%). Продовжуйте використовувати!`,
         });
       }
 
       if (stats.winRate < 40 && stats.totalBets > 5) {
         recommendations.push({
           type: "warning",
-          message: `Вінрейт стратегії "${name}" становить ${stats.winRate.toFixed(1)}%. Можливо, варто знизити ризик.`,
+          message: `Вінрейт стратегії "${name}" становить ${Number(stats.winRate).toFixed(1)}%. Можливо, варто знизити ризик.`,
         });
       }
     });
@@ -1563,7 +1563,7 @@ export default function StrategyOverview() {
                       <p
                         className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? "text-[#22C55E]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
                       >
-                        {hasStats ? stats.winRate.toFixed(1) : 0}%
+                    <span className="ml-2 text-2xl font-semibold">{hasStats ? Number(stats.winRate).toFixed(1) : 0}%
                       </p>
                     </div>
                     <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
@@ -1584,7 +1584,7 @@ export default function StrategyOverview() {
                         Прибуток
                       </p>
                       <p
-                        className={`text-3xl font-semibold ${hasStats && stats.totalProfit >= 0 ? "text-[#16A34A]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
+                        className={`text-3xl font-semibold ${hasStats && Number(stats.totalProfit) >= 0 ? "text-[#16A34A]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
                       >
                         {hasStats
                           ? `${Number(stats.totalProfit) >= 0 ? "+" : ""}${Number(stats.totalProfit).toFixed(0)}`
