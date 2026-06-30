@@ -121,16 +121,21 @@ export default function TelegramGroups() {
   useEffect(() => {
     if (!currentUser || dataLoaded) return;
     const load = async () => {
+      let localGroups = UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []);
       // Try API first
       try {
         const apiGroups = await api.get<TelegramGroup[]>('/telegram-groups');
         if (apiGroups.length > 0) {
           setGroups(apiGroups);
         } else {
-          setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
+          setGroups(localGroups);
+          // Seed localStorage groups to DB
+          for (const g of localGroups) {
+            try { await api.post('/telegram-groups', { name: g.name, link: g.link }); } catch {}
+          }
         }
       } catch {
-        setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
+        setGroups(localGroups);
       }
       setBets(UserDataService.getUserData<TelegramGroupBet[]>(currentUser, 'tg_bets', []));
       setDataLoaded(true);
