@@ -158,13 +158,7 @@ export default function Analytics() {
         }
       } catch { /* fallback */ }
 
-      // 2. Fallback: localStorage
-      if (myBetsData.length === 0) {
-        myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
-        myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
-      }
-
-      // 3. Last resort: localStorage
+      // 2. Fallback: localStorage (only if API failed or returned empty)
       if (myBetsData.length === 0) {
         myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
         myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);

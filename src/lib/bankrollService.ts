@@ -35,7 +35,7 @@ export class BankrollService {
     };
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
     // Sync to backend API
-    api.post('/bankroll', { initialBank: amount }).catch(() => {});
+    api.post('/bankroll', { initialBank: amount }).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
   }
 
   static getBankrollData(username: string): BankrollData | null {
@@ -75,7 +75,7 @@ export class BankrollService {
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
     // Sync to backend API
-    api.post('/bankroll', { initialBank: newAmount }).catch(() => {});
+    api.post('/bankroll', { initialBank: newAmount }).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
   }
 
   static validateBetAmount(username: string, bets: Bet[], betAmount: number): {

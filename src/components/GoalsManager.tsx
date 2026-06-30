@@ -216,7 +216,7 @@ export default function GoalsManager() {
         };
         if (g.status === 'completed') payload.isCompleted = true;
         if (Object.keys(payload).length > 0) {
-          UserDataService.updateGoal(backendId, payload).catch(() => {});
+          UserDataService.updateGoal(backendId, payload).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
         }
       });
     }
@@ -440,7 +440,7 @@ export default function GoalsManager() {
       if (backendGoal?.id) {
         setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, _backendId: backendGoal.id } : g));
       }
-    }).catch(() => {});
+    }).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) });
     bumpStrategy();
     setShowCreateDialog(false);
     resetNewGoalForm();
@@ -460,7 +460,7 @@ export default function GoalsManager() {
   };
 
   const confirmDeleteGoal = (goalId: string) => { setGoalToDelete(goalId); setShowDeleteDialog(true); };
-  const deleteGoal = () => { if (!goalToDelete) return; const goal = goals.find(g => g.id === goalToDelete); const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); const backendId = (goal as { _backendId?: string })?._backendId || goalToDelete; UserDataService.deleteGoal(backendId).catch(() => {}); };
+  const deleteGoal = () => { if (!goalToDelete) return; const goal = goals.find(g => g.id === goalToDelete); const u = goals.filter(g => g.id !== goalToDelete); setGoals(u); UserDataService.setUserDataSync(currentUser, 'goals', u); bumpStrategy(); setShowDeleteDialog(false); setGoalToDelete(null); toast.success('Ціль видалена'); const backendId = (goal as { _backendId?: string })?._backendId || goalToDelete; UserDataService.deleteGoal(backendId).catch((err: unknown) => { console.warn("[API sync] failed:", String(err)) }); };
   const setPrimaryGoal = (goalId: string) => {
     let updated: Goal[];
     if (goals.find(g => g.id === goalId)?.isPrimary) {

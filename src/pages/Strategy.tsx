@@ -106,10 +106,9 @@ export default function Strategy() {
   }, [currentUser, strategyVersion]);
 
   // --- Dynamic data for KPI + detail cards ---
-  const resolvedUser = currentUser || localStorage.getItem('username') || 'default';
+  const resolvedUser = currentUser || 'default';
   const activeStrategy = useMemo(() => {
-    const pid = UserDataService.getUserData<string>(resolvedUser, 'primary_strategy', '')
-      || (() => { const r = localStorage.getItem('primaryStrategy'); if (r) try { return JSON.parse(r); } catch { return r; } return ''; })();
+    const pid = UserDataService.getUserData<string>(resolvedUser, 'primary_strategy', '');
     if (!pid) return null;
     const strats = UserDataService.getUserData<StoredStrategy[]>(resolvedUser, 'strategies_data', []);
     return strats.find((s: StoredStrategy) => s.id === pid || s.name === pid) || null;
