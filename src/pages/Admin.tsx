@@ -384,7 +384,7 @@ export default function Admin() {
       return (
         <Badge className="bg-gradient-to-r from-[#FF9800] to-[#F44336] text-white hover:from-[#FB8C00] hover:to-[#E53935] px-3 py-1.5 rounded-lg border-0 shadow-[0_2px_8px_rgba(244,67,54,0.25)] font-medium text-xs animate-pulse">
           <AlertTriangle className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
-          {user.daysUntilExpiry === 0 ? 'Сьогодні!' : '${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}'}
+          {user.daysUntilExpiry === 0 ? 'Сьогодні!' : `${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
         </Badge>
       );
     }
