@@ -117,6 +117,36 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
+  // Sync localStorage teams to backend on first load if DB is empty
+  useEffect(() => {
+    const seedFromLocalStorage = async () => {
+      const seeded = localStorage.getItem('risky_teams_seeded_v2');
+      if (seeded) return;
+      try {
+        const dbTeams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+        if (dbTeams.length > 0) {
+          localStorage.setItem('risky_teams_seeded_v2', '1');
+          return;
+        }
+        // DB empty, seed from localStorage
+        if (riskyTeams.length > 0) {
+          let count = 0;
+          for (const t of riskyTeams) {
+            try { await googleSheetsRiskyTeamsService.addTeam(t.name); count++; } catch {}
+            // Small delay to not hammer the API
+            await new Promise(r => setTimeout(r, 50));
+          }
+          if (count > 0) {
+            console.log(`[RiskMgmt] Seeded ${count} teams to backend`);
+            toast.success(`${count} команд завантажено в базу даних`);
+          }
+          localStorage.setItem('risky_teams_seeded_v2', '1');
+        }
+      } catch {}
+    };
+    if (riskyTeams.length > 0) seedFromLocalStorage();
+  }, [riskyTeams]);
+
   const normalizeTeamName = (name: string): string => {
     return name
       .toLowerCase()
