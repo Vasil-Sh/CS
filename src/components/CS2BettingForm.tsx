@@ -226,11 +226,11 @@ export default function CS2BettingForm({
     logoTeam2?: string | null;
   }>({});
   const strategyLoadedRef = useRef(false);
-  const strategiesRef = useRef<any[]>([]);
+  const strategiesRef = useRef<CS2Strategy[]>([]);
 
   // Load strategies from localStorage on mount
   useEffect(() => {
-    const stored = UserDataService.getUserData<any[]>(currentUser, 'strategies', []);
+    const stored = UserDataService.getUserData<CS2Strategy[]>(currentUser, 'strategies', []);
     strategiesRef.current = stored;
   }, [currentUser]);
 
@@ -272,7 +272,7 @@ export default function CS2BettingForm({
       "";
     if (savedPrimaryStrategy) {
       const strategy = strategiesRef.current?.find(
-        (s: any) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
+        (s: CS2Strategy) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
       );
       if (strategy) {
         setPrimaryStrategy(strategy);
@@ -564,7 +564,7 @@ export default function CS2BettingForm({
       );
       if (savedPrimaryStrategy) {
         const strategy = strategiesRef.current?.find(
-      (s: any) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
+      (s: CS2Strategy) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
     );
         if (strategy) {
           setPrimaryStrategy(strategy);
@@ -993,13 +993,13 @@ export default function CS2BettingForm({
       } catch (err) {
         // Fallback: save to localStorage
         console.warn('[API] Bet save network error, saving to localStorage:', err);
-        const existingBets = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []);
-        UserDataService.setUserData(currentUser, 'mybets_data', [record as any, ...existingBets]);
+        const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+        UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
       }
 
       // Always update localStorage so UI reflects immediately
-      const existingBets = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []);
-      UserDataService.setUserData(currentUser, 'mybets_data', [record as any, ...existingBets]);
+      const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+      UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
 
       if (finalGoalId) {
         const goalName = activeGoals.find((g) => g.id === finalGoalId)?.name;
@@ -1255,7 +1255,7 @@ export default function CS2BettingForm({
     const allBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
     // Sort by date descending, count consecutive losses
     const sorted = [...allBets]
-      .filter((b: any) => b.result === "Win" || b.result === "Loss")
+      .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
       .sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();

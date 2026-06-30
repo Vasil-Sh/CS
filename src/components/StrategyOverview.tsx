@@ -220,7 +220,7 @@ export default function StrategyOverview() {
 
       // 2. Fallback to localStorage
       if (betsData.length === 0) {
-        betsData = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []) as unknown[];
+        betsData = UserDataService.getUserData<Record<string, unknown>[]>(currentUser, 'mybets_data', []) as unknown[];
       }
 
       // 1. Load strategies — try API first, fallback localStorage
@@ -234,7 +234,7 @@ export default function StrategyOverview() {
           const apiStrats = await res.json();
           if (apiStrats.length > 0) {
             // Map API strategies to CS2Strategy format
-            customStrategies = apiStrats.map((s: any) => ({
+            customStrategies = apiStrats.map((s: { id?: string; config?: Record<string, unknown>; name?: string }) => ({
               id: s.id,
               ...(s.config || {}),
               _backendId: s.id,

@@ -60,7 +60,7 @@ const compute7DayProfit = (bets: Bet[]): number[] => {
 const computeBestStrategy = (bets: Bet[]) => {
   const byStrat: Record<string, { profit: number; stake: number; count: number }> = {};
   bets.forEach(b => {
-    const name = (b as any).strategy || (b as any).strategyName || '';
+    const name = b.strategy || '';
     if (!name) return;
     if (!byStrat[name]) byStrat[name] = { profit: 0, stake: 0, count: 0 };
     byStrat[name].profit += (b.profit || 0) + (b.originalProfit || 0);

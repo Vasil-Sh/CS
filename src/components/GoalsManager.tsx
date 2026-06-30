@@ -178,7 +178,7 @@ export default function GoalsManager() {
         if (res.ok) {
           const apiGoals = await res.json();
           if (apiGoals.length > 0) {
-            const mapped = apiGoals.map((g: any) => ({
+            const mapped = apiGoals.map((g: { id: string; type: string; name: string; target?: unknown; current?: unknown; isCompleted?: boolean; config?: Record<string, unknown> }) => ({
               id: g.id,
               type: g.type,
               name: g.name,
