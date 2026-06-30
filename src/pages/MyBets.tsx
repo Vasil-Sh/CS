@@ -106,10 +106,33 @@ export default function MyBets() {
     else if (state?.prefillMatch) { setPrefillData(state.prefillMatch); setActiveTab('add'); window.history.replaceState({}, document.title); }
   }, [location.state]);
 
-  useEffect(() => { 
-    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
-    setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets)); 
-  }, [currentUser, recentBets, bankrollRefreshKey]);
+  useEffect(() => {
+    const initBankroll = async () => {
+      try {
+        const apiStats = await BankrollService.fetchBankroll();
+        if (apiStats.initialBank > 0) {
+          setBankrollStats(apiStats);
+          return;
+        }
+      } catch {}
+      // Fallback to localStorage
+      const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+      setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
+    };
+    initBankroll();
+  }, [currentUser]);
+  // React to bankroll version changes with API first
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const apiStats = await BankrollService.fetchBankroll();
+        if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
+      } catch {}
+      const allBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
+      setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
+    };
+    refresh();
+  }, [bankrollRefreshKey, bankrollVersion, currentUser]);
   useEffect(() => { 
     const init = async () => {
       await Promise.all([fetchUsers(), loadRecentBets()]);
@@ -148,8 +171,13 @@ export default function MyBets() {
     }
   }, [currentUser]);
 
-  const syncBankrollStats = useCallback(() => {
-    // Use recentBets state (already updated) for immediate UI feedback
+  const syncBankrollStats = useCallback(async () => {
+    // Try API first
+    try {
+      const apiStats = await BankrollService.fetchBankroll();
+      if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
+    } catch {}
+    // Fallback to localStorage + recentBets state
     const localBets = UserDataService.getUserData(currentUser, 'mybets_data', []);
     const merged = [...localBets];
     recentBets.forEach(rb => {
