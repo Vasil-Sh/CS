@@ -619,7 +619,7 @@ export default function Analytics() {
               <span className="text-lg font-semibold text-gray-900">Загальний профіт</span>
             </div>
             <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-              {(filteredStats.totalProfit || 0) >= 0 ? '+' : ''}{(filteredStats.totalProfit || 0).toFixed(2)} ₴
+              {Number(filteredStats.totalProfit || 0) >= 0 ? '+' : ''}{Number(filteredStats.totalProfit || 0).toFixed(2)} ₴
             </div>
             <div className="flex items-center gap-2">
               {(filteredStats.totalProfit || 0) >= 0 ? (
@@ -1010,7 +1010,7 @@ export default function Analytics() {
                                     <ArrowDownRight className="h-3.5 w-3.5 text-red-500" strokeWidth={1.5} />
                                     <span className="text-xs text-gray-500">Макс. просадка</span>
                                   </div>
-                                  <span className="text-lg font-bold text-red-500">-{period.maxDrawdown.toFixed(1)}%</span>
+                                  <span className="text-lg font-bold text-red-500">-{Number(period.maxDrawdown).toFixed(1)}%</span>
                                 </div>
                               </div>
                               <Progress value={Math.min(period.maxDrawdown * 4, 100)} className={`h-1.5 mt-3 bg-white/80 ${period.recovery ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500'}`} />
