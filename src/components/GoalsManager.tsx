@@ -612,15 +612,13 @@ export default function GoalsManager() {
                         </Collapsible>
 
                         {/* Action Buttons — row with Details + Star + Trash (like StrategyOverview) */}
-                        <div className="flex gap-2 mt-3">
-                          {goal.type === 'ladder' ? (
+                        <div className="flex items-center justify-end gap-2 mt-3">
+                          {goal.type === 'ladder' && (
                             <Button onClick={() => openDetailsDialog(goal)}
                               className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold">
                               <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                               Деталі
                             </Button>
-                          ) : (
-                            <div className="flex-1" />
                           )}
                           <Button
                             onClick={() => setPrimaryGoal(goal.id)}

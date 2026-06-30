@@ -75,7 +75,7 @@ export default function GoalsToolbar({
         <button
           onClick={onUpdate}
           disabled={isUpdating}
-          className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-gray-400 hover:bg-gray-50 hover:text-gray-500 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-red-500 text-white hover:bg-red-600 shadow-[0_2px_8px_rgba(239,68,68,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} strokeWidth={1.5} />
           Оновити
