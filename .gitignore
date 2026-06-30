@@ -48,6 +48,9 @@ jspm_packages/
 # TypeScript cache
 *.tsbuildinfo
 
+# Backend (separate repo: Vasil-Sh/CS-backend)
+backend/
+
 # Optional npm cache directory
 .npm
 
