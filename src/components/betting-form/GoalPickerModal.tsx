@@ -45,7 +45,7 @@ export default function GoalPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+      <DialogContent className="rounded-3xl max-w-lg w-[95vw] border border-[#E5E7EB] p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
@@ -86,13 +86,13 @@ export default function GoalPickerModal({
           </div>
 
           {/* Goals list */}
-          <div className="max-h-64 overflow-y-auto space-y-1.5">
+          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-3">
             {/* No goal option */}
             <button
               onClick={() => { onSelect('all'); onOpenChange(false); }}
               className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
                 selectedGoalId === 'all' || !selectedGoalId
-                  ? 'border-[#2563EB] bg-[#EFF6FF] ring-1 ring-[#2563EB]'
+                  ? 'border-[#2563EB] bg-[#EFF6FF]'
                   : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'
               }`}
             >
@@ -115,7 +115,7 @@ export default function GoalPickerModal({
                   onClick={() => { onSelect(goal.id); onOpenChange(false); }}
                   className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
                     isSelected
-                      ? 'border-[#2563EB] bg-[#EFF6FF] ring-1 ring-[#2563EB]'
+                      ? 'border-[#2563EB] bg-[#EFF6FF]'
                       : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'
                   }`}
                 >
@@ -130,9 +130,10 @@ export default function GoalPickerModal({
                     <p className="text-sm font-medium text-[#111827] truncate">{goal.name}</p>
                     <p className="text-xs text-[#9CA3AF]">
                       {typeLabels[goal.type] || goal.type}
-                      {goal.currentAmount !== undefined && ` · ${goal.currentAmount} / ${goal.targetAmount}`}
-                      {goal.currentROI !== undefined && ` · ${goal.currentROI}% / ${goal.targetROI}%`}
-                      {goal.currentWinRate !== undefined && ` · ${goal.currentWinRate}% / ${goal.targetWinRate}%`}
+                      {goal.type === 'amount' && goal.currentAmount !== undefined && ` · ${goal.currentAmount} / ${goal.targetAmount}`}
+                      {goal.type === 'ladder' && ` · крок ${goal.currentStep ?? 0} / ${goal.totalSteps ?? 0}`}
+                      {goal.type === 'roi' && goal.currentROI !== undefined && ` · ${goal.currentROI}% / ${goal.targetROI}%`}
+                      {goal.type === 'winrate' && goal.currentWinRate !== undefined && ` · ${goal.currentWinRate}% / ${goal.targetWinRate}%`}
                     </p>
                   </div>
                   {isSelected && (
@@ -156,7 +157,14 @@ export default function GoalPickerModal({
         </div>
 
         <div className="border-t border-[#E5E7EB] px-5 py-3">
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 sm:gap-3 flex items-center">
+            {selectedGoal && (
+              <div className="text-xs text-[#6B7280] mr-auto self-center bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                <Target className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={1.5} />
+                <span>Обрано:</span>
+                <span className="font-medium text-[#111827]">{selectedGoal.name}</span>
+              </div>
+            )}
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
@@ -164,11 +172,6 @@ export default function GoalPickerModal({
             >
               Скасувати
             </Button>
-            {selectedGoal && (
-              <div className="text-xs text-[#6B7280] mr-auto self-center">
-                Обрано: <span className="font-medium text-[#111827]">{selectedGoal.name}</span>
-              </div>
-            )}
           </DialogFooter>
         </div>
       </DialogContent>
