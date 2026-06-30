@@ -311,9 +311,16 @@ const BetTableMemo = memo(function BetTable({
                     const currency = bet.currency || 'UAH';
                     const currencySymbol = getCurrencySymbol(currency);
                     const displayAmount = bet.originalAmount || bet.amount;
-                    let displayProfit: number | undefined = bet.originalProfit;
-                    if (displayProfit === undefined && bet.profit !== undefined && bet.profit !== null) {
-                      displayProfit = bet.currency === 'USD' && bet.exchangeRate ? bet.profit / bet.exchangeRate : bet.profit;
+                    // Use bet.profit (computed on result change), fallback to originalProfit
+                    const rawProfit = Number(bet.profit);
+                    let displayProfit: number | undefined = isNaN(rawProfit) ? undefined : rawProfit;
+                    if (displayProfit === undefined) {
+                      const op = Number(bet.originalProfit);
+                      if (!isNaN(op)) {
+                        displayProfit = bet.currency === 'USD' && bet.exchangeRate
+                          ? op / Number(bet.exchangeRate)
+                          : op;
+                      }
                     }
                     const goalName = getGoalName(bet.goalId);
                     const isExpress = isExpressBet(bet);
