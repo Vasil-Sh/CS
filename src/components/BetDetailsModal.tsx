@@ -59,7 +59,7 @@ export default function BetDetailsModal({
         text += `💰 Коефіцієнт: ${event.odds}\n\n`;
       });
 
-      text += `💵 Загальний коефіцієнт: ${bet.odds.toFixed(2)}\n`;
+      text += `💵 Загальний коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
       text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
 
       const potentialWin = displayAmount * bet.odds;
@@ -82,7 +82,7 @@ export default function BetDetailsModal({
         text += `🎯 Вибір: ${bet.selection}\n`;
       }
 
-      text += `💰 Коефіцієнт: ${bet.odds.toFixed(2)}\n`;
+      text += `💰 Коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
       text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
 
       if (winProbability !== null) {
