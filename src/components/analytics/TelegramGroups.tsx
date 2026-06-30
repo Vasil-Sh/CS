@@ -413,8 +413,9 @@ export default function TelegramGroups() {
   // ── Render ──
 
   const renderKPICards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
       <StatCard 
         label="Win Rate" 
@@ -430,8 +431,7 @@ export default function TelegramGroups() {
         color="bg-[#EFF6FF]" 
         iconColor="text-[#447afc]"
       />
-    </div>
-  );
+    </div>    </div>  );
 
   // ── Render ──
 
