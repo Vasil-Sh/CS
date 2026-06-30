@@ -89,7 +89,7 @@ const parseDate = (dateStr: string): Date | null => {
 
 /** Format Date to DD/MM/YYYY */
 const formatDate = (d: Date): string => {
-  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 };
 
 export default function Admin() {
@@ -217,8 +217,8 @@ export default function Admin() {
         endDate: newUser.endDate.trim(),
       });
 
-      toast.success('Користувача "${result.username}" створено!', {
-        description: 'Пароль: ${result.password}',
+      toast.success(`Користувача "${result.username}" створено!`, {
+        description: `Пароль: ${result.password}`,
         duration: 15000,
       });
       setNewUser({ ...EMPTY_USER });
@@ -278,12 +278,12 @@ export default function Admin() {
     const baseDate = currentEnd && currentEnd > today ? currentEnd : today;
     const newEnd = new Date(baseDate);
     newEnd.setDate(newEnd.getDate() + 30);
-    const newEndStr = newEnd.toISOString().split('T')[0]; // YYYY-MM-DD
+    const newEndStr = newEnd.toISOString().split('T')[0];
 
     setLoading(true);
     try {
       await authService.updateUser(user.id, { endDate: newEndStr });
-      toast.success('Підписку продовжено на 30 днів — до ${newEndStr}');
+      toast.success(`Підписку продовжено на 30 днів — до ${newEndStr}`);
       await fetchUsers();
     } catch (err: unknown) {
       const e = err as { message?: string };
@@ -307,7 +307,7 @@ export default function Admin() {
     setLoading(true);
     try {
       await authService.deleteUser(user.id);
-      toast.success('Користувача "${user.username}" видалено!');
+      toast.success(`Користувача "${user.username}" видалено!`);
       setDeleteDialogOpen(false);
       setDeletingIndex(-1);
       await fetchUsers();
@@ -439,13 +439,13 @@ export default function Admin() {
   // Today's date in DD/MM/YYYY format for default values
   const todayFormatted = (() => {
     const d = new Date();
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   })();
 
   const monthLaterFormatted = (() => {
     const d = new Date();
     d.setMonth(d.getMonth() + 1);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   })();
 
 
@@ -553,7 +553,7 @@ export default function Admin() {
                   <li key={idx} className="text-sm text-[#6B7280]">
                     <span className="font-medium text-[#374151]">{renderTelegram(user.telegram)}</span> ({renderUsername(user.username)}) — 
                     <span className="font-medium text-[#D97706] ml-1">
-                      {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : 'залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}'}
+                      {user.daysUntilExpiry === 0 ? 'закінчується сьогодні' : `залишилось ${user.daysUntilExpiry} дн${user.daysUntilExpiry === 1 ? 'ень' : user.daysUntilExpiry < 5 ? 'і' : 'ів'}`}
                     </span>
                     <span className="text-[#9CA3AF] ml-1">(до {user.endDate})</span>
                   </li>
@@ -601,7 +601,7 @@ export default function Admin() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-[#9CA3AF]">
-                {users.length > 0 ? '${Math.round((activeUsers / users.length) * 100)}% від загальної кількості' : 'Немає даних'}
+                {users.length > 0 ? `${Math.round((activeUsers / users.length) * 100)}% від загальної кількості` : 'Немає даних'}
               </span>
             </div>
           </div>
@@ -682,14 +682,14 @@ export default function Admin() {
                   <button
                     key={tab.key}
                     onClick={() => setStatusFilter(tab.key)}
-                    className={'px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       statusFilter === tab.key
                         ? 'bg-[#111827] text-white shadow-sm'
                         : 'text-[#6B7280] hover:text-[#374151] hover:bg-[#F3F4F6]'
-                    }'}
+                    }`}
                   >
                     {tab.label}
-                    <span className={'ml-2 text-xs font-semibold ${statusFilter === tab.key ? 'text-[#93C5FD]' : 'text-[#9CA3AF]'}'}>
+                    <span className={`ml-2 text-xs font-semibold ${statusFilter === tab.key ? 'text-[#93C5FD]' : 'text-[#9CA3AF]'}`}>
                       {tab.count}
                     </span>
                   </button>
@@ -747,11 +747,11 @@ export default function Admin() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-[#F9FAFB] border-b border-[#D1D5DB]">
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Telegram</TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Username</TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Ціна</TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Дата початку</TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Telegram</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Username</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Ціна</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Дата початку</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>
                     <button onClick={toggleSort} className="flex items-center gap-1 hover:text-[#111827] transition-colors">
                       Дата закінчення
                       {sortDirection === 'asc' ? (
@@ -763,8 +763,8 @@ export default function Admin() {
                       )}
                     </button>
                   </TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Статус</TableHead>
-                  <TableHead className={'text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}'}>Адмін</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Статус</TableHead>
+                  <TableHead className={`text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 ${cellBorder}`}>Адмін</TableHead>
                   <TableHead className="text-xs font-medium text-[#6B7280] uppercase tracking-wider py-4 px-5 text-center">Дії</TableHead>
                 </TableRow>
               </TableHeader>
@@ -795,42 +795,42 @@ export default function Admin() {
                   displayedUsers.map(({ user, originalIndex }) => (
                     <TableRow 
                       key={originalIndex} 
-                      className={'border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors ${
+                      className={`border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors ${
                         user.isActive && user.daysUntilExpiry !== undefined && user.daysUntilExpiry <= 3 && user.daysUntilExpiry >= 0
                           ? 'bg-[#FFFBEB]/50'
                           : ''
-                      }'}
+                      }`}
                     >
-                      <TableCell className={'font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}'}>
+                      <TableCell className={`font-medium text-[#111827] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderTelegram(user.telegram)}
                       </TableCell>
-                      <TableCell className={'text-[#6B7280] py-4 px-5 text-sm ${cellBorder}'}>
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         {renderUsername(user.username)}
                         {user.isAdmin && (
                           <span className="ml-1.5">👑</span>
                         )}
                       </TableCell>
-                      <TableCell className={'py-4 px-5 ${cellBorder}'}>
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] px-3 py-1.5 rounded-lg border border-[#BBF7D0] font-medium text-xs">
                           {cleanPrice(user.priceMonth)} грн
                         </Badge>
                       </TableCell>
-                      <TableCell className={'text-[#6B7280] py-4 px-5 text-sm ${cellBorder}'}>
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
                           {user.startDate}
                         </div>
                       </TableCell>
-                      <TableCell className={'text-[#6B7280] py-4 px-5 text-sm ${cellBorder}'}>
+                      <TableCell className={`text-[#6B7280] py-4 px-5 text-sm ${cellBorder}`}>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
                           {user.endDate}
                         </div>
                       </TableCell>
-                      <TableCell className={'py-4 px-5 ${cellBorder}'}>
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         {getExpiryBadge(user)}
                       </TableCell>
-                      <TableCell className={'py-4 px-5 ${cellBorder}'}>
+                      <TableCell className={`py-4 px-5 ${cellBorder}`}>
                         {user.isAdmin ? (
                           <Badge className="bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] px-3 py-1.5 rounded-lg border border-[#FDE68A] font-medium text-xs">
                             <Crown className="mr-1 h-3.5 w-3.5" strokeWidth={1.5} />
