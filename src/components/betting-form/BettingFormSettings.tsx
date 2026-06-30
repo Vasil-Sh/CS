@@ -1,9 +1,11 @@
-import { Calendar, Plus, RotateCcw, ChevronDown } from 'lucide-react';
+import { Calendar, Plus, RotateCcw, ChevronDown, Target, Check } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import GoalPickerModal from './GoalPickerModal';
 import type { Goal } from './types';
 
 interface FormSettingsData {
@@ -45,6 +47,17 @@ export default function BettingFormSettings({
   onCategoryChange,
   onGoalSelect,
 }: BettingFormSettingsProps) {
+  const [goalPickerOpen, setGoalPickerOpen] = useState(false);
+  const selectedGoal = activeGoals.find((g) => g.id === data.goalId);
+
+  const handleGoalSelect = (goalId: string) => {
+    if (goalId === 'all') {
+      onGoalSelect('all');
+    } else {
+      onGoalSelect(goalId);
+    }
+    setGoalPickerOpen(false);
+  };
   return (
     <>
       {/* Form Header */}
@@ -165,24 +178,47 @@ export default function BettingFormSettings({
                 <Label htmlFor="goalId" className={classes.label}>
                   Ціль
                 </Label>
-                <Select value={data.goalId || 'all'} onValueChange={onGoalSelect}>
-                  <SelectTrigger className={classes.selectTrigger}>
-                    <SelectValue placeholder="Без цілі" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Без цілі</SelectItem>
-                    {activeGoals.map((goal) => (
-                      <SelectItem key={goal.id} value={goal.id}>
-                        {goal.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <button
+                  type="button"
+                  onClick={() => setGoalPickerOpen(true)}
+                  className={`flex items-center justify-between w-full rounded-xl border text-sm h-10 px-4 py-2 transition-all ${
+                    selectedGoal
+                      ? 'border-[#2563EB] bg-[#EFF6FF] text-[#111827]'
+                      : 'border-[#E5E7EB] bg-white text-[#9CA3AF] hover:border-[#D1D5DB]'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    {selectedGoal ? (
+                      <>
+                        <Target className="h-4 w-4 text-[#2563EB] flex-shrink-0" strokeWidth={1.5} />
+                        <span className="font-medium text-[#111827] truncate">{selectedGoal.name}</span>
+                        <Badge className="bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] rounded-md font-medium text-[10px] px-1.5 py-0 flex-shrink-0">
+                          {selectedGoal.type === 'amount' ? '💰' : selectedGoal.type === 'ladder' ? '🪜' : selectedGoal.type === 'roi' ? '📈' : '🎯'}
+                        </Badge>
+                      </>
+                    ) : (
+                      <>
+                        <Target className="h-4 w-4 text-[#9CA3AF] flex-shrink-0" strokeWidth={1.5} />
+                        Без цілі
+                      </>
+                    )}
+                  </span>
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 ml-2 text-[#9CA3AF]" strokeWidth={1.5} />
+                </button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Goal Picker Modal */}
+      <GoalPickerModal
+        open={goalPickerOpen}
+        onOpenChange={setGoalPickerOpen}
+        goals={activeGoals}
+        selectedGoalId={data.goalId}
+        onSelect={handleGoalSelect}
+      />
     </>
   );
 }
