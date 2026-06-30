@@ -3,7 +3,7 @@
 // Replaces the old Google Sheets auth flow.
 // ═══════════════════════════════════════════
 
-import { api, setTokens } from './apiClient';
+import { api, setTokens } from "./apiClient";
 
 export interface LoginResult {
   success: boolean;
@@ -38,37 +38,50 @@ class AuthService {
         refreshToken?: string;
         error?: string;
         user?: { username: string; role: string };
-      }>('/auth/login', { username, password });
+      }>("/auth/login", { username, password });
 
       if (!data.success) {
-        return { success: false, error: data.error || 'Невірний логін або пароль' };
+        return {
+          success: false,
+          error: data.error || "Невірний логін або пароль",
+        };
       }
 
       if (data.token) {
-        setTokens(data.token, data.refreshToken || '');
-        localStorage.setItem('userRole', data.isAdmin ? 'admin' : 'user');
-        localStorage.setItem('username', username);
+        setTokens(data.token, data.refreshToken || "");
+        localStorage.setItem("userRole", data.isAdmin ? "admin" : "user");
+        localStorage.setItem("username", username);
       }
 
       return { success: true, isAdmin: data.isAdmin ?? false };
-    } catch (err: any) {
-      console.error('Login error:', err);
-      if (err.status === 403) {
-        return { success: false, error: 'Ваша підписка закінчилася. Зверніться до адміністратора.' };
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      const status = (err as { status?: number }).status;
+      if (status === 403) {
+        return {
+          success: false,
+          error: "Ваша підписка закінчилася. Зверніться до адміністратора.",
+        };
       }
-      return { success: false, error: err.message || "Помилка з'єднання. Спробуйте ще раз." };
+      return {
+        success: false,
+        error: (err as Error).message || "Помилка з'єднання. Спробуйте ще раз.",
+      };
     }
   }
 
   async fetchUsers(): Promise<AdminUser[]> {
     try {
-      return await api.get<AdminUser[]>('/auth/users');
-    } catch (err: any) {
-      console.error('fetchUsers error:', err);
-      if (err.status === 401 || err.status === 403) {
+      return await api.get<AdminUser[]>("/auth/users");
+    } catch (err: unknown) {
+      // 401/403 = not admin → silently return empty (don't bother user)
+      const status = (err as { status?: number }).status;
+      if (status === 401 || status === 403) {
         return [];
       }
-      throw err;
+      if (import.meta.env.DEV)
+        console.error("fetchUsers error:", (err as Error).message);
+      return []; // network/CORS errors also silent
     }
   }
 
@@ -81,7 +94,10 @@ class AuthService {
     }
   }
 
-  async validateUser(username: string, password: string): Promise<{ isValid: boolean; message?: string }> {
+  async validateUser(
+    username: string,
+    password: string,
+  ): Promise<{ isValid: boolean; message?: string }> {
     try {
       const result = await this.login(username, password);
       return { isValid: result.success, message: result.error };
@@ -92,8 +108,20 @@ class AuthService {
   }
 
   /** Create user (admin only) — returns generated credentials */
-  async createUser(data: { username: string; password?: string; telegram?: string; role?: string; priceMonth?: string; endDate?: string }): Promise<{ username: string; password: string }> {
-    const result = await api.post<{ success: boolean; userId: number; username: string; password: string }>('/auth/register', data);
+  async createUser(data: {
+    username: string;
+    password?: string;
+    telegram?: string;
+    role?: string;
+    priceMonth?: string;
+    endDate?: string;
+  }): Promise<{ username: string; password: string }> {
+    const result = await api.post<{
+      success: boolean;
+      userId: number;
+      username: string;
+      password: string;
+    }>("/auth/register", data);
     return { username: result.username, password: result.password };
   }
 
