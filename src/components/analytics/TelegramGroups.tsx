@@ -129,9 +129,17 @@ export default function TelegramGroups() {
           setGroups(apiGroups);
         } else {
           setGroups(localGroups);
-          // Seed localStorage groups to DB
+          // Seed localStorage groups to DB, save backend UUIDs
+          const updated: TelegramGroup[] = [];
           for (const g of localGroups) {
-            try { await api.post('/telegram-groups', { name: g.name, link: g.link }); } catch {}
+            try {
+              const backend = await api.post<{ id: string }>('/telegram-groups', { name: g.name, link: g.link || '' });
+              updated.push({ ...g, _backendId: backend.id });
+            } catch { updated.push(g); }
+          }
+          if (updated.some(g => g._backendId)) {
+            UserDataService.setUserDataSync(currentUser, 'tg_groups', updated);
+            setGroups(updated);
           }
         }
       } catch {
@@ -185,6 +193,7 @@ export default function TelegramGroups() {
     }
 
     let newGroups: TelegramGroup[];
+    let freshGroupId: string | null = null;
     if (editingGroup) {
       newGroups = groupsRef.current.map(g => g.id === editingGroup.id
         ? { ...g, name: groupForm.name.trim(), link: groupForm.link.trim() }
@@ -198,14 +207,23 @@ export default function TelegramGroups() {
         link: groupForm.link.trim(),
         createdAt: new Date().toISOString(),
       };
+      freshGroupId = newGroup.id;
       newGroups = [...groupsRef.current, newGroup];
       toast.success('Групу додано!');
     }
     setGroups(newGroups);
     if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
-    // Sync to backend
-    if (!editingGroup) {
-      api.post('/telegram-groups', { name: groupForm.name.trim(), link: groupForm.link.trim() }).catch(() => {});
+    // Sync to backend and save backend UUID
+    if (!editingGroup && freshGroupId) {
+      api.post('/telegram-groups', { name: groupForm.name.trim(), link: groupForm.link.trim() })
+        .then((backend: { id?: string }) => {
+          if (backend?.id) {
+            const saved = UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []);
+            const idx = saved.findIndex(g => g.id === freshGroupId);
+            if (idx >= 0) { saved[idx] = { ...saved[idx], _backendId: backend.id }; UserDataService.setUserDataSync(currentUser, 'tg_groups', saved); }
+          }
+        })
+        .catch((err: unknown) => console.warn('[API] Group save failed:', err));
     }
 
     setGroupDialogOpen(false);
@@ -222,8 +240,12 @@ export default function TelegramGroups() {
       UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
       UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
     }
-    // Sync to backend
-    api.delete(`/telegram-groups/${groupId}`).catch(() => {});
+    // Sync to backend — use _backendId if available, fallback to local ID
+    const groupToDelete = groupsRef.current.find(g => g.id === groupId);
+    const backendId = (groupToDelete as { _backendId?: string })?._backendId || groupId;
+    api.delete(`/telegram-groups/${backendId}`).catch((err: unknown) => {
+      console.warn('[API] Group delete failed:', err);
+    });
     toast.success('Групу та її ставки видалено');
     setDeleteGroupConfirm(null);
   };
