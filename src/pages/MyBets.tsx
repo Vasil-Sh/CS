@@ -655,7 +655,7 @@ export default function MyBets() {
               }
               label="Поточний банк"
               value={`${bankrollStats.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
-              subtext={`${stats.totalProfit >= 0 ? "+" : ""}${stats.totalProfit.toFixed(2)} ₴ за весь час`}
+              subtext={`${Number(stats.totalProfit) >= 0 ? "+" : ""}${Number(stats.totalProfit).toFixed(2)} ₴ за весь час`}
               subIcon={
                 stats.totalProfit >= 0 ? (
                   <ArrowUpRight

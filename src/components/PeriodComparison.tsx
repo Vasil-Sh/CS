@@ -462,7 +462,7 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
                       <td className="text-center py-4 px-6 text-sm font-semibold text-[#111827]">{period.winRate.toFixed(1)}%</td>
                       <td className="text-center py-4 px-6">
                         <span className={`text-sm font-semibold ${period.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
-                          {period.totalProfit >= 0 ? '+' : ''}{period.totalProfit.toFixed(2)} ₴
+                          {Number(period.totalProfit) >= 0 ? '+' : ''}{Number(period.totalProfit).toFixed(2)} ₴
                         </span>
                       </td>
                       <td className="text-center py-4 px-6">

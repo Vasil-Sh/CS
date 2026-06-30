@@ -506,7 +506,7 @@ export default function TelegramGroups() {
       />
       <StatCard 
         label="Прибуток" 
-        value={`${overallStats.totalProfit >= 0 ? '+' : ''}${overallStats.totalProfit.toFixed(0)}`} 
+        value={`${Number(overallStats.totalProfit) >= 0 ? '+' : ''}${Number(overallStats.totalProfit).toFixed(0)}`} 
         icon={Target} 
         color="bg-[#EFF6FF]" 
         iconColor="text-[#447afc]"
@@ -672,7 +672,7 @@ export default function TelegramGroups() {
                 <div className="flex items-center justify-between px-7 py-4">
                   <span className="text-base font-bold text-[#111827]">Прибуток</span>
                   <span className={`text-xl font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-                    {gs.totalProfit >= 0 ? '+' : ''}{gs.totalProfit.toFixed(0)} ₴
+                    {Number(gs.totalProfit) >= 0 ? '+' : ''}{Number(gs.totalProfit).toFixed(0)} ₴
                   </span>
                 </div>
                 <div className="h-px w-full bg-[#F3F4F6]" />

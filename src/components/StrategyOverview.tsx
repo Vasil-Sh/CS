@@ -473,7 +473,7 @@ export default function StrategyOverview() {
         return {
           name: name.length > 15 ? name.substring(0, 15) + "..." : name,
           fullName: name,
-          value: parseFloat(stats.totalProfit.toFixed(0)),
+          value: Math.round(Number(stats.totalProfit)),
           totalBets: stats.totalBets,
           riskLevel: strategy?.riskLevel || "Medium",
         };
@@ -1587,7 +1587,7 @@ export default function StrategyOverview() {
                         className={`text-3xl font-semibold ${hasStats && stats.totalProfit >= 0 ? "text-[#16A34A]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
                       >
                         {hasStats
-                          ? `${stats.totalProfit >= 0 ? "+" : ""}${stats.totalProfit.toFixed(0)}`
+                          ? `${Number(stats.totalProfit) >= 0 ? "+" : ""}${Number(stats.totalProfit).toFixed(0)}`
                           : "0"}
                         ₴
                       </p>

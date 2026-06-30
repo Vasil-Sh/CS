@@ -8,8 +8,8 @@ interface Props {
 
 export default function AnalyticsStatCards({ stats, onBankCardClick }: Props) {
   const cards = [
-    { icon: DollarSign, label: 'Поточний банк', value: `${stats.totalProfit.toFixed(0)} ₴`, color: 'text-[#22C55E]', bg: 'bg-[#F0FDF4]', onClick: onBankCardClick },
-    { icon: TrendingUp, label: 'Загальний прибуток', value: `${stats.totalProfit >= 0 ? '+' : ''}${stats.totalProfit.toFixed(0)} ₴`, color: stats.totalProfit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]', bg: stats.totalProfit >= 0 ? 'bg-[#F0FDF4]' : 'bg-[#FEF2F2]' },
+    { icon: DollarSign, label: 'Поточний банк', value: `${Number(stats.totalProfit).toFixed(0)} ₴`, color: 'text-[#22C55E]', bg: 'bg-[#F0FDF4]', onClick: onBankCardClick },
+    { icon: TrendingUp, label: 'Загальний прибуток', value: `${Number(stats.totalProfit) >= 0 ? '+' : ''}${Number(stats.totalProfit).toFixed(0)} ₴`, color: Number(stats.totalProfit) >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]', bg: Number(stats.totalProfit) >= 0 ? 'bg-[#F0FDF4]' : 'bg-[#FEF2F2]' },
     { icon: Target, label: 'Всього ставок', value: String(stats.totalBets), color: 'text-[#3B82F6]', bg: 'bg-[#EFF6FF]' },
     { icon: Trophy, label: 'Вінрейт', value: `${stats.winRate.toFixed(1)}%`, color: stats.winRate >= 50 ? 'text-[#22C55E]' : 'text-[#F59E0B]', bg: stats.winRate >= 50 ? 'bg-[#F0FDF4]' : 'bg-[#FFFBEB]' },
   ];
