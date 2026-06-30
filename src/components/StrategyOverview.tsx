@@ -204,7 +204,24 @@ export default function StrategyOverview() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const betsData = await realGoogleSheetsService.fetchUSDTData();
+
+      // 1. Try API first (fast)
+      let betsData: unknown[] = [];
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${API_BASE}/bets?page=1&limit=200`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          betsData = json.data || json;
+        }
+      } catch { /* fallback */ }
+
+      // 2. Fallback to Google Sheets (slow, used only if API has no data)
+      if (betsData.length === 0) {
+        betsData = await realGoogleSheetsService.fetchUSDTData();
+      }
 
       const customStrategies = loadCustomStrategiesFromStorage();
       setStrategies(customStrategies);
