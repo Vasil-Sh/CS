@@ -18,7 +18,6 @@ import {
 import InitialBankModal from "@/components/InitialBankModal";
 import StatCard from "@/components/StatCard";
 import BetTable from "@/components/BetTable";
-import { realGoogleSheetsService } from "@/lib/realGoogleSheets";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -477,8 +476,8 @@ export default function MyBets() {
             body: JSON.stringify({ result, profit: profitInUAH, roi, notes: betWithNotes.notes }),
           });
         } catch {
-          // Fallback: Google Sheets (legacy)
-          await realGoogleSheetsService.updateBetResult(betWithNotes, result, profitInUAH, roi);
+          // Fallback: write to localStorage only
+          console.warn('[API] PATCH failed, saving locally');
         }
         let matched = false;
         setRecentBets((prev) =>
@@ -598,8 +597,8 @@ export default function MyBets() {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
       });
     } catch {
-      // Fallback: Google Sheets (legacy)
-      await realGoogleSheetsService.deleteRecord(bet);
+      // Fallback: just removed from local state
+      console.warn('[API] DELETE failed, removed locally only');
     }
     syncBankrollStats();
     syncStats();

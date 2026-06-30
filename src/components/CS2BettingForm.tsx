@@ -264,8 +264,9 @@ export default function CS2BettingForm({
       localStorage.getItem("primaryStrategy") ||
       "";
     if (savedPrimaryStrategy) {
-      const strategy =
-        realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
+      const strategy = strategiesRef.current?.find(
+        (s: any) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
+      );
       if (strategy) {
         setPrimaryStrategy(strategy);
         setFormData((prev) => ({ ...prev, strategy: strategy.name }));
@@ -555,8 +556,9 @@ export default function CS2BettingForm({
         "",
       );
       if (savedPrimaryStrategy) {
-        const strategy =
-          realGoogleSheetsService.getStrategyByName(savedPrimaryStrategy);
+        const strategy = strategiesRef.current?.find(
+      (s: any) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
+    );
         if (strategy) {
           setPrimaryStrategy(strategy);
           setFormData((prev) => ({ ...prev, strategy: strategy.name }));
