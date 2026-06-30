@@ -42,10 +42,10 @@ export default function GoalPickerModal({
   const selectedGoal = goals.find((g) => g.id === selectedGoalId);
 
   const typeLabels: Record<string, string> = {
-    amount: '💰 Сума',
-    ladder: '🪜 Драбина',
-    roi: '📈 ROI',
-    winrate: '🎯 Win Rate',
+    amount: 'Сума',
+    ladder: 'Драбина',
+    roi: 'ROI',
+    winrate: 'Win Rate',
   };
 
   return (

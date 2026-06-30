@@ -1,4 +1,4 @@
-import { Calendar, Plus, RotateCcw, ChevronDown, Target, Check } from 'lucide-react';
+import { Calendar, Plus, RotateCcw, ChevronDown, Target } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -192,9 +192,6 @@ export default function BettingFormSettings({
                       <>
                         <Target className="h-4 w-4 text-[#2563EB] flex-shrink-0" strokeWidth={1.5} />
                         <span className="font-medium text-[#111827] truncate">{selectedGoal.name}</span>
-                        <Badge className="bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] rounded-md font-medium text-[10px] px-1.5 py-0 flex-shrink-0">
-                          {selectedGoal.type === 'amount' ? '💰' : selectedGoal.type === 'ladder' ? '🪜' : selectedGoal.type === 'roi' ? '📈' : '🎯'}
-                        </Badge>
                       </>
                     ) : (
                       <>
