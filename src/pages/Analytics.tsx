@@ -594,8 +594,8 @@ export default function Analytics() {
               ) : (
                 <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
               )}
-              <span className={`text-base font-normal ${filteredStats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {filteredStats.totalProfit >= 0 ? '+' : ''}{filteredStats.totalProfit.toFixed(2)} ₴
+              <span className={`text-base font-normal ${Number(filteredStats.totalProfit) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {Number(filteredStats.totalProfit) >= 0 ? '+' : ''}{Number(filteredStats.totalProfit).toFixed(2)} ₴
               </span>
               <span className="text-sm text-gray-400">за весь час</span>
             </div>
