@@ -408,8 +408,8 @@ class RealGoogleSheetsService {
       userBets.push(newRecord);
       localStorage.setItem(userKey, JSON.stringify(userBets));
 
-      // Sync to backend API (fire-and-forget)
-      api.post('/bets', {
+      // Sync to backend API (await so it's ready for immediate fetch)
+      try { await api.post('/bets', {
         match: newRecord.match,
         team1: newRecord.team1,
         team2: newRecord.team2,
@@ -436,9 +436,8 @@ class RealGoogleSheetsService {
         logoTeam1: newRecord.logoTeam1,
         logoTeam2: newRecord.logoTeam2,
         expressLogos: newRecord.expressLogos || [],
-      }).catch(() => {
-        // Silent fail — localStorage is source of truth for now
-      });
+      }); } catch { /* API sync failed — data still saved to localStorage */ }
+      // Bet saved to both localStorage and API
     } catch (error) {
       logServiceCall('RealGoogleSheets', 'addRecord');
       console.error('Error adding record:', error);
