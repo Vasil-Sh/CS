@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { api } from '@/lib/apiClient';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -116,12 +117,25 @@ export default function TelegramGroups() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
 
-  // Load user data when username becomes available
+  // Load user data: try API first, fallback to localStorage
   useEffect(() => {
     if (!currentUser || dataLoaded) return;
-    setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
-    setBets(UserDataService.getUserData<TelegramGroupBet[]>(currentUser, 'tg_bets', []));
-    setDataLoaded(true);
+    const load = async () => {
+      // Try API first
+      try {
+        const apiGroups = await api.get<TelegramGroup[]>('/telegram-groups');
+        if (apiGroups.length > 0) {
+          setGroups(apiGroups);
+        } else {
+          setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
+        }
+      } catch {
+        setGroups(UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []));
+      }
+      setBets(UserDataService.getUserData<TelegramGroupBet[]>(currentUser, 'tg_bets', []));
+      setDataLoaded(true);
+    };
+    load();
   }, [currentUser, dataLoaded]);
 
   // Reload when username changes (logout/login)
@@ -184,6 +198,10 @@ export default function TelegramGroups() {
     }
     setGroups(newGroups);
     if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
+    // Sync to backend
+    if (!editingGroup) {
+      api.post('/telegram-groups', { name: groupForm.name.trim(), link: groupForm.link.trim() }).catch(() => {});
+    }
 
     setGroupDialogOpen(false);
     setEditingGroup(null);
@@ -199,6 +217,8 @@ export default function TelegramGroups() {
       UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
       UserDataService.setUserDataSync(currentUser, 'tg_bets', newBets);
     }
+    // Sync to backend
+    api.delete(`/telegram-groups/${groupId}`).catch(() => {});
     toast.success('Групу та її ставки видалено');
     setDeleteGroupConfirm(null);
   };
