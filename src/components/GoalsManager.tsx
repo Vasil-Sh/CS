@@ -174,8 +174,10 @@ export default function GoalsManager() {
       goals.forEach(g => {
         const backendId = (g as { _backendId?: string })._backendId || g.id;
         const currentVal = g.type === 'amount' ? g.currentAmount : g.type === 'roi' ? g.currentROI : g.type === 'winrate' ? g.currentWinRate : g.currentStep;
-        const payload: Record<string, unknown> = { config: g };
-        if (currentVal !== undefined && currentVal !== null) payload.current = Number(currentVal);
+        const payload: Record<string, unknown> = {
+          config: g,
+          current: Number(currentVal ?? 0),
+        };
         if (g.status === 'completed') payload.isCompleted = true;
         if (Object.keys(payload).length > 0) {
           UserDataService.updateGoal(backendId, payload).catch(() => {});
@@ -389,8 +391,16 @@ export default function GoalsManager() {
     const updated = [...goals, goal];
     setGoals(updated);
     UserDataService.setUserDataSync(currentUser, 'goals', updated);
-    // Sync to backend API and save backend UUID
-    UserDataService.createGoal(goal).then((backendGoal: { id?: string }) => {
+    // Sync to backend API (proper payload) and save backend UUID
+    UserDataService.createGoal({
+      type: goal.type,
+      name: goal.name,
+      target: goal.targetAmount ?? goal.targetLadderAmount ?? goal.targetROI ?? goal.targetWinRate ?? 0,
+      current: 0,
+      deadline: goal.deadline,
+      isCompleted: false,
+      config: goal,
+    }).then((backendGoal: { id?: string }) => {
       if (backendGoal?.id) {
         setGoals(prev => prev.map(g => g.id === goal.id ? { ...g, _backendId: backendGoal.id } : g));
       }

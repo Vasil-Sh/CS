@@ -730,7 +730,9 @@ export default function StrategyOverview() {
     // Sync to backend API (pass name as fallback for UUID mismatch)
     const backendId = strategyToRemove?._backendId || strategyToDelete;
     const strategyName = strategyToRemove?.name;
-    UserDataService.deleteStrategy(backendId, strategyName).catch(() => {});
+    UserDataService.deleteStrategy(backendId, strategyName).catch((err: unknown) => {
+      console.warn('[API] Strategy delete failed:', err);
+    });
   };
 
   const togglePrimaryStrategy = (strategy: CS2Strategy) => {
