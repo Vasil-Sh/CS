@@ -1563,7 +1563,7 @@ export default function StrategyOverview() {
                       <p
                         className={`text-3xl font-semibold ${hasStats && stats.winRate >= 50 ? "text-[#22C55E]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
                       >
-                    <span className="ml-2 text-2xl font-semibold">{hasStats ? Number(stats.winRate).toFixed(1) : 0}%
+                        {hasStats ? Number(stats.winRate).toFixed(1) : 0}%
                       </p>
                     </div>
                     <div className="p-5 bg-white rounded-2xl border border-[#F3F4F6] hover:border-[#D1D5DB] transition-colors duration-300 text-center shadow-[0_4px_16px_rgba(0,0,0,0.10)]">
@@ -1574,7 +1574,7 @@ export default function StrategyOverview() {
                         className={`text-3xl font-semibold ${hasStats && stats.roi >= 0 ? "text-[#22C55E]" : hasStats ? "text-[#EF4444]" : "text-[#111827]"}`}
                       >
                         {hasStats
-                          ? `${stats.roi >= 0 ? "+" : ""}${stats.roi.toFixed(1)}`
+                          ? `${Number(stats.roi) >= 0 ? "+" : ""}${Number(stats.roi).toFixed(1)}`
                           : "0"}
                         %
                       </p>
