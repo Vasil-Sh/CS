@@ -130,9 +130,9 @@ export default function Analytics() {
         setBankrollStats(apiStats);
         return;
       }
-    } catch {}
+    } catch { /* noop */ }
     // Fallback to localStorage
-    const allBets = realGoogleSheetsService.getAllRecords();
+    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', [] as Bet[]);
     const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
     setBankrollStats(bankStats);
   }, [currentUser]);
@@ -141,17 +141,35 @@ export default function Analytics() {
     try {
       setLoading(true);
       
-      // Try API first
       let myBetsData: Bet[] = [];
       let myBetsStats = null;
+
+      // 1. Try API first (fast, ~50ms)
       try {
-        myBetsData = await realGoogleSheetsService.fetchUSDTData() as unknown as Bet[];
-      } catch {}
-      
-      // Fallback to localStorage
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${API_BASE}/bets?page=1&limit=200`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const bets = json.data || json;
+          if (bets.length > 0) {
+            myBetsData = bets;
+          }
+        }
+      } catch { /* fallback */ }
+
+      // 2. Fallback: localStorage
       if (myBetsData.length === 0) {
         myBetsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
         myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
+      }
+
+      // 3. Last resort: Google Sheets (slow, only if nothing else works)
+      if (myBetsData.length === 0) {
+        try {
+          myBetsData = await realGoogleSheetsService.fetchUSDTData() as unknown as Bet[];
+        } catch { /* no data */ }
       }
       
       setBets(myBetsData);
