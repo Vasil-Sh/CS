@@ -21,9 +21,9 @@ import {
   RotateCcw,
   TrendingUp,
 } from "lucide-react";
-import { realGoogleSheetsService, CS2Strategy } from "@/lib/realGoogleSheets";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
+import { CS2Strategy } from "@/lib/realGoogleSheets";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBetTypeOptions } from "@/lib/displayHelpers";
@@ -982,9 +982,10 @@ export default function CS2BettingForm({
           console.error('[API] Bet save failed:', errBody);
         }
       } catch (err) {
-        // 2. Fallback: Google Sheets (legacy)
-        console.warn('[API] Bet save network error, falling back to Google Sheets:', err);
-        await realGoogleSheetsService.addRecord(record);
+        // Fallback: save to localStorage
+        console.warn('[API] Bet save network error, saving to localStorage:', err);
+        const existingBets = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []);
+        UserDataService.setUserData(currentUser, 'mybets_data', [record as any, ...existingBets]);
       }
 
       // Always update localStorage so UI reflects immediately
@@ -1050,10 +1051,10 @@ export default function CS2BettingForm({
       }
     }
 
-    const bets = realGoogleSheetsService.getAllRecords();
+    const bets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
     const validation = BankrollService.validateBetAmount(
       currentUser,
-      bets,
+      bets as unknown as Bet[],
       parseFloat(formData.stake),
     );
 
@@ -1140,10 +1141,10 @@ export default function CS2BettingForm({
 
     let kelly = null;
     if (hasConfidence) {
-      const betsStore = realGoogleSheetsService.getAllRecords();
+      const betsStore = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
       const bankrollStats = BankrollService.getBankrollStats(
         currentUser,
-        betsStore,
+        betsStore as unknown as Bet[],
       );
       kelly = calcKellyCriterion(
         formData.betCategory,
@@ -1242,10 +1243,10 @@ export default function CS2BettingForm({
     if (!blockAfter || blockAfter < 1)
       return { blocked: false, reason: "", minutesLeft: 0 };
 
-    const allBets = realGoogleSheetsService.getAllRecords();
+    const allBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
     // Sort by date descending, count consecutive losses
     const sorted = [...allBets]
-      .filter((b) => b.result === "Win" || b.result === "Loss")
+      .filter((b: any) => b.result === "Win" || b.result === "Loss")
       .sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();

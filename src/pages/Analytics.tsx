@@ -18,7 +18,6 @@ import GoalsManager from '@/components/GoalsManager';
 import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
 import { BankrollService } from '@/lib/bankrollService';
-import { realGoogleSheetsService } from '@/lib/realGoogleSheets';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/hooks/useTheme';
@@ -165,11 +164,10 @@ export default function Analytics() {
         myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
       }
 
-      // 3. Last resort: Google Sheets (slow, only if nothing else works)
+      // 3. Last resort: localStorage
       if (myBetsData.length === 0) {
-        try {
-          myBetsData = await realGoogleSheetsService.fetchUSDTData() as unknown as Bet[];
-        } catch { /* no data */ }
+        myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
+        myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
       }
       
       setBets(myBetsData);
@@ -239,7 +237,8 @@ export default function Analytics() {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
         } catch {}
-        const allBets = realGoogleSheetsService.getAllRecords();
+        // Fallback to localStorage
+        const allBets = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
         const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
         setBankrollStats(bankStats);
       }

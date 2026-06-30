@@ -235,12 +235,6 @@ export default function MyBets() {
   useEffect(() => {
     const init = async () => {
       await Promise.all([fetchUsers(), loadRecentBets()]);
-      try {
-        const data = await realGoogleSheetsService.getBettingStatistics();
-        if (data.totalBets > 0) setStats(data);
-      } catch {
-        /* fallback */
-      }
     };
     init();
   }, []);
@@ -287,22 +281,18 @@ export default function MyBets() {
 
   const loadStats = useCallback(async () => {
     try {
-      const data = await realGoogleSheetsService.getBettingStatistics();
-      setStats(
-        data.totalBets > 0
-          ? data
-          : UserDataService.getUserData(
-              currentUser,
-              "mybets_stats",
-              DEFAULT_STATS,
-            ),
-      );
-    } catch {
-      toast.error("Помилка завантаження статистики");
-      setStats(
-        UserDataService.getUserData(currentUser, "mybets_stats", DEFAULT_STATS),
-      );
-    }
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${API_BASE}/bets/stats`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.totalBets > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
+        return;
+      }
+    } catch { /* noop */ }
+    toast.error('Помилка завантаження статистики');
+    setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
   }, [currentUser]);
 
   const syncBankrollStats = useCallback(async () => {
@@ -395,19 +385,8 @@ export default function MyBets() {
     } catch {
       /* noop */
     }
-    // Fallback: Google Sheets (legacy) → localStorage
-    try {
-      const data = await realGoogleSheetsService.fetchUSDTData();
-      setRecentBets(
-        data.length > 0
-          ? data
-          : UserDataService.getUserData(currentUser, "mybets_data", []),
-      );
-    } catch {
-      setRecentBets(
-        UserDataService.getUserData(currentUser, "mybets_data", []),
-      );
-    }
+    // Fallback: localStorage
+    setRecentBets(UserDataService.getUserData(currentUser, "mybets_data", []));
   }, [currentUser]);
 
   // ── Handlers ──
@@ -421,26 +400,22 @@ export default function MyBets() {
 
   const clearRecentBets = useCallback(async () => {
     if (!window.confirm("Ви впевнені, що хочете очистити всі дані?")) return;
-    try {
-      await realGoogleSheetsService.clearAllData();
-      [
-        "mybets_data",
-        "mybets_stats",
-        "analytics_bets",
-        "analytics_stats",
-      ].forEach((k) => UserDataService.clearUserData(currentUser, k));
-      BankrollService.setInitialBank(currentUser, 0);
-      setRecentBets([]);
-      setStats(DEFAULT_STATS);
-      setBankrollRefreshKey((p) => p + 1);
-      toast.success("Всі дані очищено");
-      setTimeout(() => {
-        loadStats();
-        loadRecentBets();
-      }, 100);
-    } catch {
-      toast.error("Помилка при очищенні даних");
-    }
+    // Clear localStorage only (API data remains in DB, use Swagger for full cleanup)
+    [
+      "mybets_data",
+      "mybets_stats",
+      "analytics_bets",
+      "analytics_stats",
+    ].forEach((k) => UserDataService.clearUserData(currentUser, k));
+    BankrollService.setInitialBank(currentUser, 0);
+    setRecentBets([]);
+    setStats(DEFAULT_STATS);
+    setBankrollRefreshKey((p) => p + 1);
+    toast.success("Всі дані очищено");
+    setTimeout(() => {
+      loadStats();
+      loadRecentBets();
+    }, 100);
   }, [currentUser, loadStats, loadRecentBets]);
 
   const executeResultUpdate = useCallback(
@@ -464,12 +439,21 @@ export default function MyBets() {
                 : `Результат: ${resultLabel}\nКоментар: ${note.trim()}`,
             }
           : bet;
-        await realGoogleSheetsService.updateBetResult(
-          betWithNotes,
-          result,
-          profitInUAH,
-          roi,
-        );
+        // Try API PATCH first
+        try {
+          const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+          await fetch(`${API_BASE}/bets/${bet.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            },
+            body: JSON.stringify({ result, profit: profitInUAH, roi, notes: betWithNotes.notes }),
+          });
+        } catch {
+          // Fallback: Google Sheets (legacy)
+          await realGoogleSheetsService.updateBetResult(betWithNotes, result, profitInUAH, roi);
+        }
         let matched = false;
         setRecentBets((prev) =>
           prev.map((b) => {
@@ -580,7 +564,17 @@ export default function MyBets() {
     if (!deleteDialogBet) return;
     const bet = deleteDialogBet;
     setDeleteDialogBet(null);
-    await realGoogleSheetsService.deleteRecord(bet);
+    // Try API DELETE first
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      await fetch(`${API_BASE}/bets/${bet.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
+      });
+    } catch {
+      // Fallback: Google Sheets (legacy)
+      await realGoogleSheetsService.deleteRecord(bet);
+    }
     syncBankrollStats();
     syncStats();
     setRecentBets((prev) =>

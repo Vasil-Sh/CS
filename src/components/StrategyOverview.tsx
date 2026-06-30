@@ -25,7 +25,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { realGoogleSheetsService, CS2Strategy } from "@/lib/realGoogleSheets";
+import type { CS2Strategy } from "@/lib/realGoogleSheets";
 import {
   Target,
   TrendingUp,
@@ -218,9 +218,9 @@ export default function StrategyOverview() {
         }
       } catch { /* fallback */ }
 
-      // 2. Fallback to Google Sheets (slow, used only if API has no data)
+      // 2. Fallback to localStorage
       if (betsData.length === 0) {
-        betsData = await realGoogleSheetsService.fetchUSDTData();
+        betsData = UserDataService.getUserData<any[]>(currentUser, 'mybets_data', []) as unknown[];
       }
 
       const customStrategies = loadCustomStrategiesFromStorage();
