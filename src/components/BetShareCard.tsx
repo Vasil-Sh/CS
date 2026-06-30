@@ -474,7 +474,7 @@ export default function BetShareCard({ bet, compact = false }: BetShareCardProps
           >
             <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">Коефіцієнт</p>
             <p className={`${cellValueFont} font-bold text-gray-900`}>
-              {bet.odds.toFixed(2)}
+              {Number(bet.odds).toFixed(2)}
             </p>
           </div>
         </div>

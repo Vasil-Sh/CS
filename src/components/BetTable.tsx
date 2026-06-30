@@ -357,7 +357,7 @@ const BetTableMemo = memo(function BetTable({
                           <span className={`text-base font-semibold ${currency === 'USD' ? 'text-green-500' : 'text-blue-500'}`}>{currency}</span>
                         </td>
                         <td className="px-4 py-4 text-center border-l border-gray-100"><span className="text-base font-semibold text-gray-900">{currencySymbol}{displayAmount}</span></td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100"><span className="text-base font-bold text-gray-900">{bet.odds.toFixed(2)}</span></td>
+                        <td className="px-4 py-4 text-center border-l border-gray-100"><span className="text-base font-bold text-gray-900">{Number(bet.odds).toFixed(2)}</span></td>
                         <td className="px-4 py-4 text-center border-l border-gray-100">
                           {displayProfit !== undefined && displayProfit !== null ? (
                             <span className={`text-base font-bold ${displayProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{displayProfit >= 0 ? '+' : ''}{displayProfit.toFixed(2)} {currencySymbol}</span>
