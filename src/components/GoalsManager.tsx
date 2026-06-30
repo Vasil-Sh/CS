@@ -611,8 +611,8 @@ export default function GoalsManager() {
                           </CollapsibleContent>
                         </Collapsible>
 
-                        {/* Action Buttons — solid colored, like Details */}
-                        <div className="flex items-center gap-2 mt-3">
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2 mt-3 group/actions">
                           {goal.type === 'ladder' && (
                             <Button onClick={() => openDetailsDialog(goal)}
                               className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold h-10">
@@ -622,14 +622,16 @@ export default function GoalsManager() {
                           )}
                           <Button
                             onClick={() => setPrimaryGoal(goal.id)}
-                            className={`flex-1 rounded-xl font-semibold text-white h-10 ${isPrimary ? 'bg-[#F59E0B] hover:bg-[#D97706]' : 'bg-[#6B7280] hover:bg-[#4B5563]'}`}
+                            variant="outline"
+                            className={`flex-1 rounded-xl font-medium h-10 transition-all ${isPrimary ? 'border-[#F59E0B] text-[#F59E0B] bg-[#FFFBEB] hover:bg-[#F59E0B] hover:text-white' : 'border-[#E5E7EB] text-[#9CA3AF] hover:border-[#3B82F6] hover:text-[#3B82F6] hover:bg-[#EFF6FF]'}`}
                             title="Зробити основною"
                           >
-                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-white' : ''}`} strokeWidth={1.5} />
+                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#F59E0B]' : ''}`} strokeWidth={1.5} />
                           </Button>
                           <Button
                             onClick={() => confirmDeleteGoal(goal.id)}
-                            className="flex-1 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-semibold h-10"
+                            variant="outline"
+                            className="flex-1 rounded-xl border-[#E5E7EB] text-[#9CA3AF] hover:border-[#EF4444] hover:text-[#EF4444] hover:bg-[#FEF2F2] font-medium h-10 transition-all"
                             title="Видалити"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
@@ -775,7 +777,7 @@ export default function GoalsManager() {
                           )}
                         </div>
 
-                        {/* Action Buttons — solid colored */}
+                        {/* Action Buttons */}
                         <div className="flex items-center gap-2 mt-auto">
                           <Button
                             onClick={() => openCompletedGoalResult(goal)}
@@ -786,7 +788,8 @@ export default function GoalsManager() {
                           </Button>
                           <Button
                             onClick={() => confirmDeleteGoal(goal.id)}
-                            className="flex-1 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-semibold h-10"
+                            variant="outline"
+                            className="flex-1 rounded-xl border-[#E5E7EB] text-[#9CA3AF] hover:border-[#EF4444] hover:text-[#EF4444] hover:bg-[#FEF2F2] font-medium h-10 transition-all"
                             title="Видалити"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
