@@ -30,6 +30,7 @@ import {
   Search,
   ArrowUpDown,
   Info,
+  AlertTriangle,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -388,23 +389,55 @@ export default function TelegramGroups() {
 
       {/* ===== Delete Group Confirm ===== */}
       <Dialog open={!!deleteGroupConfirm} onOpenChange={() => setDeleteGroupConfirm(null)}>
-        <DialogContent className="rounded-2xl max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Видалити групу?</DialogTitle>
-            <DialogDescription>
-              Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
-            </DialogDescription>
+        <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
+                <Trash2 className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
+              </div>
+              <DialogTitle className="text-xl font-semibold text-[#111827]">
+                Видалити групу?
+              </DialogTitle>
+            </div>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl">Скасувати</Button>
-            <Button
-              onClick={() => deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)}
-              className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
-              Видалити
-            </Button>
-          </DialogFooter>
+
+          <div className="border-t border-[#E5E7EB]" />
+
+          <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+            <div className="text-center">
+              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+                <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+                  {deleteGroupConfirm && groups.find(g => g.id === deleteGroupConfirm)?.name || '—'}
+                </DialogDescription>
+                {deleteGroupConfirm && (() => {
+                  const g = groups.find(x => x.id === deleteGroupConfirm);
+                  return g?.link ? (
+                    <p className="text-xs text-[#9CA3AF] mt-0.5">{tgHandle(g.link)}</p>
+                  ) : null;
+                })()}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
+              <AlertTriangle className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <p className="text-sm text-[#991B1B]">
+                Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
+              </p>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl border-[#E5E7EB] font-medium">
+                Скасувати
+              </Button>
+              <Button
+                onClick={() => deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)}
+                className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
+              >
+                <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                Видалити
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>
