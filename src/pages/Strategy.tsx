@@ -43,7 +43,7 @@ const compute30dWinRate = (bets: Bet[]) => {
 const computeTodayPnL = (bets: Bet[]) => {
   const today = new Date().toISOString().split('T')[0];
   const todayBets = bets.filter((b) => { try { return new Date(b.date).toISOString().split('T')[0] === today; } catch { return false; } });
-  const profit = todayBets.reduce((sum, b) => sum + (b.profit || 0) + (b.originalProfit || 0), 0);
+  const profit = todayBets.reduce((sum, b) => sum + Number(b.profit || 0) + Number(b.originalProfit || 0), 0);
   const pending = todayBets.filter(b => b.result === 'Pending').length;
   return { profit, count: todayBets.length, pending };
 };
@@ -53,7 +53,7 @@ const compute7DayProfit = (bets: Bet[]): number[] => {
     const d = new Date(); d.setDate(d.getDate() - i);
     const key = d.toISOString().split('T')[0];
     const dayBets = bets.filter(b => { try { return new Date(b.date).toISOString().split('T')[0] === key; } catch { return false; } });
-    days.push(dayBets.reduce((sum, b) => sum + (b.profit || 0) + (b.originalProfit || 0), 0));
+    days.push(dayBets.reduce((sum, b) => sum + Number(b.profit || 0) + Number(b.originalProfit || 0), 0));
   }
   return days;
 };
