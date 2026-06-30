@@ -58,7 +58,12 @@ export default function Profile() {
   const fetchExchangeRate = async () => {
     setIsFetchingRate(true);
     try {
-      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch("https://open.er-api.com/v6/latest/USD", {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
       if (!res.ok) throw new Error("API error");
       const data = await res.json();
       const rate = data?.rates?.UAH;
