@@ -646,21 +646,29 @@ export default function StrategyOverview() {
     }
     customStrategies.push(strategy);
     saveCustomStrategiesToStorage(customStrategies);
-    // Sync new strategy to backend API and get backend ID
-    UserDataService.createStrategy(strategy).then((backendStrategy: { id?: string }) => {
-      if (backendStrategy?.id && backendStrategy.id !== strategy.id) {
-        // Update localStorage with backend UUID
+    setStrategies((prev) => [...prev, strategy]);
+    setNewlyCreatedStrategy(strategy);
+
+    // Sync to backend API (async, don't block UI)
+    UserDataService.createStrategy({
+      name: strategy.name,
+      isPrimary: false,
+      config: strategy,
+    }).then((backendStrategy: { id?: string }) => {
+      if (backendStrategy?.id) {
         const all = loadCustomStrategiesFromStorage();
-        const idx = all.findIndex((s: CS2Strategy) => (s.id || s.name) === (strategy.id || strategy.name));
+        const idx = all.findIndex(
+          (s: CS2Strategy) => (s.id || s.name) === (strategy.id || strategy.name),
+        );
         if (idx >= 0) {
           all[idx] = { ...all[idx], _backendId: backendStrategy.id };
           saveCustomStrategiesToStorage(all);
         }
       }
-    }).catch(() => {});
-
-    setStrategies((prev) => [...prev, strategy]);
-    setNewlyCreatedStrategy(strategy);
+    }).catch((err: unknown) => {
+      console.error('[API] Strategy save failed:', err);
+      toast.error('Не вдалося зберегти стратегію на сервері. Дані збережено локально.');
+    });
 
     setNewStrategy({
       name: "",
