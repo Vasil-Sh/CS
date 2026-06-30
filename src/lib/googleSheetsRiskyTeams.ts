@@ -15,6 +15,9 @@ export interface RiskyTeamFromSheet {
 interface ApiRiskyTeam {
   id: number;
   name: string;
+  game?: string;
+  status?: string;
+  notes?: string;
 }
 
 const STATUS_EMOJIS: Record<string, string> = {
@@ -39,9 +42,9 @@ class GoogleSheetsRiskyTeamsService {
         const teams = await api.get<(ApiRiskyTeam & { id: number })[]>('/risky-teams');
         return teams.map((t) => ({
           name: t.name,
-          game: 'CS',
-          status: '',
-          notes: '',
+          game: t.game || 'CS',
+          status: t.status || '',
+          notes: t.notes || '',
           _apiId: t.id,
         }));
       } catch (err: unknown) {
@@ -94,9 +97,9 @@ class GoogleSheetsRiskyTeamsService {
   }
 
   /** Add a team (admin only) */
-  async addTeam(name: string): Promise<void> {
+  async addTeam(name: string, game?: string, status?: string, notes?: string): Promise<void> {
     try {
-      await api.post('/risky-teams', { name });
+      await api.post('/risky-teams', { name, game: game || '', status: status || '', notes: notes || '' });
     } catch {
       // API unavailable — ignore
     }

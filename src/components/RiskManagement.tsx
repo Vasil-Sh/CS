@@ -132,7 +132,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         if (riskyTeams.length > 0) {
           let count = 0;
           for (const t of riskyTeams) {
-            try { await googleSheetsRiskyTeamsService.addTeam(t.name); count++; } catch {}
+            try { await googleSheetsRiskyTeamsService.addTeam(t.name, t.game, t.status, t.notes); count++; } catch {}
             // Small delay to not hammer the API
             await new Promise(r => setTimeout(r, 50));
           }
@@ -247,7 +247,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
     setNewTeam({ name: "", game: "CS", status: "Обережно", notes: "" });
     // Sync to backend API
-    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim()).catch(() => {});
+    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch(() => {});
   };
 
   const deleteRiskyTeam = (index: number) => {
