@@ -611,28 +611,26 @@ export default function GoalsManager() {
                           </CollapsibleContent>
                         </Collapsible>
 
-                        {/* Action Buttons — row with Details + Star + Trash (like StrategyOverview) */}
-                        <div className="flex items-center justify-end gap-2 mt-3">
+                        {/* Action Buttons — solid colored, like Details */}
+                        <div className="flex items-center gap-2 mt-3">
                           {goal.type === 'ladder' && (
                             <Button onClick={() => openDetailsDialog(goal)}
-                              className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold">
+                              className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold h-10">
                               <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                               Деталі
                             </Button>
                           )}
                           <Button
                             onClick={() => setPrimaryGoal(goal.id)}
-                            variant="outline"
-                            size="sm"
-                            className={`rounded-xl font-medium ${isPrimary ? 'border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF] hover:bg-[#DBEAFE]' : 'border-[#E5E7EB] hover:bg-[#F9FAFB]'}`}
+                            className={`flex-1 rounded-xl font-semibold text-white h-10 ${isPrimary ? 'bg-[#F59E0B] hover:bg-[#D97706]' : 'bg-[#6B7280] hover:bg-[#4B5563]'}`}
+                            title="Зробити основною"
                           >
-                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-[#3B82F6]' : ''}`} strokeWidth={1.5} />
+                            <Star className={`h-4 w-4 ${isPrimary ? 'fill-white' : ''}`} strokeWidth={1.5} />
                           </Button>
                           <Button
                             onClick={() => confirmDeleteGoal(goal.id)}
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
+                            className="flex-1 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-semibold h-10"
+                            title="Видалити"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
@@ -777,20 +775,19 @@ export default function GoalsManager() {
                           )}
                         </div>
 
-                        {/* Action Buttons — pushed to bottom */}
-                        <div className="flex gap-2 mt-auto">
+                        {/* Action Buttons — solid colored */}
+                        <div className="flex items-center gap-2 mt-auto">
                           <Button
                             onClick={() => openCompletedGoalResult(goal)}
-                            className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold"
+                            className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-semibold h-10"
                           >
                             <Eye className="h-4 w-4 mr-1" strokeWidth={1.5} />
                             Деталі
                           </Button>
                           <Button
                             onClick={() => confirmDeleteGoal(goal.id)}
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl border-[#FEE2E2] text-[#EF4444] hover:bg-[#FEF2F2] font-medium"
+                            className="flex-1 rounded-xl bg-[#EF4444] hover:bg-[#DC2626] text-white font-semibold h-10"
+                            title="Видалити"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
