@@ -166,20 +166,23 @@ export default function GoalsManager() {
 
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); } }, [goals, currentUser]);
 
-  // Sync goal progress to API when it changes
-  const prevProgressRef = useRef('');
+  // Sync goal progress + status to API when it changes
+  const prevGoalSnapshotRef = useRef('');
   useEffect(() => {
-    const progress = goals.map(g => `${g.id}:${g.currentAmount ?? g.currentROI ?? g.currentWinRate ?? g.currentStep ?? 0}`).join(',');
-    if (prevProgressRef.current && prevProgressRef.current !== progress) {
+    const snapshot = goals.map(g => `${g.id}:${g.currentAmount ?? g.currentROI ?? g.currentWinRate ?? g.currentStep ?? 0}:${g.status}`).join(',');
+    if (prevGoalSnapshotRef.current && prevGoalSnapshotRef.current !== snapshot) {
       goals.forEach(g => {
-        const backendId = (g as any)._backendId || g.id;
+        const backendId = (g as { _backendId?: string })._backendId || g.id;
         const currentVal = g.type === 'amount' ? g.currentAmount : g.type === 'roi' ? g.currentROI : g.type === 'winrate' ? g.currentWinRate : g.currentStep;
-        if (currentVal !== undefined && currentVal !== null) {
-          UserDataService.updateGoal(backendId, { current: Number(currentVal) }).catch(() => {});
+        const payload: Record<string, unknown> = { config: g };
+        if (currentVal !== undefined && currentVal !== null) payload.current = Number(currentVal);
+        if (g.status === 'completed') payload.isCompleted = true;
+        if (Object.keys(payload).length > 0) {
+          UserDataService.updateGoal(backendId, payload).catch(() => {});
         }
       });
     }
-    prevProgressRef.current = progress;
+    prevGoalSnapshotRef.current = snapshot;
   }, [goals]);
 
   const calculateRemainingSteps = (currentBank: number, targetAmount: number, minOdds: number): number => {
