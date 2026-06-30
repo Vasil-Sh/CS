@@ -439,13 +439,13 @@ export default function Admin() {
   // Today's date in DD/MM/YYYY format for default values
   const todayFormatted = (() => {
     const d = new Date();
-    return '${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}';
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   })();
 
   const monthLaterFormatted = (() => {
     const d = new Date();
     d.setMonth(d.getMonth() + 1);
-    return '${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}';
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   })();
 
 
