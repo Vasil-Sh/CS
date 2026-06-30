@@ -404,53 +404,22 @@ export default function MyBets() {
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
     const H = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
 
-    // 1. Delete all bets from DB
+    // Single API call — deletes everything in DB atomically
+    let apiOk = false;
     try {
-      const res = await fetch(`${API_BASE}/bets?page=1&limit=500`, { headers: H });
+      const res = await fetch(`${API_BASE}/admin/reset`, { method: 'POST', headers: H });
+      const body = await res.json();
       if (res.ok) {
-        const json = await res.json();
-        const bets = json.data || json;
-        for (const b of bets) {
-          await fetch(`${API_BASE}/bets/${b.id}`, { method: 'DELETE', headers: H }).catch(() => {});
-        }
+        apiOk = true;
+        console.log('[Reset] API OK:', body.counts);
+      } else {
+        console.warn('[Reset] API failed:', body);
       }
-    } catch { /* continue */ }
+    } catch (err: unknown) {
+      console.error('[Reset] Network error:', err);
+    }
 
-    // 2. Delete all goals from DB
-    try {
-      const res = await fetch(`${API_BASE}/goals`, { headers: H });
-      if (res.ok) {
-        const goals = await res.json();
-        for (const g of goals) {
-          await fetch(`${API_BASE}/goals/${g.id}`, { method: 'DELETE', headers: H }).catch(() => {});
-        }
-      }
-    } catch { /* continue */ }
-
-    // 3. Delete all strategies from DB
-    try {
-      const res = await fetch(`${API_BASE}/strategies`, { headers: H });
-      if (res.ok) {
-        const strats = await res.json();
-        for (const s of strats) {
-          const nameQ = s.name ? `?name=${encodeURIComponent(s.name)}` : '';
-          await fetch(`${API_BASE}/strategies/${s.id}${nameQ}`, { method: 'DELETE', headers: H }).catch(() => {});
-        }
-      }
-    } catch { /* continue */ }
-
-    // 4. Delete all telegram groups from DB
-    try {
-      const res = await fetch(`${API_BASE}/telegram-groups`, { headers: H });
-      if (res.ok) {
-        const groups = await res.json();
-        for (const g of groups) {
-          await fetch(`${API_BASE}/telegram-groups/${g.id}`, { method: 'DELETE', headers: H }).catch(() => {});
-        }
-      }
-    } catch { /* continue */ }
-
-    // 5. Clear ALL localStorage
+    // Always clear localStorage (regardless of API result)
     [
       "mybets_data", "mybets_stats", "analytics_bets", "analytics_stats",
       "goals", "strategies", "primary_strategy", "tg_groups", "tg_bets",
@@ -458,7 +427,7 @@ export default function MyBets() {
     ].forEach((k) => UserDataService.clearUserData(currentUser, k));
     localStorage.removeItem("primaryStrategy");
 
-    // 6. Reset state
+    // Reset state
     BankrollService.setInitialBank(currentUser, 0);
     setRecentBets([]);
     setStats(DEFAULT_STATS);
@@ -467,11 +436,12 @@ export default function MyBets() {
     useAppStore.getState().bumpStrategy();
     useAppStore.getState().bumpBankroll();
 
-    toast.success("✅ Всі дані очищено — ставки, цілі, стратегії, групи, банкрол");
-    setTimeout(() => {
-      loadStats();
-      loadRecentBets();
-    }, 200);
+    if (apiOk) {
+      toast.success("✅ Всі дані очищено — ставки, цілі, стратегії, групи, банкрол");
+    } else {
+      toast.error("⚠️ Дані очищено локально, але сервер повернув помилку. Перевір консоль (F12).");
+    }
+    setTimeout(() => { loadStats(); loadRecentBets(); }, 200);
   }, [currentUser, loadStats, loadRecentBets]);
 
   const executeResultUpdate = useCallback(
