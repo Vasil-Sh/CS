@@ -445,8 +445,11 @@ export default function TelegramGroups() {
       {renderKPICards()}
 
       {groups.length === 0 ? (
-        <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
-          <CardContent className="py-16 text-center">
+        <div
+          className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        >
+          <div className="py-16 text-center">
             <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
               <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
             </div>
@@ -463,8 +466,8 @@ export default function TelegramGroups() {
               <Plus className="h-4 w-4" strokeWidth={2} />
               Додати групу
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
       <>
       {/* ===== Cards View ===== */}
