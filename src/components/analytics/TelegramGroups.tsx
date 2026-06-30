@@ -444,33 +444,6 @@ export default function TelegramGroups() {
       {/* ===== KPI Cards — always visible ===== */}
       {renderKPICards()}
 
-      {/* ===== TOOLBAR — Strategy nav style ===== */}
-      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setActiveTool(activeTool === 'add' ? null : 'add')}
-            className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out flex items-center gap-2 ${activeTool === 'add' ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)]' : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'}`}
-          >
-            <Plus className="h-4 w-4" strokeWidth={1.5} />
-            Додати групу
-          </button>
-          <button
-            onClick={() => setActiveTool(activeTool === 'info' ? null : 'info')}
-            className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out flex items-center gap-2 ${activeTool === 'info' ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)]' : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'}`}
-          >
-            <Info className="h-4 w-4" strokeWidth={1.5} />
-            Інфо
-          </button>
-          <button
-            onClick={() => setActiveTool(activeTool === 'filter' ? null : 'filter')}
-            className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out flex items-center gap-2 ${activeTool === 'filter' ? 'bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)]' : 'bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]'}`}
-          >
-            <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} />
-            Фільтр
-          </button>
-        </div>
-      </div>
-
       {groups.length === 0 ? (
         <Card className="border-2 border-[#D1D5DB] rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="py-16 text-center">
