@@ -114,22 +114,30 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         /* ignore */
       }
     }
-    // 2. Fetch from API in background
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
-        if (!cancelled && teams.length > 0) setRiskyTeams(teams);
-      } catch {
-        /* ignore */
-      }
-      if (!cancelled) setIsLoadingTeams(false);
-    };
-    setIsLoadingTeams(true);
-    load();
-    return () => {
-      cancelled = true;
-    };
+    // 2. Fetch from API in background — ONLY if localStorage is empty (first load)
+    //    Otherwise localStorage is the source of truth (saveEditing syncs to API)
+    if (!saved) {
+      let cancelled = false;
+      const load = async () => {
+        try {
+          const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+          if (!cancelled && teams.length > 0) {
+            setRiskyTeams(teams);
+            localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
+          }
+        } catch {
+          /* ignore */
+        }
+        if (!cancelled) setIsLoadingTeams(false);
+      };
+      setIsLoadingTeams(true);
+      load();
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setIsLoadingTeams(false);
+    }
   }, []);
 
   const normalizeTeamName = (name: string): string => {
