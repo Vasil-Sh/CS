@@ -42,6 +42,15 @@ import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
 
+/** Normalize game names from API/localStorage to internal format */
+const normalizeGame = (game?: string): string => {
+  if (!game) return "CS";
+  const g = game.toLowerCase().trim();
+  if (g === "dota2" || g === "dota" || g === "дота") return "Дота";
+  if (g === "cs2" || g === "cs:go" || g === "csgo" || g === "cs") return "CS";
+  return game;
+};
+
 import { type RiskyTeam } from "@/data/riskyTeams";
 
 interface RiskManagementProps {
@@ -93,11 +102,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
   // Load from localStorage FIRST (instant), then update from API in background
   useEffect(() => {
-    // 1. Show cached data immediately
+    // 1. Show cached data immediately, normalize game values
     const saved = localStorage.getItem("admin_risky_teams");
     if (saved) {
       try {
-        setRiskyTeams(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setRiskyTeams(
+          parsed.map((t: RiskyTeam) => ({ ...t, game: normalizeGame(t.game) })),
+        );
       } catch {
         /* ignore */
       }
@@ -268,7 +280,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditName(team.name);
     setEditNotes(team.notes);
     setEditStatus(team.status);
-    setEditGame(team.game === "CS" || team.game === "Дота" ? team.game : "CS");
+    setEditGame(normalizeGame(team.game));
   };
 
   const cancelEditing = () => {
