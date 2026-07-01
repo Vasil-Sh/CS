@@ -19,7 +19,7 @@ import InitialBankModal from "@/components/InitialBankModal";
 import StatCard from "@/components/StatCard";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
-import { BankrollService } from "@/lib/bankrollService";
+import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { api } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
@@ -133,11 +133,9 @@ export default function MyBets() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [bankrollStats, setBankrollStats] = useState({
-    initialBank: 0,
-    currentBank: 0,
-    totalProfit: 0,
-    roi: 0,
+  const [dualBank, setDualBank] = useState<DualBankrollStats>({
+    uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+    usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
   });
   const { showOnboarding, setShowOnboarding } = useOnboarding();
 
@@ -217,29 +215,33 @@ export default function MyBets() {
       try {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
-          setBankrollStats(apiStats);
+          setDualBank({
+            uah: apiStats,
+            usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+          });
           return;
         }
       } catch {
         /* noop */
       }
-      // Fallback to localStorage
       const allBets = UserDataService.getUserData(
         currentUser,
         "mybets_data",
         [],
       );
-      setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
+      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
     };
     initBankroll();
   }, [currentUser]);
-  // React to bankroll version changes with API first
   useEffect(() => {
     const refresh = async () => {
       try {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
-          setBankrollStats(apiStats);
+          setDualBank({
+            uah: apiStats,
+            usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+          });
           return;
         }
       } catch {
@@ -250,7 +252,7 @@ export default function MyBets() {
         "mybets_data",
         [],
       );
-      setBankrollStats(BankrollService.getBankrollStats(currentUser, allBets));
+      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
     };
     refresh();
   }, [bankrollRefreshKey, bankrollVersion, currentUser]);
@@ -309,19 +311,18 @@ export default function MyBets() {
     try {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
-        setBankrollStats(apiStats);
+        setDualBank({
+          uah: apiStats,
+          usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+        });
         return;
       }
     } catch {
       /* noop */
     }
-    setBankrollStats({
-      initialBank: 0,
-      currentBank: 0,
-      totalProfit: 0,
-      roi: 0,
-    });
-  }, []);
+    const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
+  }, [currentUser]);
 
   const syncStats = useCallback(() => {
     const allBets = recentBets;
@@ -679,11 +680,11 @@ export default function MyBets() {
                   />
                 </div>
               }
-              label="Поточний банк"
-              value={`${bankrollStats.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
-              subtext={`${Number(stats.totalProfit) >= 0 ? "+" : ""}${Number(stats.totalProfit).toFixed(2)} ₴ за весь час`}
+              label="Поточний банк (UAH)"
+              value={`${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+              subtext={`${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴ за весь час`}
               subIcon={
-                stats.totalProfit >= 0 ? (
+                dualBank.uah.totalProfit >= 0 ? (
                   <ArrowUpRight
                     className="h-4 w-4 text-[#22C55E]"
                     strokeWidth={2.5}
@@ -695,8 +696,38 @@ export default function MyBets() {
                   />
                 )
               }
-              trend={stats.totalProfit >= 0 ? "up" : "down"}
+              trend={dualBank.uah.totalProfit >= 0 ? "up" : "down"}
             />
+            {hasUsdBets && dualBank.usd.initialBank > 0 && (
+              <StatCard
+                icon={
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF3C7]">
+                    <DollarSign
+                      className="h-5 w-5 text-[#D97706]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                }
+                label="Поточний банк (USD)"
+                value={`$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`}
+                valueColor="text-[#D97706]"
+                subtext={`${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`}
+                subIcon={
+                  dualBank.usd.totalProfit >= 0 ? (
+                    <ArrowUpRight
+                      className="h-4 w-4 text-[#22C55E]"
+                      strokeWidth={2.5}
+                    />
+                  ) : (
+                    <ArrowDownRight
+                      className="h-4 w-4 text-[#EF4444]"
+                      strokeWidth={2.5}
+                    />
+                  )
+                }
+                trend={dualBank.usd.totalProfit >= 0 ? "up" : "down"}
+              />
+            )}
             <StatCard
               icon={
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">

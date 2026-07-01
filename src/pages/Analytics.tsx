@@ -29,7 +29,7 @@ import GoalsManager from "@/components/GoalsManager";
 import InitialBankModal from "@/components/InitialBankModal";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
-import { BankrollService } from "@/lib/bankrollService";
+import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
 import { useTheme } from "@/hooks/useTheme";
@@ -141,11 +141,9 @@ export default function Analytics() {
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
   const [bankModalOpen, setBankModalOpen] = useState(false);
-  const [bankrollStats, setBankrollStats] = useState({
-    initialBank: 0,
-    currentBank: 0,
-    totalProfit: 0,
-    roi: 0,
+  const [dualBank, setDualBank] = useState<DualBankrollStats>({
+    uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+    usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
   });
   const [activeTab, setActiveTab] = useState("profit");
   const { theme, toggleTheme } = useTheme();
@@ -184,20 +182,19 @@ export default function Analytics() {
     try {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
-        setBankrollStats(apiStats);
+        setDualBank({
+          uah: apiStats,
+          usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+        });
         return;
       }
     } catch (err) {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Bankroll update failed:", err);
     }
-    setBankrollStats({
-      initialBank: 0,
-      currentBank: 0,
-      totalProfit: 0,
-      roi: 0,
-    });
-  }, []);
+    const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
+  }, [currentUser]);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
@@ -297,7 +294,10 @@ export default function Analytics() {
         try {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) {
-            setBankrollStats(apiStats);
+            setDualBank({
+              uah: apiStats,
+              usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+            });
             return;
           }
         } catch (err) {
@@ -307,12 +307,12 @@ export default function Analytics() {
               err,
             );
         }
-        setBankrollStats({
-          initialBank: 0,
-          currentBank: 0,
-          totalProfit: 0,
-          roi: 0,
-        });
+        const allBets = UserDataService.getUserData(
+          currentUser,
+          "mybets_data",
+          [],
+        );
+        setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -341,11 +341,9 @@ export default function Analytics() {
         profitByMonth: [],
         profitByStrategy: [],
       });
-      setBankrollStats({
-        initialBank: 0,
-        currentBank: 0,
-        totalProfit: 0,
-        roi: 0,
+      setDualBank({
+        uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+        usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
       });
     }
   }, []);
@@ -756,17 +754,15 @@ export default function Analytics() {
                   </div>
                   <div className="flex items-baseline justify-between gap-3 mb-1">
                     <div className="text-4xl font-bold text-gray-900 tracking-tight">
-                      {bankrollStats.currentBank.toLocaleString("uk-UA", {
+                      {dualBank.uah.currentBank.toLocaleString("uk-UA", {
                         maximumFractionDigits: 0,
                       })}{" "}
                       ₴
                     </div>
-                    {hasUsdBets && exchangeRate > 0 && (
+                    {hasUsdBets && dualBank.usd.initialBank > 0 && (
                       <div className="text-4xl font-bold text-amber-600 tracking-tight">
-                        ≈ $
-                        {(
-                          bankrollStats.currentBank / exchangeRate
-                        ).toLocaleString("uk-UA", {
+                        $
+                        {dualBank.usd.currentBank.toLocaleString("uk-UA", {
                           maximumFractionDigits: 0,
                         })}
                       </div>
@@ -774,7 +770,7 @@ export default function Analytics() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {filteredStats.totalProfit >= 0 ? (
+                      {dualBank.uah.totalProfit >= 0 ? (
                         <ArrowUpRight
                           className="h-4 w-4 text-green-500"
                           strokeWidth={2.5}
@@ -786,13 +782,13 @@ export default function Analytics() {
                         />
                       )}
                       <span
-                        className={`text-base font-normal ${Number(filteredStats.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
+                        className={`text-base font-normal ${Number(dualBank.uah.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
                       >
-                        {Number(filteredStats.totalProfit) >= 0 ? "+" : ""}
-                        {Number(filteredStats.totalProfit).toFixed(2)} ₴
+                        {Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}
+                        {Number(dualBank.uah.totalProfit).toFixed(2)} ₴
                       </span>
                     </div>
-                    {hasUsdBets && exchangeRate > 0 && (
+                    {hasUsdBets && dualBank.usd.initialBank > 0 && (
                       <span className="text-sm text-gray-400">
                         Курс {exchangeRate} ₴/$
                       </span>

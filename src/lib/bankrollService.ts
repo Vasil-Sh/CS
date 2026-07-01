@@ -1,53 +1,141 @@
 // ═══════════════════════════════════════════
-// Bankroll Service — localStorage + API hybrid
+// Bankroll Service — dual-currency (UAH + USD)
 // ═══════════════════════════════════════════
 
-import { api } from './apiClient';
-import { UserDataService } from './userDataService';
-import type { Bet } from '@/types/betting';
+import { api } from "./apiClient";
+import { UserDataService } from "./userDataService";
+import type { Bet } from "@/types/betting";
 
 interface BankrollData {
+  /** Total initial bank in UAH (backward compat + unified API) */
   initialBank: number;
+  /** UAH-only initial bank */
+  initialBankUAH: number;
+  /** USD-only initial bank (stored in USD) */
+  initialBankUSD: number;
+  /** Exchange rate used when USD bank was set */
+  exchangeRate: number;
   manualAdjustments: number;
   lastUpdated: string;
 }
 
-interface BankrollStats {
+export interface BankrollStats {
   initialBank: number;
   currentBank: number;
   totalProfit: number;
   roi: number;
 }
 
+export interface DualBankrollStats {
+  uah: BankrollStats;
+  usd: BankrollStats;
+}
+
 export class BankrollService {
-  private static STORAGE_KEY = 'bankroll_data';
+  private static STORAGE_KEY = "bankroll_data";
 
   static isInitialized(username: string): boolean {
-    const data = UserDataService.getUserData(username, this.STORAGE_KEY, null);
-    return data !== null && data.initialBank !== undefined;
+    const data = UserDataService.getUserData<BankrollData>(
+      username,
+      this.STORAGE_KEY,
+      null as unknown as BankrollData,
+    );
+    return (
+      data !== null &&
+      (data.initialBankUAH !== undefined || data.initialBank !== undefined)
+    );
   }
 
-  static async setInitialBank(username: string, amount: number): Promise<void> {
-    const data: BankrollData = {
-      initialBank: amount,
+  static isInitializedUSD(username: string): boolean {
+    const data = UserDataService.getUserData<BankrollData>(
+      username,
+      this.STORAGE_KEY,
+      null as unknown as BankrollData,
+    );
+    return (
+      data !== null &&
+      data.initialBankUSD !== undefined &&
+      data.initialBankUSD > 0
+    );
+  }
+
+  static async setInitialBank(
+    username: string,
+    amount: number,
+    currency: "UAH" | "USD" = "UAH",
+    exchangeRate: number = 0,
+  ): Promise<void> {
+    const existing = UserDataService.getUserData<BankrollData>(
+      username,
+      this.STORAGE_KEY,
+      null as unknown as BankrollData,
+    ) || {
+      initialBank: 0,
+      initialBankUAH: 0,
+      initialBankUSD: 0,
+      exchangeRate: 0,
       manualAdjustments: 0,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: "",
     };
-    // API first
-    try { await api.post('/bankroll', { initialBank: amount }); }
-    catch (err) { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)); }
-    // localStorage as cache
+    const data: BankrollData = {
+      initialBank:
+        currency === "UAH"
+          ? amount + (existing.initialBankUSD * existing.exchangeRate || 0)
+          : (existing.initialBankUAH || 0) + amount * (exchangeRate || 41.5),
+      initialBankUAH:
+        currency === "UAH" ? amount : existing.initialBankUAH || 0,
+      initialBankUSD:
+        currency === "USD" ? amount : existing.initialBankUSD || 0,
+      exchangeRate:
+        currency === "USD" && exchangeRate > 0
+          ? exchangeRate
+          : existing.exchangeRate || 0,
+      manualAdjustments: 0,
+      lastUpdated: new Date().toISOString(),
+    };
+    try {
+      await api.post("/bankroll", { initialBank: data.initialBank });
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
+    }
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
   }
 
   static getBankrollData(username: string): BankrollData | null {
-    return UserDataService.getUserData(username, this.STORAGE_KEY, null);
+    const data = UserDataService.getUserData<BankrollData>(
+      username,
+      this.STORAGE_KEY,
+      null as unknown as BankrollData,
+    );
+    if (!data) return null;
+    // Migrate old format (only initialBank, no split)
+    if (data.initialBankUAH === undefined) {
+      data.initialBankUAH = data.initialBank || 0;
+      data.initialBankUSD = 0;
+      data.exchangeRate = 0;
+    }
+    return data;
   }
 
-  static calculateTotalProfit(bets: Bet[]): number {
-    return bets
-      .filter(bet => bet.result !== 'Pending')
+  static calculateTotalProfit(bets: Bet[], currency?: "UAH" | "USD"): number {
+    const filtered = currency
+      ? bets.filter(
+          (b) => b.currency === currency || (!b.currency && currency === "UAH"),
+        )
+      : bets;
+    return filtered
+      .filter((bet) => bet.result !== "Pending")
       .reduce((sum, bet) => sum + (bet.profit || 0), 0);
+  }
+
+  static calculateTotalProfitUSD(bets: Bet[]): number {
+    return bets
+      .filter((b) => b.currency === "USD" && b.result !== "Pending")
+      .reduce((sum, bet) => {
+        const profit = bet.profit || 0;
+        const rate = bet.exchangeRate ? Number(bet.exchangeRate) : 41.5;
+        return sum + (rate > 0 ? profit / rate : 0);
+      }, 0);
   }
 
   static getBankrollStats(username: string, bets: Bet[]): BankrollStats {
@@ -56,9 +144,56 @@ export class BankrollService {
       return { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 };
     }
     const totalProfit = this.calculateTotalProfit(bets);
-    const currentBank = data.initialBank + totalProfit + data.manualAdjustments;
-    const roi = data.initialBank > 0 ? (totalProfit / data.initialBank) * 100 : 0;
-    return { initialBank: data.initialBank, currentBank, totalProfit, roi };
+    const currentBank =
+      (data.initialBankUAH || 0) + totalProfit + data.manualAdjustments;
+    const roi =
+      data.initialBankUAH > 0 ? (totalProfit / data.initialBankUAH) * 100 : 0;
+    return {
+      initialBank: data.initialBankUAH || 0,
+      currentBank,
+      totalProfit,
+      roi,
+    };
+  }
+
+  static getBankrollStatsDual(
+    username: string,
+    bets: Bet[],
+  ): DualBankrollStats {
+    const data = this.getBankrollData(username);
+    if (!data) {
+      return {
+        uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+        usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+      };
+    }
+    const profitUAH = this.calculateTotalProfit(bets, "UAH");
+    const profitUSD = this.calculateTotalProfitUSD(bets);
+    const rate = data.exchangeRate || 41.5;
+
+    const currentUAH =
+      (data.initialBankUAH || 0) + profitUAH + data.manualAdjustments;
+    const roiUAH =
+      data.initialBankUAH > 0 ? (profitUAH / data.initialBankUAH) * 100 : 0;
+
+    const currentUSD = (data.initialBankUSD || 0) + profitUSD;
+    const roiUSD =
+      data.initialBankUSD > 0 ? (profitUSD / data.initialBankUSD) * 100 : 0;
+
+    return {
+      uah: {
+        initialBank: data.initialBankUAH || 0,
+        currentBank: currentUAH,
+        totalProfit: profitUAH,
+        roi: roiUAH,
+      },
+      usd: {
+        initialBank: data.initialBankUSD || 0,
+        currentBank: currentUSD,
+        totalProfit: profitUSD,
+        roi: roiUSD,
+      },
+    };
   }
 
   static addManualAdjustment(username: string, amount: number): void {
@@ -67,41 +202,62 @@ export class BankrollService {
     data.manualAdjustments += amount;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserData(username, this.STORAGE_KEY, data);
-    // Sync to backend API
-    api.post('/bankroll/adjust', { amount }).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
+    api.post("/bankroll/adjust", { amount }).catch((err: unknown) => {
+      if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
+    });
   }
 
-  static async updateInitialBank(username: string, newAmount: number): Promise<void> {
-    // API first
-    try { await api.post('/bankroll', { initialBank: newAmount }); }
-    catch (err) { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)); }
+  static async updateInitialBank(
+    username: string,
+    newAmount: number,
+  ): Promise<void> {
+    try {
+      await api.post("/bankroll", { initialBank: newAmount });
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
+    }
     const data = this.getBankrollData(username);
     if (!data) return;
     data.initialBank = newAmount;
+    data.initialBankUAH = newAmount;
+    data.initialBankUSD = 0;
+    data.exchangeRate = 0;
     data.manualAdjustments = 0;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
   }
 
-  static validateBetAmount(username: string, bets: Bet[], betAmount: number): {
+  static validateBetAmount(
+    username: string,
+    bets: Bet[],
+    betAmount: number,
+    currency: "UAH" | "USD" = "UAH",
+  ): {
     isValid: boolean;
     warning?: string;
   } {
-    const stats = this.getBankrollStats(username, bets);
-    if (!this.isInitialized(username)) {
+    if (currency === "USD") {
+      if (!this.isInitializedUSD(username)) return { isValid: true };
+      const dual = this.getBankrollStatsDual(username, bets);
+      if (betAmount > dual.usd.currentBank) {
+        return {
+          isValid: false,
+          warning: "Ставка перевищує поточний банк (USD)",
+        };
+      }
       return { isValid: true };
     }
+    const stats = this.getBankrollStats(username, bets);
+    if (!this.isInitialized(username)) return { isValid: true };
     if (betAmount > stats.currentBank) {
-      return { isValid: false, warning: 'Ставка перевищує поточний банк' };
+      return { isValid: false, warning: "Ставка перевищує поточний банк" };
     }
     return { isValid: true };
   }
 
   // ═══ API-backed methods ═══
-
-  /** Fetch bankroll from API */
   static async fetchBankroll(): Promise<BankrollStats> {
-    const data = await api.get<Record<string, number>>('/bankroll');
+    const data = await api.get<Record<string, number>>("/bankroll");
     return {
       initialBank: data.initialBank || 0,
       currentBank: data.currentBank || 0,
@@ -110,13 +266,15 @@ export class BankrollService {
     };
   }
 
-  /** Set initial bank via API */
-  static async setInitialBankApi(amount: number): Promise<Record<string, unknown>> {
-    return api.post('/bankroll', { initialBank: amount });
+  static async setInitialBankApi(
+    amount: number,
+  ): Promise<Record<string, unknown>> {
+    return api.post("/bankroll", { initialBank: amount });
   }
 
-  /** Add manual adjustment via API */
-  static async adjustBankroll(amount: number): Promise<Record<string, unknown>> {
-    return api.post('/bankroll/adjust', { amount });
+  static async adjustBankroll(
+    amount: number,
+  ): Promise<Record<string, unknown>> {
+    return api.post("/bankroll/adjust", { amount });
   }
 }
