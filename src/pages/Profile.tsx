@@ -211,7 +211,7 @@ export default function Profile() {
   const getDataStats = () => {
     // Fast path: localStorage cache (instant, sync)
     const bets = UserDataService.getUserData(username, 'mybets_data', []);
-    const riskyTeams = localStorage.getItem('admin_risky_teams');
+    const riskyCache = UserDataService.getUserData(username, 'admin_risky_teams', []) || JSON.parse(localStorage.getItem('admin_risky_teams') || '[]');
     const strategies = UserDataService.getUserData(username, 'strategies_data', []);
     const goals = UserDataService.getUserData(username, 'goals', []);
     const tgGroups = UserDataService.getUserData(username, 'tg_groups', []);
@@ -219,7 +219,7 @@ export default function Profile() {
 
     return {
       bets: Array.isArray(bets) ? bets.length : 0,
-      riskyTeams: riskyTeams ? JSON.parse(riskyTeams).length : 0,
+      riskyTeams: Array.isArray(riskyCache) ? riskyCache.length : 0,
       strategies: Array.isArray(strategies) ? strategies.length : 0,
       goals: Array.isArray(goals) ? goals.length : 0,
       tgGroups: Array.isArray(tgGroups) ? tgGroups.length : 0,
