@@ -735,6 +735,21 @@ export default function MyBets() {
                     : "Негативна динаміка"
                   : undefined
               }
+              extraSubIcon={
+                hasUsdBets ? (
+                  (profitByCurrency.profitUSD || 0) >= 0 ? (
+                    <ArrowUpRight
+                      className="h-4 w-4 text-[#22C55E]"
+                      strokeWidth={2.5}
+                    />
+                  ) : (
+                    <ArrowDownRight
+                      className="h-4 w-4 text-[#EF4444]"
+                      strokeWidth={2.5}
+                    />
+                  )
+                ) : undefined
+              }
               subIcon={
                 (profitByCurrency.profitUAH || 0) >= 0 ? (
                   <ArrowUpRight

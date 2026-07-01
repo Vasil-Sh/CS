@@ -14,6 +14,7 @@ interface StatCardProps {
   extraValue?: string;
   extraSubtext?: string;
   extraValueColor?: string;
+  extraSubIcon?: ReactNode;
 }
 
 const StatCardMemo = memo(function StatCard({
@@ -28,6 +29,7 @@ const StatCardMemo = memo(function StatCard({
   extraValue,
   extraSubtext,
   extraValueColor = "text-[#D97706]",
+  extraSubIcon,
 }: StatCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -62,7 +64,10 @@ const StatCardMemo = memo(function StatCard({
                 <span className="text-sm text-[#9CA3AF]">{subtext}</span>
               </div>
               {extraSubtext && (
-                <span className="text-sm text-[#9CA3AF]">{extraSubtext}</span>
+                <div className="flex items-center gap-2">
+                  {extraSubIcon}
+                  <span className="text-sm text-[#9CA3AF]">{extraSubtext}</span>
+                </div>
               )}
             </div>
           )}
