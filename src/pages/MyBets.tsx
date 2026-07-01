@@ -177,8 +177,10 @@ export default function MyBets() {
   }, [recentBets]);
 
   const hasUsdBets = useMemo(
-    () => recentBets.some((b) => b.currency === "USD"),
-    [recentBets],
+    () =>
+      recentBets.some((b) => b.currency === "USD") ||
+      dualBank.usd.initialBank > 0,
+    [recentBets, dualBank.usd.initialBank],
   );
 
   // ── Effects ──
@@ -217,11 +219,9 @@ export default function MyBets() {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
           BankrollService.syncFromAPI(currentUser, apiStats);
-          setDualBank({
-            uah: apiStats,
-            usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
-              .usd,
-          });
+          setDualBank(
+            BankrollService.getBankrollStatsDual(currentUser, recentBets),
+          );
           return;
         }
       } catch {
@@ -242,11 +242,9 @@ export default function MyBets() {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
           BankrollService.syncFromAPI(currentUser, apiStats);
-          setDualBank({
-            uah: apiStats,
-            usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
-              .usd,
-          });
+          setDualBank(
+            BankrollService.getBankrollStatsDual(currentUser, recentBets),
+          );
           return;
         }
       } catch {
@@ -317,10 +315,9 @@ export default function MyBets() {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
         BankrollService.syncFromAPI(currentUser, apiStats);
-        setDualBank({
-          uah: apiStats,
-          usd: BankrollService.getBankrollStatsDual(currentUser, []).usd,
-        });
+        setDualBank(
+          BankrollService.getBankrollStatsDual(currentUser, recentBets),
+        );
         return;
       }
     } catch {

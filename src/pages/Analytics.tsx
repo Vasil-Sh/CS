@@ -125,8 +125,9 @@ export default function Analytics() {
   }, [bets]);
 
   const hasUsdBets = useMemo(
-    () => bets.some((b) => b.currency === "USD"),
-    [bets],
+    () =>
+      bets.some((b) => b.currency === "USD") || dualBank.usd.initialBank > 0,
+    [bets, dualBank.usd.initialBank],
   );
 
   // exchangeRate moved after currencyMode
@@ -201,17 +202,13 @@ export default function Analytics() {
     try {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
-        setDualBank({
-          uah: apiStats,
-          usd: BankrollService.getBankrollStatsDual(currentUser, bets).usd,
-        });
-        return;
+        BankrollService.syncFromAPI(currentUser, apiStats);
       }
     } catch (err) {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Bankroll update failed:", err);
     }
-    // Use bets from state (API data has currency/exchangeRate)
+    // Always compute dual stats from localStorage (which has initialBankUAH/USD split)
     setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
   }, [currentUser, bets]);
 
@@ -313,11 +310,7 @@ export default function Analytics() {
         try {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) {
-            setDualBank({
-              uah: apiStats,
-              usd: BankrollService.getBankrollStatsDual(currentUser, bets).usd,
-            });
-            return;
+            BankrollService.syncFromAPI(currentUser, apiStats);
           }
         } catch (err) {
           if (import.meta.env.DEV)
