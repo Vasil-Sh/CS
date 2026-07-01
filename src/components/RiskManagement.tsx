@@ -1305,8 +1305,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   csStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4 h-full min-h-[300px]">
+              <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
@@ -1379,8 +1379,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   dotaStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4 h-full min-h-[300px]">
+              <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
@@ -1459,8 +1459,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     щоб відредагувати.
                   </p>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
+                <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
                     {uncategorizedTeams.map((team) => {
                       const globalIndex = riskyTeams.findIndex(
                         (t) => t === team,
