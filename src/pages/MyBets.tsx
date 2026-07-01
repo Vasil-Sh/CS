@@ -152,6 +152,7 @@ export default function MyBets() {
       else if (b.result === "Loss") losing.push(b);
     }
     return { activeBets: active, winningBets: winning, losingBets: losing };
+  }, [recentBets]);
 
   const isBankrollInitialized = useMemo(
     () => BankrollService.isInitialized(currentUser),
