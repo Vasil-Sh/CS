@@ -84,10 +84,11 @@ describe("ApiError", () => {
 // API helpers smoke tests
 // ═══════════════════════════════════════════════════════════════════
 describe("api object", () => {
-  it("має методи get, post, put, delete", () => {
+  it("має методи get, post, put, patch, delete", () => {
     expect(typeof api.get).toBe("function");
     expect(typeof api.post).toBe("function");
     expect(typeof api.put).toBe("function");
+    expect(typeof api.patch).toBe("function");
     expect(typeof api.delete).toBe("function");
   });
 });

@@ -455,6 +455,39 @@ export default function MyBets() {
           if (import.meta.env.DEV)
             console.warn("[API] PATCH failed, saving locally");
         }
+        // Update localStorage cache for offline resilience
+        try {
+          const localBets = UserDataService.getUserData(
+            currentUser,
+            "mybets_data",
+            [],
+          );
+          UserDataService.setUserDataSync(
+            currentUser,
+            "mybets_data",
+            localBets.map((b: Bet) => {
+              if (
+                (bet.id && b.id === bet.id) ||
+                (bet.createdAt && b.createdAt === bet.createdAt) ||
+                (!bet.id &&
+                  !bet.createdAt &&
+                  b.date === bet.date &&
+                  b.match === bet.match)
+              ) {
+                return {
+                  ...b,
+                  result,
+                  profit: profitInUAH,
+                  roi,
+                  notes: betWithNotes.notes || b.notes,
+                };
+              }
+              return b;
+            }),
+          );
+        } catch {
+          /* ignore */
+        }
         let matched = false;
         setRecentBets((prev) =>
           prev.map((b) => {
