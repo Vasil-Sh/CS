@@ -43,24 +43,44 @@ const StatCardMemo = memo(function StatCard({
         {icon}
         <span className="text-lg font-semibold text-[#111827]">{label}</span>
       </div>
-      <div className={`text-4xl font-bold tracking-tight mb-1 ${valueColor}`}>
-        {value}
-      </div>
-      {extraValue && (
-        <div
-          className={`text-lg font-semibold tracking-tight mb-2 ${extraValueColor}`}
-        >
-          {extraValue}
-        </div>
-      )}
-      {subtext && (
-        <div className="flex items-center gap-2">
-          {subIcon}
-          <span className="text-sm text-[#9CA3AF]">{subtext}</span>
-          {extraSubtext && (
-            <span className="text-sm text-[#9CA3AF] ml-3">{extraSubtext}</span>
+      {extraValue ? (
+        <>
+          <div className="flex items-baseline justify-between gap-3 mb-1">
+            <div className={`text-4xl font-bold tracking-tight ${valueColor}`}>
+              {value}
+            </div>
+            <div
+              className={`text-4xl font-bold tracking-tight ${extraValueColor}`}
+            >
+              {extraValue}
+            </div>
+          </div>
+          {subtext && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {subIcon}
+                <span className="text-sm text-[#9CA3AF]">{subtext}</span>
+              </div>
+              {extraSubtext && (
+                <span className="text-sm text-[#9CA3AF]">{extraSubtext}</span>
+              )}
+            </div>
           )}
-        </div>
+        </>
+      ) : (
+        <>
+          <div
+            className={`text-4xl font-bold tracking-tight mb-1 ${valueColor}`}
+          >
+            {value}
+          </div>
+          {subtext && (
+            <div className="flex items-center gap-2">
+              {subIcon}
+              <span className="text-sm text-[#9CA3AF]">{subtext}</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -720,7 +720,7 @@ export default function MyBets() {
               }
               extraValueColor={
                 Number(profitByCurrency.profitUSD || 0) >= 0
-                  ? "text-[#D97706]"
+                  ? "text-[#22C55E]"
                   : "text-[#EF4444]"
               }
               subtext={
@@ -731,8 +731,8 @@ export default function MyBets() {
               extraSubtext={
                 hasUsdBets
                   ? (profitByCurrency.profitUSD || 0) >= 0
-                    ? "Прибуток у доларах"
-                    : "Збиток у доларах"
+                    ? "Позитивна динаміка"
+                    : "Негативна динаміка"
                   : undefined
               }
               subIcon={
