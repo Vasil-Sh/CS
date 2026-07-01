@@ -2,7 +2,7 @@
 // Risky Teams — через backend API + fallback на Google Sheets CSV
 // ═══════════════════════════════════════════
 
-import { api } from './apiClient';
+import { api } from "./apiClient";
 
 export interface RiskyTeamFromSheet {
   name: string;
@@ -21,12 +21,12 @@ interface ApiRiskyTeam {
 }
 
 const STATUS_EMOJIS: Record<string, string> = {
-  '🟥': 'БАН',
-  '🟨': 'Нестабільні',
-  '🟩': 'Обережно',
+  "🟥": "БАН",
+  "🟨": "Нестабільні",
+  "🟩": "Обережно",
 };
 
-const GAMES = ['CS', 'CS2', 'CS:GO', 'Dota2', 'Дота', 'Dota'];
+const GAMES = ["CS", "CS2", "CS:GO", "Dota2", "Дота", "Dota"];
 
 class GoogleSheetsRiskyTeamsService {
   /**
@@ -39,36 +39,49 @@ class GoogleSheetsRiskyTeamsService {
     // 1. Try backend API
     if (!customSheetId) {
       try {
-        const teams = await api.get<(ApiRiskyTeam & { id: number })[]>('/risky-teams');
+        const teams =
+          await api.get<(ApiRiskyTeam & { id: number })[]>("/risky-teams");
         return teams.map((t) => ({
           name: t.name,
-          game: t.game || 'CS',
-          status: t.status || '',
-          notes: t.notes || '',
+          game: t.game || "CS",
+          status: t.status || "",
+          notes: t.notes || "",
           _apiId: t.id,
         }));
       } catch (err: unknown) {
-        console.error('[RiskyTeams] Failed to fetch from API:', (err as Error).message);
+        console.error(
+          "[RiskyTeams] Failed to fetch from API:",
+          (err as Error).message,
+        );
       }
     }
 
-    // 2. Fallback: read directly from Google Sheets CSV
-    if (customSheetId) {
+    // 2. Fallback: read directly from Google Sheets CSV (dev only)
+    if (import.meta.env.DEV && customSheetId) {
       try {
-        const gidParam = sheetGid ? `&gid=${sheetGid}` : '';
+        const gidParam = sheetGid ? `&gid=${sheetGid}` : "";
         const url = `https://docs.google.com/spreadsheets/d/${customSheetId}/gviz/tq?tqx=out:csv${gidParam}`;
         const response = await fetch(url);
         const text = await response.text();
         if (!text.trim()) return [];
 
-        const rows = text.split('\n').filter(r => r.trim());
+        const rows = text.split("\n").filter((r) => r.trim());
         const parsed: RiskyTeamFromSheet[] = [];
 
         for (let i = 0; i < rows.length; i++) {
           // Skip header row if it looks like a header
           if (i === 0) {
-            const firstCell = rows[i].split(',')[0]?.replace(/"/g, '').trim().toLowerCase();
-            if (firstCell === 'назва' || firstCell === 'команда' || firstCell === 'team' || firstCell === 'name') {
+            const firstCell = rows[i]
+              .split(",")[0]
+              ?.replace(/"/g, "")
+              .trim()
+              .toLowerCase();
+            if (
+              firstCell === "назва" ||
+              firstCell === "команда" ||
+              firstCell === "team" ||
+              firstCell === "name"
+            ) {
               continue;
             }
           }
@@ -76,8 +89,8 @@ class GoogleSheetsRiskyTeamsService {
           const columns = parseCSVRow(rows[i]);
           if (columns.length < 2) continue;
 
-          const teamName = columns[0]?.replace(/"/g, '').trim();
-          const statusCell = columns[1]?.replace(/"/g, '').trim();
+          const teamName = columns[0]?.replace(/"/g, "").trim();
+          const statusCell = columns[1]?.replace(/"/g, "").trim();
 
           if (!teamName) continue;
 
@@ -86,10 +99,18 @@ class GoogleSheetsRiskyTeamsService {
           parsed.push({ name: teamName, game, status, notes });
         }
 
-        console.log('[RiskyTeams] Loaded from Google Sheets:', parsed.length, 'teams');
+        if (import.meta.env.DEV)
+          console.log(
+            "[RiskyTeams] Loaded from Google Sheets:",
+            parsed.length,
+            "teams",
+          );
         return parsed;
       } catch (err: unknown) {
-        console.error('[RiskyTeams] Failed to fetch from Google Sheets:', (err as Error).message);
+        console.error(
+          "[RiskyTeams] Failed to fetch from Google Sheets:",
+          (err as Error).message,
+        );
       }
     }
 
@@ -97,9 +118,19 @@ class GoogleSheetsRiskyTeamsService {
   }
 
   /** Add a team (admin only) */
-  async addTeam(name: string, game?: string, status?: string, notes?: string): Promise<void> {
+  async addTeam(
+    name: string,
+    game?: string,
+    status?: string,
+    notes?: string,
+  ): Promise<void> {
     try {
-      await api.post('/risky-teams', { name, game: game || '', status: status || '', notes: notes || '' });
+      await api.post("/risky-teams", {
+        name,
+        game: game || "",
+        status: status || "",
+        notes: notes || "",
+      });
     } catch {
       // API unavailable — ignore
     }
@@ -118,16 +149,16 @@ class GoogleSheetsRiskyTeamsService {
 /** Parse a CSV row that may contain quoted strings with commas */
 function parseCSVRow(row: string): string[] {
   const result: string[] = [];
-  let current = '';
+  let current = "";
   let inQuotes = false;
 
   for (let i = 0; i < row.length; i++) {
     const ch = row[i];
     if (ch === '"') {
       inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
+    } else if (ch === "," && !inQuotes) {
       result.push(current.trim());
-      current = '';
+      current = "";
     } else {
       current += ch;
     }
@@ -137,16 +168,20 @@ function parseCSVRow(row: string): string[] {
 }
 
 /** Parse the B-column (status) cell: extract emoji→status, game, notes */
-function parseStatusCell(cell: string): { status: string; game: string; notes: string } {
-  let status = '';
-  let game = '';
+function parseStatusCell(cell: string): {
+  status: string;
+  game: string;
+  notes: string;
+} {
+  let status = "";
+  let game = "";
   let notes = cell;
 
   // Detect status from emoji
   for (const [emoji, label] of Object.entries(STATUS_EMOJIS)) {
     if (cell.startsWith(emoji) || cell.includes(emoji)) {
       status = label;
-      notes = notes.replace(emoji, '').trim();
+      notes = notes.replace(emoji, "").trim();
       break;
     }
   }
@@ -154,28 +189,32 @@ function parseStatusCell(cell: string): { status: string; game: string; notes: s
   // If no emoji found, try text-based status
   if (!status) {
     const lower = cell.toLowerCase();
-    if (lower.startsWith('бан')) status = 'БАН';
-    else if (lower.startsWith('нестабільні')) status = 'Нестабільні';
-    else if (lower.startsWith('обережно')) status = 'Обережно';
+    if (lower.startsWith("бан")) status = "БАН";
+    else if (lower.startsWith("нестабільні")) status = "Нестабільні";
+    else if (lower.startsWith("обережно")) status = "Обережно";
   }
 
   // Detect game
   for (const g of GAMES) {
     const idx = notes.toLowerCase().indexOf(g.toLowerCase());
     if (idx >= 0) {
-      game = g === 'CS:GO' ? 'CS' : g === 'Дота' ? 'Дота' : g === 'CS2' ? 'CS' : g;
+      game =
+        g === "CS:GO" ? "CS" : g === "Дота" ? "Дота" : g === "CS2" ? "CS" : g;
       // Remove game from notes
-      notes = (notes.substring(0, idx) + notes.substring(idx + g.length)).trim();
+      notes = (
+        notes.substring(0, idx) + notes.substring(idx + g.length)
+      ).trim();
       // Clean up colons
-      notes = notes.replace(/^[:\s]+/, '').trim();
+      notes = notes.replace(/^[:\s]+/, "").trim();
       break;
     }
   }
 
   // Default game
-  if (!game) game = '';
+  if (!game) game = "";
 
-  return { status: status || '', game, notes };
+  return { status: status || "", game, notes };
 }
 
-export const googleSheetsRiskyTeamsService = new GoogleSheetsRiskyTeamsService();
+export const googleSheetsRiskyTeamsService =
+  new GoogleSheetsRiskyTeamsService();

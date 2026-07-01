@@ -106,4 +106,69 @@ describe("authService", () => {
       expect(r.isValid).toBe(false);
     });
   });
+
+  describe("fetchUsers", () => {
+    it("returns user list for admin", async () => {
+      mockFetch([
+        {
+          id: 1,
+          username: "user1",
+          role: "user",
+          telegram: "",
+          priceMonth: "200",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+        },
+        {
+          id: 2,
+          username: "admin1",
+          role: "admin",
+          telegram: "",
+          priceMonth: "0",
+          startDate: "2026-01-01",
+          endDate: "2027-01-01",
+        },
+      ]);
+      const users = await authService.fetchUsers();
+      expect(users).toHaveLength(2);
+      expect(users[0].username).toBe("user1");
+    });
+
+    it("returns empty on 401/403 (non-admin)", async () => {
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValue({
+          ok: false,
+          status: 401,
+          json: () => Promise.resolve({ error: "Unauthorized" }),
+        });
+      const users = await authService.fetchUsers();
+      expect(users).toEqual([]);
+    });
+
+    it("returns empty on network error", async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error("CORS"));
+      const users = await authService.fetchUsers();
+      expect(users).toEqual([]);
+    });
+  });
+
+  describe("createUser", () => {
+    it("returns generated credentials", async () => {
+      mockFetch({
+        success: true,
+        userId: 3,
+        username: "newuser",
+        password: "genpass123",
+      });
+      const r = await authService.createUser({
+        username: "newuser",
+        telegram: "@newuser",
+        role: "user",
+        priceMonth: "200",
+      });
+      expect(r.username).toBe("newuser");
+      expect(r.password).toBe("genpass123");
+    });
+  });
 });

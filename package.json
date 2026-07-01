@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node scripts/generate-sitemap.cjs",
+    "generate-sitemap": "node scripts/generate-sitemap.cjs",
     "lint": "eslint --quiet ./src",
     "test": "vitest run",
     "test:watch": "vitest",

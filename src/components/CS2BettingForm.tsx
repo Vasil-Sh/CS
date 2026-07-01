@@ -136,7 +136,7 @@ const MAX_CONFIDENCE = 95;
 const DEFAULT_MAX_STAKE_PERCENT = 7;
 
 const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
-  date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
+  date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`,
   game: "CS2" as "CS2" | "Dota2",
   matchUrl: "",
   tournament: "",
@@ -152,7 +152,7 @@ const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
   currency: "UAH",
   exchangeRate: (() => {
     const r = localStorage.getItem("matchiq_exchange_rate");
-    return r || "44.60";
+    return r || "41.50";
   })(),
   confidence: "",
   strategy: strategyName || "",
@@ -230,7 +230,11 @@ export default function CS2BettingForm({
 
   // Load strategies from localStorage on mount
   useEffect(() => {
-    const stored = UserDataService.getUserData<CS2Strategy[]>(currentUser, 'strategies', []);
+    const stored = UserDataService.getUserData<CS2Strategy[]>(
+      currentUser,
+      "strategies",
+      [],
+    );
     strategiesRef.current = stored;
   }, [currentUser]);
 
@@ -272,7 +276,8 @@ export default function CS2BettingForm({
       "";
     if (savedPrimaryStrategy) {
       const strategy = strategiesRef.current?.find(
-        (s: CS2Strategy) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
+        (s: CS2Strategy) =>
+          s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy,
       );
       if (strategy) {
         setPrimaryStrategy(strategy);
@@ -399,10 +404,16 @@ export default function CS2BettingForm({
       }
 
       // For non-ladder goals — pull last bet amount from localStorage (not stale Google Sheets)
-      const allRecords = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+      const allRecords = UserDataService.getUserData<BetRecord[]>(
+        currentUser,
+        "mybets_data",
+        [],
+      );
       const goalRecords = allRecords
         .filter((r) => r.goalId === goalId)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
 
       if (goalRecords.length > 0) {
         const lastAmount =
@@ -411,7 +422,8 @@ export default function CS2BettingForm({
           return String(Math.round(lastAmount * 100) / 100);
       }
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error getting last stake for goal:", error);
+      if (import.meta.env.DEV)
+        console.error("Error getting last stake for goal:", error);
     }
     return "";
   };
@@ -564,8 +576,9 @@ export default function CS2BettingForm({
       );
       if (savedPrimaryStrategy) {
         const strategy = strategiesRef.current?.find(
-      (s: CS2Strategy) => s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy
-    );
+          (s: CS2Strategy) =>
+            s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy,
+        );
         if (strategy) {
           setPrimaryStrategy(strategy);
           setFormData((prev) => ({ ...prev, strategy: strategy.name }));
@@ -598,7 +611,8 @@ export default function CS2BettingForm({
         }));
       }
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error loading risky teams from storage:", error);
+      if (import.meta.env.DEV)
+        console.error("Error loading risky teams from storage:", error);
     }
     return [];
   }
@@ -979,9 +993,17 @@ export default function CS2BettingForm({
           expressLogos: record.expressLogos,
         } as Parameters<typeof UserDataService.createBet>[0]);
       } catch (err) {
-        if (import.meta.env.DEV) console.warn('[API] Bet save failed, caching to localStorage:', err);
-        const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
-        UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
+        if (import.meta.env.DEV)
+          console.warn("[API] Bet save failed, caching to localStorage:", err);
+        const existingBets = UserDataService.getUserData<BetRecord[]>(
+          currentUser,
+          "mybets_data",
+          [],
+        );
+        UserDataService.setUserData(currentUser, "mybets_data", [
+          record as BetRecord,
+          ...existingBets,
+        ]);
       }
 
       if (finalGoalId) {
@@ -1043,7 +1065,11 @@ export default function CS2BettingForm({
       }
     }
 
-    const bets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+    const bets = UserDataService.getUserData<BetRecord[]>(
+      currentUser,
+      "mybets_data",
+      [],
+    );
     const validation = BankrollService.validateBetAmount(
       currentUser,
       bets as unknown as Bet[],
@@ -1133,7 +1159,11 @@ export default function CS2BettingForm({
 
     let kelly = null;
     if (hasConfidence) {
-      const betsStore = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+      const betsStore = UserDataService.getUserData<BetRecord[]>(
+        currentUser,
+        "mybets_data",
+        [],
+      );
       const bankrollStats = BankrollService.getBankrollStats(
         currentUser,
         betsStore as unknown as Bet[],
@@ -1207,10 +1237,18 @@ export default function CS2BettingForm({
     const stored = localStorage.getItem(blockKey);
     if (stored) {
       try {
-        const block = JSON.parse(stored) as { until: number; reason: string; strategyName?: string };
+        const block = JSON.parse(stored) as {
+          until: number;
+          reason: string;
+          strategyName?: string;
+        };
         if (Date.now() < block.until) {
           // Clear block if primary strategy was removed, disabled, or changed
-          if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled || (block.strategyName && block.strategyName !== primaryStrategy.name)) {
+          if (
+            !primaryStrategy ||
+            !primaryStrategy.activityLimits?.enabled ||
+            (block.strategyName && block.strategyName !== primaryStrategy.name)
+          ) {
             localStorage.removeItem(blockKey);
           } else {
             return {
@@ -1235,7 +1273,11 @@ export default function CS2BettingForm({
     if (!blockAfter || blockAfter < 1)
       return { blocked: false, reason: "", minutesLeft: 0 };
 
-    const allBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
+    const allBets = UserDataService.getUserData<BetRecord[]>(
+      currentUser,
+      "mybets_data",
+      [],
+    );
     // Sort by date descending, count consecutive losses
     const sorted = [...allBets]
       .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
@@ -1274,7 +1316,9 @@ export default function CS2BettingForm({
 
   const formValid =
     formData.betCategory === "Експрес"
-      ? formData.stake && parseFloat(formData.stake) > 0 && allExpressEventsComplete
+      ? formData.stake &&
+        parseFloat(formData.stake) > 0 &&
+        allExpressEventsComplete
       : !!(
           formData.team1 &&
           formData.team2 &&
@@ -1450,7 +1494,8 @@ export default function CS2BettingForm({
               (formData.betCategory === "Експрес" &&
                 expressEvents.length > 0)) && (
               <Button
-                type="submit" id="submit-btn"
+                type="submit"
+                id="submit-btn"
                 disabled={
                   isSubmitting ||
                   tiltBlock.blocked ||
