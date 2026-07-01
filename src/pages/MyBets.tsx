@@ -320,9 +320,9 @@ export default function MyBets() {
     } catch {
       /* noop */
     }
-    const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
-  }, [currentUser]);
+    // Use recentBets (API data has currency/exchangeRate) — not localStorage fallback
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, recentBets));
+  }, [currentUser, recentBets]);
 
   const syncStats = useCallback(() => {
     const allBets = recentBets;

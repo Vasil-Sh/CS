@@ -192,9 +192,9 @@ export default function Analytics() {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Bankroll update failed:", err);
     }
-    const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
-  }, [currentUser]);
+    // Use bets from state (API data has currency/exchangeRate)
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
+  }, [currentUser, bets]);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
