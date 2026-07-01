@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import InitialBankModal from "@/components/InitialBankModal";
 import StatCard from "@/components/StatCard";
+import CurrencySwitch from "@/components/CurrencySwitch";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -133,6 +134,7 @@ export default function MyBets() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
   const [dualBank, setDualBank] = useState<DualBankrollStats>({
     uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
     usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
@@ -672,6 +674,13 @@ export default function MyBets() {
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Stats Row 1 */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-end mb-3">
+            <CurrencySwitch
+              currency={currencyMode}
+              onChange={setCurrencyMode}
+              hasUsdBets={hasUsdBets}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard
               icon={
@@ -682,22 +691,26 @@ export default function MyBets() {
                   />
                 </div>
               }
-              label="Поточний банк"
-              value={`${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
-              extraValue={
-                hasUsdBets
-                  ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
-                  : undefined
+              label={
+                currencyMode === "USD"
+                  ? "Поточний банк (USDT)"
+                  : "Поточний банк"
               }
-              extraValueColor="text-[#D97706]"
-              subtext={`${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴ за весь час`}
-              extraSubtext={
-                hasUsdBets
+              value={
+                currencyMode === "USD"
+                  ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
+                  : `${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`
+              }
+              valueColor={currencyMode === "USD" ? "text-[#D97706]" : undefined}
+              subtext={
+                currencyMode === "USD"
                   ? `${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`
-                  : undefined
+                  : `${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴ за весь час`
               }
               subIcon={
-                dualBank.uah.totalProfit >= 0 ? (
+                (currencyMode === "USD"
+                  ? dualBank.usd.totalProfit
+                  : dualBank.uah.totalProfit) >= 0 ? (
                   <ArrowUpRight
                     className="h-4 w-4 text-[#22C55E]"
                     strokeWidth={2.5}
@@ -709,7 +722,13 @@ export default function MyBets() {
                   />
                 )
               }
-              trend={dualBank.uah.totalProfit >= 0 ? "up" : "down"}
+              trend={
+                (currencyMode === "USD"
+                  ? dualBank.usd.totalProfit
+                  : dualBank.uah.totalProfit) >= 0
+                  ? "up"
+                  : "down"
+              }
             />
             <StatCard
               icon={
@@ -721,51 +740,31 @@ export default function MyBets() {
                 </div>
               }
               label="Профіт"
-              value={`${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`}
-              valueColor={
-                Number(profitByCurrency.profitUAH || 0) >= 0
-                  ? "text-[#111827]"
-                  : "text-[#EF4444]"
-              }
-              extraValue={
-                hasUsdBets
+              value={
+                currencyMode === "USD"
                   ? `${Number(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$${Number(profitByCurrency.profitUSD || 0).toFixed(2)}`
-                  : undefined
+                  : `${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`
               }
-              extraValueColor={
-                Number(profitByCurrency.profitUSD || 0) >= 0
-                  ? "text-[#22C55E]"
+              valueColor={
+                (currencyMode === "USD"
+                  ? profitByCurrency.profitUSD
+                  : profitByCurrency.profitUAH) >= 0
+                  ? currencyMode === "USD"
+                    ? "text-[#22C55E]"
+                    : "text-[#111827]"
                   : "text-[#EF4444]"
               }
               subtext={
-                (profitByCurrency.profitUAH || 0) >= 0
+                (currencyMode === "USD"
+                  ? profitByCurrency.profitUSD
+                  : profitByCurrency.profitUAH) >= 0
                   ? "Позитивна динаміка"
                   : "Негативна динаміка"
               }
-              extraSubtext={
-                hasUsdBets
-                  ? (profitByCurrency.profitUSD || 0) >= 0
-                    ? "Позитивна динаміка"
-                    : "Негативна динаміка"
-                  : undefined
-              }
-              extraSubIcon={
-                hasUsdBets ? (
-                  (profitByCurrency.profitUSD || 0) >= 0 ? (
-                    <ArrowUpRight
-                      className="h-4 w-4 text-[#22C55E]"
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <ArrowDownRight
-                      className="h-4 w-4 text-[#EF4444]"
-                      strokeWidth={2.5}
-                    />
-                  )
-                ) : undefined
-              }
               subIcon={
-                (profitByCurrency.profitUAH || 0) >= 0 ? (
+                (currencyMode === "USD"
+                  ? profitByCurrency.profitUSD
+                  : profitByCurrency.profitUAH) >= 0 ? (
                   <ArrowUpRight
                     className="h-4 w-4 text-[#22C55E]"
                     strokeWidth={2.5}
@@ -777,7 +776,13 @@ export default function MyBets() {
                   />
                 )
               }
-              trend={(profitByCurrency.profitUAH || 0) >= 0 ? "up" : "down"}
+              trend={
+                (currencyMode === "USD"
+                  ? profitByCurrency.profitUSD
+                  : profitByCurrency.profitUAH) >= 0
+                  ? "up"
+                  : "down"
+              }
             />
             <StatCard
               icon={

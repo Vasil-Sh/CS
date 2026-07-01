@@ -27,6 +27,7 @@ import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
 import GoalsManager from "@/components/GoalsManager";
 import InitialBankModal from "@/components/InitialBankModal";
+import CurrencySwitch from "@/components/CurrencySwitch";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -145,6 +146,7 @@ export default function Analytics() {
     uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
     usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
   });
+  const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
   const [activeTab, setActiveTab] = useState("profit");
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
@@ -713,6 +715,13 @@ export default function Analytics() {
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center justify-end mb-3">
+                <CurrencySwitch
+                  currency={currencyMode}
+                  onChange={setCurrencyMode}
+                  hasUsdBets={hasUsdBets}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* 1. Поточний банк */}
                 <div
@@ -734,7 +743,9 @@ export default function Analytics() {
                       />
                     </div>
                     <span className="text-lg font-semibold text-gray-900">
-                      Поточний банк
+                      {currencyMode === "USD"
+                        ? "Поточний банк (USDT)"
+                        : "Поточний банк"}
                     </span>
                     <button
                       onClick={(e) => {
@@ -747,44 +758,34 @@ export default function Analytics() {
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                     </button>
                   </div>
-                  <div className="flex items-baseline justify-between gap-3 mb-1">
-                    <div className="text-4xl font-bold text-gray-900 tracking-tight">
-                      {dualBank.uah.currentBank.toLocaleString("uk-UA", {
-                        maximumFractionDigits: 0,
-                      })}{" "}
-                      ₴
-                    </div>
-                    {hasUsdBets && (
-                      <div className="text-4xl font-bold text-amber-600 tracking-tight">
-                        $
-                        {dualBank.usd.currentBank.toLocaleString("uk-UA", {
-                          maximumFractionDigits: 0,
-                        })}
-                      </div>
-                    )}
+                  <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
+                    {currencyMode === "USD"
+                      ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
+                      : `${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {dualBank.uah.totalProfit >= 0 ? (
-                        <ArrowUpRight
-                          className="h-4 w-4 text-green-500"
-                          strokeWidth={2.5}
-                        />
-                      ) : (
-                        <ArrowDownRight
-                          className="h-4 w-4 text-red-500"
-                          strokeWidth={2.5}
-                        />
-                      )}
-                      <span
-                        className={`text-base font-normal ${Number(dualBank.uah.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
-                      >
-                        {Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}
-                        {Number(dualBank.uah.totalProfit).toFixed(2)} ₴
-                      </span>
-                    </div>
-                    {hasUsdBets && (
-                      <span className="text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    {(currencyMode === "USD"
+                      ? dualBank.usd.totalProfit
+                      : dualBank.uah.totalProfit) >= 0 ? (
+                      <ArrowUpRight
+                        className="h-4 w-4 text-green-500"
+                        strokeWidth={2.5}
+                      />
+                    ) : (
+                      <ArrowDownRight
+                        className="h-4 w-4 text-red-500"
+                        strokeWidth={2.5}
+                      />
+                    )}
+                    <span
+                      className={`text-base font-normal ${(currencyMode === "USD" ? dualBank.usd.totalProfit : dualBank.uah.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {currencyMode === "USD"
+                        ? `${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)}`
+                        : `${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴`}
+                    </span>
+                    {currencyMode === "USD" && exchangeRate > 0 && (
+                      <span className="text-sm text-gray-400 ml-auto">
                         Курс {exchangeRate} ₴/$
                       </span>
                     )}
@@ -813,40 +814,22 @@ export default function Analytics() {
                       Загальний профіт
                     </span>
                   </div>
-                  <div className="flex items-baseline justify-between gap-3 mb-1">
-                    <div
-                      className={`text-4xl font-bold tracking-tight ${(profitByCurrency.profitUAH || 0) >= 0 ? "text-gray-900" : "text-red-500"}`}
-                    >
-                      {(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}
-                      {(profitByCurrency.profitUAH || 0).toFixed(2)} ₴
-                    </div>
-                    {hasUsdBets && (
-                      <div
-                        className={`text-4xl font-bold tracking-tight ${(profitByCurrency.profitUSD || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
-                      >
-                        {(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$
-                        {(profitByCurrency.profitUSD || 0).toFixed(2)}
-                      </div>
-                    )}
+                  <div
+                    className={`text-4xl font-bold tracking-tight mb-2 ${(currencyMode === "USD" ? profitByCurrency.profitUSD : profitByCurrency.profitUAH) >= 0 ? "text-gray-900" : "text-red-500"}`}
+                  >
+                    {currencyMode === "USD"
+                      ? `${Number(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$${Number(profitByCurrency.profitUSD || 0).toFixed(2)}`
+                      : `${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-sm ${(profitByCurrency.profitUAH || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
-                    >
-                      {(profitByCurrency.profitUAH || 0) >= 0
-                        ? "Позитивна динаміка"
-                        : "Негативна динаміка"}
-                    </span>
-                    {hasUsdBets && (
-                      <span
-                        className={`text-sm ${(profitByCurrency.profitUSD || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
-                      >
-                        {(profitByCurrency.profitUSD || 0) >= 0
-                          ? "Позитивна динаміка"
-                          : "Негативна динаміка"}
-                      </span>
-                    )}
-                  </div>
+                  <span
+                    className={`text-sm ${(currencyMode === "USD" ? profitByCurrency.profitUSD : profitByCurrency.profitUAH) >= 0 ? "text-green-500" : "text-red-500"}`}
+                  >
+                    {(currencyMode === "USD"
+                      ? profitByCurrency.profitUSD
+                      : profitByCurrency.profitUAH) >= 0
+                      ? "Позитивна динаміка"
+                      : "Негативна динаміка"}
+                  </span>
                 </div>
 
                 {/* 3. Всього ставок — GREEN donut */}
