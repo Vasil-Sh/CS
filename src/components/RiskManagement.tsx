@@ -320,7 +320,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
+    const s = status || "Без статусу";
+    switch (s) {
       case "БАН":
         return "bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs";
       case "Нестабільні":
@@ -621,7 +622,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 {getGameEmoji(team.game)} {team.name}
               </h3>
               <Badge className={getStatusBadge(team.status)}>
-                {team.status}
+                {team.status || "Без статусу"}
               </Badge>
             </div>
             {team.notes && (

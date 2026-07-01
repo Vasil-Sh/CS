@@ -44,7 +44,7 @@ class GoogleSheetsRiskyTeamsService {
         return teams.map((t) => ({
           name: t.name,
           game: t.game || "CS",
-          status: t.status || "",
+          status: t.status || "Без статусу",
           notes: t.notes || "",
           _apiId: t.id,
         }));
