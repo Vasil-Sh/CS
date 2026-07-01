@@ -5,6 +5,7 @@ import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
 import RiskManagement from '@/components/RiskManagement';
 import { UserDataService } from '@/lib/userDataService';
+import { api } from '@/lib/apiClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';import { logRender } from '@/lib/devLogger';import { PageHeader } from '@/components/PageHeader';
 import type { Bet } from '@/types/betting';
@@ -101,8 +102,16 @@ export default function Strategy() {
   const strategyVersion = useAppStore((s) => s.strategyVersion);
 
   useEffect(() => {
-    const myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
-    setBets(myBetsData || []);
+    (async () => {
+      try {
+        const fetched = await UserDataService.fetchBets();
+        setBets((fetched as Bet[]) || []);
+      } catch {
+        // fallback to localStorage cache
+        const local = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
+        setBets(local || []);
+      }
+    })();
   }, [currentUser, strategyVersion]);
 
   // --- Dynamic data for KPI + detail cards ---

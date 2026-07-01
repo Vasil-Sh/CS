@@ -1,42 +1,22 @@
 /**
  * Lib barrel exports — organized by domain.
- * Import from '@lib/api', '@lib/ai', '@lib/services', etc.
+ *
+ * Usage (new — subdirectories):
+ *   import { api, authService } from '@/lib/api';
+ *   import { BankrollService, UserDataService } from '@/lib/services';
+ *   import { cn, chartColors, t } from '@/lib/utils';
+ *
+ * Usage (legacy — flat imports still work):
+ *   import { api } from '@/lib/apiClient';
+ *   import { BankrollService } from '@/lib/bankrollService';
  */
 
-// API layer
-export { api, setTokens, setToken, clearToken } from "./apiClient";
-export { authService } from "./authService";
-export { csApi } from "./csApi";
-export { googleSheetsRiskyTeamsService } from "./googleSheetsRiskyTeams";
-
-// Services
-export { BankrollService } from "./bankrollService";
-export { UserDataService } from "./userDataService";
-
-// AI
-export { deepSeekService } from "./deepSeekService";
-export * from "./ai/shared";
-
-// Analytics / Math
-export { calculateMatchProbability } from "./analytics";
-export {
-  calculateExpressTotalOdds,
-  calculatePotentialPayout,
-} from "./betCalculations";
-
-// Parsing
-export { parseMatchUrl } from "./matchUrlParser";
-export { parseExpressText } from "./parser/expressParser";
-
-// Utils
-export { cn, normalizeDate } from "./utils";
-export { getStatusBadge, getGameEmoji } from "./displayHelpers";
-export { cardBase, cardHover, cardBorder } from "./cardStyles";
-export { t, setLang, getLang } from "./i18n";
-export type { Lang } from "./i18n";
-
-// Chart colors
+// Re-export everything from subdirectories
+export * from './api';
+export * from './services';
+export * from './ai';
+export * from './analytics';
+export * from './parsing';
+export * from './utils';
+export * from './monitoring';
 export { chartColors, chartPalette, profitColor, lossColor } from './chartColors';
-// Monitoring
-export { logRender } from './devLogger';export { reportError } from "./errorMonitor";
-export { validateEnv } from "./envValidation";
