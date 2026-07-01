@@ -301,13 +301,31 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams(updatedTeams);
     setEditingIndex(null);
 
-    // Sync to API
-    const team = updatedTeams[editingIndex];
-    googleSheetsRiskyTeamsService
-      .addTeam(team.name, team.game, team.status, team.notes)
-      .catch(() => {
-        /* ignore */
-      });
+    // Sync to API: update if _apiId exists, otherwise add
+    const savedTeam = updatedTeams[editingIndex];
+    if (savedTeam._apiId) {
+      googleSheetsRiskyTeamsService
+        .updateTeam(savedTeam._apiId, {
+          name: savedTeam.name,
+          game: savedTeam.game,
+          status: savedTeam.status,
+          notes: savedTeam.notes,
+        })
+        .catch(() => {
+          /* ignore */
+        });
+    } else {
+      googleSheetsRiskyTeamsService
+        .addTeam(
+          savedTeam.name,
+          savedTeam.game,
+          savedTeam.status,
+          savedTeam.notes,
+        )
+        .catch(() => {
+          /* ignore */
+        });
+    }
 
     if (oldGame !== newGame) {
       const targetLabel = newGame === "CS" ? "CS" : "Dota 2";

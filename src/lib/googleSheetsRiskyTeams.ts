@@ -131,6 +131,23 @@ class GoogleSheetsRiskyTeamsService {
     return [];
   }
 
+  /** Update a team (admin only) */
+  async updateTeam(
+    id: number,
+    data: { name?: string; game?: string; status?: string; notes?: string },
+  ): Promise<void> {
+    try {
+      await api.put(`/risky-teams/${id}`, {
+        name: data.name,
+        game: data.game ? normalizeGame(data.game) : undefined,
+        status: data.status,
+        notes: data.notes,
+      });
+    } catch {
+      // API unavailable — ignore
+    }
+  }
+
   /** Add a team (admin only) */
   async addTeam(
     name: string,
