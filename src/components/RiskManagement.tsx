@@ -91,33 +91,27 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
-  // Fetch risky teams from API on mount — localStorage as fallback
+  // Load from localStorage FIRST (instant), then update from API in background
   useEffect(() => {
+    // 1. Show cached data immediately
+    const saved = localStorage.getItem("admin_risky_teams");
+    if (saved) {
+      try {
+        setRiskyTeams(JSON.parse(saved));
+      } catch {
+        /* ignore */
+      }
+    }
+    // 2. Fetch from API in background
     let cancelled = false;
     const load = async () => {
       try {
         const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
-        if (!cancelled) {
-          if (teams.length > 0) {
-            setRiskyTeams(teams);
-          } else {
-            fallbackToLocalStorage();
-          }
-        }
+        if (!cancelled && teams.length > 0) setRiskyTeams(teams);
       } catch {
-        if (!cancelled) fallbackToLocalStorage();
+        /* ignore */
       }
       if (!cancelled) setIsLoadingTeams(false);
-    };
-    const fallbackToLocalStorage = () => {
-      const saved = localStorage.getItem("admin_risky_teams");
-      if (saved) {
-        try {
-          setRiskyTeams(JSON.parse(saved));
-        } catch {
-          /* ignore */
-        }
-      }
     };
     setIsLoadingTeams(true);
     load();
@@ -298,9 +292,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       status: editStatus,
       game: newGame,
     };
-    // Save team BEFORE resetting editingIndex
+    // Save team BEFORE resetting editingIndex + write to localStorage immediately
     const savedTeam = updatedTeams[editingIndex];
     setRiskyTeams(updatedTeams);
+    localStorage.setItem("admin_risky_teams", JSON.stringify(updatedTeams));
     setEditingIndex(null);
 
     // Sync to API: update if _apiId exists, otherwise add
