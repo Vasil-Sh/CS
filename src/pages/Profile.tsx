@@ -25,6 +25,7 @@ import {
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW } from '@/lib/cardStyles';
 import { toast } from 'sonner';
 import { UserDataService } from '@/lib/userDataService';
+import { api } from '@/lib/apiClient';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { t, setLang, getLang, type Lang } from '@/lib/i18n';
@@ -94,10 +95,13 @@ export default function Profile() {
   const needsBackupReminder = daysSinceBackup > BACKUP_REMINDER_DAYS;
 
   // ── Clear all data ──
-  const clearAllData = () => {
+  const clearAllData = async () => {
     setIsClearing(true);
     setClearConfirmOpen(false);
     try {
+      // Try API reset first
+      try { await api.post('/admin/reset', {}); } catch { /* API might be down */ }
+      // Also clear localStorage (UI prefs kept)
       const keysToKeep = ['authToken', 'userRole', 'username', 'matchiq_theme', 'matchiq_lang'];
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -205,8 +209,9 @@ export default function Profile() {
   };
 
   const getDataStats = () => {
+    // Fast path: localStorage cache (instant, sync)
     const bets = UserDataService.getUserData(username, 'mybets_data', []);
-    const riskyTeams = JSON.parse(localStorage.getItem('admin_risky_teams') || '[]');
+    const riskyTeams = localStorage.getItem('admin_risky_teams');
     const strategies = UserDataService.getUserData(username, 'strategies_data', []);
     const goals = UserDataService.getUserData(username, 'goals', []);
     const tgGroups = UserDataService.getUserData(username, 'tg_groups', []);
@@ -214,7 +219,7 @@ export default function Profile() {
 
     return {
       bets: Array.isArray(bets) ? bets.length : 0,
-      riskyTeams: Array.isArray(riskyTeams) ? riskyTeams.length : 0,
+      riskyTeams: riskyTeams ? JSON.parse(riskyTeams).length : 0,
       strategies: Array.isArray(strategies) ? strategies.length : 0,
       goals: Array.isArray(goals) ? goals.length : 0,
       tgGroups: Array.isArray(tgGroups) ? tgGroups.length : 0,
