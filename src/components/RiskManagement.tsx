@@ -59,34 +59,8 @@ const ALL_STATUSES = [
 
 export default function RiskManagement({ bets }: RiskManagementProps) {
   logRender("RiskManagement");
-  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>(() => {
-    const saved = localStorage.getItem("admin_risky_teams");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Array<{
-          name: string;
-          game: string;
-          status: string;
-          notes: string;
-        }>;
-        const hasCorrupted = parsed.some((t) => !t.game || t.game.length > 10);
-        if (hasCorrupted) {
-          console.log(
-            "[RiskMgmt] Detected corrupted localStorage data — resetting",
-          );
-          localStorage.removeItem("admin_risky_teams");
-          return [];
-        }
-        return parsed.map((t) => ({
-          ...t,
-          game: t.game === "CS" || t.game === "Дота" ? t.game : t.game || "",
-        }));
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(true);
 
   const [newTeam, setNewTeam] = useState<RiskyTeam>({
     name: "",
@@ -118,33 +92,22 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   }, [riskyTeams]);
 
   // Sync localStorage teams to backend on first load if DB is empty
+  // Fetch risky teams from API on mount
   useEffect(() => {
-    const seedFromLocalStorage = async () => {
-      const seeded = localStorage.getItem('risky_teams_seeded_v2');
-      if (seeded) return;
-      try {
-        const dbTeams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
-        if (dbTeams.length > 0) {
-          localStorage.setItem('risky_teams_seeded_v2', '1');
-          return;
-        }
-        // DB empty, seed from localStorage
-        if (riskyTeams.length > 0) {
-          let count = 0;
-          for (const t of riskyTeams) {
-            try { await googleSheetsRiskyTeamsService.addTeam(t.name, t.game, t.status, t.notes); count++; } catch {}
-            // Small delay to not hammer the API
-            await new Promise(r => setTimeout(r, 50));
-          }
-          if (count > 0) {
-            console.log(`[RiskMgmt] Seeded ${count} teams to backend`);
-            toast.success(`${count} команд завантажено в базу даних`);
-          }
-          localStorage.setItem('risky_teams_seeded_v2', '1');
-        }
-      } catch {}
-    };
-    if (riskyTeams.length > 0) seedFromLocalStorage();
+    googleSheetsRiskyTeamsService
+      .fetchRiskyTeams()
+      .then((teams) => {
+        setRiskyTeams(teams);
+        setIsLoadingTeams(false);
+      })
+      .catch(() => setIsLoadingTeams(false));
+  }, []);
+
+  // Save to localStorage for backward-compat read by other components
+  useEffect(() => {
+    if (riskyTeams.length > 0) {
+      localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
+    }
   }, [riskyTeams]);
 
   const normalizeTeamName = (name: string): string => {
@@ -220,7 +183,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         teamsFromSheet.filter((t) => t.game === "Дота").length,
       );
 
-      localStorage.setItem("admin_risky_teams", JSON.stringify(teamsFromSheet));
+      setRiskyTeams(teamsFromSheet);
 
       toast.success(
         `Завантажено ${teamsFromSheet.length} команд з Google Sheets!`,
@@ -247,7 +210,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
     setNewTeam({ name: "", game: "CS", status: "Обережно", notes: "" });
     // Sync to backend API
-    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
+    googleSheetsRiskyTeamsService
+      .addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes)
+      .catch((err: unknown) => {
+        if (import.meta.env.DEV)
+          console.warn("[API sync] failed:", String(err));
+      });
   };
 
   const deleteRiskyTeam = (index: number) => {
@@ -256,7 +224,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
     // Sync to backend API (by id if available, otherwise by name)
     if (team._apiId) {
-      googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
+      googleSheetsRiskyTeamsService
+        .removeTeam(team._apiId)
+        .catch((err: unknown) => {
+          if (import.meta.env.DEV)
+            console.warn("[API sync] failed:", String(err));
+        });
     }
   };
 
@@ -264,11 +237,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     // Try API delete for each team
     riskyTeams.forEach((t) => {
       if (t._apiId)
-        googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
+        googleSheetsRiskyTeamsService
+          .removeTeam(t._apiId)
+          .catch((err: unknown) => {
+            if (import.meta.env.DEV)
+              console.warn("[API sync] failed:", String(err));
+          });
     });
     setRiskyTeams([]);
     setEditingIndex(null);
-    localStorage.removeItem("admin_risky_teams");
     toast.success("Усі команди видалено");
     setIsDeleteAllOpen(false);
   };

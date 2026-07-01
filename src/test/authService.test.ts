@@ -1,90 +1,108 @@
 /**
- * Unit tests: authService
+ * Unit tests: authService (backend API)
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { authService } from "@/lib/authService";
 
-vi.stubEnv('VITE_GOOGLE_SHEETS_API_KEY', '');
+// Mock localStorage
+const store: Record<string, string> = {};
+beforeEach(() => {
+  Object.keys(store).forEach((k) => delete store[k]);
+  vi.spyOn(Storage.prototype, "getItem").mockImplementation(
+    (k) => store[String(k)] ?? null,
+  );
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation((k, v) => {
+    store[String(k)] = String(v);
+  });
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation((k) => {
+    delete store[String(k)];
+  });
+  vi.spyOn(Storage.prototype, "clear").mockImplementation(() => {
+    Object.keys(store).forEach((k) => delete store[k]);
+  });
+});
 
-import { authService } from '@/lib/authService';
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
-function csv(...rows: string[][]) {
-  return ['telegram,username,password,price,start,end,isAdmin',
-    ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+function mockFetch(json: unknown, ok = true, status = 200) {
+  globalThis.fetch = vi
+    .fn()
+    .mockResolvedValue({ ok, status, json: () => Promise.resolve(json) });
 }
 
-function mockFetch(csvText: string) {
-  globalThis.fetch = vi.fn().mockResolvedValue({
-    ok: true, status: 200,
-    text: () => Promise.resolve(csvText),
-    json: () => Promise.reject(new Error('no')),
-  } as Response);
+function mockLoginSuccess(isAdmin = false) {
+  mockFetch({
+    success: true,
+    isAdmin,
+    token: "test-access-token",
+    refreshToken: "test-refresh-token",
+    user: { username: "testuser", role: isAdmin ? "admin" : "user" },
+  });
 }
 
-function mockFetchFail() {
-  globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-}
-
-describe('authService', () => {
+describe("authService", () => {
   beforeEach(() => localStorage.clear());
 
-  describe('login', () => {
-    it('success', async () => {
-      mockFetch(csv(['@u','u1','p1','10','01/01/2025','31/12/2026','no']));
-      const r = await authService.login('u1','p1');
+  describe("login", () => {
+    it("success as regular user", async () => {
+      mockLoginSuccess(false);
+      const r = await authService.login("user", "pass");
       expect(r.success).toBe(true);
+      expect(r.isAdmin).toBe(false);
     });
 
-    it('admin yes', async () => {
-      mockFetch(csv(['@a','adm','ap','0','01/01/2025','31/12/2030','yes']));
-      expect((await authService.login('adm','ap')).isAdmin).toBe(true);
+    it("success as admin", async () => {
+      mockLoginSuccess(true);
+      const r = await authService.login("admin", "pass");
+      expect(r.success).toBe(true);
+      expect(r.isAdmin).toBe(true);
     });
 
-    it('admin так', async () => {
-      mockFetch(csv(['@a','u','p','0','01/01/2025','31/12/2030','так']));
-      expect((await authService.login('u','p')).isAdmin).toBe(true);
-    });
-
-    it('wrong password', async () => {
-      mockFetch(csv(['@u','u','pass','10','01/01/2025','31/12/2026','no']));
-      const r = await authService.login('u','wrong');
+    it("wrong password (401)", async () => {
+      mockFetch({ error: "Invalid credentials" }, false, 401);
+      const r = await authService.login("user", "wrong");
       expect(r.success).toBe(false);
     });
 
-    it('expired', async () => {
-      mockFetch(csv(['@u','old','p','10','01/01/2024','31/12/2024','no']));
-      const r = await authService.login('old','p');
+    it("subscription expired (403)", async () => {
+      mockFetch({ error: "Subscription expired" }, false, 403);
+      const r = await authService.login("expired", "pass");
       expect(r.success).toBe(false);
-      expect(r.error).toContain('підписка');
+      expect(r.error).toContain("підписка");
     });
 
-    it('network error', async () => {
-      mockFetchFail();
-      const r = await authService.login('u','p');
+    it("network error", async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+      const r = await authService.login("user", "pass");
       expect(r.success).toBe(false);
     });
   });
 
-  describe('validateAdmin', () => {
-    it('true for admin', async () => {
-      mockFetch(csv(['@a','sa','p','0','01/01/2025','31/12/2030','yes']));
-      expect(await authService.validateAdmin('sa','p')).toBe(true);
+  describe("validateAdmin", () => {
+    it("true for admin", async () => {
+      mockLoginSuccess(true);
+      expect(await authService.validateAdmin("admin", "pass")).toBe(true);
     });
 
-    it('false for user', async () => {
-      mockFetch(csv(['@u','reg','p','10','01/01/2025','31/12/2026','no']));
-      expect(await authService.validateAdmin('reg','p')).toBe(false);
+    it("false for regular user", async () => {
+      mockLoginSuccess(false);
+      expect(await authService.validateAdmin("user", "pass")).toBe(false);
     });
   });
 
-  describe('validateUser', () => {
-    it('active user', async () => {
-      mockFetch(csv(['@u','au','p','10','01/01/2025','31/12/2027','no']));
-      expect(await authService.validateUser('au','p')).toEqual({ isValid: true });
+  describe("validateUser", () => {
+    it("active user", async () => {
+      mockLoginSuccess(false);
+      expect(await authService.validateUser("user", "pass")).toEqual({
+        isValid: true,
+      });
     });
 
-    it('wrong password', async () => {
-      mockFetch(csv(['@u','u','pass','10','01/01/2025','31/12/2027','no']));
-      const r = await authService.validateUser('u','wrong');
+    it("wrong password", async () => {
+      mockFetch({ error: "Invalid credentials" }, false, 401);
+      const r = await authService.validateUser("user", "wrong");
       expect(r.isValid).toBe(false);
     });
   });

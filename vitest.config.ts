@@ -1,28 +1,29 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import path from 'path';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
     css: true,
+    exclude: ["e2e/**", "node_modules/**", "dist/**"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      include: ['src/**/*.{ts,tsx}'],
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
-        'src/test/**',
-        'src/components/ui/**',
-        'src/vite-env.d.ts',
-        'src/main.tsx',
+        "src/test/**",
+        "src/components/ui/**",
+        "src/vite-env.d.ts",
+        "src/main.tsx",
       ],
       thresholds: {
         lines: 40,
