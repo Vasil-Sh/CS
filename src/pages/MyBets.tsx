@@ -289,8 +289,15 @@ export default function MyBets() {
         setBankrollStats(apiStats);
         return;
       }
-    } catch { /* noop */ }
-    setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
+    } catch {
+      /* noop */
+    }
+    setBankrollStats({
+      initialBank: 0,
+      currentBank: 0,
+      totalProfit: 0,
+      roi: 0,
+    });
   }, []);
 
   const syncStats = useCallback(() => {
@@ -325,9 +332,17 @@ export default function MyBets() {
         setRecentBets(bets as Bet[]);
         return;
       }
-    } catch { /* noop */ }
-    setRecentBets([]);
-  }, []);
+    } catch {
+      /* noop */
+    }
+    // Fallback to localStorage when API is unavailable
+    const localBets = UserDataService.getUserData(
+      currentUser,
+      "mybets_data",
+      [],
+    );
+    setRecentBets(localBets as Bet[]);
+  }, [currentUser]);
 
   // Recompute stats whenever bets change
   useEffect(() => {
@@ -344,21 +359,40 @@ export default function MyBets() {
   }, [loadRecentBets, bumpBets, bumpBankroll, syncBankrollStats, syncStats]);
 
   const clearRecentBets = useCallback(async () => {
-    if (!window.confirm("Ви впевнені, що хочете очистити ВСІ дані (ставки, цілі, стратегії, групи, банкрол)?")) return;
+    if (
+      !window.confirm(
+        "Ви впевнені, що хочете очистити ВСІ дані (ставки, цілі, стратегії, групи, банкрол)?",
+      )
+    )
+      return;
 
     let apiOk = false;
     try {
-      const body = await api.post<{ success: boolean; counts: Record<string, number> }>('/admin/reset', {});
+      const body = await api.post<{
+        success: boolean;
+        counts: Record<string, number>;
+      }>("/admin/reset", {});
       apiOk = body.success;
-      if (import.meta.env.DEV) console.log('[Reset] API OK:', body.counts);
+      if (import.meta.env.DEV) console.log("[Reset] API OK:", body.counts);
     } catch (err: unknown) {
-      if (import.meta.env.DEV) console.error('[Reset] Error:', err instanceof Error ? err.message : err);
+      if (import.meta.env.DEV)
+        console.error(
+          "[Reset] Error:",
+          err instanceof Error ? err.message : err,
+        );
     }
 
     // Always clear localStorage (regardless of API result)
     [
-      "mybets_data", "mybets_stats", "analytics_bets", "analytics_stats",
-      "goals", "strategies_data", "primary_strategy", "tg_groups", "tg_bets",
+      "mybets_data",
+      "mybets_stats",
+      "analytics_bets",
+      "analytics_stats",
+      "goals",
+      "strategies_data",
+      "primary_strategy",
+      "tg_groups",
+      "tg_bets",
       "bankroll_data",
     ].forEach((k) => UserDataService.clearUserData(currentUser, k));
     localStorage.removeItem("primaryStrategy");
@@ -374,11 +408,18 @@ export default function MyBets() {
     useAppStore.getState().bumpBankroll();
 
     if (apiOk) {
-      toast.success("✅ Всі дані очищено — ставки, цілі, стратегії, групи, банкрол");
+      toast.success(
+        "✅ Всі дані очищено — ставки, цілі, стратегії, групи, банкрол",
+      );
     } else {
-      toast.error("⚠️ Дані очищено локально, але сервер повернув помилку. Перевір консоль (F12).");
+      toast.error(
+        "⚠️ Дані очищено локально, але сервер повернув помилку. Перевір консоль (F12).",
+      );
     }
-    setTimeout(() => { loadStats(); loadRecentBets(); }, 200);
+    setTimeout(() => {
+      loadStats();
+      loadRecentBets();
+    }, 200);
   }, [currentUser, loadStats, loadRecentBets]);
 
   const executeResultUpdate = useCallback(
@@ -404,9 +445,15 @@ export default function MyBets() {
           : bet;
         // Try API PATCH first
         try {
-          await api.patch(`/bets/${bet.id}`, { result, profit: profitInUAH, roi, notes: betWithNotes.notes });
+          await api.patch(`/bets/${bet.id}`, {
+            result,
+            profit: profitInUAH,
+            roi,
+            notes: betWithNotes.notes,
+          });
         } catch {
-          if (import.meta.env.DEV) console.warn('[API] PATCH failed, saving locally');
+          if (import.meta.env.DEV)
+            console.warn("[API] PATCH failed, saving locally");
         }
         let matched = false;
         setRecentBets((prev) =>
@@ -521,7 +568,8 @@ export default function MyBets() {
     try {
       await api.delete(`/bets/${bet.id}`);
     } catch {
-      if (import.meta.env.DEV) console.warn('[API] DELETE failed, removed locally only');
+      if (import.meta.env.DEV)
+        console.warn("[API] DELETE failed, removed locally only");
     }
     syncBankrollStats();
     syncStats();

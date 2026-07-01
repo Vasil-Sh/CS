@@ -4,8 +4,8 @@
 // localStorage kept only as instant startup cache.
 // ═══════════════════════════════════════════
 
-import { api } from './apiClient';
-import type { Bet as ApiBet } from '@/types/betting';
+import { api } from "./apiClient";
+import type { Bet as ApiBet } from "@/types/betting";
 
 /** Simple debounce: coalesce rapid writes for the same key within 100ms */
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -21,7 +21,7 @@ export class UserDataService {
       let fixed = 0;
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (!key || !key.startsWith('user_')) continue;
+        if (!key || !key.startsWith("user_")) continue;
         const raw = localStorage.getItem(key);
         if (!raw) continue;
         try {
@@ -34,10 +34,12 @@ export class UserDataService {
         }
       }
       if (fixed > 0) {
-        console.warn(`[UserDataService] Repaired ${fixed} corrupted user_* keys`);
+        console.warn(
+          `[UserDataService] Repaired ${fixed} corrupted user_* keys`,
+        );
       }
     } catch (e) {
-      console.error('[UserDataService] repairAllUserKeys failed:', e);
+      console.error("[UserDataService] repairAllUserKeys failed:", e);
     }
   }
 
@@ -55,7 +57,7 @@ export class UserDataService {
         return data as unknown as T;
       }
     } catch (error) {
-      console.error('Error getting user data:', error);
+      console.error("Error getting user data:", error);
       return defaultValue;
     }
   }
@@ -70,16 +72,19 @@ export class UserDataService {
         clearTimeout(debounceTimers.get(timerKey));
       }
 
-      debounceTimers.set(timerKey, setTimeout(() => {
-        try {
-          localStorage.setItem(userKey, JSON.stringify(value));
-          debounceTimers.delete(timerKey);
-        } catch (error) {
-          console.error('Error setting user data:', error);
-        }
-      }, 100));
+      debounceTimers.set(
+        timerKey,
+        setTimeout(() => {
+          try {
+            localStorage.setItem(userKey, JSON.stringify(value));
+            debounceTimers.delete(timerKey);
+          } catch (error) {
+            console.error("Error setting user data:", error);
+          }
+        }, 100),
+      );
     } catch (error) {
-      console.error('Error setting user data:', error);
+      console.error("Error setting user data:", error);
     }
   }
 
@@ -88,7 +93,7 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.setItem(userKey, JSON.stringify(value));
     } catch (error) {
-      console.error('Error setting user data (sync):', error);
+      console.error("Error setting user data (sync):", error);
     }
   }
 
@@ -97,7 +102,7 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.removeItem(userKey);
     } catch (error) {
-      console.error('Error clearing user data:', error);
+      console.error("Error clearing user data:", error);
     }
   }
 
@@ -105,13 +110,13 @@ export class UserDataService {
     try {
       const keys = Object.keys(localStorage);
       const userPrefix = `user_${username}_`;
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (key.startsWith(userPrefix)) {
           localStorage.removeItem(key);
         }
       });
     } catch (error) {
-      console.error('Error clearing all user data:', error);
+      console.error("Error clearing all user data:", error);
     }
   }
 
@@ -119,9 +124,9 @@ export class UserDataService {
     try {
       const keys = Object.keys(localStorage);
       const userPrefix = `user_${username}_`;
-      return keys.some(key => key.startsWith(userPrefix));
+      return keys.some((key) => key.startsWith(userPrefix));
     } catch (error) {
-      console.error('Error checking user data:', error);
+      console.error("Error checking user data:", error);
       return false;
     }
   }
@@ -129,32 +134,45 @@ export class UserDataService {
   // ═══ Daily reset (localStorage only — API handles this server-side) ═══
   static checkAndResetDailyBets(username: string): void {
     try {
-      const lastResetKey = this.getUserKey(username, 'last_mybets_reset');
+      const lastResetKey = this.getUserKey(username, "last_mybets_reset");
       const lastReset = localStorage.getItem(lastResetKey);
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
 
       if (lastReset !== today) {
-        const currentBets = this.getUserData<Array<{ result: string }>>(username, 'mybets_data', []);
-        const completedBets = currentBets.filter((bet) => bet.result !== 'Pending');
-        this.setUserData(username, 'mybets_data', completedBets);
+        const currentBets = this.getUserData<Array<{ result: string }>>(
+          username,
+          "mybets_data",
+          [],
+        );
+        const completedBets = currentBets.filter(
+          (bet) => bet.result !== "Pending",
+        );
+        this.setUserData(username, "mybets_data", completedBets);
         localStorage.setItem(lastResetKey, today);
-        if (import.meta.env.DEV) console.log(`Daily reset performed for ${username} on ${today}`);
+        if (import.meta.env.DEV)
+          console.log(`Daily reset performed for ${username} on ${today}`);
       }
     } catch (error) {
-      console.error('Error in daily reset:', error);
+      console.error("Error in daily reset:", error);
     }
   }
 
-  static getTodayBets(username: string): Array<{ date: string; result: string }> {
+  static getTodayBets(
+    username: string,
+  ): Array<{ date: string; result: string }> {
     try {
-      const allBets = this.getUserData<Array<{ date: string; result: string }>>(username, 'mybets_data', []);
-      const today = new Date().toISOString().split('T')[0];
+      const allBets = this.getUserData<Array<{ date: string; result: string }>>(
+        username,
+        "mybets_data",
+        [],
+      );
+      const today = new Date().toISOString().split("T")[0];
       return allBets.filter((bet) => {
-        const betDate = bet.date.split(' ')[0];
+        const betDate = bet.date.split(" ")[0];
         return betDate === today;
       });
     } catch (error) {
-      console.error('Error getting today bets:', error);
+      console.error("Error getting today bets:", error);
       return [];
     }
   }
@@ -165,25 +183,57 @@ export class UserDataService {
 
   /** Fetch bets from API */
   static async fetchBets(): Promise<ApiBet[]> {
-    const data = await api.get<Record<string, unknown>[]>('/bets');
-    return data.map((b) => ({
+    const data = await api.get<
+      | Record<string, unknown>[]
+      | { data?: Record<string, unknown>[]; bets?: Record<string, unknown>[] }
+    >("/bets");
+    const rawBets = Array.isArray(data)
+      ? data
+      : (
+          data as {
+            data?: Record<string, unknown>[];
+            bets?: Record<string, unknown>[];
+          }
+        ).data ||
+        (data as { bets?: Record<string, unknown>[] }).bets ||
+        [];
+    const mapped = rawBets.map((b: Record<string, unknown>) => ({
       ...b,
       id: b.id,
-      odds: parseFloat(b.odds),
-      amount: parseFloat(b.amount),
-      profit: parseFloat(b.profit || '0'),
-      roi: b.roi ? parseFloat(b.roi) : undefined,
-      stake: b.stake ? parseFloat(b.stake) : undefined,
-      originalAmount: b.originalAmount ? parseFloat(b.originalAmount) : undefined,
-      exchangeRate: b.exchangeRate ? parseFloat(b.exchangeRate) : null,
-      originalProfit: b.originalProfit ? parseFloat(b.originalProfit) : undefined,
-      winProbability: b.winProbability ? parseFloat(b.winProbability) : undefined,
+      odds: parseFloat(String(b.odds ?? 1)),
+      amount: parseFloat(String(b.amount ?? 0)),
+      profit: parseFloat(String(b.profit || "0")),
+      roi: b.roi ? parseFloat(String(b.roi)) : undefined,
+      stake: b.stake ? parseFloat(String(b.stake)) : undefined,
+      originalAmount: b.originalAmount
+        ? parseFloat(String(b.originalAmount))
+        : undefined,
+      exchangeRate: b.exchangeRate ? parseFloat(String(b.exchangeRate)) : null,
+      originalProfit: b.originalProfit
+        ? parseFloat(String(b.originalProfit))
+        : undefined,
+      winProbability: b.winProbability
+        ? parseFloat(String(b.winProbability))
+        : undefined,
     }));
+    // Cache to localStorage so "Останні записи" reads instantly on next page load
+    if (mapped.length > 0) {
+      try {
+        const username = localStorage.getItem("username") || "default";
+        localStorage.setItem(
+          `user_${username}_mybets_data`,
+          JSON.stringify(mapped),
+        );
+      } catch {
+        /* storage full — ignore */
+      }
+    }
+    return mapped as ApiBet[];
   }
 
   /** Create a bet via API */
-  static async createBet(bet: Omit<ApiBet, 'id'>): Promise<ApiBet> {
-    return api.post<ApiBet>('/bets', bet);
+  static async createBet(bet: Omit<ApiBet, "id">): Promise<ApiBet> {
+    return api.post<ApiBet>("/bets", bet);
   }
 
   /** Update a bet via API */
@@ -205,21 +255,26 @@ export class UserDataService {
     profitByMonth: { month: string; profit: number }[];
     profitByStrategy: { strategy: string; profit: number }[];
   }> {
-    return api.get('/bets/stats');
+    return api.get("/bets/stats");
   }
 
   /** Fetch goals from API */
   static async fetchGoals(): Promise<Record<string, unknown>[]> {
-    return api.get('/goals');
+    return api.get("/goals");
   }
 
   /** Create a goal via API */
-  static async createGoal(goal: Record<string, unknown>): Promise<Record<string, unknown>> {
-    return api.post('/goals', goal);
+  static async createGoal(
+    goal: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    return api.post("/goals", goal);
   }
 
   /** Update a goal via API */
-  static async updateGoal(id: string, goal: Record<string, unknown>): Promise<Record<string, unknown>> {
+  static async updateGoal(
+    id: string,
+    goal: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     return api.put(`/goals/${id}`, goal);
   }
 
@@ -230,22 +285,27 @@ export class UserDataService {
 
   /** Fetch strategies from API */
   static async fetchStrategies(): Promise<Record<string, unknown>[]> {
-    return api.get('/strategies');
+    return api.get("/strategies");
   }
 
   /** Create a strategy via API */
-  static async createStrategy(strategy: Record<string, unknown>): Promise<Record<string, unknown>> {
-    return api.post('/strategies', strategy);
+  static async createStrategy(
+    strategy: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    return api.post("/strategies", strategy);
   }
 
   /** Update a strategy via API */
-  static async updateStrategy(id: string, strategy: Record<string, unknown>): Promise<Record<string, unknown>> {
+  static async updateStrategy(
+    id: string,
+    strategy: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     return api.put(`/strategies/${id}`, strategy);
   }
 
   /** Delete a strategy via API */
   static async deleteStrategy(id: string, name?: string): Promise<void> {
-    const query = name ? `?name=${encodeURIComponent(name)}` : '';
+    const query = name ? `?name=${encodeURIComponent(name)}` : "";
     await api.delete(`/strategies/${id}${query}`);
   }
 }

@@ -963,6 +963,17 @@ export default function CS2BettingForm({
       };
 
       // 1. Save to API (primary store)
+      const localFallback = () => {
+        const existingBets = UserDataService.getUserData<BetRecord[]>(
+          currentUser,
+          "mybets_data",
+          [],
+        );
+        UserDataService.setUserDataSync(currentUser, "mybets_data", [
+          record as BetRecord,
+          ...existingBets,
+        ]);
+      };
       try {
         await UserDataService.createBet({
           match: record.match,
@@ -992,18 +1003,12 @@ export default function CS2BettingForm({
           logoTeam2: record.logoTeam2,
           expressLogos: record.expressLogos,
         } as Parameters<typeof UserDataService.createBet>[0]);
+        // Cache locally so "Останні записи" reads instantly
+        localFallback();
       } catch (err) {
         if (import.meta.env.DEV)
           console.warn("[API] Bet save failed, caching to localStorage:", err);
-        const existingBets = UserDataService.getUserData<BetRecord[]>(
-          currentUser,
-          "mybets_data",
-          [],
-        );
-        UserDataService.setUserData(currentUser, "mybets_data", [
-          record as BetRecord,
-          ...existingBets,
-        ]);
+        localFallback();
       }
 
       if (finalGoalId) {
@@ -1042,10 +1047,13 @@ export default function CS2BettingForm({
       return;
     }
 
+    // Auto-initialize bankroll with bet amount if not set yet
     if (!BankrollService.isInitialized(currentUser)) {
-      toast.warning(
-        '⚠️ Початковий банк не встановлено. Натисніть на картку "Поточний банк" щоб встановити.',
-      );
+      const stake = parseFloat(formData.stake);
+      if (stake > 0) {
+        await BankrollService.setInitialBank(currentUser, stake);
+        toast.success(`Початковий банк автоматично встановлено: ${stake} ₴`);
+      }
     }
 
     if (formData.betCategory === "Експрес" && expressEvents.length === 0) {
