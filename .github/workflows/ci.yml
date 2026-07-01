@@ -2,14 +2,39 @@ name: CI — Lint, Test, Build
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
+  # ── Backend ──
+  backend:
+    name: Backend
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: matchiq
+          POSTGRES_PASSWORD: matchiq
+          POSTGRES_DB: matchiq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -18,13 +43,78 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
       - run: pnpm install --frozen-lockfile
+
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: pnpm typecheck
+
       - name: ESLint
-        run: npx eslint src/ --max-warnings=999
+        run: pnpm lint
+
       - name: Tests
-        run: npx vitest run
+        run: pnpm test
+        env:
+          DATABASE_URL: postgres://matchiq:matchiq@localhost:5432/matchiq_test
+          JWT_SECRET: ci-test-secret
+          NODE_ENV: test
+
+  # ── Frontend ──
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check
+        run: pnpm typecheck
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Tests
+        run: pnpm test
+
       - name: Build
-        run: npx vite build
+        run: pnpm build
+
+  # ── E2E ──
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [frontend, backend]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5173
