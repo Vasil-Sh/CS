@@ -91,55 +91,40 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
-  // Sync localStorage teams to backend on first load if DB is empty
-  // Fetch risky teams from API on mount
+  // Fetch risky teams from API on mount — localStorage as fallback
   useEffect(() => {
-    googleSheetsRiskyTeamsService
-      .fetchRiskyTeams()
-      .then((teams) => {
-        setRiskyTeams(teams);
-        setIsLoadingTeams(false);
-      })
-      .catch((err) => {
-        if (import.meta.env.DEV) console.warn("[RiskMgmt] Fetch failed:", err);
-        setIsLoadingTeams(false);
-      });
-  }, []);
-
-  // Save to localStorage for backward-compat read by other components
-  useEffect(() => {
-    localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
-  }, [riskyTeams]);
-
-  // Sync localStorage teams to backend on first load if DB is empty
-  useEffect(() => {
-    const syncToBackend = async () => {
-      if (riskyTeams.length === 0) return;
-      // Only sync teams without _apiId (local-only not yet in DB)
-      const unsynced = riskyTeams.filter((t) => !t._apiId);
-      if (unsynced.length === 0) return;
-      for (const team of unsynced) {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+        if (!cancelled) {
+          if (teams.length > 0) {
+            setRiskyTeams(teams);
+          } else {
+            fallbackToLocalStorage();
+          }
+        }
+      } catch {
+        if (!cancelled) fallbackToLocalStorage();
+      }
+      if (!cancelled) setIsLoadingTeams(false);
+    };
+    const fallbackToLocalStorage = () => {
+      const saved = localStorage.getItem("admin_risky_teams");
+      if (saved) {
         try {
-          await googleSheetsRiskyTeamsService.addTeam(
-            team.name,
-            team.game,
-            team.status,
-            team.notes,
-          );
+          setRiskyTeams(JSON.parse(saved));
         } catch {
           /* ignore */
         }
       }
-      // Re-fetch to get _apiId for synced teams
-      try {
-        const fresh = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
-        if (fresh.length > 0) setRiskyTeams(fresh);
-      } catch {
-        /* ignore */
-      }
     };
-    syncToBackend();
-  }, [riskyTeams]);
+    setIsLoadingTeams(true);
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const normalizeTeamName = (name: string): string => {
     return name
