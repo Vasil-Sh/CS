@@ -124,12 +124,6 @@ export default function Analytics() {
     return { profitUAH, profitUSD };
   }, [bets]);
 
-  const hasUsdBets = useMemo(
-    () =>
-      bets.some((b) => b.currency === "USD") || dualBank.usd.initialBank > 0,
-    [bets, dualBank.usd.initialBank],
-  );
-
   // exchangeRate moved after currencyMode
 
   const [loading, setLoading] = useState(true);
@@ -143,6 +137,12 @@ export default function Analytics() {
     usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
   });
   const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
+
+  const hasUsdBets = useMemo(
+    () =>
+      bets.some((b) => b.currency === "USD") || dualBank.usd.initialBank > 0,
+    [bets, dualBank.usd.initialBank],
+  );
   const [activeTab, setActiveTab] = useState("profit");
 
   const exchangeRate = useMemo(() => {
