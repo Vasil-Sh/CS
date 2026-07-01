@@ -274,7 +274,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditName(team.name);
     setEditNotes(team.notes);
     setEditStatus(team.status);
-    setEditGame(team.game || "CS");
+    setEditGame(team.game === "CS" || team.game === "Дота" ? team.game : "CS");
   };
 
   const cancelEditing = () => {
@@ -557,15 +557,31 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <ArrowRightLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Перенести в блок
               </label>
-              <select
-                value={editGame || "CS"}
-                onChange={(e) => setEditGame(e.target.value)}
-                className="w-full p-2 border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
-              >
-                <option value="CS">🎯 CS</option>
-                <option value="Дота">🛡️ Дота</option>
-              </select>
-              {editGame && editGame !== team.game && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditGame("CS")}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                    editGame === "CS"
+                      ? "bg-[#447afc] text-white border-[#447afc]"
+                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
+                  }`}
+                >
+                  🎯 CS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditGame("Дота")}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                    editGame === "Дота"
+                      ? "bg-[#447afc] text-white border-[#447afc]"
+                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
+                  }`}
+                >
+                  🛡️ Дота
+                </button>
+              </div>
+              {editGame !== team.game && (
                 <p className="text-xs text-[#2563EB] mt-1 flex items-center gap-1">
                   <ArrowRightLeft className="h-3 w-3" strokeWidth={1.5} />
                   Команду буде перенесено в блок{" "}
