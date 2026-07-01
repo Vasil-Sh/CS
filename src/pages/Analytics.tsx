@@ -815,47 +815,21 @@ export default function Analytics() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {(profitByCurrency.profitUAH || 0) >= 0 ? (
-                        <ArrowUpRight
-                          className="h-4 w-4 text-green-500"
-                          strokeWidth={2.5}
-                        />
-                      ) : (
-                        <ArrowDownRight
-                          className="h-4 w-4 text-red-500"
-                          strokeWidth={2.5}
-                        />
-                      )}
+                    <span
+                      className={`text-sm ${(profitByCurrency.profitUAH || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {(profitByCurrency.profitUAH || 0) >= 0
+                        ? "Позитивна динаміка"
+                        : "Негативна динаміка"}
+                    </span>
+                    {hasUsdBets && (
                       <span
-                        className={`text-base font-normal ${(profitByCurrency.profitUAH || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
+                        className={`text-sm ${(profitByCurrency.profitUSD || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
                       >
-                        {(profitByCurrency.profitUAH || 0) >= 0
+                        {(profitByCurrency.profitUSD || 0) >= 0
                           ? "Позитивна динаміка"
                           : "Негативна динаміка"}
                       </span>
-                    </div>
-                    {hasUsdBets && (
-                      <div className="flex items-center gap-2">
-                        {(profitByCurrency.profitUSD || 0) >= 0 ? (
-                          <ArrowUpRight
-                            className="h-4 w-4 text-green-500"
-                            strokeWidth={2.5}
-                          />
-                        ) : (
-                          <ArrowDownRight
-                            className="h-4 w-4 text-red-500"
-                            strokeWidth={2.5}
-                          />
-                        )}
-                        <span
-                          className={`text-base font-normal ${(profitByCurrency.profitUSD || 0) >= 0 ? "text-green-500" : "text-red-500"}`}
-                        >
-                          {(profitByCurrency.profitUSD || 0) >= 0
-                            ? "Позитивна динаміка"
-                            : "Негативна динаміка"}
-                        </span>
-                      </div>
                     )}
                   </div>
                 </div>
