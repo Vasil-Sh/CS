@@ -248,12 +248,7 @@ export default function MyBets() {
   useEffect(() => {
     if (currentUser) UserDataService.checkAndResetDailyBets(currentUser);
   }, [currentUser]);
-  useEffect(() => {
-    if (currentUser) {
-      UserDataService.setUserData(currentUser, "mybets_stats", stats);
-      UserDataService.setUserData(currentUser, "mybets_data", recentBets);
-    }
-  }, [stats, recentBets, currentUser]);
+  // Stats & bets are API-first now — no localStorage sync needed.
   useEffect(() => {
     setCurrentPage(1);
   }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
@@ -280,53 +275,23 @@ export default function MyBets() {
 
   const loadStats = useCallback(async () => {
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      const res = await fetch(`${API_BASE}/bets/stats`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data.totalBets > 0 ? data : UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
-        return;
-      }
-    } catch { /* noop */ }
-    toast.error('Помилка завантаження статистики');
-    setStats(UserDataService.getUserData(currentUser, 'mybets_stats', DEFAULT_STATS));
-  }, [currentUser]);
+      const data = await UserDataService.fetchBetStats();
+      setStats(data.totalBets > 0 ? data : { ...DEFAULT_STATS, ...data });
+    } catch {
+      setStats(DEFAULT_STATS);
+    }
+  }, []);
 
   const syncBankrollStats = useCallback(async () => {
-    // Try API first
     try {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
         setBankrollStats(apiStats);
         return;
       }
-    } catch {
-      /* noop */
-    }
-    // Fallback to localStorage + recentBets state
-    const localBets = UserDataService.getUserData(
-      currentUser,
-      "mybets_data",
-      [],
-    );
-    const merged = [...localBets];
-    recentBets.forEach((rb) => {
-      if (
-        !merged.find(
-          (m) =>
-            m.id === rb.id ||
-            (m.date === rb.date &&
-              m.match === rb.match &&
-              m.amount === rb.amount),
-        )
-      ) {
-        merged.push(rb);
-      }
-    });
-    setBankrollStats(BankrollService.getBankrollStats(currentUser, merged));
-  }, [currentUser, recentBets]);
+    } catch { /* noop */ }
+    setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
+  }, []);
 
   const syncStats = useCallback(() => {
     const allBets: Bet[] = UserDataService.getUserData(
@@ -352,45 +317,26 @@ export default function MyBets() {
                 100,
             ) / 100
           : 0,
-      profitByMonth: [],
-      profitByStrategy: [],
-    });
-  }, [currentUser]);
-
-  // Recompute stats whenever bets change
-  useEffect(() => {
-    if (recentBets.length > 0) syncStats();
-  }, [recentBets, syncStats]);
-
-  const loadRecentBets = useCallback(async () => {
-    try {
-      // Try API first (paginated response)
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/bets?page=1&limit=100`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        },
-      );
-      if (res.ok) {
-        const json = await res.json();
-        const bets = json.data || json; // handle both {data:[],meta:{}} and raw array
-        if (bets.length > 0) {
-          setRecentBets(bets);
-          return;
-        }
+      profitByMon = recentBets;
+    const completed = allBets.filter(
+      (b) => b.result === "Win" || b.result === "Loss",
+    );
+    const wins = completed.filter((b) => b.result === "Win").length;
+    const totalProfit = completed.reduce((sum, b) => sum + (b.profit || 0), 0);
+    setStats({
+      totalBets: allBets.length,
+      winRate:
+        completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
+      totalProfit: Math.round(totalProfit * 100) / 100,
+      averageROI:
+      const bets = await UserDataService.fetchBets();
+      if (bets.length > 0) {
+        setRecentBets(bets as Bet[]);
+        return;
       }
-    } catch {
-      /* noop */
-    }
-    // Fallback: localStorage
-    setRecentBets(UserDataService.getUserData(currentUser, "mybets_data", []));
-  }, [currentUser]);
-
-  // ── Handlers ──
-  const handleRecordAdded = useCallback(() => {
-    syncStats();
+    } catch { /* noop */ }
+    setRecentBets([]);
+  }, [
     loadRecentBets();
     syncBankrollStats();
     bumpBets();

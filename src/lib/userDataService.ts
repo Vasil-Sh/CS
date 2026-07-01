@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════
-// User Data Service — localStorage + API hybrid
-// Write: API first, localStorage as cache
-// Read: localStorage (instant), API for refresh
+// User Data Service — API-first data store
+// All reads/writes go through backend API.
+// localStorage kept only as instant startup cache.
 // ═══════════════════════════════════════════
 
 import { api } from './apiClient';

@@ -17,6 +17,7 @@ import { PageHeader } from '@/components/PageHeader';
 import GoalsManager from '@/components/GoalsManager';
 import InitialBankModal from '@/components/InitialBankModal';
 import { UserDataService } from '@/lib/userDataService';
+import { api } from '@/lib/apiClient';
 import { BankrollService } from '@/lib/bankrollService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';
@@ -130,39 +131,18 @@ export default function Analytics() {
         return;
       }
     } catch { /* noop */ }
-    // Fallback to localStorage
-    const allBets = UserDataService.getUserData(currentUser, 'mybets_data', [] as Bet[]);
-    const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
-    setBankrollStats(bankStats);
-  }, [currentUser]);
+    setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
+  }, []);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       
+      // API-first: fetch bets from backend
       let myBetsData: Bet[] = [];
-      let myBetsStats = null;
-
-      // 1. Try API first (fast, ~50ms)
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const res = await fetch(`${API_BASE}/bets?page=1&limit=200`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-        });
-        if (res.ok) {
-          const json = await res.json();
-          const bets = json.data || json;
-          if (bets.length > 0) {
-            myBetsData = bets;
-          }
-        }
-      } catch { /* fallback */ }
-
-      // 2. Fallback: localStorage (only if API failed or returned empty)
-      if (myBetsData.length === 0) {
-        myBetsData = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
-        myBetsStats = UserDataService.getUserData(currentUser, 'mybets_stats', null);
-      }
+        myBetsData = await UserDataService.fetchBets() as Bet[];
+      } catch { /* API down — proceed with empty */ }
       
       setBets(myBetsData);
       
@@ -175,35 +155,17 @@ export default function Analytics() {
         const totalProfit = completedBets.reduce((sum: number, bet: Bet) => sum + (bet.profit || 0), 0);
         const averageROI = totalBets > 0 ? Math.round((totalProfit / completedBets.reduce((sum: number, bet: Bet) => sum + bet.amount, 0)) * 100) : 0;
         
-        // Try API stats, fallback to localStorage
         let profitByMonth: { month: string; profit: number }[] = [];
         let profitByStrategy: { strategy: string; profit: number }[] = [];
         try {
           const apiStats = await UserDataService.fetchBetStats();
           profitByMonth = apiStats.profitByMonth || [];
           profitByStrategy = apiStats.profitByStrategy || [];
-        } catch {
-          profitByMonth = myBetsStats?.profitByMonth || [];
-          profitByStrategy = myBetsStats?.profitByStrategy || [];
-        }
+        } catch { /* use empty arrays */ }
         
-        setStats({
-          totalBets,
-          winRate,
-          totalProfit,
-          averageROI,
-          profitByMonth,
-          profitByStrategy
-        });
+        setStats({ totalBets, winRate, totalProfit, averageROI, profitByMonth, profitByStrategy });
       } else {
-        setStats({
-          totalBets: 0,
-          winRate: 0,
-          totalProfit: 0,
-          averageROI: 0,
-          profitByMonth: [],
-          profitByStrategy: []
-        });
+        setStats({ totalBets: 0, winRate: 0, totalProfit: 0, averageROI: 0, profitByMonth: [], profitByStrategy: [] });
       }
       
     } catch (error) {
@@ -231,42 +193,24 @@ export default function Analytics() {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
         } catch {}
-        // Fallback to localStorage
-        const allBets = UserDataService.getUserData<Bet[]>(currentUser, 'mybets_data', []);
-        const bankStats = BankrollService.getBankrollStats(currentUser, allBets);
-        setBankrollStats(bankStats);
+        setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentUser]);
+  }, []);
 
-  const clearAllData = useCallback(() => {
+  const clearAllData = useCallback(async () => {
     if (window.confirm('Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.')) {
-      UserDataService.clearUserData(currentUser, 'mybets_data');
-      UserDataService.clearUserData(currentUser, 'mybets_stats');
-      UserDataService.clearUserData(currentUser, 'analytics_bets');
-      UserDataService.clearUserData(currentUser, 'analytics_stats');
+      try {
+        await api.post('/admin/reset', {}); // API handles all cleanup
+      } catch { /* noop */ }
       
       setBets([]);
-      setStats({
-        totalBets: 0,
-        winRate: 0,
-        totalProfit: 0,
-        averageROI: 0,
-        profitByMonth: [],
-        profitByStrategy: []
-      });
-      
-      BankrollService.setInitialBank(currentUser, 0);
-      setBankrollStats({
-        initialBank: 0,
-        currentBank: 0,
-        totalProfit: 0,
-        roi: 0
-      });
+      setStats({ totalBets: 0, winRate: 0, totalProfit: 0, averageROI: 0, profitByMonth: [], profitByStrategy: [] });
+      setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
     }
-  }, [currentUser, updateBankrollStats]);
+  }, []);
 
   const handleBankCardClick = useCallback(() => {
     setBankModalOpen(true);

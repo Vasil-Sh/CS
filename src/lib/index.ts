@@ -35,7 +35,8 @@ export { cardBase, cardHover, cardBorder } from "./cardStyles";
 export { t, setLang, getLang } from "./i18n";
 export type { Lang } from "./i18n";
 
+// Chart colors
+export { chartColors, chartPalette, profitColor, lossColor } from './chartColors';
 // Monitoring
-export { logRender } from "./devLogger";
-export { reportError } from "./errorMonitor";
+export { logRender } from './devLogger';export { reportError } from "./errorMonitor";
 export { validateEnv } from "./envValidation";
