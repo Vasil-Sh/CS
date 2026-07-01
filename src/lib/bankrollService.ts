@@ -27,15 +27,17 @@ export class BankrollService {
     return data !== null && data.initialBank !== undefined;
   }
 
-  static setInitialBank(username: string, amount: number): void {
+  static async setInitialBank(username: string, amount: number): Promise<void> {
     const data: BankrollData = {
       initialBank: amount,
       manualAdjustments: 0,
       lastUpdated: new Date().toISOString()
     };
+    // API first
+    try { await api.post('/bankroll', { initialBank: amount }); }
+    catch (err) { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)); }
+    // localStorage as cache
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
-    // Sync to backend API
-    api.post('/bankroll', { initialBank: amount }).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
   }
 
   static getBankrollData(username: string): BankrollData | null {
@@ -65,17 +67,20 @@ export class BankrollService {
     data.manualAdjustments += amount;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserData(username, this.STORAGE_KEY, data);
+    // Sync to backend API
+    api.post('/bankroll/adjust', { amount }).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
   }
 
-  static updateInitialBank(username: string, newAmount: number): void {
+  static async updateInitialBank(username: string, newAmount: number): Promise<void> {
+    // API first
+    try { await api.post('/bankroll', { initialBank: newAmount }); }
+    catch (err) { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)); }
     const data = this.getBankrollData(username);
     if (!data) return;
     data.initialBank = newAmount;
     data.manualAdjustments = 0;
     data.lastUpdated = new Date().toISOString();
     UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
-    // Sync to backend API
-    api.post('/bankroll', { initialBank: newAmount }).catch((err: unknown) => { if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err)) });
   }
 
   static validateBetAmount(username: string, bets: Bet[], betAmount: number): {

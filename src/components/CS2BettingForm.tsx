@@ -948,58 +948,42 @@ export default function CS2BettingForm({
             : undefined,
       };
 
-      // 1. Try API first (fast, reliable)
+      // 1. Save to API (primary store)
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const res = await fetch(`${API_BASE}/bets`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-          },
-          body: JSON.stringify({
-            match: record.match,
-            team1: record.team1,
-            team2: record.team2,
-            betType: record.betType,
-            odds: record.odds,
-            amount: record.amount,
-            stake: parseFloat(formData.stake),
-            date: record.date,
-            result: record.result,
-            profit: record.profit,
-            strategy: record.strategy,
-            format: record.format,
-            game: record.game,
-            currency: record.currency,
-            originalAmount: record.originalAmount,
-            exchangeRate: record.exchangeRate,
-            roi: record.roi,
-            goalId: record.goalId,
-            matchUrl: record.matchUrl,
-            winProbability: record.winProbability,
-            notes: record.notes,
-            riskyTeams: record.riskyTeams,
-            tournament: record.tournament,
-            logoTeam1: record.logoTeam1,
-            logoTeam2: record.logoTeam2,
-            expressLogos: record.expressLogos,
-          }),
-        });
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          console.error('[API] Bet save failed:', errBody);
-        }
+        await UserDataService.createBet({
+          match: record.match,
+          team1: record.team1,
+          team2: record.team2,
+          betType: record.betType,
+          odds: record.odds,
+          amount: record.amount,
+          stake: parseFloat(formData.stake),
+          date: record.date,
+          result: record.result,
+          profit: record.profit,
+          strategy: record.strategy,
+          format: record.format,
+          game: record.game,
+          currency: record.currency,
+          originalAmount: record.originalAmount,
+          exchangeRate: record.exchangeRate,
+          roi: record.roi,
+          goalId: record.goalId,
+          matchUrl: record.matchUrl,
+          winProbability: record.winProbability,
+          notes: record.notes,
+          riskyTeams: record.riskyTeams,
+          tournament: record.tournament,
+          logoTeam1: record.logoTeam1,
+          logoTeam2: record.logoTeam2,
+          expressLogos: record.expressLogos,
+        } as any);
       } catch (err) {
-        // Fallback: save to localStorage
-        console.warn('[API] Bet save network error, saving to localStorage:', err);
+        // Optimistic cache: save to localStorage so UI reflects immediately
+        console.warn('[API] Bet save failed, caching to localStorage:', err);
         const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
         UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
       }
-
-      // Always update localStorage so UI reflects immediately
-      const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
-      UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
 
       if (finalGoalId) {
         const goalName = activeGoals.find((g) => g.id === finalGoalId)?.name;

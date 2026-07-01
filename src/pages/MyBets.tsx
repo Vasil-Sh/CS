@@ -363,10 +363,11 @@ export default function MyBets() {
     // Always clear localStorage (regardless of API result)
     [
       "mybets_data", "mybets_stats", "analytics_bets", "analytics_stats",
-      "goals", "strategies", "primary_strategy", "tg_groups", "tg_bets",
+      "goals", "strategies_data", "primary_strategy", "tg_groups", "tg_bets",
       "bankroll_data",
     ].forEach((k) => UserDataService.clearUserData(currentUser, k));
     localStorage.removeItem("primaryStrategy");
+    localStorage.removeItem("customStrategies");
 
     // Reset state
     BankrollService.setInitialBank(currentUser, 0);
