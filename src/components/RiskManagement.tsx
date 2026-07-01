@@ -100,14 +100,45 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         setRiskyTeams(teams);
         setIsLoadingTeams(false);
       })
-      .catch((err) => { if (import.meta.env.DEV) console.warn('[RiskMgmt] Fetch failed:', err); setIsLoadingTeams(false); });
+      .catch((err) => {
+        if (import.meta.env.DEV) console.warn("[RiskMgmt] Fetch failed:", err);
+        setIsLoadingTeams(false);
+      });
   }, []);
 
   // Save to localStorage for backward-compat read by other components
   useEffect(() => {
-    if (riskyTeams.length > 0) {
-      localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
-    }
+    localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
+  }, [riskyTeams]);
+
+  // Sync localStorage teams to backend on first load if DB is empty
+  useEffect(() => {
+    const syncToBackend = async () => {
+      if (riskyTeams.length === 0) return;
+      // Only sync teams without _apiId (local-only not yet in DB)
+      const unsynced = riskyTeams.filter((t) => !t._apiId);
+      if (unsynced.length === 0) return;
+      for (const team of unsynced) {
+        try {
+          await googleSheetsRiskyTeamsService.addTeam(
+            team.name,
+            team.game,
+            team.status,
+            team.notes,
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+      // Re-fetch to get _apiId for synced teams
+      try {
+        const fresh = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+        if (fresh.length > 0) setRiskyTeams(fresh);
+      } catch {
+        /* ignore */
+      }
+    };
+    syncToBackend();
   }, [riskyTeams]);
 
   const normalizeTeamName = (name: string): string => {
@@ -154,16 +185,35 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
       // Replace ALL teams (not merge) — Google Sheets is the source of truth
       if (import.meta.env.DEV) {
-        console.log("[RiskMgmt] Loaded from sheet:", teamsFromSheet.length, "teams");
-        console.log("[RiskMgmt] Sample:", teamsFromSheet.slice(0, 3).map((t) => `${t.name}[${t.game}/${t.status}]`).join(", "));
+        console.log(
+          "[RiskMgmt] Loaded from sheet:",
+          teamsFromSheet.length,
+          "teams",
+        );
+        console.log(
+          "[RiskMgmt] Sample:",
+          teamsFromSheet
+            .slice(0, 3)
+            .map((t) => `${t.name}[${t.game}/${t.status}]`)
+            .join(", "),
+        );
       }
 
       setRiskyTeams(teamsFromSheet);
 
       if (import.meta.env.DEV) {
-        const sampleGames = teamsFromSheet.slice(0, 5).map((t) => `${t.name}=${t.game}`);
+        const sampleGames = teamsFromSheet
+          .slice(0, 5)
+          .map((t) => `${t.name}=${t.game}`);
         console.log("[RiskMgmt] Sample teams (name=game):", sampleGames);
-        console.log("[RiskMgmt] Total:", teamsFromSheet.length, "CS:", teamsFromSheet.filter((t) => t.game === "CS").length, "Дота:", teamsFromSheet.filter((t) => t.game === "Дота").length);
+        console.log(
+          "[RiskMgmt] Total:",
+          teamsFromSheet.length,
+          "CS:",
+          teamsFromSheet.filter((t) => t.game === "CS").length,
+          "Дота:",
+          teamsFromSheet.filter((t) => t.game === "Дота").length,
+        );
       }
 
       setRiskyTeams(teamsFromSheet);
@@ -175,7 +225,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         },
       );
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error updating from Google Sheets:", error);
+      if (import.meta.env.DEV)
+        console.error("Error updating from Google Sheets:", error);
       toast.error("Помилка оновлення", {
         description:
           error instanceof Error
