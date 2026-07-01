@@ -1306,14 +1306,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 )}
               </CardHeader>
               <CardContent className="p-0">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4 h-full min-h-[300px]">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <img
                           src="/assets/team-placeholder.svg"
                           alt="CS2"
-                          className="h-16 w-16 object-contain"
+                          className="h-16 w-16 object-contain opacity-60"
                         />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
@@ -1380,14 +1380,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 )}
               </CardHeader>
               <CardContent className="p-0">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto bg-[#F3F4F6] rounded-b-2xl p-4 h-full min-h-[300px]">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <img
                           src="/assets/team-placeholder-dota.svg"
                           alt="Dota2"
-                          className="h-16 w-16 object-contain"
+                          className="h-16 w-16 object-contain opacity-60"
                         />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
@@ -1437,9 +1437,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
                   <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                     <span className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+                      <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
                         <Pencil
-                          className="h-5 w-5 text-[#6B7280]"
+                          className="h-5 w-5 text-[#447afc]"
                           strokeWidth={1.5}
                         />
                       </div>
