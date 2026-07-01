@@ -74,8 +74,8 @@
 
 ### 🔐 Auth & Admin
 
-- Логін через Google Sheets (логін/пароль/роль)
-- Мультикористувацькість — ізольовані дані через `UserDataService`
+- Логін через JWT (backend API) — bcrypt + httpOnly cookie
+- Мультикористувацькість — ізольовані дані через PostgreSQL + `UserDataService`
 - Адмін-панель: управління користувачами, підписки
 
 ---
@@ -92,7 +92,8 @@
 | Дані      | PostgreSQL 16 (Drizzle ORM) + API (Hono)                  |
 | AI        | DeepSeek Chat API                                         |
 | Збірка    | Vite 5                                                    |
-| Тести     | Vitest 135 (backend) + 309 (frontend) + Playwright (E2E)  |
+| Тести     | Vitest 135 (backend) + 188 (frontend) + Playwright (E2E) |
+| Шрифт     | Inter (Google Fonts), system-ui fallback |
 | SEO       | react-helmet-async + JSON-LD + Sitemap + OG/Twitter Cards |
 
 ---
@@ -156,13 +157,14 @@ src/
 │   ├── Landing.tsx            # Лендінг
 │   └── Login.tsx              # Вхід
 ├── lib/
-│   ├── bankrollService.ts     # Банкрол
-│   ├── betCalculations.ts     # EV, Kelly, Value Bet
-│   ├── deepSeekService.ts     # DeepSeek AI
-│   ├── userDataService.ts     # Ізольовані дані користувача
-│   ├── csApi.ts               # CS2 API клієнт
-│   ├── authService.ts         # Аутентифікація
-│   └── ...
+│   ├── api/index.ts           # apiClient, auth, CS2 API, risky teams
+│   ├── services/index.ts      # BankrollService, UserDataService
+│   ├── ai/index.ts            # DeepSeek AI
+│   ├── analytics/index.ts     # EV, Kelly, bet math
+│   ├── parsing/index.ts       # URL/express parsers
+│   ├── utils/index.ts         # cn(), i18n, cardStyles, chartColors
+│   ├── monitoring/index.ts    # devLogger, errorMonitor, envValidation
+│   └── STRUCTURE.md           # Документація архітектури lib/
 ├── stores/appStore.ts         # Zustand event bus
 ├── hooks/
 │   ├── useTheme.ts            # Темна/світла тема
@@ -172,18 +174,21 @@ src/
 
 ---
 
-## 🔑 LocalStorage ключі
+## � Дані (API-first)
 
-| Ключ                                | Опис               |
-| ----------------------------------- | ------------------ |
-| `username`, `userRole`, `authToken` | Авторизація        |
-| `user_{name}_mybets_data`           | Історія ставок     |
-| `user_{name}_mybets_stats`          | Статистика         |
-| `user_{name}_goals`                 | Цілі               |
-| `user_{name}_bankroll_data`         | Банкрол            |
-| `customStrategies`                  | Власні стратегії   |
-| `primaryStrategy`                   | Активна стратегія  |
-| `admin_risky_teams`                 | Ризиковані команди |
+Усі дані зберігаються через backend API (PostgreSQL). `localStorage` використовується тільки як стартовий кеш для швидкого завантаження та для UI-налаштувань (тема, мова).
+
+| Джерело | Тип даних |
+|---------|------------|
+| `POST/GET /api/bets` | Ставки |
+| `POST/GET /api/goals` | Цілі |
+| `POST/GET /api/strategies` | Стратегії |
+| `POST/GET /api/bankroll` | Банкрол |
+| `POST/GET /api/risky-teams` | Ризиковані команди |
+| `POST/GET /api/telegram-groups` | Telegram групи |
+| `POST /api/admin/reset` | Очищення всіх даних |
+| `localStorage` (auth) | `authToken`, `refreshToken`, `username`, `userRole` |
+| `localStorage` (UI) | `matchiq_theme`, `matchiq_lang`, `onboarding_done` |
 
 ---
 
@@ -208,12 +213,18 @@ src/
 
 ### v1.23 — Липень 2026
 
+- **Дані API-first**: усі секції (ставки, цілі, стратегії, банкрол) пишуть/читають через backend API
 - **Backend**: 135 unit + інтеграційних тестів (17 файлів)
 - **Route refactoring**: 5 routes → services (auth, goals, strategies, bankroll, telegramGroups)
+- **API /v1**: усі routes доступні за `/api/v1/*` (backward compat з `/api/*`)
 - **CI/CD**: GitHub Actions з PostgreSQL service + E2E (Playwright)
 - **Dead code**: видалено `realGoogleSheets.ts` (577 рядків), `sheetsConfig.ts`, `apps-script/telegram-bot.gs`
-- Новий `lib/index.ts` barrel export
-- `vitest.config.ts`: виключено `e2e/` з unit-тестів
+- **lib/ restructuring**: 7 піддиректорій (api, services, ai, analytics, parsing, utils, monitoring)
+- **Raw fetch → apiClient**: 4 raw fetch замінено на типізований `api` клієнт
+- **Шрифт**: Inter (Google Fonts) замість system sans-serif
+- **Motion tokens**: fade-in, slide-up, scale-in, card-hover анімації
+- **Chart colors**: токенізована палітра для Recharts (`chartColors.ts`)
+- **`vitest.config.ts`**: виключено `e2e/` та `backend/` з unit-тестів
 
 ### v1.11 — Червень 2026
 
@@ -261,12 +272,12 @@ src/
 
 Приватний проєкт. З питань та пропозицій звертайтесь до команди розробки.
 
-## 📄 Ліцензія
+## 📄 Ліцензія1 лип
 
 Private — Всі права захищені.
 
 ---
 
 **Останнє оновлення**: 4 квітня 2026  
-**Версія**: 1.23 (основний репозиторій) + [CS-backend](https://github.com/Vasil-Sh/CS-backend) v1.23.78  
+**Версія**: 1.23 (основний репозиторій) + [CS-backend](https://github.com/Vasil-Sh/CS-backend) v1.23.80  
 **Репозиторій**: [https://github.com/Vasil-Sh/CS.git](https://github.com/Vasil-Sh/CS.git)
