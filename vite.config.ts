@@ -1,26 +1,30 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { viteSourceLocator } from "@metagptx/vite-plugin-source-locator";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
-    viteSourceLocator({
-      prefix: "matchiq",
-    }),
+    // viteSourceLocator disabled — caused React double-mount & DOM conflicts
     react(),
     ...(mode === "production"
       ? [
           VitePWA({
             registerType: "autoUpdate",
-            includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "sitemap.xml", "assets/og-image.svg"],
+            includeAssets: [
+              "favicon.svg",
+              "favicon.ico",
+              "robots.txt",
+              "sitemap.xml",
+              "assets/og-image.svg",
+            ],
             manifest: {
               name: "MatchIQ — Betting Analytics",
               short_name: "MatchIQ",
-              description: "Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації.",
+              description:
+                "Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації.",
               theme_color: "#111827",
               background_color: "#f3f3f3",
               display: "standalone",
@@ -62,7 +66,14 @@ export default defineConfig(({ mode }) => ({
         ]
       : []),
     ...(mode === "analyze"
-      ? [visualizer({ open: true, filename: "dist/stats.html", gzipSize: true, brotliSize: true })]
+      ? [
+          visualizer({
+            open: true,
+            filename: "dist/stats.html",
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ]
       : []),
   ],
   resolve: {
