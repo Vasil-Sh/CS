@@ -130,7 +130,12 @@ export class BankrollService {
 
   static calculateTotalProfitUSD(bets: Bet[]): number {
     return bets
-      .filter((b) => b.currency === "USD" && b.result !== "Pending")
+      .filter(
+        (b) =>
+          (b.currency === "USD" ||
+            (!!b.exchangeRate && Number(b.exchangeRate) > 0)) &&
+          b.result !== "Pending",
+      )
       .reduce((sum, bet) => {
         const profit = bet.profit || 0;
         const rate = bet.exchangeRate ? Number(bet.exchangeRate) : 41.5;

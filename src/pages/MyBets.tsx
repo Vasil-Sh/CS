@@ -680,9 +680,20 @@ export default function MyBets() {
                   />
                 </div>
               }
-              label="Поточний банк (UAH)"
+              label="Поточний банк"
               value={`${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+              extraValue={
+                hasUsdBets
+                  ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
+                  : undefined
+              }
+              extraValueColor="text-[#D97706]"
               subtext={`${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴ за весь час`}
+              extraSubtext={
+                hasUsdBets
+                  ? `${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`
+                  : undefined
+              }
               subIcon={
                 dualBank.uah.totalProfit >= 0 ? (
                   <ArrowUpRight
@@ -698,36 +709,6 @@ export default function MyBets() {
               }
               trend={dualBank.uah.totalProfit >= 0 ? "up" : "down"}
             />
-            {hasUsdBets && (
-              <StatCard
-                icon={
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF3C7]">
-                    <DollarSign
-                      className="h-5 w-5 text-[#D97706]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                }
-                label="Поточний банк (USDT)"
-                value={`$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`}
-                valueColor="text-[#D97706]"
-                subtext={`${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`}
-                subIcon={
-                  dualBank.usd.totalProfit >= 0 ? (
-                    <ArrowUpRight
-                      className="h-4 w-4 text-[#22C55E]"
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <ArrowDownRight
-                      className="h-4 w-4 text-[#EF4444]"
-                      strokeWidth={2.5}
-                    />
-                  )
-                }
-                trend={dualBank.usd.totalProfit >= 0 ? "up" : "down"}
-              />
-            )}
             <StatCard
               icon={
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
