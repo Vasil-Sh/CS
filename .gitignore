@@ -98,6 +98,11 @@ storybook-static
 tmp/
 temp/
 
+# Design reference assets (not needed at runtime)
+public/assets/image (*.png
+public/assets/*-reference.png
+public/assets/*-design.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

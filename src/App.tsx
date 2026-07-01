@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { HelmetProvider } from 'react-helmet-async';
-import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -11,6 +10,7 @@ import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 
 // Lazy-loaded (heavy pages — code split per route)
+const Layout = lazy(() => import('@/components/Layout'));
 const LoginDigestoDemo = lazy(() => import('@/pages/LoginDigestoDemo'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Matches = lazy(() => import('@/pages/Matches'));
@@ -53,7 +53,9 @@ function App() {
           path="/app"
           element={
             <ProtectedRoute>
-              <Layout />
+              <Suspense fallback={<PageLoader />}>
+                <Layout />
+              </Suspense>
             </ProtectedRoute>
           }
         >

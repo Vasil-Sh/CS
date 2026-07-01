@@ -89,7 +89,7 @@ const BetTableMemo = memo(function BetTable({
   bets,
   activeBets,
   currentUser,
-  isAdmin,
+  isAdmin: _isAdmin,
   tableFilter,
   onTableFilterChange,
   showAdvancedFilters,
@@ -267,9 +267,9 @@ const BetTableMemo = memo(function BetTable({
     return cachedGoals.find((g) => g.id === goalId)?.name || "Видалена ціль";
   };
   const isExpressBet = (bet: Bet) =>
-    bet.betType.includes("Експрес") || bet.format.includes("x");
+    bet.betType.includes("Експрес") || (bet.format ?? '').includes("x");
   const getExpressEventCount = (bet: Bet) => {
-    const match = bet.format.match(/(\d+)x/);
+    const match = (bet.format ?? '').match(/(\d+)x/);
     return match ? parseInt(match[1], 10) : 0;
   };
 
@@ -597,8 +597,8 @@ const BetTableMemo = memo(function BetTable({
                                 />
                               )}
                               {bet.game
-                                ? `${bet.game} • ${bet.format}`
-                                : bet.format}
+                                ? `${bet.game} • ${bet.format ?? ''}`
+                                : bet.format ?? ''}
                             </div>
                           </div>
                         </td>

@@ -60,6 +60,14 @@ export default defineConfig(({ mode }) => ({
                     expiration: { maxEntries: 50, maxAgeSeconds: 300 },
                   },
                 },
+                {
+                  urlPattern: /^https:\/\/cs-backend-production.*\.up\.railway\.app\/.*/i,
+                  handler: "NetworkFirst",
+                  options: {
+                    cacheName: "backend-api-cache",
+                    expiration: { maxEntries: 100, maxAgeSeconds: 120 },
+                  },
+                },
               ],
             },
           }),
