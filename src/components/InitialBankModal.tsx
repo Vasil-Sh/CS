@@ -41,15 +41,15 @@ export default function InitialBankModal({
       toast.error("Будь ласка, введіть коректну суму");
       return;
     }
-    const bankAmount =
-      currency === "USD" ? Math.round(value * savedRate * 100) / 100 : value;
     if (mode === "edit" && existingBank) {
-      BankrollService.updateInitialBank(currentUser, bankAmount);
-      toast.success(`Стартовий банк оновлено: ${bankAmount} ₴`);
-    } else {
-      BankrollService.setInitialBank(currentUser, bankAmount);
+      BankrollService.setInitialBank(currentUser, value, currency, savedRate);
       toast.success(
-        `Стартовий банк встановлено: ${bankAmount} ₴ (≈ $${value.toFixed(0)})`,
+        `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
+      );
+    } else {
+      BankrollService.setInitialBank(currentUser, value, currency, savedRate);
+      toast.success(
+        `Стартовий банк встановлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
       );
     }
     onClose(true);
