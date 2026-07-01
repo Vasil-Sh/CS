@@ -91,12 +91,8 @@ export default function MyBets() {
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
 
   // ── State ──
-  const [stats, setStats] = useState<BetStats>(() =>
-    UserDataService.getUserData(currentUser, "mybets_stats", DEFAULT_STATS),
-  );
-  const [recentBets, setRecentBets] = useState<Bet[]>(() =>
-    UserDataService.getUserData(currentUser, "mybets_data", []),
-  );
+  const [stats, setStats] = useState<BetStats>(DEFAULT_STATS);
+  const [recentBets, setRecentBets] = useState<Bet[]>([]);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -294,11 +290,7 @@ export default function MyBets() {
   }, []);
 
   const syncStats = useCallback(() => {
-    const allBets: Bet[] = UserDataService.getUserData(
-      currentUser,
-      "mybets_data",
-      [],
-    );
+    const allBets = recentBets;
     const completed = allBets.filter(
       (b) => b.result === "Win" || b.result === "Loss",
     );
@@ -317,18 +309,13 @@ export default function MyBets() {
                 100,
             ) / 100
           : 0,
-      profitByMon = recentBets;
-    const completed = allBets.filter(
-      (b) => b.result === "Win" || b.result === "Loss",
-    );
-    const wins = completed.filter((b) => b.result === "Win").length;
-    const totalProfit = completed.reduce((sum, b) => sum + (b.profit || 0), 0);
-    setStats({
-      totalBets: allBets.length,
-      winRate:
-        completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
-      totalProfit: Math.round(totalProfit * 100) / 100,
-      averageROI:
+      profitByMonth: [],
+      profitByStrategy: [],
+    });
+  }, [recentBets]);
+
+  const loadRecentBets = useCallback(async () => {
+    try {
       const bets = await UserDataService.fetchBets();
       if (bets.length > 0) {
         setRecentBets(bets as Bet[]);
@@ -336,7 +323,16 @@ export default function MyBets() {
       }
     } catch { /* noop */ }
     setRecentBets([]);
-  }, [
+  }, []);
+
+  // Recompute stats whenever bets change
+  useEffect(() => {
+    if (recentBets.length > 0) syncStats();
+  }, [recentBets, syncStats]);
+
+  // ── Handlers ──
+  const handleRecordAdded = useCallback(() => {
+    syncStats();
     loadRecentBets();
     syncBankrollStats();
     bumpBets();
