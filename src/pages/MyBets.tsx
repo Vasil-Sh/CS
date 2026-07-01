@@ -142,14 +142,16 @@ export default function MyBets() {
   const { showOnboarding, setShowOnboarding } = useOnboarding();
 
   // ── Derived ──
-  const { activeBets, winningBets, losingBets } = useMemo(
-    () => ({
-      activeBets: recentBets.filter((b: Bet) => b.result === "Pending"),
-      winningBets: recentBets.filter((b: Bet) => b.result === "Win"),
-      losingBets: recentBets.filter((b: Bet) => b.result === "Loss"),
-    }),
-    [recentBets],
-  );
+  const { activeBets, winningBets, losingBets } = useMemo(() => {
+    const active: Bet[] = [];
+    const winning: Bet[] = [];
+    const losing: Bet[] = [];
+    for (const b of recentBets) {
+      if (b.result === "Pending") active.push(b);
+      else if (b.result === "Win") winning.push(b);
+      else if (b.result === "Loss") losing.push(b);
+    }
+    return { activeBets: active, winningBets: winning, losingBets: losing };
 
   const isBankrollInitialized = useMemo(
     () => BankrollService.isInitialized(currentUser),
