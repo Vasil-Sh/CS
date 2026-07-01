@@ -159,6 +159,37 @@ export default function MyBets() {
     [currentUser, bankrollRefreshKey],
   );
 
+  // ── Currency breakdown ──
+  const profitByCurrency = useMemo(() => {
+    const completed = recentBets.filter(
+      (b) => b.result === "Win" || b.result === "Loss",
+    );
+    let profitUAH = 0;
+    let profitUSD = 0;
+    for (const b of completed) {
+      const profit = b.profit || 0;
+      if (b.currency === "USD" && b.exchangeRate) {
+        profitUSD += profit / Number(b.exchangeRate);
+      } else {
+        profitUAH += profit;
+      }
+    }
+    return { profitUAH, profitUSD };
+  }, [recentBets]);
+
+  const hasUsdBets = useMemo(
+    () => recentBets.some((b) => b.currency === "USD"),
+    [recentBets],
+  );
+
+  const exchangeRate = useMemo(() => {
+    const usdBets = recentBets.filter(
+      (b) => b.currency === "USD" && b.exchangeRate,
+    );
+    if (usdBets.length === 0) return 0;
+    return Number(usdBets[0].exchangeRate) || 0;
+  }, [recentBets]);
+
   // ── Effects ──
   useEffect(() => {
     const handler = (e: StorageEvent) => {
@@ -646,7 +677,9 @@ export default function MyBets() {
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Stats Row 1 */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div
+            className={`grid grid-cols-1 ${hasUsdBets ? "md:grid-cols-5" : "md:grid-cols-4"} gap-6`}
+          >
             <StatCard
               icon={
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -656,7 +689,7 @@ export default function MyBets() {
                   />
                 </div>
               }
-              label="Поточний банк"
+              label={`Поточний банк${hasUsdBets ? " (UAH)" : ""}`}
               value={`${bankrollStats.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
               subtext={`${Number(stats.totalProfit) >= 0 ? "+" : ""}${Number(stats.totalProfit).toFixed(2)} ₴ за весь час`}
               subIcon={
@@ -674,6 +707,22 @@ export default function MyBets() {
               }
               trend={stats.totalProfit >= 0 ? "up" : "down"}
             />
+            {hasUsdBets && exchangeRate > 0 && (
+              <StatCard
+                icon={
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF3C7]">
+                    <DollarSign
+                      className="h-5 w-5 text-[#D97706]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                }
+                label="Поточний банк (USD)"
+                value={`≈ $${(bankrollStats.currentBank / exchangeRate).toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`}
+                subtext={`Курс ${exchangeRate} ₴/$`}
+                valueColor="text-[#D97706]"
+              />
+            )}
             <StatCard
               icon={
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
@@ -683,20 +732,20 @@ export default function MyBets() {
                   />
                 </div>
               }
-              label="Профіт"
-              value={`${Number(stats.totalProfit || 0) >= 0 ? "+" : ""}${Number(stats.totalProfit || 0).toFixed(2)} ₴`}
+              label={`Профіт${hasUsdBets ? " (UAH)" : ""}`}
+              value={`${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`}
               valueColor={
-                Number(stats.totalProfit || 0) >= 0
+                Number(profitByCurrency.profitUAH || 0) >= 0
                   ? "text-[#111827]"
                   : "text-[#EF4444]"
               }
               subtext={
-                (stats.totalProfit || 0) >= 0
+                (profitByCurrency.profitUAH || 0) >= 0
                   ? "Позитивна динаміка"
                   : "Негативна динаміка"
               }
               subIcon={
-                (stats.totalProfit || 0) >= 0 ? (
+                (profitByCurrency.profitUAH || 0) >= 0 ? (
                   <ArrowUpRight
                     className="h-4 w-4 text-[#22C55E]"
                     strokeWidth={2.5}
@@ -708,8 +757,46 @@ export default function MyBets() {
                   />
                 )
               }
-              trend={(stats.totalProfit || 0) >= 0 ? "up" : "down"}
+              trend={(profitByCurrency.profitUAH || 0) >= 0 ? "up" : "down"}
             />
+            {hasUsdBets && (
+              <StatCard
+                icon={
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF3C7]">
+                    <DollarSign
+                      className="h-5 w-5 text-[#D97706]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                }
+                label="Профіт (USD)"
+                value={`${Number(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$${Number(profitByCurrency.profitUSD || 0).toFixed(2)}`}
+                valueColor={
+                  Number(profitByCurrency.profitUSD || 0) >= 0
+                    ? "text-[#D97706]"
+                    : "text-[#EF4444]"
+                }
+                subtext={
+                  (profitByCurrency.profitUSD || 0) >= 0
+                    ? "Прибуток у доларах"
+                    : "Збиток у доларах"
+                }
+                subIcon={
+                  (profitByCurrency.profitUSD || 0) >= 0 ? (
+                    <ArrowUpRight
+                      className="h-4 w-4 text-[#22C55E]"
+                      strokeWidth={2.5}
+                    />
+                  ) : (
+                    <ArrowDownRight
+                      className="h-4 w-4 text-[#EF4444]"
+                      strokeWidth={2.5}
+                    />
+                  )
+                }
+                trend={(profitByCurrency.profitUSD || 0) >= 0 ? "up" : "down"}
+              />
+            )}
             <StatCard
               icon={
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
