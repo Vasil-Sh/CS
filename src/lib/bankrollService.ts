@@ -94,7 +94,11 @@ export class BankrollService {
       lastUpdated: new Date().toISOString(),
     };
     try {
-      await api.post("/bankroll", { initialBank: data.initialBank });
+      await api.post("/bankroll", {
+        initialBank: data.initialBank,
+        initialBankUSD: data.initialBankUSD,
+        exchangeRate: data.exchangeRate,
+      });
     } catch (err) {
       if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
     }
@@ -174,7 +178,6 @@ export class BankrollService {
     }
     const profitUAH = this.calculateTotalProfit(bets, "UAH");
     const profitUSD = this.calculateTotalProfitUSD(bets);
-    const rate = data.exchangeRate || 41.5;
 
     const currentUAH =
       (data.initialBankUAH || 0) + profitUAH + data.manualAdjustments;
@@ -261,14 +264,41 @@ export class BankrollService {
   }
 
   // ═══ API-backed methods ═══
-  static async fetchBankroll(): Promise<BankrollStats> {
+  static async fetchBankroll(): Promise<
+    BankrollStats & { initialBankUSD?: number; exchangeRate?: number }
+  > {
     const data = await api.get<Record<string, number>>("/bankroll");
     return {
       initialBank: data.initialBank || 0,
       currentBank: data.currentBank || 0,
       totalProfit: data.totalProfit || 0,
       roi: data.roi || 0,
+      initialBankUSD: data.initialBankUSD || 0,
+      exchangeRate: data.exchangeRate || 0,
     };
+  }
+
+  /** Sync API bankroll data into localStorage (called when API returns successfully) */
+  static syncFromAPI(
+    username: string,
+    apiData: {
+      initialBank?: number;
+      initialBankUSD?: number;
+      exchangeRate?: number;
+    },
+  ): void {
+    if (
+      apiData.initialBankUSD === undefined &&
+      apiData.exchangeRate === undefined
+    )
+      return;
+    const existing = this.getBankrollData(username);
+    if (!existing) return;
+    if (apiData.initialBankUSD !== undefined)
+      existing.initialBankUSD = apiData.initialBankUSD;
+    if (apiData.exchangeRate !== undefined)
+      existing.exchangeRate = apiData.exchangeRate;
+    UserDataService.setUserDataSync(username, this.STORAGE_KEY, existing);
   }
 
   static async setInitialBankApi(

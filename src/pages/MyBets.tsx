@@ -216,6 +216,7 @@ export default function MyBets() {
       try {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
+          BankrollService.syncFromAPI(currentUser, apiStats);
           setDualBank({
             uah: apiStats,
             usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
@@ -240,6 +241,7 @@ export default function MyBets() {
       try {
         const apiStats = await BankrollService.fetchBankroll();
         if (apiStats.initialBank > 0) {
+          BankrollService.syncFromAPI(currentUser, apiStats);
           setDualBank({
             uah: apiStats,
             usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
@@ -314,6 +316,7 @@ export default function MyBets() {
     try {
       const apiStats = await BankrollService.fetchBankroll();
       if (apiStats.initialBank > 0) {
+        BankrollService.syncFromAPI(currentUser, apiStats);
         setDualBank({
           uah: apiStats,
           usd: BankrollService.getBankrollStatsDual(currentUser, []).usd,
