@@ -22,7 +22,7 @@ export interface Bet {
   selection?: string;
   matchUrl?: string;
   winProbability?: number;
-  createdAt?: number;
+  createdAt?: string; // ISO date string from PostgreSQL timestamp
   /** Risk assessment label */
   risk?: string;
   /** Additional notes / reasoning */

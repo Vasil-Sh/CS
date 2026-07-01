@@ -93,8 +93,8 @@ const BetTableMemo = memo(function BetTable({
     let result = [...bets].sort((a, b) => {
       if (a.result === 'Pending' && b.result !== 'Pending') return -1;
       if (a.result !== 'Pending' && b.result === 'Pending') return 1;
-      const aTime = a.createdAt || new Date(a.date).getTime();
-      const bTime = b.createdAt || new Date(b.date).getTime();
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : new Date(a.date).getTime();
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : new Date(b.date).getTime();
       return bTime - aTime;
     });
 
