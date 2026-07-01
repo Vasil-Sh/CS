@@ -129,6 +129,12 @@ export default function Analytics() {
     [bets],
   );
 
+  const exchangeRate = useMemo(() => {
+    const usdBets = bets.filter((b) => b.currency === "USD" && b.exchangeRate);
+    if (usdBets.length === 0) return 0;
+    return Number(usdBets[0].exchangeRate) || 0;
+  }, [bets]);
+
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("all");
   const [filtersExpanded, setFiltersExpanded] = useState(false);
@@ -748,31 +754,49 @@ export default function Analytics() {
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                     </button>
                   </div>
-                  <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-                    {bankrollStats.currentBank.toLocaleString("uk-UA", {
-                      maximumFractionDigits: 0,
-                    })}{" "}
-                    ₴
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {filteredStats.totalProfit >= 0 ? (
-                      <ArrowUpRight
-                        className="h-4 w-4 text-green-500"
-                        strokeWidth={2.5}
-                      />
-                    ) : (
-                      <ArrowDownRight
-                        className="h-4 w-4 text-red-500"
-                        strokeWidth={2.5}
-                      />
+                  <div className="flex items-baseline justify-between gap-3 mb-1">
+                    <div className="text-4xl font-bold text-gray-900 tracking-tight">
+                      {bankrollStats.currentBank.toLocaleString("uk-UA", {
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      ₴
+                    </div>
+                    {hasUsdBets && exchangeRate > 0 && (
+                      <div className="text-4xl font-bold text-amber-600 tracking-tight">
+                        ≈ $
+                        {(
+                          bankrollStats.currentBank / exchangeRate
+                        ).toLocaleString("uk-UA", {
+                          maximumFractionDigits: 0,
+                        })}
+                      </div>
                     )}
-                    <span
-                      className={`text-base font-normal ${Number(filteredStats.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
-                    >
-                      {Number(filteredStats.totalProfit) >= 0 ? "+" : ""}
-                      {Number(filteredStats.totalProfit).toFixed(2)} ₴
-                    </span>
-                    <span className="text-sm text-gray-400">за весь час</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {filteredStats.totalProfit >= 0 ? (
+                        <ArrowUpRight
+                          className="h-4 w-4 text-green-500"
+                          strokeWidth={2.5}
+                        />
+                      ) : (
+                        <ArrowDownRight
+                          className="h-4 w-4 text-red-500"
+                          strokeWidth={2.5}
+                        />
+                      )}
+                      <span
+                        className={`text-base font-normal ${Number(filteredStats.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
+                      >
+                        {Number(filteredStats.totalProfit) >= 0 ? "+" : ""}
+                        {Number(filteredStats.totalProfit).toFixed(2)} ₴
+                      </span>
+                    </div>
+                    {hasUsdBets && exchangeRate > 0 && (
+                      <span className="text-sm text-gray-400">
+                        Курс {exchangeRate} ₴/$
+                      </span>
+                    )}
                   </div>
                 </div>
 
