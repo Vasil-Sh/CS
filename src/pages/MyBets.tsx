@@ -20,6 +20,7 @@ import StatCard from "@/components/StatCard";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
+import { api } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
 import { authService } from "@/lib/authService";
@@ -342,22 +343,13 @@ export default function MyBets() {
   const clearRecentBets = useCallback(async () => {
     if (!window.confirm("Ви впевнені, що хочете очистити ВСІ дані (ставки, цілі, стратегії, групи, банкрол)?")) return;
 
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-    const H = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
-
-    // Single API call — deletes everything in DB atomically
     let apiOk = false;
     try {
-      const res = await fetch(`${API_BASE}/admin/reset`, { method: 'POST', headers: H });
-      const body = await res.json();
-      if (res.ok) {
-        apiOk = true;
-        console.log('[Reset] API OK:', body.counts);
-      } else {
-        console.warn('[Reset] API failed:', body);
-      }
+      const body = await api.post<{ success: boolean; counts: Record<string, number> }>('/admin/reset', {});
+      apiOk = body.success;
+      console.log('[Reset] API OK:', body.counts);
     } catch (err: unknown) {
-      console.error('[Reset] Network error:', err);
+      console.error('[Reset] Error:', err instanceof Error ? err.message : err);
     }
 
     // Always clear localStorage (regardless of API result)
@@ -409,17 +401,8 @@ export default function MyBets() {
           : bet;
         // Try API PATCH first
         try {
-          const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-          await fetch(`${API_BASE}/bets/${bet.id}`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-            },
-            body: JSON.stringify({ result, profit: profitInUAH, roi, notes: betWithNotes.notes }),
-          });
+          await api.patch(`/bets/${bet.id}`, { result, profit: profitInUAH, roi, notes: betWithNotes.notes });
         } catch {
-          // Fallback: write to localStorage only
           console.warn('[API] PATCH failed, saving locally');
         }
         let matched = false;
@@ -532,15 +515,9 @@ export default function MyBets() {
     if (!deleteDialogBet) return;
     const bet = deleteDialogBet;
     setDeleteDialogBet(null);
-    // Try API DELETE first
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      await fetch(`${API_BASE}/bets/${bet.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
-      });
+      await api.delete(`/bets/${bet.id}`);
     } catch {
-      // Fallback: just removed from local state
       console.warn('[API] DELETE failed, removed locally only');
     }
     syncBankrollStats();

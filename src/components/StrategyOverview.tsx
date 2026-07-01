@@ -26,6 +26,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { CS2Strategy } from "@/types/strategy";
+import { api } from "@/lib/apiClient";
 import {
   Target,
   TrendingUp,
@@ -208,14 +209,8 @@ export default function StrategyOverview() {
       // 1. Try API first (fast)
       let betsData: unknown[] = [];
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const res = await fetch(`${API_BASE}/bets?page=1&limit=200`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-        });
-        if (res.ok) {
-          const json = await res.json();
-          betsData = json.data || json;
-        }
+        const json = await api.get<{ data?: unknown[] } | unknown[]>('/bets?page=1&limit=200');
+        betsData = Array.isArray(json) ? json : (json as { data?: unknown[] }).data || [];
       } catch { /* fallback */ }
 
       // 2. Fallback to localStorage
