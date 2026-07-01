@@ -285,7 +285,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditGame("");
   };
 
-  const saveEditing = () => {
+  const saveEditing = async () => {
     if (editingIndex === null || !editName.trim()) return;
 
     const oldGame = riskyTeams[editingIndex].game;
@@ -298,33 +298,33 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       status: editStatus,
       game: newGame,
     };
+    // Save team BEFORE resetting editingIndex
+    const savedTeam = updatedTeams[editingIndex];
     setRiskyTeams(updatedTeams);
     setEditingIndex(null);
 
     // Sync to API: update if _apiId exists, otherwise add
-    const savedTeam = updatedTeams[editingIndex];
-    if (savedTeam._apiId) {
-      googleSheetsRiskyTeamsService
-        .updateTeam(savedTeam._apiId, {
+    try {
+      if (savedTeam._apiId) {
+        await googleSheetsRiskyTeamsService.updateTeam(savedTeam._apiId, {
           name: savedTeam.name,
           game: savedTeam.game,
           status: savedTeam.status,
           notes: savedTeam.notes,
-        })
-        .catch(() => {
-          /* ignore */
         });
-    } else {
-      googleSheetsRiskyTeamsService
-        .addTeam(
+      } else {
+        await googleSheetsRiskyTeamsService.addTeam(
           savedTeam.name,
           savedTeam.game,
           savedTeam.status,
           savedTeam.notes,
-        )
-        .catch(() => {
-          /* ignore */
-        });
+        );
+        // Re-fetch to get _apiId for newly created team
+        const fresh = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+        if (fresh.length > 0) setRiskyTeams(fresh);
+      }
+    } catch {
+      /* API offline — data saved in localStorage already */
     }
 
     if (oldGame !== newGame) {
