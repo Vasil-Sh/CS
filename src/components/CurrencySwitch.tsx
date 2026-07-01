@@ -18,7 +18,7 @@ const CurrencySwitchMemo = memo(function CurrencySwitch({
         onClick={() => onChange("UAH")}
         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
           currency === "UAH"
-            ? "bg-white text-[#111827] shadow-sm"
+            ? "bg-[#447afc] text-white shadow-sm"
             : "text-[#9CA3AF] hover:text-[#6B7280]"
         }`}
       >
@@ -29,7 +29,7 @@ const CurrencySwitchMemo = memo(function CurrencySwitch({
         onClick={() => onChange("USD")}
         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
           currency === "USD"
-            ? "bg-[#FEF3C7] text-[#D97706] shadow-sm"
+            ? "bg-[#447afc] text-white shadow-sm"
             : "text-[#9CA3AF] hover:text-[#6B7280]"
         } ${!hasUsdBets ? "opacity-40 cursor-not-allowed" : ""}`}
         disabled={!hasUsdBets}
