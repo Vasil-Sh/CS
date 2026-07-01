@@ -129,11 +129,7 @@ export default function Analytics() {
     [bets],
   );
 
-  const exchangeRate = useMemo(() => {
-    const usdBets = bets.filter((b) => b.currency === "USD" && b.exchangeRate);
-    if (usdBets.length === 0) return 0;
-    return Number(usdBets[0].exchangeRate) || 0;
-  }, [bets]);
+  // exchangeRate moved after currencyMode
 
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("all");
@@ -147,6 +143,28 @@ export default function Analytics() {
   });
   const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
   const [activeTab, setActiveTab] = useState("profit");
+
+  const exchangeRate = useMemo(() => {
+    const usdBets = bets.filter((b) => b.currency === "USD" && b.exchangeRate);
+    if (usdBets.length === 0) return 0;
+    return Number(usdBets[0].exchangeRate) || 0;
+  }, [bets]);
+
+  // Convert all bets to display currency — used by ALL charts
+  const displayBets = useMemo(() => {
+    if (currencyMode === "UAH") return bets;
+    return bets.map((bet: Bet) => {
+      const profit = bet.profit || 0;
+      let displayProfit = 0;
+      if (bet.currency === "USD" && bet.exchangeRate) {
+        const rate = Number(bet.exchangeRate);
+        displayProfit = rate > 0 ? profit / rate : profit;
+      }
+      // UAH bets show 0 profit in USD mode (they belong to UAH portfolio)
+      return { ...bet, profit: displayProfit };
+    });
+  }, [bets, currencyMode]);
+
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
   const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("CS2");
@@ -361,8 +379,8 @@ export default function Analytics() {
 
   // Filter bets by game
   const gameFilteredBets = useMemo(() => {
-    if (gameFilter === "all") return bets;
-    return bets.filter((bet: Bet) => {
+    if (gameFilter === "all") return displayBets;
+    return displayBets.filter((bet: Bet) => {
       const g = bet.game || "";
       return (
         g === gameFilter ||
