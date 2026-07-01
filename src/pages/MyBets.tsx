@@ -698,7 +698,7 @@ export default function MyBets() {
               }
               trend={dualBank.uah.totalProfit >= 0 ? "up" : "down"}
             />
-            {hasUsdBets && dualBank.usd.initialBank > 0 && (
+            {hasUsdBets && (
               <StatCard
                 icon={
                   <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FEF3C7]">
@@ -708,7 +708,7 @@ export default function MyBets() {
                     />
                   </div>
                 }
-                label="Поточний банк (USD)"
+                label="Поточний банк (USDT)"
                 value={`$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`}
                 valueColor="text-[#D97706]"
                 subtext={`${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`}

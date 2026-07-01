@@ -759,7 +759,7 @@ export default function Analytics() {
                       })}{" "}
                       ₴
                     </div>
-                    {hasUsdBets && dualBank.usd.initialBank > 0 && (
+                    {hasUsdBets && (
                       <div className="text-4xl font-bold text-amber-600 tracking-tight">
                         $
                         {dualBank.usd.currentBank.toLocaleString("uk-UA", {
@@ -788,7 +788,7 @@ export default function Analytics() {
                         {Number(dualBank.uah.totalProfit).toFixed(2)} ₴
                       </span>
                     </div>
-                    {hasUsdBets && dualBank.usd.initialBank > 0 && (
+                    {hasUsdBets && (
                       <span className="text-sm text-gray-400">
                         Курс {exchangeRate} ₴/$
                       </span>
