@@ -1,6 +1,7 @@
-import { type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Sun, Moon, MoreHorizontal } from 'lucide-react';
+import { type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Sun, Moon, MoreHorizontal } from "lucide-react";
+import CurrencySwitch from "@/components/CurrencySwitch";
 
 export interface PageHeaderProps {
   /** Page title (e.g., "Аналітика", "Матчі") */
@@ -21,6 +22,11 @@ export interface PageHeaderProps {
   onToggleActionsMenu?: () => void;
   /** Custom content for the actions dropdown */
   actionsMenuContent?: ReactNode;
+  /** Currency switch props */
+  showCurrencySwitch?: boolean;
+  currencyMode?: "UAH" | "USD";
+  onCurrencyChange?: (c: "UAH" | "USD") => void;
+  hasUsdBets?: boolean;
 }
 
 /**
@@ -37,6 +43,10 @@ export function PageHeader({
   actionsMenuOpen = false,
   onToggleActionsMenu,
   actionsMenuContent,
+  showCurrencySwitch = false,
+  currencyMode,
+  onCurrencyChange,
+  hasUsdBets,
 }: PageHeaderProps) {
   const navigate = useNavigate();
 
@@ -59,7 +69,10 @@ export function PageHeader({
                 className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/5 transition-colors duration-200"
                 title="Дії"
               >
-                <MoreHorizontal className="h-5 w-5 text-[#6B7280]" strokeWidth={1.5} />
+                <MoreHorizontal
+                  className="h-5 w-5 text-[#6B7280]"
+                  strokeWidth={1.5}
+                />
               </button>
 
               {actionsMenuOpen && actionsMenuContent}
@@ -70,31 +83,53 @@ export function PageHeader({
           {showThemeToggle && (
             <div className="flex items-center gap-1 p-1 rounded-full bg-black/5">
               <button
-                onClick={() => { if (isDarkTheme) onToggleTheme(); }}
+                onClick={() => {
+                  if (isDarkTheme) onToggleTheme();
+                }}
                 className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                  !isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                  !isDarkTheme ? "bg-white shadow-sm" : "hover:bg-black/5"
                 }`}
                 title="Світла тема"
               >
-                <Sun className={`h-4 w-4 ${!isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+                <Sun
+                  className={`h-4 w-4 ${!isDarkTheme ? "text-[#2563EB]" : "text-[#9CA3AF]"}`}
+                  strokeWidth={1.5}
+                />
               </button>
               <button
-                onClick={() => { if (!isDarkTheme) onToggleTheme(); }}
+                onClick={() => {
+                  if (!isDarkTheme) onToggleTheme();
+                }}
                 className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
-                  isDarkTheme ? 'bg-white shadow-sm' : 'hover:bg-black/5'
+                  isDarkTheme ? "bg-white shadow-sm" : "hover:bg-black/5"
                 }`}
                 title="Темна тема"
               >
-                <Moon className={`h-4 w-4 ${isDarkTheme ? 'text-[#2563EB]' : 'text-[#9CA3AF]'}`} strokeWidth={1.5} />
+                <Moon
+                  className={`h-4 w-4 ${isDarkTheme ? "text-[#2563EB]" : "text-[#9CA3AF]"}`}
+                  strokeWidth={1.5}
+                />
               </button>
             </div>
           )}
 
-          <div className="w-px h-8 bg-[#D1D5DB]" />
+          {/* Currency switch — conditional (UAH / USDT) */}
+          {showCurrencySwitch && currencyMode && onCurrencyChange && (
+            <>
+              <CurrencySwitch
+                currency={currencyMode}
+                onChange={onCurrencyChange}
+                hasUsdBets={hasUsdBets}
+              />
+              <div className="w-px h-8 bg-[#D1D5DB]" />
+            </>
+          )}
+
+          {!showCurrencySwitch && <div className="w-px h-8 bg-[#D1D5DB]" />}
 
           {/* User info — clickable to Profile */}
           <button
-            onClick={() => navigate('/app/profile')}
+            onClick={() => navigate("/app/profile")}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
             title="Перейти до профілю"
           >
@@ -103,7 +138,7 @@ export function PageHeader({
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-[#111827] leading-tight">
-                {currentUser || 'User'}
+                {currentUser || "User"}
               </p>
               <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
                 Активний

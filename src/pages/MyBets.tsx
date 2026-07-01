@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import InitialBankModal from "@/components/InitialBankModal";
 import StatCard from "@/components/StatCard";
-import CurrencySwitch from "@/components/CurrencySwitch";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -669,18 +668,15 @@ export default function MyBets() {
         isDarkTheme={isDarkTheme}
         onToggleTheme={toggleTheme}
         showThemeToggle={false}
+        showCurrencySwitch={true}
+        currencyMode={currencyMode}
+        onCurrencyChange={setCurrencyMode}
+        hasUsdBets={hasUsdBets}
       />
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* Stats Row 1 */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-end mb-3">
-            <CurrencySwitch
-              currency={currencyMode}
-              onChange={setCurrencyMode}
-              hasUsdBets={hasUsdBets}
-            />
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard
               icon={

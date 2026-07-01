@@ -27,7 +27,6 @@ import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
 import GoalsManager from "@/components/GoalsManager";
 import InitialBankModal from "@/components/InitialBankModal";
-import CurrencySwitch from "@/components/CurrencySwitch";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -685,6 +684,10 @@ export default function Analytics() {
             isDarkTheme={isDarkTheme}
             onToggleTheme={toggleTheme}
             showThemeToggle={false}
+            showCurrencySwitch={true}
+            currencyMode={currencyMode}
+            onCurrencyChange={setCurrencyMode}
+            hasUsdBets={hasUsdBets}
           />
 
           {/* Main Content */}
@@ -715,13 +718,6 @@ export default function Analytics() {
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center justify-end mb-3">
-                <CurrencySwitch
-                  currency={currencyMode}
-                  onChange={setCurrencyMode}
-                  hasUsdBets={hasUsdBets}
-                />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* 1. Поточний банк */}
                 <div
