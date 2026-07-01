@@ -121,7 +121,7 @@ const loadMatchRatings = (): Record<string, MatchRating> => {
     const saved = localStorage.getItem('match_ratings');
     if (saved) return JSON.parse(saved);
   } catch (e) {
-    console.error('Error loading match ratings:', e);
+    if (import.meta.env.DEV) console.warn('[Matches] Error loading ratings:', e);
   }
   return {};
 };
@@ -131,7 +131,7 @@ const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
   try {
     localStorage.setItem('match_ratings', JSON.stringify(ratings));
   } catch (e) {
-    console.error('Error saving match ratings:', e);
+    if (import.meta.env.DEV) console.warn('[Matches] Error saving ratings:', e);
   }
 };
 
@@ -591,7 +591,7 @@ export default function Matches() {
       setApiError(null);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Не вдалося завантажити матчі з API';
-      console.error('Error loading matches from API:', error);
+      if (import.meta.env.DEV) console.warn('[Matches] API error:', error);
       setApiError(msg);
       toast.error('⚠️ Помилка завантаження', {
         description: 'Не вдалося завантажити матчі з API'
@@ -608,7 +608,7 @@ export default function Matches() {
         setRiskyTeams(JSON.parse(saved));
       }
     } catch (error) {
-      console.error('Error loading risky teams:', error);
+      if (import.meta.env.DEV) console.warn('[Matches] Error loading risky teams:', error);
     }
   };
 
@@ -663,7 +663,7 @@ export default function Matches() {
       // Cache for table display
       setAiPredictions(prev => ({ ...prev, [match.id]: recommendation }));
     } catch (error) {
-      console.error('Error getting AI recommendation:', error);
+      if (import.meta.env.DEV) console.warn('[Matches] AI recommend error:', error);
       toast.error('❌ Помилка', { description: 'Не вдалося отримати AI рекомендацію' });
     } finally {
       setAiLoading(false);

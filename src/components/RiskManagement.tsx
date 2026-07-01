@@ -100,7 +100,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         setRiskyTeams(teams);
         setIsLoadingTeams(false);
       })
-      .catch(() => setIsLoadingTeams(false));
+      .catch((err) => { if (import.meta.env.DEV) console.warn('[RiskMgmt] Fetch failed:', err); setIsLoadingTeams(false); });
   }, []);
 
   // Save to localStorage for backward-compat read by other components

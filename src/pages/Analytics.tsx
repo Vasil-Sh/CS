@@ -160,7 +160,7 @@ export default function Analytics() {
       }
       
     } catch (error) {
-      console.error('❌ Error loading analytics:', error);
+      if (import.meta.env.DEV) console.warn('[Analytics] Error loading:', error);
       setBets([]);
       setStats({
         totalBets: 0,

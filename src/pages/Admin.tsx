@@ -188,7 +188,7 @@ export default function Admin() {
       setUsers(parsedUsers);
       setLastUpdate(new Date().toLocaleString('uk-UA'));
     } catch (err) {
-      console.error('Error fetching users:', err);
+      if (import.meta.env.DEV) console.warn('[Admin] Error fetching users:', err);
       setError('Помилка завантаження даних користувачів');
     } finally {
       setLoading(false);

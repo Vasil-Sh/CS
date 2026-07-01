@@ -157,7 +157,7 @@ const BetTableMemo = memo(function BetTable({
   const getCurrencySymbol = (currency?: string) => currency === 'USD' ? '$' : '₴';
   const [cachedGoals, setCachedGoals] = useState<Goal[]>([]);
   useEffect(() => {
-    api.get<Goal[]>('/goals').then(setCachedGoals).catch(() => {});
+    api.get<Goal[]>('/goals').then(setCachedGoals).catch((err) => { if (import.meta.env.DEV) console.warn('[BetTable] Goals fetch failed:', err); });
   }, [currentUser]);
   const getGoalName = (goalId?: string) => {
     if (!goalId) return null;

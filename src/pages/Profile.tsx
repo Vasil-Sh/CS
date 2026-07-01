@@ -299,7 +299,7 @@ export default function Profile() {
         description: `Файл: matchiq-backup-${new Date().toISOString().slice(0, 10)}.json`
       });
     } catch (error) {
-      console.error('Backup export error:', error);
+      if (import.meta.env.DEV) console.warn('[Profile] Backup export error:', error);
       toast.error('Помилка створення бекапу', {
         description: 'Не вдалося експортувати дані'
       });
