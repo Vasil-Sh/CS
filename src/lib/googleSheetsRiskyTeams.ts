@@ -28,6 +28,15 @@ const STATUS_EMOJIS: Record<string, string> = {
 
 const GAMES = ["CS", "CS2", "CS:GO", "Dota2", "Дота", "Dota"];
 
+/** Normalize game name from API/CSV to internal format: Dota2/Dota → Дота, CS2/CS:GO → CS */
+function normalizeGame(game?: string): string {
+  if (!game) return "CS";
+  const g = game.toLowerCase().trim();
+  if (g === "dota2" || g === "dota" || g === "дота") return "Дота";
+  if (g === "cs2" || g === "cs:go" || g === "csgo" || g === "cs") return "CS";
+  return game;
+}
+
 class GoogleSheetsRiskyTeamsService {
   /**
    * Fetch risky teams: try backend API first, fall back to Google Sheets CSV.
@@ -43,7 +52,7 @@ class GoogleSheetsRiskyTeamsService {
           await api.get<(ApiRiskyTeam & { id: number })[]>("/risky-teams");
         return teams.map((t) => ({
           name: t.name,
-          game: t.game || "CS",
+          game: normalizeGame(t.game),
           status: t.status || "Без статусу",
           notes: t.notes || "",
           _apiId: t.id,
@@ -96,7 +105,12 @@ class GoogleSheetsRiskyTeamsService {
 
           const { status, game, notes } = parseStatusCell(statusCell);
 
-          parsed.push({ name: teamName, game, status, notes });
+          parsed.push({
+            name: teamName,
+            game: normalizeGame(game),
+            status,
+            notes,
+          });
         }
 
         if (import.meta.env.DEV)
@@ -127,7 +141,7 @@ class GoogleSheetsRiskyTeamsService {
     try {
       await api.post("/risky-teams", {
         name,
-        game: game || "",
+        game: normalizeGame(game),
         status: status || "",
         notes: notes || "",
       });
