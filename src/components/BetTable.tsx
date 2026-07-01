@@ -1,7 +1,7 @@
-import { useMemo, useState, memo } from 'react';
+import { useMemo, useState, memo, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserDataService } from '@/lib/userDataService';
+import { api } from '@/lib/apiClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -155,10 +155,13 @@ const BetTableMemo = memo(function BetTable({
   };
 
   const getCurrencySymbol = (currency?: string) => currency === 'USD' ? '$' : '₴';
+  const [cachedGoals, setCachedGoals] = useState<Goal[]>([]);
+  useEffect(() => {
+    api.get<Goal[]>('/goals').then(setCachedGoals).catch(() => {});
+  }, [currentUser]);
   const getGoalName = (goalId?: string) => {
     if (!goalId) return null;
-    const goals = UserDataService.getUserData<Goal[]>(currentUser, 'goals', []);
-    return goals.find((g) => g.id === goalId)?.name || 'Видалена ціль';
+    return cachedGoals.find((g) => g.id === goalId)?.name || 'Видалена ціль';
   };
   const isExpressBet = (bet: Bet) => bet.betType.includes('Експрес') || bet.format.includes('x');
   const getExpressEventCount = (bet: Bet) => {

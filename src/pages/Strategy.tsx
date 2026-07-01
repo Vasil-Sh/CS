@@ -5,7 +5,6 @@ import StrategyOverview from '@/components/StrategyOverview';
 import GoalsManager from '@/components/GoalsManager';
 import RiskManagement from '@/components/RiskManagement';
 import { UserDataService } from '@/lib/userDataService';
-import { api } from '@/lib/apiClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/stores/appStore';import { logRender } from '@/lib/devLogger';import { PageHeader } from '@/components/PageHeader';
 import type { Bet } from '@/types/betting';

@@ -100,7 +100,7 @@ export default function Profile() {
     setClearConfirmOpen(false);
     try {
       // Try API reset first
-      try { await api.post('/admin/reset', {}); } catch { /* API might be down */ }
+      try { await api.post('/admin/reset', {}); } catch (err) { if (import.meta.env.DEV) console.warn('[Profile] API reset failed:', err); }
       // Also clear localStorage (UI prefs kept)
       const keysToKeep = ['authToken', 'userRole', 'username', 'matchiq_theme', 'matchiq_lang'];
       const keysToRemove: string[] = [];

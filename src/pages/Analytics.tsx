@@ -26,31 +26,23 @@ import { CARD_BASE_STYLE, CARD_HOVER_STYLE, CHART_CARD_SHADOW, applyCardHover, r
 import { logRender } from '@/lib/devLogger';
 import { AnalyticsSkeleton } from '@/components/PageSkeleton';
 import { useRiskMetrics } from '@/hooks/useRiskMetrics';
-import { 
-  Target, 
+import {
+  Target,
   DollarSign,
   Filter,
   RefreshCw,
-  Trash2,
   AlertTriangle,
   BarChart3,
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  Flag,
   Wallet,
-  Edit,
-  ChevronDown,
-  ChevronUp,
-  User,
-  Sun,
-  Moon,
   Pencil,
   TrendingDown,
   TrendingUp,
   Info,
   Clock,
-} from 'lucide-react';
+} from "lucide-react";
 import { XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend, ReferenceLine } from 'recharts';
 import type { Bet, BettingStats, OddsRange, BalanceData, ScatterData } from '@/types/betting';
 
@@ -84,7 +76,6 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('all');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [connectionStatus] = useState({ connected: false, environment: 'Browser' });
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -130,7 +121,7 @@ export default function Analytics() {
         setBankrollStats(apiStats);
         return;
       }
-    } catch { /* noop */ }
+    } catch (err) { if (import.meta.env.DEV) console.warn('[Analytics] Bankroll update failed:', err); }
     setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
   }, []);
 
@@ -142,7 +133,7 @@ export default function Analytics() {
       let myBetsData: Bet[] = [];
       try {
         myBetsData = await UserDataService.fetchBets() as Bet[];
-      } catch { /* API down — proceed with empty */ }
+      } catch (err) { if (import.meta.env.DEV) console.warn('[Analytics] Bets fetch failed:', err); }
       
       setBets(myBetsData);
       
@@ -161,7 +152,7 @@ export default function Analytics() {
           const apiStats = await UserDataService.fetchBetStats();
           profitByMonth = apiStats.profitByMonth || [];
           profitByStrategy = apiStats.profitByStrategy || [];
-        } catch { /* use empty arrays */ }
+        } catch (err) { if (import.meta.env.DEV) console.warn('[Analytics] Stats fetch failed:', err); }
         
         setStats({ totalBets, winRate, totalProfit, averageROI, profitByMonth, profitByStrategy });
       } else {
@@ -192,7 +183,7 @@ export default function Analytics() {
         try {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) { setBankrollStats(apiStats); return; }
-        } catch {}
+        } catch (err) { if (import.meta.env.DEV) console.warn('[Analytics] Visibility bankroll refresh failed:', err); }
         setBankrollStats({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 });
       }
     };
