@@ -1282,10 +1282,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* CS Teams */}
             <Card
-              className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+              className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
@@ -1356,10 +1356,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             {/* Dota Teams */}
             <Card
-              className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden"
+              className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
@@ -1431,10 +1431,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {/* Uncategorized Teams — teams without game/status for editing */}
             {uncategorizedTeams.length > 0 && (
               <Card
-                className="border border-[#D1D5DB] rounded-2xl bg-white overflow-hidden lg:col-span-2"
+                className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden lg:col-span-2 flex flex-col"
                 style={{ boxShadow: chartCardShadow }}
               >
-                <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
+                <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
                   <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                     <span className="flex items-center gap-3">
                       <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
