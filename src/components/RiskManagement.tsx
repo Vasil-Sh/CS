@@ -274,7 +274,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditName(team.name);
     setEditNotes(team.notes);
     setEditStatus(team.status);
-    setEditGame(team.game);
+    setEditGame(team.game || "CS");
   };
 
   const cancelEditing = () => {
@@ -289,26 +289,31 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     if (editingIndex === null || !editName.trim()) return;
 
     const oldGame = riskyTeams[editingIndex].game;
+    const newGame = editGame || "CS";
     const updatedTeams = [...riskyTeams];
     updatedTeams[editingIndex] = {
       ...updatedTeams[editingIndex],
       name: editName.trim(),
       notes: editNotes,
       status: editStatus,
-      game: editGame,
+      game: newGame,
     };
     setRiskyTeams(updatedTeams);
     setEditingIndex(null);
 
-    if (oldGame !== editGame) {
-      if (!editGame) {
-        toast.success(`Команду "${editName.trim()}" оновлено`);
-      } else {
-        const targetLabel = editGame === "CS" ? "CS" : "Dota 2";
-        toast.success(
-          `Команду "${editName.trim()}" перенесено в блок ${targetLabel}`,
-        );
-      }
+    // Sync to API
+    const team = updatedTeams[editingIndex];
+    googleSheetsRiskyTeamsService
+      .addTeam(team.name, team.game, team.status, team.notes)
+      .catch(() => {
+        /* ignore */
+      });
+
+    if (oldGame !== newGame) {
+      const targetLabel = newGame === "CS" ? "CS" : "Dota 2";
+      toast.success(
+        `Команду "${editName.trim()}" перенесено в блок ${targetLabel}`,
+      );
     } else {
       toast.success("Команду оновлено");
     }
@@ -553,15 +558,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 Перенести в блок
               </label>
               <select
-                value={editGame || ""}
+                value={editGame || "CS"}
                 onChange={(e) => setEditGame(e.target.value)}
                 className="w-full p-2 border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
               >
-                {(!editGame || (editGame !== "CS" && editGame !== "Дота")) && (
-                  <option value="" disabled>
-                    Оберіть гру...
-                  </option>
-                )}
                 <option value="CS">🎯 CS</option>
                 <option value="Дота">🛡️ Дота</option>
               </select>
