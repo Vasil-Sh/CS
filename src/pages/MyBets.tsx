@@ -217,7 +217,8 @@ export default function MyBets() {
         if (apiStats.initialBank > 0) {
           setDualBank({
             uah: apiStats,
-            usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+            usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
+              .usd,
           });
           return;
         }
@@ -240,7 +241,8 @@ export default function MyBets() {
         if (apiStats.initialBank > 0) {
           setDualBank({
             uah: apiStats,
-            usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+            usd: BankrollService.getBankrollStatsDual(currentUser, recentBets)
+              .usd,
           });
           return;
         }
@@ -313,7 +315,7 @@ export default function MyBets() {
       if (apiStats.initialBank > 0) {
         setDualBank({
           uah: apiStats,
-          usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+          usd: BankrollService.getBankrollStatsDual(currentUser, []).usd,
         });
         return;
       }

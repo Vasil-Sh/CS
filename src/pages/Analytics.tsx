@@ -184,7 +184,7 @@ export default function Analytics() {
       if (apiStats.initialBank > 0) {
         setDualBank({
           uah: apiStats,
-          usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+          usd: BankrollService.getBankrollStatsDual(currentUser, bets).usd,
         });
         return;
       }
@@ -296,7 +296,7 @@ export default function Analytics() {
           if (apiStats.initialBank > 0) {
             setDualBank({
               uah: apiStats,
-              usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+              usd: BankrollService.getBankrollStatsDual(currentUser, bets).usd,
             });
             return;
           }
@@ -307,12 +307,7 @@ export default function Analytics() {
               err,
             );
         }
-        const allBets = UserDataService.getUserData(
-          currentUser,
-          "mybets_data",
-          [],
-        );
-        setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
+        setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
