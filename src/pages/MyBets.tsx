@@ -347,9 +347,9 @@ export default function MyBets() {
     try {
       const body = await api.post<{ success: boolean; counts: Record<string, number> }>('/admin/reset', {});
       apiOk = body.success;
-      console.log('[Reset] API OK:', body.counts);
+      if (import.meta.env.DEV) console.log('[Reset] API OK:', body.counts);
     } catch (err: unknown) {
-      console.error('[Reset] Error:', err instanceof Error ? err.message : err);
+      if (import.meta.env.DEV) console.error('[Reset] Error:', err instanceof Error ? err.message : err);
     }
 
     // Always clear localStorage (regardless of API result)
@@ -403,7 +403,7 @@ export default function MyBets() {
         try {
           await api.patch(`/bets/${bet.id}`, { result, profit: profitInUAH, roi, notes: betWithNotes.notes });
         } catch {
-          console.warn('[API] PATCH failed, saving locally');
+          if (import.meta.env.DEV) console.warn('[API] PATCH failed, saving locally');
         }
         let matched = false;
         setRecentBets((prev) =>
@@ -518,7 +518,7 @@ export default function MyBets() {
     try {
       await api.delete(`/bets/${bet.id}`);
     } catch {
-      console.warn('[API] DELETE failed, removed locally only');
+      if (import.meta.env.DEV) console.warn('[API] DELETE failed, removed locally only');
     }
     syncBankrollStats();
     syncStats();

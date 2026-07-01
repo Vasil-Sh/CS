@@ -411,7 +411,7 @@ export default function CS2BettingForm({
           return String(Math.round(lastAmount * 100) / 100);
       }
     } catch (error) {
-      console.error("Error getting last stake for goal:", error);
+      if (import.meta.env.DEV) console.error("Error getting last stake for goal:", error);
     }
     return "";
   };
@@ -598,7 +598,7 @@ export default function CS2BettingForm({
         }));
       }
     } catch (error) {
-      console.error("Error loading risky teams from storage:", error);
+      if (import.meta.env.DEV) console.error("Error loading risky teams from storage:", error);
     }
     return [];
   }
@@ -752,7 +752,7 @@ export default function CS2BettingForm({
       }
     } catch (error) {
       toast.error("Помилка при парсингу URL матчу");
-      console.error(error);
+      if (import.meta.env.DEV) console.error(error);
     } finally {
       setIsParsingMatch(false);
     }
@@ -977,10 +977,9 @@ export default function CS2BettingForm({
           logoTeam1: record.logoTeam1,
           logoTeam2: record.logoTeam2,
           expressLogos: record.expressLogos,
-        } as any);
+        } as Parameters<typeof UserDataService.createBet>[0]);
       } catch (err) {
-        // Optimistic cache: save to localStorage so UI reflects immediately
-        console.warn('[API] Bet save failed, caching to localStorage:', err);
+        if (import.meta.env.DEV) console.warn('[API] Bet save failed, caching to localStorage:', err);
         const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, 'mybets_data', []);
         UserDataService.setUserData(currentUser, 'mybets_data', [record as BetRecord, ...existingBets]);
       }
@@ -1006,7 +1005,7 @@ export default function CS2BettingForm({
       onRecordAdded?.();
     } catch (error) {
       toast.error("Помилка при додаванні запису");
-      console.error(error);
+      if (import.meta.env.DEV) console.error(error);
     } finally {
       setIsSubmitting(false);
       setPendingSubmit(false);

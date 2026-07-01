@@ -103,7 +103,7 @@ export function parseAIResponse(text: string): AIRecommendation {
       riskLevel: data.riskLevel || 'medium',
     };
   } catch (error) {
-    console.error('Error parsing AI response:', error);
+    if (import.meta.env.DEV) console.error('Error parsing AI response:', error);
     return {
       prediction: 'Помилка аналізу',
       confidence: 0,

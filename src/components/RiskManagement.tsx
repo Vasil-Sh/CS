@@ -153,35 +153,18 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       }
 
       // Replace ALL teams (not merge) — Google Sheets is the source of truth
-      // Log sample data to verify correct parsing
-      console.log(
-        "[RiskMgmt] Loaded from sheet:",
-        teamsFromSheet.length,
-        "teams",
-      );
-      console.log(
-        "[RiskMgmt] Sample:",
-        teamsFromSheet
-          .slice(0, 3)
-          .map((t) => `${t.name}[${t.game}/${t.status}]`)
-          .join(", "),
-      );
+      if (import.meta.env.DEV) {
+        console.log("[RiskMgmt] Loaded from sheet:", teamsFromSheet.length, "teams");
+        console.log("[RiskMgmt] Sample:", teamsFromSheet.slice(0, 3).map((t) => `${t.name}[${t.game}/${t.status}]`).join(", "));
+      }
 
       setRiskyTeams(teamsFromSheet);
 
-      // Debug: show sample of parsed team games
-      const sampleGames = teamsFromSheet
-        .slice(0, 5)
-        .map((t) => `${t.name}=${t.game}`);
-      console.log("[RiskMgmt] Sample teams (name=game):", sampleGames);
-      console.log(
-        "[RiskMgmt] Total:",
-        teamsFromSheet.length,
-        "CS:",
-        teamsFromSheet.filter((t) => t.game === "CS").length,
-        "Дота:",
-        teamsFromSheet.filter((t) => t.game === "Дота").length,
-      );
+      if (import.meta.env.DEV) {
+        const sampleGames = teamsFromSheet.slice(0, 5).map((t) => `${t.name}=${t.game}`);
+        console.log("[RiskMgmt] Sample teams (name=game):", sampleGames);
+        console.log("[RiskMgmt] Total:", teamsFromSheet.length, "CS:", teamsFromSheet.filter((t) => t.game === "CS").length, "Дота:", teamsFromSheet.filter((t) => t.game === "Дота").length);
+      }
 
       setRiskyTeams(teamsFromSheet);
 
@@ -192,7 +175,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         },
       );
     } catch (error) {
-      console.error("Error updating from Google Sheets:", error);
+      if (import.meta.env.DEV) console.error("Error updating from Google Sheets:", error);
       toast.error("Помилка оновлення", {
         description:
           error instanceof Error

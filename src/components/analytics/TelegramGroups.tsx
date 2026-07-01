@@ -223,7 +223,7 @@ export default function TelegramGroups() {
             if (idx >= 0) { saved[idx] = { ...saved[idx], _backendId: backend.id }; UserDataService.setUserDataSync(currentUser, 'tg_groups', saved); }
           }
         })
-        .catch((err: unknown) => console.warn('[API] Group save failed:', err));
+        .catch((err: unknown) => { if (import.meta.env.DEV) console.warn('[API] Group save failed:', err); });
     }
 
     setGroupDialogOpen(false);
@@ -244,7 +244,7 @@ export default function TelegramGroups() {
     const groupToDelete = groupsRef.current.find(g => g.id === groupId);
     const backendId = (groupToDelete as { _backendId?: string })?._backendId || groupId;
     api.delete(`/telegram-groups/${backendId}`).catch((err: unknown) => {
-      console.warn('[API] Group delete failed:', err);
+      if (import.meta.env.DEV) console.warn('[API] Group delete failed:', err);
     });
     toast.success('Групу та її ставки видалено');
     setDeleteGroupConfirm(null);

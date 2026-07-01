@@ -376,7 +376,7 @@ export default function Profile() {
           window.location.reload();
         }, 1500);
       } catch (error) {
-        console.error('Backup import error:', error);
+        if (import.meta.env.DEV) console.error('Backup import error:', error);
         toast.error('Помилка відновлення', {
           description: 'Не вдалося прочитати файл бекапу. Перевірте формат.'
         });

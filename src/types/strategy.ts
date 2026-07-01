@@ -1,4 +1,4 @@
-/** Strategy types — extracted from realGoogleSheets (dead code removed) */
+/** Strategy types — shared between frontend and backend config blob */
 
 export type ActionMode = "warning" | "block";
 

@@ -55,7 +55,7 @@ class AuthService {
 
       return { success: true, isAdmin: data.isAdmin ?? false };
     } catch (err: unknown) {
-      console.error("Login error:", err);
+      if (import.meta.env.DEV) console.error("Login error:", err);
       const status = (err as { status?: number }).status;
       if (status === 403) {
         return {

@@ -95,6 +95,7 @@ export default function Analytics() {
   useEffect(() => {
     loadAnalyticsData();
     updateBankrollStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -333,7 +334,7 @@ export default function Analytics() {
       winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
       color: colors[index % colors.length]
     }));
-  }, [bets]);
+  }, [gameFilteredBets]);
 
   const monthlyProfitData = useMemo((): MonthlyData[] => {
     const monthlyData: { [key: string]: { profit: number; wins: number; losses: number; sortKey: string } } = {};

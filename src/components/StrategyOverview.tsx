@@ -239,7 +239,7 @@ export default function StrategyOverview() {
       }
       useAppStore.getState().bumpStrategy();
     } catch (error) {
-      console.error("Error loading data:", error);
+      if (import.meta.env.DEV) console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
@@ -340,7 +340,7 @@ export default function StrategyOverview() {
         return migrated;
       }
     } catch (error) {
-      console.error("Error loading custom strategies:", error);
+      if (import.meta.env.DEV) console.error("Error loading custom strategies:", error);
     }
     return [];
   };
@@ -352,7 +352,7 @@ export default function StrategyOverview() {
       }
       bumpStrategy();
     } catch (error) {
-      console.error("Error saving custom strategies:", error);
+      if (import.meta.env.DEV) console.error("Error saving custom strategies:", error);
     }
   };
 
@@ -655,7 +655,7 @@ export default function StrategyOverview() {
         }
       }
     }).catch((err: unknown) => {
-      console.error('[API] Strategy save failed:', err);
+      if (import.meta.env.DEV) console.error('[API] Strategy save failed:', err);
       toast.error('Не вдалося зберегти стратегію на сервері. Дані збережено локально.');
     });
 
@@ -720,7 +720,7 @@ export default function StrategyOverview() {
     const backendId = strategyToRemove?._backendId || strategyToDelete;
     const strategyName = strategyToRemove?.name;
     UserDataService.deleteStrategy(backendId, strategyName).catch((err: unknown) => {
-      console.warn('[API] Strategy delete failed:', err);
+      if (import.meta.env.DEV) console.warn('[API] Strategy delete failed:', err);
     });
   };
 
