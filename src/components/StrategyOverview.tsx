@@ -25,7 +25,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import type { CS2Strategy } from "@/lib/realGoogleSheets";
+import type { CS2Strategy } from "@/types/strategy";
 import {
   Target,
   TrendingUp,
@@ -223,24 +223,12 @@ export default function StrategyOverview() {
         betsData = UserDataService.getUserData<Record<string, unknown>[]>(currentUser, 'mybets_data', []) as unknown[];
       }
 
-      // 1. Load strategies — try API first, fallback localStorage
+      // 1. Load strategies — API first
       let customStrategies = loadCustomStrategiesFromStorage();
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const res = await fetch(`${API_BASE}/strategies`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-        });
-        if (res.ok) {
-          const apiStrats = await res.json();
-          if (apiStrats.length > 0) {
-            // Map API strategies to CS2Strategy format
-            customStrategies = apiStrats.map((s: { id?: string; config?: Record<string, unknown>; name?: string }) => ({
-              id: s.id,
-              ...(s.config || {}),
-              _backendId: s.id,
-            }));
-            saveCustomStrategiesToStorage(customStrategies);
-          }
+        const apiStrats = await UserDataService.fetchStrategies() as (Record<string, unknown> & { id?: string; config?: Record<string, unknown> })[];
+        if (apiStrats && apiStrats.length > 0) {
+          customStrategies = apiStrats.map(s => ({ id: s.id, ...(s.config || {}), _backendId: s.id })) as CS2Strategy[];
         }
       } catch { /* fallback to localStorage */ }
       setStrategies(customStrategies);
@@ -248,19 +236,12 @@ export default function StrategyOverview() {
       calculateStrategyStats(betsData);
 
       const saved =
-        UserDataService.getUserData<string>(
-          currentUser,
-          "primary_strategy",
-          "",
-        ) ||
-        localStorage.getItem("primaryStrategy") ||
-        "";
+        UserDataService.getUserData<string>(currentUser, "primary_strategy", "") ||
+        localStorage.getItem("primaryStrategy") || "";
       if (saved) {
         setPrimaryStrategy(saved);
-        // Also sync to Zustand store so StrategyOverviewHeader can read it
         useAppStore.getState().setPrimaryStrategyId(saved);
       }
-      // Force SOH to reload strategies (which may have been loaded async from localStorage)
       useAppStore.getState().bumpStrategy();
     } catch (error) {
       console.error("Error loading data:", error);
@@ -371,16 +352,10 @@ export default function StrategyOverview() {
 
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
-      localStorage.setItem("customStrategies", JSON.stringify(strategies));
       if (currentUser) {
-        UserDataService.setUserDataSync(
-          currentUser,
-          "strategies_data",
-          strategies,
-        );
+        UserDataService.setUserDataSync(currentUser, "strategies_data", strategies);
       }
       bumpStrategy();
-      // API sync now handled on explicit create/delete actions — not on every save
     } catch (error) {
       console.error("Error saving custom strategies:", error);
     }

@@ -166,37 +166,31 @@ export default function GoalsManager() {
 
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); } }, [goals, currentUser]);
 
-  // Load goals from API on mount, merge with localStorage
+  // Load goals from API on mount
   useEffect(() => {
     if (!currentUser) return;
     (async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const res = await fetch(`${API_BASE}/goals`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-        });
-        if (res.ok) {
-          const apiGoals = await res.json();
-          if (apiGoals.length > 0) {
-            const mapped = apiGoals.map((g: { id: string; type: string; name: string; target?: unknown; current?: unknown; isCompleted?: boolean; config?: Record<string, unknown> }) => ({
-              id: g.id,
-              type: g.type,
-              name: g.name,
-              targetAmount: g.type === 'amount' ? Number(g.target) : undefined,
-              targetLadderAmount: g.type === 'ladder' ? Number(g.target) : undefined,
-              targetROI: g.type === 'roi' ? Number(g.target) : undefined,
-              targetWinRate: g.type === 'winrate' ? Number(g.target) : undefined,
-              currentAmount: g.type === 'amount' ? Number(g.current) : undefined,
-              currentStep: g.type === 'ladder' ? Number(g.current) : undefined,
-              currentROI: g.type === 'roi' ? Number(g.current) : undefined,
-              currentWinRate: g.type === 'winrate' ? Number(g.current) : undefined,
-              status: g.isCompleted ? 'completed' : 'active',
-              ...(g.config || {}),
-              _backendId: g.id,
-            }));
-            setGoals(mapped);
-            UserDataService.setUserDataSync(currentUser, 'goals', mapped);
-          }
+        const apiGoals = await UserDataService.fetchGoals() as (Record<string, unknown> & { id: string; type: string; name: string; target?: unknown; current?: unknown; isCompleted?: boolean; config?: Record<string, unknown> })[];
+        if (apiGoals && apiGoals.length > 0) {
+          const mapped = apiGoals.map(g => ({
+            id: g.id,
+            type: g.type,
+            name: g.name,
+            targetAmount: g.type === 'amount' ? Number(g.target) : undefined,
+            targetLadderAmount: g.type === 'ladder' ? Number(g.target) : undefined,
+            targetROI: g.type === 'roi' ? Number(g.target) : undefined,
+            targetWinRate: g.type === 'winrate' ? Number(g.target) : undefined,
+            currentAmount: g.type === 'amount' ? Number(g.current) : undefined,
+            currentStep: g.type === 'ladder' ? Number(g.current) : undefined,
+            currentROI: g.type === 'roi' ? Number(g.current) : undefined,
+            currentWinRate: g.type === 'winrate' ? Number(g.current) : undefined,
+            status: g.isCompleted ? 'completed' : 'active',
+            ...(g.config || {}),
+            _backendId: g.id,
+          }));
+          setGoals(mapped);
+          UserDataService.setUserDataSync(currentUser, 'goals', mapped);
         }
       } catch { /* use localStorage data */ }
     })();

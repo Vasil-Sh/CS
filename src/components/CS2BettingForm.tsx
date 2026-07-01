@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
-import { CS2Strategy } from "@/lib/realGoogleSheets";
+import type { CS2Strategy } from "@/types/strategy";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBetTypeOptions } from "@/lib/displayHelpers";
