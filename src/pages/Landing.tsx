@@ -11,12 +11,6 @@ import {
   Moon,
   Sun,
   Globe,
-  FileCheck,
-  Search,
-  CheckCircle2,
-  XCircle,
-  PlayCircle,
-  Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -288,13 +282,10 @@ export default function Landing() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <Link to="/login">
-                <Button className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 py-2 h-14 px-8 from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] shadow-[0_8px_24px_rgba(62,117,255,0.35)] hover:shadow-[0_12px_32px_rgba(62,117,255,0.45)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[8px] pr-[32px] pb-[8px] pl-[32px] rounded-3xl text-[16px] font-semibold text-center text-[#FFFFFF] bg-[#0F172AE6] opacity-100">
+                <Button className="h-14 px-8 bg-gradient-to-r from-[#3e75ff] to-[#5b8cff] hover:from-[#3568e8] hover:to-[#4f7ff0] text-white shadow-[0_8px_24px_rgba(62,117,255,0.35)] hover:shadow-[0_12px_32px_rgba(62,117,255,0.45)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-3xl text-lg font-semibold">
                   Перевірити свою ставку
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
-              </Link>
-              <Link to="/login">
-                
               </Link>
             </div>
 

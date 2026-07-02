@@ -31,6 +31,31 @@ function getStoredUser(): AuthUser | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(!!getStoredUser());
+
+  // Validate token on mount — call /auth/me to confirm it's still valid
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) { setIsVerifying(false); return; }
+
+    const base = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+    (async () => {
+      try {
+        const res = await fetch(`${base}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Token invalid');
+        const data = await res.json();
+        setUser({ username: data.username, role: data.role });
+      } catch {
+        // Token expired/invalid — clear and set to null
+        clearToken();
+        setUser(null);
+      } finally {
+        setIsVerifying(false);
+      }
+    })();
+  }, []);
 
   // Listen for storage changes from other tabs + auth:logout events from apiClient
   useEffect(() => {

@@ -15,6 +15,7 @@ const WINDOW_MS = 2000;
 
 /** Log a component render. Warns if rendering too frequently. */
 export function logRender(componentName: string): void {
+  if (import.meta.env.PROD) return;
   const now = Date.now();
   const entry = componentRenders.get(componentName);
 

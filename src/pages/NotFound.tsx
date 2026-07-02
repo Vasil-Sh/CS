@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
@@ -12,7 +13,7 @@ export default function NotFoundPage() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild>
-            <a href="/">Return Home</a>
+            <Link to="/">Return Home</Link>
           </Button>
           <Button variant="outline" onClick={() => window.history.back()}>
             Go Back

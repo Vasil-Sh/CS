@@ -302,7 +302,7 @@ const getFormStabilityInfo = (form: FormStability) => {
   }
 };
 
-const getStatusBadge = (status?: "upcoming" | "live" | "finished") => {
+const getMatchStatusBadge = (status?: "upcoming" | "live" | "finished") => {
   switch (status) {
     case "live":
       return (

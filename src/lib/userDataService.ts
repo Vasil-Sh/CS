@@ -139,15 +139,8 @@ export class UserDataService {
       const today = new Date().toISOString().split("T")[0];
 
       if (lastReset !== today) {
-        const currentBets = this.getUserData<Array<{ result: string }>>(
-          username,
-          "mybets_data",
-          [],
-        );
-        const completedBets = currentBets.filter(
-          (bet) => bet.result !== "Pending",
-        );
-        this.setUserData(username, "mybets_data", completedBets);
+        // Mark reset timestamp without deleting any bets
+        // (pending bets must persist across days; completed bets stay for history)
         localStorage.setItem(lastResetKey, today);
         if (import.meta.env.DEV)
           console.log(`Daily reset performed for ${username} on ${today}`);

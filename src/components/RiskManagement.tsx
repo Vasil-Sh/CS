@@ -29,6 +29,7 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
+import { getStatusBadge, getGameEmoji } from "@/lib/utils/badgeStyles";
 import {
   Dialog,
   DialogContent,
@@ -357,35 +358,16 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     setEditGame("");
   };
 
-  const getStatusBadge = (status: string) => {
-    const s = status || "Без статусу";
-    switch (s) {
-      case "БАН":
-        return "bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs";
-      case "Нестабільні":
-        return "bg-[#FFF7ED] text-[#EA580C] hover:bg-[#FFF7ED] border border-[#FED7AA] rounded-lg font-medium text-xs";
-      case "Обережно":
-        return "bg-[#FFFBEB] text-[#D97706] hover:bg-[#FFFBEB] border border-[#FDE68A] rounded-lg font-medium text-xs";
-      case "Рідко":
-        return "bg-[#EFF6FF] text-[#2563EB] hover:bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg font-medium text-xs";
-      case "Надійна":
-        return "bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg font-medium text-xs";
-      case "Без статусу":
-        return "bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs";
-      default:
-        return "bg-[#F9FAFB] text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg font-medium text-xs";
-    }
-  };
-
+  // Local filter badge style (kept because it needs ring/active variant which lib doesn't provide)
   const getStatusFilterBadge = (status: string, isActive: boolean) => {
     const base = isActive
       ? "ring-2 ring-offset-1"
       : "opacity-70 hover:opacity-100";
     switch (status) {
       case "БАН":
-        return `bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] ${isActive ? "ring-[#FECACA]" : ""} ${base}`;
+        return `bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA] ${isActive ? "ring-[#FECACA]" : ""} ${base}`;
       case "Нестабільні":
-        return `bg-[#FFF7ED] text-[#EA580C] border border-[#FED7AA] ${isActive ? "ring-[#FED7AA]" : ""} ${base}`;
+        return `bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] ${isActive ? "ring-[#FDE68A]" : ""} ${base}`;
       case "Обережно":
         return `bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] ${isActive ? "ring-[#FDE68A]" : ""} ${base}`;
       case "Рідко":
@@ -397,12 +379,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       default:
         return `bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] ${isActive ? "ring-[#E5E7EB]" : ""} ${base}`;
     }
-  };
-
-  const getGameEmoji = (game: string) => {
-    if (game === "CS") return "CS:";
-    if (game === "Дота") return "Дота:";
-    return "";
   };
 
   const filteredTeams = riskyTeams.filter(
