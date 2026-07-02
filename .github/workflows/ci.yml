@@ -97,7 +97,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [frontend, backend]
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

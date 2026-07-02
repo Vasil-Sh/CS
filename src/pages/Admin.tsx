@@ -46,6 +46,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { authService } from '@/lib/authService';
+import { cleanPrice, parseDate, formatDate, getDaysUntilExpiry, isSubscriptionActive } from '@/lib/adminUtils';
 
 interface UserData {
   id?: number;
@@ -69,27 +70,6 @@ const EMPTY_USER: Omit<UserData, 'isActive' | 'daysUntilExpiry'> = {
   startDate: '',
   endDate: '',
   isAdmin: false,
-};
-
-/** Strip any currency symbols ($, ₴, €, etc.) from a price string, keep only digits and separators */
-const cleanPrice = (price: string): string => {
-  return price.replace(/[$₴€£¥]/g, '').trim();
-};
-
-/** Parse DD/MM/YYYY to Date */
-const parseDate = (dateStr: string): Date | null => {
-  try {
-    const [day, month, year] = dateStr.split('/').map(Number);
-    if (!day || !month || !year) return null;
-    return new Date(year, month - 1, day);
-  } catch {
-    return null;
-  }
-};
-
-/** Format Date to DD/MM/YYYY */
-const formatDate = (d: Date): string => {
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 };
 
 export default function Admin() {
@@ -129,34 +109,6 @@ export default function Admin() {
     }
     fetchUsers();
   }, [isAdmin, navigate]);
-
-  const getDaysUntilExpiry = (endDateStr: string): number => {
-    try {
-      // PostgreSQL returns YYYY-MM-DD, legacy format is DD/MM/YYYY
-      let endDate: Date;
-      if (endDateStr.includes('-')) {
-        endDate = new Date(endDateStr);
-      } else {
-        const [day, month, year] = endDateStr.split('/').map(Number);
-        endDate = new Date(year, month - 1, day);
-      }
-      if (isNaN(endDate.getTime())) return -1;
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
-
-      const diffTime = endDate.getTime() - today.getTime();
-      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    } catch {
-      return -1;
-    }
-  };
-
-  const isSubscriptionActive = (endDateStr: string): boolean => {
-    const daysLeft = getDaysUntilExpiry(endDateStr);
-    return daysLeft >= 0;
-  };
 
   const fetchUsers = async () => {
     setLoading(true);

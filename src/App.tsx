@@ -7,11 +7,10 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Eagerly loaded (small / critical path)
 import Landing from '@/pages/Landing';
-import Login from '@/pages/Login';
+import LoginPage from '@/pages/LoginPage';
 
 // Lazy-loaded (heavy pages — code split per route)
 const Layout = lazy(() => import('@/components/Layout'));
-const LoginDigestoDemo = lazy(() => import('@/pages/LoginDigestoDemo'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Matches = lazy(() => import('@/pages/Matches'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -36,14 +35,12 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<ErrorBoundary><Landing /></ErrorBoundary>} />
-        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
         <Route
           path="/login-digesto-demo"
           element={
             <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
-                <LoginDigestoDemo />
-              </Suspense>
+              <LoginPage demo />
             </ErrorBoundary>
           }
         />
