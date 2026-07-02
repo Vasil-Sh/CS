@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -178,7 +178,7 @@ export default function Analytics() {
 
   useEffect(() => {
     loadAnalyticsData();
-    updateBankrollStats();
+    // Bankroll is computed by useEffect([bets, currentUser]) below — don't race here
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -198,6 +198,12 @@ export default function Analytics() {
     updateBankrollStats();
   }, [bankrollVersion]);
 
+  // Refs to avoid stale closure in visibility handler
+  const betsRef = useRef(bets);
+  betsRef.current = bets;
+  const userRef = useRef(currentUser);
+  userRef.current = currentUser;
+
   // Recompute bankroll when bets data changes
   useEffect(() => {
     if (bets.length > 0) {
@@ -215,9 +221,9 @@ export default function Analytics() {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Bankroll update failed:", err);
     }
-    // Always compute dual stats from localStorage (which has initialBankUAH/USD split)
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
-  }, [currentUser, bets]);
+    // Use refs to always read latest bets/user
+    setDualBank(BankrollService.getBankrollStatsDual(userRef.current, betsRef.current));
+  }, [currentUser]);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
@@ -306,33 +312,29 @@ export default function Analytics() {
       });
     } finally {
       setLoading(false);
-      updateBankrollStats();
+      // Bankroll is computed by useEffect([bets, currentUser]) — don't race here
     }
-  }, [currentUser, updateBankrollStats]);
+  }, [currentUser]);
 
-  // Refresh bankroll when user switches back to this tab
+  // Refresh bankroll when user switches back to this tab (single listener, uses refs)
   useEffect(() => {
-    let betsRef = bets;
-    let userRef = currentUser;
-
     const handleVisibility = async () => {
       if (document.visibilityState === "visible") {
         try {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) {
-            BankrollService.syncFromAPI(userRef, apiStats);
+            BankrollService.syncFromAPI(userRef.current, apiStats);
           }
         } catch (err) {
           if (import.meta.env.DEV)
             console.warn("[Analytics] Visibility bankroll refresh failed:", err);
         }
-        setDualBank(BankrollService.getBankrollStatsDual(userRef, betsRef));
+        setDualBank(BankrollService.getBankrollStatsDual(userRef.current, betsRef.current));
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibility);
-  }, [bets, currentUser]);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []); // refs keep it fresh — no deps needed
 
   const clearAllData = useCallback(async () => {
     if (
