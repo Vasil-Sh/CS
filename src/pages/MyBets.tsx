@@ -7,16 +7,7 @@ import BetShareModal from "@/components/BetShareModal";
 import OnboardingTour, { useOnboarding } from "@/components/OnboardingTour";
 import ExpressDetailsModal from "@/components/ExpressDetailsModal";
 import BetDetailsModal from "@/components/BetDetailsModal";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import InitialBankModal from "@/components/InitialBankModal";
-import StatCard from "@/components/StatCard";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -28,30 +19,19 @@ import {
   parseExpressEvents,
   type ParsedEvent,
 } from "@/lib/parser/expressParser";
-import { getBetTypeLabel } from "@/lib/displayHelpers";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
 import { PageHeader } from "@/components/PageHeader";
 import {
-  TrendingUp,
-  DollarSign,
-  Target,
-  BarChart3,
-  Trophy,
-  AlertTriangle,
-  Clock,
   Plus,
-  ArrowUpRight,
-  ArrowDownRight,
-  Trash2,
-  Wallet,
   ClipboardList,
-  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
+import MyBetsStatsCards from "@/components/mybets/MyBetsStatsCards";
+import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
+import DeleteBetDialog from "@/components/mybets/DeleteBetDialog";
 
 // ── Types ──
 interface UserRecord {
@@ -159,23 +139,6 @@ export default function MyBets() {
   );
 
   // ── Currency breakdown ──
-  const profitByCurrency = useMemo(() => {
-    const completed = recentBets.filter(
-      (b) => b.result === "Win" || b.result === "Loss",
-    );
-    let profitUAH = 0;
-    let profitUSD = 0;
-    for (const b of completed) {
-      const profit = b.profit || 0;
-      if (b.currency === "USD" && b.exchangeRate) {
-        profitUSD += profit / Number(b.exchangeRate);
-      } else {
-        profitUAH += profit;
-      }
-    }
-    return { profitUAH, profitUSD };
-  }, [recentBets]);
-
   const hasUsdBets = useMemo(
     () =>
       recentBets.some((b) => b.currency === "USD") ||
@@ -675,218 +638,15 @@ export default function MyBets() {
       />
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
-        {/* Stats Row 1 */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <Wallet
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label={
-                currencyMode === "USD"
-                  ? "Поточний банк (USDT)"
-                  : "Поточний банк"
-              }
-              value={
-                currencyMode === "USD"
-                  ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
-                  : `${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`
-              }
-              valueColor={currencyMode === "USD" ? "text-[#D97706]" : undefined}
-              subtext={
-                currencyMode === "USD"
-                  ? `${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)} за весь час`
-                  : `${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴ за весь час`
-              }
-              subIcon={
-                (currencyMode === "USD"
-                  ? dualBank.usd.totalProfit
-                  : dualBank.uah.totalProfit) >= 0 ? (
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[#22C55E]"
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <ArrowDownRight
-                    className="h-4 w-4 text-[#EF4444]"
-                    strokeWidth={2.5}
-                  />
-                )
-              }
-              trend={
-                (currencyMode === "USD"
-                  ? dualBank.usd.totalProfit
-                  : dualBank.uah.totalProfit) >= 0
-                  ? "up"
-                  : "down"
-              }
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <DollarSign
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Профіт"
-              value={
-                currencyMode === "USD"
-                  ? `${Number(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$${Number(profitByCurrency.profitUSD || 0).toFixed(2)}`
-                  : `${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`
-              }
-              valueColor={
-                (currencyMode === "USD"
-                  ? profitByCurrency.profitUSD
-                  : profitByCurrency.profitUAH) >= 0
-                  ? currencyMode === "USD"
-                    ? "text-[#22C55E]"
-                    : "text-[#111827]"
-                  : "text-[#EF4444]"
-              }
-              subtext={
-                (currencyMode === "USD"
-                  ? profitByCurrency.profitUSD
-                  : profitByCurrency.profitUAH) >= 0
-                  ? "Позитивна динаміка"
-                  : "Негативна динаміка"
-              }
-              subIcon={
-                (currencyMode === "USD"
-                  ? profitByCurrency.profitUSD
-                  : profitByCurrency.profitUAH) >= 0 ? (
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[#22C55E]"
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <ArrowDownRight
-                    className="h-4 w-4 text-[#EF4444]"
-                    strokeWidth={2.5}
-                  />
-                )
-              }
-              trend={
-                (currencyMode === "USD"
-                  ? profitByCurrency.profitUSD
-                  : profitByCurrency.profitUAH) >= 0
-                  ? "up"
-                  : "down"
-              }
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <BarChart3
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Всього записів"
-              value={String(stats.totalBets)}
-              subtext={
-                activeBets.length > 0
-                  ? `${activeBets.length} активних`
-                  : "Немає активних"
-              }
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <Target
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Вінрейт"
-              value={`${stats.winRate}%`}
-              subtext={`${winningBets.length}W / ${losingBets.length}L`}
-            />
-          </div>
-
-          {/* Stats Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
-                </div>
-              }
-              label="Активні"
-              value={String(activeBets.length)}
-              valueColor="text-[#3B82F6]"
-              subtext="Очікують результату"
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <Trophy
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Виграші"
-              value={String(winningBets.length)}
-              valueColor="text-[#22C55E]"
-              subtext="Успішних записів"
-              trend="up"
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <AlertTriangle
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Програші"
-              value={String(losingBets.length)}
-              valueColor="text-[#EF4444]"
-              subtext="Невдалих записів"
-              trend="down"
-            />
-            <StatCard
-              icon={
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-                  <TrendingUp
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-              }
-              label="Середній ROI"
-              value={`${stats.averageROI >= 0 ? "+" : ""}${stats.averageROI}%`}
-              valueColor={
-                stats.averageROI >= 0 ? "text-[#111827]" : "text-[#EF4444]"
-              }
-              subtext={stats.averageROI >= 0 ? "Позитивний" : "Негативний"}
-              subIcon={
-                stats.averageROI >= 0 ? (
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[#22C55E]"
-                    strokeWidth={2.5}
-                  />
-                ) : (
-                  <ArrowDownRight
-                    className="h-4 w-4 text-[#EF4444]"
-                    strokeWidth={2.5}
-                  />
-                )
-              }
-              trend={stats.averageROI >= 0 ? "up" : "down"}
-            />
-          </div>
-        </div>
+        <MyBetsStatsCards
+          recentBets={recentBets}
+          stats={stats}
+          dualBank={dualBank}
+          currencyMode={currencyMode}
+          activeBets={activeBets}
+          winningBets={winningBets}
+          losingBets={losingBets}
+        />
 
         {/* Tabs */}
         <div className="space-y-6">
@@ -1006,227 +766,21 @@ export default function MyBets() {
         )}
 
         {/* Result Note Dialog — opens when marking bet result */}
-        <Dialog
+        <ResultNoteDialog
           open={resultNoteOpen}
-          onOpenChange={(open) => {
-            if (!open) skipResultNote();
-          }}
-        >
-          <DialogContent className="rounded-3xl max-w-lg border border-[#E5E7EB] p-0 gap-0">
-            <DialogHeader className="px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-2xl flex-shrink-0 ${
-                    pendingResultAction?.result === "Win"
-                      ? "bg-green-100"
-                      : "bg-red-100"
-                  }`}
-                >
-                  {pendingResultAction?.result === "Win" ? (
-                    <Trophy
-                      className="h-5 w-5 text-[#22C55E]"
-                      strokeWidth={1.5}
-                    />
-                  ) : (
-                    <AlertTriangle
-                      className="h-5 w-5 text-[#DC2626]"
-                      strokeWidth={1.5}
-                    />
-                  )}
-                </div>
-                <DialogTitle className="text-xl font-semibold text-[#111827]">
-                  Чому такий результат?
-                </DialogTitle>
-              </div>
-            </DialogHeader>
-
-            <div className="border-t border-[#E5E7EB]" />
-
-            <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
-              {pendingResultAction && (
-                <div className="text-center">
-                  <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                    <div className="flex items-center justify-center gap-1 w-full">
-                      <img
-                        src="/assets/team-placeholder.svg"
-                        alt=""
-                        className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                      />
-                      <DialogDescription className="text-lg font-bold text-[#111827] text-center flex-1">
-                        {pendingResultAction.bet.match}
-                      </DialogDescription>
-                      <img
-                        src="/assets/team-placeholder.svg"
-                        alt=""
-                        className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                      />
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      {!pendingResultAction.bet.betType.includes("Експрес") && (
-                        <p className="text-xs text-gray-400">
-                          {(() => {
-                            const parts =
-                              pendingResultAction.bet.betType.split(" - ");
-                            const typeLabel = getBetTypeLabel(
-                              parts[0],
-                              pendingResultAction.bet.format,
-                            );
-                            return parts.length > 1
-                              ? `${typeLabel} - ${parts.slice(1).join(" - ")}`
-                              : typeLabel;
-                          })()}
-                        </p>
-                      )}
-                      <Badge
-                        className={`rounded-full border-0 text-xs font-semibold px-2 py-0.5 ${
-                          pendingResultAction.result === "Win"
-                            ? "bg-green-100 text-green-600"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                      >
-                        {pendingResultAction.result === "Win"
-                          ? "Виграш"
-                          : "Програш"}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <textarea
-                value={resultNote}
-                onChange={(e) => setResultNote(e.target.value)}
-                placeholder={`Що спрацювало? Що ні? Це аналіз чи емоції?\n\nНаприклад:\n• Переоцінив форму команди\n• Не врахував заміну гравця\n• Емоційна ставка після серії програшів`}
-                className="w-full h-44 rounded-2xl border border-[#E5E7EB] p-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 resize-none bg-white"
-                autoFocus
-              />
-              <div className="flex items-start gap-2 p-3 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE]">
-                <Info
-                  className="h-4 w-4 text-[#447afc] flex-shrink-0 mt-0.5"
-                  strokeWidth={1.5}
-                />
-                <p className="text-xs text-[#1E40AF]">
-                  Нотатка збережеться з записом. Це допоможе аналізувати помилки
-                  в майбутньому.
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-[#E5E7EB]" />
-
-            <DialogFooter className="px-6 py-4 gap-2">
-              <Button
-                variant="outline"
-                onClick={skipResultNote}
-                className="rounded-xl"
-              >
-                Пропустити
-              </Button>
-              <Button
-                onClick={confirmResultUpdate}
-                className={`rounded-xl text-white ${
-                  pendingResultAction?.result === "Win"
-                    ? "bg-[#22C55E] hover:bg-[#16A34A]"
-                    : "bg-[#DC2626] hover:bg-[#B91C1C]"
-                }`}
-              >
-                {pendingResultAction?.result === "Win"
-                  ? "✅ Виграш"
-                  : "Програш"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          resultNote={resultNote}
+          onResultNoteChange={setResultNote}
+          pendingAction={pendingResultAction}
+          onConfirm={confirmResultUpdate}
+          onSkip={skipResultNote}
+        />
 
         {/* Delete Confirmation Dialog */}
-        <Dialog
-          open={!!deleteDialogBet}
-          onOpenChange={(open) => {
-            if (!open) setDeleteDialogBet(null);
-          }}
-        >
-          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
-            <DialogHeader className="px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-                  <Trash2
-                    className="h-5 w-5 text-[#DC2626]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <DialogTitle className="text-xl font-semibold text-[#111827]">
-                  Видалити ставку?
-                </DialogTitle>
-              </div>
-            </DialogHeader>
-
-            <div className="border-t border-[#E5E7EB]" />
-
-            <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
-              <div className="text-center">
-                <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                  <div className="flex items-center justify-center gap-1 w-full">
-                    <img
-                      src="/assets/team-placeholder.svg"
-                      alt=""
-                      className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                    />
-                    <DialogDescription className="text-lg font-bold text-[#111827] text-center flex-1">
-                      {deleteDialogBet && deleteDialogBet.match}
-                    </DialogDescription>
-                    <img
-                      src="/assets/team-placeholder.svg"
-                      alt=""
-                      className="h-10 w-10 rounded-full object-contain bg-gray-100 flex-shrink-0"
-                    />
-                  </div>
-                  {deleteDialogBet &&
-                    !deleteDialogBet.betType.includes("Експрес") && (
-                      <p className="text-xs text-gray-400 -mt-0.5">
-                        {(() => {
-                          const parts = deleteDialogBet.betType.split(" - ");
-                          const typeLabel = getBetTypeLabel(
-                            parts[0],
-                            deleteDialogBet.format,
-                          );
-                          return parts.length > 1
-                            ? `${typeLabel} - ${parts.slice(1).join(" - ")}`
-                            : typeLabel;
-                        })()}
-                      </p>
-                    )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
-                <AlertTriangle
-                  className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5"
-                  strokeWidth={1.5}
-                />
-                <p className="text-sm text-[#991B1B]">
-                  Ця дія незворотна. Дані про ставку будуть видалені назавжди.
-                </p>
-              </div>
-
-              <DialogFooter className="gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeleteDialogBet(null)}
-                  className="rounded-xl"
-                >
-                  Скасувати
-                </Button>
-                <Button
-                  onClick={confirmDeleteBet}
-                  className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Видалити
-                </Button>
-              </DialogFooter>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <DeleteBetDialog
+          bet={deleteDialogBet}
+          onConfirm={confirmDeleteBet}
+          onClose={() => setDeleteDialogBet(null)}
+        />
       </div>
     </div>
   );
