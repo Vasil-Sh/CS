@@ -1108,7 +1108,7 @@ export default function Matches() {
         >
           Нотатки
         </th>
-        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap">
+        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap min-w-[110px]">
           Додати до Записів
         </th>
       </tr>
@@ -1656,9 +1656,9 @@ export default function Matches() {
               return (
                 <div
                   key={dateKey}
-                  className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden"
+                  className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-x-auto"
                 >
-                  <div className="bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.10)]">
+                  <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
                     <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
                       <CardTitle>
                         <div className="flex items-center gap-4">
@@ -1675,8 +1675,8 @@ export default function Matches() {
                         </div>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 rounded-b-[24px] overflow-hidden">
-                      <div className="overflow-x-auto">
+                    <CardContent className="p-0 rounded-b-[24px]">
+                      <div>
                         <table className="w-full border-collapse">
                           {renderTableHeader()}
                           <tbody>{dateMatches.map(renderMatchRow)}</tbody>

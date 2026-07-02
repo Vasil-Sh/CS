@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { t } from '@/lib/i18n';
-import { logRender } from '@/lib/devLogger';
-import { 
-  BarChart3, 
-  Trophy, 
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { t } from "@/lib/i18n";
+import { logRender } from "@/lib/devLogger";
+import {
+  BarChart3,
+  Trophy,
   Plus,
   Menu,
   LogOut,
@@ -15,41 +15,47 @@ import {
   TrendingUp,
   Target,
   MessageCircle,
-  WifiOff
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+  WifiOff,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navigation = [
-  { nameKey: 'nav.analytics', href: '/app/analytics', icon: BarChart3 },
-  { nameKey: 'nav.strategies', href: '/app/strategy', icon: Target },
-  { nameKey: 'nav.addRecord', href: '/app/my-bets', icon: Plus },
-  { nameKey: 'nav.matches', href: '/app/matches', icon: Trophy },
-  { nameKey: 'nav.telegram', href: '/app/telegram', icon: MessageCircle },
-  { nameKey: 'nav.profile', href: '/app/profile', icon: User },
+  { nameKey: "nav.analytics", href: "/app/analytics", icon: BarChart3 },
+  { nameKey: "nav.strategies", href: "/app/strategy", icon: Target },
+  { nameKey: "nav.addRecord", href: "/app/my-bets", icon: Plus },
+  { nameKey: "nav.matches", href: "/app/matches", icon: Trophy },
+  { nameKey: "nav.telegram", href: "/app/telegram", icon: MessageCircle },
+  { nameKey: "nav.profile", href: "/app/profile", icon: User },
 ];
 
 const adminNavigation = [
-  { nameKey: 'nav.admin', href: '/app/admin', icon: Shield, adminOnly: true },
+  { nameKey: "nav.admin", href: "/app/admin", icon: Shield, adminOnly: true },
 ];
 
 // Nav items as module-level component (not re-created on every Layout render)
-function NavItems({ location, isAdmin }: { location: string; isAdmin: boolean }) {
+function NavItems({
+  location,
+  isAdmin,
+}: {
+  location: string;
+  isAdmin: boolean;
+}) {
   return (
     <>
       {navigation.map((item) => {
         const Icon = item.icon;
         const isActive = location === item.href;
-        
+
         return (
           <Link
             key={item.nameKey}
             to={item.href}
             className={cn(
-              'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
+              "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300",
               isActive
-                ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
-                : 'text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]'
+                ? "bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+                : "text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]",
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -57,62 +63,63 @@ function NavItems({ location, isAdmin }: { location: string; isAdmin: boolean })
           </Link>
         );
       })}
-      {isAdmin && adminNavigation.map((item) => {
-        const Icon = item.icon;
-        const isActive = location === item.href;
-        
-        return (
-          <Link
-            key={item.nameKey}
-            to={item.href}
-            className={cn(
-              'group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300',
-              isActive
-                ? 'bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]'
-                : 'text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]'
-            )}
-          >
-            <Icon className="h-5 w-5" strokeWidth={1.5} />
-            <span>{t(item.nameKey)}</span>
-          </Link>
-        );
-      })}
+      {isAdmin &&
+        adminNavigation.map((item) => {
+          const Icon = item.icon;
+          const isActive = location === item.href;
+
+          return (
+            <Link
+              key={item.nameKey}
+              to={item.href}
+              className={cn(
+                "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300",
+                isActive
+                  ? "bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+                  : "text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]",
+              )}
+            >
+              <Icon className="h-5 w-5" strokeWidth={1.5} />
+              <span>{t(item.nameKey)}</span>
+            </Link>
+          );
+        })}
     </>
   );
 }
 
 export default function Layout() {
-  logRender('Layout');
+  logRender("Layout");
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, isAuthenticated, logout } = useAuth();
-  const username = user?.username ?? '';
+  const username = user?.username ?? "";
   const [offline, setOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
     const goOffline = () => setOffline(true);
     const goOnline = () => setOffline(false);
-    window.addEventListener('offline', goOffline);
-    window.addEventListener('online', goOnline);
+    window.addEventListener("offline", goOffline);
+    window.addEventListener("online", goOnline);
     return () => {
-      window.removeEventListener('offline', goOffline);
-      window.removeEventListener('online', goOnline);
+      window.removeEventListener("offline", goOffline);
+      window.removeEventListener("online", goOnline);
     };
   }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
     }
   }, [location.pathname, navigate, isAuthenticated]);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff]">
+    <div className="min-h-screen bg-[#f3f3f3]">
       {/* Offline Banner */}
       {offline && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-[#FEF3C7] border-b border-[#F59E0B] px-4 py-2 flex items-center justify-center gap-2">
@@ -147,7 +154,9 @@ export default function Layout() {
               </li>
               <li className="mt-auto space-y-3">
                 <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
-                  <span className="text-base font-semibold text-[#111827]">Потрібна допомога?</span>
+                  <span className="text-base font-semibold text-[#111827]">
+                    Потрібна допомога?
+                  </span>
                   <p className="text-xs text-[#111827] text-center">
                     Є питання або пропозиції? Напиши нам в Telegram
                   </p>
@@ -157,19 +166,23 @@ export default function Layout() {
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#447afc] rounded-[16px] text-white font-semibold text-sm transition-all duration-300 hover:bg-[#3568e0] hover:shadow-[0_2px_8px_rgba(68,122,252,0.4)]"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                     </svg>
-                    <span>{t('app.writeUs')}</span>
+                    <span>{t("app.writeUs")}</span>
                   </a>
                 </div>
                 <button
                   onClick={handleLogout}
-                  aria-label={t('app.logout')}
+                  aria-label={t("app.logout")}
                   className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
-                  <span>{t('app.logout')}</span>
+                  <span>{t("app.logout")}</span>
                 </button>
               </li>
             </ul>
@@ -195,21 +208,32 @@ export default function Layout() {
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-medium text-[#1a1a2e] truncate max-w-[120px]">
-                  @{username || 'User'}
+                  @{username || "User"}
                   {isAdmin && <span className="ml-1">👑</span>}
                 </p>
               </div>
             </div>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="Відкрити меню" className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Відкрити меню"
+                  className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12"
+                >
                   <Menu className="h-6 w-6" strokeWidth={1.5} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]">
+              <SheetContent
+                side="left"
+                className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]"
+              >
                 <div className="flex h-20 items-center gap-4">
                   <div className="w-14 h-14 bg-[#1a1a2e] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
-                    <TrendingUp className="w-7 h-7 text-white" strokeWidth={1.5} />
+                    <TrendingUp
+                      className="w-7 h-7 text-white"
+                      strokeWidth={1.5}
+                    />
                   </div>
                   <h1 className="text-2xl font-semibold text-[#1a1a2e] tracking-tight">
                     MatchIQ
@@ -225,9 +249,11 @@ export default function Layout() {
                   </ul>
                   <div className="mt-8 space-y-3">
                     <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
-                      <span className="text-base font-semibold text-[#111827]">{t('app.help')}</span>
+                      <span className="text-base font-semibold text-[#111827]">
+                        {t("app.help")}
+                      </span>
                       <p className="text-xs text-[#111827] text-center">
-                        {t('app.helpDesc')}
+                        {t("app.helpDesc")}
                       </p>
                       <a
                         href="https://t.me/cs2beet"
@@ -235,10 +261,14 @@ export default function Layout() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2.5 bg-[#447afc] rounded-[16px] text-white font-semibold text-sm transition-all duration-300 hover:bg-[#3568e0] hover:shadow-[0_2px_8px_rgba(68,122,252,0.4)]"
                       >
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        <svg
+                          className="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                         </svg>
-                        <span>{t('app.writeUs')}</span>
+                        <span>{t("app.writeUs")}</span>
                       </a>
                     </div>
                     <button
@@ -246,7 +276,7 @@ export default function Layout() {
                       className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
                     >
                       <LogOut className="h-5 w-5" strokeWidth={1.5} />
-                      <span>{t('app.logout')}</span>
+                      <span>{t("app.logout")}</span>
                     </button>
                   </div>
                 </nav>
@@ -258,7 +288,7 @@ export default function Layout() {
 
       {/* Main Content - constrained width for better visual density */}
       <main className="lg:pl-80">
-        <div className="mx-auto max-w-[1440px]">
+        <div className="w-full">
           <Outlet />
         </div>
       </main>
