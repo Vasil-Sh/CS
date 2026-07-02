@@ -170,14 +170,15 @@ export class BankrollService {
     bets: Bet[],
   ): DualBankrollStats {
     const data = this.getBankrollData(username);
-    if (!data) {
-      return {
-        uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-        usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-      };
-    }
     const profitUAH = this.calculateTotalProfit(bets, "UAH");
     const profitUSD = this.calculateTotalProfitUSD(bets);
+
+    if (!data) {
+      return {
+        uah: { initialBank: 0, currentBank: profitUAH, totalProfit: profitUAH, roi: 0 },
+        usd: { initialBank: 0, currentBank: profitUSD, totalProfit: profitUSD, roi: 0 },
+      };
+    }
 
     const currentUAH =
       (data.initialBankUAH || 0) + profitUAH + data.manualAdjustments;
