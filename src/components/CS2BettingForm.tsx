@@ -232,7 +232,7 @@ export default function CS2BettingForm({
   useEffect(() => {
     const stored = UserDataService.getUserData<CS2Strategy[]>(
       currentUser,
-      "strategies",
+      "strategies_data",
       [],
     );
     strategiesRef.current = stored;
