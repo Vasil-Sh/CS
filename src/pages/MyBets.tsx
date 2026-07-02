@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import CS2BettingForm from "@/components/CS2BettingForm";
 import type { MatchPrefillData } from "@/components/CS2BettingForm";
@@ -120,6 +120,10 @@ export default function MyBets() {
   });
   const { showOnboarding, setShowOnboarding } = useOnboarding();
 
+  // Ref to avoid stale closure in result update callbacks
+  const recentBetsRef = useRef(recentBets);
+  recentBetsRef.current = recentBets;
+
   // ── Derived ──
   const { activeBets, winningBets, losingBets } = useMemo(() => {
     const active: Bet[] = [];
@@ -183,18 +187,14 @@ export default function MyBets() {
         if (apiStats.initialBank > 0) {
           BankrollService.syncFromAPI(currentUser, apiStats);
           setDualBank(
-            BankrollService.getBankrollStatsDual(currentUser, recentBets),
+            BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current),
           );
           return;
         }
       } catch {
         /* noop */
       }
-      const allBets = UserDataService.getUserData(
-        currentUser,
-        "mybets_data",
-        [],
-      );
+      const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
       setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
     };
     initBankroll();
@@ -206,18 +206,14 @@ export default function MyBets() {
         if (apiStats.initialBank > 0) {
           BankrollService.syncFromAPI(currentUser, apiStats);
           setDualBank(
-            BankrollService.getBankrollStatsDual(currentUser, recentBets),
+            BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current),
           );
           return;
         }
       } catch {
         /* noop */
       }
-      const allBets = UserDataService.getUserData(
-        currentUser,
-        "mybets_data",
-        [],
-      );
+      const allBets = UserDataService.getUserData(currentUser, "mybets_data", []);
       setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
     };
     refresh();
@@ -279,19 +275,18 @@ export default function MyBets() {
       if (apiStats.initialBank > 0) {
         BankrollService.syncFromAPI(currentUser, apiStats);
         setDualBank(
-          BankrollService.getBankrollStatsDual(currentUser, recentBets),
+          BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current),
         );
         return;
       }
     } catch {
       /* noop */
     }
-    // Use recentBets (API data has currency/exchangeRate) — not localStorage fallback
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, recentBets));
-  }, [currentUser, recentBets]);
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current));
+  }, [currentUser]);
 
   const syncStats = useCallback(() => {
-    const allBets = recentBets;
+    const allBets = recentBetsRef.current;
     const completed = allBets.filter(
       (b) => b.result === "Win" || b.result === "Loss",
     );
@@ -343,10 +338,9 @@ export default function MyBets() {
   const handleRecordAdded = useCallback(() => {
     syncStats();
     loadRecentBets();
-    syncBankrollStats();
     bumpBets();
     bumpBankroll();
-  }, [loadRecentBets, bumpBets, bumpBankroll, syncBankrollStats, syncStats]);
+  }, [loadRecentBets, bumpBets, bumpBankroll, syncStats]);
 
   const clearRecentBets = useCallback(async () => {
     if (
@@ -513,14 +507,15 @@ export default function MyBets() {
         if (note.trim())
           toast("Нотатку додано до запису", { description: note.trim() });
         loadStats();
-        syncBankrollStats();
         syncStats();
         bumpBankroll();
+        // Compute bankroll immediately from updated ref — don't wait for next render
+        setDualBank(BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current));
       } catch {
         toast.error("Помилка при оновленні результату");
       }
     },
-    [currentUser, bumpBankroll, syncBankrollStats, syncStats],
+    [currentUser, bumpBankroll, syncStats],
   );
 
   const updateBetResult = useCallback(
@@ -594,7 +589,13 @@ export default function MyBets() {
       if (import.meta.env.DEV)
         console.warn("[API] DELETE failed, removed locally only");
     }
-    syncBankrollStats();
+    // Compute bankroll from filtered bets immediately
+    const filtered = recentBetsRef.current.filter(
+      (b) =>
+        b.id !== bet.id &&
+        !(b.date === bet.date && b.match === bet.match && b.amount === bet.amount),
+    );
+    setDualBank(BankrollService.getBankrollStatsDual(currentUser, filtered));
     syncStats();
     setRecentBets((prev) =>
       prev.filter(
@@ -610,7 +611,7 @@ export default function MyBets() {
     bumpBets();
     bumpBankroll();
     toast.success("Ставку видалено");
-  }, [deleteDialogBet, bumpBets, bumpBankroll, syncBankrollStats, syncStats]);
+  }, [deleteDialogBet, currentUser, bumpBets, bumpBankroll, syncStats]);
 
   // ── UI ──
   const tabs = [
