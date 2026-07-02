@@ -209,30 +209,56 @@ export default function StrategyOverview() {
       // 1. Try API first (fast)
       let betsData: unknown[] = [];
       try {
-        const json = await api.get<{ data?: unknown[] } | unknown[]>('/bets?page=1&limit=200');
-        betsData = Array.isArray(json) ? json : (json as { data?: unknown[] }).data || [];
-      } catch { /* fallback */ }
+        const json = await api.get<{ data?: unknown[] } | unknown[]>(
+          "/bets?page=1&limit=200",
+        );
+        betsData = Array.isArray(json)
+          ? json
+          : (json as { data?: unknown[] }).data || [];
+      } catch {
+        /* fallback */
+      }
 
       // 2. Fallback to localStorage
       if (betsData.length === 0) {
-        betsData = UserDataService.getUserData<Record<string, unknown>[]>(currentUser, 'mybets_data', []) as unknown[];
+        betsData = UserDataService.getUserData<Record<string, unknown>[]>(
+          currentUser,
+          "mybets_data",
+          [],
+        ) as unknown[];
       }
 
-      // 1. Load strategies — API first
+      // 1. Load strategies — API first, then sync to localStorage
       let customStrategies = loadCustomStrategiesFromStorage();
       try {
-        const apiStrats = await UserDataService.fetchStrategies() as (Record<string, unknown> & { id?: string; config?: Record<string, unknown> })[];
+        const apiStrats = (await UserDataService.fetchStrategies()) as (Record<
+          string,
+          unknown
+        > & { id?: string; config?: Record<string, unknown> })[];
         if (apiStrats && apiStrats.length > 0) {
-          customStrategies = apiStrats.map(s => ({ id: s.id, ...(s.config || {}), _backendId: s.id })) as CS2Strategy[];
+          customStrategies = apiStrats.map((s) => ({
+            id: s.id,
+            ...(s.config || {}),
+            _backendId: s.id,
+          })) as CS2Strategy[];
+          // Sync API data back to localStorage so deletes find _backendId
+          saveCustomStrategiesToStorage(customStrategies);
         }
-      } catch { /* fallback to localStorage */ }
+      } catch {
+        /* fallback to localStorage */
+      }
       setStrategies(customStrategies);
       setBettingData(betsData);
       calculateStrategyStats(betsData);
 
       const saved =
-        UserDataService.getUserData<string>(currentUser, "primary_strategy", "") ||
-        localStorage.getItem("primaryStrategy") || "";
+        UserDataService.getUserData<string>(
+          currentUser,
+          "primary_strategy",
+          "",
+        ) ||
+        localStorage.getItem("primaryStrategy") ||
+        "";
       if (saved) {
         setPrimaryStrategy(saved);
         useAppStore.getState().setPrimaryStrategyId(saved);
@@ -340,7 +366,8 @@ export default function StrategyOverview() {
         return migrated;
       }
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error loading custom strategies:", error);
+      if (import.meta.env.DEV)
+        console.error("Error loading custom strategies:", error);
     }
     return [];
   };
@@ -348,11 +375,16 @@ export default function StrategyOverview() {
   const saveCustomStrategiesToStorage = (strategies: CS2Strategy[]) => {
     try {
       if (currentUser) {
-        UserDataService.setUserDataSync(currentUser, "strategies_data", strategies);
+        UserDataService.setUserDataSync(
+          currentUser,
+          "strategies_data",
+          strategies,
+        );
       }
       bumpStrategy();
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error saving custom strategies:", error);
+      if (import.meta.env.DEV)
+        console.error("Error saving custom strategies:", error);
     }
   };
 
@@ -643,21 +675,27 @@ export default function StrategyOverview() {
       name: strategy.name,
       isPrimary: false,
       config: strategy,
-    }).then((backendStrategy: { id?: string }) => {
-      if (backendStrategy?.id) {
-        const all = loadCustomStrategiesFromStorage();
-        const idx = all.findIndex(
-          (s: CS2Strategy) => (s.id || s.name) === (strategy.id || strategy.name),
-        );
-        if (idx >= 0) {
-          all[idx] = { ...all[idx], _backendId: backendStrategy.id };
-          saveCustomStrategiesToStorage(all);
+    })
+      .then((backendStrategy: { id?: string }) => {
+        if (backendStrategy?.id) {
+          const all = loadCustomStrategiesFromStorage();
+          const idx = all.findIndex(
+            (s: CS2Strategy) =>
+              (s.id || s.name) === (strategy.id || strategy.name),
+          );
+          if (idx >= 0) {
+            all[idx] = { ...all[idx], _backendId: backendStrategy.id };
+            saveCustomStrategiesToStorage(all);
+          }
         }
-      }
-    }).catch((err: unknown) => {
-      if (import.meta.env.DEV) console.error('[API] Strategy save failed:', err);
-      toast.error('Не вдалося зберегти стратегію на сервері. Дані збережено локально.');
-    });
+      })
+      .catch((err: unknown) => {
+        if (import.meta.env.DEV)
+          console.error("[API] Strategy save failed:", err);
+        toast.error(
+          "Не вдалося зберегти стратегію на сервері. Дані збережено локально.",
+        );
+      });
 
     setNewStrategy({
       name: "",
@@ -699,7 +737,9 @@ export default function StrategyOverview() {
     if (!strategyToDelete) return;
 
     const customStrategies = loadCustomStrategiesFromStorage();
-    const strategyToRemove = customStrategies.find(s => (s.id || s.name) === strategyToDelete);
+    const strategyToRemove = customStrategies.find(
+      (s) => (s.id || s.name) === strategyToDelete,
+    );
     const updatedStrategies = customStrategies.filter(
       (s) => (s.id || s.name) !== strategyToDelete,
     );
@@ -719,9 +759,12 @@ export default function StrategyOverview() {
     // Sync to backend API (pass name as fallback for UUID mismatch)
     const backendId = strategyToRemove?._backendId || strategyToDelete;
     const strategyName = strategyToRemove?.name;
-    UserDataService.deleteStrategy(backendId, strategyName).catch((err: unknown) => {
-      if (import.meta.env.DEV) console.warn('[API] Strategy delete failed:', err);
-    });
+    UserDataService.deleteStrategy(backendId, strategyName).catch(
+      (err: unknown) => {
+        if (import.meta.env.DEV)
+          console.warn("[API] Strategy delete failed:", err);
+      },
+    );
   };
 
   const togglePrimaryStrategy = (strategy: CS2Strategy) => {
