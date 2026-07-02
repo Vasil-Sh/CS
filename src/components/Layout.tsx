@@ -256,9 +256,11 @@ export default function Layout() {
         </div>
       </div>
 
-      {/* Main Content - no padding, each page handles its own padding */}
+      {/* Main Content - constrained width for better visual density */}
       <main className="lg:pl-80">
-        <Outlet />
+        <div className="mx-auto max-w-[1440px]">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
