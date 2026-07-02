@@ -269,22 +269,6 @@ export default function MyBets() {
     }
   }, []);
 
-  const syncBankrollStats = useCallback(async () => {
-    try {
-      const apiStats = await BankrollService.fetchBankroll();
-      if (apiStats.initialBank > 0) {
-        BankrollService.syncFromAPI(currentUser, apiStats);
-        setDualBank(
-          BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current),
-        );
-        return;
-      }
-    } catch {
-      /* noop */
-    }
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, recentBetsRef.current));
-  }, [currentUser]);
-
   const syncStats = useCallback(() => {
     const allBets = recentBetsRef.current;
     const completed = allBets.filter(

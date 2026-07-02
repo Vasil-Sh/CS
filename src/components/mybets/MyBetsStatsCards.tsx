@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import type { Bet } from "@/types/betting";
-import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
+import type { DualBankrollStats } from "@/lib/bankrollService";
 
 interface MyBetsStatsCardsProps {
   recentBets: Bet[];
