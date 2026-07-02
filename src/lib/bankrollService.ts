@@ -149,10 +149,12 @@ export class BankrollService {
 
   static getBankrollStats(username: string, bets: Bet[]): BankrollStats {
     const data = this.getBankrollData(username);
-    if (!data) {
-      return { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 };
-    }
     const totalProfit = this.calculateTotalProfit(bets);
+
+    if (!data) {
+      const totalStakes = bets.reduce((sum, b) => sum + (b.amount || 0), 0);
+      return { initialBank: totalStakes, currentBank: totalStakes + totalProfit, totalProfit, roi: totalStakes > 0 ? (totalProfit / totalStakes) * 100 : 0 };
+    }
     const currentBank =
       (data.initialBankUAH || 0) + totalProfit + data.manualAdjustments;
     const roi =
@@ -174,9 +176,16 @@ export class BankrollService {
     const profitUSD = this.calculateTotalProfitUSD(bets);
 
     if (!data) {
+      // No bankroll data — derive from bets: sum of all stakes as implied bank
+      const totalStakesUAH = bets
+        .filter(b => !b.currency || b.currency !== 'USD')
+        .reduce((sum, b) => sum + (b.amount || 0), 0);
+      const totalStakesUSD = bets
+        .filter(b => b.currency === 'USD')
+        .reduce((sum, b) => sum + (b.amount || 0), 0);
       return {
-        uah: { initialBank: 0, currentBank: profitUAH, totalProfit: profitUAH, roi: 0 },
-        usd: { initialBank: 0, currentBank: profitUSD, totalProfit: profitUSD, roi: 0 },
+        uah: { initialBank: totalStakesUAH, currentBank: totalStakesUAH + profitUAH, totalProfit: profitUAH, roi: totalStakesUAH > 0 ? (profitUAH / totalStakesUAH) * 100 : 0 },
+        usd: { initialBank: totalStakesUSD, currentBank: totalStakesUSD + profitUSD, totalProfit: profitUSD, roi: totalStakesUSD > 0 ? (profitUSD / totalStakesUSD) * 100 : 0 },
       };
     }
 
