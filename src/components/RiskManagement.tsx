@@ -29,7 +29,8 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
-import { getStatusBadge, getGameEmoji } from "@/lib/utils/badgeStyles";
+import { getStatusBadge } from "@/lib/utils/badgeStyles";
+import { getGameEmoji } from "@/lib/utils/gameIcons";
 import {
   Dialog,
   DialogContent,
