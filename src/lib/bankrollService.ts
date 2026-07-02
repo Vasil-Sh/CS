@@ -176,13 +176,20 @@ export class BankrollService {
     const profitUSD = this.calculateTotalProfitUSD(bets);
 
     if (!data) {
-      // No bankroll data — derive from bets: sum of all stakes as implied bank
+      // No bankroll data — derive from bets and auto-initialize
       const totalStakesUAH = bets
         .filter(b => !b.currency || b.currency !== 'USD')
         .reduce((sum, b) => sum + (b.amount || 0), 0);
       const totalStakesUSD = bets
         .filter(b => b.currency === 'USD')
         .reduce((sum, b) => sum + (b.amount || 0), 0);
+      // Fire-and-forget: save to DB (UAH first, then USD preserves both)
+      if (totalStakesUAH + totalStakesUSD > 0) {
+        const usdRate = bets.find(b => b.currency === 'USD' && b.exchangeRate)?.exchangeRate;
+        this.setInitialBank(username, totalStakesUAH, 'UAH', 0).then(() => {
+          if (totalStakesUSD > 0) this.setInitialBank(username, totalStakesUSD, 'USD', Number(usdRate) || 41.5).catch(() => {});
+        }).catch(() => {});
+      }
       return {
         uah: { initialBank: totalStakesUAH, currentBank: totalStakesUAH + profitUAH, totalProfit: profitUAH, roi: totalStakesUAH > 0 ? (profitUAH / totalStakesUAH) * 100 : 0 },
         usd: { initialBank: totalStakesUSD, currentBank: totalStakesUSD + profitUSD, totalProfit: profitUSD, roi: totalStakesUSD > 0 ? (profitUSD / totalStakesUSD) * 100 : 0 },
