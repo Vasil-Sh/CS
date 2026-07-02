@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getGroupedBetTypeOptions, getBetTypeLabel } from "@/lib/displayHelpers";
-import { hintInputClass, FieldHint } from "./FieldHint";
 
 interface FormMatchData {
   game: "CS2" | "Dota2";
@@ -39,7 +38,6 @@ interface BettingFormMatchSectionProps {
   isParsing: boolean;
   isExpressFromMatches: boolean;
   expressEventsCount: number;
-  showHints: boolean;
   classes: {
     input: string;
     selectTrigger: string;
@@ -60,7 +58,6 @@ export default function BettingFormMatchSection({
   isParsing,
   isExpressFromMatches,
   expressEventsCount,
-  showHints,
   classes,
   onFieldChange,
   onParseUrl,
@@ -237,8 +234,7 @@ export default function BettingFormMatchSection({
         <div className="border-t border-gray-100 -mx-6" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FieldHint showHints={showHints} isEmpty={!data.team1} hint="Введіть назву команди 1">
-          <div id="team1-wrapper">
+          <div className="space-y-1.5" id="team1-wrapper">
             <Label htmlFor="team1" className={classes.label}>
               Команда 1{" "}
               {showRequired && <span className="text-red-500">*</span>}
@@ -258,14 +254,12 @@ export default function BettingFormMatchSection({
                 onChange={(e) => onFieldChange("team1", e.target.value)}
                 placeholder={data.game === "CS2" ? "NAVI" : "Team Spirit"}
                 required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={hintInputClass(classes.input, showHints, !data.team1)}
+                className={classes.input}
               />
             </div>
           </div>
-          </FieldHint>
 
-          <FieldHint showHints={showHints} isEmpty={!data.team2} hint="Введіть назву команди 2">
-          <div>
+          <div className="space-y-1.5">
             <Label htmlFor="team2" className={classes.label}>
               Команда 2{" "}
               {showRequired && <span className="text-red-500">*</span>}
@@ -285,19 +279,17 @@ export default function BettingFormMatchSection({
                 onChange={(e) => onFieldChange("team2", e.target.value)}
                 placeholder={data.game === "CS2" ? "G2" : "OG"}
                 required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={hintInputClass(classes.input, showHints, !data.team2)}
+                className={classes.input}
               />
             </div>
           </div>
-          </FieldHint>
         </div>
 
         <div className="border-t border-gray-100 -mx-6" />
 
         {/* Bet type: button that opens modal */}
         <div className="flex items-end gap-3">
-          <FieldHint showHints={showHints} isEmpty={!data.betType} hint="Оберіть тип прогнозу">
-          <div className="flex-[2]">
+          <div className="flex-[2] space-y-1.5">
             <Label className={classes.label}>
               Тип прогнозу{" "}
               {showRequired && <span className="text-red-500">*</span>}
@@ -309,23 +301,22 @@ export default function BettingFormMatchSection({
               className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
                 !data.team1 || !data.team2
                   ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                  : showHints && !data.betType
-                    ? "ring-2 ring-red-300 border-red-400 bg-red-50 text-red-600"
-                    : data.betType
-                      ? "border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE]"
-                      : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
+                  : data.betType
+                    ? "border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE]"
+                    : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
               }`}
             >
               {!data.team1 || !data.team2
                 ? "Спочатку введіть команди"
                 : data.betType
                   ? getBetTypeLabel(data.betType, data.format)
-                  : showHints ? "Оберіть тип прогнозу ⚠" : "Оберіть тип прогнозу"}
+                  : "Оберіть тип прогнозу"}
             </button>
           </div>
-          </FieldHint>
-          <FieldHint showHints={showHints} isEmpty={!data.selection} hint="Оберіть команду">
-          <div className="flex-[2]">
+          <div className="flex-[2] space-y-1.5">
+            <Label className={classes.label}>
+              Вибір {showRequired && <span className="text-red-500">*</span>}
+            </Label>
             <Select
               value={data.selection}
               onValueChange={(value) => onFieldChange("selection", value)}
@@ -350,9 +341,7 @@ export default function BettingFormMatchSection({
               </SelectContent>
             </Select>
           </div>
-          </FieldHint>
-          <FieldHint showHints={showHints} isEmpty={!data.odds || parseFloat(data.odds) <= 1} hint="Введіть коефіцієнт (≥1.01)">
-          <div className="flex-1">
+          <div className="flex-1 space-y-1.5">
             <Label htmlFor="odds" className={classes.label}>
               Коефіцієнт{" "}
               {showRequired && <span className="text-red-500">*</span>}
@@ -366,10 +355,9 @@ export default function BettingFormMatchSection({
               onChange={(e) => onFieldChange("odds", e.target.value)}
               placeholder="1.65"
               required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={hintInputClass(classes.input, showHints, !data.odds || parseFloat(data.odds) <= 1)}
+              className={classes.input}
             />
           </div>
-          </FieldHint>
         </div>
 
         {/* Show "Add event to express" button ONLY when NOT pre-filled from matches */}
