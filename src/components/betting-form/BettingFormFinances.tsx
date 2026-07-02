@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { hintInputClass, FieldHint } from './FieldHint';
 import type { ExpressEvent } from './types';
 
 const MAX_CONFIDENCE = 95;
@@ -19,6 +20,7 @@ interface BettingFormFinancesProps {
   isBlocked: boolean;
   isHighConfidence: boolean;
   showSection: boolean;
+  showHints: boolean;
   classes: {
     input: string;
     label: string;
@@ -34,6 +36,7 @@ export default function BettingFormFinances({
   isBlocked,
   isHighConfidence,
   showSection,
+  showHints,
   classes,
   onFieldChange,
   onConfidenceChange,
@@ -51,7 +54,8 @@ export default function BettingFormFinances({
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
+          <FieldHint showHints={showHints} isEmpty={!data.stake || parseFloat(data.stake) <= 0} hint="Введіть суму ставки">
+          <div>
             <Label htmlFor="stake" className={classes.label}>
               Сума прогнозу ({data.currency === 'USD' ? '$' : '₴'}){' '}
               <span className="text-red-500">*</span>
@@ -94,10 +98,11 @@ export default function BettingFormFinances({
                 onChange={(e) => onFieldChange('stake', e.target.value)}
                 placeholder="100"
                 required
-                className={`flex-1 ${classes.input}`}
+                className={`flex-1 ${hintInputClass(classes.input, showHints, !data.stake || parseFloat(data.stake) <= 0)}`}
               />
             </div>
           </div>
+          </FieldHint>
 
           <div className="space-y-1.5">
             <Label

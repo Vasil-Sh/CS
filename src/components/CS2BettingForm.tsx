@@ -186,6 +186,7 @@ export default function CS2BettingForm({
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
+  const [showHints, setShowHints] = useState(false);
   const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
     const saved = UserDataService.getUserData<number>(
       currentUser,
@@ -1043,9 +1044,11 @@ export default function CS2BettingForm({
     e.preventDefault();
 
     if (!formValid) {
-      toast.error("Заповніть усі обов'язкові поля (позначені *)");
+      setShowHints(true);
+      toast.error("Заповніть усі обов'язкові поля (позначені червоним)");
       return;
     }
+    setShowHints(false);
 
     // Auto-initialize bankroll with bet amount if not set yet
     const betCurrency = (formData.currency as "UAH" | "USD") || "UAH";
@@ -1450,6 +1453,7 @@ export default function CS2BettingForm({
                       isParsing={isParsingMatch}
                       isExpressFromMatches={isExpressFromMatches}
                       expressEventsCount={expressEvents.length}
+                      showHints={showHints}
                       classes={{
                         input: inputClass,
                         selectTrigger: selectTriggerClass,
@@ -1481,6 +1485,7 @@ export default function CS2BettingForm({
                     isBlocked={tiltBlock.blocked}
                     isHighConfidence={isHighConfidence}
                     showSection={true}
+                    showHints={showHints}
                     format={formData.format}
                     classes={{
                       input: inputClass,
