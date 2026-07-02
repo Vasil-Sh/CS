@@ -12,6 +12,11 @@ import {
   Sun,
   Globe,
   PlayCircle,
+  XCircle,
+  CheckCircle2,
+  FileCheck,
+  Search,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
