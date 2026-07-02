@@ -198,6 +198,13 @@ export default function Analytics() {
     updateBankrollStats();
   }, [bankrollVersion]);
 
+  // Recompute bankroll when bets data changes
+  useEffect(() => {
+    if (bets.length > 0) {
+      setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
+    }
+  }, [bets, currentUser]);
+
   const updateBankrollStats = useCallback(async () => {
     try {
       const apiStats = await BankrollService.fetchBankroll();
@@ -305,27 +312,27 @@ export default function Analytics() {
 
   // Refresh bankroll when user switches back to this tab
   useEffect(() => {
+    let betsRef = bets;
+    let userRef = currentUser;
+
     const handleVisibility = async () => {
       if (document.visibilityState === "visible") {
         try {
           const apiStats = await BankrollService.fetchBankroll();
           if (apiStats.initialBank > 0) {
-            BankrollService.syncFromAPI(currentUser, apiStats);
+            BankrollService.syncFromAPI(userRef, apiStats);
           }
         } catch (err) {
           if (import.meta.env.DEV)
-            console.warn(
-              "[Analytics] Visibility bankroll refresh failed:",
-              err,
-            );
+            console.warn("[Analytics] Visibility bankroll refresh failed:", err);
         }
-        setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
+        setDualBank(BankrollService.getBankrollStatsDual(userRef, betsRef));
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
+  }, [bets, currentUser]);
 
   const clearAllData = useCallback(async () => {
     if (
