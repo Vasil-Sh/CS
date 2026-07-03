@@ -64,6 +64,7 @@ import StrategyOverallStats from "@/components/strategy/StrategyOverallStats";
 import StrategyTopRoiList from "@/components/strategy/StrategyTopRoiList";
 import StrategyRecommendations from "@/components/strategy/StrategyRecommendations";
 import StrategyPerformanceCharts from "@/components/strategy/StrategyPerformanceCharts";
+import CreateStrategyDialog from "@/components/strategy/CreateStrategyDialog";
 
 interface BetData {
   strategy?: string;
@@ -157,6 +158,7 @@ export default function StrategyOverview() {
   const [selectedStrategy, setSelectedStrategy] = useState<CS2Strategy | null>(
     null,
   );
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const bumpStrategy = useAppStore((s) => s.bumpStrategy);
@@ -677,6 +679,29 @@ export default function StrategyOverview() {
     toast.success(`Шаблон "${template.name}" застосовано!`);
   };
 
+  const handleSaveStrategy = (strategy: CS2Strategy) => {
+    const customStrategies = loadCustomStrategiesFromStorage();
+    if (customStrategies.length >= 25) {
+      toast.error("Досягнуто ліміту стратегій", { description: "Максимум 25 стратегій." });
+      return;
+    }
+    customStrategies.push(strategy);
+    saveCustomStrategiesToStorage(customStrategies);
+    setStrategies((prev) => [...prev, strategy]);
+    setNewlyCreatedStrategy(strategy);
+    UserDataService.createStrategy({ name: strategy.name, isPrimary: false, config: strategy })
+      .then((bs: { id?: string }) => {
+        if (bs?.id) {
+          const all = loadCustomStrategiesFromStorage();
+          const idx = all.findIndex((s: CS2Strategy) => (s.id || s.name) === (strategy.id || strategy.name));
+          if (idx >= 0) { all[idx] = { ...all[idx], _backendId: bs.id }; saveCustomStrategiesToStorage(all); }
+        }
+      })
+      .catch((err: unknown) => { if (import.meta.env.DEV) console.error("[API] Strategy save failed:", err); });
+    setSuccessDialogOpen(true);
+    setActiveTab("overview");
+  };
+
   const confirmDeleteStrategy = (strategyId: string) => {
     setStrategyToDelete(strategyId);
     setDeleteDialogOpen(true);
@@ -852,7 +877,7 @@ export default function StrategyOverview() {
           showFilters={showFilters}
           onTabChange={setActiveTab}
           onFilterToggle={() => setShowFilters(!showFilters)}
-          onCreateClick={() => setActiveTab("create")}
+          onCreateClick={() => setShowCreateDialog(true)}
         />
 
         {/* Tab Content */}
@@ -862,7 +887,7 @@ export default function StrategyOverview() {
               {strategies.length === 0 ? (
                 <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                   <StrategyEmptyState
-                    onCreateStrategy={() => setActiveTab("create")}
+                    onCreateStrategy={() => setShowCreateDialog(true)}
                   />
                 </div>
               ) : (
@@ -2027,6 +2052,14 @@ export default function StrategyOverview() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CreateStrategyDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        strategies={strategies}
+        onSave={handleSaveStrategy}
+      />
+
     </div>
   );
 }
