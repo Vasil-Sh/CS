@@ -363,8 +363,6 @@ export default function MyBets() {
       "tg_bets",
       "bankroll_data",
     ].forEach((k) => UserDataService.clearUserData(currentUser, k));
-    localStorage.removeItem("primaryStrategy");
-    localStorage.removeItem("customStrategies");
 
     // Reset state
     BankrollService.setInitialBank(currentUser, 0);

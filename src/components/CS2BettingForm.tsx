@@ -273,9 +273,7 @@ export default function CS2BettingForm({
         currentUser,
         "primary_strategy",
         "",
-      ) ||
-      localStorage.getItem("primaryStrategy") ||
-      "";
+      );
     if (savedPrimaryStrategy) {
       const strategy = strategiesRef.current?.find(
         (s: CS2Strategy) =>
@@ -1326,6 +1324,12 @@ export default function CS2BettingForm({
         blockKey,
         JSON.stringify({ until, reason, strategyName: primaryStrategy?.name }),
       );
+      // Sync to API
+      UserDataService.createTiltBlock({
+        until: new Date(until).toISOString(),
+        reason,
+        strategyName: primaryStrategy?.name || '',
+      }).catch(() => {});
       return { blocked: true, reason, minutesLeft: blockMinutes };
     }
 

@@ -72,6 +72,7 @@ export default function Profile() {
         const rounded = Math.round(rate * 100) / 100;
         localStorage.setItem("matchiq_exchange_rate", String(rounded));
         setExchangeRate(rounded);
+        UserDataService.saveUserPrefs({ preferences: { exchangeRate: rounded } }).catch(() => {});
         toast.success(`Курс оновлено: 1 USD = ${rounded} UAH`);
       } else {
         throw new Error("No UAH rate");
@@ -141,21 +142,20 @@ export default function Profile() {
     'admin_risky_teams',
     'matchiq_theme',
     'matchiq_lang',
-    'ui-settings',
     'match_ratings',
   ] as const;
 
   // ── Admin-only keys ──
-  const ADMIN_KEYS = [
-    'adminLocalUsers',
-    'adminUserEdits',
-    'adminDeletedUsers',
-  ] as const;
+  const ADMIN_KEYS: readonly string[] = [];
 
   // Keys to NEVER include in backup (security, ephemeral)
   const FORBIDDEN_BACKUP_KEYS = new Set([
     'google_sheets_api_key',
     'currentUser',
+    'ui-settings',
+    'adminLocalUsers',
+    'adminUserEdits',
+    'adminDeletedUsers',
   ]);
 
   // Auto-collect user-scoped keys for the CURRENT user
@@ -576,6 +576,7 @@ export default function Profile() {
                   if (!isNaN(v) && v > 0) {
                     setExchangeRate(v);
                     localStorage.setItem("matchiq_exchange_rate", String(v));
+                    UserDataService.saveUserPrefs({ preferences: { exchangeRate: v } }).catch(() => {});
                   }
                 }}
                 className="flex-1 h-10 px-3 rounded-xl border border-[#D1D5DB] hover:border-[#9CA3AF] focus:border-[#111827] focus:ring-1 focus:ring-[#111827] transition-colors text-sm bg-white text-[#111827] outline-none"

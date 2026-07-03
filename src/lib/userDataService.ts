@@ -353,4 +353,19 @@ export class UserDataService {
   static async saveUserPrefs(data: { maxStakePercent?: number; preferences?: Record<string, unknown> }): Promise<{ maxStakePercent: number; preferences: Record<string, unknown> }> {
     return api.put("/user", data);
   }
+
+  /** Fetch active tilt blocks for current user */
+  static async fetchTiltBlocks(): Promise<Array<{ id: string; until: string; reason: string; strategyName: string }>> {
+    return api.get("/tilt-blocks");
+  }
+
+  /** Create a tilt block */
+  static async createTiltBlock(data: { until: string; reason?: string; strategyName?: string }): Promise<{ id: string }> {
+    return api.post("/tilt-blocks", data);
+  }
+
+  /** Delete a tilt block */
+  static async deleteTiltBlock(id: string): Promise<void> {
+    await api.delete(`/tilt-blocks/${id}`);
+  }
 }
