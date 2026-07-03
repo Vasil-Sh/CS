@@ -195,6 +195,15 @@ export default function CS2BettingForm({
     return saved || DEFAULT_MAX_STAKE_PERCENT;
   });
 
+  // API-synced bets cache for Kelly/tilt calculations (avoid stale localStorage)
+  const apiBetsRef = useRef<BetRecord[]>([]);
+  useEffect(() => {
+    if (!currentUser) return;
+    UserDataService.fetchBets()
+      .then((bets) => { apiBetsRef.current = bets as unknown as BetRecord[]; })
+      .catch(() => { /** keep localStorage fallback */ });
+  }, [currentUser]);
+
   const [formData, setFormData] = useState(() => {
     const initialCategory =
       expressMatchesData && expressMatchesData.length >= 2
@@ -1181,14 +1190,13 @@ export default function CS2BettingForm({
 
     let kelly = null;
     if (hasConfidence) {
-      const betsStore = UserDataService.getUserData<BetRecord[]>(
-        currentUser,
-        "mybets_data",
-        [],
-      );
+      // Use API-synced bets (fallback to localStorage cache)
+      const apiBets = apiBetsRef.current.length > 0
+        ? apiBetsRef.current
+        : UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
       const bankrollStats = BankrollService.getBankrollStats(
         currentUser,
-        betsStore as unknown as Bet[],
+        apiBets as unknown as Bet[],
       );
       kelly = calcKellyCriterion(
         formData.betCategory,
@@ -1295,11 +1303,10 @@ export default function CS2BettingForm({
     if (!blockAfter || blockAfter < 1)
       return { blocked: false, reason: "", minutesLeft: 0 };
 
-    const allBets = UserDataService.getUserData<BetRecord[]>(
-      currentUser,
-      "mybets_data",
-      [],
-    );
+    // Use API-synced bets (fallback to localStorage cache)
+    const allBets = apiBetsRef.current.length > 0
+      ? apiBetsRef.current
+      : UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
     // Sort by date descending, count consecutive losses
     const sorted = [...allBets]
       .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
