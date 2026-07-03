@@ -39,7 +39,7 @@ export class UserDataService {
         );
       }
     } catch (e) {
-      console.error("[UserDataService] repairAllUserKeys failed:", e);
+      if (import.meta.env.DEV) console.error("[UserDataService] repairAllUserKeys failed:", e);
     }
   }
 
@@ -57,7 +57,7 @@ export class UserDataService {
         return data as unknown as T;
       }
     } catch (error) {
-      console.error("Error getting user data:", error);
+      if (import.meta.env.DEV) console.error("Error getting user data:", error);
       return defaultValue;
     }
   }
@@ -79,12 +79,12 @@ export class UserDataService {
             localStorage.setItem(userKey, JSON.stringify(value));
             debounceTimers.delete(timerKey);
           } catch (error) {
-            console.error("Error setting user data:", error);
+            if (import.meta.env.DEV) console.error("Error setting user data:", error);
           }
         }, 100),
       );
     } catch (error) {
-      console.error("Error setting user data:", error);
+      if (import.meta.env.DEV) console.error("Error setting user data:", error);
     }
   }
 
@@ -93,7 +93,7 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.setItem(userKey, JSON.stringify(value));
     } catch (error) {
-      console.error("Error setting user data (sync):", error);
+      if (import.meta.env.DEV) console.error("Error setting user data (sync):", error);
     }
   }
 
@@ -102,7 +102,7 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.removeItem(userKey);
     } catch (error) {
-      console.error("Error clearing user data:", error);
+      if (import.meta.env.DEV) console.error("Error clearing user data:", error);
     }
   }
 
@@ -116,7 +116,7 @@ export class UserDataService {
         }
       });
     } catch (error) {
-      console.error("Error clearing all user data:", error);
+      if (import.meta.env.DEV) console.error("Error clearing all user data:", error);
     }
   }
 
@@ -126,7 +126,7 @@ export class UserDataService {
       const userPrefix = `user_${username}_`;
       return keys.some((key) => key.startsWith(userPrefix));
     } catch (error) {
-      console.error("Error checking user data:", error);
+      if (import.meta.env.DEV) console.error("Error checking user data:", error);
       return false;
     }
   }
@@ -146,7 +146,7 @@ export class UserDataService {
           console.log(`Daily reset performed for ${username} on ${today}`);
       }
     } catch (error) {
-      console.error("Error in daily reset:", error);
+      if (import.meta.env.DEV) console.error("Error in daily reset:", error);
     }
   }
 
@@ -165,7 +165,7 @@ export class UserDataService {
         return betDate === today;
       });
     } catch (error) {
-      console.error("Error getting today bets:", error);
+      if (import.meta.env.DEV) console.error("Error getting today bets:", error);
       return [];
     }
   }
@@ -190,25 +190,30 @@ export class UserDataService {
         ).data ||
         (data as { bets?: Record<string, unknown>[] }).bets ||
         [];
-    const mapped = rawBets.map((b: Record<string, unknown>) => ({
-      ...b,
-      id: b.id,
-      odds: parseFloat(String(b.odds ?? 1)),
-      amount: parseFloat(String(b.amount ?? 0)),
-      profit: parseFloat(String(b.profit || "0")),
-      roi: b.roi ? parseFloat(String(b.roi)) : undefined,
-      stake: b.stake ? parseFloat(String(b.stake)) : undefined,
-      originalAmount: b.originalAmount
-        ? parseFloat(String(b.originalAmount))
-        : undefined,
-      exchangeRate: b.exchangeRate ? parseFloat(String(b.exchangeRate)) : null,
-      originalProfit: b.originalProfit
-        ? parseFloat(String(b.originalProfit))
-        : undefined,
-      winProbability: b.winProbability
-        ? parseFloat(String(b.winProbability))
-        : undefined,
-    }));
+    const mapped = rawBets.map((b: Record<string, unknown>) => {
+      const rawCurrency = String(b.currency || '').toUpperCase();
+      const currency = (rawCurrency === 'USD' || rawCurrency === 'UAH') ? rawCurrency : 'UAH';
+      return {
+        ...b,
+        id: b.id,
+        currency,
+        odds: parseFloat(String(b.odds ?? 1)),
+        amount: parseFloat(String(b.amount ?? 0)),
+        profit: parseFloat(String(b.profit || "0")),
+        roi: b.roi ? parseFloat(String(b.roi)) : undefined,
+        stake: b.stake ? parseFloat(String(b.stake)) : undefined,
+        originalAmount: b.originalAmount
+          ? parseFloat(String(b.originalAmount))
+          : undefined,
+        exchangeRate: b.exchangeRate ? parseFloat(String(b.exchangeRate)) : null,
+        originalProfit: b.originalProfit
+          ? parseFloat(String(b.originalProfit))
+          : undefined,
+        winProbability: b.winProbability
+          ? parseFloat(String(b.winProbability))
+          : undefined,
+      };
+    });
     // Cache to localStorage so "Останні записи" reads instantly on next page load
     if (mapped.length > 0) {
       try {
@@ -300,5 +305,52 @@ export class UserDataService {
   static async deleteStrategy(id: string, name?: string): Promise<void> {
     const query = name ? `?name=${encodeURIComponent(name)}` : "";
     await api.delete(`/strategies/${id}${query}`);
+  }
+
+  /** Set a strategy as primary (unsets all others) */
+  static async setPrimaryStrategy(id: string): Promise<void> {
+    await api.put(`/strategies/${id}/primary`);
+  }
+
+  // ═══ New API-backed methods (migrated from localStorage-only) ═══
+
+  /** Fetch match ratings from API */
+  static async fetchMatchRatings(): Promise<Array<{ id: string; matchId: string; rating: string }>> {
+    return api.get("/match-ratings");
+  }
+
+  /** Upsert a match rating (like/dislike) */
+  static async upsertMatchRating(matchId: string, rating: string): Promise<{ id: string; matchId: string; rating: string }> {
+    return api.post("/match-ratings", { matchId, rating });
+  }
+
+  /** Delete a match rating */
+  static async deleteMatchRating(matchId: string): Promise<void> {
+    await api.delete(`/match-ratings/${encodeURIComponent(matchId)}`);
+  }
+
+  /** Fetch telegram bets from API */
+  static async fetchTelegramBets(): Promise<Array<{ id: string; betData: Record<string, unknown> }>> {
+    return api.get("/telegram-bets");
+  }
+
+  /** Save a telegram bet to API */
+  static async saveTelegramBet(betData: Record<string, unknown>): Promise<{ id: string }> {
+    return api.post("/telegram-bets", { betData });
+  }
+
+  /** Delete a telegram bet */
+  static async deleteTelegramBet(id: string): Promise<void> {
+    await api.delete(`/telegram-bets/${id}`);
+  }
+
+  /** Fetch user preferences (theme, lang, max_stake_percent) */
+  static async fetchUserPrefs(): Promise<{ maxStakePercent: number; preferences: { theme?: string; lang?: string } }> {
+    return api.get("/user");
+  }
+
+  /** Save user preferences */
+  static async saveUserPrefs(data: { maxStakePercent?: number; preferences?: Record<string, unknown> }): Promise<{ maxStakePercent: number; preferences: Record<string, unknown> }> {
+    return api.put("/user", data);
   }
 }

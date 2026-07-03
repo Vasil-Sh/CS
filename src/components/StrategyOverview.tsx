@@ -785,6 +785,11 @@ export default function StrategyOverview() {
       );
       localStorage.setItem("primaryStrategy", strategyId);
       store.setPrimaryStrategyId(strategyId);
+      // Sync to backend API
+      const backendId = strategy._backendId;
+      if (backendId) {
+        UserDataService.setPrimaryStrategy(backendId).catch(() => {});
+      }
       toast.success(`"${strategy.name}" встановлено як основну стратегію!`);
     }
     bumpStrategy();

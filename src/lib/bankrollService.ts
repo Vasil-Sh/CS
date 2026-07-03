@@ -305,12 +305,15 @@ export class BankrollService {
     },
   ): void {
     if (
+      apiData.initialBank === undefined &&
       apiData.initialBankUSD === undefined &&
       apiData.exchangeRate === undefined
     )
       return;
     const existing = this.getBankrollData(username);
     if (!existing) return;
+    if (apiData.initialBank !== undefined)
+      existing.initialBankUAH = apiData.initialBank;
     if (apiData.initialBankUSD !== undefined)
       existing.initialBankUSD = apiData.initialBankUSD;
     if (apiData.exchangeRate !== undefined)

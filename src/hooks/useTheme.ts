@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { UserDataService } from '@/lib/userDataService';
 
 type Theme = 'light' | 'dark';
 
@@ -33,6 +34,8 @@ export function useTheme() {
       const next: Theme = prev === 'light' ? 'dark' : 'light';
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
+      // Sync to API
+      UserDataService.saveUserPrefs({ preferences: { theme: next } }).catch(() => {});
       return next;
     });
   }, []);

@@ -175,6 +175,10 @@ let currentLang: Lang = (() => {
 export function setLang(lang: Lang) {
   currentLang = lang;
   try { localStorage.setItem('matchiq_lang', lang); } catch { /* ignore */ }
+  // Sync to API
+  import('./userDataService').then(({ UserDataService }) => {
+    UserDataService.saveUserPrefs({ preferences: { lang } }).catch(() => {});
+  }).catch(() => {});
   listeners.forEach(fn => fn(lang));
 }
 

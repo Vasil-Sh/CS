@@ -244,6 +244,8 @@ export default function CS2BettingForm({
       "max_stake_percent",
       maxStakePercent,
     );
+    // Sync to API
+    UserDataService.saveUserPrefs({ maxStakePercent }).catch(() => {});
   }, [maxStakePercent, currentUser]);
 
   useEffect(() => {

@@ -121,7 +121,7 @@ export default function TelegramGroups() {
   useEffect(() => {
     if (!currentUser || dataLoaded) return;
     const load = async () => {
-      let localGroups = UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []);
+      const localGroups = UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []);
       // Try API first
       try {
         const apiGroups = await api.get<TelegramGroup[]>('/telegram-groups');
@@ -170,6 +170,8 @@ export default function TelegramGroups() {
   useEffect(() => {
     if (!currentUser || !dataLoaded) return;
     UserDataService.setUserDataSync(currentUser, 'tg_bets', bets);
+    // Sync all tg bets to API (fire-and-forget)
+    UserDataService.saveTelegramBet({ bets }).catch(() => {});
   }, [bets, currentUser, dataLoaded]);
 
   // Dialogs

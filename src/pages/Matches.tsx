@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserDataService } from "@/lib/userDataService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -140,7 +141,7 @@ const loadMatchRatings = (): Record<string, MatchRating> => {
   return {};
 };
 
-/** Save match ratings to localStorage */
+/** Save match ratings to localStorage AND sync to API */
 const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
   try {
     localStorage.setItem("match_ratings", JSON.stringify(ratings));
@@ -646,6 +647,12 @@ export default function Matches() {
       saveMatchRatings(updated);
       return updated;
     });
+    // Sync to API in background
+    if (rating) {
+      UserDataService.upsertMatchRating(matchId, rating).catch(() => {});
+    } else {
+      UserDataService.deleteMatchRating(matchId).catch(() => {});
+    }
   };
 
   const handleAddToBets = (match: Match) => {
