@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, TrendingUp, Target, BarChart3 } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { BankrollService } from "@/lib/bankrollService";
 import { UserDataService } from "@/lib/userDataService";
 import { toast } from "sonner";
@@ -42,17 +49,10 @@ export default function InitialBankModal({
       toast.error("Будь ласка, введіть коректну суму");
       return;
     }
-    if (mode === "edit" && existingBank) {
-      BankrollService.setInitialBank(currentUser, value, currency, savedRate);
-      toast.success(
-        `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
-      );
-    } else {
-      BankrollService.setInitialBank(currentUser, value, currency, savedRate);
-      toast.success(
-        `Стартовий банк встановлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
-      );
-    }
+    BankrollService.setInitialBank(currentUser, value, currency, savedRate);
+    toast.success(
+      `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
+    );
     onClose(true);
   };
 
@@ -74,176 +74,93 @@ export default function InitialBankModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent
-        className="sm:max-w-[480px] rounded-3xl border border-[#E5E7EB] bg-white p-0 gap-0 overflow-hidden"
-        style={{
-          boxShadow: "0 20px 60px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.04)",
-        }}
-      >
+      <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 border-2 border-[#3B82F6] bg-[#EFF6FF] rounded-2xl flex-shrink-0">
-              <Wallet className="h-6 w-6 text-[#3B82F6]" strokeWidth={1.5} />
+        <DialogHeader className="pt-4 pb-3 px-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[#EFF6FF] rounded-2xl">
+              <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
-                {mode === "edit"
-                  ? "Редагувати стартовий банк"
-                  : "Налаштування стартового банку"}
-              </h2>
-              <p className="text-sm text-[#6B7280] mt-0.5">
-                {mode === "edit"
-                  ? "Змініть ваш стартовий банк для точного відстеження прогресу"
-                  : "Введіть ваш стартовий банк для точного відстеження прогресу та аналітики"}
-              </p>
+              <DialogTitle className="text-xl font-semibold text-[#111827]">
+                Редагувати стартовий банк
+              </DialogTitle>
+              <DialogDescription className="text-sm text-[#6B7280] mt-0.5">
+                Змініть ваш стартовий банк для точного відстеження прогресу
+              </DialogDescription>
             </div>
           </div>
-          {currency === "USD" && amount && parseFloat(amount) > 0 && (
-            <div className="text-sm text-gray-500 text-center bg-[#F9FAFB] rounded-xl py-2 px-4 border border-[#E5E7EB]">
-              ≈{" "}
-              {(parseFloat(amount) * savedRate).toLocaleString("uk-UA", {
-                maximumFractionDigits: 0,
-              })}{" "}
-              ₴ за курсом {savedRate} ₴/$
-            </div>
-          )}
-        </div>
+        </DialogHeader>
 
-        <div className="border-b border-[#E5E7EB]" />
+        <div className="border-t border-[#E5E7EB]" />
 
         {/* Body */}
-        <div className="px-6 pb-6 space-y-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="initialBank"
-              className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider pl-1"
-            >
-              {label}
+        <div className="space-y-4 pt-4 pb-4 px-6 bg-[#F3F4F6]">
+          <div>
+            <Label className="text-base font-medium">
+              Стартовий банк ({currency === "USD" ? "$" : "₴"})
             </Label>
-            <div className="flex items-center gap-2">
-              <div className="flex bg-[#F3F4F6] rounded-xl p-0.5 flex-shrink-0">
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex bg-white rounded-xl p-0.5 border border-[#E5E7EB] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setCurrency("UAH")}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "UAH" ? "bg-white text-[#111827] shadow-sm" : "text-[#9CA3AF] hover:text-[#6B7280]"}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "UAH" ? "bg-[#447afc] text-white shadow-sm" : "text-[#9CA3AF] hover:text-[#6B7280]"}`}
                 >
                   ₴
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrency("USD")}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "USD" ? "bg-white text-[#111827] shadow-sm" : "text-[#9CA3AF] hover:text-[#6B7280]"}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "USD" ? "bg-[#447afc] text-white shadow-sm" : "text-[#9CA3AF] hover:text-[#6B7280]"}`}
                 >
                   $
                 </button>
               </div>
               <Input
-                id="initialBank"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                className="flex-1 text-2xl h-16 rounded-2xl border-2 border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#3B82F6] focus:ring-0 transition-all duration-200 font-bold bg-[#F9FAFB] text-[#111827] px-5"
+                className="flex-1 rounded-2xl border-[#E5E7EB] h-11 text-base font-semibold"
                 autoFocus
               />
-              {mode === "edit" && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="h-16 px-4 rounded-2xl border-2 border-[#EF4444] text-[#EF4444] hover:bg-[#FEF2F2] font-semibold text-sm transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                >
-                  {"Скинути до 0"}
-                </button>
-              )}
             </div>
+            {currency === "USD" && amount && parseFloat(amount) > 0 && (
+              <p className="text-xs text-[#6B7280] mt-1.5">
+                ≈ {(parseFloat(amount) * savedRate).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴ за курсом {savedRate} ₴/$
+              </p>
+            )}
           </div>
 
-          {mode === "setup" && (
-            <div className="bg-[#F9FAFB] rounded-2xl p-5 space-y-4 border border-[#E5E7EB]">
-              <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                {"Це допоможе вам:"}
-              </p>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-white rounded-xl border border-[#E5E7EB] flex-shrink-0">
-                  <BarChart3
-                    className="h-4 w-4 text-[#3B82F6]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#111827]">
-                    {"Відстежувати поточний банк"}
-                  </p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
-                    {"Бачити реальний стан ваших коштів"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-white rounded-xl border border-[#E5E7EB] flex-shrink-0">
-                  <TrendingUp
-                    className="h-4 w-4 text-[#22C55E]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#111827]">
-                    {"Розраховувати ROI"}
-                  </p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
-                    {"Точний відсоток прибутковості"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-white rounded-xl border border-[#E5E7EB] flex-shrink-0">
-                  <Target
-                    className="h-4 w-4 text-[#8B5CF6]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#111827]">
-                    {"Планувати лесенки"}
-                  </p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
-                    {"Автоматичний розрахунок розміру ставок"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-5 border-t border-[#F3F4F6] bg-[#FAFAFA] flex items-center gap-3">
-          {mode === "setup" && (
-            <Button
-              variant="outline"
-              onClick={handleSkip}
-              className="flex-1 rounded-2xl border border-[#D1D5DB] font-semibold h-12 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-all duration-200"
-            >
-              {"Пропустити"}
-            </Button>
-          )}
-          {mode === "edit" && (
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1 rounded-2xl border border-[#D1D5DB] font-semibold h-12 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-all duration-200"
-            >
-              {"Скасувати"}
-            </Button>
-          )}
           <Button
-            onClick={handleSubmit}
-            className="flex-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold h-12 text-sm shadow-none hover:shadow-md transition-all duration-200"
+            type="button"
+            variant="outline"
+            onClick={handleReset}
+            className="w-full rounded-xl border-[#E5E7EB] font-medium text-sm"
           >
-            <Wallet className="h-4 w-4 mr-2" strokeWidth={2} />
-            {mode === "edit" ? "Оновити" : "Почати"}
+            Скинути до 0
           </Button>
         </div>
+
+        <div className="border-t border-[#E5E7EB]" />
+
+        {/* Footer */}
+        <DialogFooter className="gap-2 pt-3 pb-4 px-6">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base"
+          >
+            Скасувати
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+          >
+            Оновити
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
