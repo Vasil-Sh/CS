@@ -174,6 +174,8 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
     handleOpenChange(false);
   };
 
+  const isValid = form.name.trim() !== '' && form.description.trim() !== '' && form.criteria.some((c) => c.trim() !== '');
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0">
@@ -263,14 +265,14 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </div>
 
           {/* Tilt protection */}
-          <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] space-y-4">
+          <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-[#FECACA] space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#E5E7EB]">
-                <Shield className="h-4 w-4 text-[#6B7280]" strokeWidth={2} />
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FEE2E2]">
+                <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={2} />
               </div>
-              <h4 className="font-semibold text-[#6B7280] text-sm">🔒 Тілт-захист (anti-tilt)</h4>
+              <h4 className="font-semibold text-[#DC2626] text-sm">🔒 Тілт-захист (anti-tilt)</h4>
             </div>
-            <p className="text-xs text-[#9CA3AF]">
+            <p className="text-xs text-[#DC2626]/70">
               Автоматично блокує форму ставки після N програшів поспіль.
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -303,7 +305,7 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           {/* Name / Risk / ROI row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label className="text-base font-medium">Назва стратегії *</Label>
+              <Label className="text-base font-medium">Назва стратегії <span className="text-[#DC2626]">*</span></Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -312,7 +314,7 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
               />
             </div>
             <div>
-              <Label className="text-base font-medium">Рівень ризику *</Label>
+              <Label className="text-base font-medium">Рівень ризику <span className="text-[#DC2626]">*</span></Label>
               <Select value={form.riskLevel} onValueChange={(v: "Low" | "Medium" | "High") => setForm({ ...form, riskLevel: v })}>
                 <SelectTrigger className="rounded-2xl border-[#E5E7EB] mt-1.5 h-11"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -323,7 +325,7 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
               </Select>
             </div>
             <div>
-              <Label className="text-base font-medium">Очікуваний ROI (%) *</Label>
+              <Label className="text-base font-medium">Очікуваний ROI (%)</Label>
               <Input
                 type="number" min={0} max={100}
                 value={form.expectedROI}
@@ -335,7 +337,7 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
 
           {/* Description */}
           <div>
-            <Label className="text-base font-medium">Опис стратегії *</Label>
+            <Label className="text-base font-medium">Опис стратегії <span className="text-[#DC2626]">*</span></Label>
             <Textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -348,7 +350,7 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           {/* Criteria */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-base font-medium">Критерії стратегії *</Label>
+              <Label className="text-base font-medium">Критерії стратегії <span className="text-[#DC2626]">*</span></Label>
               <Button
                 type="button" variant="outline" size="sm"
                 onClick={addCriterion}
@@ -390,7 +392,8 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </Button>
           <Button
             onClick={handleSave}
-            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+            disabled={!isValid}
+            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <Plus className="h-4 w-4 mr-2" /> Створити стратегію
           </Button>
