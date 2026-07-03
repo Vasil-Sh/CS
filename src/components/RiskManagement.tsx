@@ -1501,8 +1501,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </div>
 
         {/* Risk Alerts */}
-        {(riskMetrics.currentDrawdown > 15 ||
-          riskMetrics.consecutiveLosses > 5) && (
+        {riskMetrics.consecutiveLosses > 5 && (
           <Alert className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4">
             <AlertTriangle
               className="h-4 w-4 text-[#EF4444]"
@@ -1510,10 +1509,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             />
             <AlertDescription className="text-sm text-[#991B1B] ml-2">
               <strong className="font-semibold">Попередження про ризик:</strong>
-              {riskMetrics.currentDrawdown > 15 &&
-                ` Поточна просадка ${riskMetrics.currentDrawdown}% перевищує рекомендований поріг.`}
-              {riskMetrics.consecutiveLosses > 5 &&
-                ` ${riskMetrics.consecutiveLosses} послідовних програшів вказують на необхідність перегляду стратегії.`}
+              {` ${riskMetrics.consecutiveLosses} послідовних програшів вказують на необхідність перегляду стратегії.`}
             </AlertDescription>
           </Alert>
         )}
