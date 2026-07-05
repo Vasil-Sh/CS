@@ -1,19 +1,35 @@
-﻿import { memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
-import { TrendingUp } from 'lucide-react';
-import type { BalanceData } from '@/types/betting';
+﻿import { memo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Legend,
+  Area,
+} from "recharts";
+import { TrendingUp, Wallet } from "lucide-react";
+import type { BalanceData } from "@/types/betting";
 
 interface BalanceChartProps {
   data: BalanceData[];
 }
 
-const BalanceChartMemo = memo(function BalanceChart({ data }: BalanceChartProps) {
+const BalanceChartMemo = memo(function BalanceChart({
+  data,
+}: BalanceChartProps) {
   if (!data || data.length === 0) {
     return null;
   }
 
   const initialBalance = data[0]?.balance || 1000;
+  const currentBalance = data[data.length - 1]?.balance || initialBalance;
+  const totalChange = currentBalance - initialBalance;
+  const isUp = totalChange >= 0;
 
   interface CustomTooltipProps {
     active?: boolean;
@@ -23,56 +39,118 @@ const BalanceChartMemo = memo(function BalanceChart({ data }: BalanceChartProps)
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload;
-      const date = new Date(d.date).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const date = new Date(d.date).toLocaleDateString("uk-UA", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
       return (
-        <div className="bg-white p-3 rounded-xl shadow-lg border border-[#E5E7EB] text-xs" style={{ backgroundColor: "white", borderRadius: "12px" }}>
+        <div
+          className="bg-white p-3 rounded-xl shadow-lg border border-[#E5E7EB] text-xs"
+          style={{ backgroundColor: "white", borderRadius: "12px" }}
+        >
           <p className="font-bold text-[#111827] mb-1">Дата: {date}</p>
           {d.betName && <p className="text-[#6B7280]">Прогноз: {d.betName}</p>}
-          {d.odds && <p className="text-[#6B7280]">Коеф.: {Number(d.odds).toFixed(2)}</p>}
-          <p className={`font-bold ${d.profit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
-            Профіт: {d.profit >= 0 ? '+' : ''}{Number(d.profit).toFixed(2)} ₴
+          {d.odds && (
+            <p className="text-[#6B7280]">Коеф.: {Number(d.odds).toFixed(2)}</p>
+          )}
+          <p
+            className={`font-bold ${d.profit >= 0 ? "text-[#16A34A]" : "text-[#DC2626]"}`}
+          >
+            Профіт: {d.profit >= 0 ? "+" : ""}
+            {Number(d.profit).toFixed(2)} ₴
           </p>
-          <p className="font-bold text-[#111827]">Банк: {Number(d.balance).toFixed(2)} ₴</p>
+          <p className="font-bold text-[#111827]">
+            Банк: {Number(d.balance).toFixed(2)} ₴
+          </p>
         </div>
       );
     }
     return null;
   };
 
+  const initialLabel = `Початковий: ${initialBalance.toFixed(0)} ₴`;
+
   return (
     <Card className="border border-[#D1D5DB] shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04)] rounded-2xl bg-white overflow-hidden">
       <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-        <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-          <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
-            <TrendingUp className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
+            <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+              <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            </div>
+            Історія банкролу
+          </CardTitle>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-[#6B7280]">Старт:</span>
+            <span className="font-semibold text-[#111827]">
+              {initialBalance.toFixed(0)} ₴
+            </span>
+            <span className="text-[#D1D5DB]">→</span>
+            <span
+              className={`font-semibold ${isUp ? "text-[#16A34A]" : "text-[#DC2626]"}`}
+            >
+              {currentBalance.toFixed(0)} ₴
+            </span>
+            <span
+              className={`text-xs font-medium px-1.5 py-0.5 rounded ${isUp ? "bg-[#DCFCE7] text-[#16A34A]" : "bg-[#FEE2E2] text-[#DC2626]"}`}
+            >
+              {isUp ? "+" : ""}
+              {totalChange.toFixed(0)} ₴
+            </span>
           </div>
-          Баланс в часі
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="p-6">
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={data} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+          >
+            <defs>
+              <linearGradient id="bankrollGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#447afc" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#447afc" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
-              axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }}
-              tickLine={{ stroke: '#9CA3AF' }}
+              tick={{ fontSize: 11, fill: "#6B7280", fontWeight: 500 }}
+              axisLine={{ stroke: "#9CA3AF", strokeWidth: 1.5 }}
+              tickLine={{ stroke: "#9CA3AF" }}
               tickFormatter={(value) => {
                 const d = new Date(value);
-                return d.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+                return d.toLocaleDateString("uk-UA", {
+                  day: "2-digit",
+                  month: "2-digit",
+                });
               }}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
-              axisLine={{ stroke: '#9CA3AF', strokeWidth: 1.5 }}
-              tickLine={{ stroke: '#9CA3AF' }}
-              tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-              label={{ value: 'Баланс (₴)', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#9CA3AF' } }}
+              tick={{ fontSize: 11, fill: "#6B7280", fontWeight: 500 }}
+              axisLine={{ stroke: "#9CA3AF", strokeWidth: 1.5 }}
+              tickLine={{ stroke: "#9CA3AF" }}
+              tickFormatter={(v: number) =>
+                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
+              }
+              label={{
+                value: "Банкрол (₴)",
+                angle: -90,
+                position: "insideLeft",
+                style: { fontSize: 11, fill: "#9CA3AF" },
+              }}
             />
-            <Tooltip content={<CustomTooltip />} contentStyle={{ backgroundColor: "transparent", border: "none", padding: 0 }} />
+            <Tooltip
+              content={<CustomTooltip />}
+              contentStyle={{
+                backgroundColor: "transparent",
+                border: "none",
+                padding: 0,
+              }}
+            />
             <Legend
-              formatter={() => 'Баланс'}
+              formatter={() => "Банкрол"}
               iconType="plainline"
               wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
             />
@@ -81,7 +159,17 @@ const BalanceChartMemo = memo(function BalanceChart({ data }: BalanceChartProps)
               stroke="#9CA3AF"
               strokeDasharray="6 4"
               strokeWidth={1.5}
-              label={{ value: `Початковий`, position: 'insideTopRight', style: { fontSize: 10, fill: '#9CA3AF', fontWeight: 500 } }}
+              label={{
+                value: initialLabel,
+                position: "insideTopRight",
+                style: { fontSize: 10, fill: "#9CA3AF", fontWeight: 500 },
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="balance"
+              fill="url(#bankrollGradient)"
+              stroke="none"
             />
             <Line
               type="linear"
@@ -89,8 +177,13 @@ const BalanceChartMemo = memo(function BalanceChart({ data }: BalanceChartProps)
               stroke="#447afc"
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 5, fill: '#447afc', stroke: '#fff', strokeWidth: 2 }}
-              name="Баланс"
+              activeDot={{
+                r: 5,
+                fill: "#447afc",
+                stroke: "#fff",
+                strokeWidth: 2,
+              }}
+              name="Банкрол"
             />
           </LineChart>
         </ResponsiveContainer>

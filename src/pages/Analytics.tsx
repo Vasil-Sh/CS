@@ -206,9 +206,14 @@ export default function Analytics() {
 
   // Recompute bankroll when bets data changes
   useEffect(() => {
-    if (bets.length > 0) {
-      setDualBank(BankrollService.getBankrollStatsDual(currentUser, bets));
-    }
+    // Use bets from state, fallback to localStorage if API hasn't loaded yet
+    const betsForBankroll =
+      bets.length > 0
+        ? bets
+        : UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
+    setDualBank(
+      BankrollService.getBankrollStatsDual(currentUser, betsForBankroll),
+    );
   }, [bets, currentUser]);
 
   const updateBankrollStats = useCallback(async () => {
@@ -221,8 +226,18 @@ export default function Analytics() {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Bankroll update failed:", err);
     }
-    // Use refs to always read latest bets/user
-    setDualBank(BankrollService.getBankrollStatsDual(userRef.current, betsRef.current));
+    // Use refs + localStorage fallback to always have bets available
+    const betsForBankroll =
+      betsRef.current.length > 0
+        ? betsRef.current
+        : UserDataService.getUserData<Bet[]>(
+            userRef.current,
+            "mybets_data",
+            [],
+          );
+    setDualBank(
+      BankrollService.getBankrollStatsDual(userRef.current, betsForBankroll),
+    );
   }, [currentUser]);
 
   const loadAnalyticsData = useCallback(async () => {
@@ -327,13 +342,30 @@ export default function Analytics() {
           }
         } catch (err) {
           if (import.meta.env.DEV)
-            console.warn("[Analytics] Visibility bankroll refresh failed:", err);
+            console.warn(
+              "[Analytics] Visibility bankroll refresh failed:",
+              err,
+            );
         }
-        setDualBank(BankrollService.getBankrollStatsDual(userRef.current, betsRef.current));
+        const betsForBankroll =
+          betsRef.current.length > 0
+            ? betsRef.current
+            : UserDataService.getUserData<Bet[]>(
+                userRef.current,
+                "mybets_data",
+                [],
+              );
+        setDualBank(
+          BankrollService.getBankrollStatsDual(
+            userRef.current,
+            betsForBankroll,
+          ),
+        );
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
   }, []); // refs keep it fresh — no deps needed
 
   const clearAllData = useCallback(async () => {
@@ -608,21 +640,39 @@ export default function Analytics() {
   }, [completedBets]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
-    let runningBalance = 0;
+    // Use initial bank as starting balance so chart shows actual bankroll, not just cumulative profit
+    const initialBank = dualBank.uah.initialBank || 0;
 
     const sortedBets = [...completedBets].sort(
       (a: Bet, b: Bet) =>
         new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
+    if (sortedBets.length === 0) {
+      // No bets yet — show just the starting point
+      return [
+        {
+          date: new Date().toISOString().split("T")[0],
+          balance: initialBank,
+          profit: 0,
+        },
+      ];
+    }
+
+    // Start chart from the day before the first bet, at initial bank
+    const firstDate = new Date(sortedBets[0].date);
+    firstDate.setDate(firstDate.getDate() - 1);
+    const startDate = firstDate.toISOString().split("T")[0];
+
     const balanceData: BalanceData[] = [
       {
-        date: sortedBets[0]?.date || new Date().toISOString().split("T")[0],
-        balance: 0,
+        date: startDate,
+        balance: initialBank,
         profit: 0,
       },
     ];
 
+    let runningBalance = initialBank;
     sortedBets.forEach((bet: Bet) => {
       runningBalance += bet.profit || 0;
       balanceData.push({
@@ -634,8 +684,19 @@ export default function Analytics() {
       });
     });
 
+    // Always add today's final balance if the last bet wasn't today
+    const today = new Date().toISOString().split("T")[0];
+    const lastPoint = balanceData[balanceData.length - 1];
+    if (lastPoint.date !== today) {
+      balanceData.push({
+        date: today,
+        balance: runningBalance,
+        profit: 0,
+      });
+    }
+
     return balanceData;
-  }, [completedBets]);
+  }, [completedBets, dualBank.uah.initialBank]);
 
   const scatterData = useMemo((): ScatterData[] => {
     return completedBets.map((bet: Bet) => ({
