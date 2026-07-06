@@ -609,52 +609,20 @@ export default function MatchRow({
         </td>
       )}
       {visibleColumns.has("notes") && (
-        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 180 }}>
-          <div className="flex items-center gap-1">
-            {/* Inline note editing */}
-            {editing ? (
-              <input
-                ref={inputRef}
-                type="text"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onBlur={commitNote}
-                onKeyDown={handleKeyDown}
-                placeholder="Нотатка..."
-                className="w-full text-xs px-2 py-1.5 rounded-lg border border-[#447afc] bg-[#F8FAFF] text-[#111827] outline-none focus:ring-1 focus:ring-[#447afc]/30"
-              />
-            ) : (
+        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 210 }}>
+          <div className="flex items-center gap-2">
+            {/* Add to risky teams — blue button with text */}
+            {!hasRiskyTeam && (
               <button
-                onClick={startEditing}
-                className="flex-1 text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
-                title={matchNotes[match.id] || "Додати нотатку"}
+                onClick={() => onAddToRisky(match)}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium transition-all flex-shrink-0 shadow-sm"
               >
-                {matchNotes[match.id] ? (
-                  <span className="text-[#111827]">{matchNotes[match.id]}</span>
-                ) : (
-                  <span className="italic text-[#9CA3AF]">+ нотатка</span>
-                )}
+                <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Додати запис
               </button>
             )}
 
-            {/* Add to risky teams — blue button, only when team is NOT risky */}
-            {!hasRiskyTeam && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onAddToRisky(match)}
-                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white transition-all flex-shrink-0 shadow-sm"
-                  >
-                    <Shield className="h-4 w-4" strokeWidth={1.5} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                  <p className="text-sm">Додати до ризикованих команд</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Risky team comment button — only when team is already risky */}
+            {/* Risky team comment — only when team is already risky */}
             {hasRiskyTeam && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -672,6 +640,32 @@ export default function MatchRow({
                   <p className="text-sm">Коментар</p>
                 </TooltipContent>
               </Tooltip>
+            )}
+
+            {/* Inline note editing */}
+            {editing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commitNote}
+                onKeyDown={handleKeyDown}
+                placeholder="Нотатка..."
+                className="flex-1 text-xs px-2 py-1.5 rounded-lg border border-[#447afc] bg-[#F8FAFF] text-[#111827] outline-none focus:ring-1 focus:ring-[#447afc]/30"
+              />
+            ) : (
+              <button
+                onClick={startEditing}
+                className="flex-1 text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
+                title={matchNotes[match.id] || "Додати нотатку"}
+              >
+                {matchNotes[match.id] ? (
+                  <span className="text-[#111827]">{matchNotes[match.id]}</span>
+                ) : (
+                  <span className="italic text-[#9CA3AF]">+ нотатка</span>
+                )}
+              </button>
             )}
           </div>
         </td>

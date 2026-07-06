@@ -35,6 +35,7 @@ const STATUS_OPTIONS = [
   { value: "БАН", label: "🔴 БАН", color: "text-red-600" },
   { value: "Нестабільні", label: "🟠 Нестабільні", color: "text-orange-500" },
   { value: "Обережно", label: "🟡 Обережно", color: "text-yellow-600" },
+  { value: "Рідко", label: "🔵 Рідко", color: "text-blue-600" },
 ] as const;
 
 export default function AddToRiskyTeamsModal({
