@@ -64,7 +64,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
+    "@eslint/js": "^9.39.4",
     "@metagptx/vite-plugin-source-locator": "latest",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "^0.5.15",
