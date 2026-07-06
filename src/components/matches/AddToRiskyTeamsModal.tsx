@@ -114,8 +114,6 @@ export default function AddToRiskyTeamsModal({
     }
   };
 
-  const activeTeam = selectedTeam === team1.name ? team1 : team2;
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[520px] rounded-3xl border border-gray-100 bg-white p-0 gap-0 [&>button]:hidden">
@@ -177,27 +175,6 @@ export default function AddToRiskyTeamsModal({
             ))}
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-[#E5E7EB]" />
-
-          {/* Selected team info */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#F0F7FF] border border-[#BFDBFE]">
-            {activeTeam.logo ? (
-              <img
-                src={activeTeam.logo}
-                alt={activeTeam.name}
-                className="w-9 h-9 object-contain rounded-lg"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-lg bg-[#E5E7EB] flex items-center justify-center text-[#6B7280] font-bold text-sm flex-shrink-0">
-                {activeTeam.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="text-sm font-semibold text-[#1E40AF]">
-              {activeTeam.name}
-            </span>
-          </div>
-
           {/* Form */}
           <div className="space-y-4">
             {/* Status */}
@@ -240,8 +217,12 @@ export default function AddToRiskyTeamsModal({
           {/* Save button */}
           <Button
             onClick={handleSave}
-            disabled={saving || !selectedTeam}
-            className="w-full h-12 rounded-2xl bg-[#447afc] hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
+            disabled={saving || !selectedTeam || !status}
+            className={`w-full h-12 rounded-2xl font-semibold text-base transition-all ${
+              !selectedTeam || !status
+                ? "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed hover:bg-[#E5E7EB]"
+                : "bg-[#447afc] hover:bg-[#3568e0] text-white"
+            }`}
           >
             <Save className="h-4 w-4 mr-2" strokeWidth={2} />
             {saving ? "Збереження..." : "Зберегти"}

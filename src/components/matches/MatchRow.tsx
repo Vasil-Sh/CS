@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -74,13 +74,11 @@ interface Props {
   colDivider: string;
   hasRiskyTeam: boolean;
   visibleColumns: Set<string>;
-  matchNotes: Record<string, string>;
   onRate: (id: string, rating: MatchRating) => void;
   onAIRecommend: (match: Match) => void;
   onShowComment: (match: Match) => void;
   onAddToBets: (match: Match) => void;
   onToggleSelect: (id: string) => void;
-  onSaveNote: (matchId: string, note: string) => void;
   onAddToRisky: (match: Match) => void;
 }
 
@@ -319,13 +317,11 @@ export default function MatchRow({
   colDivider,
   hasRiskyTeam,
   visibleColumns,
-  matchNotes,
   onRate,
   onAIRecommend,
   onShowComment,
   onAddToBets,
   onToggleSelect,
-  onSaveNote,
   onAddToRisky,
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
@@ -344,46 +340,6 @@ export default function MatchRow({
     ((match.bettingCoefficientTeam1 ?? 0) > 0 ||
       (match.bettingCoefficientTeam2 ?? 0) > 0);
   const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
-
-  // Inline note editing
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(matchNotes[match.id] || "");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Sync draft when external notes change (e.g., after save from another match)
-  useEffect(() => {
-    if (!editing) {
-      setDraft(matchNotes[match.id] || "");
-    }
-  }, [matchNotes, match.id, editing]);
-
-  // Auto-focus input when editing starts
-  useEffect(() => {
-    if (editing) inputRef.current?.focus();
-  }, [editing]);
-
-  const startEditing = () => {
-    setDraft(matchNotes[match.id] || "");
-    setEditing(true);
-  };
-
-  const commitNote = () => {
-    const trimmed = draft.trim();
-    if (trimmed !== (matchNotes[match.id] || "")) {
-      onSaveNote(match.id, trimmed);
-    }
-    setEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      commitNote();
-    } else if (e.key === "Escape") {
-      setDraft(matchNotes[match.id] || "");
-      setEditing(false);
-    }
-  };
 
   return (
     <tr
@@ -609,65 +565,40 @@ export default function MatchRow({
         </td>
       )}
       {visibleColumns.has("notes") && (
-        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 210 }}>
-          <div className="flex items-center gap-2">
-            {/* Add to risky teams — blue button with text */}
-            {!hasRiskyTeam && (
-              <button
-                onClick={() => onAddToRisky(match)}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium transition-all flex-shrink-0 shadow-sm"
-              >
-                <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />
-                Додати запис
-              </button>
-            )}
+        <td
+          className={`py-3 px-2 text-center ${colDivider}`}
+          style={{ minWidth: 120 }}
+        >
+          {/* Add to risky teams — blue button with plus */}
+          {!hasRiskyTeam && (
+            <button
+              onClick={() => onAddToRisky(match)}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium transition-all shadow-sm"
+            >
+              <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Додати запис
+            </button>
+          )}
 
-            {/* Risky team comment — only when team is already risky */}
-            {hasRiskyTeam && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onShowComment(match)}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all flex-shrink-0"
-                  >
-                    <Eye
-                      className="h-3.5 w-3.5 text-[#2563EB]"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                  <p className="text-sm">Коментар</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Inline note editing */}
-            {editing ? (
-              <input
-                ref={inputRef}
-                type="text"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onBlur={commitNote}
-                onKeyDown={handleKeyDown}
-                placeholder="Нотатка..."
-                className="flex-1 text-xs px-2 py-1.5 rounded-lg border border-[#447afc] bg-[#F8FAFF] text-[#111827] outline-none focus:ring-1 focus:ring-[#447afc]/30"
-              />
-            ) : (
-              <button
-                onClick={startEditing}
-                className="flex-1 text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
-                title={matchNotes[match.id] || "Додати нотатку"}
-              >
-                {matchNotes[match.id] ? (
-                  <span className="text-[#111827]">{matchNotes[match.id]}</span>
-                ) : (
-                  <span className="italic text-[#9CA3AF]">+ нотатка</span>
-                )}
-              </button>
-            )}
-          </div>
+          {/* Risky team comment — only when team is already risky */}
+          {hasRiskyTeam && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onShowComment(match)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all"
+                >
+                  <Eye
+                    className="h-3.5 w-3.5 text-[#2563EB]"
+                    strokeWidth={1.5}
+                  />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">Коментар</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </td>
       )}
       {visibleColumns.has("actions") && (
