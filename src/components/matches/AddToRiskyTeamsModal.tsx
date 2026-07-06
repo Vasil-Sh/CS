@@ -61,9 +61,12 @@ export default function AddToRiskyTeamsModal({
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!selectedTeam || !status) return;
     setSaving(true);
     try {
+      // Fallback to defaults if state wasn't initialized properly
+      const teamName = selectedTeam || team1.name;
+      const teamStatus = status || "Обережно";
+
       // Load existing risky teams
       let teams: Array<{
         name: string;
@@ -80,19 +83,19 @@ export default function AddToRiskyTeamsModal({
 
       // Check if team already exists
       const exists = teams.some(
-        (t) => t.name.toLowerCase() === selectedTeam.toLowerCase(),
+        (t) => t.name.toLowerCase() === teamName.toLowerCase(),
       );
       if (exists) {
-        toast.error(`Команда "${selectedTeam}" вже є у списку ризикованих`);
+        toast.error(`Команда "${teamName}" вже є у списку ризикованих`);
         setSaving(false);
         return;
       }
 
       // Add new entry
       teams.push({
-        name: selectedTeam,
+        name: teamName,
         game,
-        status,
+        status: teamStatus,
         notes: notes.trim(),
       });
 
@@ -103,16 +106,16 @@ export default function AddToRiskyTeamsModal({
       try {
         const { api } = await import("@/lib/apiClient");
         await api.post("/risky-teams", {
-          name: selectedTeam,
+          name: teamName,
           game,
-          status,
+          status: teamStatus,
           notes: notes.trim(),
         });
       } catch {
         // Backend sync failed — data is saved locally
       }
 
-      toast.success(`"${selectedTeam}" додано до ризикованих команд!`);
+      toast.success(`"${teamName}" додано до ризикованих команд!`);
       onSaved();
       onClose();
       setNotes("");
@@ -254,12 +257,8 @@ export default function AddToRiskyTeamsModal({
           {/* Save button */}
           <Button
             onClick={handleSave}
-            disabled={saving || !selectedTeam || !status}
-            className={`w-full h-12 rounded-2xl font-semibold text-base transition-all ${
-              !selectedTeam || !status
-                ? "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed hover:bg-[#E5E7EB]"
-                : "bg-[#447afc] hover:bg-[#3568e0] text-white"
-            }`}
+            disabled={saving}
+            className="w-full h-12 rounded-2xl bg-[#447afc] hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
           >
             <Save className="h-4 w-4 mr-2" strokeWidth={2} />
             {saving ? "Збереження..." : "Зберегти"}
