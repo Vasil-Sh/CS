@@ -81,6 +81,7 @@ interface Props {
   onAddToBets: (match: Match) => void;
   onToggleSelect: (id: string) => void;
   onSaveNote: (matchId: string, note: string) => void;
+  onAddToRisky: (match: Match) => void;
 }
 
 const TeamLogo = ({
@@ -325,6 +326,7 @@ export default function MatchRow({
   onAddToBets,
   onToggleSelect,
   onSaveNote,
+  onAddToRisky,
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
@@ -607,7 +609,7 @@ export default function MatchRow({
         </td>
       )}
       {visibleColumns.has("notes") && (
-        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 140 }}>
+        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 180 }}>
           <div className="flex items-center gap-1">
             {/* Inline note editing */}
             {editing ? (
@@ -624,7 +626,7 @@ export default function MatchRow({
             ) : (
               <button
                 onClick={startEditing}
-                className="w-full text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
+                className="flex-1 text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
                 title={matchNotes[match.id] || "Додати нотатку"}
               >
                 {matchNotes[match.id] ? (
@@ -635,7 +637,24 @@ export default function MatchRow({
               </button>
             )}
 
-            {/* Risky team comment button */}
+            {/* Add to risky teams — blue button, only when team is NOT risky */}
+            {!hasRiskyTeam && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onAddToRisky(match)}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white transition-all flex-shrink-0 shadow-sm"
+                  >
+                    <Shield className="h-4 w-4" strokeWidth={1.5} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                  <p className="text-sm">Додати до ризикованих команд</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Risky team comment button — only when team is already risky */}
             {hasRiskyTeam && (
               <Tooltip>
                 <TooltipTrigger asChild>

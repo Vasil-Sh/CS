@@ -57,6 +57,7 @@ import {
 import { PageHeader } from "@/components/PageHeader";
 import AIRecommendationModal from "@/components/AIRecommendationModal";
 import CommentModal from "@/components/CommentModal";
+import AddToRiskyTeamsModal from "@/components/matches/AddToRiskyTeamsModal";
 import {
   MatchesLoadingState,
   MatchesEmptyState,
@@ -646,6 +647,12 @@ export default function Matches() {
   const [selectedCommentMatch, setSelectedCommentMatch] =
     useState<Match | null>(null);
 
+  // Add to risky teams modal
+  const [riskyModalOpen, setRiskyModalOpen] = useState(false);
+  const [selectedRiskyMatch, setSelectedRiskyMatch] = useState<Match | null>(
+    null,
+  );
+
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -924,6 +931,15 @@ export default function Matches() {
     setCommentModalOpen(true);
   };
 
+  const handleAddToRisky = (match: Match) => {
+    setSelectedRiskyMatch(match);
+    setRiskyModalOpen(true);
+  };
+
+  const handleRiskySaved = () => {
+    loadRiskyTeams(); // refresh from localStorage
+  };
+
   // Apply filters
   const filteredMatches = matches.filter((match) => {
     if (filterTier !== "all" && match.tier !== filterTier) return false;
@@ -1125,6 +1141,7 @@ export default function Matches() {
       onAddToBets={handleAddToBets}
       onToggleSelect={toggleMatchSelection}
       onSaveNote={handleSaveNote}
+      onAddToRisky={handleAddToRisky}
       hasRiskyTeam={!!getMatchRiskComments(match.team1, match.team2)}
     />
   );
@@ -1856,6 +1873,20 @@ export default function Matches() {
                   )
                 : ""
             }
+          />
+
+          <AddToRiskyTeamsModal
+            open={riskyModalOpen}
+            onClose={() => setRiskyModalOpen(false)}
+            team1={{
+              name: selectedRiskyMatch?.team1 || "",
+              logo: selectedRiskyMatch?.logoTeam1,
+            }}
+            team2={{
+              name: selectedRiskyMatch?.team2 || "",
+              logo: selectedRiskyMatch?.logoTeam2,
+            }}
+            onSaved={handleRiskySaved}
           />
         </div>
 
