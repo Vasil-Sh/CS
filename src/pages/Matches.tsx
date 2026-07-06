@@ -152,6 +152,17 @@ const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
   }
 };
 
+/** Load match notes from localStorage */
+const loadMatchNotes = (): Record<string, string> => {
+  try {
+    const saved = localStorage.getItem("match_notes");
+    if (saved) return JSON.parse(saved);
+  } catch {
+    /* ignore */
+  }
+  return {};
+};
+
 function apiMatchToMatch(apiMatch: ApiMatch): Match {
   const matchType = parseMatchType(apiMatch.type);
   const context = parseMatchContext(apiMatch.type, apiMatch.link);
@@ -524,7 +535,7 @@ const COLUMN_DEFS = [
   { id: "ai", label: "AI", defaultVisible: true },
   { id: "prediction", label: "Прогноз", defaultVisible: false },
   { id: "odds", label: "Коеф.", defaultVisible: false },
-  { id: "notes", label: "Нотатки", defaultVisible: false },
+  { id: "notes", label: "Нотатки", defaultVisible: true },
   { id: "actions", label: "Додати до Записів", defaultVisible: true },
 ] as const;
 
@@ -641,6 +652,23 @@ export default function Matches() {
   // Match ratings state
   const [matchRatings, setMatchRatings] =
     useState<Record<string, MatchRating>>(loadMatchRatings);
+
+  // Match notes — free-text inline editable notes per match
+  const [matchNotes, setMatchNotes] =
+    useState<Record<string, string>>(loadMatchNotes);
+
+  const handleSaveNote = (matchId: string, note: string) => {
+    setMatchNotes((prev) => {
+      const next = { ...prev };
+      if (note.trim()) {
+        next[matchId] = note.trim();
+      } else {
+        delete next[matchId];
+      }
+      localStorage.setItem("match_notes", JSON.stringify(next));
+      return next;
+    });
+  };
 
   // Multi-select for Express
   const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(
@@ -1090,11 +1118,13 @@ export default function Matches() {
       currentRating={matchRatings[match.id] || null}
       colDivider={colDivider}
       visibleColumns={visibleColumns}
+      matchNotes={matchNotes}
       onRate={handleRateMatch}
       onAIRecommend={handleGetAIRecommendation}
       onShowComment={handleShowComment}
       onAddToBets={handleAddToBets}
       onToggleSelect={toggleMatchSelection}
+      onSaveNote={handleSaveNote}
       hasRiskyTeam={!!getMatchRiskComments(match.team1, match.team2)}
     />
   );

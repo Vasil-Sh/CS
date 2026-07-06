@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -74,11 +74,13 @@ interface Props {
   colDivider: string;
   hasRiskyTeam: boolean;
   visibleColumns: Set<string>;
+  matchNotes: Record<string, string>;
   onRate: (id: string, rating: MatchRating) => void;
   onAIRecommend: (match: Match) => void;
   onShowComment: (match: Match) => void;
   onAddToBets: (match: Match) => void;
   onToggleSelect: (id: string) => void;
+  onSaveNote: (matchId: string, note: string) => void;
 }
 
 const TeamLogo = ({
@@ -316,11 +318,13 @@ export default function MatchRow({
   colDivider,
   hasRiskyTeam,
   visibleColumns,
+  matchNotes,
   onRate,
   onAIRecommend,
   onShowComment,
   onAddToBets,
   onToggleSelect,
+  onSaveNote,
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
@@ -338,6 +342,46 @@ export default function MatchRow({
     ((match.bettingCoefficientTeam1 ?? 0) > 0 ||
       (match.bettingCoefficientTeam2 ?? 0) > 0);
   const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
+
+  // Inline note editing
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(matchNotes[match.id] || "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync draft when external notes change (e.g., after save from another match)
+  useEffect(() => {
+    if (!editing) {
+      setDraft(matchNotes[match.id] || "");
+    }
+  }, [matchNotes, match.id, editing]);
+
+  // Auto-focus input when editing starts
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const startEditing = () => {
+    setDraft(matchNotes[match.id] || "");
+    setEditing(true);
+  };
+
+  const commitNote = () => {
+    const trimmed = draft.trim();
+    if (trimmed !== (matchNotes[match.id] || "")) {
+      onSaveNote(match.id, trimmed);
+    }
+    setEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitNote();
+    } else if (e.key === "Escape") {
+      setDraft(matchNotes[match.id] || "");
+      setEditing(false);
+    }
+  };
 
   return (
     <tr
@@ -563,39 +607,54 @@ export default function MatchRow({
         </td>
       )}
       {visibleColumns.has("notes") && (
-        <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {hasRiskyTeam ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => onShowComment(match)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all"
-                >
-                  <Eye className="h-4 w-4 text-[#2563EB]" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                <p className="text-sm">Коментар</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center justify-center cursor-help">
-                  <Info
-                    className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
-                    strokeWidth={1.5}
-                  />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
-                <p className="text-sm">
-                  Додайте команди в розділі «Ризиковані команди», щоб бачити
-                  коментарі до команд
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+        <td className={`py-3 px-2 ${colDivider}`} style={{ minWidth: 140 }}>
+          <div className="flex items-center gap-1">
+            {/* Inline note editing */}
+            {editing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commitNote}
+                onKeyDown={handleKeyDown}
+                placeholder="Нотатка..."
+                className="w-full text-xs px-2 py-1.5 rounded-lg border border-[#447afc] bg-[#F8FAFF] text-[#111827] outline-none focus:ring-1 focus:ring-[#447afc]/30"
+              />
+            ) : (
+              <button
+                onClick={startEditing}
+                className="w-full text-left text-xs px-2 py-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#6B7280] hover:text-[#111827] truncate transition-all min-h-[28px]"
+                title={matchNotes[match.id] || "Додати нотатку"}
+              >
+                {matchNotes[match.id] ? (
+                  <span className="text-[#111827]">{matchNotes[match.id]}</span>
+                ) : (
+                  <span className="italic text-[#9CA3AF]">+ нотатка</span>
+                )}
+              </button>
+            )}
+
+            {/* Risky team comment button */}
+            {hasRiskyTeam && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onShowComment(match)}
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all flex-shrink-0"
+                  >
+                    <Eye
+                      className="h-3.5 w-3.5 text-[#2563EB]"
+                      strokeWidth={1.5}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                  <p className="text-sm">Коментар</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </td>
       )}
       {visibleColumns.has("actions") && (
