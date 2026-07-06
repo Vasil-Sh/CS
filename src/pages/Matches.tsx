@@ -97,7 +97,6 @@ interface Match {
   team1: string;
   team2: string;
   favorite: string;
-  game: "CS2" | "Dota 2";
   aiConfidence: number;
   risk: number;
   comment: string;
@@ -224,7 +223,6 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     risk,
     comment: "",
     aiSummary: "",
-    game: "CS2",
     odds: {
       team1: hasCoeffs ? (coeff1 ?? 0) : 0,
       team2: hasCoeffs ? (coeff2 ?? 0) : 0,
@@ -523,7 +521,6 @@ const COLUMN_DEFS = [
   { id: "match", label: "Матч", defaultVisible: true },
   { id: "time", label: "Час", defaultVisible: true },
   { id: "score", label: "Рахунок", defaultVisible: true },
-  { id: "game", label: "Гра", defaultVisible: true },
   { id: "status", label: "Статус", defaultVisible: true },
   { id: "ai", label: "AI", defaultVisible: true },
   { id: "prediction", label: "Прогноз", defaultVisible: false },
@@ -1153,13 +1150,6 @@ export default function Matches() {
             className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
           >
             Рахунок
-          </th>
-        )}
-        {visibleColumns.has("game") && (
-          <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-          >
-            Гра
           </th>
         )}
         {visibleColumns.has("status") && (

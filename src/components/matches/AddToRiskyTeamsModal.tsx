@@ -38,6 +38,11 @@ const STATUS_OPTIONS = [
   { value: "Рідко", label: "🔵 Рідко", color: "text-blue-600" },
 ] as const;
 
+const GAME_OPTIONS = [
+  { value: "CS", label: "🎯 CS2" },
+  { value: "Дота", label: "🐉 Dota 2" },
+] as const;
+
 export default function AddToRiskyTeamsModal({
   open,
   onClose,
@@ -47,6 +52,7 @@ export default function AddToRiskyTeamsModal({
 }: AddToRiskyTeamsModalProps) {
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
   const [status, setStatus] = useState<string>("Обережно");
+  const [game, setGame] = useState<string>("CS");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -81,7 +87,7 @@ export default function AddToRiskyTeamsModal({
       // Add new entry
       teams.push({
         name: selectedTeam,
-        game: "CS",
+        game,
         status,
         notes: notes.trim(),
       });
@@ -94,7 +100,7 @@ export default function AddToRiskyTeamsModal({
         const { api } = await import("@/lib/apiClient");
         await api.post("/risky-teams", {
           name: selectedTeam,
-          game: "CS",
+          game,
           status,
           notes: notes.trim(),
         });
@@ -107,6 +113,7 @@ export default function AddToRiskyTeamsModal({
       onClose();
       setNotes("");
       setStatus("Обережно");
+      setGame("CS");
     } catch (err) {
       toast.error("Помилка при збереженні");
     } finally {
@@ -188,6 +195,27 @@ export default function AddToRiskyTeamsModal({
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
                   {STATUS_OPTIONS.map((opt) => (
+                    <SelectItem
+                      key={opt.value}
+                      value={opt.value}
+                      className="rounded-lg"
+                    >
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Game */}
+            <div className="space-y-2">
+              <Label className="text-sm text-[#374151] font-medium">Гра</Label>
+              <Select value={game} onValueChange={setGame}>
+                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {GAME_OPTIONS.map((opt) => (
                     <SelectItem
                       key={opt.value}
                       value={opt.value}
