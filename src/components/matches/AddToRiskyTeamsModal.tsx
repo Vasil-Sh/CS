@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShieldAlert, Save } from "lucide-react";
+import { ShieldAlert, Save, Crosshair, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 interface TeamInfo {
@@ -39,8 +39,8 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const GAME_OPTIONS = [
-  { value: "CS", label: "🎯 CS2" },
-  { value: "Дота", label: "🐉 Dota 2" },
+  { value: "CS", label: "CS2", icon: Crosshair },
+  { value: "Дота", label: "Dota 2", icon: Shield },
 ] as const;
 
 export default function AddToRiskyTeamsModal({
@@ -207,25 +207,29 @@ export default function AddToRiskyTeamsModal({
               </Select>
             </div>
 
-            {/* Game */}
+            {/* Game — toggle buttons with icons */}
             <div className="space-y-2">
               <Label className="text-sm text-[#374151] font-medium">Гра</Label>
-              <Select value={game} onValueChange={setGame}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {GAME_OPTIONS.map((opt) => (
-                    <SelectItem
+              <div className="grid grid-cols-2 gap-3">
+                {GAME_OPTIONS.map((opt) => {
+                  const Icon = opt.icon;
+                  return (
+                    <button
                       key={opt.value}
-                      value={opt.value}
-                      className="rounded-lg"
+                      type="button"
+                      onClick={() => setGame(opt.value)}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all text-sm font-semibold ${
+                        game === opt.value
+                          ? "border-[#447afc] bg-[#EFF6FF] text-[#111827] shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
+                          : "border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] hover:border-[#D1D5DB] hover:bg-white"
+                      }`}
                     >
+                      <Icon className="h-4 w-4" strokeWidth={1.5} />
                       {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Notes */}
