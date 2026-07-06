@@ -39,8 +39,12 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const GAME_OPTIONS = [
-  { value: "CS", label: "CS2", iconSrc: "/assets/game-cs2.svg" },
-  { value: "Дота", label: "Dota 2", iconSrc: "/assets/game-dota2.svg" },
+  { value: "CS", label: "CS2", iconSrc: "/assets/team-placeholder.svg" },
+  {
+    value: "Дота",
+    label: "Dota 2",
+    iconSrc: "/assets/team-placeholder-dota.svg",
+  },
 ] as const;
 
 export default function AddToRiskyTeamsModal({
