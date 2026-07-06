@@ -42,6 +42,7 @@ interface Match {
   team1: string;
   team2: string;
   favorite: string;
+  game?: "CS2" | "Dota 2";
   aiConfidence: number;
   risk: number;
   matchType: "Bo1" | "Bo3" | "Bo5";
@@ -464,6 +465,13 @@ export default function MatchRow({
           ) : (
             <span className="text-[#9CA3AF] text-sm">—</span>
           )}
+        </td>
+      )}
+      {visibleColumns.has("game") && (
+        <td className={`py-3 px-2 text-center ${colDivider}`}>
+          <Badge className="bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/20 rounded-md px-2 py-0.5 text-xs font-semibold">
+            {match.game || "CS2"}
+          </Badge>
         </td>
       )}
       {visibleColumns.has("status") && (
