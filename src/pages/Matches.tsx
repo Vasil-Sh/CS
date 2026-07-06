@@ -29,6 +29,7 @@ import {
   ArrowDown,
   PlusCircle,
   Layers,
+  Columns,
   X,
   ChevronDown,
 } from "lucide-react";
@@ -51,6 +52,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/PageHeader";
 import AIRecommendationModal from "@/components/AIRecommendationModal";
@@ -512,6 +514,36 @@ const cardHoverStyle = CARD_HOVER_STYLE;
 /** Column divider style — right border */
 const colDivider = "border-r border-[#E5E7EB]";
 
+/** All match table columns — id, label, default visibility */
+const COLUMN_DEFS = [
+  { id: "rating", label: "Інтерес до Матчу", defaultVisible: true },
+  { id: "match", label: "Матч", defaultVisible: true },
+  { id: "time", label: "Час", defaultVisible: true },
+  { id: "score", label: "Рахунок", defaultVisible: true },
+  { id: "status", label: "Статус", defaultVisible: true },
+  { id: "ai", label: "AI", defaultVisible: true },
+  { id: "prediction", label: "Прогноз", defaultVisible: false },
+  { id: "odds", label: "Коеф.", defaultVisible: false },
+  { id: "notes", label: "Нотатки", defaultVisible: false },
+  { id: "actions", label: "Додати до Записів", defaultVisible: true },
+] as const;
+
+const COLUMNS_STORAGE_KEY = "matchiq_columns_visible";
+
+/** Load saved column visibility from localStorage, fall back to defaults */
+const loadVisibleColumns = (): Set<string> => {
+  try {
+    const saved = localStorage.getItem(COLUMNS_STORAGE_KEY);
+    if (saved) {
+      const arr = JSON.parse(saved) as string[];
+      if (Array.isArray(arr) && arr.length > 0) return new Set(arr);
+    }
+  } catch {
+    /* ignore */
+  }
+  return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
+};
+
 /** Get Ukrainian day of week short name */
 const getDayOfWeek = (date: Date): string => {
   const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
@@ -583,6 +615,8 @@ export default function Matches() {
     "all" | "upcoming" | "live" | "finished"
   >("all");
   const [showHotMatches, setShowHotMatches] = useState(false);
+  const [visibleColumns, setVisibleColumns] =
+    useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
@@ -613,6 +647,20 @@ export default function Matches() {
     new Set(),
   );
 
+  // Toggle a single column on/off
+  const toggleColumn = (colId: string) => {
+    setVisibleColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(colId)) {
+        next.delete(colId);
+      } else {
+        next.add(colId);
+      }
+      localStorage.setItem(COLUMNS_STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+
   // Reset all filters
   const resetAllFilters = () => {
     setFilterStatus("all");
@@ -622,6 +670,11 @@ export default function Matches() {
     setFilterRisk("all");
     setShowHotMatches(false);
     setSearchQuery("");
+    const defaults = new Set(
+      COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
+    );
+    setVisibleColumns(defaults);
+    localStorage.setItem(COLUMNS_STORAGE_KEY, JSON.stringify([...defaults]));
   };
 
   // Check if any filter is active
@@ -1036,6 +1089,7 @@ export default function Matches() {
       isSelected={selectedMatchIds.has(match.id)}
       currentRating={matchRatings[match.id] || null}
       colDivider={colDivider}
+      visibleColumns={visibleColumns}
       onRate={handleRateMatch}
       onAIRecommend={handleGetAIRecommendation}
       onShowComment={handleShowComment}
@@ -1049,75 +1103,95 @@ export default function Matches() {
   const renderTableHeader = () => (
     <thead>
       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
-        >
-          Інтерес до Матчу
-        </th>
-        <th
-          className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-        >
-          Матч
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
-          onClick={() => toggleSort("date")}
-        >
-          <div className="flex items-center justify-center gap-0.5">
-            Час
-            {renderSortIndicator("date")}
-          </div>
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-        >
-          Рахунок
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
-          onClick={() => toggleSort("status")}
-        >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center justify-center gap-0.5">
-                Статус
-                {renderSortIndicator("status")}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-              <p className="text-sm">
-                {sortBy === "status" && sortOrder === "asc"
-                  ? "↑ LIVE → Очікуються → Завершені"
-                  : sortBy === "status" && sortOrder === "desc"
-                    ? "↓ Завершені → Очікуються → LIVE"
-                    : "Сортування за статусом"}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-        >
-          AI
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-        >
-          Прогноз
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-        >
-          Коеф.
-        </th>
-        <th
-          className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
-        >
-          Нотатки
-        </th>
-        <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap min-w-[110px]">
-          Додати до Записів
-        </th>
+        {visibleColumns.has("rating") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
+          >
+            Інтерес до Матчу
+          </th>
+        )}
+        {visibleColumns.has("match") && (
+          <th
+            className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+          >
+            Матч
+          </th>
+        )}
+        {visibleColumns.has("time") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
+            onClick={() => toggleSort("date")}
+          >
+            <div className="flex items-center justify-center gap-0.5">
+              Час
+              {renderSortIndicator("date")}
+            </div>
+          </th>
+        )}
+        {visibleColumns.has("score") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+          >
+            Рахунок
+          </th>
+        )}
+        {visibleColumns.has("status") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
+            onClick={() => toggleSort("status")}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center gap-0.5">
+                  Статус
+                  {renderSortIndicator("status")}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+                <p className="text-sm">
+                  {sortBy === "status" && sortOrder === "asc"
+                    ? "↑ LIVE → Очікуються → Завершені"
+                    : sortBy === "status" && sortOrder === "desc"
+                      ? "↓ Завершені → Очікуються → LIVE"
+                      : "Сортування за статусом"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </th>
+        )}
+        {visibleColumns.has("ai") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+          >
+            AI
+          </th>
+        )}
+        {visibleColumns.has("prediction") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+          >
+            Прогноз
+          </th>
+        )}
+        {visibleColumns.has("odds") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+          >
+            Коеф.
+          </th>
+        )}
+        {visibleColumns.has("notes") && (
+          <th
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
+          >
+            Нотатки
+          </th>
+        )}
+        {visibleColumns.has("actions") && (
+          <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap min-w-[110px]">
+            Додати до Записів
+          </th>
+        )}
       </tr>
     </thead>
   );
@@ -1615,6 +1689,35 @@ export default function Matches() {
                 <Flame className="h-4 w-4" strokeWidth={1.5} />
                 Гарячі
               </button>
+
+              {/* Column visibility toggle — pill dropdown with checkboxes */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm">
+                    <Columns className="h-4 w-4" strokeWidth={1.5} />
+                    Колонки
+                    <ChevronDown
+                      className="h-3.5 w-3.5 opacity-60"
+                      strokeWidth={2}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="rounded-xl p-1 min-w-[200px]"
+                >
+                  {COLUMN_DEFS.map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.id}
+                      checked={visibleColumns.has(col.id)}
+                      onCheckedChange={() => toggleColumn(col.id)}
+                      className="rounded-lg text-sm"
+                    >
+                      {col.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Reset filters */}
               {hasActiveFilters && (
