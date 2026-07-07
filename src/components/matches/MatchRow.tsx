@@ -217,6 +217,32 @@ const PredictionBar = ({
   );
 };
 
+/** Compact status badge for inside the match column (left sidebar) */
+function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
+  switch (status) {
+    case "live":
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-500 leading-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          LIVE
+        </span>
+      );
+    case "finished":
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#9CA3AF] leading-none">
+          <CheckCircle2 className="h-3 w-3" strokeWidth={1.5} />
+        </span>
+      );
+    case "upcoming":
+    default:
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#9CA3AF] leading-none">
+          <Clock className="h-3 w-3" strokeWidth={1.5} />
+        </span>
+      );
+  }
+}
+
 const getFormInfo = (form: FormStability) => {
   const map: Record<
     FormStability,
@@ -372,77 +398,87 @@ export default function MatchRow({
         </td>
       )}
       {visibleColumns.has("match") && (
-        <td className={`py-4 px-4 ${colDivider}`}>
-          <div className="space-y-1">
-            {match.context && (
-              <div
-                className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px] flex items-center gap-1"
-                title={match.context}
-              >
-                {(match.stars ?? 0) >= 4 && (
-                  <Star
-                    className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0"
-                    strokeWidth={1}
+        <td className={`py-3 px-4 ${colDivider}`}>
+          <div className="flex items-stretch gap-3">
+            {/* Left: time (top — aligned with teams) + status (bottom — aligned with badges) */}
+            <div className="flex flex-col justify-between items-center min-w-[48px] pr-3 border-r border-[#E5E7EB]">
+              <div className="flex items-center" style={{ height: 28 }}>
+                <span className="text-sm font-semibold text-[#111827] leading-tight">
+                  {formatTime(match.date)}
+                </span>
+              </div>
+              <div className="flex items-center" style={{ minHeight: 22 }}>
+                {getMatchStatusBadgeCompact(match.matchStatus)}
+              </div>
+            </div>
+            {/* Right: match content */}
+            <div className="space-y-1 flex-1 min-w-0">
+              {match.context && (
+                <div
+                  className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px] flex items-center gap-1"
+                  title={match.context}
+                >
+                  {(match.stars ?? 0) >= 4 && (
+                    <Star
+                      className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0"
+                      strokeWidth={1}
+                    />
+                  )}
+                  {match.context}
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <TeamLogo
+                    src={match.logoTeam1}
+                    teamName={match.team1}
+                    size={28}
                   />
-                )}
-                {match.context}
+                  <span className="font-semibold text-[#111827] text-base">
+                    {match.team1}
+                  </span>
+                </div>
+                <span className="text-[#9CA3AF] text-xs font-medium">vs</span>
+                <div className="flex items-center gap-1.5">
+                  <TeamLogo
+                    src={match.logoTeam2}
+                    teamName={match.team2}
+                    size={28}
+                  />
+                  <span className="font-semibold text-[#111827] text-base">
+                    {match.team2}
+                  </span>
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <TeamLogo
-                  src={match.logoTeam1}
-                  teamName={match.team1}
-                  size={28}
-                />
-                <span className="font-semibold text-[#111827] text-base">
-                  {match.team1}
-                </span>
+              <div className="flex items-center gap-1">
+                <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
+                  {match.matchType}
+                </Badge>
+                <Badge className="bg-[#111827] text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
+                  {match.tier}
+                </Badge>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge
+                      className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5 max-w-[120px]`}
+                    >
+                      {formInfo.icon}
+                      <span className="truncate">{formLabelWithTeam}</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
+                    <p className="text-sm font-semibold mb-1">
+                      {match.favorite}
+                    </p>
+                    <p className="text-sm">{formInfo.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-              <span className="text-[#9CA3AF] text-xs font-medium">vs</span>
-              <div className="flex items-center gap-1.5">
-                <TeamLogo
-                  src={match.logoTeam2}
-                  teamName={match.team2}
-                  size={28}
-                />
-                <span className="font-semibold text-[#111827] text-base">
-                  {match.team2}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
-                {match.matchType}
-              </Badge>
-              <Badge className="bg-[#111827] text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
-                {match.tier}
-              </Badge>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge
-                    className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5 max-w-[120px]`}
-                  >
-                    {formInfo.icon}
-                    <span className="truncate">{formLabelWithTeam}</span>
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
-                  <p className="text-sm font-semibold mb-1">{match.favorite}</p>
-                  <p className="text-sm">{formInfo.tooltip}</p>
-                </TooltipContent>
-              </Tooltip>
             </div>
           </div>
         </td>
       )}
-      {visibleColumns.has("time") && (
-        <td className={`py-3 px-2 text-center ${colDivider}`}>
-          <div className="text-base font-semibold text-[#111827]">
-            {formatTime(match.date)}
-          </div>
-        </td>
-      )}
+      {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           {match.score1 !== undefined &&
@@ -466,11 +502,7 @@ export default function MatchRow({
           )}
         </td>
       )}
-      {visibleColumns.has("status") && (
-        <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {getMatchStatusBadge(match.matchStatus)}
-        </td>
-      )}
+      {visibleColumns.has("status") && <td className="hidden"></td>}
       {visibleColumns.has("ai") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           <Tooltip>

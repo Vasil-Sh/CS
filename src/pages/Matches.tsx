@@ -268,9 +268,7 @@ const colDivider = "border-r border-[#E5E7EB]";
 const COLUMN_DEFS = [
   { id: "rating", label: "Інтерес до Матчу", defaultVisible: true },
   { id: "match", label: "Матч", defaultVisible: true },
-  { id: "time", label: "Час", defaultVisible: true },
   { id: "score", label: "Рахунок", defaultVisible: true },
-  { id: "status", label: "Статус", defaultVisible: true },
   { id: "ai", label: "AI", defaultVisible: true },
   { id: "prediction", label: "Прогноз", defaultVisible: false },
   { id: "odds", label: "Коеф.", defaultVisible: false },
@@ -847,22 +845,16 @@ export default function Matches() {
         )}
         {visibleColumns.has("match") && (
           <th
-            className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
-          >
-            Матч
-          </th>
-        )}
-        {visibleColumns.has("time") && (
-          <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
+            className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
             onClick={() => toggleSort("date")}
           >
-            <div className="flex items-center justify-center gap-0.5">
-              Час
+            <div className="flex items-center gap-1">
+              Матч
               {renderSortIndicator("date")}
             </div>
           </th>
         )}
+        {visibleColumns.has("time") && <th className="hidden"></th>}
         {visibleColumns.has("score") && (
           <th
             className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
@@ -870,30 +862,7 @@ export default function Matches() {
             Рахунок
           </th>
         )}
-        {visibleColumns.has("status") && (
-          <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none whitespace-nowrap ${colDivider}`}
-            onClick={() => toggleSort("status")}
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-center gap-0.5">
-                  Статус
-                  {renderSortIndicator("status")}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
-                <p className="text-sm">
-                  {sortBy === "status" && sortOrder === "asc"
-                    ? "↑ LIVE → Очікуються → Завершені"
-                    : sortBy === "status" && sortOrder === "desc"
-                      ? "↓ Завершені → Очікуються → LIVE"
-                      : "Сортування за статусом"}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </th>
-        )}
+        {visibleColumns.has("status") && <th className="hidden"></th>}
         {visibleColumns.has("ai") && (
           <th
             className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
