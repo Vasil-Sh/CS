@@ -1,24 +1,28 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { HelmetProvider } from 'react-helmet-async';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { lazy, Suspense } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "sonner";
+import { HelmetProvider } from "react-helmet-async";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Eagerly loaded (small / critical path)
-import Landing from '@/pages/Landing';
-import LoginPage from '@/pages/LoginPage';
+import Landing from "@/pages/Landing";
+import LoginPage from "@/pages/LoginPage";
 
 // Lazy-loaded (heavy pages — code split per route)
-const Layout = lazy(() => import('@/components/Layout'));
-const Analytics = lazy(() => import('@/pages/Analytics'));
-const Matches = lazy(() => import('@/pages/Matches'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const MyBets = lazy(() => import('@/pages/MyBets'));
-const Strategy = lazy(() => import('@/pages/Strategy'));
-const TelegramPage = lazy(() => import('@/pages/Telegram'));
-const Admin = lazy(() => import('@/pages/Admin'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
+const Layout = lazy(() => import("@/components/Layout"));
+const Analytics = lazy(() => import("@/pages/Analytics"));
+const Matches = lazy(() => import("@/pages/Matches"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const MyBets = lazy(() => import("@/pages/MyBets"));
+const Strategy = lazy(() => import("@/pages/Strategy"));
+const TelegramPage = lazy(() => import("@/pages/Telegram"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function PageLoader() {
   return (
@@ -31,127 +35,131 @@ function PageLoader() {
 function App() {
   return (
     <HelmetProvider>
-    <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<ErrorBoundary><Landing /></ErrorBoundary>} />
-        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
-        <Route
-          path="/login-digesto-demo"
-          element={
-            <ErrorBoundary>
-              <LoginPage demo />
-            </ErrorBoundary>
-          }
-        />
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary>
+                <Landing />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <ErrorBoundary>
+                <LoginPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/login-digesto-demo"
+            element={
+              <ErrorBoundary>
+                <LoginPage demo />
+              </ErrorBoundary>
+            }
+          />
 
-        {/* Protected routes */}
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<PageLoader />}>
-                <Layout />
-              </Suspense>
-            </ProtectedRoute>
-          }
-        >
+          {/* Protected routes */}
           <Route
-            index
+            path="/app"
             element={
-              <ErrorBoundary>
+              <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
-                  <Navigate to="/app/analytics" replace />
+                  <Layout />
                 </Suspense>
-              </ErrorBoundary>
+              </ProtectedRoute>
             }
-          />
-          <Route
-            path="analytics"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Analytics />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="matches"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Matches />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Profile />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="my-bets"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <MyBets />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="strategy"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Strategy />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="telegram"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <TelegramPage />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="admin"
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Admin />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-        </Route>
+          >
+            <Route
+              index
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Navigate to="/app/analytics" replace />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="analytics"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Analytics />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="matches"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Matches />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Profile />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="my-bets"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <MyBets />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="strategy"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Strategy />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="telegram"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <TelegramPage />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+          </Route>
 
-        {/* 404 catch-all */}
-        <Route
-          path="*"
-          element={
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
-                <NotFound />
-              </Suspense>
-            </ErrorBoundary>
-          }
-        />
-      </Routes>
-      <Toaster position="top-center" richColors closeButton duration={4000} />
-    </Router>
+          {/* 404 catch-all */}
+          <Route
+            path="*"
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <NotFound />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+        </Routes>
+        <Toaster position="top-center" richColors closeButton duration={4000} />
+      </Router>
     </HelmetProvider>
   );
 }

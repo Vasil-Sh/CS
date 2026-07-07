@@ -11,7 +11,6 @@ import {
   Menu,
   LogOut,
   User,
-  Shield,
   TrendingUp,
   Target,
   MessageCircle,
@@ -29,18 +28,8 @@ const navigation = [
   { nameKey: "nav.profile", href: "/app/profile", icon: User },
 ];
 
-const adminNavigation = [
-  { nameKey: "nav.admin", href: "/app/admin", icon: Shield, adminOnly: true },
-];
-
 // Nav items as module-level component (not re-created on every Layout render)
-function NavItems({
-  location,
-  isAdmin,
-}: {
-  location: string;
-  isAdmin: boolean;
-}) {
+function NavItems({ location }: { location: string }) {
   return (
     <>
       {navigation.map((item) => {
@@ -63,27 +52,6 @@ function NavItems({
           </Link>
         );
       })}
-      {isAdmin &&
-        adminNavigation.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.href;
-
-          return (
-            <Link
-              key={item.nameKey}
-              to={item.href}
-              className={cn(
-                "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300",
-                isActive
-                  ? "bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
-                  : "text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]",
-              )}
-            >
-              <Icon className="h-5 w-5" strokeWidth={1.5} />
-              <span>{t(item.nameKey)}</span>
-            </Link>
-          );
-        })}
     </>
   );
 }
@@ -149,7 +117,7 @@ export default function Layout() {
             <ul role="list" className="flex flex-1 flex-col gap-y-8">
               <li>
                 <ul role="list" className="space-y-2">
-                  <NavItems location={location.pathname} isAdmin={isAdmin} />
+                  <NavItems location={location.pathname} />
                 </ul>
               </li>
               <li className="mt-auto space-y-3">
@@ -245,7 +213,7 @@ export default function Layout() {
 
                 <nav className="mt-8">
                   <ul className="space-y-2">
-                    <NavItems location={location.pathname} isAdmin={isAdmin} />
+                    <NavItems location={location.pathname} />
                   </ul>
                   <div className="mt-8 space-y-3">
                     <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
