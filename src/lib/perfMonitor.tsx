@@ -10,9 +10,12 @@
  *   const MyComponent = () => { useRenderCount('MyComponent'); return ...; }
  */
 
-import { Profiler as ReactProfiler, type ProfilerOnRenderCallback } from 'react';
-import type { ReactNode } from 'react';
-import { logRender } from './devLogger';
+import {
+  Profiler as ReactProfiler,
+  type ProfilerOnRenderCallback,
+} from "react";
+import type { ReactNode } from "react";
+import { logRender } from "./devLogger";
 
 const onRenderCallback: ProfilerOnRenderCallback = (
   id,
@@ -29,7 +32,13 @@ const onRenderCallback: ProfilerOnRenderCallback = (
 };
 
 /** React.Profiler wrapper with dev-only logging */
-export function Profiler({ id, children }: { id: string; children: ReactNode }) {
+export function Profiler({
+  id,
+  children,
+}: {
+  id: string;
+  children: ReactNode;
+}) {
   if (!import.meta.env.DEV) return <>{children}</>;
   return (
     <ReactProfiler id={id} onRender={onRenderCallback}>

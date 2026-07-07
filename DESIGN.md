@@ -1,8 +1,16 @@
 ---
 
-version: "1.0"
+version: "1.1"
 name: MatchIQ
+updated: 2026-07-07
 designSystem: "Seline Analytics — Quiet analyst's desk on warm paper"
+actualUI: "shadcn/ui + Tailwind CSS 3 + Radix UI primitives"
+adminPanel: "Separated → mathciq-admin (Basedash dark theme, localhost:5174)"
+note: >
+This DESIGN.md describes the _ideal_ design system. The actual implementation
+uses shadcn/ui defaults with Tailwind token overrides. The admin panel has been
+extracted to a separate project (mathciq-admin). Some tokens below (Inter Tight,
+warm-stone canvas) are aspirational — the live app uses Inter + [#f3f3f3] background.
 description: >
 A sports betting analytics dashboard with a calm, editorial SaaS aesthetic
 inspired by Seline Analytics. A warm-stone canvas (#fafaf9) with a single

@@ -10,15 +10,11 @@ import {
   Calendar,
   Trophy,
   RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
   ArrowUpDown,
   Search,
   Loader2,
   Flame,
   Shield,
-  AlertCircle,
   Brain,
   ArrowUpRight,
   ArrowDownRight,
@@ -33,11 +29,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
-import {
-  CARD_BASE_STYLE,
-  CARD_HOVER_STYLE,
-  CHART_CARD_SHADOW,
-} from "@/lib/cardStyles";
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
@@ -250,90 +242,6 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
   };
 }
 
-const getFormStabilityInfo = (form: FormStability) => {
-  switch (form) {
-    case "hot_streak":
-      return {
-        icon: <Flame className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "Серія перемог",
-        color:
-          "bg-gradient-to-r from-orange-500 to-red-500 text-white border-0",
-        tooltip:
-          "🔥 Команда у топ-формі з серією перемог. Висока ймовірність продовження успішної гри.",
-      };
-    case "stable":
-      return {
-        icon: <Shield className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "Стабільна",
-        color:
-          "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0",
-        tooltip:
-          "🛡️ Стабільна форма з передбачуваними результатами. Надійний вибір для ставок.",
-      };
-    case "momentum":
-      return {
-        icon: <TrendingUp className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "На підйомі",
-        color: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0",
-        tooltip:
-          "📈 Команда набирає темп і покращує результати. Позитивна динаміка.",
-      };
-    case "falling":
-      return {
-        icon: <TrendingDown className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "Спад",
-        color:
-          "bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0",
-        tooltip:
-          "📉 Команда втрачає форму з погіршенням результатів. Обережно зі ставками.",
-      };
-    case "slump":
-      return {
-        icon: <AlertCircle className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "Криза",
-        color: "bg-gradient-to-r from-red-500 to-pink-500 text-white border-0",
-        tooltip:
-          "⚠️ Команда у кризі з серією поразок. Високий ризик для ставок.",
-      };
-    case "inconsistent":
-      return {
-        icon: <AlertTriangle className="h-3.5 w-3.5" strokeWidth={1.5} />,
-        label: "Нестабільна",
-        color: "bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0",
-        tooltip:
-          "⚡ Непередбачувана форма зі змінними результатами. Складно прогнозувати.",
-      };
-  }
-};
-
-const getMatchStatusBadge = (status?: "upcoming" | "live" | "finished") => {
-  switch (status) {
-    case "live":
-      return (
-        <Badge className="bg-red-500/10 text-red-600 border-red-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5 animate-pulse">
-          <Radio className="h-3.5 w-3.5" strokeWidth={2} />
-          LIVE
-        </Badge>
-      );
-    case "finished":
-      return (
-        <Badge className="bg-gray-100 text-gray-600 border-gray-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5">
-          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-          Завершено
-        </Badge>
-      );
-    case "upcoming":
-      return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5" strokeWidth={2} />
-          Очікується
-        </Badge>
-      );
-    default:
-      return null;
-  }
-};
-
 const getStatusPriority = (
   status?: "upcoming" | "live" | "finished",
 ): number => {
@@ -347,165 +255,6 @@ const getStatusPriority = (
     default:
       return 3;
   }
-};
-
-/** Team logo component */
-const TeamLogo = ({
-  src,
-  teamName,
-  size = 26,
-}: {
-  src?: string | null;
-  teamName: string;
-  size?: number;
-}) => {
-  if (!src) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs flex-shrink-0"
-        style={{ width: size, height: size, minWidth: size }}
-      >
-        {teamName.charAt(0).toUpperCase()}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="flex items-center justify-center flex-shrink-0"
-      style={{ width: size, height: size, minWidth: size }}
-    >
-      <img
-        src={src}
-        alt={teamName}
-        className="w-full h-full object-contain"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.style.display = "none";
-          const fallback = document.createElement("div");
-          fallback.className =
-            "flex items-center justify-center w-full h-full rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs";
-          fallback.textContent = teamName.charAt(0).toUpperCase();
-          target.parentNode?.appendChild(fallback);
-        }}
-      />
-    </div>
-  );
-};
-
-/** Prediction bar component — HLTV prediction + optional AI prediction */
-const PredictionBar = ({
-  percent1,
-  percent2,
-  team1,
-  team2,
-  aiPrediction,
-}: {
-  percent1: number;
-  percent2: number;
-  team1: string;
-  team2: string;
-  aiPrediction?: AIRecommendation | null;
-}) => {
-  const total = percent1 + percent2;
-  const w1 = total > 0 ? Math.round((percent1 / total) * 100) : 50;
-  const w2 = total > 0 ? 100 - w1 : 50;
-  const isTeam1Favored = percent1 >= percent2;
-  const hasHltv = total > 0;
-
-  // AI gives: predicted team + confidence%. The opponent gets 100 - confidence.
-  const aiPredictedTeam1 = aiPrediction?.prediction === team1;
-  const aiPredictedTeam2 = aiPrediction?.prediction === team2;
-  const aiConf = aiPrediction?.confidence ?? 0;
-  const aiTeam1Conf = aiPredictedTeam1
-    ? aiConf
-    : aiPredictedTeam2
-      ? 100 - aiConf
-      : 0;
-  const aiTeam2Conf = aiPredictedTeam2
-    ? aiConf
-    : aiPredictedTeam1
-      ? 100 - aiConf
-      : 0;
-  const hasAi = aiPrediction && (aiPredictedTeam1 || aiPredictedTeam2);
-
-  return (
-    <div className="space-y-1.5 min-w-[150px]">
-      {/* HLTV prediction row */}
-      {hasHltv && (
-        <>
-          <div className="flex items-center justify-between text-xs">
-            <span
-              className={
-                isTeam1Favored ? "font-bold text-[#111827]" : "text-[#4B5563]"
-              }
-            >
-              {percent1}%
-            </span>
-            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
-              <TrendingUp className="h-3 w-3" strokeWidth={1.5} />
-              HLTV
-            </span>
-            <span
-              className={
-                !isTeam1Favored ? "font-bold text-[#111827]" : "text-[#4B5563]"
-              }
-            >
-              {percent2}%
-            </span>
-          </div>
-          <div className="flex h-2 rounded-full overflow-hidden bg-[#E5E7EB]">
-            <div
-              className={`transition-all duration-300 ${isTeam1Favored ? "bg-[#22C55E]" : "bg-[#3B82F6]"}`}
-              style={{ width: `${w1}%` }}
-            />
-            <div
-              className={`transition-all duration-300 ${!isTeam1Favored ? "bg-[#22C55E]" : "bg-[#3B82F6]"}`}
-              style={{ width: `${w2}%` }}
-            />
-          </div>
-        </>
-      )}
-      {/* AI prediction row — shown only when AI data available */}
-      {hasAi && (
-        <>
-          <div className="flex items-center justify-between text-xs mt-1">
-            <span
-              className={
-                aiTeam1Conf > aiTeam2Conf
-                  ? "font-bold text-[#7C3AED]"
-                  : "text-[#4B5563]"
-              }
-            >
-              {aiTeam1Conf}%
-            </span>
-            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
-              <Brain className="h-3 w-3 text-[#9CA3AF]" strokeWidth={1.5} />
-              AI
-            </span>
-            <span
-              className={
-                aiTeam2Conf > aiTeam1Conf
-                  ? "font-bold text-[#7C3AED]"
-                  : "text-[#4B5563]"
-              }
-            >
-              {aiTeam2Conf}%
-            </span>
-          </div>
-          <div className="flex h-1.5 rounded-full overflow-hidden bg-[#F3F4F6]">
-            <div
-              className="bg-[#A78BFA] transition-all duration-300"
-              style={{ width: `${aiTeam1Conf}%` }}
-            />
-            <div
-              className="bg-[#C4B5FD] transition-all duration-300"
-              style={{ width: `${aiTeam2Conf}%` }}
-            />
-          </div>
-        </>
-      )}
-    </div>
-  );
 };
 
 const cardBaseStyle = CARD_BASE_STYLE;
@@ -546,11 +295,6 @@ const loadVisibleColumns = (): Set<string> => {
 };
 
 /** Get Ukrainian day of week short name */
-const getDayOfWeek = (date: Date): string => {
-  const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-  return days[date.getDay()];
-};
-
 /** Format date key for grouping: "YYYY-MM-DD" */
 const getDateKey = (dateStr: string): string => {
   const d = new Date(dateStr);
@@ -991,17 +735,6 @@ export default function Matches() {
       ? futureDateKeys
       : Object.keys(groupedByDate).sort();
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    if (hours === 0 && minutes === 0) return "TBD";
-    return date.toLocaleTimeString("uk-UA", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // Displayed matches — only those actually shown on screen (today+future, or all if only past)
   const displayedMatches = sortedDateKeys.flatMap(
     (k) => groupedByDate[k] || [],
@@ -1078,21 +811,6 @@ export default function Matches() {
     return (
       <ArrowUpDown className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
     );
-  };
-
-  const formatCoeff = (coeff: number | null | undefined): string => {
-    if (coeff == null || coeff === 0) return "—";
-    return coeff.toFixed(2);
-  };
-
-  /** Get the visual style for the match row based on rating */
-  const getRowRatingStyle = (matchId: string): string => {
-    const rating = matchRatings[matchId];
-    if (rating === "like")
-      return "bg-[#F0FDF4]/60 border-l-4 border-l-[#22C55E]";
-    if (rating === "dislike")
-      return "bg-[#FEF2F2]/60 border-l-4 border-l-[#EF4444]";
-    return "border-l-4 border-l-transparent";
   };
 
   /** Render a single match row */

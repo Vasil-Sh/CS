@@ -82,6 +82,7 @@
     "globals": "^15.9.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "knip": "^6.25.0",
     "lint-staged": "^17.0.8",
     "postcss": "^8.4.47",
     "prettier": "^3.8.4",
