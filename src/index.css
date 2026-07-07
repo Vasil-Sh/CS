@@ -4,84 +4,85 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* ═══ Seline Analytics — Warm Stone Canvas ═══ */
+    --background: 30 9% 98%; /* #fafaf9 — warm off-white, paper-like */
+    --foreground: 15 14% 5%; /* #0c0a09 — ink black, warm cast */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%; /* #ffffff — elevated card surfaces */
+    --card-foreground: 15 14% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 15 14% 5%;
 
-    /* MatchIQ primary blue (#447afc → HSL 224 92% 63%) */
-    --primary: 224 92% 63%;
-    --primary-foreground: 210 40% 98%;
+    /* Cyan Signal — the ONLY chromatic voice on the page */
+    --primary: 205 87% 59%; /* #3ba6f1 — primary CTA fill, brand icon strokes */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 7% 96%; /* warm stone surface */
+    --secondary-foreground: 15 14% 5%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 30 7% 96%;
+    --muted-foreground: 28 5% 45%; /* #78716c — warm gray body text */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 204 77% 93%; /* #c1e1f7 wash — sky highlight */
+    --accent-foreground: 205 76% 54%; /* #3398e1 — cyan edge for outlined actions */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 20 6% 91%; /* #e8e6e5 — stone hairline, primary structural device */
+    --input: 20 6% 91%;
+    --ring: 205 87% 59%; /* #3ba6f1 */
 
-    /* Chart Color Tokens (Recharts) */
-    --chart-1: 224 92% 63%; /* primary blue #447afc */
-    --chart-2: 142 71% 45%; /* green */
-    --chart-3: 38 92% 50%; /* amber */
-    --chart-4: 262 83% 58%; /* purple */
-    --chart-5: 0 72% 51%; /* red */
-    --chart-6: 199 89% 48%; /* cyan */
-    --chart-7: 271 91% 65%; /* violet */
+    /* Chart Color Tokens (Recharts) — extended from cyan + stone palette */
+    --chart-1: 205 87% 59%; /* cyan signal #3ba6f1 */
+    --chart-2: 160 60% 45%; /* teal */
+    --chart-3: 35 75% 55%; /* warm amber */
+    --chart-4: 205 76% 54%; /* cyan edge #3398e1 */
+    --chart-5: 0 70% 55%; /* muted red */
+    --chart-6: 200 20% 50%; /* stone blue-gray */
+    --chart-7: 25 15% 35%; /* warm stone dark */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 15 6% 8%; /* #1c1917 — soot, dark surface */
+    --foreground: 30 9% 98%; /* #fafaf9 on dark */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 15 6% 10%;
+    --card-foreground: 30 9% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 15 6% 10%;
+    --popover-foreground: 30 9% 98%;
 
-    --primary: 224 92% 63%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 205 87% 59%; /* cyan signal — same as light */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 15 5% 14%;
+    --secondary-foreground: 30 9% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 15 5% 14%;
+    --muted-foreground: 25 5% 55%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 205 76% 18%; /* cyan edge dim */
+    --accent-foreground: 205 87% 59%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 60% 35%;
+    --destructive-foreground: 30 9% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 20 5% 20%;
+    --input: 20 5% 20%;
+    --ring: 205 87% 59%;
 
-    /* Chart colors — same as light (readable on dark bg) */
-    --chart-1: 224 92% 63%;
-    --chart-2: 142 71% 45%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 262 83% 58%;
-    --chart-5: 0 72% 51%;
-    --chart-6: 199 89% 48%;
-    --chart-7: 271 91% 65%;
+    /* Chart colors — same as light */
+    --chart-1: 205 87% 59%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 35 75% 55%;
+    --chart-4: 205 76% 54%;
+    --chart-5: 0 70% 55%;
+    --chart-6: 200 20% 50%;
+    --chart-7: 25 15% 35%;
   }
 
   * {
