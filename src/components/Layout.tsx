@@ -23,10 +23,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const navigation = [
   { nameKey: "nav.analytics", href: "/app/analytics", icon: BarChart3 },
   { nameKey: "nav.strategies", href: "/app/strategy", icon: Target },
+  { nameKey: "nav.riskyTeams", href: "/app/risky-teams", icon: AlertTriangle },
   { nameKey: "nav.addRecord", href: "/app/my-bets", icon: Plus },
   { nameKey: "nav.matches", href: "/app/matches", icon: Trophy },
   { nameKey: "nav.telegram", href: "/app/telegram", icon: MessageCircle },
-  { nameKey: "nav.riskyTeams", href: "/app/risky-teams", icon: AlertTriangle },
   { nameKey: "nav.profile", href: "/app/profile", icon: User },
 ];
 
