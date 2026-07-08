@@ -848,8 +848,8 @@ export default function Matches() {
             className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
             onClick={() => toggleSort("date")}
           >
-            <div className="flex items-center gap-1">
-              Матч
+            <div className="flex items-center justify-between w-full">
+              <span>Матч</span>
               {renderSortIndicator("date")}
             </div>
           </th>
