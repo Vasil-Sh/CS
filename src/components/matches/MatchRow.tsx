@@ -222,25 +222,46 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
   switch (status) {
     case "live":
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-white leading-none bg-red-500 rounded px-1.5 py-0.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-          LIVE
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-white leading-none bg-red-500 rounded px-1.5 py-0.5 cursor-default">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              LIVE
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+            <p className="text-xs">Зараз грають</p>
+          </TooltipContent>
+        </Tooltip>
       );
     case "finished":
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5">
-          <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
-          ЗАВ
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5 cursor-default">
+              <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
+              ЗАВ
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+            <p className="text-xs">Завершено</p>
+          </TooltipContent>
+        </Tooltip>
       );
     case "upcoming":
     default:
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5">
-          <Clock className="h-3 w-3" strokeWidth={2} />
-          ОЧІ
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5 cursor-default">
+              <Clock className="h-3 w-3" strokeWidth={2} />
+              ОЧІ
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+            <p className="text-xs">Очікується</p>
+          </TooltipContent>
+        </Tooltip>
       );
   }
 }
