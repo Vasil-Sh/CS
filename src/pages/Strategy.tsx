@@ -910,7 +910,7 @@ export default function Strategy() {
         {/* Tabs bar */}
         <div className="space-y-6">
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
