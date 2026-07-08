@@ -416,12 +416,16 @@ export default function MatchRow({
           )}
           {/* Main row: time/status sidebar + teams/badges */}
           <div className="flex items-stretch gap-3">
-            {/* Left sidebar: time + status, divider only between sidebar and content */}
-            <div className="flex flex-col justify-between items-center min-w-[48px] pr-3 border-r border-[#E5E7EB]">
-              <span className="text-sm font-semibold text-[#111827] leading-tight">
-                {formatTime(match.date)}
-              </span>
-              {getMatchStatusBadgeCompact(match.matchStatus)}
+            {/* Left sidebar: time (aligned with teams) + status (aligned with badges) */}
+            <div className="flex flex-col items-center min-w-[48px] pr-3 border-r border-[#E5E7EB] space-y-1">
+              <div className="flex items-center" style={{ minHeight: 28 }}>
+                <span className="text-sm font-semibold text-[#111827] leading-tight">
+                  {formatTime(match.date)}
+                </span>
+              </div>
+              <div className="flex items-center" style={{ minHeight: 22 }}>
+                {getMatchStatusBadgeCompact(match.matchStatus)}
+              </div>
             </div>
             {/* Right: teams + badges */}
             <div className="space-y-1 flex-1 min-w-0">
