@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -99,27 +99,39 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const [csStatusFilter, setCsStatusFilter] = useState<string>("all");
   const [dotaStatusFilter, setDotaStatusFilter] = useState<string>("all");
 
+  // Track whether initial data load has completed
+  const initializedRef = useRef(false);
+
+  // Save to localStorage after initial load — always persist (including empty array after deletion)
   useEffect(() => {
-    localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
+    if (initializedRef.current) {
+      localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
+    }
   }, [riskyTeams]);
 
-  // Load from localStorage FIRST (instant), then update from API in background
+  // Load from localStorage FIRST (instant), skip API if user explicitly cleared
   useEffect(() => {
-    // 1. Show cached data immediately, normalize game values
     const saved = localStorage.getItem("admin_risky_teams");
+    let parsedSaved: RiskyTeam[] | null = null;
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setRiskyTeams(
-          parsed.map((t: RiskyTeam) => ({ ...t, game: normalizeGame(t.game) })),
-        );
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          parsedSaved = parsed;
+        }
       } catch {
         /* ignore */
       }
     }
-    // 2. Fetch from API in background — ONLY if localStorage is empty (first load)
-    //    Otherwise localStorage is the source of truth (saveEditing syncs to API)
-    if (!saved) {
+
+    if (parsedSaved) {
+      setRiskyTeams(
+        parsedSaved.map((t: RiskyTeam) => ({ ...t, game: normalizeGame(t.game) })),
+      );
+      setIsLoadingTeams(false);
+      initializedRef.current = true;
+    } else if (saved === null) {
+      // No localStorage at all — first visit, fetch from API
       let cancelled = false;
       const load = async () => {
         try {
@@ -131,7 +143,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         } catch {
           /* ignore */
         }
-        if (!cancelled) setIsLoadingTeams(false);
+        if (!cancelled) { setIsLoadingTeams(false); initializedRef.current = true; }
       };
       setIsLoadingTeams(true);
       load();
@@ -139,7 +151,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         cancelled = true;
       };
     } else {
+      // Empty array was explicitly saved (user deleted all) — show empty
       setIsLoadingTeams(false);
+      initializedRef.current = true;
     }
   }, []);
 
@@ -198,23 +212,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             .slice(0, 3)
             .map((t) => `${t.name}[${t.game}/${t.status}]`)
             .join(", "),
-        );
-      }
-
-      setRiskyTeams(teamsFromSheet);
-
-      if (import.meta.env.DEV) {
-        const sampleGames = teamsFromSheet
-          .slice(0, 5)
-          .map((t) => `${t.name}=${t.game}`);
-        console.log("[RiskMgmt] Sample teams (name=game):", sampleGames);
-        console.log(
-          "[RiskMgmt] Total:",
-          teamsFromSheet.length,
-          "CS:",
-          teamsFromSheet.filter((t) => t.game === "CS").length,
-          "Дота:",
-          teamsFromSheet.filter((t) => t.game === "Дота").length,
         );
       }
 
@@ -282,6 +279,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     });
     setRiskyTeams([]);
     setEditingIndex(null);
+    localStorage.setItem("admin_risky_teams", JSON.stringify([]));
     toast.success("Усі команди видалено");
     setIsDeleteAllOpen(false);
   };
@@ -1331,11 +1329,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   csStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-white flex flex-col flex-1">
+              <CardContent className="p-0 bg-[#F9FAFB] flex flex-col flex-1">
                 <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-[#F9FAFB] rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <Users
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1}
@@ -1403,11 +1401,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   dotaStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-white flex flex-col flex-1">
+              <CardContent className="p-0 bg-[#F9FAFB] flex flex-col flex-1">
                 <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-[#F9FAFB] rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <Users
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1}
