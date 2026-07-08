@@ -204,8 +204,6 @@ export default function Strategy() {
   }, [resolvedUser, primaryStrategyId, strategyVersion]);
 
   const [primaryGoal, setPrimaryGoal] = useState<StoredGoal | null>(null);
-  const todayRisk = useMemo(() => computeTodayRisk(bets), [bets]);
-  const winRate30d = useMemo(() => compute30dWinRate(bets), [bets]);
   const todayPnL = useMemo(() => computeTodayPnL(bets), [bets]);
   const sevenDayProfit = useMemo(() => compute7DayProfit(bets), [bets]);
   const bestStrategy = useMemo(() => computeBestStrategy(bets), [bets]);
