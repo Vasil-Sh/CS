@@ -683,117 +683,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
-        {/* Unified pill-bar: info + Google Sheets + Search toggle + Add team */}
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            {/* Info tooltip */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
-                  <Info className="h-4 w-4" strokeWidth={2} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                align="start"
-                className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg"
-              >
-                <p className="text-sm font-semibold text-[#111827] mb-1">
-                  Управління ризиками
-                </p>
-                <p className="text-sm text-[#6B7280] leading-relaxed">
-                  Тут ви можете вести список команд, на які не варто ставити або
-                  потрібно бути обережним. Кожній команді можна призначити
-                  статус (БАН, Обережно, Нестабільні тощо) та додати коментар.
-                  При створенні запису на сторінці «Додати запис» ви отримаєте
-                  попередження, якщо обрали ризикову команду.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Filter/search toggle — compact icon button */}
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
-                isSearchOpen
-                  ? "bg-[#447afc] text-white"
-                  : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]"
-              }`}
-              title="Пошук"
-            >
-              <Search className="h-4 w-4" strokeWidth={2} />
-            </button>
-
-            {/* Delete all — only shown when teams exist */}
-            {riskyTeams.length > 0 && (
-              <button
-                onClick={() => setIsDeleteAllOpen(true)}
-                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors"
-                title="Видалити всі команди"
-              >
-                <Trash2 className="h-4 w-4" strokeWidth={2} />
-              </button>
-            )}
-
-            {/* Google Sheets button — opens guide modal */}
-            <button
-              onClick={() => setIsSheetsGuideOpen(true)}
-              disabled={isUpdating}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUpdating ? (
-                <>
-                  <RefreshCw
-                    className="h-4 w-4 animate-spin"
-                    strokeWidth={1.5}
-                  />
-                  Оновлення...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4" strokeWidth={1.5} />
-                  Підтягнути команди з Google Sheets
-                </>
-              )}
-            </button>
-
-            {/* Divider */}
-            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
-
-            {/* Add new team — accent blue */}
-            <button
-              onClick={() => setIsAddTeamOpen(true)}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2} />
-              Додати нову команду
-            </button>
-          </div>
-        </div>
-
-        {/* Inline search input — shown when toggled */}
-        {isSearchOpen && (
-          <div
-            className="bg-white border border-[#E5E7EB] rounded-2xl p-4"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
-          >
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]"
-                strokeWidth={1.5}
-              />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Пошук за назвою, грою, статусом або примітками..."
-                className="pl-10 w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
-                autoFocus
-              />
-            </div>
-          </div>
-        )}
-
+      <div className="flex flex-col flex-1 min-h-0 space-y-6">
         {/* Team-focused Overview Cards */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -919,6 +809,116 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </div>
           </div>
         </div>
+
+        {/* Toolbar: Google Sheets, Add team, Info */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            {/* Info tooltip */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                  <Info className="h-4 w-4" strokeWidth={2} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                align="start"
+                className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg"
+              >
+                <p className="text-sm font-semibold text-[#111827] mb-1">
+                  Управління ризиками
+                </p>
+                <p className="text-sm text-[#6B7280] leading-relaxed">
+                  Тут ви можете вести список команд, на які не варто ставити або
+                  потрібно бути обережним. Кожній команді можна призначити
+                  статус (БАН, Обережно, Нестабільні тощо) та додати коментар.
+                  При створенні запису на сторінці «Додати запис» ви отримаєте
+                  попередження, якщо обрали ризикову команду.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Filter/search toggle — compact icon button */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
+                isSearchOpen
+                  ? "bg-[#447afc] text-white"
+                  : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]"
+              }`}
+              title="Пошук"
+            >
+              <Search className="h-4 w-4" strokeWidth={2} />
+            </button>
+
+            {/* Delete all — only shown when teams exist */}
+            {riskyTeams.length > 0 && (
+              <button
+                onClick={() => setIsDeleteAllOpen(true)}
+                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors"
+                title="Видалити всі команди"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2} />
+              </button>
+            )}
+
+            {/* Google Sheets button — opens guide modal */}
+            <button
+              onClick={() => setIsSheetsGuideOpen(true)}
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdating ? (
+                <>
+                  <RefreshCw
+                    className="h-4 w-4 animate-spin"
+                    strokeWidth={1.5}
+                  />
+                  Оновлення...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" strokeWidth={1.5} />
+                  Підтягнути команди з Google Sheets
+                </>
+              )}
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+
+            {/* Add new team — accent blue */}
+            <button
+              onClick={() => setIsAddTeamOpen(true)}
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2} />
+              Додати нову команду
+            </button>
+          </div>
+        </div>
+
+        {/* Inline search input — shown when toggled */}
+        {isSearchOpen && (
+          <div
+            className="bg-white border border-[#E5E7EB] rounded-2xl p-4"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+          >
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]"
+                strokeWidth={1.5}
+              />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Пошук за назвою, грою, статусом або примітками..."
+                className="pl-10 w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
 
         {/* Google Sheets Guide Dialog */}
         <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
@@ -1305,8 +1305,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </Dialog>
 
         {/* Teams by Game */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
             {/* CS Teams */}
             <Card
               className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden flex flex-col"
