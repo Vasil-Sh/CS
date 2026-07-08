@@ -229,17 +229,17 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
       );
     case "finished":
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5">
-          <CheckCircle2 className="h-3 w-3" strokeWidth={1.5} />
-          Завершено
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5">
+          <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
+          ЗАВ
         </span>
       );
     case "upcoming":
     default:
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5">
-          <Clock className="h-3 w-3" strokeWidth={1.5} />
-          Очікується
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5">
+          <Clock className="h-3 w-3" strokeWidth={2} />
+          ОЧІ
         </span>
       );
   }
