@@ -13,7 +13,6 @@ import {
   ArrowUpDown,
   Search,
   Loader2,
-  Flame,
   Shield,
   Brain,
   ArrowUpRight,
@@ -357,7 +356,6 @@ export default function Matches() {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "upcoming" | "live" | "finished"
   >("all");
-  const [showHotMatches, setShowHotMatches] = useState(false);
   const [visibleColumns, setVisibleColumns] =
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
@@ -417,7 +415,6 @@ export default function Matches() {
     setFilterMatchType("all");
     setFilterConfidence("all");
     setFilterRisk("all");
-    setShowHotMatches(false);
     setSearchQuery("");
     const defaults = new Set(
       COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
@@ -433,7 +430,6 @@ export default function Matches() {
     filterMatchType !== "all" ||
     filterConfidence !== "all" ||
     filterRisk !== "all" ||
-    showHotMatches ||
     searchQuery !== "";
 
   useEffect(() => {
@@ -671,11 +667,6 @@ export default function Matches() {
     if (filterMatchType !== "all" && match.matchType !== filterMatchType)
       return false;
     if (filterStatus !== "all" && match.matchStatus !== filterStatus)
-      return false;
-    if (
-      showHotMatches &&
-      (match.aiConfidence <= 70 || match.upsetProbability >= 20)
-    )
       return false;
     if (
       searchQuery &&
@@ -1375,24 +1366,6 @@ export default function Matches() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {/* Hot matches toggle — pill button */}
-              <button
-                onClick={() => setShowHotMatches(!showHotMatches)}
-                className={`
-                  rounded-[24px] px-5 h-11 font-medium text-sm
-                  transition-all duration-300 ease-in-out
-                  inline-flex items-center gap-2
-                  ${
-                    showHotMatches
-                      ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                      : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
-                  }
-                `}
-              >
-                <Flame className="h-4 w-4" strokeWidth={1.5} />
-                Гарячі
-              </button>
 
               {/* Column visibility toggle — pill dropdown with checkboxes */}
               <DropdownMenu>
