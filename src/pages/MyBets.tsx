@@ -648,6 +648,7 @@ export default function MyBets() {
           activeBets={activeBets}
           winningBets={winningBets}
           losingBets={losingBets}
+          onEditBank={() => setBankModalOpen(true)}
         />
 
         {/* Tabs */}

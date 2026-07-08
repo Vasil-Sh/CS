@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import BalanceChart from "@/components/BalanceChart";
-import MiniDonut from "@/components/MiniDonut";
 import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCard";
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
 import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
@@ -26,7 +25,6 @@ import RiskManagement from "@/components/RiskManagement";
 import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
 import GoalsManager from "@/components/GoalsManager";
-import InitialBankModal from "@/components/InitialBankModal";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -44,7 +42,6 @@ import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import {
-  Target,
   DollarSign,
   Filter,
   RefreshCw,
@@ -54,11 +51,11 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Wallet,
-  Pencil,
   TrendingDown,
   TrendingUp,
-  Info,
-  Clock,
+  Trophy,
+  Zap,
+  Percent,
 } from "lucide-react";
 import {
   XAxis,
@@ -131,7 +128,6 @@ export default function Analytics() {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
-  const [bankModalOpen, setBankModalOpen] = useState(false);
   const [dualBank, setDualBank] = useState<DualBankrollStats>({
     uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
     usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
@@ -396,21 +392,6 @@ export default function Analytics() {
     }
   }, []);
 
-  const handleBankCardClick = useCallback(() => {
-    setBankModalOpen(true);
-  }, []);
-
-  const handleBankModalClose = useCallback(
-    (success: boolean) => {
-      setBankModalOpen(false);
-      if (success) {
-        updateBankrollStats();
-        bumpBankroll();
-      }
-    },
-    [updateBankrollStats, bumpBankroll],
-  );
-
   // Filter bets by game
   const gameFilteredBets = useMemo(() => {
     if (gameFilter === "all") return displayBets;
@@ -448,30 +429,45 @@ export default function Analytics() {
     return { totalBets, winRate, totalProfit };
   }, [completedBets, winningBets]);
 
-  const streaks = useMemo(() => {
-    let currentWinStreak = 0;
-    let currentLossStreak = 0;
-    let maxWinStreak = 0;
-    let maxLossStreak = 0;
+  // ── Analytics-specific computed values ──
+  const totalStaked = useMemo(() => completedBets.reduce((s: number, b: Bet) => s + b.amount, 0), [completedBets]);
+  const roi = useMemo(() => {
+    return totalStaked > 0 ? Math.round((filteredStats.totalProfit / totalStaked) * 100) : 0;
+  }, [completedBets, filteredStats.totalProfit, totalStaked]);
 
-    const sortedBets = [...completedBets].sort(
-      (a: Bet, b: Bet) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
+  const avgOdds = useMemo(() => {
+    if (completedBets.length === 0) return 0;
+    const sum = completedBets.reduce((s: number, b: Bet) => s + b.odds, 0);
+    return Math.round((sum / completedBets.length) * 100) / 100;
+  }, [completedBets]);
 
-    for (const bet of sortedBets) {
-      if (bet.result === "Win") {
-        currentWinStreak++;
-        currentLossStreak = 0;
-        maxWinStreak = Math.max(maxWinStreak, currentWinStreak);
-      } else {
-        currentLossStreak++;
-        currentWinStreak = 0;
-        maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
-      }
-    }
+  const bestMonth = useMemo(() => {
+    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return null;
+    return [...stats.profitByMonth].sort((a, b) => b.profit - a.profit)[0];
+  }, [stats.profitByMonth]);
 
-    return { maxWinStreak, maxLossStreak, currentWinStreak, currentLossStreak };
+  const worstMonth = useMemo(() => {
+    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return null;
+    return [...stats.profitByMonth].sort((a, b) => a.profit - b.profit)[0];
+  }, [stats.profitByMonth]);
+
+  const avgMonthlyProfit = useMemo(() => {
+    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return 0;
+    const total = stats.profitByMonth.reduce((s, m) => s + m.profit, 0);
+    return Math.round(total / stats.profitByMonth.length);
+  }, [stats.profitByMonth]);
+
+  const totalMonthsTracked = useMemo(() => {
+    return stats.profitByMonth?.length || 0;
+  }, [stats.profitByMonth]);
+
+  const betsThisMonth = useMemo(() => {
+    const now = new Date();
+    const start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return completedBets.filter((b: Bet) => {
+      const d = b.date || "";
+      return d.startsWith(start);
+    }).length;
   }, [completedBets]);
 
   const oddsAnalysis = useMemo((): OddsRange[] => {
@@ -752,12 +748,6 @@ export default function Analytics() {
         <AnalyticsSkeleton />
       ) : (
         <>
-          <InitialBankModal
-            open={bankModalOpen}
-            onClose={handleBankModalClose}
-            mode={BankrollService.isInitialized(currentUser) ? "edit" : "setup"}
-          />
-
           {/* ===== HEADER ===== */}
           <PageHeader
             title="Аналітика"
@@ -799,245 +789,138 @@ export default function Analytics() {
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {/* 1. Поточний банк */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* 1. ROI */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 cursor-pointer group relative overflow-hidden hover:border-gray-400"
-                  onClick={handleBankCardClick}
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => {
-                    Object.assign(e.currentTarget.style, cardHoverStyle);
-                  }}
-                  onMouseLeave={(e) => {
-                    Object.assign(e.currentTarget.style, cardBaseStyle);
-                  }}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                      <Wallet
-                        className="h-5 w-5 text-blue-500"
-                        strokeWidth={1.5}
-                      />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50">
+                      <Percent className="h-5 w-5 text-emerald-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {currencyMode === "USD"
-                        ? "Поточний банк (USDT)"
-                        : "Поточний банк"}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBankCardClick();
-                      }}
-                      className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
-                      title="Редагувати банк"
-                    >
-                      <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
-                    </button>
+                    <span className="text-lg font-semibold text-gray-900">ROI</span>
+                  </div>
+                  <div className={`text-4xl font-bold tracking-tight mb-1 ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                    {roi >= 0 ? "+" : ""}{roi}%
+                  </div>
+                  <div className="text-xs text-gray-400 mb-3">Прибуток / Вкладено</div>
+                  {/* Stats row */}
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-gray-400">Вкладено</div>
+                      <div className="text-sm font-bold text-gray-900">{totalStaked.toLocaleString("uk-UA")} ₴</div>
+                    </div>
+                    <div className={`rounded-lg px-2 py-1.5 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+                      <div className={`text-[10px] ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
+                      <div className={`text-sm font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                        {filteredStats.totalProfit >= 0 ? "+" : ""}{filteredStats.totalProfit.toLocaleString("uk-UA")} ₴
+                      </div>
+                    </div>
+                  </div>
+                  {/* ROI gauge bar — centered from -100% to +100% */}
+                  <div className="relative w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="absolute left-1/2 top-0 w-px h-full bg-gray-300" />
+                    <div
+                      className={`absolute top-0 h-full rounded-full transition-all ${roi >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
+                      style={roi >= 0
+                        ? { width: `${Math.min(roi, 100) / 2}%`, right: "50%" }
+                        : { width: `${Math.min(Math.abs(roi), 100) / 2}%`, left: "50%" }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-red-400">−100%</span>
+                    <span className="text-[10px] text-gray-400">0%</span>
+                    <span className="text-[10px] text-emerald-400">+100%</span>
+                  </div>
+                </div>
+
+                {/* 2. Найкращий місяць */}
+                <div
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
+                  style={cardBaseStyle}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50">
+                      <Trophy className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
+                    </div>
+                    <span className="text-lg font-semibold text-gray-900">По місяцях</span>
+                  </div>
+                  {/* Best / Worst */}
+                  <div className="flex items-end gap-3 mb-2">
+                    <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2 border border-emerald-200">
+                      <div className="text-[10px] text-emerald-500 font-medium mb-0.5">▲ Найкращий</div>
+                      <div className="text-lg font-bold text-emerald-700">
+                        {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${bestMonth.profit.toLocaleString("uk-UA")} ₴` : "—"}
+                      </div>
+                      {bestMonth && (
+                        <div className="text-[10px] text-emerald-500 mt-0.5">{bestMonth.month}</div>
+                      )}
+                    </div>
+                    <div className="flex-1 bg-red-50 rounded-xl px-3 py-2 border border-red-200">
+                      <div className="text-[10px] text-red-400 font-medium mb-0.5">▼ Найгірший</div>
+                      <div className="text-lg font-bold text-red-500">
+                        {worstMonth ? `${worstMonth.profit >= 0 ? "+" : ""}${worstMonth.profit.toLocaleString("uk-UA")} ₴` : "—"}
+                      </div>
+                      {worstMonth && (
+                        <div className="text-[10px] text-red-400 mt-0.5">{worstMonth.month}</div>
+                      )}
+                    </div>
+                  </div>
+                  {/* Averages row */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-gray-400">Середнє/міс</div>
+                      <div className={`text-sm font-bold ${avgMonthlyProfit >= 0 ? "text-gray-900" : "text-red-500"}`}>
+                        {avgMonthlyProfit >= 0 ? "+" : ""}{avgMonthlyProfit.toLocaleString("uk-UA")} ₴
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-gray-400">Місяців</div>
+                      <div className="text-sm font-bold text-gray-900">{totalMonthsTracked}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Коефіцієнти */}
+                <div
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
+                  style={cardBaseStyle}
+                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
+                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50">
+                      <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
+                    </div>
+                    <span className="text-lg font-semibold text-gray-900">Коефіцієнти</span>
                   </div>
                   <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-                    {currencyMode === "USD"
-                      ? `$${dualBank.usd.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
-                      : `${dualBank.uah.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+                    {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {(currencyMode === "USD"
-                      ? dualBank.usd.totalProfit
-                      : dualBank.uah.totalProfit) >= 0 ? (
-                      <ArrowUpRight
-                        className="h-4 w-4 text-green-500"
-                        strokeWidth={2.5}
-                      />
-                    ) : (
-                      <ArrowDownRight
-                        className="h-4 w-4 text-red-500"
-                        strokeWidth={2.5}
-                      />
-                    )}
-                    <span
-                      className={`text-base font-normal ${(currencyMode === "USD" ? dualBank.usd.totalProfit : dualBank.uah.totalProfit) >= 0 ? "text-green-500" : "text-red-500"}`}
-                    >
-                      {currencyMode === "USD"
-                        ? `${Number(dualBank.usd.totalProfit) >= 0 ? "+" : ""}$${Number(dualBank.usd.totalProfit).toFixed(2)}`
-                        : `${Number(dualBank.uah.totalProfit) >= 0 ? "+" : ""}${Number(dualBank.uah.totalProfit).toFixed(2)} ₴`}
-                    </span>
-                    {currencyMode === "USD" && exchangeRate > 0 && (
-                      <span className="text-sm text-gray-400 ml-auto">
-                        Курс {exchangeRate} ₴/$
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Загальний профіт */}
-                <div
-                  className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => {
-                    Object.assign(e.currentTarget.style, cardHoverStyle);
-                  }}
-                  onMouseLeave={(e) => {
-                    Object.assign(e.currentTarget.style, cardBaseStyle);
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                      <DollarSign
-                        className="h-5 w-5 text-blue-500"
-                        strokeWidth={1.5}
-                      />
+                  <div className="text-xs text-gray-400 mb-3">середній коефіцієнт</div>
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-gray-400">Ставок</div>
+                      <div className="text-sm font-bold text-gray-900">{completedBets.length}</div>
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      Загальний профіт
-                    </span>
-                  </div>
-                  <div
-                    className={`text-4xl font-bold tracking-tight mb-2 ${(currencyMode === "USD" ? profitByCurrency.profitUSD : profitByCurrency.profitUAH) >= 0 ? "text-gray-900" : "text-red-500"}`}
-                  >
-                    {currencyMode === "USD"
-                      ? `${Number(profitByCurrency.profitUSD || 0) >= 0 ? "+" : ""}$${Number(profitByCurrency.profitUSD || 0).toFixed(2)}`
-                      : `${Number(profitByCurrency.profitUAH || 0) >= 0 ? "+" : ""}${Number(profitByCurrency.profitUAH || 0).toFixed(2)} ₴`}
-                  </div>
-                  <span
-                    className={`text-sm ${(currencyMode === "USD" ? profitByCurrency.profitUSD : profitByCurrency.profitUAH) >= 0 ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {(currencyMode === "USD"
-                      ? profitByCurrency.profitUSD
-                      : profitByCurrency.profitUAH) >= 0
-                      ? "Позитивна динаміка"
-                      : "Негативна динаміка"}
-                  </span>
-                </div>
-
-                {/* 3. Всього ставок — GREEN donut */}
-                <div
-                  className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => {
-                    Object.assign(e.currentTarget.style, cardHoverStyle);
-                  }}
-                  onMouseLeave={(e) => {
-                    Object.assign(e.currentTarget.style, cardBaseStyle);
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                      <BarChart3
-                        className="h-5 w-5 text-blue-500"
-                        strokeWidth={1.5}
-                      />
+                    <div className="bg-emerald-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-emerald-500">Виграші</div>
+                      <div className="text-sm font-bold text-emerald-600">{winningBets.length}</div>
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      Всього записів
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col justify-center">
-                      <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-                        {filteredStats.totalBets || 0}
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: "#10B981" }}
-                          />
-                          <span className="text-base font-semibold text-gray-900">
-                            {winningBets.length}
-                          </span>
-                          <span className="text-sm text-gray-400">
-                            виграшів
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: "#FCA5A5" }}
-                          />
-                          <span className="text-base font-semibold text-gray-900">
-                            {losingBets.length}
-                          </span>
-                          <span className="text-sm text-gray-400">
-                            програшів
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-center flex-shrink-0">
-                      <MiniDonut
-                        value={winningBets.length}
-                        total={filteredStats.totalBets || 1}
-                        colors={{
-                          main: "#10B981",
-                          sub1: "#6EE7B7",
-                          sub2: "#FCA5A5",
-                        }}
-                        size={140}
-                      />
+                    <div className="bg-red-50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-red-400">Програші</div>
+                      <div className="text-sm font-bold text-red-500">{losingBets.length}</div>
                     </div>
                   </div>
-                </div>
-
-                {/* 4. Win Rate — GREEN donut */}
-                <div
-                  className="stat-card bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 group"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => {
-                    Object.assign(e.currentTarget.style, cardHoverStyle);
-                  }}
-                  onMouseLeave={(e) => {
-                    Object.assign(e.currentTarget.style, cardBaseStyle);
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                      <Target
-                        className="h-5 w-5 text-blue-500"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      Вінрейт
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col justify-center">
-                      <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-                        {filteredStats.winRate || 0}%
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {(filteredStats.winRate || 0) >= 50 ? (
-                          <ArrowUpRight
-                            className="h-4 w-4 text-green-500"
-                            strokeWidth={2.5}
-                          />
-                        ) : (
-                          <ArrowDownRight
-                            className="h-4 w-4 text-red-500"
-                            strokeWidth={2.5}
-                          />
-                        )}
-                        <span
-                          className={`text-sm font-semibold ${(filteredStats.winRate || 0) >= 50 ? "text-green-500" : "text-red-500"}`}
-                        >
-                          {(filteredStats.winRate || 0) >= 50
-                            ? "Вище середнього"
-                            : "Нижче середнього"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-center flex-shrink-0">
-                      <MiniDonut
-                        value={filteredStats.winRate || 0}
-                        total={100}
-                        colors={{
-                          main: "#10B981",
-                          sub1: "#6EE7B7",
-                          sub2: "#ECFDF5",
-                        }}
-                        size={140}
-                      />
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-[10px] text-gray-400">За місяць: {betsThisMonth}</span>
+                    <span className="text-[10px] text-gray-400">Winrate: {filteredStats.winRate}%</span>
                   </div>
                 </div>
               </div>

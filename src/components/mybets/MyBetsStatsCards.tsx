@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from "react";
 import {
   Wallet, DollarSign, BarChart3, Target, Clock, Trophy,
-  AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight,
+  AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Pencil,
 } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import type { Bet } from "@/types/betting";
@@ -15,10 +15,11 @@ interface MyBetsStatsCardsProps {
   activeBets: Bet[];
   winningBets: Bet[];
   losingBets: Bet[];
+  onEditBank?: () => void;
 }
 
 export default function MyBetsStatsCards({
-  recentBets, stats, dualBank, currencyMode, activeBets, winningBets, losingBets,
+  recentBets, stats, dualBank, currencyMode, activeBets, winningBets, losingBets, onEditBank,
 }: MyBetsStatsCardsProps) {
   const profitByCurrency = useMemo(() => {
     const completed = recentBets.filter(b => b.result === "Win" || b.result === "Loss");
@@ -43,19 +44,48 @@ export default function MyBetsStatsCards({
     <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       {/* Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard
-          icon={<IconBox><Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label={currencyMode === "USD" ? "Поточний банк (USDT)" : "Поточний банк"}
-          value={currencyMode === "USD"
-            ? `$${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
-            : `${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
-          valueColor={currencyMode === "USD" ? "text-[#D97706]" : undefined}
-          subtext={currencyMode === "USD"
-            ? `${Number(bank.totalProfit) >= 0 ? "+" : ""}$${Number(bank.totalProfit).toFixed(2)} за весь час`
-            : `${Number(bank.totalProfit) >= 0 ? "+" : ""}${Number(bank.totalProfit).toFixed(2)} ₴ за весь час`}
-          subIcon={bankUp ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}
-          trend={bankUp ? "up" : "down"}
-        />
+        {/* Bank card with edit button */}
+        <div
+          className="relative bg-white border border-gray-200 rounded-3xl px-6 py-5 transition-all duration-300 ease-out cursor-pointer overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-400 hover:-translate-y-[3px]"
+          onClick={onEditBank}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+              <Wallet className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
+            </div>
+            <span className="text-lg font-semibold text-gray-900">
+              {currencyMode === "USD" ? "Поточний банк (USDT)" : "Поточний банк"}
+            </span>
+            {onEditBank && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEditBank(); }}
+                className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
+                title="Редагувати банк"
+              >
+                <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+              </button>
+            )}
+          </div>
+          <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
+            {currencyMode === "USD"
+              ? `$${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
+              : `${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            {bankUp ? (
+              <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+            ) : (
+              <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+            )}
+            <span className={bankUp ? "text-[#22C55E] font-medium" : "text-[#EF4444] font-medium"}>
+              {currencyMode === "USD"
+                ? `${Number(bank.totalProfit) >= 0 ? "+" : ""}$${Number(bank.totalProfit).toFixed(2)}`
+                : `${Number(bank.totalProfit) >= 0 ? "+" : ""}${Number(bank.totalProfit).toFixed(2)} ₴`}
+            </span>
+            <span className="text-gray-400">за весь час</span>
+          </div>
+        </div>
+
         <StatCard
           icon={<IconBox><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Профіт"
