@@ -63,7 +63,6 @@ const COLUMN_DEFS = [
   { id: "date", label: "Дата", defaultVisible: true },
   { id: "match", label: "Матч", defaultVisible: true },
   { id: "type", label: "Тип", defaultVisible: true },
-  { id: "currency", label: "Валюта", defaultVisible: false },
   { id: "amount", label: "Сума", defaultVisible: true },
   { id: "odds", label: "Коеф.", defaultVisible: true },
   { id: "profit", label: "Профіт", defaultVisible: true },
@@ -549,11 +548,6 @@ const BetTableMemo = memo(function BetTable({
                         Тип
                       </th>
                     )}
-                    {visibleColumns.has("currency") && (
-                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                        Валюта
-                      </th>
-                    )}
                     {visibleColumns.has("amount") && (
                       <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
                         Сума
@@ -735,15 +729,6 @@ const BetTableMemo = memo(function BetTable({
                                   )}
                               </Badge>
                             )}
-                          </td>
-                        )}
-                        {visibleColumns.has("currency") && (
-                          <td className="px-4 py-4 text-center border-l border-gray-100">
-                            <span
-                              className={`text-base font-semibold ${currency === "USD" ? "text-green-500" : "text-blue-500"}`}
-                            >
-                              {currency}
-                            </span>
                           </td>
                         )}
                         {visibleColumns.has("amount") && (
