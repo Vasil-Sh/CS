@@ -25,7 +25,17 @@ export interface ApiMatch {
   bettingCoefficientTeam2: number | null;
 }
 
+const MATCHES_CACHE_KEY = 'matches_cache';
+const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
+  const cached = localStorage.getItem(MATCHES_CACHE_KEY);
+  if (cached) {
+    try {
+      const { data, ts } = JSON.parse(cached);
+      if (Date.now() - ts < MATCHES_CACHE_TTL) return data as ApiMatch[];
+    } catch { /* ignore */ }
+  }
   try {
   const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
     method: 'GET',
@@ -39,6 +49,7 @@ export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
   }
 
   const data: ApiMatch[] = await response.json();
+  localStorage.setItem(MATCHES_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
   return data;
   } catch (e) {
     if (import.meta.env.DEV) console.error('csApi: fetchTodaysAndUpcomingMatches failed', e);

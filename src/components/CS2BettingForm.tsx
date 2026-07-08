@@ -1343,6 +1343,39 @@ export default function CS2BettingForm({
     return { blocked: false, reason: "", minutesLeft: 0 };
   }, [currentUser, primaryStrategy]);
 
+  // Auto-reset tilt block when time expires (poll every 30s)
+  const [tiltTick, setTiltTick] = useState(0);
+  useEffect(() => {
+    if (!tiltBlock.blocked) return;
+    const interval = setInterval(() => {
+      setTiltTick(t => t + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [tiltBlock.blocked]);
+
+  // Re-memo tiltBlock with tick to react to timer expiry
+  const tiltBlockWithTick = useMemo(() => {
+    const blockKey = `tilt_block_${currentUser}`;
+    const stored = localStorage.getItem(blockKey);
+    if (stored) {
+      try {
+        const block = JSON.parse(stored) as { until: number; reason: string; strategyName?: string };
+        if (Date.now() < block.until) {
+          if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled || (block.strategyName && block.strategyName !== primaryStrategy.name)) {
+            localStorage.removeItem(blockKey);
+          } else {
+            return { blocked: true, reason: block.reason, minutesLeft: Math.ceil((block.until - Date.now()) / 60000) };
+          }
+        } else {
+          localStorage.removeItem(blockKey);
+        }
+      } catch { localStorage.removeItem(blockKey); }
+    }
+    return tiltBlock;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tiltTick, tiltBlock]);
+  const effectiveTiltBlock = tiltBlockWithTick.blocked ? tiltBlockWithTick : tiltBlock;
+
   const allExpressEventsComplete =
     expressEvents.length > 0 &&
     expressEvents.every(
@@ -1377,14 +1410,14 @@ export default function CS2BettingForm({
       />
 
       <BettingFormAlerts
-        tiltBlock={tiltBlock}
+        tiltBlock={effectiveTiltBlock}
         primaryStrategy={primaryStrategy}
         strategyViolations={strategyViolations}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div
-          className={`lg:col-span-2 space-y-6 ${tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
+          className={`lg:col-span-2 space-y-6 ${effectiveTiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
         >
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {/* Main Form */}
@@ -1491,7 +1524,7 @@ export default function CS2BettingForm({
                       confidence: formData.confidence,
                     }}
                     isSubmitting={isSubmitting}
-                    isBlocked={tiltBlock.blocked}
+                    isBlocked={effectiveTiltBlock.blocked}
                     isHighConfidence={isHighConfidence}
                     showSection={true}
                     format={formData.format}
@@ -1533,7 +1566,7 @@ export default function CS2BettingForm({
                 id="submit-btn"
                 disabled={
                   isSubmitting ||
-                  tiltBlock.blocked ||
+                  effectiveTiltBlock.blocked ||
                   (formData.betCategory === "Експрес" &&
                     !allExpressEventsComplete) ||
                   !formValid

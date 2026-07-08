@@ -326,7 +326,7 @@ export default function MyBets() {
       [],
     );
     setRecentBets(localBets as Bet[]);
-  }, [currentUser]);
+  }, [currentUser, bankrollVersion]);
 
   // Recompute stats whenever bets change
   useEffect(() => {

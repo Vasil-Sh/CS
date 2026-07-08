@@ -1,6 +1,30 @@
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Brain, Loader2 } from 'lucide-react';
+import { Brain, Loader2, Clock } from 'lucide-react';
 import type { AIRecommendation } from '@/lib/ai/shared';
+
+const HISTORY_KEY = 'ai_recommendations_history';
+const MAX_HISTORY = 10;
+
+interface HistoryEntry {
+  matchInfo: string;
+  prediction: string;
+  confidence: number;
+  timestamp: string;
+}
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveHistory(entry: HistoryEntry) {
+  const history = loadHistory();
+  history.unshift(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
 
 interface AIRecommendationModalProps {
   open: boolean;
@@ -17,6 +41,20 @@ export default function AIRecommendationModal({
   recommendation,
   isLoading = false
 }: AIRecommendationModalProps) {
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
+
+  useEffect(() => {
+    if (recommendation && matchInfo && !isLoading) {
+      saveHistory({
+        matchInfo,
+        prediction: recommendation.prediction,
+        confidence: recommendation.confidence,
+        timestamp: new Date().toISOString(),
+      });
+      setHistory(loadHistory());
+    }
+  }, [recommendation, matchInfo, isLoading]);
+
   const getRiskLabel = (riskLevel: 'low' | 'medium' | 'high') => {
     switch (riskLevel) {
       case 'low':
@@ -106,6 +144,30 @@ export default function AIRecommendationModal({
                 <p className="text-xs text-[#6B7280] leading-relaxed">
                   ⚠️ Ця рекомендація створена AI на основі аналізу доступних даних. Використовуйте її як додатковий інструмент, але завжди проводьте власний аналіз.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {/* History */}
+          {history.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Історія</p>
+              </div>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {history.slice(0, 5).map((entry, i) => (
+                  <div key={i} className="rounded-lg bg-[#F9FAFB] px-3 py-2 border border-gray-100">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="text-xs font-medium text-gray-700 truncate max-w-[240px]">{entry.matchInfo}</p>
+                      <span className="text-[10px] text-gray-400">
+                        {new Date(entry.timestamp).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 truncate">{entry.prediction}</p>
+                    <span className="text-[10px] text-blue-500 font-medium">{entry.confidence}% впевненість</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

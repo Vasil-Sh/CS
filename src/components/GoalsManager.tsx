@@ -259,7 +259,8 @@ export default function GoalsManager() {
               if (currentStepIndex < steps.length) steps[currentStepIndex] = { ...steps[currentStepIndex], startAmount: actualWinAmount, minPlannedAmount: Math.round(actualWinAmount * minOdds * 100) / 100, maxPlannedAmount: Math.round(actualWinAmount * maxOdds * 100) / 100, status: 'current' };
             }
           });
-          const currentBank = currentStepIndex > 0 && steps[currentStepIndex - 1]?.actualAmount ? steps[currentStepIndex - 1].actualAmount : goal.startAmount || 0;
+          const prevActual = currentStepIndex > 0 ? steps[currentStepIndex - 1]?.actualAmount : undefined;
+          const currentBank = prevActual != null ? prevActual : (goal.startAmount || 0);
           const remainingSteps = calculateRemainingSteps(currentBank, goal.targetLadderAmount || 100000, minOdds);
           const isCompleted = currentBank >= (goal.targetLadderAmount || 100000);
           return { ...goal, avgOdds: minOdds, currentStep: currentStepIndex, totalSteps: currentStepIndex + remainingSteps, currentBank, steps, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };

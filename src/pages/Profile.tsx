@@ -117,12 +117,19 @@ export default function Profile() {
     setIsClearing(true);
     setClearConfirmOpen(false);
     try {
-      // Try API reset first
+      // Try API reset first — await before clearing localStorage
+      let apiOk = false;
       try {
-        await api.post("/admin/reset", {});
+        const res = await api.post<{ success: boolean }>("/admin/reset", {});
+        apiOk = !!res.success;
       } catch (err) {
         if (import.meta.env.DEV)
           console.warn("[Profile] API reset failed:", err);
+      }
+      if (!apiOk) {
+        toast.error("Сервер повернув помилку. Спробуйте ще раз.");
+        setIsClearing(false);
+        return;
       }
       // Also clear localStorage (UI prefs kept)
       const keysToKeep = [
