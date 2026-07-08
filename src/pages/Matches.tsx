@@ -1123,7 +1123,12 @@ export default function Matches() {
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <Radio className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#22C55E]/10">
+                      <Radio
+                        className="h-3 w-3 text-[#22C55E]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     {filterStatus === "all"
                       ? "Статус"
                       : filterStatus === "live"
@@ -1175,7 +1180,12 @@ export default function Matches() {
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <Trophy className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
+                      <Trophy
+                        className="h-3 w-3 text-[#F59E0B]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     {filterTier === "all"
                       ? "Tier"
                       : filterTier === "tier1"
@@ -1227,7 +1237,12 @@ export default function Matches() {
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <Layers className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#3B82F6]/10">
+                      <Layers
+                        className="h-3 w-3 text-[#3B82F6]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     {filterMatchType === "all" ? "Формат" : filterMatchType}
                     <ChevronDown
                       className="h-3.5 w-3.5 opacity-60"
@@ -1273,7 +1288,12 @@ export default function Matches() {
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <Brain className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#7C3AED]/10">
+                      <Brain
+                        className="h-3 w-3 text-[#7C3AED]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     {filterConfidence === "all"
                       ? "Впевненість"
                       : filterConfidence === "high"
@@ -1325,7 +1345,12 @@ export default function Matches() {
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <Shield className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#EF4444]/10">
+                      <Shield
+                        className="h-3 w-3 text-[#EF4444]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     {filterRisk === "all"
                       ? "Ризик"
                       : filterRisk === "safe"
@@ -1371,7 +1396,12 @@ export default function Matches() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm">
-                    <Columns className="h-4 w-4" strokeWidth={1.5} />
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#14B8A6]/10">
+                      <Columns
+                        className="h-3 w-3 text-[#14B8A6]"
+                        strokeWidth={2}
+                      />
+                    </span>
                     Колонки
                     <ChevronDown
                       className="h-3.5 w-3.5 opacity-60"
