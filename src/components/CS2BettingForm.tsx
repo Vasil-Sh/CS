@@ -999,7 +999,9 @@ export default function CS2BettingForm({
           betType: record.betType,
           odds: record.odds,
           amount: record.amount,
-          stake: parseFloat(formData.stake),
+          stake: isNaN(parseFloat(formData.stake))
+            ? undefined
+            : parseFloat(formData.stake),
           date: record.date,
           result: record.result,
           profit: record.profit,
@@ -1007,7 +1009,9 @@ export default function CS2BettingForm({
           format: record.format,
           game: record.game,
           currency: record.currency,
-          originalAmount: record.originalAmount,
+          originalAmount: isNaN(record.originalAmount)
+            ? undefined
+            : record.originalAmount,
           exchangeRate: record.exchangeRate,
           roi: record.roi,
           goalId: record.goalId,
