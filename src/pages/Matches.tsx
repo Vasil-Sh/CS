@@ -1479,10 +1479,12 @@ export default function Matches() {
                     <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
                       <CardTitle>
                         <div className="flex items-center gap-4">
-                          <Calendar
-                            className="h-8 w-8 text-[#9CA3AF]"
-                            strokeWidth={1.5}
-                          />
+                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]/10">
+                            <Calendar
+                              className="h-5 w-5 text-[#447afc]"
+                              strokeWidth={2}
+                            />
+                          </div>
                           <span className="text-2xl font-bold text-[#111827] tracking-tight">
                             {formatFullDateTitle(dateKey)}
                           </span>
