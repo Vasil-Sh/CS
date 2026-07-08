@@ -27,6 +27,7 @@ import {
   Check,
   X,
   ArrowRightLeft,
+  Users,
 } from "lucide-react";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { getStatusBadge } from "@/lib/utils/badgeStyles";
@@ -1315,10 +1316,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <img
-                        src="/assets/team-placeholder.svg"
-                        alt="CS2"
-                        className="h-5 w-5 object-contain"
+                      <Users
+                        className="h-5 w-5 text-[#447afc]"
+                        strokeWidth={1.5}
                       />
                     </div>
                     CS команди
@@ -1336,10 +1336,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
-                        <img
-                          src="/assets/team-placeholder.svg"
-                          alt="CS2"
-                          className="h-16 w-16 object-contain opacity-60"
+                        <Users
+                          className="h-16 w-16 text-[#9CA3AF]"
+                          strokeWidth={1}
                         />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
@@ -1389,10 +1388,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
                   <span className="flex items-center gap-3">
                     <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                      <img
-                        src="/assets/team-placeholder-dota.svg"
-                        alt="Dota2"
-                        className="h-5 w-5 object-contain"
+                      <Users
+                        className="h-5 w-5 text-[#447afc]"
+                        strokeWidth={1.5}
                       />
                     </div>
                     Dota 2 команди
@@ -1410,10 +1408,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                       <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
-                        <img
-                          src="/assets/team-placeholder-dota.svg"
-                          alt="Dota2"
-                          className="h-16 w-16 object-contain opacity-60"
+                        <Users
+                          className="h-16 w-16 text-[#9CA3AF]"
+                          strokeWidth={1}
                         />
                       </div>
                       <h3 className="text-xl font-semibold text-[#111827] mb-2">
