@@ -32,7 +32,14 @@ import {
   Search,
   X,
   Trash2,
+  Columns,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Bet } from "@/types/betting";
 import { normalizeDateStr } from "@/lib/utils";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
@@ -50,6 +57,36 @@ type PeriodFilter = "all" | "week" | "month" | "quarter";
 type SortBy = "date" | "profit" | "odds";
 
 const ITEMS_PER_PAGE = 10;
+
+/** All bet table columns — id, label, default visibility */
+const COLUMN_DEFS = [
+  { id: "date", label: "Дата", defaultVisible: true },
+  { id: "match", label: "Матч", defaultVisible: true },
+  { id: "type", label: "Тип", defaultVisible: true },
+  { id: "currency", label: "Валюта", defaultVisible: false },
+  { id: "amount", label: "Сума", defaultVisible: true },
+  { id: "odds", label: "Коеф.", defaultVisible: true },
+  { id: "profit", label: "Профіт", defaultVisible: true },
+  { id: "goal", label: "Ціль", defaultVisible: false },
+  { id: "status", label: "Статус", defaultVisible: true },
+  { id: "notes", label: "Нотатки", defaultVisible: false },
+  { id: "actions", label: "Дії", defaultVisible: true },
+] as const;
+
+const COLUMNS_STORAGE_KEY = "matchiq_mybets_columns";
+
+function loadVisibleColumns(): Set<string> {
+  try {
+    const saved = localStorage.getItem(COLUMNS_STORAGE_KEY);
+    if (saved) {
+      const arr = JSON.parse(saved) as string[];
+      if (Array.isArray(arr) && arr.length > 0) return new Set(arr);
+    }
+  } catch {
+    /* ignore */
+  }
+  return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
+}
 
 function getTodayStr(): string {
   const now = new Date();
@@ -120,7 +157,19 @@ const BetTableMemo = memo(function BetTable({
     onResultFilterChange("all");
     onPeriodFilterChange("all");
     onSortByChange("date");
-    // sortOrder stays desc by default
+  };
+
+  const [visibleColumns, setVisibleColumns] =
+    useState<Set<string>>(loadVisibleColumns);
+
+  const toggleColumn = (colId: string) => {
+    setVisibleColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(colId)) next.delete(colId);
+      else next.add(colId);
+      localStorage.setItem(COLUMNS_STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
   };
 
   const toggleSort = (column: SortBy) => {
@@ -267,9 +316,9 @@ const BetTableMemo = memo(function BetTable({
     return cachedGoals.find((g) => g.id === goalId)?.name || "Видалена ціль";
   };
   const isExpressBet = (bet: Bet) =>
-    bet.betType.includes("Експрес") || (bet.format ?? '').includes("x");
+    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
   const getExpressEventCount = (bet: Bet) => {
-    const match = (bet.format ?? '').match(/(\d+)x/);
+    const match = (bet.format ?? "").match(/(\d+)x/);
     return match ? parseInt(match[1], 10) : 0;
   };
 
@@ -333,6 +382,32 @@ const BetTableMemo = memo(function BetTable({
               Скинути
             </button>
           )}
+          {/* Columns toggle */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="ml-2 px-4 py-2 rounded-xl text-sm font-medium bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 flex items-center gap-1.5">
+                <Columns className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Колонки
+                <ChevronDown className="h-3 w-3 opacity-60" strokeWidth={2} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="rounded-xl p-1 min-w-[200px]"
+            >
+              {COLUMN_DEFS.map((col) => (
+                <DropdownMenuCheckboxItem
+                  key={col.id}
+                  checked={visibleColumns.has(col.id)}
+                  onCheckedChange={() => toggleColumn(col.id)}
+                  className="rounded-lg text-sm"
+                >
+                  {col.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Search */}
           <div className="ml-auto flex items-center gap-2">
             <div className="relative">
@@ -453,57 +528,79 @@ const BetTableMemo = memo(function BetTable({
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    <th
-                      className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => toggleSort("date")}
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        Дата
-                        <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
-                      </div>
-                    </th>
-                    <th className="text-left px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider min-w-[220px] border-l border-gray-200">
-                      Матч
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Тип
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Валюта
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Сума
-                    </th>
-                    <th
-                      className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-l border-gray-200"
-                      onClick={() => toggleSort("odds")}
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        Коеф.
-                        <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
-                      </div>
-                    </th>
-                    <th
-                      className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-l border-gray-200"
-                      onClick={() => toggleSort("profit")}
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        Профіт
-                        <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
-                      </div>
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Ціль
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Статус
-                    </th>
-                    <th className="text-center px-3 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Нотатки
-                    </th>
-                    <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
-                      Дії
-                    </th>
+                    {visibleColumns.has("date") && (
+                      <th
+                        className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => toggleSort("date")}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          Дата
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
+                        </div>
+                      </th>
+                    )}
+                    {visibleColumns.has("match") && (
+                      <th className="text-left px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider min-w-[220px] border-l border-gray-200">
+                        Матч
+                      </th>
+                    )}
+                    {visibleColumns.has("type") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Тип
+                      </th>
+                    )}
+                    {visibleColumns.has("currency") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Валюта
+                      </th>
+                    )}
+                    {visibleColumns.has("amount") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Сума
+                      </th>
+                    )}
+                    {visibleColumns.has("odds") && (
+                      <th
+                        className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-l border-gray-200"
+                        onClick={() => toggleSort("odds")}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          Коеф.
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
+                        </div>
+                      </th>
+                    )}
+                    {visibleColumns.has("profit") && (
+                      <th
+                        className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors border-l border-gray-200"
+                        onClick={() => toggleSort("profit")}
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          Профіт
+                          <ArrowUpDown className="h-3 w-3" strokeWidth={1.5} />
+                        </div>
+                      </th>
+                    )}
+                    {visibleColumns.has("goal") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Ціль
+                      </th>
+                    )}
+                    {visibleColumns.has("status") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Статус
+                      </th>
+                    )}
+                    {visibleColumns.has("notes") && (
+                      <th className="text-center px-3 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Нотатки
+                      </th>
+                    )}
+                    {visibleColumns.has("actions") && (
+                      <th className="text-center px-4 py-3.5 text-sm font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">
+                        Дії
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -552,217 +649,239 @@ const BetTableMemo = memo(function BetTable({
                         key={betKey}
                         className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <td className="px-4 py-4 text-center">
-                          <span className="text-base text-gray-700 font-medium">
-                            {bet.date}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 border-l border-gray-100">
-                          <div className="min-w-0">
-                            <div
-                              className="font-semibold text-base text-gray-900 truncate"
-                              title={
-                                bet.match || `${bet.team1} vs ${bet.team2}`
-                              }
-                            >
-                              {bet.match || `${bet.team1} vs ${bet.team2}`}
-                            </div>
-                            {!isExpress && (
-                              <div
-                                className="text-sm text-gray-400 truncate mt-0.5"
-                                title={getBetTypeLabel(
-                                  bet.betType.split(" - ")[0],
-                                  bet.format,
-                                )}
-                              >
-                                {getBetTypeLabel(
-                                  bet.betType.split(" - ")[0],
-                                  bet.format,
-                                )}{" "}
-                                {bet.betType.includes(" - ")
-                                  ? `- ${bet.betType.split(" - ").slice(1).join(" - ")}`
-                                  : ""}
-                              </div>
-                            )}
-                            <div className="text-xs text-gray-500 font-medium mt-1.5 flex items-center gap-1">
-                              {bet.game && (
-                                <img
-                                  src={
-                                    bet.game.toLowerCase() === "dota2"
-                                      ? "/assets/team-placeholder-dota.svg"
-                                      : "/assets/team-placeholder.svg"
-                                  }
-                                  alt={bet.game}
-                                  className="h-3.5 w-3.5 object-contain opacity-80 flex-shrink-0"
-                                />
-                              )}
-                              {bet.game
-                                ? `${bet.game} • ${bet.format ?? ''}`
-                                : bet.format ?? ''}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          {isExpress ? (
-                            <div className="flex flex-col items-center gap-1.5">
-                              <Badge className="rounded-md bg-amber-100 text-amber-600 border-0 font-semibold text-sm px-2.5 py-1 hover:bg-amber-100">
-                                Express {expressEventCount}×
-                              </Badge>
-                              <button
-                                onClick={() => onExpressDetails(bet)}
-                                className="text-sm text-purple-600 hover:text-purple-700 font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors duration-200"
-                              >
-                                Деталі
-                              </button>
-                            </div>
-                          ) : (
-                            <Badge
-                              className="rounded-md bg-blue-50 text-blue-500 border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-blue-50"
-                              title={
-                                bet.betType.split(" - ")[1] ||
-                                getBetTypeLabel(
-                                  bet.betType.split(" - ")[0],
-                                  bet.format,
-                                )
-                              }
-                            >
-                              {bet.betType.split(" - ")[1] ||
-                                getBetTypeLabel(
-                                  bet.betType.split(" - ")[0],
-                                  bet.format,
-                                )}
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          <span
-                            className={`text-base font-semibold ${currency === "USD" ? "text-green-500" : "text-blue-500"}`}
-                          >
-                            {currency}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          <span className="text-base font-semibold text-gray-900">
-                            {currencySymbol}
-                            {displayAmount}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          <span className="text-base font-bold text-gray-900">
-                            {Number(bet.odds).toFixed(2)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          {displayProfit !== undefined &&
-                          displayProfit !== null ? (
-                            <span
-                              className={`text-base font-bold ${displayProfit >= 0 ? "text-green-500" : "text-red-500"}`}
-                            >
-                              {displayProfit >= 0 ? "+" : ""}
-                              {displayProfit.toFixed(2)} {currencySymbol}
+                        {visibleColumns.has("date") && (
+                          <td className="px-4 py-4 text-center">
+                            <span className="text-base text-gray-700 font-medium">
+                              {bet.date}
                             </span>
-                          ) : (
-                            <span className="text-gray-300 text-base">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          {goalName ? (
-                            <Badge
-                              className="font-medium px-2.5 py-1 rounded-md bg-blue-50 text-blue-500 border-0 text-sm max-w-[130px] truncate hover:bg-blue-50"
-                              title={goalName}
-                            >
-                              <Flag
-                                className="h-3.5 w-3.5 mr-1.5 flex-shrink-0"
-                                strokeWidth={1.5}
-                              />
-                              <span className="truncate">{goalName}</span>
-                            </Badge>
-                          ) : (
-                            <span className="text-gray-300 text-sm">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          <Badge
-                            className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${isWin ? "bg-green-100 text-green-600 hover:bg-green-100" : isLoss ? "bg-red-100 text-red-600 hover:bg-red-100" : "bg-amber-100 text-amber-600 hover:bg-amber-100"}`}
-                          >
-                            {isWin
-                              ? "Виграш"
-                              : isLoss
-                                ? "Програш"
-                                : "Очікується"}
-                          </Badge>
-                        </td>
-                        <td className="px-3 py-4 text-center border-l border-gray-100">
-                          {bet.notes ? (
-                            <div className="relative group inline-block">
-                              <button
-                                onClick={() =>
-                                  setNotesDialogBet(bet.notes || "")
+                          </td>
+                        )}
+                        {visibleColumns.has("match") && (
+                          <td className="px-4 py-4 border-l border-gray-100">
+                            <div className="min-w-0">
+                              <div
+                                className="font-semibold text-base text-gray-900 truncate"
+                                title={
+                                  bet.match || `${bet.team1} vs ${bet.team2}`
                                 }
-                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-blue-500 transition-all duration-200"
-                                title="Переглянути нотатки"
                               >
-                                <FileText
-                                  className="h-4 w-4"
+                                {bet.match || `${bet.team1} vs ${bet.team2}`}
+                              </div>
+                              {!isExpress && (
+                                <div
+                                  className="text-sm text-gray-400 truncate mt-0.5"
+                                  title={getBetTypeLabel(
+                                    bet.betType.split(" - ")[0],
+                                    bet.format,
+                                  )}
+                                >
+                                  {getBetTypeLabel(
+                                    bet.betType.split(" - ")[0],
+                                    bet.format,
+                                  )}{" "}
+                                  {bet.betType.includes(" - ")
+                                    ? `- ${bet.betType.split(" - ").slice(1).join(" - ")}`
+                                    : ""}
+                                </div>
+                              )}
+                              <div className="text-xs text-gray-500 font-medium mt-1.5 flex items-center gap-1">
+                                {bet.game && (
+                                  <img
+                                    src={
+                                      bet.game.toLowerCase() === "dota2"
+                                        ? "/assets/team-placeholder-dota.svg"
+                                        : "/assets/team-placeholder.svg"
+                                    }
+                                    alt={bet.game}
+                                    className="h-3.5 w-3.5 object-contain opacity-80 flex-shrink-0"
+                                  />
+                                )}
+                                {bet.game
+                                  ? `${bet.game} • ${bet.format ?? ""}`
+                                  : (bet.format ?? "")}
+                              </div>
+                            </div>
+                          </td>
+                        )}
+                        {visibleColumns.has("type") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            {isExpress ? (
+                              <div className="flex flex-col items-center gap-1.5">
+                                <Badge className="rounded-md bg-amber-100 text-amber-600 border-0 font-semibold text-sm px-2.5 py-1 hover:bg-amber-100">
+                                  Express {expressEventCount}×
+                                </Badge>
+                                <button
+                                  onClick={() => onExpressDetails(bet)}
+                                  className="text-sm text-purple-600 hover:text-purple-700 font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors duration-200"
+                                >
+                                  Деталі
+                                </button>
+                              </div>
+                            ) : (
+                              <Badge
+                                className="rounded-md bg-blue-50 text-blue-500 border-0 font-medium text-sm px-2.5 py-1 max-w-[160px] truncate hover:bg-blue-50"
+                                title={
+                                  bet.betType.split(" - ")[1] ||
+                                  getBetTypeLabel(
+                                    bet.betType.split(" - ")[0],
+                                    bet.format,
+                                  )
+                                }
+                              >
+                                {bet.betType.split(" - ")[1] ||
+                                  getBetTypeLabel(
+                                    bet.betType.split(" - ")[0],
+                                    bet.format,
+                                  )}
+                              </Badge>
+                            )}
+                          </td>
+                        )}
+                        {visibleColumns.has("currency") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            <span
+                              className={`text-base font-semibold ${currency === "USD" ? "text-green-500" : "text-blue-500"}`}
+                            >
+                              {currency}
+                            </span>
+                          </td>
+                        )}
+                        {visibleColumns.has("amount") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            <span className="text-base font-semibold text-gray-900">
+                              {currencySymbol}
+                              {displayAmount}
+                            </span>
+                          </td>
+                        )}
+                        {visibleColumns.has("odds") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            <span className="text-base font-bold text-gray-900">
+                              {Number(bet.odds).toFixed(2)}
+                            </span>
+                          </td>
+                        )}
+                        {visibleColumns.has("profit") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            {displayProfit !== undefined &&
+                            displayProfit !== null ? (
+                              <span
+                                className={`text-base font-bold ${displayProfit >= 0 ? "text-green-500" : "text-red-500"}`}
+                              >
+                                {displayProfit >= 0 ? "+" : ""}
+                                {displayProfit.toFixed(2)} {currencySymbol}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300 text-base">—</span>
+                            )}
+                          </td>
+                        )}
+                        {visibleColumns.has("goal") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            {goalName ? (
+                              <Badge
+                                className="font-medium px-2.5 py-1 rounded-md bg-blue-50 text-blue-500 border-0 text-sm max-w-[130px] truncate hover:bg-blue-50"
+                                title={goalName}
+                              >
+                                <Flag
+                                  className="h-3.5 w-3.5 mr-1.5 flex-shrink-0"
                                   strokeWidth={1.5}
                                 />
+                                <span className="truncate">{goalName}</span>
+                              </Badge>
+                            ) : (
+                              <span className="text-gray-300 text-sm">—</span>
+                            )}
+                          </td>
+                        )}
+                        {visibleColumns.has("status") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            <Badge
+                              className={`rounded-full border-0 font-semibold text-sm px-3.5 py-1.5 ${isWin ? "bg-green-100 text-green-600 hover:bg-green-100" : isLoss ? "bg-red-100 text-red-600 hover:bg-red-100" : "bg-amber-100 text-amber-600 hover:bg-amber-100"}`}
+                            >
+                              {isWin
+                                ? "Виграш"
+                                : isLoss
+                                  ? "Програш"
+                                  : "Очікується"}
+                            </Badge>
+                          </td>
+                        )}
+                        {visibleColumns.has("notes") && (
+                          <td className="px-3 py-4 text-center border-l border-gray-100">
+                            {bet.notes ? (
+                              <div className="relative group inline-block">
+                                <button
+                                  onClick={() =>
+                                    setNotesDialogBet(bet.notes || "")
+                                  }
+                                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-blue-500 transition-all duration-200"
+                                  title="Переглянути нотатки"
+                                >
+                                  <FileText
+                                    className="h-4 w-4"
+                                    strokeWidth={1.5}
+                                  />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-gray-300 text-sm">—</span>
+                            )}
+                          </td>
+                        )}
+                        {visibleColumns.has("actions") && (
+                          <td className="px-4 py-4 text-center border-l border-gray-100">
+                            <div className="flex gap-2 justify-center">
+                              {isPending && (
+                                <>
+                                  <button
+                                    onClick={() => onUpdateResult(bet, "Win")}
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-green-100 hover:border-green-300 text-green-600 transition-all duration-200"
+                                    title="Виграш"
+                                  >
+                                    <CheckCircle
+                                      className="h-4 w-4"
+                                      strokeWidth={2}
+                                    />
+                                  </button>
+                                  <button
+                                    onClick={() => onUpdateResult(bet, "Loss")}
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-red-100 hover:border-red-300 text-red-600 transition-all duration-200"
+                                    title="Програш"
+                                  >
+                                    <XCircle
+                                      className="h-4 w-4"
+                                      strokeWidth={2}
+                                    />
+                                  </button>
+                                </>
+                              )}
+                              <button
+                                onClick={() => onShareBet(bet)}
+                                className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-blue-500 transition-all duration-200"
+                                title="Поділитися"
+                              >
+                                <Share2 className="h-4 w-4" strokeWidth={2} />
+                              </button>
+                              {!isPending && (
+                                <button
+                                  onClick={() => onDeleteBet(bet)}
+                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-red-100 hover:border-red-300 text-red-600 transition-all duration-200"
+                                  title="Видалити"
+                                >
+                                  <Trash2 className="h-4 w-4" strokeWidth={2} />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => onBetDetails(bet)}
+                                className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-purple-50 hover:border-purple-300 text-purple-600 transition-all duration-200"
+                                title="Деталі"
+                              >
+                                <Eye className="h-4 w-4" strokeWidth={2} />
                               </button>
                             </div>
-                          ) : (
-                            <span className="text-gray-300 text-sm">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-center border-l border-gray-100">
-                          <div className="flex gap-2 justify-center">
-                            {isPending && (
-                              <>
-                                <button
-                                  onClick={() => onUpdateResult(bet, "Win")}
-                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-green-100 hover:border-green-300 text-green-600 transition-all duration-200"
-                                  title="Виграш"
-                                >
-                                  <CheckCircle
-                                    className="h-4 w-4"
-                                    strokeWidth={2}
-                                  />
-                                </button>
-                                <button
-                                  onClick={() => onUpdateResult(bet, "Loss")}
-                                  className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-red-100 hover:border-red-300 text-red-600 transition-all duration-200"
-                                  title="Програш"
-                                >
-                                  <XCircle
-                                    className="h-4 w-4"
-                                    strokeWidth={2}
-                                  />
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => onShareBet(bet)}
-                              className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-blue-500 transition-all duration-200"
-                              title="Поділитися"
-                            >
-                              <Share2 className="h-4 w-4" strokeWidth={2} />
-                            </button>
-                            {!isPending && (
-                              <button
-                                onClick={() => onDeleteBet(bet)}
-                                className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-red-100 hover:border-red-300 text-red-600 transition-all duration-200"
-                                title="Видалити"
-                              >
-                                <Trash2 className="h-4 w-4" strokeWidth={2} />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => onBetDetails(bet)}
-                              className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 hover:bg-purple-50 hover:border-purple-300 text-purple-600 transition-all duration-200"
-                              title="Деталі"
-                            >
-                              <Eye className="h-4 w-4" strokeWidth={2} />
-                            </button>
-                          </div>
-                        </td>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
