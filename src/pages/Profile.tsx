@@ -41,7 +41,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { t, setLang, getLang, type Lang } from "@/lib/i18n";
-import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
 import BackupStatusCard from "@/components/profile/BackupStatusCard";
 import DataStatsCards from "@/components/profile/DataStatsCards";
@@ -101,8 +100,6 @@ export default function Profile() {
       setIsFetchingRate(false);
     }
   };
-
-  const { theme, toggleTheme } = useTheme();
 
   // ── Backup last date ──
   const BACKUP_REMINDER_DAYS = 7;
