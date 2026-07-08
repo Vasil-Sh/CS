@@ -225,19 +225,17 @@ export class UserDataService {
       };
     });
     // Cache to localStorage so "Останні записи" reads instantly on next page load
-    try {
-      const username = localStorage.getItem("username") || "default";
-      if (mapped.length > 0) {
+    // Only UPDATE the cache (never delete) — deletion is handled explicitly by confirmDeleteBet
+    if (mapped.length > 0) {
+      try {
+        const username = localStorage.getItem("username") || "default";
         localStorage.setItem(
           `user_${username}_mybets_data`,
           JSON.stringify(mapped),
         );
-      } else {
-        // Clear cache when API returns no bets (e.g., all were deleted)
-        localStorage.removeItem(`user_${username}_mybets_data`);
+      } catch {
+        /* storage full — ignore */
       }
-    } catch {
-      /* storage full — ignore */
     }
     return mapped as ApiBet[];
   }
