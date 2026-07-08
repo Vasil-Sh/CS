@@ -826,7 +826,7 @@ export default function Matches() {
   /** Render the table header row */
   const renderTableHeader = () => (
     <thead>
-      <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+      <tr className="bg-white border-b border-[#E5E7EB]">
         {visibleColumns.has("rating") && (
           <th
             className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}

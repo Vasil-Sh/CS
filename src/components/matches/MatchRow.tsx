@@ -369,7 +369,7 @@ export default function MatchRow({
 
   return (
     <tr
-      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isLive ? "bg-red-50" : ""} ${isSelected ? "bg-[#EFF6FF]/60 !border-l-[#3B82F6]" : ""}`}
+      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isLive ? "bg-red-50/30" : ""} ${isSelected ? "bg-[#EFF6FF]/60 !border-l-[#3B82F6]" : ""}`}
     >
       {visibleColumns.has("rating") && (
         <td className={`py-4 px-3 ${colDivider}`}>
