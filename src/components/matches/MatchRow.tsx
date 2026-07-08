@@ -222,8 +222,8 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
   switch (status) {
     case "live":
       return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-500 leading-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-white leading-none bg-red-500 rounded px-1.5 py-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           LIVE
         </span>
       );
@@ -399,34 +399,32 @@ export default function MatchRow({
       )}
       {visibleColumns.has("match") && (
         <td className={`py-3 px-4 ${colDivider}`}>
-          <div className="flex items-stretch gap-3">
-            {/* Left: time (top — aligned with teams) + status (bottom — aligned with badges) */}
-            <div className="flex flex-col justify-between items-center min-w-[48px] pr-3 border-r border-[#E5E7EB]">
-              <div className="flex items-center" style={{ height: 28 }}>
-                <span className="text-sm font-semibold text-[#111827] leading-tight">
-                  {formatTime(match.date)}
-                </span>
-              </div>
-              <div className="flex items-center" style={{ minHeight: 22 }}>
-                {getMatchStatusBadgeCompact(match.matchStatus)}
-              </div>
-            </div>
-            {/* Right: match content */}
-            <div className="space-y-1 flex-1 min-w-0">
-              {match.context && (
-                <div
-                  className="text-[11px] text-[#9CA3AF] font-medium truncate max-w-[280px] flex items-center gap-1"
-                  title={match.context}
-                >
-                  {(match.stars ?? 0) >= 4 && (
-                    <Star
-                      className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0"
-                      strokeWidth={1}
-                    />
-                  )}
-                  {match.context}
-                </div>
+          {/* Tournament text — full width, no divider interference */}
+          {match.context && (
+            <div
+              className="text-[11px] text-[#9CA3AF] font-medium truncate flex items-center gap-1 mb-1"
+              title={match.context}
+            >
+              {(match.stars ?? 0) >= 4 && (
+                <Star
+                  className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0"
+                  strokeWidth={1}
+                />
               )}
+              {match.context}
+            </div>
+          )}
+          {/* Main row: time/status sidebar + teams/badges */}
+          <div className="flex items-stretch gap-3">
+            {/* Left sidebar: time + status, divider only between sidebar and content */}
+            <div className="flex flex-col justify-between items-center min-w-[48px] pr-3 border-r border-[#E5E7EB]">
+              <span className="text-sm font-semibold text-[#111827] leading-tight">
+                {formatTime(match.date)}
+              </span>
+              {getMatchStatusBadgeCompact(match.matchStatus)}
+            </div>
+            {/* Right: teams + badges */}
+            <div className="space-y-1 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <TeamLogo
