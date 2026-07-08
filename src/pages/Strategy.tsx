@@ -250,7 +250,7 @@ export default function Strategy() {
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
         {/* ===== KPI CARDS ===== */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Сьогоднішній P&L */}
             <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
               <div className="flex items-center gap-2 mb-2">

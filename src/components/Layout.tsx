@@ -43,10 +43,10 @@ function NavItems({ location }: { location: string }) {
             key={item.nameKey}
             to={item.href}
             className={cn(
-              "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-normal transition-all duration-300",
+              "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-medium transition-all duration-200",
               isActive
-                ? "bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
-                : "text-[#8B8B9A] hover:text-white hover:bg-[#5b8ffd]",
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -101,7 +101,7 @@ export default function Layout() {
       )}
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-80 lg:flex-col">
-        <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white/97 backdrop-blur-xl px-8 py-8 border-r-2 border-[#E8E6DC] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+        <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white px-8 py-8 border-r border-gray-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
           {/* Logo Header */}
           <div className="flex h-24 shrink-0 items-center gap-4">
             <div className="w-16 h-16 bg-[#1a1a2e] rounded-[28px] flex items-center justify-center shadow-[0_8px_24px_rgba(26,26,46,0.3)]">
@@ -113,7 +113,7 @@ export default function Layout() {
           </div>
 
           {/* Divider line under MatchIQ — full width */}
-          <div className="-mx-8 border-t-2 border-[#E8E6DC]" />
+          <div className="-mx-8 border-t border-gray-200" />
 
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-8">
@@ -123,7 +123,7 @@ export default function Layout() {
                 </ul>
               </li>
               <li className="mt-auto space-y-3">
-                <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
+                <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-blue-50 rounded-[24px] border border-blue-100">
                   <span className="text-base font-semibold text-[#111827]">
                     Потрібна допомога?
                   </span>
@@ -134,7 +134,7 @@ export default function Layout() {
                     href="https://t.me/cs2beet"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#447afc] rounded-[16px] text-white font-semibold text-sm transition-all duration-300 hover:bg-[#3568e0] hover:shadow-[0_2px_8px_rgba(68,122,252,0.4)]"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-primary rounded-[16px] text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
                   >
                     <svg
                       className="h-4 w-4"
@@ -149,7 +149,7 @@ export default function Layout() {
                 <button
                   onClick={handleLogout}
                   aria-label={t("app.logout")}
-                  className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
+                  className="w-full flex items-center justify-start gap-3 px-5 py-4 text-red-600 bg-transparent border border-red-300 rounded-[24px] font-normal text-base transition-all duration-200 hover:bg-red-600 hover:text-white hover:shadow-md"
                 >
                   <LogOut className="h-5 w-5" strokeWidth={1.5} />
                   <span>{t("app.logout")}</span>
@@ -162,7 +162,7 @@ export default function Layout() {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between bg-white/97 backdrop-blur-xl px-6 py-5 border-b-2 border-[#E8E6DC] shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between bg-white px-6 py-5 border-b border-gray-200 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-[#1a1a2e] rounded-[20px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
               <TrendingUp className="w-6 h-6 text-white" strokeWidth={1.5} />
@@ -172,8 +172,8 @@ export default function Layout() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#f2f8ff] rounded-[16px]">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#447afc]">
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-[16px]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
                 <User className="h-4 w-4 text-white" strokeWidth={1.5} />
               </div>
               <div className="hidden sm:block">
@@ -189,14 +189,14 @@ export default function Layout() {
                   variant="outline"
                   size="icon"
                   aria-label="Відкрити меню"
-                  className="rounded-[20px] border-2 border-[#E8E6DC] hover:bg-[#f2f8ff] w-12 h-12"
+                  className="rounded-[20px] border border-gray-200 hover:bg-gray-50 w-12 h-12"
                 >
                   <Menu className="h-6 w-6" strokeWidth={1.5} />
                 </Button>
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-80 bg-white/97 backdrop-blur-xl border-r-2 border-[#E8E6DC]"
+                className="w-80 bg-white border-r border-gray-200"
               >
                 <div className="flex h-20 items-center gap-4">
                   <div className="w-14 h-14 bg-[#1a1a2e] rounded-[24px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
@@ -211,14 +211,14 @@ export default function Layout() {
                 </div>
 
                 {/* Divider line under MatchIQ mobile — full width */}
-                <div className="-mx-6 border-t-2 border-[#E8E6DC] mt-2" />
+                <div className="-mx-6 border-t border-gray-200 mt-2" />
 
                 <nav className="mt-8">
                   <ul className="space-y-2">
                     <NavItems location={location.pathname} />
                   </ul>
                   <div className="mt-8 space-y-3">
-                    <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-[#f1f8ff] rounded-[24px] border border-[#E5E7EB]">
+                    <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-blue-50 rounded-[24px] border border-blue-100">
                       <span className="text-base font-semibold text-[#111827]">
                         {t("app.help")}
                       </span>
@@ -229,7 +229,7 @@ export default function Layout() {
                         href="https://t.me/cs2beet"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#447afc] rounded-[16px] text-white font-semibold text-sm transition-all duration-300 hover:bg-[#3568e0] hover:shadow-[0_2px_8px_rgba(68,122,252,0.4)]"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-primary rounded-[16px] text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
                       >
                         <svg
                           className="h-4 w-4"
@@ -243,7 +243,7 @@ export default function Layout() {
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-start gap-3 px-5 py-4 text-[#D32F2F] bg-transparent border-2 border-[#D32F2F] rounded-[24px] font-normal text-base transition-all duration-300 hover:bg-[#D32F2F] hover:text-white hover:shadow-[0_4px_16px_rgba(211,47,47,0.3)]"
+                      className="w-full flex items-center justify-start gap-3 px-5 py-4 text-red-600 bg-transparent border border-red-300 rounded-[24px] font-normal text-base transition-all duration-200 hover:bg-red-600 hover:text-white hover:shadow-md"
                     >
                       <LogOut className="h-5 w-5" strokeWidth={1.5} />
                       <span>{t("app.logout")}</span>

@@ -66,7 +66,7 @@ const ALL_STATUSES = [
   "Обережно",
   "Рідко",
   "Надійна",
-  "Без статусу",
+  "Неоцінена",
 ] as const;
 
 export default function RiskManagement({ bets }: RiskManagementProps) {
@@ -376,7 +376,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         return `bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] ${isActive ? "ring-[#BFDBFE]" : ""} ${base}`;
       case "Надійна":
         return `bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0] ${isActive ? "ring-[#BBF7D0]" : ""} ${base}`;
-      case "Без статусу":
+      case "Неоцінена":
         return `bg-[#F9FAFB] text-[#6B7280] border border-[#E5E7EB] ${isActive ? "ring-[#E5E7EB]" : ""} ${base}`;
       default:
         return `bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] ${isActive ? "ring-[#E5E7EB]" : ""} ${base}`;
@@ -410,7 +410,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       (t) => t.status === "Надійна",
     ).length;
     const noStatusCount = riskyTeams.filter(
-      (t) => t.status === "Без статусу",
+      (t) => t.status === "Неоцінена",
     ).length;
     const attentionCount = banCount + unstableCount; // High-risk teams
     const dominantGame = csCount >= dotaCount ? "CS" : "Dota 2";
@@ -455,7 +455,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     Обережно: filteredTeams.filter((t) => t.status === "Обережно"),
     Рідко: filteredTeams.filter((t) => t.status === "Рідко"),
     Надійна: filteredTeams.filter((t) => t.status === "Надійна"),
-    "Без статусу": filteredTeams.filter((t) => t.status === "Без статусу"),
+    "Неоцінена": filteredTeams.filter((t) => t.status === "Неоцінена"),
   };
 
   // Count statuses per game for filter badges
@@ -649,7 +649,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 {getGameEmoji(team.game)} {team.name}
               </h3>
               <Badge className={getStatusBadge(team.status)}>
-                {team.status || "Без статусу"}
+                {team.status || "Неоцінена"}
               </Badge>
             </div>
             {team.notes && (

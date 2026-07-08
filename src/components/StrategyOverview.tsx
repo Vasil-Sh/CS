@@ -263,7 +263,6 @@ export default function StrategyOverview() {
         setPrimaryStrategy(saved);
         useAppStore.getState().setPrimaryStrategyId(saved);
       }
-      useAppStore.getState().bumpStrategy();
     } catch (error) {
       if (import.meta.env.DEV) console.error("Error loading data:", error);
     } finally {

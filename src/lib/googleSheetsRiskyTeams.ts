@@ -53,7 +53,7 @@ class GoogleSheetsRiskyTeamsService {
         return teams.map((t) => ({
           name: t.name,
           game: normalizeGame(t.game),
-          status: t.status || "Без статусу",
+          status: t.status || "Неоцінена",
           notes: t.notes || "",
           _apiId: t.id,
         }));

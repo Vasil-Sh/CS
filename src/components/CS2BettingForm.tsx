@@ -1065,16 +1065,27 @@ export default function CS2BettingForm({
     if (needsUAHInit || needsUSDInit) {
       const stake = parseFloat(formData.stake);
       if (stake > 0) {
+        const bankAmount = stake * 10;
         const rate = parseFloat(formData.exchangeRate) || 41.5;
         await BankrollService.setInitialBank(
           currentUser,
-          stake,
+          bankAmount,
           betCurrency,
           rate,
         );
         toast.success(
-          `Початковий банк (${betCurrency}) автоматично встановлено: ${stake} ${betCurrency === "USD" ? "$" : "₴"}`,
+          `Початковий банк (${betCurrency}) автоматично встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"} (10× від суми ставки)`,
         );
+      }
+    }
+
+    // Warning if stake exceeds current bank
+    const stake = parseFloat(formData.stake);
+    const bankData = BankrollService.getBankrollData(currentUser);
+    if (stake > 0 && bankData) {
+      const currBank = formData.currency === "USD" ? (bankData.initialBankUSD || 0) : (bankData.initialBankUAH || 0);
+      if (stake > currBank * 1.5 && currBank > 0) {
+        toast.warning(`Сума ставки (${stake} ${formData.currency === "USD" ? "$" : "₴"}) перевищує банк (${currBank} ${formData.currency === "USD" ? "$" : "₴"}) у ${(stake / currBank).toFixed(1)}×`);
       }
     }
 

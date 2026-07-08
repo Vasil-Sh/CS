@@ -71,20 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  // Listen for storage changes from other tabs + auth:logout events from apiClient
+  // Listen for storage changes from other tabs
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "authToken" && !e.newValue) {
         setUser(null);
       }
     };
-    const handleLogout = () => setUser(null);
 
     window.addEventListener("storage", handleStorage);
-    window.addEventListener("auth:logout", handleLogout);
     return () => {
       window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("auth:logout", handleLogout);
     };
   }, []);
 
@@ -108,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
+    window.dispatchEvent(new CustomEvent('auth:logout'));
   }, []);
 
   const value: AuthContextType = {

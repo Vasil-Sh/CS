@@ -215,7 +215,7 @@ export default function Profile() {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith("user_") && !FORBIDDEN_BACKUP_KEYS.has(key)) {
+      if (key && (key.startsWith("user_") || key.startsWith("match_ratings") || key.startsWith("ai_recommendations_history")) && !FORBIDDEN_BACKUP_KEYS.has(key)) {
         keys.push(key);
       }
     }

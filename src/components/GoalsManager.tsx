@@ -224,8 +224,13 @@ export default function GoalsManager() {
     return steps;
   };
 
-  const updateGoalsProgress = () => {
-    const betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
+  const updateGoalsProgress = async () => {
+    let betsData: any[] = [];
+    try {
+      betsData = await UserDataService.fetchBets() as any[];
+    } catch {
+      betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
+    }
     if (!betsData.length) return;
     const updatedGoals = goals.map(goal => {
       if (goal.status !== 'active') return goal;
@@ -251,7 +256,7 @@ export default function GoalsManager() {
             const cs = steps[currentStepIndex];
             if (cs.status !== 'current') return;
             const betAmount = bet.amount || 0, actualWinAmount = Math.round(betAmount * bet.odds * 100) / 100;
-            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.20;
+            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.50;
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
               const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
               steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
@@ -375,16 +380,11 @@ export default function GoalsManager() {
     };
   };
 
-  const createGoal = () => {
-    // Sync string inputs to newGoal before validation
+  const createGoal = async () => {
     const synced = syncNewGoalFromStrings();
     const goalData = { ...synced };
 
-    // Temporarily set for validation
-    const prevGoal = { ...newGoal };
-    setNewGoal(goalData);
-
-    if (!goalData.name.trim()) { toast.error('Введіть назву цілі'); setNewGoal(prevGoal); return; }
+    if (!goalData.name.trim()) { toast.error('Введіть назву цілі'); return; }
 
     switch (goalData.type) {
       case 'amount':
@@ -501,7 +501,7 @@ export default function GoalsManager() {
 
   const getKeyMetric = (goal: Goal): { label: string; value: string; color: string } => {
     switch (goal.type) {
-      case 'amount': return { label: 'Залишилось', value: `${((goal.targetAmount || 0) - (goal.currentAmount || 0)).toFixed(0)} грн`, color: 'text-[#3B82F6]' };
+      case 'amount': return { label: 'Залишилось', value: `${((goal.targetAmount || 0) - (goal.currentAmount || 0)).toFixed(0)} грн прибутку`, color: 'text-[#3B82F6]' };
       case 'ladder': return { label: 'Поточний крок', value: `${goal.currentStep} / ${goal.totalSteps}`, color: 'text-[#8B5CF6]' };
       case 'roi': return { label: 'ROI', value: `${(goal.currentROI || 0).toFixed(1)}%`, color: 'text-[#22C55E]' };
       case 'winrate': return { label: 'Win Rate', value: `${(goal.currentWinRate || 0).toFixed(1)}%`, color: 'text-[#F59E0B]' };

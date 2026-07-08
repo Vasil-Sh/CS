@@ -15,7 +15,7 @@
     --popover-foreground: 15 14% 5%;
 
     /* Cyan Signal — the ONLY chromatic voice on the page */
-    --primary: 205 87% 59%; /* #3ba6f1 — primary CTA fill, brand icon strokes */
+    --primary: 221 96% 63%; /* #447afc — primary CTA fill, brand icon strokes */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 30 7% 96%; /* warm stone surface */
@@ -56,7 +56,7 @@
     --popover: 15 6% 10%;
     --popover-foreground: 30 9% 98%;
 
-    --primary: 205 87% 59%; /* cyan signal — same as light */
+    --primary: 221 96% 63%; /* cyan signal — same as light */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 15 5% 14%;
