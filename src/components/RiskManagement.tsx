@@ -215,7 +215,24 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         );
       }
 
-      setRiskyTeams(teamsFromSheet);
+      // Sync all loaded teams to backend API to get _apiId for each team
+      const syncedTeams = await Promise.all(
+        teamsFromSheet.map(async (t) => {
+          try {
+            const added = await googleSheetsRiskyTeamsService.addTeamAndGet(
+              t.name,
+              t.game,
+              t.status,
+              t.notes,
+            );
+            return { ...t, _apiId: added?.id };
+          } catch {
+            return t; // keep without _apiId
+          }
+        }),
+      );
+
+      setRiskyTeams(syncedTeams);
 
       toast.success(
         `Завантажено ${teamsFromSheet.length} команд з Google Sheets!`,
