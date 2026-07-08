@@ -85,7 +85,7 @@ function App() {
               element={
                 <ErrorBoundary>
                   <Suspense fallback={<PageLoader />}>
-                    <Navigate to="/app/analytics" replace />
+                    <Navigate to="/app/matches" replace />
                   </Suspense>
                 </ErrorBoundary>
               }
