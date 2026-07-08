@@ -1309,7 +1309,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
             {/* CS Teams */}
             <Card
-              className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden flex flex-col"
+              className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
               <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
@@ -1331,11 +1331,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   csStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
+              <CardContent className="p-0 bg-white flex flex-col flex-1">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-[#F9FAFB] rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <Users
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1}
@@ -1381,7 +1381,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             {/* Dota Teams */}
             <Card
-              className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden flex flex-col"
+              className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
               <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
@@ -1403,11 +1403,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   dotaStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
-                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
+              <CardContent className="p-0 bg-white flex flex-col flex-1">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-[#F9FAFB] rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
                         <Users
                           className="h-16 w-16 text-[#9CA3AF]"
                           strokeWidth={1}
@@ -1454,7 +1454,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {/* Uncategorized Teams — teams without game/status for editing */}
             {uncategorizedTeams.length > 0 && (
               <Card
-                className="border border-[#D1D5DB] rounded-2xl bg-[#F3F4F6] overflow-hidden lg:col-span-2 flex flex-col"
+                className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden lg:col-span-2 flex flex-col"
                 style={{ boxShadow: chartCardShadow }}
               >
                 <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
@@ -1482,8 +1482,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     щоб відредагувати.
                   </p>
                 </CardHeader>
-                <CardContent className="p-0 bg-[#F3F4F6] flex flex-col flex-1">
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-2xl p-4 flex-1">
+                <CardContent className="p-0 bg-white flex flex-col flex-1">
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                     {uncategorizedTeams.map((team) => {
                       const globalIndex = riskyTeams.findIndex(
                         (t) => t === team,

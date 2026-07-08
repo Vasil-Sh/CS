@@ -1,14 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Target,
-  Flag,
-  ShieldAlert,
-  TrendingUp,
-  Activity,
-  DollarSign,
-  Trophy,
-} from "lucide-react";
+import { Target, Flag, Activity, DollarSign, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import StrategyOverview from "@/components/StrategyOverview";
 import GoalsManager from "@/components/GoalsManager";
@@ -53,61 +44,6 @@ interface StoredGoal {
   isPrimary?: boolean;
 }
 
-const riskLabel = (risk: string) => {
-  switch (risk) {
-    case "Low":
-      return "Низький";
-    case "Medium":
-      return "Середній";
-    case "High":
-      return "Високий";
-    default:
-      return risk;
-  }
-};
-const computeTodayRisk = (bets: Bet[]) => {
-  const weekAgo = Date.now() - 7 * 86400000;
-  const recent = bets.filter((b) => {
-    const t = b.date ? new Date(b.date).getTime() : NaN;
-    return (
-      !Number.isNaN(t) &&
-      t >= weekAgo &&
-      (b.result === "Win" || b.result === "Loss")
-    );
-  });
-  if (recent.length < 3)
-    return {
-      level: null as "Low" | "Medium" | "High" | null,
-      winRate: null as number | null,
-    };
-  const wins = recent.filter((b) => b.result === "Win").length;
-  const wr = (wins / recent.length) * 100;
-  return {
-    level: (wr < 35 ? "High" : wr < 55 ? "Medium" : "Low") as
-      | "Low"
-      | "Medium"
-      | "High",
-    winRate: wr,
-  };
-};
-const compute30dWinRate = (bets: Bet[]) => {
-  const monthAgo = Date.now() - 30 * 86400000;
-  const recent = bets.filter((b) => {
-    const t = b.date ? new Date(b.date).getTime() : NaN;
-    return (
-      !Number.isNaN(t) &&
-      t >= monthAgo &&
-      (b.result === "Win" || b.result === "Loss")
-    );
-  });
-  if (recent.length === 0)
-    return { winRate: null as number | null, totalBets: 0 };
-  return {
-    winRate:
-      (recent.filter((b) => b.result === "Win").length / recent.length) * 100,
-    totalBets: recent.length,
-  };
-};
 const computeTodayPnL = (bets: Bet[]) => {
   const today = new Date().toISOString().split("T")[0];
   const todayBets = bets.filter((b) => {
@@ -222,7 +158,6 @@ const goalProgress = (goal: StoredGoal): { percent: number; label: string } => {
 
 export default function Strategy() {
   logRender("Strategy");
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"strategies" | "goals">(
     "strategies",
   );
@@ -495,69 +430,6 @@ export default function Strategy() {
                     Потрібно мін. 3 ставки
                   </span>
                 </>
-              )}
-            </button>
-            {/* Рівень ризику — now navigates to /app/risky-teams */}
-            <button
-              onClick={() => navigate("/app/risky-teams")}
-              className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
-                  <ShieldAlert
-                    className="h-5 w-5 text-[#447afc]"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <span className="text-xl font-semibold text-[#111827]">
-                  Рівень ризику
-                </span>
-              </div>
-              {todayRisk.level ? (
-                <>
-                  <div
-                    className={`text-3xl font-bold mb-1 ${todayRisk.level === "High" ? "text-[#DC2626]" : todayRisk.level === "Medium" ? "text-[#D97706]" : "text-[#16A34A]"}`}
-                  >
-                    {riskLabel(todayRisk.level)}
-                  </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <div className="flex-1 h-2 rounded-full bg-[#DCFCE7] relative">
-                      {todayRisk.level === "Low" && (
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#16A34A] shadow-sm" />
-                      )}
-                    </div>
-                    <div className="flex-1 h-2 rounded-full bg-[#FEF3C7] relative">
-                      {todayRisk.level === "Medium" && (
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#D97706] shadow-sm" />
-                      )}
-                    </div>
-                    <div className="flex-1 h-2 rounded-full bg-[#FEE2E2] relative">
-                      {todayRisk.level === "High" && (
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#DC2626] shadow-sm" />
-                      )}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-sm font-semibold ${(todayRisk.winRate ?? 0) >= 50 ? "text-[#22C55E]" : "text-[#EF4444]"}`}
-                  >
-                    Вінрейт {todayRisk.winRate?.toFixed(0)}%
-                  </span>
-                  <span className="text-sm text-[#9CA3AF] ml-2">за 7 днів</span>
-                </>
-              ) : (
-                <div className="py-1">
-                  <div className="text-3xl font-bold text-[#9CA3AF] mb-1">
-                    —
-                  </div>
-                  <div className="flex items-center gap-1 mb-1 opacity-30">
-                    <div className="flex-1 h-2 rounded-full bg-[#DCFCE7]" />
-                    <div className="flex-1 h-2 rounded-full bg-[#FEF3C7]" />
-                    <div className="flex-1 h-2 rounded-full bg-[#FEE2E2]" />
-                  </div>
-                  <span className="text-sm text-[#9CA3AF]">
-                    Мін. 3 ставки за тиждень
-                  </span>
-                </div>
               )}
             </button>
             {/* Стратегій / Цілей */}
