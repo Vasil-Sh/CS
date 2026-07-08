@@ -200,8 +200,12 @@ export default function CS2BettingForm({
   useEffect(() => {
     if (!currentUser) return;
     UserDataService.fetchBets()
-      .then((bets) => { apiBetsRef.current = bets as unknown as BetRecord[]; })
-      .catch(() => { /** keep localStorage fallback */ });
+      .then((bets) => {
+        apiBetsRef.current = bets as unknown as BetRecord[];
+      })
+      .catch(() => {
+        /** keep localStorage fallback */
+      });
   }, [currentUser]);
 
   const [formData, setFormData] = useState(() => {
@@ -277,12 +281,11 @@ export default function CS2BettingForm({
     if (strategyLoadedRef.current) return;
     strategyLoadedRef.current = true;
 
-    const savedPrimaryStrategy =
-      UserDataService.getUserData<string>(
-        currentUser,
-        "primary_strategy",
-        "",
-      );
+    const savedPrimaryStrategy = UserDataService.getUserData<string>(
+      currentUser,
+      "primary_strategy",
+      "",
+    );
     if (savedPrimaryStrategy) {
       const strategy = strategiesRef.current?.find(
         (s: CS2Strategy) =>
@@ -978,8 +981,13 @@ export default function CS2BettingForm({
           "mybets_data",
           [],
         );
+        // Store riskyTeams as string[] for API consistency
+        const recordForStorage = {
+          ...record,
+          riskyTeams: record.riskyTeams.map((t) => t.name),
+        };
         UserDataService.setUserDataSync(currentUser, "mybets_data", [
-          record as BetRecord,
+          recordForStorage as BetRecord,
           ...existingBets,
         ]);
       };
@@ -1006,7 +1014,7 @@ export default function CS2BettingForm({
           matchUrl: record.matchUrl,
           winProbability: record.winProbability,
           notes: record.notes,
-          riskyTeams: record.riskyTeams,
+          riskyTeams: record.riskyTeams.map((t) => t.name),
           tournament: record.tournament,
           logoTeam1: record.logoTeam1,
           logoTeam2: record.logoTeam2,
@@ -1083,9 +1091,14 @@ export default function CS2BettingForm({
     const stake = parseFloat(formData.stake);
     const bankData = BankrollService.getBankrollData(currentUser);
     if (stake > 0 && bankData) {
-      const currBank = formData.currency === "USD" ? (bankData.initialBankUSD || 0) : (bankData.initialBankUAH || 0);
+      const currBank =
+        formData.currency === "USD"
+          ? bankData.initialBankUSD || 0
+          : bankData.initialBankUAH || 0;
       if (stake > currBank * 1.5 && currBank > 0) {
-        toast.warning(`Сума ставки (${stake} ${formData.currency === "USD" ? "$" : "₴"}) перевищує банк (${currBank} ${formData.currency === "USD" ? "$" : "₴"}) у ${(stake / currBank).toFixed(1)}×`);
+        toast.warning(
+          `Сума ставки (${stake} ${formData.currency === "USD" ? "$" : "₴"}) перевищує банк (${currBank} ${formData.currency === "USD" ? "$" : "₴"}) у ${(stake / currBank).toFixed(1)}×`,
+        );
       }
     }
 
@@ -1202,9 +1215,14 @@ export default function CS2BettingForm({
     let kelly = null;
     if (hasConfidence) {
       // Use API-synced bets (fallback to localStorage cache)
-      const apiBets = apiBetsRef.current.length > 0
-        ? apiBetsRef.current
-        : UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
+      const apiBets =
+        apiBetsRef.current.length > 0
+          ? apiBetsRef.current
+          : UserDataService.getUserData<BetRecord[]>(
+              currentUser,
+              "mybets_data",
+              [],
+            );
       const bankrollStats = BankrollService.getBankrollStats(
         currentUser,
         apiBets as unknown as Bet[],
@@ -1315,9 +1333,14 @@ export default function CS2BettingForm({
       return { blocked: false, reason: "", minutesLeft: 0 };
 
     // Use API-synced bets (fallback to localStorage cache)
-    const allBets = apiBetsRef.current.length > 0
-      ? apiBetsRef.current
-      : UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
+    const allBets =
+      apiBetsRef.current.length > 0
+        ? apiBetsRef.current
+        : UserDataService.getUserData<BetRecord[]>(
+            currentUser,
+            "mybets_data",
+            [],
+          );
     // Sort by date descending, count consecutive losses
     const sorted = [...allBets]
       .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
@@ -1346,7 +1369,7 @@ export default function CS2BettingForm({
       UserDataService.createTiltBlock({
         until: new Date(until).toISOString(),
         reason,
-        strategyName: primaryStrategy?.name || '',
+        strategyName: primaryStrategy?.name || "",
       }).catch(() => {});
       return { blocked: true, reason, minutesLeft: blockMinutes };
     }
@@ -1359,7 +1382,7 @@ export default function CS2BettingForm({
   useEffect(() => {
     if (!tiltBlock.blocked) return;
     const interval = setInterval(() => {
-      setTiltTick(t => t + 1);
+      setTiltTick((t) => t + 1);
     }, 30000);
     return () => clearInterval(interval);
   }, [tiltBlock.blocked]);
@@ -1370,22 +1393,38 @@ export default function CS2BettingForm({
     const stored = localStorage.getItem(blockKey);
     if (stored) {
       try {
-        const block = JSON.parse(stored) as { until: number; reason: string; strategyName?: string };
+        const block = JSON.parse(stored) as {
+          until: number;
+          reason: string;
+          strategyName?: string;
+        };
         if (Date.now() < block.until) {
-          if (!primaryStrategy || !primaryStrategy.activityLimits?.enabled || (block.strategyName && block.strategyName !== primaryStrategy.name)) {
+          if (
+            !primaryStrategy ||
+            !primaryStrategy.activityLimits?.enabled ||
+            (block.strategyName && block.strategyName !== primaryStrategy.name)
+          ) {
             localStorage.removeItem(blockKey);
           } else {
-            return { blocked: true, reason: block.reason, minutesLeft: Math.ceil((block.until - Date.now()) / 60000) };
+            return {
+              blocked: true,
+              reason: block.reason,
+              minutesLeft: Math.ceil((block.until - Date.now()) / 60000),
+            };
           }
         } else {
           localStorage.removeItem(blockKey);
         }
-      } catch { localStorage.removeItem(blockKey); }
+      } catch {
+        localStorage.removeItem(blockKey);
+      }
     }
     return tiltBlock;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tiltTick, tiltBlock]);
-  const effectiveTiltBlock = tiltBlockWithTick.blocked ? tiltBlockWithTick : tiltBlock;
+  const effectiveTiltBlock = tiltBlockWithTick.blocked
+    ? tiltBlockWithTick
+    : tiltBlock;
 
   const allExpressEventsComplete =
     expressEvents.length > 0 &&

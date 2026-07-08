@@ -39,7 +39,8 @@ export class UserDataService {
         );
       }
     } catch (e) {
-      if (import.meta.env.DEV) console.error("[UserDataService] repairAllUserKeys failed:", e);
+      if (import.meta.env.DEV)
+        console.error("[UserDataService] repairAllUserKeys failed:", e);
     }
   }
 
@@ -79,7 +80,8 @@ export class UserDataService {
             localStorage.setItem(userKey, JSON.stringify(value));
             debounceTimers.delete(timerKey);
           } catch (error) {
-            if (import.meta.env.DEV) console.error("Error setting user data:", error);
+            if (import.meta.env.DEV)
+              console.error("Error setting user data:", error);
           }
         }, 100),
       );
@@ -93,7 +95,8 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.setItem(userKey, JSON.stringify(value));
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error setting user data (sync):", error);
+      if (import.meta.env.DEV)
+        console.error("Error setting user data (sync):", error);
     }
   }
 
@@ -102,7 +105,8 @@ export class UserDataService {
       const userKey = this.getUserKey(username, key);
       localStorage.removeItem(userKey);
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error clearing user data:", error);
+      if (import.meta.env.DEV)
+        console.error("Error clearing user data:", error);
     }
   }
 
@@ -116,7 +120,8 @@ export class UserDataService {
         }
       });
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error clearing all user data:", error);
+      if (import.meta.env.DEV)
+        console.error("Error clearing all user data:", error);
     }
   }
 
@@ -126,7 +131,8 @@ export class UserDataService {
       const userPrefix = `user_${username}_`;
       return keys.some((key) => key.startsWith(userPrefix));
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error checking user data:", error);
+      if (import.meta.env.DEV)
+        console.error("Error checking user data:", error);
       return false;
     }
   }
@@ -165,7 +171,8 @@ export class UserDataService {
         return betDate === today;
       });
     } catch (error) {
-      if (import.meta.env.DEV) console.error("Error getting today bets:", error);
+      if (import.meta.env.DEV)
+        console.error("Error getting today bets:", error);
       return [];
     }
   }
@@ -191,8 +198,9 @@ export class UserDataService {
         (data as { bets?: Record<string, unknown>[] }).bets ||
         [];
     const mapped = rawBets.map((b: Record<string, unknown>) => {
-      const rawCurrency = String(b.currency || '').toUpperCase();
-      const currency = (rawCurrency === 'USD' || rawCurrency === 'UAH') ? rawCurrency : 'UAH';
+      const rawCurrency = String(b.currency || "").toUpperCase();
+      const currency =
+        rawCurrency === "USD" || rawCurrency === "UAH" ? rawCurrency : "UAH";
       return {
         ...b,
         id: b.id,
@@ -205,7 +213,9 @@ export class UserDataService {
         originalAmount: b.originalAmount
           ? parseFloat(String(b.originalAmount))
           : undefined,
-        exchangeRate: b.exchangeRate ? parseFloat(String(b.exchangeRate)) : null,
+        exchangeRate: b.exchangeRate
+          ? parseFloat(String(b.exchangeRate))
+          : null,
         originalProfit: b.originalProfit
           ? parseFloat(String(b.originalProfit))
           : undefined,
@@ -215,16 +225,19 @@ export class UserDataService {
       };
     });
     // Cache to localStorage so "Останні записи" reads instantly on next page load
-    if (mapped.length > 0) {
-      try {
-        const username = localStorage.getItem("username") || "default";
+    try {
+      const username = localStorage.getItem("username") || "default";
+      if (mapped.length > 0) {
         localStorage.setItem(
           `user_${username}_mybets_data`,
           JSON.stringify(mapped),
         );
-      } catch {
-        /* storage full — ignore */
+      } else {
+        // Clear cache when API returns no bets (e.g., all were deleted)
+        localStorage.removeItem(`user_${username}_mybets_data`);
       }
+    } catch {
+      /* storage full — ignore */
     }
     return mapped as ApiBet[];
   }
@@ -315,12 +328,17 @@ export class UserDataService {
   // ═══ New API-backed methods (migrated from localStorage-only) ═══
 
   /** Fetch match ratings from API */
-  static async fetchMatchRatings(): Promise<Array<{ id: string; matchId: string; rating: string }>> {
+  static async fetchMatchRatings(): Promise<
+    Array<{ id: string; matchId: string; rating: string }>
+  > {
     return api.get("/match-ratings");
   }
 
   /** Upsert a match rating (like/dislike) */
-  static async upsertMatchRating(matchId: string, rating: string): Promise<{ id: string; matchId: string; rating: string }> {
+  static async upsertMatchRating(
+    matchId: string,
+    rating: string,
+  ): Promise<{ id: string; matchId: string; rating: string }> {
     return api.post("/match-ratings", { matchId, rating });
   }
 
@@ -330,12 +348,16 @@ export class UserDataService {
   }
 
   /** Fetch telegram bets from API */
-  static async fetchTelegramBets(): Promise<Array<{ id: string; betData: Record<string, unknown> }>> {
+  static async fetchTelegramBets(): Promise<
+    Array<{ id: string; betData: Record<string, unknown> }>
+  > {
     return api.get("/telegram-bets");
   }
 
   /** Save a telegram bet to API */
-  static async saveTelegramBet(betData: Record<string, unknown>): Promise<{ id: string }> {
+  static async saveTelegramBet(
+    betData: Record<string, unknown>,
+  ): Promise<{ id: string }> {
     return api.post("/telegram-bets", { betData });
   }
 
@@ -345,22 +367,37 @@ export class UserDataService {
   }
 
   /** Fetch user preferences (theme, lang, max_stake_percent) */
-  static async fetchUserPrefs(): Promise<{ maxStakePercent: number; preferences: { theme?: string; lang?: string } }> {
+  static async fetchUserPrefs(): Promise<{
+    maxStakePercent: number;
+    preferences: { theme?: string; lang?: string };
+  }> {
     return api.get("/user");
   }
 
   /** Save user preferences */
-  static async saveUserPrefs(data: { maxStakePercent?: number; preferences?: Record<string, unknown> }): Promise<{ maxStakePercent: number; preferences: Record<string, unknown> }> {
+  static async saveUserPrefs(data: {
+    maxStakePercent?: number;
+    preferences?: Record<string, unknown>;
+  }): Promise<{
+    maxStakePercent: number;
+    preferences: Record<string, unknown>;
+  }> {
     return api.put("/user", data);
   }
 
   /** Fetch active tilt blocks for current user */
-  static async fetchTiltBlocks(): Promise<Array<{ id: string; until: string; reason: string; strategyName: string }>> {
+  static async fetchTiltBlocks(): Promise<
+    Array<{ id: string; until: string; reason: string; strategyName: string }>
+  > {
     return api.get("/tilt-blocks");
   }
 
   /** Create a tilt block */
-  static async createTiltBlock(data: { until: string; reason?: string; strategyName?: string }): Promise<{ id: string }> {
+  static async createTiltBlock(data: {
+    until: string;
+    reason?: string;
+    strategyName?: string;
+  }): Promise<{ id: string }> {
     return api.post("/tilt-blocks", data);
   }
 

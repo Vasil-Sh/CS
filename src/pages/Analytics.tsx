@@ -56,6 +56,8 @@ import {
   Trophy,
   Zap,
   Percent,
+  Info,
+  Clock,
 } from "lucide-react";
 import {
   XAxis,
@@ -430,9 +432,14 @@ export default function Analytics() {
   }, [completedBets, winningBets]);
 
   // ── Analytics-specific computed values ──
-  const totalStaked = useMemo(() => completedBets.reduce((s: number, b: Bet) => s + b.amount, 0), [completedBets]);
+  const totalStaked = useMemo(
+    () => completedBets.reduce((s: number, b: Bet) => s + b.amount, 0),
+    [completedBets],
+  );
   const roi = useMemo(() => {
-    return totalStaked > 0 ? Math.round((filteredStats.totalProfit / totalStaked) * 100) : 0;
+    return totalStaked > 0
+      ? Math.round((filteredStats.totalProfit / totalStaked) * 100)
+      : 0;
   }, [completedBets, filteredStats.totalProfit, totalStaked]);
 
   const avgOdds = useMemo(() => {
@@ -794,29 +801,54 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.currentTarget.style, cardHoverStyle);
+                  }}
+                  onMouseLeave={(e) => {
+                    Object.assign(e.currentTarget.style, cardBaseStyle);
+                  }}
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50">
-                      <Percent className="h-5 w-5 text-emerald-500" strokeWidth={1.5} />
+                      <Percent
+                        className="h-5 w-5 text-emerald-500"
+                        strokeWidth={1.5}
+                      />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">ROI</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      ROI
+                    </span>
                   </div>
-                  <div className={`text-4xl font-bold tracking-tight mb-1 ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                    {roi >= 0 ? "+" : ""}{roi}%
+                  <div
+                    className={`text-4xl font-bold tracking-tight mb-1 ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                  >
+                    {roi >= 0 ? "+" : ""}
+                    {roi}%
                   </div>
-                  <div className="text-xs text-gray-400 mb-3">Прибуток / Вкладено</div>
+                  <div className="text-xs text-gray-400 mb-3">
+                    Прибуток / Вкладено
+                  </div>
                   {/* Stats row */}
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-gray-400">Вкладено</div>
-                      <div className="text-sm font-bold text-gray-900">{totalStaked.toLocaleString("uk-UA")} ₴</div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {totalStaked.toLocaleString("uk-UA")} ₴
+                      </div>
                     </div>
-                    <div className={`rounded-lg px-2 py-1.5 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-                      <div className={`text-[10px] ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
-                      <div className={`text-sm font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {filteredStats.totalProfit >= 0 ? "+" : ""}{filteredStats.totalProfit.toLocaleString("uk-UA")} ₴
+                    <div
+                      className={`rounded-lg px-2 py-1.5 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}
+                    >
+                      <div
+                        className={`text-[10px] ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}
+                      >
+                        Прибуток
+                      </div>
+                      <div
+                        className={`text-sm font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                      >
+                        {filteredStats.totalProfit >= 0 ? "+" : ""}
+                        {filteredStats.totalProfit.toLocaleString("uk-UA")} ₴
                       </div>
                     </div>
                   </div>
@@ -825,9 +857,17 @@ export default function Analytics() {
                     <div className="absolute left-1/2 top-0 w-px h-full bg-gray-300" />
                     <div
                       className={`absolute top-0 h-full rounded-full transition-all ${roi >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
-                      style={roi >= 0
-                        ? { width: `${Math.min(roi, 100) / 2}%`, right: "50%" }
-                        : { width: `${Math.min(Math.abs(roi), 100) / 2}%`, left: "50%" }}
+                      style={
+                        roi >= 0
+                          ? {
+                              width: `${Math.min(roi, 100) / 2}%`,
+                              right: "50%",
+                            }
+                          : {
+                              width: `${Math.min(Math.abs(roi), 100) / 2}%`,
+                              left: "50%",
+                            }
+                      }
                     />
                   </div>
                   <div className="flex justify-between mt-1">
@@ -841,47 +881,75 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.currentTarget.style, cardHoverStyle);
+                  }}
+                  onMouseLeave={(e) => {
+                    Object.assign(e.currentTarget.style, cardBaseStyle);
+                  }}
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50">
-                      <Trophy className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
+                      <Trophy
+                        className="h-5 w-5 text-amber-500"
+                        strokeWidth={1.5}
+                      />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">По місяцях</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      По місяцях
+                    </span>
                   </div>
                   {/* Best / Worst */}
                   <div className="flex items-end gap-3 mb-2">
                     <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2 border border-emerald-200">
-                      <div className="text-[10px] text-emerald-500 font-medium mb-0.5">▲ Найкращий</div>
+                      <div className="text-[10px] text-emerald-500 font-medium mb-0.5">
+                        ▲ Найкращий
+                      </div>
                       <div className="text-lg font-bold text-emerald-700">
-                        {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${bestMonth.profit.toLocaleString("uk-UA")} ₴` : "—"}
+                        {bestMonth
+                          ? `${bestMonth.profit >= 0 ? "+" : ""}${bestMonth.profit.toLocaleString("uk-UA")} ₴`
+                          : "—"}
                       </div>
                       {bestMonth && (
-                        <div className="text-[10px] text-emerald-500 mt-0.5">{bestMonth.month}</div>
+                        <div className="text-[10px] text-emerald-500 mt-0.5">
+                          {bestMonth.month}
+                        </div>
                       )}
                     </div>
                     <div className="flex-1 bg-red-50 rounded-xl px-3 py-2 border border-red-200">
-                      <div className="text-[10px] text-red-400 font-medium mb-0.5">▼ Найгірший</div>
+                      <div className="text-[10px] text-red-400 font-medium mb-0.5">
+                        ▼ Найгірший
+                      </div>
                       <div className="text-lg font-bold text-red-500">
-                        {worstMonth ? `${worstMonth.profit >= 0 ? "+" : ""}${worstMonth.profit.toLocaleString("uk-UA")} ₴` : "—"}
+                        {worstMonth
+                          ? `${worstMonth.profit >= 0 ? "+" : ""}${worstMonth.profit.toLocaleString("uk-UA")} ₴`
+                          : "—"}
                       </div>
                       {worstMonth && (
-                        <div className="text-[10px] text-red-400 mt-0.5">{worstMonth.month}</div>
+                        <div className="text-[10px] text-red-400 mt-0.5">
+                          {worstMonth.month}
+                        </div>
                       )}
                     </div>
                   </div>
                   {/* Averages row */}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-gray-400">Середнє/міс</div>
-                      <div className={`text-sm font-bold ${avgMonthlyProfit >= 0 ? "text-gray-900" : "text-red-500"}`}>
-                        {avgMonthlyProfit >= 0 ? "+" : ""}{avgMonthlyProfit.toLocaleString("uk-UA")} ₴
+                      <div className="text-[10px] text-gray-400">
+                        Середнє/міс
+                      </div>
+                      <div
+                        className={`text-sm font-bold ${avgMonthlyProfit >= 0 ? "text-gray-900" : "text-red-500"}`}
+                      >
+                        {avgMonthlyProfit >= 0 ? "+" : ""}
+                        {avgMonthlyProfit.toLocaleString("uk-UA")} ₴
                       </div>
                     </div>
                     <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-gray-400">Місяців</div>
-                      <div className="text-sm font-bold text-gray-900">{totalMonthsTracked}</div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {totalMonthsTracked}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -890,37 +958,57 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-                  onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.currentTarget.style, cardHoverStyle);
+                  }}
+                  onMouseLeave={(e) => {
+                    Object.assign(e.currentTarget.style, cardBaseStyle);
+                  }}
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50">
                       <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">Коефіцієнти</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      Коефіцієнти
+                    </span>
                   </div>
                   <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
                     {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
                   </div>
-                  <div className="text-xs text-gray-400 mb-3">середній коефіцієнт</div>
+                  <div className="text-xs text-gray-400 mb-3">
+                    середній коефіцієнт
+                  </div>
                   {/* Stats row */}
                   <div className="grid grid-cols-3 gap-2 mb-2">
                     <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-gray-400">Ставок</div>
-                      <div className="text-sm font-bold text-gray-900">{completedBets.length}</div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {completedBets.length}
+                      </div>
                     </div>
                     <div className="bg-emerald-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-emerald-500">Виграші</div>
-                      <div className="text-sm font-bold text-emerald-600">{winningBets.length}</div>
+                      <div className="text-[10px] text-emerald-500">
+                        Виграші
+                      </div>
+                      <div className="text-sm font-bold text-emerald-600">
+                        {winningBets.length}
+                      </div>
                     </div>
                     <div className="bg-red-50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-red-400">Програші</div>
-                      <div className="text-sm font-bold text-red-500">{losingBets.length}</div>
+                      <div className="text-sm font-bold text-red-500">
+                        {losingBets.length}
+                      </div>
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[10px] text-gray-400">За місяць: {betsThisMonth}</span>
-                    <span className="text-[10px] text-gray-400">Winrate: {filteredStats.winRate}%</span>
+                    <span className="text-[10px] text-gray-400">
+                      За місяць: {betsThisMonth}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      Winrate: {filteredStats.winRate}%
+                    </span>
                   </div>
                 </div>
               </div>

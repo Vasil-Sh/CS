@@ -312,10 +312,8 @@ export default function MyBets() {
   const loadRecentBets = useCallback(async () => {
     try {
       const bets = await UserDataService.fetchBets();
-      if (bets.length > 0) {
-        setRecentBets(bets as Bet[]);
-        return;
-      }
+      setRecentBets(bets as Bet[]);
+      return;
     } catch {
       /* noop */
     }
@@ -591,33 +589,45 @@ export default function MyBets() {
       if (import.meta.env.DEV)
         console.warn("[API] DELETE failed, removed locally only");
     }
-    // Compute bankroll from filtered bets immediately
-    const filtered = recentBetsRef.current.filter(
-      (b) =>
-        b.id !== bet.id &&
-        !(
-          b.date === bet.date &&
-          b.match === bet.match &&
-          b.amount === bet.amount
+
+    // Remove from localStorage cache immediately
+    try {
+      const localBets = UserDataService.getUserData<Bet[]>(
+        currentUser,
+        "mybets_data",
+        [],
+      );
+      UserDataService.setUserDataSync(
+        currentUser,
+        "mybets_data",
+        localBets.filter(
+          (b: Bet) =>
+            b.id !== bet.id &&
+            !(
+              b.date === bet.date &&
+              b.match === bet.match &&
+              b.amount === bet.amount
+            ),
         ),
-    );
-    setDualBank(BankrollService.getBankrollStatsDual(currentUser, filtered));
+      );
+    } catch {
+      /* ignore */
+    }
+
+    // Reload from API to ensure cache is in sync, then compute stats
+    await loadRecentBets();
     syncStats();
-    setRecentBets((prev) =>
-      prev.filter(
-        (b) =>
-          b.id !== bet.id &&
-          !(
-            b.date === bet.date &&
-            b.match === bet.match &&
-            b.amount === bet.amount
-          ),
-      ),
-    );
     bumpBets();
     bumpBankroll();
     toast.success("Ставку видалено");
-  }, [deleteDialogBet, currentUser, bumpBets, bumpBankroll, syncStats]);
+  }, [
+    deleteDialogBet,
+    currentUser,
+    bumpBets,
+    bumpBankroll,
+    syncStats,
+    loadRecentBets,
+  ]);
 
   // ── UI ──
   const tabs = [
