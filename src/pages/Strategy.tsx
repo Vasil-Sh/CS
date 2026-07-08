@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Target,
   Flag,
-  AlertTriangle,
   ShieldAlert,
   TrendingUp,
   Activity,
@@ -12,7 +12,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 import StrategyOverview from "@/components/StrategyOverview";
 import GoalsManager from "@/components/GoalsManager";
-import RiskManagement from "@/components/RiskManagement";
 import { UserDataService } from "@/lib/userDataService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
@@ -223,7 +222,8 @@ const goalProgress = (goal: StoredGoal): { percent: number; label: string } => {
 
 export default function Strategy() {
   logRender("Strategy");
-  const [activeTab, setActiveTab] = useState<"strategies" | "goals" | "risks">(
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"strategies" | "goals">(
     "strategies",
   );
   const [bets, setBets] = useState<Bet[]>([]);
@@ -300,7 +300,6 @@ export default function Strategy() {
   const tabs = [
     { id: "strategies" as const, label: "Стратегії", icon: Target },
     { id: "goals" as const, label: "Цілі", icon: Flag },
-    { id: "risks" as const, label: "Ризиковані команди", icon: AlertTriangle },
   ];
 
   return (
@@ -498,9 +497,9 @@ export default function Strategy() {
                 </>
               )}
             </button>
-            {/* Рівень ризику */}
+            {/* Рівень ризику — now navigates to /app/risky-teams */}
             <button
-              onClick={() => setActiveTab("risks")}
+              onClick={() => navigate("/app/risky-teams")}
               className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
             >
               <div className="flex items-center gap-2 mb-2">
@@ -946,9 +945,6 @@ export default function Strategy() {
             </div>
             <div className={activeTab === "goals" ? "" : "hidden"}>
               <GoalsManager />
-            </div>
-            <div className={activeTab === "risks" ? "" : "hidden"}>
-              <RiskManagement bets={bets} />
             </div>
           </div>
         </div>

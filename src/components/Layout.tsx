@@ -15,6 +15,7 @@ import {
   Target,
   MessageCircle,
   WifiOff,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -25,6 +26,7 @@ const navigation = [
   { nameKey: "nav.addRecord", href: "/app/my-bets", icon: Plus },
   { nameKey: "nav.matches", href: "/app/matches", icon: Trophy },
   { nameKey: "nav.telegram", href: "/app/telegram", icon: MessageCircle },
+  { nameKey: "nav.riskyTeams", href: "/app/risky-teams", icon: AlertTriangle },
   { nameKey: "nav.profile", href: "/app/profile", icon: User },
 ];
 

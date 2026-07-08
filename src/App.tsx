@@ -21,6 +21,7 @@ const Matches = lazy(() => import("@/pages/Matches"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const MyBets = lazy(() => import("@/pages/MyBets"));
 const Strategy = lazy(() => import("@/pages/Strategy"));
+const RiskyTeams = lazy(() => import("@/pages/RiskyTeams"));
 const TelegramPage = lazy(() => import("@/pages/Telegram"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
@@ -130,6 +131,16 @@ function App() {
                 <ErrorBoundary>
                   <Suspense fallback={<PageLoader />}>
                     <Strategy />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="risky-teams"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <RiskyTeams />
                   </Suspense>
                 </ErrorBoundary>
               }
