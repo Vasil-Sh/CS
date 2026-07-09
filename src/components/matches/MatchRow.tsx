@@ -240,7 +240,7 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
           <TooltipTrigger asChild>
             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5 cursor-default">
               <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
-              ЗАВ
+              ЗАВЕР
             </span>
           </TooltipTrigger>
           <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
@@ -255,7 +255,7 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
           <TooltipTrigger asChild>
             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5 cursor-default">
               <Clock className="h-3 w-3" strokeWidth={2} />
-              ОЧІ
+              ОЧІКУ
             </span>
           </TooltipTrigger>
           <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
