@@ -126,7 +126,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
     if (parsedSaved) {
       setRiskyTeams(
-        parsedSaved.map((t: RiskyTeam) => ({ ...t, game: normalizeGame(t.game) })),
+        parsedSaved.map((t: RiskyTeam) => ({
+          ...t,
+          game: normalizeGame(t.game),
+        })),
       );
       setIsLoadingTeams(false);
       initializedRef.current = true;
@@ -143,7 +146,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         } catch {
           /* ignore */
         }
-        if (!cancelled) { setIsLoadingTeams(false); initializedRef.current = true; }
+        if (!cancelled) {
+          setIsLoadingTeams(false);
+          initializedRef.current = true;
+        }
       };
       setIsLoadingTeams(true);
       load();
@@ -346,15 +352,20 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
           notes: savedTeam.notes,
         });
       } else {
-        await googleSheetsRiskyTeamsService.addTeam(
+        const added = await googleSheetsRiskyTeamsService.addTeamAndGet(
           savedTeam.name,
           savedTeam.game,
           savedTeam.status,
           savedTeam.notes,
         );
-        // Re-fetch to get _apiId for newly created team
-        const fresh = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
-        if (fresh.length > 0) setRiskyTeams(fresh);
+        // Update _apiId locally — no full re-fetch (which can lose local state on API error/stale cache)
+        if (added?.id) {
+          const withId = updatedTeams.map((t, i) =>
+            i === editingIndex ? { ...t, _apiId: added.id } : t,
+          );
+          setRiskyTeams(withId);
+          localStorage.setItem("admin_risky_teams", JSON.stringify(withId));
+        }
       }
     } catch {
       /* API offline — data saved in localStorage already */
@@ -470,7 +481,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     Обережно: filteredTeams.filter((t) => t.status === "Обережно"),
     Рідко: filteredTeams.filter((t) => t.status === "Рідко"),
     Надійна: filteredTeams.filter((t) => t.status === "Надійна"),
-    "Неоцінена": filteredTeams.filter((t) => t.status === "Неоцінена"),
+    Неоцінена: filteredTeams.filter((t) => t.status === "Неоцінена"),
   };
 
   // Count statuses per game for filter badges
