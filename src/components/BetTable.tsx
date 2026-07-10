@@ -1290,7 +1290,7 @@ const BetTableMemo = memo(function BetTable({
                     />
                   </div>
                   <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
-                    Результати
+                    Стислий список результатів
                   </h2>
                 </div>
               </DialogTitle>
