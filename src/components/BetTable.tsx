@@ -33,6 +33,8 @@ import {
   X,
   Trash2,
   Columns,
+  Copy,
+  ListChecks,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -149,6 +151,7 @@ const BetTableMemo = memo(function BetTable({
   onNavigateToAdd,
 }: BetTableProps) {
   const [notesDialogBet, setNotesDialogBet] = useState<string>("");
+  const [showCompactResults, setShowCompactResults] = useState(false);
   const hasActiveAdvancedFilters =
     resultFilter !== "all" || periodFilter !== "all" || sortBy !== "date";
 
@@ -321,6 +324,36 @@ const BetTableMemo = memo(function BetTable({
     return match ? parseInt(match[1], 10) : 0;
   };
 
+  // Build compact results list for quick sharing
+  const compactResultsText = useMemo(() => {
+    const completed = sortedAndFilteredBets
+      .filter((b) => b.result === "Win" || b.result === "Loss")
+      .slice(0, 100);
+    return completed
+      .map((b) => {
+        const icon = b.result === "Win" ? "✅" : "✖️";
+        const odds = Number(b.odds).toFixed(2);
+        const team = (b.selection || b.team1 || b.match).split(" vs ")[0];
+        const betDesc = b.betType
+          .replace("Переможець матчу - ", "")
+          .replace("Победа матч - ", "")
+          .replace(/^[^-]+ - /, "");
+        // Simplify bet description for compact view
+        const shortType = betDesc
+          .replace(/^Переможець матчу\s*/i, "Победа матч")
+          .replace(/^Победа матч\s*/i, "Победа матч")
+          .replace(/\s*\(гонка\)/, " (гонка)");
+        return `${icon}~${odds}. ${team}, ${shortType}`;
+      })
+      .join("\n");
+  }, [sortedAndFilteredBets]);
+
+  const handleCopyCompact = () => {
+    navigator.clipboard.writeText(compactResultsText).then(() => {
+      // toast handled by parent or just silent
+    });
+  };
+
   return (
     <div
       className="bg-white border border-gray-300 rounded-3xl overflow-hidden"
@@ -338,6 +371,14 @@ const BetTableMemo = memo(function BetTable({
             </Badge>
           )}
         </div>
+        <button
+          onClick={() => setShowCompactResults(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-700 transition-all duration-200"
+          title="Стислий список результатів"
+        >
+          <ListChecks className="h-4 w-4" strokeWidth={1.5} />
+          Результати
+        </button>
       </div>
 
       {/* Filter Bar */}
@@ -1067,6 +1108,66 @@ const BetTableMemo = memo(function BetTable({
             <Button
               onClick={() => setNotesDialogBet("")}
               className="rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white w-full"
+            >
+              Закрити
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compact Results Modal */}
+      <Dialog open={showCompactResults} onOpenChange={setShowCompactResults}>
+        <DialogContent className="max-w-lg border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
+          <DialogHeader className="px-6 pt-5 pb-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
+                    <ListChecks
+                      className="h-5 w-5 text-[#447afc]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
+                    Результати
+                  </h2>
+                </div>
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="border-t border-[#E5E7EB]" />
+          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto bg-[#F9FAFB]">
+            {compactResultsText ? (
+              <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed bg-white p-4 rounded-2xl border border-gray-200">
+                {compactResultsText}
+              </pre>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="p-6 bg-gray-100 rounded-2xl inline-block mb-4">
+                  <ListChecks
+                    className="h-10 w-10 text-gray-400"
+                    strokeWidth={1.5}
+                  />
+                </div>
+                <p className="text-gray-500 text-sm">
+                  Немає завершених ставок для відображення
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="border-t border-[#E5E7EB] px-6 py-4 bg-white flex gap-3">
+            <Button
+              onClick={handleCopyCompact}
+              disabled={!compactResultsText}
+              className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white flex items-center gap-2"
+            >
+              <Copy className="h-4 w-4" strokeWidth={1.5} />
+              Копіювати
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowCompactResults(false)}
+              className="flex-1 rounded-xl"
             >
               Закрити
             </Button>
