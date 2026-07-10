@@ -327,41 +327,56 @@ const BetTableMemo = memo(function BetTable({
   /** Translate internal bet type codes to human-readable Ukrainian */
   function humanizeBetType(raw: string): string {
     // Already Ukrainian — return as-is (after basic cleanup)
-    if (raw.match(/[а-яіїєґ]/i)) return raw;
+    if (raw.match(/[а-яіїєґ]/i))
+      return raw.replace(/Победа\s*матч/i, "Переможець матчу");
 
-    // Strip "MapW_HC_" prefix patterns
-    const desc = raw
-      // Map2_HC_T2+3.5 → Карта 2: Фора +3.5
-      .replace(/^Map(\d+)_HC_T(\d+)\+?([\d.]+)/, "Карта $1: Фора +$3 ($2 матч)")
-      // Map1_HC_<rest> → Карта 1: <rest>
-      .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
-      // Map1_tb → Карта 1 (тотал більше)
-      .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
-      // Map1_tm → Карта 1 (тотал менше)
-      .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
-      // Map1 → Карта 1
-      .replace(/^Map(\d+)_?(.+)?/, (_, n: string, rest?: string) => {
-        if (!rest) return `Карта ${n}`;
-        const humanRest = rest
-          .replace(/_/g, " ")
-          .replace(/\btb\b/g, "тотал більше")
-          .replace(/\btm\b/g, "тотал менше")
-          .replace(/\bHC\b/g, "Фора");
-        return `Карта ${n}: ${humanRest}`;
-      })
-      // Match Winner → Победа матч
-      .replace(/^Match\s*Winner$/i, "Победа матч")
-      // Over → Тотал більше
+    let desc = raw;
+    // Map patterns
+    if (/^Map\d/.test(desc)) {
+      desc = desc
+        .replace(
+          /^Map(\d+)_HC_T(\d+)\+?([\d.]+)/,
+          "Карта $1: Фора +$3 ($2 матч)",
+        )
+        .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
+        .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
+        .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
+        .replace(/^Map(\d+)_?(.+)?/, (_: string, n: string, rest?: string) => {
+          if (!rest) return `Карта ${n}`;
+          return `Карта ${n}: ${rest
+            .replace(/_/g, " ")
+            .replace(/\btb\b/g, "тотал більше")
+            .replace(/\btm\b/g, "тотал менше")
+            .replace(/\bHC\b/g, "Фора")}`;
+        });
+    }
+    // Match Winner → Переможець матчу
+    desc = desc.replace(/^Match\s*Winner$/i, "Переможець матчу");
+    // Over/Under
+    desc = desc
       .replace(/^Over\s*([\d.]+)/, "Тотал більше $1")
-      // Under → Тотал менше
-      .replace(/^Under\s*([\d.]+)/, "Тотал менше $1")
-      // Generic: replace underscores with spaces
-      .replace(/_/g, " ");
-
+      .replace(/^Under\s*([\d.]+)/, "Тотал менше $1");
+    // Generic underscore cleanup
+    desc = desc.replace(/_/g, " ");
     return desc || raw;
   }
 
-  // Build compact results list for quick sharing
+  /** Get logo URL for the selected team of a bet */
+  function getSelectedTeamLogo(bet: Bet): string | null {
+    const sel = (bet.selection || "").trim().toLowerCase();
+    const t1 = (bet.team1 || "").trim().toLowerCase();
+    const t2 = (bet.team2 || "").trim().toLowerCase();
+    if (sel && t1 && sel === t1) return bet.logoTeam1 || null;
+    if (sel && t2 && sel === t2) return bet.logoTeam2 || null;
+    // Partial match
+    if (sel && t1 && (t1.includes(sel) || sel.includes(t1)))
+      return bet.logoTeam1 || null;
+    if (sel && t2 && (t2.includes(sel) || sel.includes(t2)))
+      return bet.logoTeam2 || null;
+    return bet.logoTeam1 || null;
+  }
+
+  // Build compact results text (for clipboard copy)
   const compactResultsText = useMemo(() => {
     const completed = sortedAndFilteredBets
       .filter((b) => b.result === "Win" || b.result === "Loss")
@@ -370,18 +385,54 @@ const BetTableMemo = memo(function BetTable({
       .map((b) => {
         const icon = b.result === "Win" ? "✅" : "✖️";
         const odds = Number(b.odds).toFixed(2);
-        const isCS = (b.game || "").toLowerCase().startsWith("cs");
-        const gameEmoji = isCS ? " 🎯" : " 🛡️";
-        // Selected team: use selection field, or extract from betType (last part after dash)
         const selectedTeam =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
-        // Bet description: strip selected team from end, then humanize
         const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
-        // Humanize internal codes to readable Ukrainian
         const betDesc = humanizeBetType(rawDesc);
-        return `${icon}~${odds}. ${selectedTeam}${gameEmoji}, ${betDesc}`;
+        return `${icon}~${odds}. ${selectedTeam}, ${betDesc}`;
       })
       .join("\n");
+  }, [sortedAndFilteredBets]);
+
+  // Build rendered rows with team icons
+  const compactRows = useMemo(() => {
+    const completed = sortedAndFilteredBets
+      .filter((b) => b.result === "Win" || b.result === "Loss")
+      .slice(0, 100);
+    return completed.map((b, idx) => {
+      const isWin = b.result === "Win";
+      const odds = Number(b.odds).toFixed(2);
+      const selectedTeam =
+        b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
+      const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
+      const betDesc = humanizeBetType(rawDesc);
+      const logoUrl = getSelectedTeamLogo(b);
+      const teamPlaceholder = (b.game || "").toLowerCase().startsWith("cs")
+        ? "/assets/team-placeholder.svg"
+        : "/assets/team-placeholder-dota.svg";
+      return (
+        <div key={idx} className="flex items-center gap-2 py-1.5">
+          <span className="flex-shrink-0 text-sm">{isWin ? "✅" : "✖️"}</span>
+          <span className="flex-shrink-0 text-sm font-medium text-gray-600 w-10 text-right">
+            {odds}
+          </span>
+          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white border border-gray-200 overflow-hidden flex items-center justify-center">
+            <img
+              src={logoUrl || teamPlaceholder}
+              alt={selectedTeam}
+              className="w-4 h-4 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = teamPlaceholder;
+              }}
+            />
+          </div>
+          <span className="text-sm font-semibold text-gray-900">
+            {selectedTeam}
+          </span>
+          <span className="text-sm text-gray-500">{betDesc}</span>
+        </div>
+      );
+    });
   }, [sortedAndFilteredBets]);
 
   const handleCopyCompact = () => {
@@ -1172,11 +1223,11 @@ const BetTableMemo = memo(function BetTable({
             </div>
           </DialogHeader>
           <div className="border-t border-[#E5E7EB]" />
-          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto bg-[#F9FAFB]">
-            {compactResultsText ? (
-              <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono leading-relaxed bg-white p-4 rounded-2xl border border-gray-200">
-                {compactResultsText}
-              </pre>
+          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto bg-white">
+            {compactRows.length > 0 ? (
+              <div className="space-y-0 divide-y divide-gray-100">
+                {compactRows}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="p-6 bg-gray-100 rounded-2xl inline-block mb-4">
