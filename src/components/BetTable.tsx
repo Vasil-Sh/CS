@@ -469,7 +469,7 @@ const BetTableMemo = memo(function BetTable({
           className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors gap-0"
         >
           <span
-            className={`flex-shrink-0 w-10 text-center text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
+            className={`flex-shrink-0 w-10 flex items-center justify-center text-lg font-bold ${isWin ? "" : "text-red-500"}`}
           >
             {isWin ? "✅" : "✕"}
           </span>
