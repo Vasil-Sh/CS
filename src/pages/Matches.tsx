@@ -423,7 +423,7 @@ export default function Matches() {
   const [isLoading, setIsLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [sortBy, setSortBy] = useState<
-    "date" | "confidence" | "risk" | "upset" | "status"
+    "date" | "confidence" | "risk" | "upset" | "status" | "odds"
   >("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterTier, setFilterTier] = useState<
@@ -435,6 +435,7 @@ export default function Matches() {
   const [filterRisk, setFilterRisk] = useState<
     "all" | "safe" | "moderate" | "high"
   >("all");
+  const [filterTournament, setFilterTournament] = useState("all");
   const [filterMatchType, setFilterMatchType] = useState<
     "all" | "Bo1" | "Bo3" | "Bo5"
   >("all");
@@ -502,6 +503,7 @@ export default function Matches() {
     setFilterMatchType("all");
     setFilterConfidence("all");
     setFilterRisk("all");
+    setFilterTournament("all");
     setSearchQuery("");
     const defaults = new Set(
       COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
@@ -518,6 +520,7 @@ export default function Matches() {
     filterMatchType !== "all" ||
     filterConfidence !== "all" ||
     filterRisk !== "all" ||
+    filterTournament !== "all" ||
     searchQuery !== "";
 
   useEffect(() => {
@@ -525,13 +528,37 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
-  // Auto-refresh when there are live matches (every 60s)
+  // Targeted live-update: only Dota2 scores/status, not full reload
   const hasLiveMatches = matches.some((m) => m.matchStatus === "live");
   useEffect(() => {
     if (!hasLiveMatches) return;
-    const interval = setInterval(() => {
-      loadMatchesFromApi();
-    }, 60000);
+    const interval = setInterval(async () => {
+      try {
+        const resp = await fetch("/api/v1/dota2-matches/live-scores");
+        if (!resp.ok) return;
+        const updates: Array<{ id: string; score1: number | null; score2: number | null; status: string }> = await resp.json();
+        if (!Array.isArray(updates) || updates.length === 0) return;
+
+        setMatches((prev) =>
+          prev.map((m) => {
+            if (m.game !== "Dota2") return m;
+            const update = updates.find((u) => m.id.endsWith(u.id));
+            if (!update) return m;
+            const newStatus = update.status === "finished" ? "finished"
+              : update.status === "live" ? "live"
+              : m.matchStatus;
+            return {
+              ...m,
+              score1: update.score1 ?? m.score1 ?? 0,
+              score2: update.score2 ?? m.score2 ?? 0,
+              matchStatus: newStatus as "upcoming" | "live" | "finished",
+            };
+          }),
+        );
+      } catch {
+        // Silent fail — full refresh handles later
+      }
+    }, 30000);
     return () => clearInterval(interval);
   }, [hasLiveMatches]);
 
@@ -793,6 +820,8 @@ export default function Matches() {
     if (filterRisk === "high" && match.risk <= 50) return false;
     if (filterMatchType !== "all" && match.matchType !== filterMatchType)
       return false;
+    if (filterTournament !== "all" && !match.context.includes(filterTournament))
+      return false;
     if (filterStatus !== "all" && match.matchStatus !== filterStatus)
       return false;
     if (
@@ -819,6 +848,11 @@ export default function Matches() {
         break;
       case "upset":
         comparison = b.upsetProbability - a.upsetProbability;
+        break;
+      case "odds":
+        comparison =
+          Math.max(a.odds.team1 || 0, a.odds.team2 || 0) -
+          Math.max(b.odds.team1 || 0, b.odds.team2 || 0);
         break;
       case "status": {
         const statusDiff =
@@ -874,8 +908,13 @@ export default function Matches() {
     (m) => m.game === "Dota2",
   ).length;
 
+  // Collect unique tournaments for filter dropdown
+  const tournamentOptions = [...new Set(
+    displayedMatches.map((m) => m.context).filter(Boolean),
+  )].sort();
+
   const toggleSort = (
-    column: "date" | "confidence" | "risk" | "upset" | "status",
+    column: "date" | "confidence" | "risk" | "upset" | "status" | "odds",
   ) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -947,7 +986,7 @@ export default function Matches() {
       : 0;
 
   const renderSortIndicator = (
-    column: "date" | "confidence" | "risk" | "upset" | "status",
+    column: "date" | "confidence" | "risk" | "upset" | "status" | "odds",
   ) => {
     if (sortBy === column) {
       return sortOrder === "asc" ? (
@@ -1029,9 +1068,13 @@ export default function Matches() {
         )}
         {visibleColumns.has("odds") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
+            onClick={() => toggleSort("odds")}
           >
-            Коеф.
+            <div className="flex items-center justify-center gap-1">
+              <span>Коеф.</span>
+              {renderSortIndicator("odds")}
+            </div>
           </th>
         )}
         {visibleColumns.has("notes") && (
@@ -1234,7 +1277,7 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== PILL FILTER BAR — Analytics-style ===== */}
+          {/* ===== PILL FILTER BAR ===== */}
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-4 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="flex items-center gap-2.5 flex-wrap justify-between">
               {/* Refresh button */}
@@ -1437,6 +1480,52 @@ export default function Matches() {
                   >
                     Bo5
                   </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Tournament filter — pill dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                      filterTournament !== "all"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
+                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                    }`}
+                  >
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
+                      <Trophy
+                        className="h-3 w-3 text-[#F59E0B]"
+                        strokeWidth={2}
+                      />
+                    </span>
+                    {filterTournament === "all"
+                      ? "Турнір"
+                      : filterTournament.length > 15
+                        ? filterTournament.slice(0, 15) + "…"
+                        : filterTournament}
+                    <ChevronDown
+                      className="h-3.5 w-3.5 opacity-60"
+                      strokeWidth={2}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl p-1 max-h-64 overflow-y-auto">
+                  <DropdownMenuItem
+                    onClick={() => setFilterTournament("all")}
+                    className="rounded-lg"
+                  >
+                    Всі турніри
+                  </DropdownMenuItem>
+                  {tournamentOptions.map((t) => (
+                    <DropdownMenuItem
+                      key={t}
+                      onClick={() => setFilterTournament(t)}
+                      className="rounded-lg text-sm"
+                    >
+                      {t}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
