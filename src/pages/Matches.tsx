@@ -65,6 +65,13 @@ import {
   buildHltvUrl,
   type ApiMatch,
 } from "@/lib/csApi";
+import {
+  fetchDota2Matches,
+  parseDota2MatchType,
+  parseDota2MatchContext,
+  buildTipsGgUrl,
+  type Dota2ApiMatch,
+} from "@/lib/dota2Api";
 
 // Form Stability Types
 type FormStability =
@@ -104,7 +111,8 @@ interface Match {
   }[];
   context: string;
   tier: "tier1" | "tier2" | "tier3";
-  matchType: "Bo1" | "Bo3" | "Bo5";
+  matchType: "Bo1" | "Bo2" | "Bo3" | "Bo5";
+  game: "CS2" | "Dota2";
   upsetProbability: number;
   url?: string;
   score1?: number;
@@ -144,9 +152,15 @@ const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
   }
 };
 
-function apiMatchToMatch(apiMatch: ApiMatch): Match {
+function apiMatchToMatch(
+  apiMatch: ApiMatch,
+  game: "CS2" | "Dota2" = "CS2",
+): Match {
   const matchType = parseMatchType(apiMatch.type);
-  const context = parseMatchContext(apiMatch.type, apiMatch.link);
+  const context =
+    game === "CS2"
+      ? parseMatchContext(apiMatch.type, apiMatch.link)
+      : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
   const tier = determineTier(apiMatch.positionTeam1, apiMatch.positionTeam2);
   const favorite = determineFavorite(
     apiMatch.nameTeam1,
@@ -225,7 +239,10 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     tier,
     matchType,
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
-    url: buildHltvUrl(apiMatch.link),
+    url:
+      game === "CS2"
+        ? buildHltvUrl(apiMatch.link)
+        : buildTipsGgUrl(apiMatch.link),
     score1: apiMatch.score1,
     score2: apiMatch.score2,
     matchStatus: status,
@@ -238,6 +255,56 @@ function apiMatchToMatch(apiMatch: ApiMatch): Match {
     bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
     bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
     stars: apiMatch.stars,
+    game,
+  };
+}
+
+/** Convert a Dota2 API match to unified Match format */
+function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
+  return {
+    id: `dota-${m.id}`,
+    date: m.date,
+    team1: m.nameTeam1,
+    team2: m.nameTeam2,
+    favorite:
+      (m.predictionPercentTeam1 ?? 0) >= (m.predictionPercentTeam2 ?? 0)
+        ? m.nameTeam1
+        : m.nameTeam2,
+    aiConfidence: Math.max(
+      m.predictionPercentTeam1 ?? 50,
+      m.predictionPercentTeam2 ?? 50,
+    ),
+    risk: 30,
+    comment: "",
+    aiSummary: "",
+    odds: {
+      team1: m.bettingCoefficientTeam1 ?? 0,
+      team2: m.bettingCoefficientTeam2 ?? 0,
+    },
+    winRate: Math.max(
+      m.predictionPercentTeam1 ?? 50,
+      m.predictionPercentTeam2 ?? 50,
+    ),
+    formStability: "stable",
+    playerForm: [],
+    context: parseDota2MatchContext(m),
+    tier: "tier2",
+    matchType: parseDota2MatchType(m.type) as "Bo2" | "Bo3" | "Bo5",
+    upsetProbability: 25,
+    url: buildTipsGgUrl(m.link),
+    score1: m.score1,
+    score2: m.score2,
+    matchStatus: m.score1 > 0 || m.score2 > 0 ? "live" : "upcoming",
+    positionTeam1: m.positionTeam1,
+    positionTeam2: m.positionTeam2,
+    logoTeam1: m.logoTeam1,
+    logoTeam2: m.logoTeam2,
+    predictionPercentTeam1: m.predictionPercentTeam1,
+    predictionPercentTeam2: m.predictionPercentTeam2,
+    bettingCoefficientTeam1: m.bettingCoefficientTeam1,
+    bettingCoefficientTeam2: m.bettingCoefficientTeam2,
+    stars: m.stars,
+    game: "Dota2",
   };
 }
 
@@ -291,15 +358,20 @@ const loadVisibleColumns = (): Set<string> => {
   return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
 };
 
-/** Get Ukrainian day of week short name */
-/** Format date key for grouping: "YYYY-MM-DD" */
+/** Format date key for grouping: "YYYY-MM-DD". Safe for UTC-only date strings. */
 const getDateKey = (dateStr: string): string => {
+  // "YYYY-MM-DD" already — use directly (avoids new Date() UTC shift)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // Full ISO 8601 with timezone — parse normally
   const d = new Date(dateStr);
   return d.toISOString().split("T")[0];
 };
 
-/** Format full date title: "Counter-Strike matches (Четвер, 18.06.2026)" */
-const formatFullDateTitle = (dateKey: string): string => {
+/** Format full date title: "Матчі (П'ятниця, 10.07.2026)" — game-aware */
+const formatFullDateTitle = (
+  dateKey: string,
+  gameFilter: "all" | "CS2" | "Dota2",
+): string => {
   const d = new Date(dateKey + "T12:00:00");
   const dayNames = [
     "Неділя",
@@ -316,7 +388,13 @@ const formatFullDateTitle = (dateKey: string): string => {
     month: "2-digit",
     year: "numeric",
   });
-  return `Counter-Strike matches (${dayFull}, ${formatted})`;
+  const prefix =
+    gameFilter === "CS2"
+      ? "CS2 матчі"
+      : gameFilter === "Dota2"
+        ? "Dota 2 матчі"
+        : "Матчі";
+  return `${prefix} (${dayFull}, ${formatted})`;
 };
 
 /** Get today's date key in YYYY-MM-DD format */
@@ -353,6 +431,7 @@ export default function Matches() {
   const [filterMatchType, setFilterMatchType] = useState<
     "all" | "Bo1" | "Bo3" | "Bo5"
   >("all");
+  const [filterGame, setFilterGame] = useState<"all" | "CS2" | "Dota2">("all");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "upcoming" | "live" | "finished"
   >("all");
@@ -410,6 +489,7 @@ export default function Matches() {
 
   // Reset all filters
   const resetAllFilters = () => {
+    setFilterGame("all");
     setFilterStatus("all");
     setFilterTier("all");
     setFilterMatchType("all");
@@ -425,6 +505,7 @@ export default function Matches() {
 
   // Check if any filter is active
   const hasActiveFilters =
+    filterGame !== "all" ||
     filterStatus !== "all" ||
     filterTier !== "all" ||
     filterMatchType !== "all" ||
@@ -525,10 +606,34 @@ export default function Matches() {
 
   const loadMatchesFromApi = async () => {
     try {
-      const apiMatches = await fetchTodaysAndUpcomingMatches();
-      if (apiMatches && apiMatches.length > 0) {
-        const converted = apiMatches.map(apiMatchToMatch);
-        setMatches(converted);
+      const allMatches: Match[] = [];
+
+      // Fetch CS2 matches
+      try {
+        const csApiMatches = await fetchTodaysAndUpcomingMatches();
+        if (csApiMatches && csApiMatches.length > 0) {
+          allMatches.push(
+            ...csApiMatches.map((m) => apiMatchToMatch(m, "CS2")),
+          );
+        }
+      } catch (csErr) {
+        if (import.meta.env.DEV)
+          console.warn("[Matches] CS2 API error:", csErr);
+      }
+
+      // Fetch Dota 2 matches
+      try {
+        const dotaApiMatches = await fetchDota2Matches();
+        if (dotaApiMatches && dotaApiMatches.length > 0) {
+          allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
+        }
+      } catch (dotaErr) {
+        if (import.meta.env.DEV)
+          console.warn("[Matches] Dota2 API error:", dotaErr);
+      }
+
+      if (allMatches.length > 0) {
+        setMatches(allMatches);
       }
       setApiError(null);
     } catch (error) {
@@ -650,8 +755,12 @@ export default function Matches() {
     loadRiskyTeams(); // refresh from localStorage
   };
 
+  // Count per game for stats (use date-displayed matches for consistency)
+
   // Apply filters
   const filteredMatches = matches.filter((match) => {
+    if (filterGame === "CS2" && match.game !== "CS2") return false;
+    if (filterGame === "Dota2" && match.game !== "Dota2") return false;
     if (filterTier !== "all" && match.tier !== filterTier) return false;
     if (filterConfidence === "high" && match.aiConfidence <= 80) return false;
     if (
@@ -739,6 +848,14 @@ export default function Matches() {
     (m) => m.matchStatus === "finished",
   ).length;
 
+  // Per-game displayed counts for stats card
+  const cs2DisplayedCount = displayedMatches.filter(
+    (m) => m.game === "CS2",
+  ).length;
+  const dota2DisplayedCount = displayedMatches.filter(
+    (m) => m.game === "Dota2",
+  ).length;
+
   const toggleSort = (
     column: "date" | "confidence" | "risk" | "upset" | "status",
   ) => {
@@ -758,12 +875,34 @@ export default function Matches() {
     setIsLoading(true);
     try {
       toast("🔄 Завантаження матчів...", { description: "Оновлення з API" });
-      const apiMatches = await fetchTodaysAndUpcomingMatches();
-      if (apiMatches && apiMatches.length > 0) {
-        const converted = apiMatches.map(apiMatchToMatch);
-        setMatches(converted);
+      const allMatches: Match[] = [];
+
+      try {
+        const csApiMatches = await fetchTodaysAndUpcomingMatches();
+        if (csApiMatches && csApiMatches.length > 0) {
+          allMatches.push(
+            ...csApiMatches.map((m) => apiMatchToMatch(m, "CS2")),
+          );
+        }
+      } catch (csErr) {
+        if (import.meta.env.DEV)
+          console.warn("[Matches] CS2 refresh error:", csErr);
+      }
+
+      try {
+        const dotaApiMatches = await fetchDota2Matches();
+        if (dotaApiMatches && dotaApiMatches.length > 0) {
+          allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
+        }
+      } catch (dotaErr) {
+        if (import.meta.env.DEV)
+          console.warn("[Matches] Dota2 refresh error:", dotaErr);
+      }
+
+      if (allMatches.length > 0) {
+        setMatches(allMatches);
         toast.success("✅ Матчі оновлено!", {
-          description: `Завантажено ${converted.length} матчів`,
+          description: `Завантажено ${allMatches.length} матчів`,
         });
       } else {
         toast.warning("⚠️ Матчі не знайдено", {
@@ -772,7 +911,9 @@ export default function Matches() {
       }
     } catch (error) {
       toast.error("❌ Помилка завантаження", {
-        description: `${error instanceof Error ? error.message : "Unknown error"}`,
+        description: `${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       });
     } finally {
       setIsLoading(false);
@@ -931,11 +1072,14 @@ export default function Matches() {
                   {displayCount}
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[#22C55E]"
-                    strokeWidth={2.5}
-                  />
-                  <span className="text-sm text-[#4B5563]">на сьогодні</span>
+                  <span className="text-sm font-semibold text-[#D97706]">
+                    CS2 {cs2DisplayedCount}
+                  </span>
+                  <span className="text-sm text-[#9CA3AF]">—</span>
+                  <span className="text-sm font-semibold text-[#7C3AED]">
+                    Dota {dota2DisplayedCount}
+                  </span>
+                  <span className="text-sm text-[#4B5563]">матчів</span>
                 </div>
               </div>
 
@@ -1335,29 +1479,27 @@ export default function Matches() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Risk filter — pill dropdown */}
+              {/* Game filter — pill dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
-                      filterRisk !== "all"
+                      filterGame !== "all"
                         ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#EF4444]/10">
-                      <Shield
-                        className="h-3 w-3 text-[#EF4444]"
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#8B5CF6]/10">
+                      <Layers
+                        className="h-3 w-3 text-[#8B5CF6]"
                         strokeWidth={2}
                       />
                     </span>
-                    {filterRisk === "all"
-                      ? "Ризик"
-                      : filterRisk === "safe"
-                        ? "Низький"
-                        : filterRisk === "moderate"
-                          ? "Помірний"
-                          : "Високий"}
+                    {filterGame === "all"
+                      ? "Гра"
+                      : filterGame === "CS2"
+                        ? "CS2"
+                        : "Dota 2"}
                     <ChevronDown
                       className="h-3.5 w-3.5 opacity-60"
                       strokeWidth={2}
@@ -1366,28 +1508,22 @@ export default function Matches() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
                   <DropdownMenuItem
-                    onClick={() => setFilterRisk("all")}
+                    onClick={() => setFilterGame("all")}
                     className="rounded-lg"
                   >
-                    Всі рівні
+                    Всі ігри
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => setFilterRisk("safe")}
+                    onClick={() => setFilterGame("CS2")}
                     className="rounded-lg"
                   >
-                    Низький
+                    🔫 CS2
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => setFilterRisk("moderate")}
+                    onClick={() => setFilterGame("Dota2")}
                     className="rounded-lg"
                   >
-                    Помірний
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterRisk("high")}
-                    className="rounded-lg"
-                  >
-                    Високий
+                    🛡️ Dota 2
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1486,7 +1622,7 @@ export default function Matches() {
                             />
                           </div>
                           <span className="text-2xl font-bold text-[#111827] tracking-tight">
-                            {formatFullDateTitle(dateKey)}
+                            {formatFullDateTitle(dateKey, filterGame)}
                           </span>
                           <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
                             {dateMatches.length}

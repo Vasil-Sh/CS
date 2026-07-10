@@ -44,7 +44,8 @@ interface Match {
   favorite: string;
   aiConfidence: number;
   risk: number;
-  matchType: "Bo1" | "Bo3" | "Bo5";
+  matchType: "Bo1" | "Bo2" | "Bo3" | "Bo5";
+  game?: "CS2" | "Dota2";
   tier: "tier1" | "tier2" | "tier3";
   formStability: FormStability;
   context?: string;
@@ -476,6 +477,17 @@ export default function MatchRow({
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {match.game && (
+                  <Badge
+                    className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
+                      match.game === "CS2"
+                        ? "bg-[#FEF3C7] text-[#92400E]"
+                        : "bg-[#EDE9FE] text-[#5B21B6]"
+                    }`}
+                  >
+                    {match.game}
+                  </Badge>
+                )}
                 <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                   {match.matchType}
                 </Badge>
