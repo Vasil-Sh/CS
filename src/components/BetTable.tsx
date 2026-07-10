@@ -413,7 +413,7 @@ const BetTableMemo = memo(function BetTable({
       return (
         <div
           key={idx}
-          className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
         >
           <span className="flex-shrink-0 text-lg leading-none">
             {isWin ? "✅" : "✖️"}
@@ -421,7 +421,7 @@ const BetTableMemo = memo(function BetTable({
           <span className="flex-shrink-0 text-base font-bold text-gray-800 w-12 text-right tabular-nums">
             {odds}
           </span>
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white border border-gray-200 overflow-hidden flex items-center justify-center">
+          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
             <img
               src={logoUrl || teamPlaceholder}
               alt={selectedTeam}
@@ -1230,7 +1230,9 @@ const BetTableMemo = memo(function BetTable({
           <div className="border-t border-[#E5E7EB]" />
           <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-[#F3F4F6]">
             {compactRows.length > 0 ? (
-              <div className="space-y-2">{compactRows}</div>
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                {compactRows}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="p-6 bg-gray-100 rounded-2xl inline-block mb-4">
