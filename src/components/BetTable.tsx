@@ -152,6 +152,9 @@ const BetTableMemo = memo(function BetTable({
 }: BetTableProps) {
   const [notesDialogBet, setNotesDialogBet] = useState<string>("");
   const [showCompactResults, setShowCompactResults] = useState(false);
+  const [compactPeriodFilter, setCompactPeriodFilter] = useState<
+    "day" | "week" | "month" | "all"
+  >("all");
   const hasActiveAdvancedFilters =
     resultFilter !== "all" || periodFilter !== "all" || sortBy !== "date";
 
@@ -385,12 +388,31 @@ const BetTableMemo = memo(function BetTable({
     return null;
   }
 
+  /** Filter completed bets by compactPeriodFilter */
+  const filteredCompletedBets = useMemo(() => {
+    const completed = sortedAndFilteredBets.filter(
+      (b) => b.result === "Win" || b.result === "Loss",
+    );
+    if (compactPeriodFilter === "all") return completed.slice(0, 100);
+    const now = new Date();
+    const todayStr = getTodayStr();
+    return completed
+      .filter((b) => {
+        const betDate = normalizeDateStr(b.date);
+        if (compactPeriodFilter === "day") return betDate === todayStr;
+        const diffDays = Math.floor(
+          (now.getTime() - new Date(betDate).getTime()) / 86400000,
+        );
+        if (compactPeriodFilter === "week") return diffDays <= 7;
+        if (compactPeriodFilter === "month") return diffDays <= 30;
+        return true;
+      })
+      .slice(0, 100);
+  }, [sortedAndFilteredBets, compactPeriodFilter]);
+
   // Build compact results text (for clipboard copy)
   const compactResultsText = useMemo(() => {
-    const completed = sortedAndFilteredBets
-      .filter((b) => b.result === "Win" || b.result === "Loss")
-      .slice(0, 100);
-    return completed
+    return filteredCompletedBets
       .map((b) => {
         const icon = b.result === "Win" ? "✅" : "✕";
         const odds = Number(b.odds).toFixed(2);
@@ -401,14 +423,11 @@ const BetTableMemo = memo(function BetTable({
         return `${icon}~${odds}. ${selectedTeam}, ${betDesc}`;
       })
       .join("\n");
-  }, [sortedAndFilteredBets]);
+  }, [filteredCompletedBets]);
 
   // Build rendered rows with team icons
   const compactRows = useMemo(() => {
-    const completed = sortedAndFilteredBets
-      .filter((b) => b.result === "Win" || b.result === "Loss")
-      .slice(0, 100);
-    return completed.map((b, idx) => {
+    return filteredCompletedBets.map((b, idx) => {
       const isWin = b.result === "Win";
       const odds = Number(b.odds).toFixed(2);
       const selectedTeam =
@@ -459,7 +478,7 @@ const BetTableMemo = memo(function BetTable({
         </div>
       );
     });
-  }, [sortedAndFilteredBets]);
+  }, [filteredCompletedBets]);
 
   const handleCopyCompact = () => {
     navigator.clipboard.writeText(compactResultsText).then(() => {
@@ -1249,6 +1268,42 @@ const BetTableMemo = memo(function BetTable({
             </div>
           </DialogHeader>
           <div className="border-t border-[#E5E7EB]" />
+          {/* Period filter */}
+          <div className="px-6 py-3 bg-white border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
+              <span className="text-sm text-gray-500 font-medium">Період:</span>
+              {(
+                [
+                  ["all", "Всі"],
+                  ["day", "День"],
+                  ["week", "Тиждень"],
+                  ["month", "Місяць"],
+                ] as const
+              ).map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => setCompactPeriodFilter(val)}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    compactPeriodFilter === val
+                      ? "bg-gray-900 text-white shadow-sm"
+                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+              <span className="ml-auto text-sm text-gray-400">
+                {filteredCompletedBets.length}{" "}
+                {filteredCompletedBets.length === 1
+                  ? "запис"
+                  : filteredCompletedBets.length >= 2 &&
+                      filteredCompletedBets.length <= 4
+                    ? "записи"
+                    : "записів"}
+              </span>
+            </div>
+          </div>
           <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-[#F3F4F6]">
             {compactRows.length > 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
