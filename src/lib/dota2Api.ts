@@ -29,6 +29,7 @@ export interface Dota2ApiMatch {
   bettingCoefficientTeam2: number | null;
   tournament: string;
   stage: string;
+  status: "upcoming" | "live" | "finished";
 }
 
 interface TipsGgApiMatch {
@@ -54,7 +55,7 @@ interface TipsGgApiMatch {
   coeff2: number | null;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v3";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v4";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -89,6 +90,7 @@ function tipsGgToApiMatch(m: TipsGgApiMatch, index: number): Dota2ApiMatch {
       (m.pred2 > 0 ? Math.round((100 / m.pred2) * 100) / 100 : null),
     tournament: m.tournament || "",
     stage: m.stage || "",
+    status: m.status,
   };
 }
 
