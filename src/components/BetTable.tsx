@@ -422,30 +422,37 @@ const BetTableMemo = memo(function BetTable({
       return (
         <div
           key={idx}
-          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors"
         >
           <span
-            className={`flex-shrink-0 text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
+            className={`flex-shrink-0 w-8 text-center text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
           >
             {isWin ? "✅" : "✕"}
           </span>
-          <span className="flex-shrink-0 text-base font-bold text-gray-800 w-12 text-right tabular-nums">
+          <span className="flex-shrink-0 w-14 text-right text-base font-bold text-gray-800 tabular-nums">
             {odds}
           </span>
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-            <img
-              src={logoUrl || teamPlaceholder}
-              alt={selectedTeam}
-              className="w-5 h-5 object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = teamPlaceholder;
-              }}
-            />
+          <div className="flex-shrink-0 w-8 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+              <img
+                src={logoUrl || teamPlaceholder}
+                alt={selectedTeam}
+                className="w-5 h-5 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = teamPlaceholder;
+                }}
+              />
+            </div>
           </div>
-          <span className="text-base font-semibold text-gray-900 whitespace-nowrap">
+          <span
+            className="flex-shrink-0 w-28 text-base font-semibold text-gray-900 truncate"
+            title={selectedTeam}
+          >
             {selectedTeam}
           </span>
-          <span className="text-base text-gray-500">{betDesc}</span>
+          <span className="flex-1 text-base text-gray-500 truncate">
+            {betDesc}
+          </span>
         </div>
       );
     });
