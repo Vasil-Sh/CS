@@ -446,7 +446,6 @@ const BetTableMemo = memo(function BetTable({
               />
             </div>
           </div>
-          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <span
             className="flex-shrink-0 w-24 text-center text-base font-semibold text-gray-900 truncate"
             title={selectedTeam}
