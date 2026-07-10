@@ -1362,9 +1362,9 @@ const BetTableMemo = memo(function BetTable({
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-8 bg-white rounded-3xl inline-block mb-6 shadow-sm border border-gray-200">
+                <div className="p-6 bg-white rounded-2xl inline-block mb-6 shadow-sm border border-gray-200">
                   <ListChecks
-                    className="h-16 w-16 text-gray-300"
+                    className="h-11 w-11 text-gray-300"
                     strokeWidth={1.5}
                   />
                 </div>
