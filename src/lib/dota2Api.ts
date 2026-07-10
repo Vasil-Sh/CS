@@ -37,7 +37,7 @@ interface TipsGgApiMatch {
   coeff2: number | null;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v6";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v7";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -58,8 +58,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch, index: number): Dota2ApiMatch {
     lastChangeDateTeam2: null,
     positionTeam1: null,
     positionTeam2: null,
-    logoTeam1: proxyLogo(m.logoTeam1),
-    logoTeam2: proxyLogo(m.logoTeam2),
+    logoTeam1: m.logoTeam1,
+    logoTeam2: m.logoTeam2,
     predictionPercentTeam1: m.pred1,
     predictionPercentTeam2: m.pred2,
     bettingCoefficientTeam1:
@@ -72,18 +72,6 @@ function tipsGgToApiMatch(m: TipsGgApiMatch, index: number): Dota2ApiMatch {
     stage: m.stage || "",
     status: m.status,
   };
-}
-
-/** Proxy logo URLs through backend to avoid CORS/blocking issues */
-function proxyLogo(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const filename = url.split('/').pop();
-    if (!filename) return url;
-    return `/api/v1/dota2-matches/logo/${filename}`;
-  } catch {
-    return url;
-  }
 }
 
 function getCache(): Dota2ApiMatch[] | null {

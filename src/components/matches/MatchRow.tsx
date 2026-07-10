@@ -130,21 +130,18 @@ const PredictionBar = ({
   team1,
   team2,
   aiPrediction,
-  game,
 }: {
   percent1: number;
   percent2: number;
   team1: string;
   team2: string;
   aiPrediction?: AIRecommendation | null;
-  game?: "CS2" | "Dota2";
 }) => {
   const total = percent1 + percent2;
   const w1 = total > 0 ? Math.round((percent1 / total) * 100) : 50;
   const w2 = total > 0 ? 100 - w1 : 50;
   const isFav = percent1 >= percent2;
   const hasPrediction = total > 0;
-  const sourceLabel = game === "Dota2" ? "TipsGG" : "HLTV";
   const aiTeam1 = aiPrediction?.prediction === team1;
   const aiTeam2 = aiPrediction?.prediction === team2;
   const aiConf = aiPrediction?.confidence ?? 0;
@@ -160,10 +157,6 @@ const PredictionBar = ({
               className={isFav ? "font-bold text-[#111827]" : "text-[#4B5563]"}
             >
               {percent1}%
-            </span>
-            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
-              <TrendingUp className="h-3 w-3" strokeWidth={1.5} />
-              {sourceLabel}
             </span>
             <span
               className={!isFav ? "font-bold text-[#111827]" : "text-[#4B5563]"}
@@ -570,7 +563,6 @@ export default function MatchRow({
               team1={match.team1}
               team2={match.team2}
               aiPrediction={aiPredictions[match.id]}
-              game={match.game}
             />
           ) : (
             <Tooltip>
