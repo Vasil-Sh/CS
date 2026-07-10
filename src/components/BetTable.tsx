@@ -422,30 +422,28 @@ const BetTableMemo = memo(function BetTable({
       return (
         <div
           key={idx}
-          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors"
+          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors gap-3"
         >
           <span
-            className={`flex-shrink-0 w-8 text-center text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
+            className={`flex-shrink-0 w-6 text-center text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
           >
             {isWin ? "✅" : "✕"}
           </span>
-          <span className="flex-shrink-0 w-14 text-right text-base font-bold text-gray-800 tabular-nums">
+          <span className="flex-shrink-0 w-12 text-right text-base font-bold text-gray-800 tabular-nums">
             {odds}
           </span>
-          <div className="flex-shrink-0 w-8 flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-              <img
-                src={logoUrl || teamPlaceholder}
-                alt={selectedTeam}
-                className="w-5 h-5 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = teamPlaceholder;
-                }}
-              />
-            </div>
+          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+            <img
+              src={logoUrl || teamPlaceholder}
+              alt={selectedTeam}
+              className="w-5 h-5 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = teamPlaceholder;
+              }}
+            />
           </div>
           <span
-            className="flex-shrink-0 w-28 text-base font-semibold text-gray-900 truncate"
+            className="flex-shrink-0 w-24 text-base font-semibold text-gray-900 truncate"
             title={selectedTeam}
           >
             {selectedTeam}
