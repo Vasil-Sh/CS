@@ -434,8 +434,8 @@ const BetTableMemo = memo(function BetTable({
             {odds}
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <div className="flex-shrink-0 w-10 flex justify-center">
-            <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+          <div className="flex-shrink-0 flex items-center gap-1.5 w-32">
+            <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0">
               <img
                 src={logoUrl || teamPlaceholder}
                 alt={selectedTeam}
@@ -445,13 +445,13 @@ const BetTableMemo = memo(function BetTable({
                 }}
               />
             </div>
+            <span
+              className="text-base font-semibold text-gray-900 truncate"
+              title={selectedTeam}
+            >
+              {selectedTeam}
+            </span>
           </div>
-          <span
-            className="flex-shrink-0 w-24 text-center text-base font-semibold text-gray-900 truncate"
-            title={selectedTeam}
-          >
-            {selectedTeam}
-          </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <span className="flex-1 pl-3 text-base text-gray-500 truncate">
             {betDesc}
