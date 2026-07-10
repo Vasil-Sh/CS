@@ -5,32 +5,14 @@
  */
 
 import { api } from "./apiClient";
+import type { BaseApiMatch } from "./matchTypes";
 
-// Shape matches csApi.ts ApiMatch for compatibility
-export interface Dota2ApiMatch {
-  id: number;
-  date: string;
-  link: string;
-  type: string;
-  score1: number;
-  score2: number;
-  stars: number;
-  nameTeam1: string;
-  nameTeam2: string;
-  lastChangeDateTeam1: string | null;
-  lastChangeDateTeam2: string | null;
-  positionTeam1: number | null;
-  positionTeam2: number | null;
-  logoTeam1: string | null;
-  logoTeam2: string | null;
-  predictionPercentTeam1: number | null;
-  predictionPercentTeam2: number | null;
-  bettingCoefficientTeam1: number | null;
-  bettingCoefficientTeam2: number | null;
+// Extends unified match type with Dota-specific fields
+export type Dota2ApiMatch = BaseApiMatch & {
   tournament: string;
   stage: string;
   status: "upcoming" | "live" | "finished";
-}
+};
 
 interface TipsGgApiMatch {
   id: string;
