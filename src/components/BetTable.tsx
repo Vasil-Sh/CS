@@ -1274,7 +1274,7 @@ const BetTableMemo = memo(function BetTable({
 
       {/* Compact Results Modal */}
       <Dialog open={showCompactResults} onOpenChange={setShowCompactResults}>
-        <DialogContent className="max-w-xl border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
+        <DialogContent className="max-w-[40rem] border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
           <DialogHeader className="px-6 pt-5 pb-4">
             <div className="flex items-center justify-between">
               <DialogTitle>
