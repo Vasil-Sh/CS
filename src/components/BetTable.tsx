@@ -334,10 +334,7 @@ const BetTableMemo = memo(function BetTable({
     // Map patterns
     if (/^Map\d/.test(desc)) {
       desc = desc
-        .replace(
-          /^Map(\d+)_HC_T(\d+)\+?([\d.]+)/,
-          "Карта $1: Фора +$3 ($2 матч)",
-        )
+        .replace(/^Map(\d+)_HC_T(\d+)\+?([\d.]+)/, "Карта $1: Фора +$3")
         .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
         .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
         .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
@@ -362,18 +359,30 @@ const BetTableMemo = memo(function BetTable({
   }
 
   /** Get logo URL for the selected team of a bet */
-  function getSelectedTeamLogo(bet: Bet): string | null {
-    const sel = (bet.selection || "").trim().toLowerCase();
-    const t1 = (bet.team1 || "").trim().toLowerCase();
-    const t2 = (bet.team2 || "").trim().toLowerCase();
-    if (sel && t1 && sel === t1) return bet.logoTeam1 || null;
-    if (sel && t2 && sel === t2) return bet.logoTeam2 || null;
-    // Partial match
-    if (sel && t1 && (t1.includes(sel) || sel.includes(t1)))
+  function getSelectedTeamLogo(bet: Bet, selectedTeam: string): string | null {
+    const sel = selectedTeam.toLowerCase().trim();
+    if (!sel) return null;
+    const t1 = (bet.team1 || "").toLowerCase().trim();
+    const t2 = (bet.team2 || "").toLowerCase().trim();
+    // Exact match
+    if (t1 && sel === t1) return bet.logoTeam1 || null;
+    if (t2 && sel === t2) return bet.logoTeam2 || null;
+    // Partial match (e.g. "9z" inside "9z Team")
+    if (t1 && (t1.includes(sel) || sel.includes(t1)))
       return bet.logoTeam1 || null;
-    if (sel && t2 && (t2.includes(sel) || sel.includes(t2)))
+    if (t2 && (t2.includes(sel) || sel.includes(t2)))
       return bet.logoTeam2 || null;
-    return bet.logoTeam1 || null;
+    // Try match field: "Team1 vs Team2"
+    const matchParts = (bet.match || "").toLowerCase().split(/\s+vs\s+/);
+    if (matchParts.length === 2) {
+      const m1 = matchParts[0].trim();
+      const m2 = matchParts[1].trim();
+      if (sel === m1 || m1.includes(sel) || sel.includes(m1))
+        return bet.logoTeam1 || null;
+      if (sel === m2 || m2.includes(sel) || sel.includes(m2))
+        return bet.logoTeam2 || null;
+    }
+    return null;
   }
 
   // Build compact results text (for clipboard copy)
@@ -406,7 +415,7 @@ const BetTableMemo = memo(function BetTable({
         b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
       const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
       const betDesc = humanizeBetType(rawDesc);
-      const logoUrl = getSelectedTeamLogo(b);
+      const logoUrl = getSelectedTeamLogo(b, selectedTeam);
       const teamPlaceholder = (b.game || "").toLowerCase().startsWith("cs")
         ? "/assets/team-placeholder.svg"
         : "/assets/team-placeholder-dota.svg";
@@ -415,7 +424,9 @@ const BetTableMemo = memo(function BetTable({
           key={idx}
           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
         >
-          <span className="flex-shrink-0 text-lg leading-none">
+          <span
+            className={`flex-shrink-0 text-lg leading-none ${isWin ? "" : "text-red-500"}`}
+          >
             {isWin ? "✅" : "✖️"}
           </span>
           <span className="flex-shrink-0 text-base font-bold text-gray-800 w-12 text-right tabular-nums">
