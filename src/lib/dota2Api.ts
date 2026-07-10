@@ -27,6 +27,8 @@ export interface Dota2ApiMatch {
   predictionPercentTeam2: number | null;
   bettingCoefficientTeam1: number | null;
   bettingCoefficientTeam2: number | null;
+  tournament: string;
+  stage: string;
 }
 
 interface TipsGgApiMatch {
@@ -48,7 +50,7 @@ interface TipsGgApiMatch {
   startDate: string;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v2";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -75,6 +77,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch, index: number): Dota2ApiMatch {
     predictionPercentTeam2: m.performer === m.nameTeam2 ? 55 : 45,
     bettingCoefficientTeam1: null,
     bettingCoefficientTeam2: null,
+    tournament: m.tournament || "",
+    stage: m.stage || "",
   };
 }
 

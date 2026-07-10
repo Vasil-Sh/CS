@@ -518,9 +518,7 @@ export default function MatchRow({
       {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {match.score1 !== undefined &&
-          match.score2 !== undefined &&
-          (match.score1 > 0 || match.score2 > 0 || isLive || isFinished) ? (
+          {match.score1 !== undefined && match.score2 !== undefined ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
                 className={`text-base font-bold ${isFinished && match.score1! > match.score2! ? "text-[#22C55E]" : isFinished && match.score1! < match.score2! ? "text-[#EF4444]" : "text-[#111827]"}`}

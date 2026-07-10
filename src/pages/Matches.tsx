@@ -287,7 +287,9 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     ),
     formStability: "stable",
     playerForm: [],
-    context: parseDota2MatchContext(m),
+    context: m.tournament
+      ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
+      : parseDota2MatchContext(m),
     tier: "tier2",
     matchType: parseDota2MatchType(m.type) as "Bo2" | "Bo3" | "Bo5",
     upsetProbability: 25,
@@ -1479,55 +1481,6 @@ export default function Matches() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Game filter — pill dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
-                      filterGame !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
-                    }`}
-                  >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#8B5CF6]/10">
-                      <Layers
-                        className="h-3 w-3 text-[#8B5CF6]"
-                        strokeWidth={2}
-                      />
-                    </span>
-                    {filterGame === "all"
-                      ? "Гра"
-                      : filterGame === "CS2"
-                        ? "CS2"
-                        : "Dota 2"}
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterGame("all")}
-                    className="rounded-lg"
-                  >
-                    Всі ігри
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterGame("CS2")}
-                    className="rounded-lg"
-                  >
-                    🔫 CS2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterGame("Dota2")}
-                    className="rounded-lg"
-                  >
-                    🛡️ Dota 2
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               {/* Column visibility toggle — pill dropdown with checkboxes */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1614,7 +1567,7 @@ export default function Matches() {
                   <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
                     <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
                       <CardTitle>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-wrap">
                           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]/10">
                             <Calendar
                               className="h-5 w-5 text-[#447afc]"
@@ -1627,6 +1580,39 @@ export default function Matches() {
                           <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
                             {dateMatches.length}
                           </Badge>
+                          {/* Game quick-toggle */}
+                          <div className="flex items-center gap-1 ml-auto">
+                            <button
+                              onClick={() => setFilterGame("all")}
+                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                filterGame === "all"
+                                  ? "bg-[#111827] text-white shadow-md"
+                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
+                              }`}
+                            >
+                              Всі
+                            </button>
+                            <button
+                              onClick={() => setFilterGame("CS2")}
+                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                filterGame === "CS2"
+                                  ? "bg-[#D97706] text-white shadow-md"
+                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
+                              }`}
+                            >
+                              CS2
+                            </button>
+                            <button
+                              onClick={() => setFilterGame("Dota2")}
+                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                filterGame === "Dota2"
+                                  ? "bg-[#7C3AED] text-white shadow-md"
+                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
+                              }`}
+                            >
+                              Dota 2
+                            </button>
+                          </div>
                         </div>
                       </CardTitle>
                     </CardHeader>
