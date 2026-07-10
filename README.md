@@ -55,15 +55,19 @@
 
 ### 🏆 Матчі (`/app/matches`)
 
-- Live-дані CS2/Dota2 з `api.cstest.pp.ua`
+- **CS2 + Dota 2** — live-дані з `api.cstest.pp.ua` + `tips.gg` (JSON-LD парсинг)
+- **Перемикач гри** — CS2 / Dota 2 / Всі з кольоровими лічильниками
+- **19+ матчів на день** — 14 сьогодні + 5 завтра (Dota 2), 8 CS2
+- **Коефіцієнти** — реальні букмекерські з predictions-сторінок
 - Картки матчів з логотипами, формами команд, tier-рейтингами, prediction bars
-- Пошук, фільтри (статус, tier, формат, рівень впевненості)
+- Пошук, фільтри (статус, tier, формат, турнір, рівень впевненості)
 - Multi-select → експрес-ставка
 - AI-рекомендації на кожен матч
+- **Live auto-refresh** — точкове оновлення рахунків/статусів (без повного перезавантаження)
 
-### 🤖 AI (DeepSeek)
+### 🤖 AI (DeepSeek + Gemini)
 
-- **DeepSeek Chat** — безкоштовний AI для прогнозів на матчі
+- **DeepSeek Chat** / **Gemini Flash** — безкоштовний AI для прогнозів на матчі
 - AIRecommendationModal з prediction, confidence, reasoning, risk level
 
 ### 🛡️ Ризиковані команди
@@ -211,6 +215,18 @@ src/
 
 ## 📝 Changelog
 
+### v1.24 — Липень 2026
+
+- **Dota 2 парсер**: 19 матчів/день з tips.gg (JSON-LD + curl), реальні коефіцієнти
+- **Game toggle**: перемикач CS2/Dota 2/All на сторінці матчів
+- **Live auto-refresh**: точкове оновлення рахунків (30s), без повного перезавантаження
+- **Tournament filter + sort by odds**: фільтр по турніру, сортування за коефіцієнтами
+- **Unified match types**: `matchTypes.ts` — `BaseApiMatch`, `ApiError`, `FetchResult`
+- **Gemini Flash**: безкоштовний AI fallback при відсутності DeepSeek ключа
+- **Backend**: circuit breaker + SWR + graceful degradation + file cache + rate limiting
+- **CI/CD**: GitHub Actions щоденний тест скрейпера
+- **Бета-фікси**: MapWinner → Переможець карти, ставки не губляться при перезавантаженні
+
 ### v1.23 — Липень 2026
 
 - **Дані API-first**: усі секції (ставки, цілі, стратегії, банкрол) пишуть/читають через backend API
@@ -278,6 +294,6 @@ Private — Всі права захищені.
 
 ---
 
-**Останнє оновлення**: 4 квітня 2026  
-**Версія**: 1.23 (основний репозиторій) + [CS-backend](https://github.com/Vasil-Sh/CS-backend) v1.23.80  
+**Останнє оновлення**: 10 липня 2026  
+**Версія**: 1.24 (основний репозиторій) + [CS-backend](https://github.com/Vasil-Sh/CS-backend) v1.24  
 **Репозиторій**: [https://github.com/Vasil-Sh/CS.git](https://github.com/Vasil-Sh/CS.git)
