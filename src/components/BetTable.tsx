@@ -518,7 +518,9 @@ const BetTableMemo = memo(function BetTable({
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <Calendar className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
+          <div className="p-2 bg-blue-50 rounded-xl">
+            <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+          </div>
           <span className="text-lg font-semibold text-gray-900">
             Останні записи
           </span>
