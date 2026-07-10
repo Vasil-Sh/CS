@@ -1362,13 +1362,13 @@ const BetTableMemo = memo(function BetTable({
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-6 bg-gray-100 rounded-2xl inline-block mb-4">
+                <div className="p-8 bg-blue-50 rounded-3xl inline-block mb-6">
                   <ListChecks
-                    className="h-10 w-10 text-gray-400"
+                    className="h-16 w-16 text-[#447afc]"
                     strokeWidth={1.5}
                   />
                 </div>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 text-base">
                   Немає завершених ставок для відображення
                 </p>
               </div>
