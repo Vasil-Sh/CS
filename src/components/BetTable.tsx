@@ -497,7 +497,7 @@ const BetTableMemo = memo(function BetTable({
             </span>
           </div>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span className="flex-1 text-center text-base text-gray-500 truncate">
+          <span className="flex-1 text-center text-base text-gray-800 truncate">
             {betDesc}
           </span>
         </div>
