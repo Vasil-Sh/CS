@@ -333,21 +333,17 @@ const BetTableMemo = memo(function BetTable({
       .map((b) => {
         const icon = b.result === "Win" ? "✅" : "✖️";
         const odds = Number(b.odds).toFixed(2);
-        // Extract selected team from betType (e.g., "Переможець матчу - NAVI" → "NAVI")
+        // Selected team: use selection field, or extract from betType (last part after dash)
         const selectedTeam =
-          b.selection ||
-          b.betType.match(/матчу?\s*[-–—]\s*(.+)/)?.[1] ||
-          b.team1 ||
-          "";
-        const gameEmoji = (b.game || "").toLowerCase().startsWith("cs")
-          ? "🎯"
-          : "🛡️";
+          b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
+        // Bet description: betType WITHOUT the selected team at the end
+        // e.g. "Карта 2: Фора +3.5 - 9z" → "Карта 2: Фора +3.5"
+        // e.g. "Переможець матчу - NA'VI" → "Победа матч"
         const betDesc = b.betType
-          .replace(/Переможець\s*матчу?\s*[-–—]\s*.+/, "Победа матч")
-          .replace(/Победа\s*матч\s*[-–—]\s*.+/, "Победа матч")
-          .replace(/^[^-–—]+[-–—]\s*/, "")
+          .replace(/\s*[-–—]\s*[^\-–—]+$/, "") // strip " - TeamName" at the end
+          .replace(/^Переможець\s*матчу?$/i, "Победа матч")
           .trim();
-        return `${icon}~${odds}. ${selectedTeam}${gameEmoji}, ${betDesc}`;
+        return `${icon}~${odds}. ${selectedTeam}, ${betDesc}`;
       })
       .join("\n");
   }, [sortedAndFilteredBets]);
