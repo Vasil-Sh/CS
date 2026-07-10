@@ -392,7 +392,7 @@ const BetTableMemo = memo(function BetTable({
       .slice(0, 100);
     return completed
       .map((b) => {
-        const icon = b.result === "Win" ? "✅" : "✖️";
+        const icon = b.result === "Win" ? "✅" : "✕";
         const odds = Number(b.odds).toFixed(2);
         const selectedTeam =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
@@ -425,9 +425,9 @@ const BetTableMemo = memo(function BetTable({
           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
         >
           <span
-            className={`flex-shrink-0 text-lg leading-none ${isWin ? "" : "text-red-500"}`}
+            className={`flex-shrink-0 text-lg leading-none font-bold ${isWin ? "" : "text-red-500"}`}
           >
-            {isWin ? "✅" : "✖️"}
+            {isWin ? "✅" : "✕"}
           </span>
           <span className="flex-shrink-0 text-base font-bold text-gray-800 w-12 text-right tabular-nums">
             {odds}
@@ -480,7 +480,7 @@ const BetTableMemo = memo(function BetTable({
           title="Стислий список результатів"
         >
           <ListChecks className="h-4 w-4" strokeWidth={1.5} />
-          Результати
+          Стислий список
         </button>
       </div>
 
