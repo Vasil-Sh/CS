@@ -525,6 +525,16 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
+  // Auto-refresh when there are live matches (every 60s)
+  const hasLiveMatches = matches.some((m) => m.matchStatus === "live");
+  useEffect(() => {
+    if (!hasLiveMatches) return;
+    const interval = setInterval(() => {
+      loadMatchesFromApi();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [hasLiveMatches]);
+
   const handleRateMatch = (matchId: string, rating: MatchRating) => {
     setMatchRatings((prev) => {
       const current = prev[matchId];
