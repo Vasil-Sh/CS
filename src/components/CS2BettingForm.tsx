@@ -60,6 +60,7 @@ export interface MatchPrefillData {
   odds?: string;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  game?: "CS2" | "Dota2";
 }
 
 interface CS2BettingFormProps {
@@ -213,7 +214,16 @@ export default function CS2BettingForm({
       expressMatchesData && expressMatchesData.length >= 2
         ? "Експрес"
         : "Ординар";
-    return getDefaultFormData(undefined, initialCategory);
+    const defaults = getDefaultFormData(undefined, initialCategory);
+    // If prefillData has a game, use it from the start (avoids flash of CS2)
+    if (prefillData?.game) {
+      defaults.game = prefillData.game;
+      // Also set format to match (BO2 for Dota)
+      if (prefillData.format) {
+        defaults.format = prefillData.format;
+      }
+    }
+    return defaults;
   });
 
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>(() => {
@@ -240,6 +250,8 @@ export default function CS2BettingForm({
   }>({});
   const strategyLoadedRef = useRef(false);
   const strategiesRef = useRef<CS2Strategy[]>([]);
+  const onPrefillConsumedRef = useRef(onPrefillConsumed);
+  onPrefillConsumedRef.current = onPrefillConsumed;
 
   // Load strategies from localStorage on mount
   useEffect(() => {
@@ -310,6 +322,7 @@ export default function CS2BettingForm({
 
       const formatMap: Record<string, string> = {
         Bo1: "BO1",
+        Bo2: "BO2",
         Bo3: "BO3",
         Bo5: "BO5",
       };
@@ -325,9 +338,10 @@ export default function CS2BettingForm({
         date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
         matchUrl: prefillData.matchUrl || "",
         odds: prefillData.odds || "",
+        game: prefillData.game || prev.game,
       }));
       setTimeout(() => {
-        onPrefillConsumed?.();
+        onPrefillConsumedRef.current?.();
       }, 0);
       toast.success("Дані матчу підставлено у форму");
     }
@@ -335,7 +349,7 @@ export default function CS2BettingForm({
     if (!prefillData) {
       prefillConsumedRef.current = false;
     }
-  }, [prefillData, onPrefillConsumed]);
+  }, [prefillData]);
 
   useEffect(() => {
     if (

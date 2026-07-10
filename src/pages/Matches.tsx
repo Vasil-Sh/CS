@@ -548,6 +548,7 @@ export default function Matches() {
           matchUrl: match.url || "",
           logoTeam1: match.logoTeam1,
           logoTeam2: match.logoTeam2,
+          game: match.game,
         },
       },
     });
