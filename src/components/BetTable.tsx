@@ -532,10 +532,12 @@ const BetTableMemo = memo(function BetTable({
         </div>
         <button
           onClick={() => setShowCompactResults(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-700 transition-all duration-200"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-700 transition-all duration-200"
           title="Стислий список результатів"
         >
-          <ListChecks className="h-4 w-4" strokeWidth={1.5} />
+          <div className="p-1 bg-blue-50 rounded-lg">
+            <ListChecks className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+          </div>
           Стислий список
         </button>
       </div>
