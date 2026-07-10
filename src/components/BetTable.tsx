@@ -155,6 +155,23 @@ const BetTableMemo = memo(function BetTable({
   const [compactPeriodFilter, setCompactPeriodFilter] = useState<
     "day" | "week" | "month" | "all"
   >("all");
+  const [compactMonth, setCompactMonth] = useState<string>("");
+
+  /** Build 12-month dropdown options (current month back to 11 months ago, newest first) */
+  const monthOptions = useMemo(() => {
+    const months: { value: string; label: string }[] = [];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("uk-UA", {
+        month: "long",
+        year: "numeric",
+      });
+      months.push({ value, label });
+    }
+    return months;
+  }, []);
   const hasActiveAdvancedFilters =
     resultFilter !== "all" || periodFilter !== "all" || sortBy !== "date";
 
@@ -404,11 +421,19 @@ const BetTableMemo = memo(function BetTable({
           (now.getTime() - new Date(betDate).getTime()) / 86400000,
         );
         if (compactPeriodFilter === "week") return diffDays <= 7;
+        if (compactPeriodFilter === "month" && compactMonth) {
+          const [y, m] = compactMonth.split("-").map(Number);
+          return (
+            betDate.startsWith(compactMonth) ||
+            (new Date(betDate).getFullYear() === y &&
+              new Date(betDate).getMonth() + 1 === m)
+          );
+        }
         if (compactPeriodFilter === "month") return diffDays <= 30;
         return true;
       })
       .slice(0, 100);
-  }, [sortedAndFilteredBets, compactPeriodFilter]);
+  }, [sortedAndFilteredBets, compactPeriodFilter, compactMonth]);
 
   // Build compact results text (for clipboard copy)
   const compactResultsText = useMemo(() => {
@@ -1280,19 +1305,41 @@ const BetTableMemo = memo(function BetTable({
                   ["week", "Тиждень"],
                   ["month", "Місяць"],
                 ] as const
-              ).map(([val, label]) => (
-                <button
-                  key={val}
-                  onClick={() => setCompactPeriodFilter(val)}
-                  className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    compactPeriodFilter === val
-                      ? "bg-gray-900 text-white shadow-sm"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+              ).map(([val, label]) =>
+                val === "month" && compactPeriodFilter === "month" ? (
+                  <Select
+                    key={val}
+                    value={compactMonth}
+                    onValueChange={(v) => setCompactMonth(v)}
+                  >
+                    <SelectTrigger className="rounded-xl border-gray-200 bg-white h-8 w-auto min-w-[130px] text-sm">
+                      <SelectValue placeholder="Оберіть місяць" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {monthOptions.map((mo) => (
+                        <SelectItem key={mo.value} value={mo.value}>
+                          {mo.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <button
+                    key={val}
+                    onClick={() => {
+                      setCompactPeriodFilter(val);
+                      if (val !== "month") setCompactMonth("");
+                    }}
+                    className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      compactPeriodFilter === val
+                        ? "bg-gray-900 text-white shadow-sm"
+                        : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ),
+              )}
               <span className="ml-auto text-sm text-gray-400">
                 {filteredCompletedBets.length}{" "}
                 {filteredCompletedBets.length === 1
