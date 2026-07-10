@@ -333,9 +333,7 @@ export default function MyBets() {
 
   // ── Handlers ──
   const handleRecordAdded = useCallback(() => {
-    // Read directly from localStorage (localFallback in CS2BettingForm already saved the new bet)
-    // Don't call loadRecentBets() — it would overwrite with API data which may not have the new bet yet
-    // The useEffect on recentBets will trigger syncStats automatically
+    // Read fresh from localStorage (which CS2BettingForm just updated)
     const localBets = UserDataService.getUserData<Bet[]>(
       currentUser,
       "mybets_data",
@@ -623,11 +621,11 @@ export default function MyBets() {
       /* ignore */
     }
 
-    // Reload from API to ensure cache is in sync, then compute stats
-    await loadRecentBets();
-    syncStats();
+    // Remove from state directly (no round-trip to API)
+    setRecentBets((prev) => prev.filter((b) => b.id !== bet.id));
     bumpBets();
     bumpBankroll();
+    syncStats();
     toast.success("Ставку видалено");
   }, [
     deleteDialogBet,

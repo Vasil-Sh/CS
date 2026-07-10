@@ -224,10 +224,25 @@ export class UserDataService {
           : undefined,
       };
     });
-    // Cache API data to localStorage for offline fallback
+    // Merge API data with localStorage — never downgrade local "Win"/"Loss" to "Pending"
     try {
       const username = localStorage.getItem("username") || "default";
       const storageKey = `user_${username}_mybets_data`;
+      const localRaw = localStorage.getItem(storageKey);
+      if (localRaw) {
+        const localBets = JSON.parse(localRaw) as ApiBet[];
+        const localMap = new Map(localBets.map((b: ApiBet) => [b.id, b]));
+        // For each API bet, if local has a non-Pending result, keep it
+        for (const bet of mapped) {
+          const local = localMap.get(bet.id as string | number);
+          if (local && local.result && local.result !== 'Pending') {
+            bet.result = local.result;
+            bet.profit = local.profit;
+            bet.roi = local.roi;
+            bet.notes = local.notes;
+          }
+        }
+      }
       localStorage.setItem(storageKey, JSON.stringify(mapped));
     } catch {
       /* storage full — ignore */

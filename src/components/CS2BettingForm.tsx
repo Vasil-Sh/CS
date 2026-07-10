@@ -990,19 +990,19 @@ export default function CS2BettingForm({
 
       // 1. Save to API (primary store)
       const localFallback = () => {
-        const existingBets = UserDataService.getUserData<BetRecord[]>(
+        // ALWAYS read fresh from localStorage to avoid overwriting recent bet updates
+        const freshBets = UserDataService.getUserData<BetRecord[]>(
           currentUser,
           "mybets_data",
           [],
         );
-        // Store riskyTeams as string[] for API consistency
         const recordForStorage = {
           ...record,
           riskyTeams: record.riskyTeams.map((t) => t.name),
         };
         UserDataService.setUserDataSync(currentUser, "mybets_data", [
           recordForStorage as BetRecord,
-          ...existingBets,
+          ...freshBets,
         ]);
       };
       try {

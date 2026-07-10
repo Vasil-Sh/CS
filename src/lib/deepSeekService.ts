@@ -12,7 +12,7 @@ interface CacheEntry {
 }
 
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-const CACHE_VERSION = 'v2'; // bump when mock logic changes to invalidate old cached entries
+const CACHE_VERSION = 'v3'; // bump when mock logic changes to invalidate old cached entries
 const CACHE_KEY_PREFIX = `ds_cache_${CACHE_VERSION}_`;
 
 function getCached(key: string): AIRecommendation | null {
