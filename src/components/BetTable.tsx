@@ -411,25 +411,30 @@ const BetTableMemo = memo(function BetTable({
         ? "/assets/team-placeholder.svg"
         : "/assets/team-placeholder-dota.svg";
       return (
-        <div key={idx} className="flex items-center gap-2 py-1.5">
-          <span className="flex-shrink-0 text-sm">{isWin ? "✅" : "✖️"}</span>
-          <span className="flex-shrink-0 text-sm font-medium text-gray-600 w-10 text-right">
+        <div
+          key={idx}
+          className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-gray-100 transition-colors"
+        >
+          <span className="flex-shrink-0 text-lg leading-none">
+            {isWin ? "✅" : "✖️"}
+          </span>
+          <span className="flex-shrink-0 text-base font-bold text-gray-800 w-12 text-right tabular-nums">
             {odds}
           </span>
-          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white border border-gray-200 overflow-hidden flex items-center justify-center">
+          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white border border-gray-200 overflow-hidden flex items-center justify-center">
             <img
               src={logoUrl || teamPlaceholder}
               alt={selectedTeam}
-              className="w-4 h-4 object-contain"
+              className="w-5 h-5 object-contain"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = teamPlaceholder;
               }}
             />
           </div>
-          <span className="text-sm font-semibold text-gray-900">
+          <span className="text-base font-semibold text-gray-900 whitespace-nowrap">
             {selectedTeam}
           </span>
-          <span className="text-sm text-gray-500">{betDesc}</span>
+          <span className="text-base text-gray-500">{betDesc}</span>
         </div>
       );
     });
@@ -1204,7 +1209,7 @@ const BetTableMemo = memo(function BetTable({
 
       {/* Compact Results Modal */}
       <Dialog open={showCompactResults} onOpenChange={setShowCompactResults}>
-        <DialogContent className="max-w-lg border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
+        <DialogContent className="max-w-xl border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
           <DialogHeader className="px-6 pt-5 pb-4">
             <div className="flex items-center justify-between">
               <DialogTitle>
@@ -1223,11 +1228,9 @@ const BetTableMemo = memo(function BetTable({
             </div>
           </DialogHeader>
           <div className="border-t border-[#E5E7EB]" />
-          <div className="px-6 py-4 max-h-[60vh] overflow-y-auto bg-white">
+          <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-[#F3F4F6]">
             {compactRows.length > 0 ? (
-              <div className="space-y-0 divide-y divide-gray-100">
-                {compactRows}
-              </div>
+              <div className="space-y-2">{compactRows}</div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="p-6 bg-gray-100 rounded-2xl inline-block mb-4">
