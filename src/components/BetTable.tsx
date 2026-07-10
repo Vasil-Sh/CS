@@ -324,6 +324,43 @@ const BetTableMemo = memo(function BetTable({
     return match ? parseInt(match[1], 10) : 0;
   };
 
+  /** Translate internal bet type codes to human-readable Ukrainian */
+  function humanizeBetType(raw: string): string {
+    // Already Ukrainian — return as-is (after basic cleanup)
+    if (raw.match(/[а-яіїєґ]/i)) return raw;
+
+    // Strip "MapW_HC_" prefix patterns
+    const desc = raw
+      // Map2_HC_T2+3.5 → Карта 2: Фора +3.5
+      .replace(/^Map(\d+)_HC_T(\d+)\+?([\d.]+)/, "Карта $1: Фора +$3 ($2 матч)")
+      // Map1_HC_<rest> → Карта 1: <rest>
+      .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
+      // Map1_tb → Карта 1 (тотал більше)
+      .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
+      // Map1_tm → Карта 1 (тотал менше)
+      .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
+      // Map1 → Карта 1
+      .replace(/^Map(\d+)_?(.+)?/, (_, n: string, rest?: string) => {
+        if (!rest) return `Карта ${n}`;
+        const humanRest = rest
+          .replace(/_/g, " ")
+          .replace(/\btb\b/g, "тотал більше")
+          .replace(/\btm\b/g, "тотал менше")
+          .replace(/\bHC\b/g, "Фора");
+        return `Карта ${n}: ${humanRest}`;
+      })
+      // Match Winner → Победа матч
+      .replace(/^Match\s*Winner$/i, "Победа матч")
+      // Over → Тотал більше
+      .replace(/^Over\s*([\d.]+)/, "Тотал більше $1")
+      // Under → Тотал менше
+      .replace(/^Under\s*([\d.]+)/, "Тотал менше $1")
+      // Generic: replace underscores with spaces
+      .replace(/_/g, " ");
+
+    return desc || raw;
+  }
+
   // Build compact results list for quick sharing
   const compactResultsText = useMemo(() => {
     const completed = sortedAndFilteredBets
@@ -333,17 +370,16 @@ const BetTableMemo = memo(function BetTable({
       .map((b) => {
         const icon = b.result === "Win" ? "✅" : "✖️";
         const odds = Number(b.odds).toFixed(2);
+        const isCS = (b.game || "").toLowerCase().startsWith("cs");
+        const gameEmoji = isCS ? " 🎯" : " 🛡️";
         // Selected team: use selection field, or extract from betType (last part after dash)
         const selectedTeam =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
-        // Bet description: betType WITHOUT the selected team at the end
-        // e.g. "Карта 2: Фора +3.5 - 9z" → "Карта 2: Фора +3.5"
-        // e.g. "Переможець матчу - NA'VI" → "Победа матч"
-        const betDesc = b.betType
-          .replace(/\s*[-–—]\s*[^\-–—]+$/, "") // strip " - TeamName" at the end
-          .replace(/^Переможець\s*матчу?$/i, "Победа матч")
-          .trim();
-        return `${icon}~${odds}. ${selectedTeam}, ${betDesc}`;
+        // Bet description: strip selected team from end, then humanize
+        const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
+        // Humanize internal codes to readable Ukrainian
+        const betDesc = humanizeBetType(rawDesc);
+        return `${icon}~${odds}. ${selectedTeam}${gameEmoji}, ${betDesc}`;
       })
       .join("\n");
   }, [sortedAndFilteredBets]);
