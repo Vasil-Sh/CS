@@ -333,11 +333,20 @@ export default function MyBets() {
 
   // ── Handlers ──
   const handleRecordAdded = useCallback(() => {
-    syncStats();
-    loadRecentBets();
+    // Read directly from localStorage (localFallback in CS2BettingForm already saved the new bet)
+    // Don't call loadRecentBets() — it would overwrite with API data which may not have the new bet yet
+    // The useEffect on recentBets will trigger syncStats automatically
+    const localBets = UserDataService.getUserData<Bet[]>(
+      currentUser,
+      "mybets_data",
+      [],
+    );
+    if (localBets.length > 0) {
+      setRecentBets(localBets);
+    }
     bumpBets();
     bumpBankroll();
-  }, [loadRecentBets, bumpBets, bumpBankroll, syncStats]);
+  }, [currentUser, bumpBets, bumpBankroll]);
 
   const clearRecentBets = useCallback(async () => {
     if (

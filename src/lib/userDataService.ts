@@ -224,21 +224,11 @@ export class UserDataService {
           : undefined,
       };
     });
-    // Merge with localStorage: preserve locally-created bets that aren't yet in API
-    // This prevents data loss when API returns fewer bets than localStorage has
-    // (e.g., when a bet was just created and localFallback saved it, but API hasn't indexed it yet)
+    // Cache API data to localStorage for offline fallback
     try {
       const username = localStorage.getItem("username") || "default";
       const storageKey = `user_${username}_mybets_data`;
-      const existingLocal: Record<string, unknown>[] = JSON.parse(
-        localStorage.getItem(storageKey) || "[]",
-      );
-      const apiIds = new Set(mapped.map((b) => String(b.id)).filter(Boolean));
-      const localOnly = existingLocal.filter(
-        (b) => !b.id || !apiIds.has(String(b.id)),
-      );
-      const merged = [...mapped, ...localOnly];
-      localStorage.setItem(storageKey, JSON.stringify(merged));
+      localStorage.setItem(storageKey, JSON.stringify(mapped));
     } catch {
       /* storage full — ignore */
     }
