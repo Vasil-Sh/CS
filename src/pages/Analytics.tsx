@@ -858,16 +858,14 @@ export default function Analytics() {
                   <span className="text-xs text-amber-500 mt-2 font-medium">
                     {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
                   </span>
-                  <div className="flex items-end gap-3 mt-2 w-full">
-                    <div className="flex-1 bg-white border border-emerald-200 rounded-xl px-3 py-2 shadow-sm">
-                      <div className="text-[10px] text-emerald-500 font-medium mb-0.5">▲ Найкращий</div>
-                      <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
-                      {bestMonth && <div className="text-[10px] text-emerald-500 mt-0.5">{bestMonth.month}</div>}
+                  <div className="flex items-end gap-2 mt-2 w-full">
+                    <div className="flex-1 bg-white border border-emerald-200 rounded-lg px-2 py-1.5 shadow-sm">
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium">▲ Найкращий {bestMonth?.month}</div>
+                      <div className="text-xs font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
                     </div>
-                    <div className="flex-1 bg-white border border-red-200 rounded-xl px-3 py-2 shadow-sm">
-                      <div className="text-[10px] text-red-400 font-medium mb-0.5">▼ Найгірший</div>
-                      <div className="text-sm font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
-                      {worstMonth && <div className="text-[10px] text-red-400 mt-0.5">{worstMonth.month}</div>}
+                    <div className="flex-1 bg-white border border-red-200 rounded-lg px-2 py-1.5 shadow-sm">
+                      <div className="flex items-center gap-1 text-[10px] text-red-400 font-medium">▼ Найгірший {worstMonth?.month}</div>
+                      <div className="text-xs font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
                     </div>
                   </div>
                 </div>
