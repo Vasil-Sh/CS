@@ -15,6 +15,7 @@ interface StrategyData {
 import { memo } from 'react';
 import { Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { ShineBorder } from '@/components/ui/shine-border';
 import { UserDataService } from '@/lib/userDataService';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/contexts/AuthContext';

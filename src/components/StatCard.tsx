@@ -3,7 +3,7 @@ import { type ReactNode, useState, memo } from "react";
 interface StatCardProps {
   icon: ReactNode;
   label: string;
-  value: string;
+  value: ReactNode;
   subtext?: string;
   valueColor?: string;
   subIcon?: ReactNode;

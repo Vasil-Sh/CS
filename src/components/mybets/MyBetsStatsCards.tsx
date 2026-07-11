@@ -4,6 +4,8 @@ import {
   AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Pencil,
 } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
+import { SparklesText } from "@/components/ui/sparkles-text";
 import StatCard from "@/components/StatCard";
 import type { Bet } from "@/types/betting";
 import type { DualBankrollStats } from "@/lib/bankrollService";
@@ -107,7 +109,19 @@ export default function MyBetsStatsCards({
         <StatCard
           icon={<IconBox><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Вінрейт"
-          value={`${stats.winRate}%`}
+          value={
+            <div className="flex items-center gap-3">
+              <AnimatedCircularProgressBar
+                max={100}
+                min={0}
+                value={stats.winRate}
+                gaugePrimaryColor="#22C55E"
+                gaugeSecondaryColor="#E5E7EB"
+                className="w-10 h-10"
+              />
+              <span>{stats.winRate}%</span>
+            </div>
+          }
           subtext={`${winningBets.length}W / ${losingBets.length}L`}
         />
       </div>
@@ -134,7 +148,7 @@ export default function MyBetsStatsCards({
           label="Середній ROI"
           value={`${stats.averageROI >= 0 ? "+" : ""}${stats.averageROI}%`}
           valueColor={stats.averageROI >= 0 ? "text-[#111827]" : "text-[#EF4444]"}
-          subtext={stats.averageROI >= 0 ? "Позитивний" : "Негативний"}
+          subtext={winningBets.length >= losingBets.length * 2 ? <SparklesText sparklesCount={5} colors={{ first: '#22C55E', second: '#F59E0B' }}>🔥 Hot Streak!</SparklesText> : winningBets.length >= losingBets.length ? "Позитивний" : "Негативний"}
           subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}
           trend={stats.averageROI >= 0 ? "up" : "down"}
         />
