@@ -152,8 +152,8 @@ export class BankrollService {
     const totalProfit = this.calculateTotalProfit(bets);
 
     if (!data) {
-      const totalStakes = bets.reduce((sum, b) => sum + (b.amount || 0), 0);
-      return { initialBank: totalStakes, currentBank: totalStakes + totalProfit, totalProfit, roi: totalStakes > 0 ? (totalProfit / totalStakes) * 100 : 0 };
+      // No bankroll data — use zero as initial bank.
+      return { initialBank: 0, currentBank: totalProfit, totalProfit, roi: 0 };
     }
     const currentBank =
       (data.initialBankUAH || 0) + totalProfit + data.manualAdjustments;
@@ -176,23 +176,21 @@ export class BankrollService {
     const profitUSD = this.calculateTotalProfitUSD(bets);
 
     if (!data) {
-      // No bankroll data — derive from bets and auto-initialize
-      const totalStakesUAH = bets
-        .filter(b => !b.currency || b.currency !== 'USD')
-        .reduce((sum, b) => sum + (b.amount || 0), 0);
-      const totalStakesUSD = bets
-        .filter(b => b.currency === 'USD')
-        .reduce((sum, b) => sum + (b.amount || 0), 0);
-      // Fire-and-forget: save to DB (UAH first, then USD preserves both)
-      if (totalStakesUAH + totalStakesUSD > 0) {
-        const usdRate = bets.find(b => b.currency === 'USD' && b.exchangeRate)?.exchangeRate;
-        this.setInitialBank(username, totalStakesUAH, 'UAH', 0).then(() => {
-          if (totalStakesUSD > 0) this.setInitialBank(username, totalStakesUSD, 'USD', Number(usdRate) || 41.5).catch(() => {});
-        }).catch(() => {});
-      }
+      // No bankroll data — use zero as initial bank.
+      // Do NOT auto-initialize; user must set bankroll explicitly via InitialBankModal.
       return {
-        uah: { initialBank: totalStakesUAH, currentBank: totalStakesUAH + profitUAH, totalProfit: profitUAH, roi: totalStakesUAH > 0 ? (profitUAH / totalStakesUAH) * 100 : 0 },
-        usd: { initialBank: totalStakesUSD, currentBank: totalStakesUSD + profitUSD, totalProfit: profitUSD, roi: totalStakesUSD > 0 ? (profitUSD / totalStakesUSD) * 100 : 0 },
+        uah: {
+          initialBank: 0,
+          currentBank: profitUAH,
+          totalProfit: profitUAH,
+          roi: 0,
+        },
+        usd: {
+          initialBank: 0,
+          currentBank: profitUSD,
+          totalProfit: profitUSD,
+          roi: 0,
+        },
       };
     }
 

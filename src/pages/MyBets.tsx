@@ -178,24 +178,6 @@ export default function MyBets() {
 
   useEffect(() => {
     const initBankroll = async () => {
-      try {
-        const apiStats = await BankrollService.fetchBankroll();
-        if (apiStats.initialBank > 0) {
-          BankrollService.syncFromAPI(currentUser, apiStats);
-          // Always use ALL bets from localStorage, not recentBets (which may be empty at init)
-          const allBets = UserDataService.getUserData<Bet[]>(
-            currentUser,
-            "mybets_data",
-            [],
-          );
-          setDualBank(
-            BankrollService.getBankrollStatsDual(currentUser, allBets),
-          );
-          return;
-        }
-      } catch {
-        /* noop */
-      }
       const allBets = UserDataService.getUserData<Bet[]>(
         currentUser,
         "mybets_data",
@@ -207,23 +189,6 @@ export default function MyBets() {
   }, [currentUser]);
   useEffect(() => {
     const refresh = async () => {
-      try {
-        const apiStats = await BankrollService.fetchBankroll();
-        if (apiStats.initialBank > 0) {
-          BankrollService.syncFromAPI(currentUser, apiStats);
-          const allBets = UserDataService.getUserData<Bet[]>(
-            currentUser,
-            "mybets_data",
-            [],
-          );
-          setDualBank(
-            BankrollService.getBankrollStatsDual(currentUser, allBets),
-          );
-          return;
-        }
-      } catch {
-        /* noop */
-      }
       const allBets = UserDataService.getUserData<Bet[]>(
         currentUser,
         "mybets_data",

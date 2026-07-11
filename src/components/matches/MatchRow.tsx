@@ -25,6 +25,7 @@ import {
   CircleCheck,
   Info,
   Star,
+  Trophy,
 } from "lucide-react";
 
 type FormStability =
@@ -425,12 +426,10 @@ export default function MatchRow({
               className="text-[11px] text-[#9CA3AF] font-medium truncate flex items-center gap-1 mb-1"
               title={match.context}
             >
-              {(match.stars ?? 0) >= 4 && (
-                <Star
-                  className="h-3 w-3 text-[#F59E0B] fill-[#F59E0B] flex-shrink-0"
-                  strokeWidth={1}
-                />
-              )}
+              <Trophy
+                className="h-3 w-3 text-[#9CA3AF] flex-shrink-0"
+                strokeWidth={1.5}
+              />
               {match.context}
             </div>
           )}

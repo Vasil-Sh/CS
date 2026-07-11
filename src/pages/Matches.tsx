@@ -302,7 +302,9 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
         ? m.status
         : m.score1 > 0 || m.score2 > 0
           ? "live"
-          : "upcoming",
+          : new Date(m.date).getTime() < Date.now() - 15 * 60 * 1000
+            ? "live"
+            : "upcoming",
     positionTeam1: m.positionTeam1,
     positionTeam2: m.positionTeam2,
     logoTeam1: m.logoTeam1,
@@ -679,9 +681,16 @@ export default function Matches() {
 
       // Fetch Dota 2 matches
       try {
-        const dotaApiMatches = await fetchDota2Matches();
+        const dotaApiMatches = await fetchDota2Matches(true); // always fresh on mount
         if (dotaApiMatches && dotaApiMatches.length > 0) {
           allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
+          if (import.meta.env.DEV)
+            console.log(
+              `[Matches] Loaded ${dotaApiMatches.length} Dota2 matches`,
+            );
+        } else {
+          if (import.meta.env.DEV)
+            console.warn("[Matches] Dota2: 0 matches (initial load)");
         }
       } catch (dotaErr) {
         if (import.meta.env.DEV)
