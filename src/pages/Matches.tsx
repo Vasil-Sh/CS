@@ -825,7 +825,8 @@ export default function Matches() {
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
     if (filterTier !== "all" && match.tier !== filterTier) return false;
     if (filterDayOfWeek !== "all") {
-      const matchDate = new Date(match.date + "T12:00:00");
+      const dateKey = getDateKey(match.date);
+      const matchDate = new Date(dateKey + "T12:00:00");
       const matchDayIdx = matchDate.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
       const dayMap: Record<string, number> = {
         sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
