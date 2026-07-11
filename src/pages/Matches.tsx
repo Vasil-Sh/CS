@@ -1333,40 +1333,6 @@ export default function Matches() {
                 />
               </div>
 
-              {/* Game filter buttons — always visible so Dota2 is reachable even when CS2 API is down */}
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setFilterGame("all")}
-                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                    filterGame === "all"
-                      ? "bg-[#111827] text-white shadow-md"
-                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
-                  }`}
-                >
-                  Всі
-                </button>
-                <button
-                  onClick={() => setFilterGame("CS2")}
-                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                    filterGame === "CS2"
-                      ? "bg-[#D97706] text-white shadow-md"
-                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
-                  }`}
-                >
-                  CS2
-                </button>
-                <button
-                  onClick={() => setFilterGame("Dota2")}
-                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                    filterGame === "Dota2"
-                      ? "bg-[#7C3AED] text-white shadow-md"
-                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
-                  }`}
-                >
-                  Dota 2
-                </button>
-              </div>
-
               {/* Status filter — pill dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1718,79 +1684,91 @@ export default function Matches() {
             </Card>
           )}
 
-          {/* ===== DATE GROUP CARDS — today and future dates ===== */}
+          {/* ===== DATE GROUP CARDS — always visible ===== */}
           {!initialLoading &&
-            sortedDateKeys.map((dateKey) => {
-              const dateMatches = groupedByDate[dateKey];
-              return (
-                <div
-                  key={dateKey}
-                  className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-x-auto"
-                >
-                  <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
-                    <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
-                      <CardTitle>
-                        <div className="flex items-center gap-4 flex-wrap">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]/10">
-                            <Calendar
-                              className="h-5 w-5 text-[#447afc]"
-                              strokeWidth={2}
-                            />
+            Object.keys(groupedByDate)
+              .sort()
+              .map((dateKey) => {
+                const dateMatches = groupedByDate[dateKey];
+                return (
+                  <div
+                    key={dateKey}
+                    className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-x-auto"
+                  >
+                    <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
+                      <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
+                        <CardTitle>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]/10">
+                              <Calendar
+                                className="h-5 w-5 text-[#447afc]"
+                                strokeWidth={2}
+                              />
+                            </div>
+                            <span className="text-2xl font-bold text-[#111827] tracking-tight">
+                              {formatFullDateTitle(dateKey, filterGame)}
+                            </span>
+                            <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
+                              {dateMatches.length}
+                            </Badge>
+                            {/* Game quick-toggle */}
+                            <div className="flex items-center gap-1 ml-auto">
+                              <button
+                                onClick={() => setFilterGame("all")}
+                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                  filterGame === "all"
+                                    ? "bg-[#111827] text-white shadow-md"
+                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
+                                }`}
+                              >
+                                Всі
+                              </button>
+                              <button
+                                onClick={() => setFilterGame("CS2")}
+                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                  filterGame === "CS2"
+                                    ? "bg-[#D97706] text-white shadow-md"
+                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
+                                }`}
+                              >
+                                CS2
+                              </button>
+                              <button
+                                onClick={() => setFilterGame("Dota2")}
+                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                  filterGame === "Dota2"
+                                    ? "bg-[#7C3AED] text-white shadow-md"
+                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
+                                }`}
+                              >
+                                Dota 2
+                              </button>
+                            </div>
                           </div>
-                          <span className="text-2xl font-bold text-[#111827] tracking-tight">
-                            {formatFullDateTitle(dateKey, filterGame)}
-                          </span>
-                          <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
-                            {dateMatches.length}
-                          </Badge>
-                          {/* Game quick-toggle */}
-                          <div className="flex items-center gap-1 ml-auto">
-                            <button
-                              onClick={() => setFilterGame("all")}
-                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                filterGame === "all"
-                                  ? "bg-[#111827] text-white shadow-md"
-                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
-                              }`}
-                            >
-                              Всі
-                            </button>
-                            <button
-                              onClick={() => setFilterGame("CS2")}
-                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                filterGame === "CS2"
-                                  ? "bg-[#D97706] text-white shadow-md"
-                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
-                              }`}
-                            >
-                              CS2
-                            </button>
-                            <button
-                              onClick={() => setFilterGame("Dota2")}
-                              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                filterGame === "Dota2"
-                                  ? "bg-[#7C3AED] text-white shadow-md"
-                                  : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
-                              }`}
-                            >
-                              Dota 2
-                            </button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-0 rounded-b-[24px]">
+                        {dateMatches.length > 0 ? (
+                          <div>
+                            <table className="w-full border-collapse">
+                              {renderTableHeader()}
+                              <tbody>{dateMatches.map(renderMatchRow)}</tbody>
+                            </table>
                           </div>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 rounded-b-[24px]">
-                      <div>
-                        <table className="w-full border-collapse">
-                          {renderTableHeader()}
-                          <tbody>{dateMatches.map(renderMatchRow)}</tbody>
-                        </table>
-                      </div>
-                    </CardContent>
+                        ) : (
+                          <div className="py-16 text-center text-[#9CA3AF]">
+                            <p className="text-lg font-medium">Немає матчів</p>
+                            <p className="text-sm mt-1">
+                              Спробуйте обрати інший фільтр гри або натисніть
+                              «Оновити»
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
 
           <AIRecommendationModal
             open={aiModalOpen}
