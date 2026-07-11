@@ -157,8 +157,8 @@ const BalanceChartMemo = memo(function BalanceChart({
             />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: "#9CA3AF", fontWeight: 500 }}
-              axisLine={{ stroke: "#F3F4F6", strokeWidth: 1 }}
+              tick={{ fontSize: 11, fill: "#6B7280", fontWeight: 500 }}
+              axisLine={{ stroke: "#D1D5DB", strokeWidth: 1 }}
               tickLine={false}
               tickFormatter={(value) => {
                 const d = new Date(value);
@@ -170,8 +170,8 @@ const BalanceChartMemo = memo(function BalanceChart({
               dy={8}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#9CA3AF", fontWeight: 500 }}
-              axisLine={false}
+              tick={{ fontSize: 11, fill: "#6B7280", fontWeight: 500 }}
+              axisLine={{ stroke: "#D1D5DB", strokeWidth: 1 }}
               tickLine={false}
               tickFormatter={(v: number) =>
                 v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
