@@ -23,12 +23,16 @@ export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
     }
   }
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
     const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);

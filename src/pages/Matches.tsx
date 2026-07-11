@@ -666,35 +666,30 @@ export default function Matches() {
       clearDota2Cache();
       const allMatches: Match[] = [];
 
-      // Fetch CS2 matches
-      try {
-        const csApiMatches = await fetchTodaysAndUpcomingMatches();
-        if (csApiMatches && csApiMatches.length > 0) {
-          allMatches.push(
-            ...csApiMatches.map((m) => apiMatchToMatch(m, "CS2")),
-          );
-        }
-      } catch (csErr) {
+      // Fetch CS2 and Dota2 in PARALLEL — don't let CS2 hang block Dota2
+      const [csResult, dotaResult] = await Promise.allSettled([
+        fetchTodaysAndUpcomingMatches(),
+        fetchDota2Matches(true),
+      ]);
+
+      if (csResult.status === "fulfilled" && csResult.value?.length > 0) {
+        allMatches.push(
+          ...csResult.value.map((m) => apiMatchToMatch(m, "CS2")),
+        );
+      } else if (csResult.status === "rejected") {
         if (import.meta.env.DEV)
-          console.warn("[Matches] CS2 API error:", csErr);
+          console.warn("[Matches] CS2 API error:", csResult.reason);
       }
 
-      // Fetch Dota 2 matches
-      try {
-        const dotaApiMatches = await fetchDota2Matches(true); // always fresh on mount
-        if (dotaApiMatches && dotaApiMatches.length > 0) {
-          allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
-          if (import.meta.env.DEV)
-            console.log(
-              `[Matches] Loaded ${dotaApiMatches.length} Dota2 matches`,
-            );
-        } else {
-          if (import.meta.env.DEV)
-            console.warn("[Matches] Dota2: 0 matches (initial load)");
-        }
-      } catch (dotaErr) {
+      if (dotaResult.status === "fulfilled" && dotaResult.value?.length > 0) {
+        allMatches.push(...dotaResult.value.map(dota2ApiMatchToMatch));
         if (import.meta.env.DEV)
-          console.warn("[Matches] Dota2 API error:", dotaErr);
+          console.log(
+            `[Matches] Loaded ${dotaResult.value.length} Dota2 matches`,
+          );
+      } else if (dotaResult.status === "rejected") {
+        if (import.meta.env.DEV)
+          console.warn("[Matches] Dota2 API error:", dotaResult.reason);
       }
 
       if (allMatches.length > 0) {
@@ -954,29 +949,26 @@ export default function Matches() {
       toast("🔄 Завантаження матчів...", { description: "Оновлення з API" });
       const allMatches: Match[] = [];
 
-      try {
-        const csApiMatches = await fetchTodaysAndUpcomingMatches();
-        if (csApiMatches && csApiMatches.length > 0) {
-          allMatches.push(
-            ...csApiMatches.map((m) => apiMatchToMatch(m, "CS2")),
-          );
-        }
-      } catch (csErr) {
+      // Fetch CS2 and Dota2 in PARALLEL
+      const [csResult, dotaResult] = await Promise.allSettled([
+        fetchTodaysAndUpcomingMatches(),
+        fetchDota2Matches(true),
+      ]);
+
+      if (csResult.status === "fulfilled" && csResult.value?.length > 0) {
+        allMatches.push(
+          ...csResult.value.map((m) => apiMatchToMatch(m, "CS2")),
+        );
+      } else if (csResult.status === "rejected") {
         if (import.meta.env.DEV)
-          console.warn("[Matches] CS2 refresh error:", csErr);
+          console.warn("[Matches] CS2 refresh error:", csResult.reason);
       }
 
-      try {
-        const dotaApiMatches = await fetchDota2Matches(true); // force: skip stale cache on manual refresh
-        if (dotaApiMatches && dotaApiMatches.length > 0) {
-          allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
-        } else {
-          if (import.meta.env.DEV)
-            console.warn("[Matches] Dota2 refresh: 0 matches returned");
-        }
-      } catch (dotaErr) {
+      if (dotaResult.status === "fulfilled" && dotaResult.value?.length > 0) {
+        allMatches.push(...dotaResult.value.map(dota2ApiMatchToMatch));
+      } else if (dotaResult.status === "rejected") {
         if (import.meta.env.DEV)
-          console.warn("[Matches] Dota2 refresh error:", dotaErr);
+          console.warn("[Matches] Dota2 refresh error:", dotaResult.reason);
       }
 
       if (allMatches.length > 0) {
@@ -1339,6 +1331,40 @@ export default function Matches() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-3 rounded-[24px] border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-11 w-full text-sm bg-white/80"
                 />
+              </div>
+
+              {/* Game filter buttons — always visible so Dota2 is reachable even when CS2 API is down */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setFilterGame("all")}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                    filterGame === "all"
+                      ? "bg-[#111827] text-white shadow-md"
+                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
+                  }`}
+                >
+                  Всі
+                </button>
+                <button
+                  onClick={() => setFilterGame("CS2")}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                    filterGame === "CS2"
+                      ? "bg-[#D97706] text-white shadow-md"
+                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
+                  }`}
+                >
+                  CS2
+                </button>
+                <button
+                  onClick={() => setFilterGame("Dota2")}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                    filterGame === "Dota2"
+                      ? "bg-[#7C3AED] text-white shadow-md"
+                      : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
+                  }`}
+                >
+                  Dota 2
+                </button>
               </div>
 
               {/* Status filter — pill dropdown */}
