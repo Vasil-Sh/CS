@@ -107,14 +107,16 @@ export default function MyBetsStatsCards({
         />
         {/* Winrate card — large donut filling the card */}
         <div
-          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-4 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
+          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-5 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
           style={{ transform: "translateY(0)" }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
-          <div className="flex items-center gap-1.5 mb-2">
-            <Target className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
-            <span className="text-sm font-semibold text-[#111827]">Вінрейт</span>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+              <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            </div>
+            <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
           </div>
           <div className="flex items-center justify-center">
             <AnimatedCircularProgressBar
