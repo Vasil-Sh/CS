@@ -26,7 +26,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { Confetti } from "@/components/ui/confetti";
-import { Marquee } from "@/components/ui/marquee";
 import type { Bet } from "@/types/betting";
 import MyBetsStatsCards from "@/components/mybets/MyBetsStatsCards";
 import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
@@ -653,34 +652,6 @@ export default function MyBets() {
           losingBets={losingBets}
           onEditBank={() => setBankModalOpen(true)}
         />
-
-        {/* Recent results Marquee ticker */}
-        {recentBets.filter((b) => b.result !== "Pending").length > 0 && (
-          <Marquee pauseOnHover className="[--duration:40s] py-2">
-            {recentBets
-              .filter((b) => b.result !== "Pending")
-              .slice(0, 10)
-              .map((bet, i) => (
-                <span
-                  key={bet.id || i}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                    bet.result === "Win"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {bet.result === "Win" ? "✅" : "✕"}{" "}
-                  {bet.match?.substring(0, 30)}
-                  {bet.profit != null && (
-                    <span className="tabular-nums">
-                      {bet.profit >= 0 ? "+" : ""}
-                      {bet.profit.toFixed(0)}₴
-                    </span>
-                  )}
-                </span>
-              ))}
-          </Marquee>
-        )}
 
         {/* Tabs */}
         <div className="space-y-6">
