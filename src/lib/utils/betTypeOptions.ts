@@ -147,13 +147,18 @@ export function getGroupedBetTypeOptions(format?: string): SectionedBetTypes {
 /** Reverse-lookup: find the display label for a saved betType value */
 export function getBetTypeLabel(betType: string, format?: string): string {
   if (!betType) return '';
-  // Handle "Карта N:" prefix — strip, translate, re-add
-  const mapPrefixMatch = betType.match(/^Карта (\d+):\s*/);
-  if (mapPrefixMatch) {
-    const mapNum = mapPrefixMatch[1];
-    const rest = betType.slice(mapPrefixMatch[0].length);
-    const translatedRest = getBetTypeLabel(rest, format);
-    return `Карта ${mapNum}: ${translatedRest}`;
+  // Handle "Карта N:" prefix
+  const mapPrefixMatchUa = betType.match(/^Карта (\d+):\s*/);
+  if (mapPrefixMatchUa) {
+    const rest = betType.slice(mapPrefixMatchUa[0].length);
+    return `Карта ${mapPrefixMatchUa[1]}: ${getBetTypeLabel(rest, format)}`;
+  }
+  // Handle "MapN_" prefix (from CS2BettingForm: Map1_MapWinner)
+  const mapPrefixMatchEn = betType.match(/^Map(\d+)_(.+)/);
+  if (mapPrefixMatchEn) {
+    const mapNum = mapPrefixMatchEn[1];
+    const rest = mapPrefixMatchEn[2];
+    return `Карта ${mapNum}: ${getBetTypeLabel(rest, format)}`;
   }
   // Check flat options first (CS2)
   const opts = getBetTypeOptions('CS2', format);
