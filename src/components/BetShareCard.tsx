@@ -38,7 +38,9 @@ interface BetShareCardProps {
 function translateBetType(betType: string): string {
   const translations: Record<string, string> = {
     "Match Winner": "Переможець матчу",
+    "MatchWinner": "Переможець матчу",
     "Map Winner": "Переможець карти",
+    "MapWinner": "Переможець карти",
     Handicap: "Фора",
     "Map Handicap": "Фора на карту",
     "Round Handicap": "Фора раундів",

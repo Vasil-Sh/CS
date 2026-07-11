@@ -147,10 +147,22 @@ export function getGroupedBetTypeOptions(format?: string): SectionedBetTypes {
 /** Reverse-lookup: find the display label for a saved betType value */
 export function getBetTypeLabel(betType: string, format?: string): string {
   if (!betType) return '';
-  // Check flat options first
+  // Handle "Карта N:" prefix — strip, translate, re-add
+  const mapPrefixMatch = betType.match(/^Карта (\d+):\s*/);
+  if (mapPrefixMatch) {
+    const mapNum = mapPrefixMatch[1];
+    const rest = betType.slice(mapPrefixMatch[0].length);
+    const translatedRest = getBetTypeLabel(rest, format);
+    return `Карта ${mapNum}: ${translatedRest}`;
+  }
+  // Check flat options first (CS2)
   const opts = getBetTypeOptions('CS2', format);
   const found = opts.find(o => o.value === betType);
   if (found) return found.label;
+  // Check flat Dota2 options (they differ from CS2)
+  const dotaOpts = getBetTypeOptions('Dota2', format);
+  const dotaFound = dotaOpts.find(o => o.value === betType);
+  if (dotaFound) return dotaFound.label;
   // Check grouped options (main + maps)
   const grouped = getGroupedBetTypeOptions(format);
   // Search main groups
@@ -165,6 +177,12 @@ export function getBetTypeLabel(betType: string, format?: string): string {
       if (f) {
         return `Карта ${mg.mapNumber}: ${f.label}`;
       }
+    }
+  }
+  // Fallback: search raw MAP_BET_TYPES for values like "MapWinner" → label
+  for (const g of MAP_BET_TYPES) {
+    for (const o of g.options) {
+      if (o.value === betType) return o.label;
     }
   }
   return betType;
