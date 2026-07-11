@@ -51,8 +51,8 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount, cha
             <XAxis
               dataKey="odds"
               name="Коефіцієнт"
-              tick={{ fontSize: 11, fill: '#9CA3AF', fontWeight: 500 }}
-              axisLine={false}
+              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }}
               tickLine={false}
               tickFormatter={(value) => Number(value).toFixed(2)}
               dy={8}
@@ -60,8 +60,8 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount, cha
             <YAxis
               dataKey="profit"
               name="Прибуток"
-              tick={{ fontSize: 11, fill: '#9CA3AF', fontWeight: 500 }}
-              axisLine={false}
+              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
+              axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }}
               tickLine={false}
               tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
               width={50}

@@ -66,8 +66,8 @@ export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props)
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF', fontWeight: 500 }} axisLine={false} tickLine={false} dy={8} />
-            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF', fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} width={50} />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }} tickLine={false} dy={8} />
+            <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} width={50} />
             <Tooltip
               contentStyle={{ backgroundColor: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '12px', padding: '8px 12px' }}
               formatter={(value: number | string, name: string) => { if (name === 'profit') return [`${value} ₴`, 'За місяць']; if (name === 'cumulative') return [`${value} ₴`, 'Загалом']; return [value, name]; }}
