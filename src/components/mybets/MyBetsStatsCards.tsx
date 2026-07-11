@@ -105,32 +105,26 @@ export default function MyBetsStatsCards({
           value={String(stats.totalBets)}
           subtext={activeBets.length > 0 ? `${activeBets.length} активних` : "Немає активних"}
         />
-        {/* Winrate card with donut left, label+subtext right */}
+        {/* Winrate card — large donut filling the card */}
         <div
-          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-5 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
+          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-4 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB] flex flex-col items-center justify-center gap-2"
           style={{ transform: "translateY(0)" }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
-          <div className="flex items-center gap-4">
-            <AnimatedCircularProgressBar
-              max={100}
-              min={0}
-              value={stats.winRate}
-              gaugePrimaryColor="#22C55E"
-              gaugeSecondaryColor="#E5E7EB"
-              className="w-16 h-16 shrink-0"
-            />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <IconBox><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>
-                <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#9CA3AF]">
-                {winningBets.length}W / {losingBets.length}L
-              </div>
-            </div>
+          <AnimatedCircularProgressBar
+            max={100}
+            min={0}
+            value={stats.winRate}
+            gaugePrimaryColor="#22C55E"
+            gaugeSecondaryColor="#E5E7EB"
+            className="!w-28 !h-28"
+          />
+          <div className="flex items-center gap-1.5">
+            <Target className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+            <span className="text-sm font-semibold text-[#111827]">Вінрейт</span>
           </div>
+          <span className="text-xs text-[#9CA3AF]">{winningBets.length}W / {losingBets.length}L</span>
         </div>
       </div>
 
