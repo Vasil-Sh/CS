@@ -434,8 +434,8 @@ export default function Matches() {
   const [filterTier, setFilterTier] = useState<
     "all" | "tier1" | "tier2" | "tier3"
   >("all");
-  const [filterConfidence, setFilterConfidence] = useState<
-    "all" | "high" | "medium" | "low"
+  const [filterDayOfWeek, setFilterDayOfWeek] = useState<
+    "all" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
   >("all");
   const [filterRisk, setFilterRisk] = useState<
     "all" | "safe" | "moderate" | "high"
@@ -506,7 +506,7 @@ export default function Matches() {
     setFilterStatus("all");
     setFilterTier("all");
     setFilterMatchType("all");
-    setFilterConfidence("all");
+    setFilterDayOfWeek("all");
     setFilterRisk("all");
     setFilterTournament("all");
     setSearchQuery("");
@@ -523,7 +523,7 @@ export default function Matches() {
     filterStatus !== "all" ||
     filterTier !== "all" ||
     filterMatchType !== "all" ||
-    filterConfidence !== "all" ||
+    filterDayOfWeek !== "all" ||
     filterRisk !== "all" ||
     filterTournament !== "all" ||
     searchQuery !== "";
@@ -824,13 +824,14 @@ export default function Matches() {
     if (filterGame === "CS2" && match.game !== "CS2") return false;
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
     if (filterTier !== "all" && match.tier !== filterTier) return false;
-    if (filterConfidence === "high" && match.aiConfidence <= 80) return false;
-    if (
-      filterConfidence === "medium" &&
-      (match.aiConfidence <= 60 || match.aiConfidence > 80)
-    )
-      return false;
-    if (filterConfidence === "low" && match.aiConfidence > 60) return false;
+    if (filterDayOfWeek !== "all") {
+      const matchDate = new Date(match.date + "T12:00:00");
+      const matchDayIdx = matchDate.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+      const dayMap: Record<string, number> = {
+        sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
+      };
+      if (dayMap[filterDayOfWeek] !== matchDayIdx) return false;
+    }
     if (filterRisk === "safe" && match.risk > 30) return false;
     if (filterRisk === "moderate" && (match.risk <= 30 || match.risk > 50))
       return false;
@@ -1552,29 +1553,31 @@ export default function Matches() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Confidence filter — pill dropdown */}
+              {/* Day of week filter — pill dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
-                      filterConfidence !== "all"
+                      filterDayOfWeek !== "all"
                         ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
                         : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#7C3AED]/10">
-                      <Brain
-                        className="h-3 w-3 text-[#7C3AED]"
+                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
+                      <Calendar
+                        className="h-3 w-3 text-[#F59E0B]"
                         strokeWidth={2}
                       />
                     </span>
-                    {filterConfidence === "all"
-                      ? "Впевненість"
-                      : filterConfidence === "high"
-                        ? "Висока"
-                        : filterConfidence === "medium"
-                          ? "Середня"
-                          : "Низька"}
+                    {filterDayOfWeek === "all"
+                      ? "Всі дні"
+                      : filterDayOfWeek === "mon" ? "Понеділок"
+                      : filterDayOfWeek === "tue" ? "Вівторок"
+                      : filterDayOfWeek === "wed" ? "Середа"
+                      : filterDayOfWeek === "thu" ? "Четвер"
+                      : filterDayOfWeek === "fri" ? "П'ятниця"
+                      : filterDayOfWeek === "sat" ? "Субота"
+                      : "Неділя"}
                     <ChevronDown
                       className="h-3.5 w-3.5 opacity-60"
                       strokeWidth={2}
@@ -1583,29 +1586,18 @@ export default function Matches() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
                   <DropdownMenuItem
-                    onClick={() => setFilterConfidence("all")}
+                    onClick={() => setFilterDayOfWeek("all")}
                     className="rounded-lg"
                   >
-                    Всі рівні
+                    Всі дні
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterConfidence("high")}
-                    className="rounded-lg"
-                  >
-                    Висока (&gt;80%)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterConfidence("medium")}
-                    className="rounded-lg"
-                  >
-                    Середня (60-80%)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterConfidence("low")}
-                    className="rounded-lg"
-                  >
-                    Низька (&lt;60%)
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("mon")} className="rounded-lg">Понеділок</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("tue")} className="rounded-lg">Вівторок</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("wed")} className="rounded-lg">Середа</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("thu")} className="rounded-lg">Четвер</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("fri")} className="rounded-lg">П'ятниця</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("sat")} className="rounded-lg">Субота</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("sun")} className="rounded-lg">Неділя</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
