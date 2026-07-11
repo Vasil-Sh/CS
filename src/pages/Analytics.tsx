@@ -908,7 +908,6 @@ export default function Analytics() {
                       <div className="text-sm font-bold text-red-500"><NumberTicker value={losingBets.length} /></div>
                     </div>
                   </div>
-                  <div className="text-[10px] text-center text-gray-500 font-medium">За місяць: <NumberTicker value={betsThisMonth} /></div>
                 </div>
               </div>
             </div>
