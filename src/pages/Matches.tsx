@@ -885,7 +885,14 @@ export default function Matches() {
 
   // Group matches by date. Show today + future by default, but if ALL matches are in the past, still show them.
   const todayKey = getTodayDateKey();
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowKey = tomorrowDate.toISOString().split("T")[0];
+
   const groupedByDate: Record<string, Match[]> = {};
+  // Always ensure today and tomorrow keys exist (so date cards are always visible)
+  groupedByDate[todayKey] = [];
+  groupedByDate[tomorrowKey] = [];
   sortedMatches.forEach((match) => {
     const key = getDateKey(match.date);
     if (!groupedByDate[key]) groupedByDate[key] = [];
@@ -1665,21 +1672,6 @@ export default function Matches() {
             <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CardContent className="py-16 text-center">
                 <MatchesLoadingState />
-              </CardContent>
-            </Card>
-          )}
-
-          {!initialLoading && sortedMatches.length === 0 && (
-            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <CardContent className="py-16 text-center">
-                <MatchesEmptyState error={apiError || undefined} />
-                <Button
-                  onClick={refreshMatches}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors mt-4"
-                >
-                  <RefreshCw className="h-4 w-4" strokeWidth={2} />
-                  Спробувати знову
-                </Button>
               </CardContent>
             </Card>
           )}
