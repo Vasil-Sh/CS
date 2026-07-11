@@ -61,11 +61,12 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
     <button
       type="button"
       onClick={onNavigate}
-      className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between"
+      className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between overflow-hidden"
       style={CARD_BASE_STYLE}
       onMouseEnter={(e) => applyCardHover(e.currentTarget)}
       onMouseLeave={(e) => resetCardHover(e.currentTarget)}
     >
+      <ShineBorder shineColor={["#447afc", "#7C3AED", "#F59E0B"]} duration={12} borderWidth={2} />
       <div className="flex items-center gap-2 mb-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
           <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />

@@ -27,6 +27,7 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
+import { RippleButton } from "@/components/ui/ripple-button";
 
 type FormStability =
   | "hot_streak"
@@ -631,15 +632,15 @@ export default function MatchRow({
           className={`py-3 px-2 text-center ${colDivider}`}
           style={{ minWidth: 120 }}
         >
-          {/* Add to risky teams — blue button with plus */}
+          {/* Add to risky teams — ripple button */}
           {!hasRiskyTeam && (
-            <button
+            <RippleButton
               onClick={() => onAddToRisky(match)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium transition-all shadow-sm"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm"
             >
               <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
               Додати запис
-            </button>
+            </RippleButton>
           )}
 
           {/* Risky team comment — only when team is already risky */}
