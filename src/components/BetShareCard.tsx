@@ -36,11 +36,16 @@ interface BetShareCardProps {
 }
 
 function translateBetType(betType: string): string {
+  // First, handle "Карта N: " prefix explicitly
+  const mapPrefix = betType.match(/^Карта (\d+):\s*(.+)/);
+  if (mapPrefix) {
+    return `Карта ${mapPrefix[1]}: ${translateBetType(mapPrefix[2])}`;
+  }
   const translations: Record<string, string> = {
     "Match Winner": "Переможець матчу",
-    "MatchWinner": "Переможець матчу",
+    MatchWinner: "Переможець матчу",
     "Map Winner": "Переможець карти",
-    "MapWinner": "Переможець карти",
+    MapWinner: "Переможець карти",
     Handicap: "Фора",
     "Map Handicap": "Фора на карту",
     "Round Handicap": "Фора раундів",

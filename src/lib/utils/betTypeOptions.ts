@@ -190,5 +190,13 @@ export function getBetTypeLabel(betType: string, format?: string): string {
       if (o.value === betType) return o.label;
     }
   }
+  // Fallback: translate common English camelCase patterns
+  const camelFallbacks: Record<string, string> = {
+    MatchWinner: 'Переможець матчу',
+    MapWinner: 'Переможець карти',
+    FirstBlood: 'Перша кров',
+    TotalKills: 'Тотал вбивств',
+  };
+  if (camelFallbacks[betType]) return camelFallbacks[betType];
   return betType;
 }
