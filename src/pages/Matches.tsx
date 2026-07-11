@@ -70,6 +70,7 @@ import {
   parseDota2MatchType,
   parseDota2MatchContext,
   buildTipsGgUrl,
+  clearDota2Cache,
   type Dota2ApiMatch,
 } from "@/lib/dota2Api";
 
@@ -437,7 +438,7 @@ export default function Matches() {
   >("all");
   const [filterTournament, setFilterTournament] = useState("all");
   const [filterMatchType, setFilterMatchType] = useState<
-    "all" | "Bo1" | "Bo3" | "Bo5"
+    "all" | "Bo1" | "Bo2" | "Bo3" | "Bo5"
   >("all");
   const [filterGame, setFilterGame] = useState<"all" | "CS2" | "Dota2">("all");
   const [filterStatus, setFilterStatus] = useState<
@@ -536,7 +537,12 @@ export default function Matches() {
       try {
         const resp = await fetch("/api/v1/dota2-matches/live-scores");
         if (!resp.ok) return;
-        const updates: Array<{ id: string; score1: number | null; score2: number | null; status: string }> = await resp.json();
+        const updates: Array<{
+          id: string;
+          score1: number | null;
+          score2: number | null;
+          status: string;
+        }> = await resp.json();
         if (!Array.isArray(updates) || updates.length === 0) return;
 
         setMatches((prev) =>
@@ -544,9 +550,12 @@ export default function Matches() {
             if (m.game !== "Dota2") return m;
             const update = updates.find((u) => m.id.endsWith(u.id));
             if (!update) return m;
-            const newStatus = update.status === "finished" ? "finished"
-              : update.status === "live" ? "live"
-              : m.matchStatus;
+            const newStatus =
+              update.status === "finished"
+                ? "finished"
+                : update.status === "live"
+                  ? "live"
+                  : m.matchStatus;
             return {
               ...m,
               score1: update.score1 ?? m.score1 ?? 0,
@@ -651,6 +660,8 @@ export default function Matches() {
 
   const loadMatchesFromApi = async () => {
     try {
+      // Clear stale Dota2 cache on mount — ensures fresh matches every page load
+      clearDota2Cache();
       const allMatches: Match[] = [];
 
       // Fetch CS2 matches
@@ -909,9 +920,9 @@ export default function Matches() {
   ).length;
 
   // Collect unique tournaments for filter dropdown
-  const tournamentOptions = [...new Set(
-    displayedMatches.map((m) => m.context).filter(Boolean),
-  )].sort();
+  const tournamentOptions = [
+    ...new Set(displayedMatches.map((m) => m.context).filter(Boolean)),
+  ].sort();
 
   const toggleSort = (
     column: "date" | "confidence" | "risk" | "upset" | "status" | "odds",
@@ -947,9 +958,12 @@ export default function Matches() {
       }
 
       try {
-        const dotaApiMatches = await fetchDota2Matches();
+        const dotaApiMatches = await fetchDota2Matches(true); // force: skip stale cache on manual refresh
         if (dotaApiMatches && dotaApiMatches.length > 0) {
           allMatches.push(...dotaApiMatches.map(dota2ApiMatchToMatch));
+        } else {
+          if (import.meta.env.DEV)
+            console.warn("[Matches] Dota2 refresh: 0 matches returned");
         }
       } catch (dotaErr) {
         if (import.meta.env.DEV)
@@ -1469,6 +1483,12 @@ export default function Matches() {
                     Bo1
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    onClick={() => setFilterMatchType("Bo2")}
+                    className="rounded-lg"
+                  >
+                    Bo2
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => setFilterMatchType("Bo3")}
                     className="rounded-lg"
                   >
@@ -1510,7 +1530,10 @@ export default function Matches() {
                     />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1 max-h-64 overflow-y-auto">
+                <DropdownMenuContent
+                  align="start"
+                  className="rounded-xl p-1 max-h-64 overflow-y-auto"
+                >
                   <DropdownMenuItem
                     onClick={() => setFilterTournament("all")}
                     className="rounded-lg"

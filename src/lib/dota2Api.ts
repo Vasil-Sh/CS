@@ -100,16 +100,24 @@ function setCache(data: Dota2ApiMatch[]): void {
 
 /**
  * Fetch today's and upcoming Dota 2 matches from tips.gg via backend proxy.
+ * @param forceRefresh — skip localStorage cache and force a fresh API call (used by refresh button)
  */
-export async function fetchDota2Matches(): Promise<Dota2ApiMatch[]> {
-  const cached = getCache();
-  if (cached) return cached;
+export async function fetchDota2Matches(
+  forceRefresh = false,
+): Promise<Dota2ApiMatch[]> {
+  if (!forceRefresh) {
+    const cached = getCache();
+    if (cached) return cached;
+  }
 
   try {
     const data = await api.get<TipsGgApiMatch[]>("/v1/dota2-matches");
     const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
     if (matches.length > 0) {
       setCache(matches);
+    } else if (forceRefresh) {
+      // Clear stale cache so next load tries API again
+      clearCache();
     }
     return matches;
   } catch (e) {
@@ -118,6 +126,16 @@ export async function fetchDota2Matches(): Promise<Dota2ApiMatch[]> {
     return [];
   }
 }
+
+function clearCache(): void {
+  try {
+    localStorage.removeItem(MATCHES_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export { clearCache as clearDota2Cache };
 
 /**
  * Determine match format from the type field.

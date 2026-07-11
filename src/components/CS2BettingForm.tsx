@@ -989,7 +989,7 @@ export default function CS2BettingForm({
       };
 
       // 1. Save to API (primary store)
-      const localFallback = () => {
+      const localFallback = (apiId?: string | number) => {
         // ALWAYS read fresh from localStorage to avoid overwriting recent bet updates
         const freshBets = UserDataService.getUserData<BetRecord[]>(
           currentUser,
@@ -998,6 +998,7 @@ export default function CS2BettingForm({
         );
         const recordForStorage = {
           ...record,
+          id: apiId, // include API id so result updates find the match
           riskyTeams: record.riskyTeams.map((t) => t.name),
         };
         UserDataService.setUserDataSync(currentUser, "mybets_data", [
@@ -1006,7 +1007,7 @@ export default function CS2BettingForm({
         ]);
       };
       try {
-        await UserDataService.createBet({
+        const created = await UserDataService.createBet({
           match: record.match,
           team1: record.team1,
           team2: record.team2,
@@ -1039,7 +1040,7 @@ export default function CS2BettingForm({
           expressLogos: record.expressLogos,
         } as Parameters<typeof UserDataService.createBet>[0]);
         // Cache locally so "Останні записи" reads instantly
-        localFallback();
+        localFallback(created.id);
       } catch (err) {
         if (import.meta.env.DEV)
           console.warn("[API] Bet save failed, caching to localStorage:", err);

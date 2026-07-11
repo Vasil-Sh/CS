@@ -244,9 +244,13 @@ const BetTableMemo = memo(function BetTable({
         return (
           bet.match?.toLowerCase().includes(query) ||
           false ||
-          bet.team1?.toLowerCase().includes(query) ||
+          String(bet.team1 || "")
+            .toLowerCase()
+            .includes(query) ||
           false ||
-          bet.team2?.toLowerCase().includes(query) ||
+          String(bet.team2 || "")
+            .toLowerCase()
+            .includes(query) ||
           false ||
           bet.game?.toLowerCase().includes(query) ||
           false ||
@@ -382,8 +386,12 @@ const BetTableMemo = memo(function BetTable({
   function getSelectedTeamLogo(bet: Bet, selectedTeam: string): string | null {
     const sel = selectedTeam.toLowerCase().trim();
     if (!sel) return null;
-    const t1 = (bet.team1 || "").toLowerCase().trim();
-    const t2 = (bet.team2 || "").toLowerCase().trim();
+    const t1 = String(bet.team1 || "")
+      .toLowerCase()
+      .trim();
+    const t2 = String(bet.team2 || "")
+      .toLowerCase()
+      .trim();
     // Exact match
     if (t1 && sel === t1) return bet.logoTeam1 || null;
     if (t2 && sel === t2) return bet.logoTeam2 || null;

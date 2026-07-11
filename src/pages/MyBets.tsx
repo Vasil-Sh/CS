@@ -621,8 +621,18 @@ export default function MyBets() {
       /* ignore */
     }
 
-    // Remove from state directly (no round-trip to API)
-    setRecentBets((prev) => prev.filter((b) => b.id !== bet.id));
+    // Remove from state — match by id OR by date+match+amount (for localStorage bets without id)
+    setRecentBets((prev) =>
+      prev.filter(
+        (b) =>
+          !(b.id && bet.id && b.id === bet.id) &&
+          !(
+            b.date === bet.date &&
+            b.match === bet.match &&
+            b.amount === bet.amount
+          ),
+      ),
+    );
     bumpBets();
     bumpBankroll();
     syncStats();
