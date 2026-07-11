@@ -27,7 +27,6 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
-import { RippleButton } from "@/components/ui/ripple-button";
 
 type FormStability =
   | "hot_streak"
@@ -630,17 +629,17 @@ export default function MatchRow({
       {visibleColumns.has("notes") && (
         <td
           className={`py-3 px-2 text-center ${colDivider}`}
-          style={{ minWidth: 150 }}
+          style={{ minWidth: 170 }}
         >
-          {/* Add to risky teams — ripple button */}
+          {/* Add to bets */}
           {!hasRiskyTeam && (
-            <RippleButton
+            <button
               onClick={() => onAddToRisky(match)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
+              className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
             >
-              <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
-              Додати запис
-            </RippleButton>
+              <PlusCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+              <span>Додати запис</span>
+            </button>
           )}
 
           {/* Risky team comment — only when team is already risky */}

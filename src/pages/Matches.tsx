@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { PulsatingButton } from "@/components/ui/pulsating-button";
 import {
   Calendar,
   Trophy,
@@ -1306,20 +1305,18 @@ export default function Matches() {
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-4 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="flex items-center gap-2.5 flex-wrap justify-between">
               {/* Refresh button */}
-              <PulsatingButton
+              <button
                 onClick={refreshMatches}
                 disabled={isLoading}
-                pulseColor="#447afc"
-                duration="2s"
-                className="inline-flex items-center whitespace-nowrap rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 text-sm gap-2 disabled:opacity-50"
+                className="inline-flex items-center whitespace-nowrap !flex !flex-nowrap rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 text-sm gap-2 disabled:opacity-50 transition-colors"
               >
                 {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+                  <Loader2 className="h-4 w-4 animate-spin shrink-0" strokeWidth={1.5} />
                 ) : (
-                  <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                  <RefreshCw className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                 )}
                 Оновити
-              </PulsatingButton>
+              </button>
 
               {/* Search */}
               <div className="relative flex-1 min-w-[140px]">
