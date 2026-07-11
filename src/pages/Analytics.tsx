@@ -822,12 +822,12 @@ export default function Analytics() {
                   />
                   <span className={`text-xs mt-2 ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}% ROI</span>
                   <div className="grid grid-cols-2 gap-2 mt-2 w-full">
-                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-gray-400">Вкладено</div>
+                    <div className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
+                      <div className="text-[10px] text-gray-500 font-medium">Вкладено</div>
                       <div className="text-sm font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
                     </div>
-                    <div className={`rounded-lg px-2 py-1.5 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-                      <div className={`text-[10px] ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
+                    <div className={`bg-white border rounded-lg px-2 py-1.5 text-center shadow-sm ${filteredStats.totalProfit >= 0 ? "border-emerald-200" : "border-red-200"}`}>
+                      <div className={`text-[10px] font-medium ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
                       <div className={`text-sm font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
                     </div>
                   </div>
@@ -859,12 +859,12 @@ export default function Analytics() {
                     {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
                   </span>
                   <div className="flex items-end gap-3 mt-2 w-full">
-                    <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2 border border-emerald-200">
+                    <div className="flex-1 bg-white border border-emerald-200 rounded-xl px-3 py-2 shadow-sm">
                       <div className="text-[10px] text-emerald-500 font-medium mb-0.5">▲ Найкращий</div>
                       <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
                       {bestMonth && <div className="text-[10px] text-emerald-500 mt-0.5">{bestMonth.month}</div>}
                     </div>
-                    <div className="flex-1 bg-red-50 rounded-xl px-3 py-2 border border-red-200">
+                    <div className="flex-1 bg-white border border-red-200 rounded-xl px-3 py-2 shadow-sm">
                       <div className="text-[10px] text-red-400 font-medium mb-0.5">▼ Найгірший</div>
                       <div className="text-sm font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
                       {worstMonth && <div className="text-[10px] text-red-400 mt-0.5">{worstMonth.month}</div>}
@@ -895,20 +895,20 @@ export default function Analytics() {
                   />
                   <span className="text-xs text-sky-500 mt-2 font-medium">середній {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</span>
                   <div className="grid grid-cols-3 gap-2 mt-2 w-full mb-2">
-                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-gray-400">Ставок</div>
+                    <div className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
+                      <div className="text-[10px] text-gray-500 font-medium">Ставок</div>
                       <div className="text-sm font-bold text-gray-900"><NumberTicker value={completedBets.length} /></div>
                     </div>
-                    <div className="bg-emerald-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-emerald-500">Виграші</div>
+                    <div className="bg-white border border-emerald-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
+                      <div className="text-[10px] text-emerald-500 font-medium">Виграші</div>
                       <div className="text-sm font-bold text-emerald-600"><NumberTicker value={winningBets.length} /></div>
                     </div>
-                    <div className="bg-red-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-red-400">Програші</div>
+                    <div className="bg-white border border-red-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
+                      <div className="text-[10px] text-red-400 font-medium">Програші</div>
                       <div className="text-sm font-bold text-red-500"><NumberTicker value={losingBets.length} /></div>
                     </div>
                   </div>
-                  <div className="text-[10px] text-center text-gray-400">За місяць: <NumberTicker value={betsThisMonth} /></div>
+                  <div className="text-[10px] text-center text-gray-500 font-medium">За місяць: <NumberTicker value={betsThisMonth} /></div>
                 </div>
               </div>
             </div>
