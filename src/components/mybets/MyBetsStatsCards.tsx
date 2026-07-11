@@ -109,17 +109,14 @@ export default function MyBetsStatsCards({
           icon={<IconBox><Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Вінрейт"
           value={
-            <div className="flex items-center gap-3">
-              <AnimatedCircularProgressBar
-                max={100}
-                min={0}
-                value={stats.winRate}
-                gaugePrimaryColor="#22C55E"
-                gaugeSecondaryColor="#E5E7EB"
-                className="w-10 h-10"
-              />
-              <span>{stats.winRate}%</span>
-            </div>
+            <AnimatedCircularProgressBar
+              max={100}
+              min={0}
+              value={stats.winRate}
+              gaugePrimaryColor="#22C55E"
+              gaugeSecondaryColor="#E5E7EB"
+              className="w-12 h-12"
+            />
           }
           subtext={`${winningBets.length}W / ${losingBets.length}L`}
         />
