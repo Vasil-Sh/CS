@@ -168,7 +168,7 @@ export default function Analytics() {
 
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
-  const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("CS2");
+  const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("all");
 
   const {
     completedBets: completedBetsForMetrics,
