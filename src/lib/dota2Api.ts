@@ -111,7 +111,10 @@ export async function fetchDota2Matches(
   }
 
   try {
-    const data = await api.get<TipsGgApiMatch[]>("/v1/dota2-matches");
+    const path = forceRefresh
+      ? "/v1/dota2-matches?refresh=true"
+      : "/v1/dota2-matches";
+    const data = await api.get<TipsGgApiMatch[]>(path);
     const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
     if (matches.length > 0) {
       setCache(matches);
