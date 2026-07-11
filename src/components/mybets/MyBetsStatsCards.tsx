@@ -107,24 +107,28 @@ export default function MyBetsStatsCards({
         />
         {/* Winrate card — large donut filling the card */}
         <div
-          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-4 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB] flex flex-col items-center justify-center gap-2"
+          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-4 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
           style={{ transform: "translateY(0)" }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
-          <AnimatedCircularProgressBar
-            max={100}
-            min={0}
-            value={stats.winRate}
-            gaugePrimaryColor="#22C55E"
-            gaugeSecondaryColor="#E5E7EB"
-            className="!w-28 !h-28"
-          />
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 mb-2">
             <Target className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
             <span className="text-sm font-semibold text-[#111827]">Вінрейт</span>
           </div>
-          <span className="text-xs text-[#9CA3AF]">{winningBets.length}W / {losingBets.length}L</span>
+          <div className="flex items-center justify-center">
+            <AnimatedCircularProgressBar
+              max={100}
+              min={0}
+              value={stats.winRate}
+              gaugePrimaryColor="#22C55E"
+              gaugeSecondaryColor="#E5E7EB"
+              className="!w-28 !h-28"
+            />
+          </div>
+          <div className="text-center mt-1">
+            <span className="text-xs text-[#9CA3AF]">{winningBets.length}W / {losingBets.length}L</span>
+          </div>
         </div>
       </div>
 
