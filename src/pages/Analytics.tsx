@@ -870,16 +870,6 @@ export default function Analytics() {
                       {worstMonth && <div className="text-[10px] text-red-400 mt-0.5">{worstMonth.month}</div>}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mt-2 w-full">
-                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-gray-400">Середнє/міс</div>
-                      <div className={`text-sm font-bold ${avgMonthlyProfit >= 0 ? "text-gray-900" : "text-red-500"}`}>{avgMonthlyProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(avgMonthlyProfit)} /> ₴</div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg px-2 py-1.5 text-center">
-                      <div className="text-[10px] text-gray-400">Місяців</div>
-                      <div className="text-sm font-bold text-gray-900"><NumberTicker value={totalMonthsTracked} /></div>
-                    </div>
-                  </div>
                 </div>
 
                 {/* 3. Коефіцієнти */}
