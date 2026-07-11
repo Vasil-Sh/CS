@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { BlurFade } from "@/components/ui/blur-fade";
 import {
   Calendar,
   Trophy,
@@ -1680,14 +1682,23 @@ export default function Matches() {
           {!initialLoading &&
             Object.keys(groupedByDate)
               .sort()
-              .map((dateKey) => {
+              .map((dateKey, idx) => {
                 const dateMatches = groupedByDate[dateKey];
+                const hasLive = dateMatches.some((m) => m.matchStatus === "live");
                 return (
-                  <div
-                    key={dateKey}
-                    className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-x-auto"
-                  >
-                    <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
+                  <BlurFade key={dateKey} delay={idx * 0.1} inView>
+                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-x-auto">
+                      {hasLive && (
+                        <BorderBeam
+                          size={200}
+                          duration={4}
+                          colorFrom="#EF4444"
+                          colorTo="#F59E0B"
+                          borderWidth={2}
+                          className="rounded-[32px]"
+                        />
+                      )}
+                      <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] min-w-max">
                       <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
                         <CardTitle>
                           <div className="flex items-center gap-4 flex-wrap">
@@ -1759,6 +1770,7 @@ export default function Matches() {
                       </CardContent>
                     </div>
                   </div>
+                </BlurFade>
                 );
               })}
 

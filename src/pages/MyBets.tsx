@@ -25,6 +25,7 @@ import { logRender } from "@/lib/devLogger";
 import { PageHeader } from "@/components/PageHeader";
 import { Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
+import { Confetti } from "@/components/ui/confetti";
 import type { Bet } from "@/types/betting";
 import MyBetsStatsCards from "@/components/mybets/MyBetsStatsCards";
 import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
@@ -88,6 +89,7 @@ export default function MyBets() {
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<
     ParsedEvent[]
   >([]);
+  const [confettiKey, setConfettiKey] = useState(0);
   const [selectedDetailsBet, setSelectedDetailsBet] = useState<Bet | null>(
     null,
   );
@@ -471,6 +473,7 @@ export default function MyBets() {
         toast.success(
           `Запис позначено як ${result === "Win" ? "виграшний" : "програшний"}`,
         );
+        if (result === "Win") setConfettiKey((k) => k + 1);
         if (note.trim())
           toast("Нотатку додано до запису", { description: note.trim() });
         loadStats();
@@ -619,6 +622,13 @@ export default function MyBets() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative">
+      <Confetti
+        key={confettiKey}
+        particleCount={80}
+        spread={90}
+        origin={{ x: 0.5, y: 0.3 }}
+        className="pointer-events-none fixed inset-0 z-[9999]"
+      />
       <PageHeader
         title="Додати запис"
         currentUser={currentUser || "User"}

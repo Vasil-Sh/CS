@@ -3,6 +3,7 @@ import {
   Wallet, DollarSign, BarChart3, Target, Clock, Trophy,
   AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Pencil,
 } from "lucide-react";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import StatCard from "@/components/StatCard";
 import type { Bet } from "@/types/betting";
 import type { DualBankrollStats } from "@/lib/bankrollService";
@@ -66,10 +67,10 @@ export default function MyBetsStatsCards({
               </button>
             )}
           </div>
-          <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-            {currencyMode === "USD"
-              ? `$${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })}`
-              : `${bank.currentBank.toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴`}
+          <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2 flex items-baseline gap-1">
+            {currencyMode === "USD" ? "$" : ""}
+            <NumberTicker value={Math.round(bank.currentBank)} />
+            {currencyMode !== "USD" && " ₴"}
           </div>
           <div className="flex items-center gap-2 text-sm">
             {bankUp ? (
