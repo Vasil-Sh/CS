@@ -630,13 +630,13 @@ export default function MatchRow({
       {visibleColumns.has("notes") && (
         <td
           className={`py-3 px-2 text-center ${colDivider}`}
-          style={{ minWidth: 120 }}
+          style={{ minWidth: 150 }}
         >
           {/* Add to risky teams — ripple button */}
           {!hasRiskyTeam && (
             <RippleButton
               onClick={() => onAddToRisky(match)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
             >
               <PlusCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
               Додати запис

@@ -1311,7 +1311,7 @@ export default function Matches() {
                 disabled={isLoading}
                 pulseColor="#447afc"
                 duration="2s"
-                className="rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 text-sm gap-2 disabled:opacity-50"
+                className="inline-flex items-center whitespace-nowrap rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 text-sm gap-2 disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
