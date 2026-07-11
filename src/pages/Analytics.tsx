@@ -801,108 +801,119 @@ export default function Analytics() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 {/* 1. ROI */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
                 >
-                  <div className="flex items-center gap-2 mb-3 self-start">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50 shrink-0">
                       <Percent className="h-5 w-5 text-emerald-500" strokeWidth={1.5} />
                     </div>
                     <span className="text-lg font-semibold text-gray-900">ROI</span>
                   </div>
-                  <AnimatedCircularProgressBar
-                    max={100}
-                    min={0}
-                    value={Math.abs(roi) > 100 ? 100 : Math.abs(roi)}
-                    gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
-                    gaugeSecondaryColor="#E5E7EB"
-                    className="!w-32 !h-32"
-                  />
-                  <span className={`text-xs mt-2 ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}% ROI</span>
-                  <div className="grid grid-cols-2 gap-2 mt-2 w-full">
-                    <div className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
-                      <div className="text-[10px] text-gray-500 font-medium">Вкладено</div>
-                      <div className="text-sm font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
+                  <div className="flex items-center gap-4 mb-3">
+                    <AnimatedCircularProgressBar
+                      max={100} min={0}
+                      value={Math.abs(roi) > 100 ? 100 : Math.abs(roi)}
+                      gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
+                      gaugeSecondaryColor="#E5E7EB"
+                      className="!w-20 !h-20 shrink-0"
+                    />
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <span className={`text-xl font-bold ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}%</span>
+                      <span className="text-[11px] text-gray-400">прибуток / вкладено</span>
                     </div>
-                    <div className={`bg-white border rounded-lg px-2 py-1.5 text-center shadow-sm ${filteredStats.totalProfit >= 0 ? "border-emerald-200" : "border-red-200"}`}>
-                      <div className={`text-[10px] font-medium ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
-                      <div className={`text-sm font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-center">
+                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Вкладено</div>
+                      <div className="text-base font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
+                    </div>
+                    <div className={`bg-white border rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "border-emerald-200" : "border-red-200"}`}>
+                      <div className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
+                      <div className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
                     </div>
                   </div>
                 </div>
 
                 {/* 2. По місяцях */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
                 >
-                  <div className="flex items-center gap-2 mb-3 self-start">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50 shrink-0">
                       <Trophy className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
                     </div>
                     <span className="text-lg font-semibold text-gray-900">По місяцях</span>
                   </div>
-                  {/* Month profit donut */}
-                  <AnimatedCircularProgressBar
-                    max={100}
-                    min={0}
-                    value={bestMonth && totalMonthsTracked > 0 ? Math.min(100, Math.round((bestMonth.profit / (Math.abs(bestMonth.profit) + Math.abs(worstMonth?.profit || 0) + 1)) * 100)) : 50}
-                    gaugePrimaryColor="#F59E0B"
-                    gaugeSecondaryColor="#E5E7EB"
-                    className="!w-28 !h-28"
-                  />
-                  <span className="text-xs text-amber-500 mt-2 font-medium">
-                    {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
-                  </span>
-                  <div className="flex items-end gap-2 mt-2 w-full">
-                    <div className="flex-1 bg-white border border-emerald-200 rounded-lg px-2 py-1.5 shadow-sm">
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium">▲ Найкращий {bestMonth?.month}</div>
-                      <div className="text-xs font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
+                  <div className="flex items-center gap-4 mb-3">
+                    <AnimatedCircularProgressBar
+                      max={100} min={0}
+                      value={bestMonth && totalMonthsTracked > 0 ? Math.min(100, Math.round((bestMonth.profit / (Math.abs(bestMonth.profit) + Math.abs(worstMonth?.profit || 0) + 1)) * 100)) : 50}
+                      gaugePrimaryColor="#F59E0B"
+                      gaugeSecondaryColor="#E5E7EB"
+                      className="!w-20 !h-20 shrink-0"
+                    />
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <span className="text-xl font-bold text-amber-500">
+                        {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
+                      </span>
+                      <span className="text-[11px] text-gray-400">найкращий місяць</span>
                     </div>
-                    <div className="flex-1 bg-white border border-red-200 rounded-lg px-2 py-1.5 shadow-sm">
-                      <div className="flex items-center gap-1 text-[10px] text-red-400 font-medium">▼ Найгірший {worstMonth?.month}</div>
-                      <div className="text-xs font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 bg-white border border-emerald-200 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium uppercase tracking-wider">▲ Найкращий {bestMonth?.month}</div>
+                      <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
+                    </div>
+                    <div className="flex-1 bg-white border border-red-200 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-1 text-[10px] text-red-400 font-medium uppercase tracking-wider">▼ Найгірший {worstMonth?.month}</div>
+                      <div className="text-sm font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* 3. Коефіцієнти */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
                 >
-                  <div className="flex items-center gap-2 mb-3 self-start">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 shrink-0">
                       <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
                     </div>
                     <span className="text-lg font-semibold text-gray-900">Коефіцієнти</span>
                   </div>
-                  <AnimatedCircularProgressBar
-                    max={100}
-                    min={0}
-                    value={filteredStats.winRate}
-                    gaugePrimaryColor="#3B82F6"
-                    gaugeSecondaryColor="#E5E7EB"
-                    className="!w-28 !h-28"
-                  />
-                  <span className="text-xs text-sky-500 mt-2 font-medium">середній {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</span>
-                  <div className="grid grid-cols-3 gap-2 mt-2 w-full mb-2">
-                    <div className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
-                      <div className="text-[10px] text-gray-500 font-medium">Ставок</div>
+                  <div className="flex items-center gap-4 mb-3">
+                    <AnimatedCircularProgressBar
+                      max={100} min={0}
+                      value={filteredStats.winRate}
+                      gaugePrimaryColor="#3B82F6"
+                      gaugeSecondaryColor="#E5E7EB"
+                      className="!w-20 !h-20 shrink-0"
+                    />
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <span className="text-xl font-bold text-gray-900">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</span>
+                      <span className="text-[11px] text-gray-400">середній коеф.</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-white border border-gray-200 rounded-xl px-2 py-2 text-center">
+                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Ставок</div>
                       <div className="text-sm font-bold text-gray-900"><NumberTicker value={completedBets.length} /></div>
                     </div>
-                    <div className="bg-white border border-emerald-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
-                      <div className="text-[10px] text-emerald-500 font-medium">Виграші</div>
+                    <div className="bg-white border border-emerald-200 rounded-xl px-2 py-2 text-center">
+                      <div className="text-[10px] text-emerald-500 font-medium uppercase tracking-wider">Виграші</div>
                       <div className="text-sm font-bold text-emerald-600"><NumberTicker value={winningBets.length} /></div>
                     </div>
-                    <div className="bg-white border border-red-200 rounded-lg px-2 py-1.5 text-center shadow-sm">
-                      <div className="text-[10px] text-red-400 font-medium">Програші</div>
+                    <div className="bg-white border border-red-200 rounded-xl px-2 py-2 text-center">
+                      <div className="text-[10px] text-red-400 font-medium uppercase tracking-wider">Програші</div>
                       <div className="text-sm font-bold text-red-500"><NumberTicker value={losingBets.length} /></div>
                     </div>
                   </div>
