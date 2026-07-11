@@ -281,10 +281,11 @@ export default function BetShareCard({
 
   const betTypeParts = bet.betType.split(" - ");
   const selection = betTypeParts[1] || "";
-  const betCategory =
+  const betCategoryRaw =
     getBetTypeLabel(betTypeParts[0] || bet.betType, bet.format) ||
     translateBetType(betTypeParts[0]) ||
     translateBetType(bet.betType);
+  const betCategory = betCategoryRaw.replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу');
 
   const totalAmount = isPending
     ? displayAmount * bet.odds
@@ -506,7 +507,7 @@ export default function BetShareCard({
 
                     <div className="space-y-0.5 ml-9">
                       <p className="text-sm text-gray-400 font-medium uppercase tracking-wide">
-                        {getBetTypeLabel(event.betType, bet.format)}
+                        {getBetTypeLabel(event.betType, bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}
                       </p>
                       <div className="flex items-center justify-between">
                         <p

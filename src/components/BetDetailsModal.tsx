@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
+import { getBetTypeLabel } from '@/lib/displayHelpers';
 import type { Bet } from "@/types/betting";
 import {
   parseExpressEvents,
@@ -54,7 +55,7 @@ export default function BetDetailsModal({
       parsedEvents.forEach((event, index) => {
         text += `📌 Подія ${index + 1}:\n`;
         text += `⚽ Матч: ${event.match}\n`;
-        text += `📊 Тип: ${event.betType}\n`;
+        text += `📊 Тип: ${getBetTypeLabel(event.betType, bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}\n`;
         text += `🎯 Вибір: ${event.selection}\n`;
         text += `💰 Коефіцієнт: ${event.odds}\n\n`;
       });
@@ -76,7 +77,7 @@ export default function BetDetailsModal({
           : null;
 
       let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
-      text += `📊 Тип прогнозу: ${bet.betType}\n`;
+      text += `📊 Тип прогнозу: ${getBetTypeLabel(bet.betType.split(" - ")[0], bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}\n`;
 
       if (bet.selection) {
         text += `🎯 Вибір: ${bet.selection}\n`;

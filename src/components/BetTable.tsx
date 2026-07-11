@@ -880,9 +880,9 @@ const BetTableMemo = memo(function BetTable({
                                   )}
                                 >
                                   {getBetTypeLabel(
-                                    bet.betType.split(" - ")[0],
+                                    bet.betType.split(" - ")[0].replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу'),
                                     bet.format,
-                                  )}{" "}
+                                  ).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}{" "}
                                   {bet.betType.includes(" - ")
                                     ? `- ${bet.betType.split(" - ").slice(1).join(" - ")}`
                                     : ""}
