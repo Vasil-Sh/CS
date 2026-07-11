@@ -1654,6 +1654,15 @@ export default function Matches() {
           {/* ===== DATE GROUP CARDS — always visible ===== */}
             {Object.keys(groupedByDate)
               .sort()
+              .filter((dateKey) => {
+                // When day-of-week filter is active, only show dates matching that day
+                if (filterDayOfWeek === "all") return true;
+                const dayMap: Record<string, number> = {
+                  sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
+                };
+                const d = new Date(dateKey + "T12:00:00");
+                return d.getDay() === dayMap[filterDayOfWeek];
+              })
               .map((dateKey, idx) => {
                 const dateMatches = groupedByDate[dateKey];
                 const hasLive = dateMatches.some((m) => m.matchStatus === "live");
