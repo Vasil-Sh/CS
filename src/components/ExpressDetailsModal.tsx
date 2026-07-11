@@ -126,7 +126,7 @@ export default function ExpressDetailsModal({ bet, open, onClose, parsedEvents }
                         {/* Bet details */}
                         <div className="space-y-1 bg-gray-50 rounded-xl p-3 border border-gray-100">
                           <p className="text-xs text-gray-900">
-                            <span className="text-gray-400">Тип:</span> <span className="font-medium ml-1">{getBetTypeLabel(event.betType, bet.format)}</span>
+                            <span className="text-gray-400">Тип:</span> <span className="font-medium ml-1">{getBetTypeLabel(event.betType, bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}</span>
                           </p>
                           <p className="text-xs text-gray-900">
                             <span className="text-gray-400">Вибір:</span> <span className="font-semibold ml-1">{event.selection}</span>

@@ -352,7 +352,10 @@ const BetTableMemo = memo(function BetTable({
   function humanizeBetType(raw: string): string {
     // Already Ukrainian — return as-is (after basic cleanup)
     if (raw.match(/[а-яіїєґ]/i))
-      return raw.replace(/Победа\s*матч/i, "Переможець матчу");
+      return raw
+        .replace(/Победа\s*матч/i, "Переможець матчу")
+        .replace(/\bMapWinner\b/g, "Переможець карти")
+        .replace(/\bMatchWinner\b/g, "Переможець матчу");
 
     let desc = raw;
     // Map patterns
@@ -506,7 +509,7 @@ const BetTableMemo = memo(function BetTable({
           </div>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <span className="flex-1 text-center text-base text-gray-800 truncate">
-            {betDesc}
+            {betDesc.replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}
           </span>
         </div>
       );
