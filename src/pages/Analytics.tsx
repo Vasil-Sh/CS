@@ -960,13 +960,11 @@ export default function Analytics() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <MonthlyProfitChartCard
                             data={monthlyProfit}
-                            chartCardShadow={chartCardShadow}
                           />
                           <OddsVsProfitScatterCard
                             data={scatterData}
                             winCount={winningBets.length}
                             lossCount={losingBets.length}
-                            chartCardShadow={chartCardShadow}
                           />
                         </div>
                       </div>
@@ -1003,7 +1001,6 @@ export default function Analytics() {
                       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
                         <OddsWinRateChartCard
                           data={oddsChartData}
-                          chartCardShadow={chartCardShadow}
                         />
                         <OddsCategoryCards
                           data={oddsData}

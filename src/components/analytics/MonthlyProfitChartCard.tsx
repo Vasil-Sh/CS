@@ -13,11 +13,10 @@ interface MonthlyData {
 
 interface Props {
   data: MonthlyData[];
-  chartCardShadow: string;
 }
 
 /** Monthly profit line chart with cumulative line — modern redesign */
-export default function MonthlyProfitChartCard({ data, chartCardShadow }: Props) {
+export default function MonthlyProfitChartCard({ data }: Props) {
   const maxProfit = Math.max(...data.map(m => m.profit));
   const minProfit = Math.min(...data.map(m => m.profit));
   const avgProfit = Math.round(data.reduce((sum, m) => sum + m.profit, 0) / data.length);

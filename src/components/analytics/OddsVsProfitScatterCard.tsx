@@ -9,11 +9,10 @@ interface Props {
   data: Array<{ odds: string | number; profit: string | number }>;
   winCount: number;
   lossCount: number;
-  chartCardShadow: string;
 }
 
 /** Odds vs Profit scatter chart — modern redesign */
-export default function OddsVsProfitScatterCard({ data, winCount, lossCount, chartCardShadow }: Props) {
+export default function OddsVsProfitScatterCard({ data, winCount, lossCount }: Props) {
   return (
     <Card
       className="border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden"
