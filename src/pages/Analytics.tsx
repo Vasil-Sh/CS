@@ -798,10 +798,10 @@ export default function Analytics() {
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 {/* 1. ROI */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
@@ -835,7 +835,7 @@ export default function Analytics() {
 
                 {/* 2. По місяцях */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
@@ -874,7 +874,7 @@ export default function Analytics() {
 
                 {/* 3. Коефіцієнти */}
                 <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center"
+                  className="stat-card bg-white border border-gray-200 rounded-3xl px-6 py-5 group relative overflow-hidden flex flex-col items-center justify-between h-full"
                   style={cardBaseStyle}
                   onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
                   onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
