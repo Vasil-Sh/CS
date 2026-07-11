@@ -1659,18 +1659,8 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== LOADING STATE ===== */}
-          {initialLoading && (
-            <Card className="border-2 border-[#E8E6DC] rounded-[32px] bg-white/60 backdrop-blur-sm overflow-hidden flex-1 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <CardContent className="py-16 text-center">
-                <MatchesLoadingState />
-              </CardContent>
-            </Card>
-          )}
-
           {/* ===== DATE GROUP CARDS — always visible ===== */}
-          {!initialLoading &&
-            Object.keys(groupedByDate)
+            {Object.keys(groupedByDate)
               .sort()
               .map((dateKey, idx) => {
                 const dateMatches = groupedByDate[dateKey];
@@ -1741,7 +1731,12 @@ export default function Matches() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-0 rounded-b-[24px]">
-                        {dateMatches.length > 0 ? (
+                        {initialLoading ? (
+                          <div className="py-12 text-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-[#447afc] mx-auto mb-3" strokeWidth={1.5} />
+                            <p className="text-sm text-[#9CA3AF]">Завантаження матчів...</p>
+                          </div>
+                        ) : dateMatches.length > 0 ? (
                           <div>
                             <table className="w-full border-collapse">
                               {renderTableHeader()}
