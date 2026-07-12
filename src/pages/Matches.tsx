@@ -1749,9 +1749,16 @@ export default function Matches() {
                             </div>
                             <p className="text-lg font-bold text-[#6B7280]">Немає матчів</p>
                             <p className="text-sm">
-                              Спробуйте обрати інший фільтр гри або натисніть
-                              «Оновити»
+                              Спробуйте обрати інший фільтр гри або натисніть «Оновити»
                             </p>
+                            <button
+                              onClick={refreshMatches}
+                              disabled={isLoading}
+                              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white text-sm font-medium transition-colors disabled:opacity-50"
+                            >
+                              <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                              Оновити
+                            </button>
                           </div>
                         )}
                       </CardContent>

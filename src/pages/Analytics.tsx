@@ -34,7 +34,6 @@ import { useTheme } from "@/hooks/useTheme";
 import {
   CARD_BASE_STYLE,
   CARD_HOVER_STYLE,
-  CHART_CARD_SHADOW,
   applyCardHover,
   resetCardHover,
 } from "@/lib/cardStyles";
@@ -741,9 +740,6 @@ export default function Analytics() {
   const cardBaseStyle = CARD_BASE_STYLE;
   const cardHoverStyle = CARD_HOVER_STYLE;
 
-  // Enhanced card shadow for chart cards — subtle depth like header
-  const chartCardShadow = CHART_CARD_SHADOW;
-
   // Odds category labels
   const oddsCategoryLabels = [
     { label: "Низькі", sublabel: "< 2.0" },
@@ -774,8 +770,7 @@ export default function Analytics() {
           <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
             {gameFilteredBets.length === 0 && (
               <Card
-                className="rounded-2xl bg-white overflow-hidden"
-                style={{ boxShadow: chartCardShadow }}
+                className="rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
               >
                 <CardContent className="py-5 px-6 flex items-center gap-4">
                   <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
@@ -981,8 +976,7 @@ export default function Analytics() {
                       </div>
                     ) : (
                       <Card
-                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
-                        style={{ boxShadow: chartCardShadow }}
+                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
                       >
                         <CardContent className="py-16 text-center">
                           <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
@@ -1020,8 +1014,7 @@ export default function Analytics() {
                       </div>
                     ) : (
                       <Card
-                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center"
-                        style={{ boxShadow: chartCardShadow }}
+                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
                       >
                         <CardContent className="py-16 text-center">
                           <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
