@@ -305,14 +305,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     url: buildTipsGgUrl(m.link),
     score1: m.score1,
     score2: m.score2,
-    matchStatus:
-      m.status !== "upcoming"
-        ? m.status
-        : m.score1 > 0 || m.score2 > 0
-          ? "live"
-          : new Date(m.date).getTime() < Date.now() - 15 * 60 * 1000
-            ? "live"
-            : "upcoming",
+    matchStatus: (m.status as "upcoming" | "live" | "finished"),
     positionTeam1: m.positionTeam1,
     positionTeam2: m.positionTeam2,
     logoTeam1: m.logoTeam1,
