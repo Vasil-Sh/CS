@@ -1743,7 +1743,7 @@ export default function Matches() {
                             </table>
                           </div>
                         ) : (
-                          <div className="py-16 text-center text-[#9CA3AF]">
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-[#9CA3AF]">
                             <p className="text-lg font-medium">Немає матчів</p>
                             <p className="text-sm mt-1">
                               Спробуйте обрати інший фільтр гри або натисніть
