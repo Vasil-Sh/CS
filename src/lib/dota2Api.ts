@@ -40,12 +40,21 @@ interface TipsGgApiMatch {
 const MATCHES_CACHE_KEY = "dota2_matches_cache_v7";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+/** Simple string hash for stable IDs across reloads */
+function stringHash(s: string): number {
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
 /**
  * Convert tips.gg match to unified ApiMatch format.
  */
-function tipsGgToApiMatch(m: TipsGgApiMatch, index: number): Dota2ApiMatch {
+function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
   return {
-    id: index + 10000, // offset to avoid collision with CS IDs
+    id: stringHash(m.id || m.link),
     date: m.startDate || `${m.date}T00:00:00`,
     link: m.link,
     type: m.type,

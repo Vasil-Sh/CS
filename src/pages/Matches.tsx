@@ -264,38 +264,44 @@ function apiMatchToMatch(
 
 /** Convert a Dota2 API match to unified Match format */
 function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
+  // Use backend-supplied prediction % directly (already normalized from bookmaker coefficients)
+  const pred1 = m.predictionPercentTeam1;
+  const pred2 = m.predictionPercentTeam2;
+  const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+
+  const confidence = hasPrediction
+    ? Math.max(pred1 ?? 50, pred2 ?? 50)
+    : 50;
+
+  const fav = hasPrediction
+    ? ((pred1 ?? 50) >= (pred2 ?? 50) ? m.nameTeam1 : m.nameTeam2)
+    : m.nameTeam1;
+
   return {
     id: `dota-${m.id}`,
     date: m.date,
     team1: m.nameTeam1,
     team2: m.nameTeam2,
-    favorite:
-      (m.predictionPercentTeam1 ?? 0) >= (m.predictionPercentTeam2 ?? 0)
-        ? m.nameTeam1
-        : m.nameTeam2,
-    aiConfidence: Math.max(
-      m.predictionPercentTeam1 ?? 50,
-      m.predictionPercentTeam2 ?? 50,
-    ),
-    risk: 30,
+    favorite: fav,
+    aiConfidence: confidence,
+    risk: hasPrediction ? Math.max(5, 100 - confidence - 5) : 30,
     comment: "",
     aiSummary: "",
     odds: {
       team1: m.bettingCoefficientTeam1 ?? 0,
       team2: m.bettingCoefficientTeam2 ?? 0,
     },
-    winRate: Math.max(
-      m.predictionPercentTeam1 ?? 50,
-      m.predictionPercentTeam2 ?? 50,
-    ),
+    winRate: confidence,
     formStability: "stable",
     playerForm: [],
     context: m.tournament
       ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
       : parseDota2MatchContext(m),
     tier: "tier2",
-    matchType: parseDota2MatchType(m.type) as "Bo2" | "Bo3" | "Bo5",
-    upsetProbability: 25,
+    matchType: parseDota2MatchType(m.type),
+    upsetProbability: hasPrediction
+      ? Math.max(5, Math.min(45, 50 - (Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5)))
+      : 25,
     url: buildTipsGgUrl(m.link),
     score1: m.score1,
     score2: m.score2,

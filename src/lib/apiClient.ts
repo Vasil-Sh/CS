@@ -83,10 +83,16 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  // Add timeout via AbortController (20s default)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
+    signal: controller.signal,
   });
+  clearTimeout(timeoutId);
 
   // Handle 401 — try refresh, then retry once
   if (res.status === 401 && retry) {
