@@ -1302,53 +1302,47 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== PILL FILTER BAR ===== */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-4 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="flex items-center gap-2.5 flex-wrap justify-between">
+          {/* ===== PILL FILTER BAR — styled as StrategyTabNav ===== */}
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               {/* Refresh button */}
               <button
                 onClick={refreshMatches}
                 disabled={isLoading}
-                className="inline-flex items-center whitespace-nowrap !flex !flex-nowrap rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11 px-5 text-sm gap-2 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
               >
                 {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin shrink-0" strokeWidth={1.5} />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
                 ) : (
-                  <RefreshCw className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  <RefreshCw className="h-4 w-4" strokeWidth={2} />
                 )}
                 Оновити
               </button>
 
               {/* Search */}
-              <div className="relative flex-1 min-w-[140px]">
+              <div className="relative min-w-[140px]">
                 <Search
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]"
                   strokeWidth={1.5}
                 />
                 <Input
                   placeholder="Пошук..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-3 rounded-[24px] border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors h-11 w-full text-sm bg-white/80"
+                  className="pl-10 pr-4 rounded-[24px] border border-[#E8E6DC] bg-transparent text-base text-[#111827] placeholder:text-[#6B7280] focus:bg-white focus:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:border-[#D1D5DB] transition-all duration-300 h-full py-4 min-h-[56px]"
                 />
               </div>
 
-              {/* Status filter — pill dropdown */}
+              {/* Status filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterStatus !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#22C55E]/10">
-                      <Radio
-                        className="h-3 w-3 text-[#22C55E]"
-                        strokeWidth={2}
-                      />
-                    </span>
                     {filterStatus === "all"
                       ? "Статус"
                       : filterStatus === "live"
@@ -1357,55 +1351,29 @@ export default function Matches() {
                           ? "Очікуються"
                           : "Завершені"}
                     <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
                     />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("all")}
-                    className="rounded-lg"
-                  >
-                    Всі статуси
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("live")}
-                    className="rounded-lg"
-                  >
-                    🔴 LIVE
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("upcoming")}
-                    className="rounded-lg"
-                  >
-                    🕐 Очікуються
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("finished")}
-                    className="rounded-lg"
-                  >
-                    ✅ Завершені
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("all")} className="rounded-lg">Всі статуси</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("live")} className="rounded-lg">🔴 LIVE</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("upcoming")} className="rounded-lg">🕐 Очікуються</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("finished")} className="rounded-lg">✅ Завершені</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Tier filter — pill dropdown */}
+              {/* Tier filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterTier !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
-                      <Trophy
-                        className="h-3 w-3 text-[#F59E0B]"
-                        strokeWidth={2}
-                      />
-                    </span>
                     {filterTier === "all"
                       ? "Tier"
                       : filterTier === "tier1"
@@ -1413,162 +1381,76 @@ export default function Matches() {
                         : filterTier === "tier2"
                           ? "Tier 2"
                           : "Tier 3"}
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
+                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("all")}
-                    className="rounded-lg"
-                  >
-                    Всі Tier
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier1")}
-                    className="rounded-lg"
-                  >
-                    Tier 1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier2")}
-                    className="rounded-lg"
-                  >
-                    Tier 2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier3")}
-                    className="rounded-lg"
-                  >
-                    Tier 3
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier("all")} className="rounded-lg">Всі Tier</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier("tier1")} className="rounded-lg">Tier 1</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier("tier2")} className="rounded-lg">Tier 2</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterTier("tier3")} className="rounded-lg">Tier 3</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Format filter — pill dropdown */}
+              {/* Format filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterMatchType !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#3B82F6]/10">
-                      <Layers
-                        className="h-3 w-3 text-[#3B82F6]"
-                        strokeWidth={2}
-                      />
-                    </span>
                     {filterMatchType === "all" ? "Формат" : filterMatchType}
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
+                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("all")}
-                    className="rounded-lg"
-                  >
-                    Всі формати
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo1")}
-                    className="rounded-lg"
-                  >
-                    Bo1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo2")}
-                    className="rounded-lg"
-                  >
-                    Bo2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo3")}
-                    className="rounded-lg"
-                  >
-                    Bo3
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo5")}
-                    className="rounded-lg"
-                  >
-                    Bo5
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType("all")} className="rounded-lg">Всі формати</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo1")} className="rounded-lg">Bo1</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo2")} className="rounded-lg">Bo2</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo3")} className="rounded-lg">Bo3</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo5")} className="rounded-lg">Bo5</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Tournament filter — pill dropdown */}
+              {/* Tournament filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterTournament !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
-                      <Trophy
-                        className="h-3 w-3 text-[#F59E0B]"
-                        strokeWidth={2}
-                      />
-                    </span>
                     {filterTournament === "all"
                       ? "Турнір"
                       : filterTournament.length > 15
                         ? filterTournament.slice(0, 15) + "…"
                         : filterTournament}
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
+                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="rounded-xl p-1 max-h-64 overflow-y-auto"
-                >
-                  <DropdownMenuItem
-                    onClick={() => setFilterTournament("all")}
-                    className="rounded-lg"
-                  >
-                    Всі турніри
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="start" className="rounded-xl p-1 max-h-64 overflow-y-auto">
+                  <DropdownMenuItem onClick={() => setFilterTournament("all")} className="rounded-lg">Всі турніри</DropdownMenuItem>
                   {tournamentOptions.map((t) => (
-                    <DropdownMenuItem
-                      key={t}
-                      onClick={() => setFilterTournament(t)}
-                      className="rounded-lg text-sm"
-                    >
-                      {t}
-                    </DropdownMenuItem>
+                    <DropdownMenuItem key={t} onClick={() => setFilterTournament(t)} className="rounded-lg text-sm">{t}</DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Day of week filter — pill dropdown */}
+              {/* Day filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 ${
+                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterDayOfWeek !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#111827]"
-                        : "bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm"
+                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
                     }`}
                   >
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#F59E0B]/10">
-                      <Calendar
-                        className="h-3 w-3 text-[#F59E0B]"
-                        strokeWidth={2}
-                      />
-                    </span>
                     {filterDayOfWeek === "all"
                       ? "Всі дні"
                       : filterDayOfWeek === "mon" ? "Понеділок"
@@ -1578,19 +1460,11 @@ export default function Matches() {
                       : filterDayOfWeek === "fri" ? "П'ятниця"
                       : filterDayOfWeek === "sat" ? "Субота"
                       : "Неділя"}
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
+                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("all")}
-                    className="rounded-lg"
-                  >
-                    Всі дні
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("all")} className="rounded-lg">Всі дні</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterDayOfWeek("mon")} className="rounded-lg">Понеділок</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterDayOfWeek("tue")} className="rounded-lg">Вівторок</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterDayOfWeek("wed")} className="rounded-lg">Середа</DropdownMenuItem>
@@ -1601,27 +1475,15 @@ export default function Matches() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Column visibility toggle — pill dropdown with checkboxes */}
+              {/* Column visibility */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded-[24px] px-5 h-11 font-medium text-sm transition-all duration-300 ease-in-out inline-flex items-center gap-2 bg-white text-[#6B7280] hover:text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-[#14B8A6]/10">
-                      <Columns
-                        className="h-3 w-3 text-[#14B8A6]"
-                        strokeWidth={2}
-                      />
-                    </span>
+                  <button className="relative px-5 py-4 text-base rounded-[24px] border border-[#E8E6DC] transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-[#111827] font-light">
                     Колонки
-                    <ChevronDown
-                      className="h-3.5 w-3.5 opacity-60"
-                      strokeWidth={2}
-                    />
+                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="rounded-xl p-1 min-w-[200px]"
-                >
+                <DropdownMenuContent align="start" className="rounded-xl p-1 min-w-[200px]">
                   {COLUMN_DEFS.map((col) => (
                     <DropdownMenuCheckboxItem
                       key={col.id}
@@ -1638,10 +1500,10 @@ export default function Matches() {
               {/* Reset filters */}
               {hasActiveFilters && (
                 <>
-                  <div className="w-px h-8 bg-[#D1D5DB]/60" />
+                  <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
                   <button
                     onClick={resetAllFilters}
-                    className="rounded-[24px] px-4 h-11 font-medium text-sm text-[#6B7280] hover:text-[#111827] bg-white hover:bg-[#F9FAFB] border border-[#E5E7EB] hover:border-[#D1D5DB] shadow-sm transition-all duration-300 inline-flex items-center gap-2"
+                    className="relative px-4 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-[#111827] font-light"
                   >
                     <X className="h-4 w-4" strokeWidth={1.5} />
                     Скинути
