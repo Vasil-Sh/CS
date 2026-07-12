@@ -1743,9 +1743,12 @@ export default function Matches() {
                             </table>
                           </div>
                         ) : (
-                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-[#9CA3AF]">
-                            <p className="text-lg font-medium">Немає матчів</p>
-                            <p className="text-sm mt-1">
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-[#9CA3AF] gap-3">
+                            <div className="p-5 bg-[#F3F4F6] rounded-2xl">
+                              <Trophy className="h-10 w-10 text-[#9CA3AF]" strokeWidth={1.5} />
+                            </div>
+                            <p className="text-lg font-bold text-[#6B7280]">Немає матчів</p>
+                            <p className="text-sm">
                               Спробуйте обрати інший фільтр гри або натисніть
                               «Оновити»
                             </p>
