@@ -118,14 +118,21 @@ export async function fetchDota2Matches(
     const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
     if (matches.length > 0) {
       setCache(matches);
-    } else if (forceRefresh) {
-      // Clear stale cache so next load tries API again
-      clearCache();
+    } else {
+      // Don't cache empty responses — keep any previous cached data alive
+      // But if user explicitly refreshed and got empty, return stale cache if available
+      if (forceRefresh) {
+        const stale = getCache();
+        if (stale) return stale;
+      }
     }
     return matches;
   } catch (e) {
     if (import.meta.env.DEV)
       console.error("dota2Api: fetchDota2Matches failed", e);
+    // On error, serve stale cache as fallback
+    const stale = getCache();
+    if (stale) return stale;
     return [];
   }
 }
