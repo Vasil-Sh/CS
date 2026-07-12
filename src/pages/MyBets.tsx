@@ -478,7 +478,7 @@ export default function MyBets() {
           toast("Нотатку додано до запису", { description: note.trim() });
         loadStats();
         syncStats();
-        bumpBankroll();
+        // Don't call bumpBankroll() — we set dualBank directly below to avoid double-render jumps
         // Compute bankroll from all bets — don't wait for next render
         const allBets = UserDataService.getUserData<Bet[]>(
           currentUser,

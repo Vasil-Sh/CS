@@ -45,6 +45,7 @@ import {
 import type { Bet } from "@/types/betting";
 import { normalizeDateStr } from "@/lib/utils";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
+import CompactBetModal from "@/components/mybets/CompactBetModal";
 
 interface Goal {
   id: string;
@@ -1288,122 +1289,19 @@ const BetTableMemo = memo(function BetTable({
       </Dialog>
 
       {/* Compact Results Modal */}
-      <Dialog open={showCompactResults} onOpenChange={setShowCompactResults}>
-        <DialogContent className="max-w-[40rem] border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
-          <DialogHeader className="px-6 pt-5 pb-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
-                    <ListChecks
-                      className="h-5 w-5 text-[#447afc]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
-                    Стислий список результатів
-                  </h2>
-                </div>
-              </DialogTitle>
-            </div>
-          </DialogHeader>
-          <div className="border-t border-[#E5E7EB]" />
-          {/* Period filter */}
-          <div className="px-6 py-3 bg-white border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-              <span className="text-sm text-gray-500 font-medium">Період:</span>
-              {(
-                [
-                  ["all", "Всі"],
-                  ["day", "День"],
-                  ["week", "Тиждень"],
-                  ["month", "Місяць"],
-                ] as const
-              ).map(([val, label]) =>
-                val === "month" && compactPeriodFilter === "month" ? (
-                  <Select
-                    key={val}
-                    value={compactMonth}
-                    onValueChange={(v) => setCompactMonth(v)}
-                  >
-                    <SelectTrigger className="rounded-xl border-gray-200 bg-white h-8 w-auto min-w-[130px] text-sm">
-                      <SelectValue placeholder="Оберіть місяць" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {monthOptions.map((mo) => (
-                        <SelectItem key={mo.value} value={mo.value}>
-                          {mo.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <button
-                    key={val}
-                    onClick={() => {
-                      setCompactPeriodFilter(val);
-                      if (val !== "month") setCompactMonth("");
-                    }}
-                    className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      compactPeriodFilter === val
-                        ? "bg-gray-900 text-white shadow-sm"
-                        : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ),
-              )}
-              <span className="ml-auto text-sm text-gray-400">
-                {filteredCompletedBets.length}{" "}
-                {filteredCompletedBets.length === 1
-                  ? "запис"
-                  : filteredCompletedBets.length >= 2 &&
-                      filteredCompletedBets.length <= 4
-                    ? "записи"
-                    : "записів"}
-              </span>
-            </div>
-          </div>
-          <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-[#F3F4F6]">
-            {compactRows.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
-                {compactRows}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-6 bg-white rounded-2xl inline-block mb-6 shadow-sm border border-gray-200">
-                  <ListChecks
-                    className="h-11 w-11 text-gray-300"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <p className="text-gray-500 text-base">
-                  Немає завершених ставок для відображення
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="border-t border-[#E5E7EB] px-6 py-4 bg-white flex gap-3">
-            <Button
-              onClick={handleCopyCompact}
-              disabled={!compactResultsText}
-              className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white flex items-center gap-2"
-            >
-              <Copy className="h-4 w-4" strokeWidth={1.5} />
-              Копіювати
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowCompactResults(false)}
-              className="flex-1 rounded-xl"
-            >
-              Закрити
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CompactBetModal
+        open={showCompactResults}
+        onClose={() => setShowCompactResults(false)}
+        periodFilter={compactPeriodFilter}
+        month={compactMonth}
+        monthOptions={monthOptions}
+        betsCount={filteredCompletedBets.length}
+        rows={compactRows}
+        copyText={compactResultsText}
+        onPeriodChange={(val) => { setCompactPeriodFilter(val as typeof compactPeriodFilter); if (val !== "month") setCompactMonth(""); }}
+        onMonthChange={setCompactMonth}
+        onCopy={handleCopyCompact}
+      />
     </div>
   );
 });
