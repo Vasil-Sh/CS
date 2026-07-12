@@ -37,7 +37,7 @@ interface TipsGgApiMatch {
   coeff2: number | null;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v7";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v8";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /** Simple string hash for stable IDs across reloads */
