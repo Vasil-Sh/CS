@@ -1664,6 +1664,10 @@ export default function Matches() {
                 const d = new Date(dateKey + "T12:00:00");
                 return d.getDay() === dayMap[filterDayOfWeek];
               })
+              .filter((dateKey) => {
+                // Only show date cards that actually have matches
+                return (groupedByDate[dateKey]?.length || 0) > 0;
+              })
               .map((dateKey, idx) => {
                 const dateMatches = groupedByDate[dateKey];
                 const hasLive = dateMatches.some((m) => m.matchStatus === "live");
