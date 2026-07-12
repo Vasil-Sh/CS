@@ -1653,18 +1653,16 @@ export default function Matches() {
           </div>
 
           {/* ===== DATE GROUP CARDS — always visible ===== */}
-            {Object.keys(groupedByDate)
-              .sort()
-              .filter((dateKey) => {
-                // When day-of-week filter is active, only show dates matching that day
+            {(() => {
+              const allDateKeys = Object.keys(groupedByDate).sort().filter((dk) => {
                 if (filterDayOfWeek === "all") return true;
-                const dayMap: Record<string, number> = {
-                  sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
-                };
-                const d = new Date(dateKey + "T12:00:00");
-                return d.getDay() === dayMap[filterDayOfWeek];
-              })
-              .map((dateKey, idx) => {
+                const dayMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+                return new Date(dk + "T12:00:00").getDay() === dayMap[filterDayOfWeek];
+              });
+              // Only show cards that have matches — but ensure at least one card is visible
+              const withMatches = allDateKeys.filter(dk => (groupedByDate[dk]?.length || 0) > 0);
+              const finalKeys = withMatches.length > 0 ? withMatches : allDateKeys;
+              return finalKeys.map((dateKey, idx) => {
                 const dateMatches = groupedByDate[dateKey];
                 const hasLive = dateMatches.some((m) => m.matchStatus === "live");
                 return (
@@ -1759,7 +1757,7 @@ export default function Matches() {
                   </div>
                 </BlurFade>
                 );
-              })}
+              })})()}
 
           <AIRecommendationModal
             open={aiModalOpen}
