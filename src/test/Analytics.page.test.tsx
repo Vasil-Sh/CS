@@ -20,6 +20,10 @@ vi.mock('@/lib/bankrollService', () => ({
   BankrollService: {
     fetchBankroll: vi.fn(() => Promise.resolve({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 })),
     isInitialized: vi.fn(() => false),
+    getBankrollStatsDual: vi.fn(() => ({
+      uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+      usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+    })),
   },
 }));
 

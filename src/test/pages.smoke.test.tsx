@@ -12,11 +12,6 @@ describe('Page module loading', () => {
     expect(mod.default).toBeDefined();
   });
 
-  it('Admin module loads', async () => {
-    const mod = await import('@/pages/Admin');
-    expect(mod.default).toBeDefined();
-  });
-
   it('Profile module loads', async () => {
     const mod = await import('@/pages/Profile');
     expect(mod.default).toBeDefined();

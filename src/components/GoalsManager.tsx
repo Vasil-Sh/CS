@@ -225,9 +225,9 @@ export default function GoalsManager() {
   };
 
   const updateGoalsProgress = async () => {
-    let betsData: any[] = [];
+    let betsData: Bet[] = [];
     try {
-      betsData = await UserDataService.fetchBets() as any[];
+      betsData = (await UserDataService.fetchBets()) as Bet[];
     } catch {
       betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
     }

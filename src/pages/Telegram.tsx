@@ -6,20 +6,23 @@ import { logRender } from '@/lib/devLogger';
 import { PageHeader } from '@/components/PageHeader';
 import { MessageSquare, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 
+interface TgGroup { id?: string; name?: string }
+interface TgBet { id?: string; groupId?: string; date?: string; createdAt?: number; result?: string; amount?: number; odds?: number; profit?: number }
+
 export default function Telegram() {
   logRender('Telegram');
   const { user } = useAuth();
   const currentUser = user?.username || 'User';
 
   const tgStats = useMemo(() => {
-    const groups = UserDataService.getUserData<any[]>(currentUser, 'tg_groups', []);
-    const bets = UserDataService.getUserData<any[]>(currentUser, 'tg_bets', []);
+    const groups = UserDataService.getUserData<TgGroup[]>(currentUser, 'tg_groups', []);
+    const bets = UserDataService.getUserData<TgBet[]>(currentUser, 'tg_bets', []);
     const lastSend = bets.length > 0 ? [...bets].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0] : null;
     return {
       groupsCount: groups.length,
       betsCount: bets.length,
-      wins: bets.filter((b: any) => b.result === 'Win').length,
-      losses: bets.filter((b: any) => b.result === 'Loss').length,
+      wins: bets.filter((b) => b.result === 'Win').length,
+      losses: bets.filter((b) => b.result === 'Loss').length,
       lastSent: lastSend ? new Date(lastSend.date || lastSend.createdAt).toLocaleDateString('uk-UA') : null,
     };
   }, [currentUser]);

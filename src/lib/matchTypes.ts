@@ -37,10 +37,3 @@ export class ApiError extends Error {
     this.details = details;
   }
 }
-
-/** Result of fetching matches from a single source */
-export interface FetchResult {
-  matches: BaseApiMatch[];
-  error: string | null;
-  source: "CS2" | "Dota2";
-}

@@ -14,8 +14,3 @@ export {
   getGroupedBetTypeOptions,
   getBetTypeLabel,
 } from './utils/betTypeOptions';
-export type {
-  BetTypeGroup,
-  MapBetTypeGroup,
-  SectionedBetTypes,
-} from './utils/betTypeOptions';

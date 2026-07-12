@@ -72,11 +72,11 @@ export function initErrorMonitoring() {
 }
 
 /** Get current pending error count (for debugging) */
-export function getPendingErrors(): number {
+function getPendingErrors(): number {
   return queue.length;
 }
 
 /** Manually report an error */
-export function reportError(error: Error) {
+function reportError(error: Error) {
   queue.push(createReport(error));
 }

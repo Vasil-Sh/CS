@@ -37,7 +37,7 @@ export function logRender(componentName: string): void {
 }
 
 /** Log a service/API call. Warns if the same call is made too many times in a row. */
-export function logServiceCall(serviceName: string, method: string): void {
+function logServiceCall(serviceName: string, method: string): void {
   const key = `${serviceName}.${method}`;
   const now = Date.now();
   const entry = serviceCalls.get(key);
@@ -58,7 +58,7 @@ export function logServiceCall(serviceName: string, method: string): void {
 }
 
 /** Clear all logs. Call periodically (e.g. on route change). */
-export function clearLogStats(): void {
+function clearLogStats(): void {
   componentRenders.clear();
   serviceCalls.clear();
 }

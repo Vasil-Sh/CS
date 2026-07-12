@@ -323,7 +323,7 @@ export function t(key: string, fallback?: string): string {
  * React hook to subscribe to language changes.
  * Returns current language — re-renders component when language switches.
  */
-export function useLang(): Lang {
+function useLang(): Lang {
   const [lang, setLangState] = useState<Lang>(currentLang);
   useEffect(() => onLangChange(setLangState), []);
   return lang;
@@ -333,7 +333,7 @@ export function useLang(): Lang {
  * Plural-aware record count: tPlural(count, 'mybets.records1', 'mybets.records2', 'mybets.records3')
  * For English we always use plural, Ukrainian uses 1/2-4/5+ forms.
  */
-export function tPlural(
+function tPlural(
   count: number,
   one: string,
   few: string,
