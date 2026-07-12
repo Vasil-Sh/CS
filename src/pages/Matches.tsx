@@ -1731,8 +1731,8 @@ export default function Matches() {
                       </CardHeader>
                       <CardContent className="p-0 rounded-b-[24px]">
                         {initialLoading ? (
-                          <div className="py-12 text-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-[#447afc] mx-auto mb-3" strokeWidth={1.5} />
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+                            <Loader2 className="h-8 w-8 animate-spin text-[#447afc]" strokeWidth={1.5} />
                             <p className="text-sm text-[#9CA3AF]">Завантаження матчів...</p>
                           </div>
                         ) : dateMatches.length > 0 ? (
