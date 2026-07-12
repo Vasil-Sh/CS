@@ -894,9 +894,6 @@ export default function Matches() {
   const tomorrowKey = tomorrowDate.toISOString().split("T")[0];
 
   const groupedByDate: Record<string, Match[]> = {};
-  // Always ensure today and tomorrow keys exist (so date cards are always visible)
-  groupedByDate[todayKey] = [];
-  groupedByDate[tomorrowKey] = [];
   sortedMatches.forEach((match) => {
     const key = getDateKey(match.date);
     if (!groupedByDate[key]) groupedByDate[key] = [];
