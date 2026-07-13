@@ -69,7 +69,18 @@ export default function BettingFormMatchSection({
   const isExpress = data.betCategory === "Експрес";
   // Always show required markers on the main form (not when adding events to express)
   const showRequired = !isExpress || expressEventsCount === 0;
-  const err = (field: string) => submitErrors[field] ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "";
+  const err = (field: string) => {
+    // Only highlight if error is set AND field is still empty/invalid
+    if (!submitErrors[field]) return "";
+    const val = (data as Record<string, unknown>)[field];
+    if (field === "odds") {
+      const n = parseFloat(String(val || ""));
+      if (!isNaN(n) && n > 1) return "";
+    } else {
+      if (val && String(val).trim() !== "") return "";
+    }
+    return "border-red-500 bg-red-50 ring-1 ring-red-500";
+  };
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betTab, setBetTab] = useState(1); // 1=Основне, 2+=Карта N
   const [tempBetType, setTempBetType] = useState(data.betType);

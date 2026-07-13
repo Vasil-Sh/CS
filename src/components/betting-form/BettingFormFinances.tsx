@@ -42,7 +42,12 @@ export default function BettingFormFinances({
 }: BettingFormFinancesProps) {
   if (!showSection) return null;
 
-  const err = (field: string) => submitErrors[field] ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "";
+  const err = (field: string) => {
+    if (!submitErrors[field]) return "";
+    const val = (data as Record<string, unknown>)[field];
+    if (val && String(val).trim() !== "" && parseFloat(String(val)) > 0) return "";
+    return "border-red-500 bg-red-50 ring-1 ring-red-500";
+  };
 
   return (
     <>

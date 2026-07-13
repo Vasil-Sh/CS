@@ -165,6 +165,21 @@ export default function CS2BettingForm({
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [submitErrors, setSubmitErrors] = useState<Record<string, boolean>>({});
+
+  // Clear validation errors when user fixes the field
+  useEffect(() => {
+    if (Object.keys(submitErrors).length === 0) return;
+    const cleared = { ...submitErrors };
+    let changed = false;
+    for (const field of Object.keys(cleared)) {
+      const val = (formData as Record<string, unknown>)[field];
+      if (field === "odds" && val && parseFloat(String(val)) > 1) { delete cleared[field]; changed = true; }
+      else if (field === "stake" && val && parseFloat(String(val)) > 0) { delete cleared[field]; changed = true; }
+      else if (val && String(val).trim() !== "") { delete cleared[field]; changed = true; }
+    }
+    if (changed) setSubmitErrors(cleared);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.team1, formData.team2, formData.betType, formData.selection, formData.odds, formData.stake]);
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
   const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
