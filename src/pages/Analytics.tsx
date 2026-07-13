@@ -1,5 +1,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import BalanceChart from "@/components/BalanceChart";
+import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCard";
+import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
+import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
+import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
+import RiskManagement from "@/components/RiskManagement";
+import PeriodComparison from "@/components/PeriodComparison";
+import { PageHeader } from "@/components/PageHeader";
+import GoalsManager from "@/components/GoalsManager";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
