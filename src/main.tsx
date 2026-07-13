@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { Component, type ReactNode } from 'react';
 import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthContext';
+import { DataProvider } from './contexts/DataContext';
 import { UserDataService } from './lib/userDataService';
 import { validateEnv, getMissingEnvVars } from './lib/envValidation';
 import { initErrorMonitoring } from './lib/errorMonitor';
@@ -73,7 +74,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
     <AuthProvider>
-      <App />
+      <DataProvider>
+        <App />
+      </DataProvider>
     </AuthProvider>
   </ErrorBoundary>
 );

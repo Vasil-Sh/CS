@@ -13,6 +13,7 @@ import { UserDataService } from "@/lib/userDataService";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { api } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { useData } from "@/contexts/DataContext";
 import { useAppStore } from "@/stores/appStore";
 import { authService } from "@/lib/authService";
 import {
@@ -62,6 +63,7 @@ const DEFAULT_STATS: BetStats = {
 export default function MyBets() {
   logRender("MyBets");
   const { user } = useAuth();
+  const dataProvider = useData(); // unified bets + bankroll source
   const currentUser = user?.username || "";
   const isAdminRole = user?.role === "admin";
   const location = useLocation();
@@ -114,10 +116,8 @@ export default function MyBets() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
-  const [dualBank, setDualBank] = useState<DualBankrollStats>({
-    uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-    usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-  });
+  // dualBank now comes from DataProvider (single source of truth)
+  const dualBank = dataProvider.bankroll;
 
   // Ref to avoid stale closure in result update callbacks
   const recentBetsRef = useRef(recentBets);
@@ -179,45 +179,11 @@ export default function MyBets() {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    const initBankroll = async () => {
-      const allBets = UserDataService.getUserData<Bet[]>(
-        currentUser,
-        "mybets_data",
-        [],
-      );
-      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
-    };
-    initBankroll();
-  }, [currentUser]);
-  useEffect(() => {
-    const refresh = async () => {
-      const allBets = UserDataService.getUserData<Bet[]>(
-        currentUser,
-        "mybets_data",
-        [],
-      );
-      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
-    };
-    refresh();
-  }, [bankrollRefreshKey, bankrollVersion, currentUser]);
-  // Recompute bankroll whenever recentBets change (e.g. after API load)
-  useEffect(() => {
-    if (recentBets.length === 0) return;
-    const allBets = UserDataService.getUserData<Bet[]>(
-      currentUser,
-      "mybets_data",
-      [],
-    );
-    // Only recalc if localStorage matches recentBets to avoid race conditions
-    if (allBets.length >= recentBets.length) {
-      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
-    }
-  }, [recentBets, currentUser]);
+  // DataProvider is the single source of truth for bankroll — no need to recalc locally
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([fetchUsers(), loadRecentBets()]);
+      await Promise.all([fetchUsers(), dataProvider.refresh()]);
     };
     init();
   }, []);
@@ -473,14 +439,8 @@ export default function MyBets() {
           toast("Нотатку додано до запису", { description: note.trim() });
         loadStats();
         syncStats();
-        // Don't call bumpBankroll() — we set dualBank directly below to avoid double-render jumps
-        // Compute bankroll from all bets — don't wait for next render
-        const allBets = UserDataService.getUserData<Bet[]>(
-          currentUser,
-          "mybets_data",
-          [],
-        );
-        setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
+        // DataProvider handles bankroll recalculation — trigger refresh
+        dataProvider.refresh().catch(() => {});
       } catch {
         toast.error("Помилка при оновленні результату");
       }
@@ -528,11 +488,11 @@ export default function MyBets() {
     (success: boolean) => {
       setBankModalOpen(false);
       if (success) {
-        setBankrollRefreshKey((p) => p + 1);
+        dataProvider.refresh().catch(() => {});
         bumpBankroll();
       }
     },
-    [bumpBankroll],
+    [bumpBankroll, dataProvider],
   );
 
   const handleExpressDetails = useCallback((bet: Bet) => {
