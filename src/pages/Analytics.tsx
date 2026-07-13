@@ -810,24 +810,24 @@ export default function Analytics() {
                   <div className="flex items-center gap-4 mb-3">
                     <AnimatedCircularProgressBar
                       max={100} min={0}
-                      value={Math.abs(roi) > 100 ? 100 : Math.abs(roi)}
+                      value={Math.abs(roi) >= 100 ? 98 : Math.abs(roi)}
                       gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
                       gaugeSecondaryColor="#E5E7EB"
                       className="!w-20 !h-20 shrink-0"
                     />
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className={`text-xl font-bold ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}%</span>
+                      <span className={`text-lg font-bold leading-tight ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}%</span>
                       <span className="text-[11px] text-gray-400">прибуток / вкладено</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-center">
+                    <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
                       <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Вкладено</div>
                       <div className="text-base font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
                     </div>
-                    <div className={`bg-white border rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "border-emerald-200" : "border-red-200"}`}>
-                      <div className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-500" : "text-red-400"}`}>Прибуток</div>
-                      <div className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
+                    <div className={`rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+                      <div className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
+                      <div className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
                     </div>
                   </div>
                 </div>
@@ -861,13 +861,13 @@ export default function Analytics() {
                     </div>
                   </div>
                   <div className="flex items-end gap-2">
-                    <div className="flex-1 bg-white border border-emerald-200 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium uppercase tracking-wider">▲ Найкращий {bestMonth?.month}</div>
+                    <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium uppercase tracking-wider">▲ Найкращий {bestMonth?.month}</div>
                       <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
                     </div>
-                    <div className="flex-1 bg-white border border-red-200 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-red-400 font-medium uppercase tracking-wider">▼ Найгірший {worstMonth?.month}</div>
-                      <div className="text-sm font-bold text-red-500">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
+                    <div className="flex-1 bg-red-50 rounded-xl px-3 py-2">
+                      <div className="flex items-center gap-1 text-[10px] text-red-500 font-medium uppercase tracking-wider">▼ Найгірший {worstMonth?.month}</div>
+                      <div className="text-sm font-bold text-red-600">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
                     </div>
                   </div>
                 </div>
@@ -899,17 +899,17 @@ export default function Analytics() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-white border border-gray-200 rounded-xl px-2 py-2 text-center">
+                    <div className="bg-gray-50 rounded-xl px-2 py-2 text-center">
                       <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Ставок</div>
                       <div className="text-sm font-bold text-gray-900"><NumberTicker value={completedBets.length} /></div>
                     </div>
-                    <div className="bg-white border border-emerald-200 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-emerald-500 font-medium uppercase tracking-wider">Виграші</div>
-                      <div className="text-sm font-bold text-emerald-600"><NumberTicker value={winningBets.length} /></div>
+                    <div className="bg-emerald-50 rounded-xl px-2 py-2 text-center">
+                      <div className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">Виграші</div>
+                      <div className="text-sm font-bold text-emerald-700"><NumberTicker value={winningBets.length} /></div>
                     </div>
-                    <div className="bg-white border border-red-200 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-red-400 font-medium uppercase tracking-wider">Програші</div>
-                      <div className="text-sm font-bold text-red-500"><NumberTicker value={losingBets.length} /></div>
+                    <div className="bg-red-50 rounded-xl px-2 py-2 text-center">
+                      <div className="text-[10px] text-red-500 font-medium uppercase tracking-wider">Програші</div>
+                      <div className="text-sm font-bold text-red-600"><NumberTicker value={losingBets.length} /></div>
                     </div>
                   </div>
                 </div>

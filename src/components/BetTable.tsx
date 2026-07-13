@@ -603,7 +603,7 @@ const BetTableMemo = memo(function BetTable({
           {hasActiveAdvancedFilters && (
             <button
               onClick={resetAdvancedFilters}
-              className="px-3 py-2 rounded-xl text-sm font-medium text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 transition-all duration-200"
+              className="px-3 py-2 rounded-xl text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-all duration-200"
             >
               Скинути
             </button>

@@ -42,13 +42,13 @@ export default function MonthlyProfitChartCard({ data }: Props) {
               <div className="w-3 h-0.5 rounded-full bg-blue-500" /> Загальний
             </div>
             <div className="flex items-center gap-3">
-              <Badge className="bg-white border border-emerald-200 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+              <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
                 ▲ <NumberTicker value={maxProfit} />
               </Badge>
-              <Badge className="bg-white border border-red-200 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+              <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
                 ▼ <NumberTicker value={minProfit} />
               </Badge>
-              <Badge className="bg-white border border-gray-200 text-gray-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+              <Badge className="bg-gray-50 text-gray-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
                 ─ <NumberTicker value={avgProfit} />
               </Badge>
             </div>

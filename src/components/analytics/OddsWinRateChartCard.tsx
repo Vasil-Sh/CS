@@ -41,10 +41,10 @@ export default function OddsWinRateChartCard({ data }: Props) {
               <div className="w-3 h-3 rounded-sm bg-blue-500" /> ROI
             </div>
             <div className="w-px h-6 bg-gray-200" />
-            <Badge className="bg-white border border-emerald-200 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+            <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
               ▲ <NumberTicker value={maxWinRate} />%
             </Badge>
-            <Badge className="bg-white border border-blue-200 text-blue-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+            <Badge className="bg-blue-50 text-blue-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
               ROI <NumberTicker value={maxROI} />%
             </Badge>
           </div>

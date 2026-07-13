@@ -34,10 +34,10 @@ export default function OddsVsProfitScatterCard({ data, winCount, lossCount }: P
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Програш
             </div>
             <div className="w-px h-6 bg-gray-200" />
-            <Badge className="bg-white border border-emerald-200 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+            <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
               ✅ <NumberTicker value={winCount} />
             </Badge>
-            <Badge className="bg-white border border-red-200 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg">
+            <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
               ✕ <NumberTicker value={lossCount} />
             </Badge>
           </div>
