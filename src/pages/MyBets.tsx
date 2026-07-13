@@ -181,6 +181,11 @@ export default function MyBets() {
 
   // DataProvider is the single source of truth for bankroll — no need to recalc locally
 
+  // Recalculate bankroll when bankrollVersion bumps (bet added/deleted/result changed)
+  useEffect(() => {
+    dataProvider.refresh().catch(() => {});
+  }, [bankrollVersion]);
+
   useEffect(() => {
     const init = async () => {
       await Promise.all([fetchUsers(), loadRecentBets(), dataProvider.refresh()]);
