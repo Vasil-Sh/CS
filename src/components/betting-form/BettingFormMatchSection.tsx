@@ -318,7 +318,7 @@ export default function BettingFormMatchSection({
                   placeholder={
                     data.team1 && data.team2
                       ? "Хто переможе?"
-                      : "Спочатку введіть команди"
+                      : "Спочатку оберіть команду"
                   }
                 />
               </SelectTrigger>
