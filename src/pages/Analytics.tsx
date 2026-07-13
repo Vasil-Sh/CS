@@ -41,7 +41,6 @@ import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import {
   DollarSign,
   Filter,
@@ -54,7 +53,6 @@ import {
   Wallet,
   TrendingDown,
   TrendingUp,
-  Trophy,
   Zap,
   Percent,
   Info,
@@ -793,123 +791,85 @@ export default function Analytics() {
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
                 {/* 1. ROI */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50 shrink-0">
+                <div className="flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
                       <Percent className="h-5 w-5 text-emerald-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">ROI</span>
+                    <span className="text-base font-semibold text-gray-900">ROI</span>
                   </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100} min={0}
-                      value={Math.abs(roi) >= 100 ? 98 : Math.abs(roi)}
-                      gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className={`text-lg font-bold leading-tight ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}%</span>
-                      <span className="text-[11px] text-gray-400">прибуток / вкладено</span>
-                    </div>
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-gray-900 leading-none">{roi >= 0 ? "+" : ""}{roi}%</div>
+                    <div className="text-xs text-gray-400 mt-1">прибуток / вкладено</div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Вкладено</div>
-                      <div className="text-base font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
+                  <div className="flex gap-3">
+                    <div className="flex-1 bg-gray-50 rounded-2xl px-4 py-3">
+                      <div className="text-[11px] text-gray-400 uppercase tracking-wider">Вкладено</div>
+                      <div className="text-lg font-bold text-gray-900 mt-0.5"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
                     </div>
-                    <div className={`rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-                      <div className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
-                      <div className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
+                    <div className={`flex-1 rounded-2xl px-4 py-3 ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+                      <div className={`text-[11px] uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
+                      <div className={`text-lg font-bold mt-0.5 ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                        {filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 2. По місяцях */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50 shrink-0">
-                      <Trophy className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
+                <div className="flex flex-col justify-between border-l border-gray-100 pl-5">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                      <Calendar className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">По місяцях</span>
+                    <span className="text-base font-semibold text-gray-900">По місяцях</span>
                   </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100} min={0}
-                      value={bestMonth && totalMonthsTracked > 0 ? Math.min(100, Math.round((bestMonth.profit / (Math.abs(bestMonth.profit) + Math.abs(worstMonth?.profit || 0) + 1)) * 100)) : 50}
-                      gaugePrimaryColor="#F59E0B"
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-xl font-bold text-amber-500">
-                        {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
-                      </span>
-                      <span className="text-[11px] text-gray-400">найкращий місяць</span>
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-gray-900 leading-none">
+                      {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
                     </div>
+                    <div className="text-xs text-gray-400 mt-1">найкращий місяць</div>
                   </div>
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium uppercase tracking-wider">▲ Найкращий {bestMonth?.month}</div>
-                      <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
+                  <div className="flex gap-3">
+                    <div className="flex-1 bg-gray-50 rounded-2xl px-4 py-3">
+                      <div className="text-[11px] text-gray-400 uppercase tracking-wider">Найкращий</div>
+                      <div className="text-sm font-bold text-gray-900 mt-0.5">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5">{bestMonth?.month || "—"}</div>
                     </div>
-                    <div className="flex-1 bg-red-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-red-500 font-medium uppercase tracking-wider">▼ Найгірший {worstMonth?.month}</div>
-                      <div className="text-sm font-bold text-red-600">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
+                    <div className="flex-1 bg-gray-50 rounded-2xl px-4 py-3">
+                      <div className="text-[11px] text-gray-400 uppercase tracking-wider">Найгірший</div>
+                      <div className="text-sm font-bold text-gray-900 mt-0.5">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5">{worstMonth?.month || "—"}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* 3. Коефіцієнти */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 shrink-0">
+                <div className="flex flex-col justify-between border-l border-gray-100 pl-5">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center shrink-0">
                       <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">Коефіцієнти</span>
+                    <span className="text-base font-semibold text-gray-900">Коефіцієнти</span>
                   </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100} min={0}
-                      value={filteredStats.winRate}
-                      gaugePrimaryColor="#3B82F6"
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-xl font-bold text-gray-900">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</span>
-                      <span className="text-[11px] text-gray-400">середній коеф.</span>
-                    </div>
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-gray-900 leading-none">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</div>
+                    <div className="text-xs text-gray-400 mt-1">середній коефіцієнт</div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-gray-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Ставок</div>
-                      <div className="text-sm font-bold text-gray-900"><NumberTicker value={completedBets.length} /></div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-gray-50 rounded-2xl px-3 py-3 text-center">
+                      <div className="text-[11px] text-gray-400 uppercase tracking-wider">Ставок</div>
+                      <div className="text-lg font-bold text-gray-900 mt-0.5"><NumberTicker value={completedBets.length} /></div>
                     </div>
-                    <div className="bg-emerald-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">Виграші</div>
-                      <div className="text-sm font-bold text-emerald-700"><NumberTicker value={winningBets.length} /></div>
+                    <div className="flex-1 bg-emerald-50 rounded-2xl px-3 py-3 text-center">
+                      <div className="text-[11px] text-emerald-600 uppercase tracking-wider">Виграші</div>
+                      <div className="text-lg font-bold text-emerald-700 mt-0.5"><NumberTicker value={winningBets.length} /></div>
                     </div>
-                    <div className="bg-red-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-red-500 font-medium uppercase tracking-wider">Програші</div>
-                      <div className="text-sm font-bold text-red-600"><NumberTicker value={losingBets.length} /></div>
+                    <div className="flex-1 bg-red-50 rounded-2xl px-3 py-3 text-center">
+                      <div className="text-[11px] text-red-500 uppercase tracking-wider">Програші</div>
+                      <div className="text-lg font-bold text-red-600 mt-0.5"><NumberTicker value={losingBets.length} /></div>
                     </div>
                   </div>
                 </div>
