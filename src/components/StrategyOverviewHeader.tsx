@@ -167,8 +167,8 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
   logRender('StrategyOverviewHeader');
   const { user } = useAuth();
   const resolvedUser = propUser || user?.username || localStorage.getItem('username') || 'default';
-  // Force re-render when strategies change
-  useAppStore((s) => s.strategyVersion);
+  // Force re-render when strategies or goals change
+  const strategyVersion = useAppStore((s) => s.strategyVersion);
 
   // Read active strategy for insight section (card uses StrategyKpiCard instead)
   const activeStrategy = (() => {
@@ -189,7 +189,7 @@ export default function StrategyOverviewHeader({ bets, onNavigateTab, refreshKey
 
     setTodayRisk(computeTodayRisk(bets));
     setWinRate30d(compute30dWinRate(bets));
-  }, [bets, resolvedUser, refreshKey]);
+  }, [bets, resolvedUser, refreshKey, strategyVersion]);
 
   const goalInfo = primaryGoal ? goalProgress(primaryGoal) : null;
 

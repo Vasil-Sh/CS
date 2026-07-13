@@ -300,9 +300,11 @@ export default function GoalsManager() {
       }
     });
     setGoals(updatedGoals);
+    // Write to localStorage synchronously so StrategyOverviewHeader sees fresh data immediately
+    UserDataService.setUserDataSync(currentUser, 'goals', updatedGoals);
   };
 
-  const handleManualUpdate = () => { setIsUpdating(true); updateGoalsProgress(); toast.success('Прогрес цілей оновлено!'); setTimeout(() => setIsUpdating(false), 500); };
+  const handleManualUpdate = () => { setIsUpdating(true); updateGoalsProgress().then(() => { bumpStrategy(); toast.success('Прогрес цілей оновлено!'); setIsUpdating(false); }); };
 
   const calculateLadderSteps = (start: number, target: number, minOdds: number, maxOdds: number): LadderStep[] => {
     // Guard against invalid values that would cause infinite loops
