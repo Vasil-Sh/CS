@@ -1,30 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import BalanceChart from "@/components/BalanceChart";
-import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCard";
-import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
-import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
-import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
-import RiskManagement from "@/components/RiskManagement";
-import PeriodComparison from "@/components/PeriodComparison";
-import { PageHeader } from "@/components/PageHeader";
-import GoalsManager from "@/components/GoalsManager";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
@@ -34,8 +9,6 @@ import { useTheme } from "@/hooks/useTheme";
 import {
   CARD_BASE_STYLE,
   CARD_HOVER_STYLE,
-  applyCardHover,
-  resetCardHover,
 } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
@@ -52,13 +25,10 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Wallet,
-  TrendingDown,
   TrendingUp,
   Trophy,
   Zap,
   Percent,
-  Info,
-  Clock,
 } from "lucide-react";
 import {
   XAxis,
@@ -76,7 +46,6 @@ import type {
   BettingStats,
   OddsRange,
   BalanceData,
-  ScatterData,
 } from "@/types/betting";
 
 interface MonthlyData {

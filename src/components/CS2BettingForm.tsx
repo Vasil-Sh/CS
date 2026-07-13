@@ -1,36 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Plus,
-  DollarSign,
-  Link,
-  AlertTriangle,
   X,
-  Shield,
-  Users,
-  Info,
-  RotateCcw,
-  TrendingUp,
 } from "lucide-react";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import type { CS2Strategy } from "@/types/strategy";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { getBetTypeOptions } from "@/lib/displayHelpers";
 import { parseDota2MatchFromUrl, parseCS2MatchFromUrl } from "@/lib/matchUrlParser";
-import { useBetForm, getDefaultFormData, type FormData } from "@/hooks/useBetForm";
-import { useExpressBuilder, type ExpressEvent } from "@/hooks/useExpressBuilder";
-import { useHltvParser } from "@/hooks/useHltvParser";
 import StrategyViolationDialog from "./StrategyViolationDialog";
 import {
   calcTotalExpressOdds,

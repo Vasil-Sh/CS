@@ -10,7 +10,7 @@ import BetDetailsModal from "@/components/BetDetailsModal";
 import InitialBankModal from "@/components/InitialBankModal";
 import BetTable from "@/components/BetTable";
 import { UserDataService } from "@/lib/userDataService";
-import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
+import { BankrollService } from "@/lib/bankrollService";
 import { api } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -20,7 +20,6 @@ import {
   parseExpressEvents,
   type ParsedEvent,
 } from "@/lib/parser/expressParser";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
 import { PageHeader } from "@/components/PageHeader";
@@ -65,7 +64,6 @@ export default function MyBets() {
   const { user } = useAuth();
   const dataProvider = useData(); // unified bets + bankroll source
   const currentUser = user?.username || "";
-  const isAdminRole = user?.role === "admin";
   const location = useLocation();
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bumpBets = useAppStore((s) => s.bumpBets);

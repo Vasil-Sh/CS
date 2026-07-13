@@ -27,7 +27,6 @@ import {
   Trophy,
   DollarSign,
   Percent,
-  AlertCircle,
   RefreshCw,
   Info,
   Eye,
