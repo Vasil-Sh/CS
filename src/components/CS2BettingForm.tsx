@@ -998,7 +998,8 @@ export default function CS2BettingForm({
         );
         const recordForStorage = {
           ...record,
-          id: apiId, // include API id so result updates find the match
+          // Guarantee unique ID: API id if available, otherwise local UUID
+          id: apiId ?? `local_${crypto.randomUUID()}`,
           riskyTeams: record.riskyTeams.map((t) => t.name),
         };
         UserDataService.setUserDataSync(currentUser, "mybets_data", [

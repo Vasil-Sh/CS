@@ -27,6 +27,8 @@ export class UserDataService {
         try {
           JSON.parse(raw);
         } catch {
+          // Skip date-like strings (YYYY-MM-DD) — they're valid but not JSON
+          if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) continue;
           const healed = JSON.stringify(raw);
           localStorage.setItem(key, healed);
           fixed++;
@@ -141,13 +143,15 @@ export class UserDataService {
   static checkAndResetDailyBets(username: string): void {
     try {
       const lastResetKey = this.getUserKey(username, "last_mybets_reset");
-      const lastReset = localStorage.getItem(lastResetKey);
+      const lastResetRaw = localStorage.getItem(lastResetKey);
+      let lastReset: string | null = null;
+      try { lastReset = lastResetRaw ? JSON.parse(lastResetRaw) : null; } catch { lastReset = lastResetRaw; }
       const today = new Date().toISOString().split("T")[0];
 
       if (lastReset !== today) {
         // Mark reset timestamp without deleting any bets
         // (pending bets must persist across days; completed bets stay for history)
-        localStorage.setItem(lastResetKey, today);
+        localStorage.setItem(lastResetKey, JSON.stringify(today));
         if (import.meta.env.DEV)
           console.log(`Daily reset performed for ${username} on ${today}`);
       }

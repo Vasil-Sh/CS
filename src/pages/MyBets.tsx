@@ -72,6 +72,7 @@ export default function MyBets() {
   // ── State ──
   const [stats, setStats] = useState<BetStats>(DEFAULT_STATS);
   const [recentBets, setRecentBets] = useState<Bet[]>([]);
+  const [isLoadingBets, setIsLoadingBets] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -200,6 +201,20 @@ export default function MyBets() {
     };
     refresh();
   }, [bankrollRefreshKey, bankrollVersion, currentUser]);
+  // Recompute bankroll whenever recentBets change (e.g. after API load)
+  useEffect(() => {
+    if (recentBets.length === 0) return;
+    const allBets = UserDataService.getUserData<Bet[]>(
+      currentUser,
+      "mybets_data",
+      [],
+    );
+    // Only recalc if localStorage matches recentBets to avoid race conditions
+    if (allBets.length >= recentBets.length) {
+      setDualBank(BankrollService.getBankrollStatsDual(currentUser, allBets));
+    }
+  }, [recentBets, currentUser]);
+
   useEffect(() => {
     const init = async () => {
       await Promise.all([fetchUsers(), loadRecentBets()]);
@@ -277,6 +292,7 @@ export default function MyBets() {
   }, [recentBets]);
 
   const loadRecentBets = useCallback(async () => {
+    setIsLoadingBets(true);
     try {
       const bets = await UserDataService.fetchBets();
       setRecentBets(bets as Bet[]);
@@ -292,6 +308,14 @@ export default function MyBets() {
     );
     setRecentBets(localBets as Bet[]);
   }, [currentUser, bankrollVersion]);
+
+  // After loadRecentBets completes, mark loading as done
+  useEffect(() => {
+    if (isLoadingBets) {
+      const timer = setTimeout(() => setIsLoadingBets(false), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [recentBets, isLoadingBets]);
 
   // Recompute stats whenever bets change
   useEffect(() => {
@@ -418,57 +442,28 @@ export default function MyBets() {
           UserDataService.setUserDataSync(
             currentUser,
             "mybets_data",
-            localBets.map((b: Bet) => {
-              if (
-                (bet.id && b.id === bet.id) ||
-                (bet.createdAt && b.createdAt === bet.createdAt) ||
-                (!bet.id &&
-                  !bet.createdAt &&
-                  b.date === bet.date &&
-                  b.match === bet.match)
-              ) {
-                return {
-                  ...b,
-                  result,
-                  profit: profitInUAH,
-                  roi,
-                  notes: betWithNotes.notes || b.notes,
-                };
-              }
-              return b;
-            }),
+            localBets.map((b: Bet) =>
+              String(bet.id) === String(b.id)
+                ? { ...b, result, profit: profitInUAH, roi, notes: betWithNotes.notes || b.notes }
+                : b,
+            ),
           );
         } catch {
           /* ignore */
         }
-        let matched = false;
         setRecentBets((prev) =>
-          prev.map((b) => {
-            if (matched) return b;
-            if (
-              (bet.id && b.id === bet.id) ||
-              (bet.createdAt && b.createdAt === bet.createdAt) ||
-              (!bet.id &&
-                !bet.createdAt &&
-                b.date === bet.date &&
-                b.match === bet.match &&
-                b.amount === bet.amount &&
-                b.odds === bet.odds &&
-                b.result === "Pending")
-            ) {
-              matched = true;
-              return {
-                ...b,
-                result,
-                profit: profitInUAH,
-                originalProfit,
-                roi,
-                goalId: b.goalId,
-                notes: betWithNotes.notes || b.notes,
-              };
-            }
-            return b;
-          }),
+          prev.map((b) =>
+            String(bet.id) === String(b.id)
+              ? {
+                  ...b,
+                  result,
+                  profit: profitInUAH,
+                  originalProfit,
+                  roi,
+                  notes: betWithNotes.notes || b.notes,
+                }
+              : b,
+          ),
         );
         toast.success(
           `Запис позначено як ${result === "Win" ? "виграшний" : "програшний"}`,
@@ -624,9 +619,7 @@ export default function MyBets() {
     <div className="min-h-screen bg-[#f3f3f3] relative">
       <Confetti
         key={confettiKey}
-        particleCount={80}
-        spread={90}
-        origin={{ x: 0.5, y: 0.3 }}
+        options={{ particleCount: 80, spread: 90, origin: { x: 0.5, y: 0.3 } }}
         className="pointer-events-none fixed inset-0 z-[9999]"
       />
       <PageHeader
