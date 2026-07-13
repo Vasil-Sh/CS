@@ -1502,7 +1502,7 @@ export default function Matches() {
                   <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
                   <button
                     onClick={resetAllFilters}
-                    className="relative px-4 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-[#111827] font-light"
+                    className="relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 font-semibold shadow-[0_2px_8px_rgba(239,68,68,0.3)]"
                   >
                     <X className="h-4 w-4" strokeWidth={1.5} />
                     Скинути

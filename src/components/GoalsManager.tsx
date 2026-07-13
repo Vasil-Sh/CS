@@ -231,7 +231,7 @@ export default function GoalsManager() {
     } catch {
       betsData = UserDataService.getUserData(currentUser, 'mybets_data', []);
     }
-    if (!betsData.length) return;
+    // Always update — even with 0 bets (must reset progress to zero)
     const updatedGoals = goals.map(goal => {
       if (goal.status !== 'active') return goal;
       switch (goal.type) {
@@ -247,14 +247,21 @@ export default function GoalsManager() {
         }
         case 'ladder': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.odds >= (goal.minOdds || 1.3) && bet.odds <= (goal.maxOdds || 5) && bet.result === 'Win');
-          let currentStepIndex = goal.currentStep || 0;
-          const steps = [...(goal.steps || [])];
           const minOdds = goal.minOdds || 1.3, maxOdds = goal.maxOdds || 5;
+          // Always start from scratch: reset all steps, replay bets from step 0
+          let currentStepIndex = 0;
+          const steps = (goal.steps || []).map((s, i) => ({
+            ...s,
+            status: i === 0 ? 'current' as const : 'locked' as const,
+            actualAmount: undefined,
+            actualOdds: undefined,
+            deviation: undefined,
+            completedAt: undefined,
+          }));
           const sortedBets = goalBets.sort((a: Bet, b: Bet) => new Date(a.date).getTime() - new Date(b.date).getTime());
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             const cs = steps[currentStepIndex];
-            if (cs.status !== 'current') return;
             const betAmount = bet.amount || 0, actualWinAmount = Math.round(betAmount * bet.odds * 100) / 100;
             const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.50;
             if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
@@ -272,7 +279,8 @@ export default function GoalsManager() {
         }
         case 'roi': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result !== 'Pending');
-          if (!goalBets.length) return goal;
+          // Reset to 0 when no bets found
+          if (!goalBets.length) return { ...goal, currentROI: 0 };
           const totalStake = goalBets.reduce((s: number, b: Bet) => s + (b.amount || 100), 0);
           const totalProfit = goalBets.reduce((s: number, b: Bet) => { if (b.result === 'Win') return s + (b.profit || ((b.odds - 1) * (b.amount || 100))); if (b.result === 'Loss') return s - (b.amount || 100); return s; }, 0);
           const currentROI = (totalProfit / totalStake) * 100;
@@ -281,7 +289,8 @@ export default function GoalsManager() {
         }
         case 'winrate': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result !== 'Pending');
-          if (!goalBets.length) return goal;
+          // Reset to 0 when no bets found
+          if (!goalBets.length) return { ...goal, currentWinRate: 0 };
           const wins = goalBets.filter((b: Bet) => b.result === 'Win').length;
           const currentWinRate = (wins / goalBets.length) * 100;
           const isCompleted = currentWinRate >= (goal.targetWinRate || 0);
