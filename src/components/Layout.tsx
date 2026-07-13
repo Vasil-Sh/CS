@@ -18,7 +18,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AuroraText } from "@/components/ui/aurora-text";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navigation = [
@@ -108,8 +107,8 @@ export default function Layout() {
             <div className="w-16 h-16 bg-[#1a1a2e] rounded-[28px] flex items-center justify-center shadow-[0_8px_24px_rgba(26,26,46,0.3)]">
               <TrendingUp className="w-8 h-8 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              <AuroraText>MatchIQ</AuroraText>
+            <h1 className="text-3xl font-semibold tracking-tight text-black">
+              MatchIQ
             </h1>
           </div>
 
@@ -168,8 +167,8 @@ export default function Layout() {
             <div className="w-12 h-12 bg-[#1a1a2e] rounded-[20px] flex items-center justify-center shadow-[0_4px_12px_rgba(26,26,46,0.2)]">
               <TrendingUp className="w-6 h-6 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              <AuroraText>MatchIQ</AuroraText>
+            <h1 className="text-2xl font-semibold tracking-tight text-black">
+              MatchIQ
             </h1>
           </div>
           <div className="flex items-center gap-3">
