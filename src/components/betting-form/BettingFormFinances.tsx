@@ -26,6 +26,7 @@ interface BettingFormFinancesProps {
   };
   onFieldChange: <K extends keyof FormFinancialData>(field: K, value: FormFinancialData[K]) => void;
   onConfidenceChange: (value: string) => void;
+  submitErrors?: Record<string, boolean>;
 }
 
 export default function BettingFormFinances({
@@ -37,8 +38,11 @@ export default function BettingFormFinances({
   classes,
   onFieldChange,
   onConfidenceChange,
+  submitErrors = {},
 }: BettingFormFinancesProps) {
   if (!showSection) return null;
+
+  const err = (field: string) => submitErrors[field] ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "";
 
   return (
     <>
@@ -94,7 +98,7 @@ export default function BettingFormFinances({
                 onChange={(e) => onFieldChange('stake', e.target.value)}
                 placeholder="100"
                 required
-                className={`flex-1 ${classes.input}`}
+                className={`flex-1 ${classes.input} ${err("stake")}`}
               />
             </div>
           </div>

@@ -51,6 +51,7 @@ interface BettingFormMatchSectionProps {
   onParseUrl: () => void;
   onUrlChange: (url: string) => void;
   onAddToExpress: () => void;
+  submitErrors?: Record<string, boolean>;
 }
 
 export default function BettingFormMatchSection({
@@ -63,9 +64,11 @@ export default function BettingFormMatchSection({
   onParseUrl,
   onUrlChange,
   onAddToExpress,
+  submitErrors = {},
 }: BettingFormMatchSectionProps) {
   const isExpress = data.betCategory === "Експрес";
   const showRequired = isExpress && expressEventsCount === 0;
+  const err = (field: string) => submitErrors[field] ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "";
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betTab, setBetTab] = useState(1); // 1=Основне, 2+=Карта N
   const [tempBetType, setTempBetType] = useState(data.betType);
@@ -254,7 +257,7 @@ export default function BettingFormMatchSection({
                 onChange={(e) => onFieldChange("team1", e.target.value)}
                 placeholder={data.game === "CS2" ? "NAVI" : "Team Spirit"}
                 required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={classes.input}
+                className={`${classes.input} ${err("team1")}`}
               />
             </div>
           </div>
@@ -279,7 +282,7 @@ export default function BettingFormMatchSection({
                 onChange={(e) => onFieldChange("team2", e.target.value)}
                 placeholder={data.game === "CS2" ? "G2" : "OG"}
                 required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={classes.input}
+                className={`${classes.input} ${err("team2")}`}
               />
             </div>
           </div>
@@ -302,8 +305,8 @@ export default function BettingFormMatchSection({
                 !data.team1 || !data.team2
                   ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
                   : data.betType
-                    ? "border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE]"
-                    : "border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4]"
+                    ? `border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE] ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
+                    : `border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4] ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
               }`}
             >
               {!data.team1 || !data.team2
@@ -322,7 +325,7 @@ export default function BettingFormMatchSection({
               onValueChange={(value) => onFieldChange("selection", value)}
               disabled={!data.team1 || !data.team2}
             >
-              <SelectTrigger className={classes.selectTrigger}>
+              <SelectTrigger className={`${classes.selectTrigger} ${err("selection")}`}>
                 <SelectValue
                   placeholder={
                     data.team1 && data.team2
@@ -355,7 +358,7 @@ export default function BettingFormMatchSection({
               onChange={(e) => onFieldChange("odds", e.target.value)}
               placeholder="1.65"
               required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={classes.input}
+              className={`${classes.input} ${err("odds")}`}
             />
           </div>
         </div>

@@ -164,6 +164,7 @@ export default function CS2BettingForm({
   const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
   const [showViolationDialog, setShowViolationDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
+  const [submitErrors, setSubmitErrors] = useState<Record<string, boolean>>({});
   const [isPrefilled, setIsPrefilled] = useState(false);
   const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
   const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
@@ -1055,9 +1056,18 @@ export default function CS2BettingForm({
     e.preventDefault();
 
     if (!formValid) {
-      toast.error("Заповніть усі обов'язкові поля (позначені *)");
+      const missing: Record<string, boolean> = {};
+      if (!formData.team1) missing.team1 = true;
+      if (!formData.team2) missing.team2 = true;
+      if (!formData.betType) missing.betType = true;
+      if (!formData.selection) missing.selection = true;
+      if (!formData.odds || parseFloat(formData.odds) <= 1) missing.odds = true;
+      if (!formData.stake || parseFloat(formData.stake) <= 0) missing.stake = true;
+      setSubmitErrors(missing);
+      toast.error("Заповніть усі обов'язкові поля — вони підсвічені червоним");
       return;
     }
+    setSubmitErrors({});
 
     // Auto-initialize bankroll with bet amount if not set yet
     const betCurrency = (formData.currency as "UAH" | "USD") || "UAH";
@@ -1551,6 +1561,7 @@ export default function CS2BettingForm({
                       onParseUrl={() => parseMatchFromUrl(formData.matchUrl)}
                       onUrlChange={(url) => handleUrlChange(url)}
                       onAddToExpress={addExpressEvent}
+                      submitErrors={submitErrors}
                     />
                   </div>
                 </>
@@ -1580,6 +1591,7 @@ export default function CS2BettingForm({
                       setFormData((prev) => ({ ...prev, [field]: value }))
                     }
                     onConfidenceChange={handleConfidenceChange}
+                    submitErrors={submitErrors}
                   />
                 </div>
               )}
@@ -1611,8 +1623,7 @@ export default function CS2BettingForm({
                   isSubmitting ||
                   effectiveTiltBlock.blocked ||
                   (formData.betCategory === "Експрес" &&
-                    !allExpressEventsComplete) ||
-                  !formValid
+                    !allExpressEventsComplete)
                 }
                 className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
               >
