@@ -302,32 +302,8 @@ export default function BettingFormMatchSection({
 
         <div className="border-t border-gray-100 -mx-6" />
 
-        {/* Bet type: button that opens modal */}
+        {/* Bet type + Selection — swapped: Selection left, Bet type center */}
         <div className="flex items-end gap-3">
-          <div className="flex-[2] space-y-1.5">
-            <Label className={classes.label}>
-              Тип прогнозу{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <button
-              type="button"
-              disabled={!data.team1 || !data.team2}
-              onClick={openBetModal}
-              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
-                !data.team1 || !data.team2
-                  ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                  : data.betType
-                    ? `border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE] ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
-                    : `border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4] ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
-              }`}
-            >
-              {!data.team1 || !data.team2
-                ? "Спочатку введіть команди"
-                : data.betType
-                  ? getBetTypeLabel(data.betType, data.format)
-                  : "Оберіть тип прогнозу"}
-            </button>
-          </div>
           <div className="flex-[2] space-y-1.5">
             <Label className={classes.label}>
               Вибір {showRequired && <span className="text-red-500">*</span>}
@@ -355,6 +331,30 @@ export default function BettingFormMatchSection({
                 )}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex-[2] space-y-1.5">
+            <Label className={classes.label}>
+              Тип прогнозу{" "}
+              {showRequired && <span className="text-red-500">*</span>}
+            </Label>
+            <button
+              type="button"
+              disabled={!data.team1 || !data.team2}
+              onClick={openBetModal}
+              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
+                !data.team1 || !data.team2
+                  ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
+                  : data.betType
+                    ? `border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE] ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
+                    : `border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4] ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
+              }`}
+            >
+              {!data.team1 || !data.team2
+                ? "Спочатку введіть команди"
+                : data.betType
+                  ? getBetTypeLabel(data.betType, data.format)
+                  : "Оберіть тип прогнозу"}
+            </button>
           </div>
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="odds" className={classes.label}>
