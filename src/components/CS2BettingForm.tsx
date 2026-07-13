@@ -677,8 +677,6 @@ export default function CS2BettingForm({
     }));
   };
 
-  // parseDota2MatchFromUrl, parseCS2MatchFromUrl — imported from @/lib/matchUrlParser
-
   const parseMatchFromUrl = async (url: string) => {
     setIsParsingMatch(true);
     try {
@@ -791,8 +789,6 @@ export default function CS2BettingForm({
       riskyTeams: prev.riskyTeams.filter((_, i) => i !== index),
     }));
   };
-
-  // getStatusBadge, getGameEmoji — imported from @/lib/displayHelpers
 
   const addExpressEvent = () => {
     if (expressEvents.length >= 10) {
@@ -1274,8 +1270,6 @@ export default function CS2BettingForm({
   const getCurrencySymbol = () => {
     return "₴";
   };
-
-  // getBetTypeOptions — imported from @/lib/displayHelpers (accepts game param)
 
   const inputClass =
     "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";

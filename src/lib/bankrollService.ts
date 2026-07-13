@@ -220,37 +220,6 @@ export class BankrollService {
     };
   }
 
-  static addManualAdjustment(username: string, amount: number): void {
-    const data = this.getBankrollData(username);
-    if (!data) return;
-    data.manualAdjustments += amount;
-    data.lastUpdated = new Date().toISOString();
-    UserDataService.setUserData(username, this.STORAGE_KEY, data);
-    api.post("/bankroll/adjust", { amount }).catch((err: unknown) => {
-      if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
-    });
-  }
-
-  static async updateInitialBank(
-    username: string,
-    newAmount: number,
-  ): Promise<void> {
-    try {
-      await api.post("/bankroll", { initialBank: newAmount });
-    } catch (err) {
-      if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
-    }
-    const data = this.getBankrollData(username);
-    if (!data) return;
-    data.initialBank = newAmount;
-    data.initialBankUAH = newAmount;
-    data.initialBankUSD = 0;
-    data.exchangeRate = 0;
-    data.manualAdjustments = 0;
-    data.lastUpdated = new Date().toISOString();
-    UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
-  }
-
   static validateBetAmount(
     username: string,
     bets: Bet[],
