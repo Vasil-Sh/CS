@@ -67,7 +67,8 @@ export default function BettingFormMatchSection({
   submitErrors = {},
 }: BettingFormMatchSectionProps) {
   const isExpress = data.betCategory === "Експрес";
-  const showRequired = isExpress && expressEventsCount === 0;
+  // Always show required markers on the main form (not when adding events to express)
+  const showRequired = !isExpress || expressEventsCount === 0;
   const err = (field: string) => submitErrors[field] ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "";
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betTab, setBetTab] = useState(1); // 1=Основне, 2+=Карта N
