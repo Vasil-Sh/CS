@@ -877,11 +877,11 @@ export default function GoalsManager() {
 
           <div className="space-y-4 pt-4 pb-4 px-6 bg-[#F3F4F6]">
             <div>
-              <Label htmlFor="goalName" className="text-base font-medium text-[#111827]">Назва цілі *</Label>
+              <Label htmlFor="goalName" className="text-base font-medium text-[#111827]">Назва цілі <span className="text-red-500">*</span></Label>
               <Input id="goalName" value={newGoal.name} onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })} placeholder="Наприклад: Досягти 100,000 грн" className="rounded-2xl border border-[#E5E7EB] focus:border-[#447afc] mt-1.5 h-11 text-base" />
             </div>
             <div>
-              <Label htmlFor="goalType" className="text-base font-medium text-[#111827]">Тип цілі *</Label>
+              <Label htmlFor="goalType" className="text-base font-medium text-[#111827]">Тип цілі <span className="text-red-500">*</span></Label>
               <Select value={newGoal.type} onValueChange={(v: GoalType) => setNewGoal({ ...newGoal, type: v })}>
                 <SelectTrigger className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -895,7 +895,7 @@ export default function GoalsManager() {
 
             {newGoal.type === 'amount' && (
               <div>
-                <Label htmlFor="targetAmount" className="text-base font-medium text-[#111827]">Цільова сума (грн) *</Label>
+                <Label htmlFor="targetAmount" className="text-base font-medium text-[#111827]">Цільова сума (грн) <span className="text-red-500">*</span></Label>
                 <Input id="targetAmount" type="number" min="1" value={targetAmountStr} onChange={(e) => {
                   setTargetAmountStr(e.target.value);
                   const val = parseFloat(e.target.value);
@@ -908,7 +908,7 @@ export default function GoalsManager() {
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-base font-medium text-[#111827]">Початкова сума *</Label>
+                    <Label className="text-base font-medium text-[#111827]">Початкова сума <span className="text-red-500">*</span></Label>
                     <Input type="number" min="1" value={startAmountStr} onChange={(e) => {
                       setStartAmountStr(e.target.value);
                       const val = parseFloat(e.target.value);
@@ -916,7 +916,7 @@ export default function GoalsManager() {
                     }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
-                    <Label className="text-base font-medium text-[#111827]">Цільова сума *</Label>
+                    <Label className="text-base font-medium text-[#111827]">Цільова сума <span className="text-red-500">*</span></Label>
                     <Input type="number" min="1" value={targetLadderAmountStr} onChange={(e) => {
                       setTargetLadderAmountStr(e.target.value);
                       const val = parseFloat(e.target.value);
@@ -926,7 +926,7 @@ export default function GoalsManager() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-base font-medium text-[#111827]">Мін. коефіцієнт *</Label>
+                    <Label className="text-base font-medium text-[#111827]">Мін. коефіцієнт <span className="text-red-500">*</span></Label>
                     <Input type="number" min="1.01" step="0.01" value={minOddsStr} onChange={(e) => {
                       setMinOddsStr(e.target.value);
                       const val = parseFloat(e.target.value);
@@ -934,7 +934,7 @@ export default function GoalsManager() {
                     }} className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base" />
                   </div>
                   <div>
-                    <Label className="text-base font-medium text-[#111827]">Макс. коефіцієнт *</Label>
+                    <Label className="text-base font-medium text-[#111827]">Макс. коефіцієнт <span className="text-red-500">*</span></Label>
                     <Input type="number" min="1.01" step="0.01" value={maxOddsStr} onChange={(e) => {
                       setMaxOddsStr(e.target.value);
                       const val = parseFloat(e.target.value);
@@ -943,7 +943,7 @@ export default function GoalsManager() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-base font-medium text-[#111827]">Режим при програші *</Label>
+                  <Label className="text-base font-medium text-[#111827]">Режим при програші <span className="text-red-500">*</span></Label>
                   <Select value={newGoal.ladderMode} onValueChange={(v: LadderMode) => setNewGoal({ ...newGoal, ladderMode: v })}>
                     <SelectTrigger className="rounded-2xl border border-[#E5E7EB] mt-1.5 h-11 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -963,7 +963,7 @@ export default function GoalsManager() {
 
             {newGoal.type === 'roi' && (
               <div>
-                <Label className="text-base font-medium text-[#111827]">Цільовий ROI (%) *</Label>
+                <Label className="text-base font-medium text-[#111827]">Цільовий ROI (%) <span className="text-red-500">*</span></Label>
                 <Input type="number" min="0" max="1000" value={targetROIStr} onChange={(e) => {
                   setTargetROIStr(e.target.value);
                   const val = parseFloat(e.target.value);
@@ -974,7 +974,7 @@ export default function GoalsManager() {
 
             {newGoal.type === 'winrate' && (
               <div>
-                <Label className="text-base font-medium text-[#111827]">Цільовий Win Rate (%) *</Label>
+                <Label className="text-base font-medium text-[#111827]">Цільовий Win Rate (%) <span className="text-red-500">*</span></Label>
                 <Input type="number" min="0" max="100" value={targetWinRateStr} onChange={(e) => {
                   setTargetWinRateStr(e.target.value);
                   const val = parseFloat(e.target.value);
