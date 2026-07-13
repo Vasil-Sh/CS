@@ -183,7 +183,7 @@ export default function MyBets() {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([fetchUsers(), dataProvider.refresh()]);
+      await Promise.all([fetchUsers(), loadRecentBets(), dataProvider.refresh()]);
     };
     init();
   }, []);
