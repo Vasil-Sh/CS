@@ -1,8 +1,4 @@
-// ═══════════════════════════════════════════
-// useHltvParser — HLTV/Dota2 match URL parsing
-// ═══════════════════════════════════════════
-
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { parseDota2MatchFromUrl, parseCS2MatchFromUrl } from "@/lib/matchUrlParser";
 import { UserDataService } from "@/lib/userDataService";
@@ -23,33 +19,29 @@ interface ParseResult {
   riskyTeams: RiskyTeam[];
 }
 
-interface UseHltvParserOptions {
-  currentUser: string;
-}
-
-export function useHltvParser({ currentUser }: UseHltvParserOptions) {
-  const [isParsing, setIsParsing] = useState(false);
-
-  const loadRiskyTeams = (): RiskyTeam[] => {
-    try {
-      return UserDataService.getUserData<RiskyTeam[]>(currentUser, "risky_teams", []);
-    } catch {
-      return [];
-    }
-  };
-
-  const findMatchingRiskyTeams = (team1: string, team2: string, gameFilter: "CS" | "Dota"): RiskyTeam[] => {
-    const allRisky = loadRiskyTeams();
-    const n1 = normalizeTeamName(team1);
-    const n2 = normalizeTeamName(team2);
-    return allRisky.filter((rt) => {
+/** Pure function — reads risky teams from localStorage for the given user+game filter */
+function findRiskyTeams(
+  currentUser: string,
+  team1: string,
+  team2: string,
+  gameFilter: "CS" | "Dota",
+): RiskyTeam[] {
+  const allRisky = UserDataService.getUserData<RiskyTeam[]>(currentUser, "risky_teams", []);
+  const n1 = normalizeTeamName(team1);
+  const n2 = normalizeTeamName(team2);
+  return allRisky
+    .filter((rt) => {
       if (rt.game !== gameFilter) return false;
       const nr = normalizeTeamName(rt.name);
       return n1 === nr || n2 === nr || n1.includes(nr) || n2.includes(nr);
-    }).map((rt) => ({ name: rt.name, game: rt.game, status: rt.status, notes: rt.notes }));
-  };
+    })
+    .map((rt) => ({ name: rt.name, game: rt.game, status: rt.status, notes: rt.notes }));
+}
 
-  const parse = useCallback(async (url: string): Promise<ParseResult | null> => {
+export function useHltvParser() {
+  const [isParsing, setIsParsing] = useState(false);
+
+  const parse = useCallback(async (url: string, currentUser: string): Promise<ParseResult | null> => {
     setIsParsing(true);
     try {
       if (url.includes("dota2")) {
@@ -61,7 +53,7 @@ export function useHltvParser({ currentUser }: UseHltvParserOptions) {
           team1: result.team1,
           team2: result.team2,
           tournament: result.tournament,
-          riskyTeams: findMatchingRiskyTeams(result.team1, result.team2, "Dota"),
+          riskyTeams: findRiskyTeams(currentUser, result.team1, result.team2, "Dota"),
         };
       }
 
@@ -74,7 +66,7 @@ export function useHltvParser({ currentUser }: UseHltvParserOptions) {
           team1: result.team1,
           team2: result.team2,
           tournament: result.tournament,
-          riskyTeams: findMatchingRiskyTeams(result.team1, result.team2, "CS"),
+          riskyTeams: findRiskyTeams(currentUser, result.team1, result.team2, "CS"),
         };
       }
 
@@ -87,11 +79,10 @@ export function useHltvParser({ currentUser }: UseHltvParserOptions) {
     } finally {
       setIsParsing(false);
     }
-  }, [loadRiskyTeams, findMatchingRiskyTeams]);
+  }, []); // stable — currentUser passed as argument, no dependency needed
 
-  /** Returns true if URL looks parseable */
-  const isParseable = (url: string) =>
-    url.includes("hltv.org/matches/") || url.includes("dota2");
+  const isParseable = useCallback((url: string) =>
+    url.includes("hltv.org/matches/") || url.includes("dota2"), []);
 
   return { isParsing, parse, isParseable };
 }

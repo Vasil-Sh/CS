@@ -6,8 +6,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { MatchPrefillData } from "@/components/CS2BettingForm";
 
-const MAX_CONFIDENCE = 95;
-
 export interface FormData {
   date: string;
   game: "CS2" | "Dota2";
@@ -62,14 +60,12 @@ interface UseBetFormOptions {
   primaryStrategyName?: string;
   prefillData?: MatchPrefillData | null;
   expressMatchesData?: MatchPrefillData[] | null;
-  activeGoals: { id: string }[];
 }
 
 export function useBetForm({
   primaryStrategyName,
   prefillData,
   expressMatchesData,
-  activeGoals,
 }: UseBetFormOptions) {
   const initialCategory =
     expressMatchesData && expressMatchesData.length >= 2 ? "Експрес" : "Ординар";
@@ -88,28 +84,30 @@ export function useBetForm({
   const prefillConsumedRef = useRef(false);
   const prefillLogosRef = useRef<{ logoTeam1?: string | null; logoTeam2?: string | null }>({});
 
-  /** Apply prefill data from Matches page */
+  /** Apply prefill data from Matches page (runs once per prefillData change) */
   useEffect(() => {
-    if (prefillData && !prefillConsumedRef.current) {
-      prefillConsumedRef.current = true;
-      prefillLogosRef.current = {
-        logoTeam1: prefillData.logoTeam1,
-        logoTeam2: prefillData.logoTeam2,
-      };
-      const formatMap: Record<string, string> = { Bo1: "BO1", Bo2: "BO2", Bo3: "BO3", Bo5: "BO5" };
-      setFormData((prev) => ({
-        ...prev,
-        team1: prefillData.team1 || "",
-        team2: prefillData.team2 || "",
-        tournament: prefillData.tournament || "",
-        format: formatMap[prefillData.format] || prefillData.format || "BO3",
-        date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
-        matchUrl: prefillData.matchUrl || "",
-        odds: prefillData.odds || "",
-        game: prefillData.game || prev.game,
-      }));
-      setTimeout(() => prefillConsumedRef.current = false, 100);
+    if (!prefillData) {
+      prefillConsumedRef.current = false;
+      return;
     }
+    if (prefillConsumedRef.current) return;
+    prefillConsumedRef.current = true;
+    prefillLogosRef.current = {
+      logoTeam1: prefillData.logoTeam1,
+      logoTeam2: prefillData.logoTeam2,
+    };
+    const formatMap: Record<string, string> = { Bo1: "BO1", Bo2: "BO2", Bo3: "BO3", Bo5: "BO5" };
+    setFormData((prev) => ({
+      ...prev,
+      team1: prefillData.team1 || "",
+      team2: prefillData.team2 || "",
+      tournament: prefillData.tournament || "",
+      format: formatMap[prefillData.format] || prefillData.format || "BO3",
+      date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
+      matchUrl: prefillData.matchUrl || "",
+      odds: prefillData.odds || "",
+      game: prefillData.game || prev.game,
+    }));
   }, [prefillData]);
 
   const clearForm = useCallback(() => {
