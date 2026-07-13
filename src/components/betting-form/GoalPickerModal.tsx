@@ -50,7 +50,7 @@ export default function GoalPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl max-w-lg w-[95vw] border border-[#E5E7EB] p-0 gap-0">
+      <DialogContent className="rounded-3xl max-w-lg w-[95vw] max-h-[85vh] overflow-hidden flex flex-col border border-[#E5E7EB] p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
@@ -69,9 +69,9 @@ export default function GoalPickerModal({
 
         <div className="border-t border-[#E5E7EB]" />
 
-        <div className="bg-[#F3F4F6] px-5 py-4 space-y-3">
+        <div className="bg-[#F3F4F6] px-5 py-4 space-y-3 flex-1 overflow-y-auto min-h-0">
           {/* Search */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
             <Input
               value={search}
@@ -91,7 +91,7 @@ export default function GoalPickerModal({
           </div>
 
           {/* Goals list */}
-          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-3">
+          <div className="space-y-1.5 pr-3">
             {/* No goal option */}
             <button
               onClick={() => { onSelect('all'); onOpenChange(false); }}

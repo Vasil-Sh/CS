@@ -91,9 +91,7 @@ export default function MyBetsStatsCards({
         <StatCard
           icon={<IconBox><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Профіт"
-          value={currencyMode === "USD"
-            ? `${isUp ? "+" : ""}$${profit.toFixed(2)}`
-            : `${isUp ? "+" : ""}${profit.toFixed(2)} ₴`}
+          value={<>{isUp ? "+" : ""}{currencyMode === "USD" ? "$" : ""}<NumberTicker value={Math.abs(Math.round(profit * 100) / 100)} decimalPlaces={2} />{currencyMode !== "USD" && " ₴"}</>}
           valueColor={isUp ? (currencyMode === "USD" ? "text-[#22C55E]" : "text-[#111827]") : "text-[#EF4444]"}
           subtext={isUp ? "Позитивна динаміка" : "Негативна динаміка"}
           subIcon={isUp ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}
@@ -102,7 +100,7 @@ export default function MyBetsStatsCards({
         <StatCard
           icon={<IconBox><BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Всього записів"
-          value={String(stats.totalBets)}
+          value={<NumberTicker value={stats.totalBets} />}
           subtext={activeBets.length > 0 ? `${activeBets.length} активних` : "Немає активних"}
         />
         {/* Winrate card — large donut filling the card */}
@@ -138,23 +136,23 @@ export default function MyBetsStatsCards({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         <StatCard
           icon={<IconBox><Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Активні" value={String(activeBets.length)} valueColor="text-[#3B82F6]"
+          label="Активні" value={<NumberTicker value={activeBets.length} />} valueColor="text-[#3B82F6]"
           subtext="Очікують результату"
         />
         <StatCard
           icon={<IconBox><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Виграші" value={String(winningBets.length)} valueColor="text-[#22C55E]"
+          label="Виграші" value={<NumberTicker value={winningBets.length} />} valueColor="text-[#22C55E]"
           subtext="Успішних записів" trend="up"
         />
         <StatCard
           icon={<IconBox><AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Програші" value={String(losingBets.length)} valueColor="text-[#EF4444]"
+          label="Програші" value={<NumberTicker value={losingBets.length} />} valueColor="text-[#EF4444]"
           subtext="Невдалих записів" trend="down"
         />
         <StatCard
           icon={<IconBox><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
           label="Середній ROI"
-          value={`${stats.averageROI >= 0 ? "+" : ""}${stats.averageROI}%`}
+          value={<>{stats.averageROI >= 0 ? "+" : ""}<NumberTicker value={Math.abs(stats.averageROI)} />%</>}
           valueColor={stats.averageROI >= 0 ? "text-[#111827]" : "text-[#EF4444]"}
           subtext={stats.averageROI >= 0 ? "Позитивний" : "Негативний"}
           subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}

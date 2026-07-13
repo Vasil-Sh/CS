@@ -43,16 +43,26 @@ export default function InitialBankModal({
   const label =
     currency === "USD" ? "Стартовий банк ($)" : "Стартовий банк (₴)";
 
-  const handleSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     const value = parseFloat(amount);
     if (isNaN(value) || value < 0) {
       toast.error("Будь ласка, введіть коректну суму");
       return;
     }
-    BankrollService.setInitialBank(currentUser, value, currency, savedRate);
-    toast.success(
-      `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
-    );
+    setIsSubmitting(true);
+    try {
+      await BankrollService.setInitialBank(currentUser, value, currency, savedRate);
+      toast.success(
+        `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
+      );
+    } catch (err) {
+      toast.error("Помилка при збереженні банку");
+      if (import.meta.env.DEV) console.error("[Bank] Save error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
     onClose(true);
   };
 
@@ -156,9 +166,10 @@ export default function InitialBankModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+            disabled={isSubmitting}
+            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-50"
           >
-            Оновити
+            {isSubmitting ? "Збереження..." : "Оновити"}
           </Button>
         </DialogFooter>
       </DialogContent>

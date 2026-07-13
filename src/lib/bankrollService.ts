@@ -93,6 +93,8 @@ export class BankrollService {
       manualAdjustments: 0,
       lastUpdated: new Date().toISOString(),
     };
+    // Write to localStorage FIRST (non-blocking), then sync to API
+    UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
     try {
       await api.post("/bankroll", {
         initialBank: data.initialBank,
@@ -102,7 +104,6 @@ export class BankrollService {
     } catch (err) {
       if (import.meta.env.DEV) console.warn("[API sync] failed:", String(err));
     }
-    UserDataService.setUserDataSync(username, this.STORAGE_KEY, data);
   }
 
   static getBankrollData(username: string): BankrollData | null {

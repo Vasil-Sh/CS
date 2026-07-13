@@ -225,25 +225,48 @@ export class UserDataService {
       };
     });
     // Merge API data with localStorage — never downgrade local "Win"/"Loss" to "Pending"
+    // NEVER overwrite localStorage with empty API response
     try {
       const username = localStorage.getItem("username") || "default";
       const storageKey = `user_${username}_mybets_data`;
       const localRaw = localStorage.getItem(storageKey);
-      if (localRaw) {
-        const localBets = JSON.parse(localRaw) as ApiBet[];
+      let localBets: ApiBet[] = [];
+      if (localRaw) localBets = JSON.parse(localRaw) as ApiBet[];
+
+      if (localBets.length > 0) {
         const localMap = new Map(localBets.map((b: ApiBet) => [b.id, b]));
-        // For each API bet, if local has a non-Pending result, keep it
-        for (const bet of mapped) {
-          const local = localMap.get(bet.id as string | number);
-          if (local && local.result && local.result !== 'Pending') {
-            bet.result = local.result;
-            bet.profit = local.profit;
-            bet.roi = local.roi;
-            bet.notes = local.notes;
+        // Merge API results into local: add new bets, update existing with fresh API data
+        const mergedIds = new Set<number | string>();
+        for (const apiBet of mapped) {
+          const local = localMap.get(apiBet.id as string | number);
+          if (local) {
+            // Keep local non-Pending result if newer; otherwise use API data
+            if (local.result && local.result !== 'Pending') {
+              apiBet.result = local.result;
+              apiBet.profit = local.profit;
+              apiBet.roi = local.roi;
+              apiBet.notes = local.notes;
+            }
+          } else {
+            // New bet from API — add to local
+            localBets.push(apiBet);
           }
+          mergedIds.add(apiBet.id as string | number);
         }
+        // Sort by date descending (newest first)
+        localBets.sort((a, b) => {
+          const da = a.date ? new Date(String(a.date)).getTime() : 0;
+          const db = b.date ? new Date(String(b.date)).getTime() : 0;
+          return db - da;
+        });
+        localStorage.setItem(storageKey, JSON.stringify(localBets));
+        return localBets as ApiBet[];
       }
-      localStorage.setItem(storageKey, JSON.stringify(mapped));
+
+      // No local data — safe to use API data as-is
+      if (mapped.length > 0) {
+        localStorage.setItem(storageKey, JSON.stringify(mapped));
+      }
     } catch {
       /* storage full — ignore */
     }

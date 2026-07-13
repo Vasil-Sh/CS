@@ -340,7 +340,20 @@ const BetTableMemo = memo(function BetTable({
   }, [currentUser]);
   const getGoalName = (goalId?: string) => {
     if (!goalId) return null;
-    return cachedGoals.find((g) => g.id === goalId)?.name || "Видалена ціль";
+    // First try API-loaded goals
+    const apiGoal = cachedGoals.find((g) => g.id === goalId);
+    if (apiGoal) return apiGoal.name;
+    // Fallback to localStorage (goals may not yet be synced to API)
+    try {
+      const username = localStorage.getItem("username") || "default";
+      const raw = localStorage.getItem(`user_${username}_goals`);
+      if (raw) {
+        const localGoals = JSON.parse(raw) as { id: string; name: string }[];
+        const localGoal = localGoals.find((g) => g.id === goalId);
+        if (localGoal) return localGoal.name;
+      }
+    } catch { /* ignore */ }
+    return "Видалена ціль";
   };
   const isExpressBet = (bet: Bet) =>
     bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
