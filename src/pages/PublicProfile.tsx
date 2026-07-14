@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   TrendingUp, DollarSign, Target, Trophy, BarChart3,
-  Zap, Calendar, Loader2, Share2, Wallet, User,
+  Zap, Loader2, Share2, Wallet, User,
 } from "lucide-react";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { toast } from "sonner";
@@ -282,10 +282,7 @@ export default function PublicProfile() {
           {/* Recent bets */}
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5 text-gray-500" />
-                <span className="text-base font-semibold text-gray-900">Останні ставки</span>
-              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Останні ставки</h3>
               {data.recentBets.length === 0 ? (
                 <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
               ) : (
@@ -295,21 +292,12 @@ export default function PublicProfile() {
                       <img
                         src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
                         alt={bet.game}
-                        className="h-9 w-9 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
+                        className="h-8 w-8 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{bet.match}</p>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
-                            bet.result === "Win" ? "bg-green-50 text-green-600" :
-                            bet.result === "Loss" ? "bg-red-50 text-red-500" :
-                            "bg-gray-100 text-gray-500"
-                          }`}>
-                            {bet.result === "Win" ? `+${bet.profit} ₴` : bet.result === "Loss" ? `${bet.profit} ₴` : "Очікується"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                        <p className="text-sm font-semibold text-gray-900 mb-0.5">{bet.match}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
                           <span>{bet.game}</span>
                           <span>·</span>
                           <span>{bet.date}</span>
