@@ -96,10 +96,10 @@ export default function PublicProfile() {
   return (
     <div className="min-h-screen bg-[#f3f3f3]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div className="max-w-4xl mx-auto px-6 pt-8 pb-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-gray-400 hover:text-gray-600">
+            <Link to="/" className="text-gray-400 hover:text-gray-600 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
@@ -117,186 +117,191 @@ export default function PublicProfile() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Wallet className="h-4 w-4 text-primary" strokeWidth={1.5} />
+      {/* KPI Cards — wrapped in stone container like analytics */}
+      <div className="max-w-4xl mx-auto px-6 pb-6 space-y-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Wallet className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                </div>
+                <span className="text-xs text-gray-500">Банк</span>
               </div>
-              <span className="text-xs text-gray-500">Банк</span>
-            </div>
-            <div className="text-xl font-bold text-gray-900">
-              <NumberTicker value={Math.round(stats.currentBank)} /> ₴
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+              <div className="text-xl font-bold text-gray-900">
+                <NumberTicker value={Math.round(stats.currentBank)} /> ₴
               </div>
-              <span className="text-xs text-gray-500">Профіт</span>
             </div>
-            <div className={`text-xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
-              {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                <Target className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                  <DollarSign className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+                </div>
+                <span className="text-xs text-gray-500">Профіт</span>
               </div>
-              <span className="text-xs text-gray-500">Вінрейт</span>
-            </div>
-            <div className="text-xl font-bold text-gray-900">{stats.winRate}%</div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
+              <div className={`text-xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
+                {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
               </div>
-              <span className="text-xs text-gray-500">ROI</span>
             </div>
-            <div className={`text-xl font-bold ${stats.roi >= 0 ? "text-green-600" : "text-red-500"}`}>
-              {stats.roi >= 0 ? "+" : ""}{stats.roi}%
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <Target className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
+                </div>
+                <span className="text-xs text-gray-500">Вінрейт</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900">{stats.winRate}%</div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
+                </div>
+                <span className="text-xs text-gray-500">ROI</span>
+              </div>
+              <div className={`text-xl font-bold ${stats.roi >= 0 ? "text-green-600" : "text-red-500"}`}>
+                {stats.roi >= 0 ? "+" : ""}{stats.roi}%
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Main stats grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* ROI Circle */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200 flex flex-col items-center justify-center">
-            <span className="text-sm text-gray-500 mb-4">ROI</span>
-            <AnimatedCircularProgressBar
-              max={100} min={0}
-              value={Math.abs(stats.roi) >= 100 ? 98 : Math.abs(stats.roi)}
-              gaugePrimaryColor={stats.roi >= 0 ? "#10B981" : "#EF4444"}
-              gaugeSecondaryColor="#E5E7EB"
-              className="!w-28 !h-28"
-            />
-            <span className={`text-2xl font-bold mt-3 ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-              {stats.roi >= 0 ? "+" : ""}{stats.roi}%
-            </span>
-            <div className="grid grid-cols-2 gap-2 mt-4 w-full">
-              <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
-                <div className="text-[10px] text-gray-400 uppercase">Вкладено</div>
-                <div className="text-sm font-bold"><NumberTicker value={Math.round(stats.totalStaked)} /> ₴</div>
-              </div>
-              <div className={`rounded-xl px-3 py-2 text-center ${isUp ? "bg-emerald-50" : "bg-red-50"}`}>
-                <div className={`text-[10px] uppercase ${isUp ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
-                <div className={`text-sm font-bold ${isUp ? "text-emerald-700" : "text-red-600"}`}>
-                  {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
+        {/* Main stats — wrapped in stone container */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* ROI Circle */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center">
+              <span className="text-sm text-gray-500 mb-4">ROI</span>
+              <AnimatedCircularProgressBar
+                max={100} min={0}
+                value={Math.abs(stats.roi) >= 100 ? 98 : Math.abs(stats.roi)}
+                gaugePrimaryColor={stats.roi >= 0 ? "#10B981" : "#EF4444"}
+                gaugeSecondaryColor="#E5E7EB"
+                className="!w-28 !h-28"
+              />
+              <span className={`text-2xl font-bold mt-3 ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                {stats.roi >= 0 ? "+" : ""}{stats.roi}%
+              </span>
+              <div className="grid grid-cols-2 gap-2 mt-4 w-full">
+                <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
+                  <div className="text-[10px] text-gray-400 uppercase">Вкладено</div>
+                  <div className="text-sm font-bold"><NumberTicker value={Math.round(stats.totalStaked)} /> ₴</div>
+                </div>
+                <div className={`rounded-xl px-3 py-2 text-center ${isUp ? "bg-emerald-50" : "bg-red-50"}`}>
+                  <div className={`text-[10px] uppercase ${isUp ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
+                  <div className={`text-sm font-bold ${isUp ? "text-emerald-700" : "text-red-600"}`}>
+                    {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Numbers */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-                <BarChart3 className="h-4 w-4 text-primary" strokeWidth={1.5} />
+            {/* Numbers */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Всього ставок</p>
+                  <p className="text-lg font-bold text-gray-900">{stats.totalBets}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500">Всього ставок</p>
-                <p className="text-lg font-bold text-gray-900">{stats.totalBets}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Виграші / Програші</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-sky-500" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Середній коеф.</p>
+                  <p className="text-lg font-bold text-gray-900">{stats.avgOdds}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
+                  <Target className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Активні цілі</p>
+                  <p className="text-lg font-bold text-gray-900">{stats.activeGoals}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
-                <Trophy className="h-4 w-4 text-green-500" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Виграші / Програші</p>
-                <p className="text-lg font-bold text-gray-900">
-                  <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-sky-500" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Середній коеф.</p>
-                <p className="text-lg font-bold text-gray-900">{stats.avgOdds}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
-                <Target className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Активні цілі</p>
-                <p className="text-lg font-bold text-gray-900">{stats.activeGoals}</p>
-              </div>
-            </div>
-          </div>
 
-          {/* Recent bets */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-semibold text-gray-900">Останні ставки</span>
-            </div>
-            {data.recentBets.length === 0 ? (
-              <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
-            ) : (
-              <div className="space-y-2">
-                {data.recentBets.map((bet, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
-                      <p className="text-xs text-gray-400">{bet.game} · {bet.date}</p>
-                    </div>
-                    <div className="text-right ml-3">
-                      <p className={`text-sm font-semibold ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
-                        {bet.result === "Win" ? `+${bet.profit} ₴` : bet.result === "Loss" ? `${bet.profit} ₴` : "..."}
-                      </p>
-                      <p className="text-xs text-gray-400">@{bet.odds}</p>
-                    </div>
-                  </div>
-                ))}
+            {/* Recent bets */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-semibold text-gray-900">Останні ставки</span>
               </div>
-            )}
+              {data.recentBets.length === 0 ? (
+                <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
+              ) : (
+                <div className="space-y-2">
+                  {data.recentBets.map((bet, i) => (
+                    <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
+                        <p className="text-xs text-gray-400">{bet.game} · {bet.date}</p>
+                      </div>
+                      <div className="text-right ml-3">
+                        <p className={`text-sm font-semibold ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
+                          {bet.result === "Win" ? `+${bet.profit} ₴` : bet.result === "Loss" ? `${bet.profit} ₴` : "..."}
+                        </p>
+                        <p className="text-xs text-gray-400">@{bet.odds}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Monthly profit */}
+        {/* Monthly profit — wrapped in stone container */}
         {data.monthlyProfit.length > 0 && (
-          <div className="bg-white rounded-3xl p-6 border border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
-            <div className="flex items-end gap-2 h-32">
-              {data.monthlyProfit.map((m) => {
-                const maxAbs = Math.max(...data.monthlyProfit.map(x => Math.abs(x.profit)), 1);
-                const h = Math.max(4, Math.round((Math.abs(m.profit) / maxAbs) * 100));
-                return (
-                  <div key={m.month} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-                    <span className="text-[10px] text-gray-500 tabular-nums">
-                      {m.profit >= 0 ? "+" : ""}{Math.round(m.profit)} ₴
-                    </span>
-                    <div
-                      className={`w-full rounded-t-md ${m.profit >= 0 ? "bg-green-400" : "bg-red-400"}`}
-                      style={{ height: `${h}%` }}
-                    />
-                    <span className="text-[10px] text-gray-400 truncate w-full text-center">{fmtMonth(m.month)}</span>
-                  </div>
-                );
-              })}
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
+              <div className="flex items-end gap-2 h-32">
+                {data.monthlyProfit.map((m) => {
+                  const maxAbs = Math.max(...data.monthlyProfit.map(x => Math.abs(x.profit)), 1);
+                  const h = Math.max(4, Math.round((Math.abs(m.profit) / maxAbs) * 100));
+                  return (
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+                      <span className="text-[10px] text-gray-500 tabular-nums">
+                        {m.profit >= 0 ? "+" : ""}{Math.round(m.profit)} ₴
+                      </span>
+                      <div
+                        className={`w-full rounded-t-md ${m.profit >= 0 ? "bg-green-400" : "bg-red-400"}`}
+                        style={{ height: `${h}%` }}
+                      />
+                      <span className="text-[10px] text-gray-400 truncate w-full text-center">{fmtMonth(m.month)}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
+      </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-400 pb-8">
-          Статистика оновлюється автоматично ·{" "}
-          <Link to="/" className="text-primary hover:underline">
-            MatchIQ
-          </Link>
-        </div>
+      {/* Footer */}
+      <div className="text-center text-sm text-gray-400 pb-8 pt-4">
+        Статистика оновлюється автоматично ·{" "}
+        <Link to="/" className="text-primary hover:underline">
+          MatchIQ
+        </Link>
       </div>
     </div>
   );
-}
