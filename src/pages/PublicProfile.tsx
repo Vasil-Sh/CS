@@ -170,9 +170,9 @@ export default function PublicProfile() {
           </div>
         </div>
 
-        {/* Main stats — ROI + Numbers side by side */}
+        {/* Stats row — ROI + Numbers + Monthly profit (3 columns) */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* ROI Circle */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center">
               <span className="text-base text-gray-500 mb-4">ROI</span>
@@ -201,56 +201,49 @@ export default function PublicProfile() {
             </div>
 
             {/* Numbers */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-center">
-              <div className="grid grid-cols-2 gap-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Всього ставок</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
-                  </div>
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                    <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Виграші / Програші</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
-                    </p>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-500">Всього ставок</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
-                    <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Середній коеф.</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
-                  </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                    <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Активні цілі</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-500">Виграші / Програші</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Середній коеф.</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Активні цілі</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Monthly profit + Recent bets — side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Monthly profit */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
+            {/* Monthly profit */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
               <h3 className="text-base font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
               {data.monthlyProfit.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -288,48 +281,48 @@ export default function PublicProfile() {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Recent bets */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Останні ставки</h3>
-              {data.recentBets.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-                    <Trophy className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
-                  </div>
-                  <p className="text-sm text-gray-400">Немає ставок</p>
-                  <p className="text-xs text-gray-300 mt-1">Тут з'являться останні 5 ставок</p>
+        {/* Recent bets — full width */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Останні ставки</h3>
+            {data.recentBets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+                  <Trophy className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {data.recentBets.map((bet, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-gray-100 transition-colors">
-                      <img
-                        src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
-                        alt={bet.game}
-                        className="h-8 w-8 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 mb-0.5">{bet.match}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                          <span>{bet.game}</span>
-                          <span>·</span>
-                          <span>{bet.date}</span>
-                          <span>·</span>
-                          <span>Коеф. {bet.odds}</span>
-                          <span>·</span>
-                          <span className={`font-medium ${bet.result === "Win" ? "text-green-500" : bet.result === "Loss" ? "text-red-400" : "text-gray-400"}`}>
-                            {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікування"}
-                          </span>
-                        </div>
+                <p className="text-sm text-gray-400">Немає ставок</p>
+                <p className="text-xs text-gray-300 mt-1">Тут з'являться останні 5 ставок</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.recentBets.map((bet, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-gray-100 transition-colors">
+                    <img
+                      src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
+                      alt={bet.game}
+                      className="h-8 w-8 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 mb-0.5">{bet.match}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+                        <span>{bet.game}</span>
+                        <span>·</span>
+                        <span>{bet.date}</span>
+                        <span>·</span>
+                        <span>Коеф. {bet.odds}</span>
+                        <span>·</span>
+                        <span className={`font-medium ${bet.result === "Win" ? "text-green-500" : bet.result === "Loss" ? "text-red-400" : "text-gray-400"}`}>
+                          {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікування"}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
