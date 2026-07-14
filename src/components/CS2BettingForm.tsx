@@ -307,6 +307,11 @@ export default function CS2BettingForm({
     loadActiveGoals();
   }, []); // run once on mount only
 
+  // Reload goals when returning to this component (user might have changed goals on Strategy page)
+  useEffect(() => {
+    if (currentUser) loadActiveGoals();
+  }, [currentUser]);
+
   useEffect(() => {
     if (prefillData && !prefillConsumedRef.current) {
       prefillConsumedRef.current = true;
