@@ -1089,26 +1089,27 @@ export default function CS2BettingForm({
     }
     setSubmitErrors({});
 
-    // Auto-initialize bankroll with bet amount if not set yet
+    // Auto-initialize bankroll ONLY if user has NEVER set it AND has no prior bets
     const betCurrency = (formData.currency as "UAH" | "USD") || "UAH";
     const needsUAHInit =
       betCurrency === "UAH" && !BankrollService.isInitialized(currentUser);
     const needsUSDInit =
       betCurrency === "USD" && !BankrollService.isInitializedUSD(currentUser);
     if (needsUAHInit || needsUSDInit) {
-      const stake = parseFloat(formData.stake);
-      if (stake > 0) {
-        const bankAmount = stake * 10;
-        const rate = parseFloat(formData.exchangeRate) || 41.5;
-        await BankrollService.setInitialBank(
-          currentUser,
-          bankAmount,
-          betCurrency,
-          rate,
-        );
-        toast.success(
-          `Початковий банк (${betCurrency}) автоматично встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"} (10× від суми ставки)`,
-        );
+      const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
+      if (existingBets.length === 0) {
+        const stake = parseFloat(formData.stake);
+        if (stake > 0) {
+          const bankAmount = stake * 5;
+          const rate = parseFloat(formData.exchangeRate) || 41.5;
+          await BankrollService.setInitialBank(
+            currentUser,
+            bankAmount,
+            betCurrency,
+            rate,
+          );
+          toast.info(`Початковий банк встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"}`);
+        }
       }
     }
 
