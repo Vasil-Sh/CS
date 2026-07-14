@@ -237,10 +237,14 @@ export class UserDataService {
       let localBets: ApiBet[] = [];
       if (localRaw) localBets = JSON.parse(localRaw) as ApiBet[];
 
+      // Build dedup fingerprint: match|amount|profit|date — prevents duplicates
+      // when local bet IDs differ from API UUIDs (e.g. local_xxx vs real UUID)
+      const fingerprint = (b: any) =>
+        `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`;
+      const localFingerprints = new Set(localBets.map(fingerprint));
+
       if (localBets.length > 0) {
         const localMap = new Map(localBets.map((b: ApiBet) => [b.id, b]));
-        // Merge API results into local: add new bets, update existing with fresh API data
-        const mergedIds = new Set<number | string>();
         for (const apiBet of mapped) {
           const local = localMap.get(apiBet.id as string | number);
           if (local) {
@@ -252,10 +256,13 @@ export class UserDataService {
               apiBet.notes = local.notes;
             }
           } else {
-            // New bet from API — add to local
-            localBets.push(apiBet);
+            // New bet from API — only add if not already in local by fingerprint
+            const fp = fingerprint(apiBet);
+            if (!localFingerprints.has(fp)) {
+              localBets.push(apiBet);
+              localFingerprints.add(fp);
+            }
           }
-          mergedIds.add(apiBet.id as string | number);
         }
         // Sort by date descending (newest first)
         localBets.sort((a, b) => {

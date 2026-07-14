@@ -62,16 +62,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setBets(apiBets as Bet[]);
       recalcBankroll(apiBets as Bet[]);
 
-      // Backfill: push localStorage-only bets to the server
+      // Backfill: push localStorage-only bets (not yet on server) to the API
       try {
         const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
         const rawApiBets = await api.get<{ data?: Array<{ id: number | string }> }>("/bets").catch(() => ({ data: [] }));
         const rawData = (rawApiBets as any).data || rawApiBets || [];
         const serverIds = new Set(rawData.map((b: any) => String(b.id)));
+        // Also dedup by fingerprint to avoid pushing already-existing bets
+        const serverFingerprints = new Set(
+          rawData.map((b: any) =>
+            `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`
+          )
+        );
         for (const lb of localBets) {
           const betId = String(lb.id || "");
-          // Already on server
+          // Only backfill local-only bets (local_xxx IDs) that aren't on the server
+          if (!betId.startsWith("local_")) continue;
           if (serverIds.has(betId)) continue;
+          const fp = `${String(lb.match || '').trim()}|${parseFloat(String(lb.amount || 0)).toFixed(2)}|${parseFloat(String(lb.profit || 0)).toFixed(2)}|${String(lb.date || '').substring(0, 10)}`;
+          if (serverFingerprints.has(fp)) continue;
           // Strip internal/local-only fields before sending to API
           const { id: _id, createdAt, ...rawBet } = lb as any;
           // Normalize riskyTeams: if array of objects → array of names
