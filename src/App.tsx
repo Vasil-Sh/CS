@@ -24,6 +24,7 @@ const Strategy = lazy(() => import("@/pages/Strategy"));
 const RiskyTeams = lazy(() => import("@/pages/RiskyTeams"));
 const TelegramPage = lazy(() => import("@/pages/Telegram"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const PublicProfile = lazy(() => import("@/pages/PublicProfile"));
 
 function PageLoader() {
   return (
@@ -65,6 +66,18 @@ function App() {
             element={
               <ErrorBoundary>
                 <LoginPage demo />
+              </ErrorBoundary>
+            }
+          />
+
+          {/* Public profile — shareable stats */}
+          <Route
+            path="/user/:username"
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <PublicProfile />
+                </Suspense>
               </ErrorBoundary>
             }
           />

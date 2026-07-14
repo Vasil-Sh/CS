@@ -28,6 +28,8 @@ import {
   Clock,
   RefreshCw,
   DollarSign,
+  Share2,
+  Copy,
 } from "lucide-react";
 import {
   CARD_BASE_STYLE,
@@ -474,6 +476,46 @@ export default function Profile() {
           needsBackupReminder={needsBackupReminder}
           chartCardShadow={chartCardShadow}
         />
+
+        {/* Share Profile Card */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+                <Share2 className="h-6 w-6 text-white" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Публічний профіль</h3>
+                <p className="text-sm text-gray-500">Поділися своєю статистикою з друзями</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <code className="px-3 py-1.5 bg-gray-100 rounded-xl text-sm text-gray-700 font-mono">
+                matchiq.pro/user/{username}
+              </code>
+              <Button
+                onClick={() => {
+                  const url = `${window.location.origin}/user/${username}`;
+                  navigator.clipboard.writeText(url).then(() => toast.success("Посилання скопійовано!"));
+                }}
+                size="sm"
+                className="rounded-xl bg-primary hover:bg-blue-700 text-white gap-2"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Копіювати
+              </Button>
+              <Button
+                onClick={() => window.open(`/user/${username}`, "_blank")}
+                size="sm"
+                variant="outline"
+                className="rounded-xl border-gray-200 text-gray-700 gap-2"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                Відкрити
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Data Statistics + User Info — unified card */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
