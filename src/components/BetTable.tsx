@@ -507,7 +507,7 @@ const BetTableMemo = memo(function BetTable({
           const selection = selectionPart.split(":")[0]?.trim() || "";
           const selectedFromMatch = selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() || "";
           selectedTeam = selectedFromMatch || teams[0] || selection;
-          betDesc = "Експрес";
+          betDesc = `Експрес x${count || events.length}`;
           // Get logo from expressLogos first event
           if (b.expressLogos && b.expressLogos.length > 0) {
             // Determine which team logo to use based on selection
@@ -522,7 +522,7 @@ const BetTableMemo = memo(function BetTable({
           }
         } else {
           selectedTeam = "Експрес";
-          betDesc = "Експрес";
+          betDesc = `Експрес x${count}`;
           logoUrl = null;
         }
       } else {
