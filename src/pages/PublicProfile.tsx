@@ -170,9 +170,9 @@ export default function PublicProfile() {
           </div>
         </div>
 
-        {/* Main stats — wrapped in stone container */}
+        {/* Main stats — ROI + Numbers side by side */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* ROI Circle */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center">
               <span className="text-base text-gray-500 mb-4">ROI</span>
@@ -241,57 +241,59 @@ export default function PublicProfile() {
                 </div>
               </div>
             </div>
-
-            {/* Recent bets */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5 text-gray-500" />
-                <span className="text-base font-semibold text-gray-900">Останні ставки</span>
-              </div>
-              {data.recentBets.length === 0 ? (
-                <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
-              ) : (
-                <div className="space-y-3">
-                  {data.recentBets.map((bet, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <img
-                        src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
-                        alt={bet.game}
-                        className="h-9 w-9 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{bet.match}</p>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
-                            bet.result === "Win" ? "bg-green-50 text-green-600" :
-                            bet.result === "Loss" ? "bg-red-50 text-red-500" :
-                            "bg-gray-100 text-gray-500"
-                          }`}>
-                            {bet.result === "Win" ? `+${bet.profit} ₴` : bet.result === "Loss" ? `${bet.profit} ₴` : "Очікується"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                          <span>{bet.game}</span>
-                          <span>·</span>
-                          <span>{bet.date}</span>
-                          <span>·</span>
-                          <span>Коеф. {bet.odds}</span>
-                          <span>·</span>
-                          <span className={`font-medium ${bet.result === "Win" ? "text-green-500" : bet.result === "Loss" ? "text-red-400" : "text-gray-400"}`}>
-                            {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікування"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-                {/* Monthly profit — clean table */}
+        {/* Recent bets — full width for more space */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="h-5 w-5 text-gray-500" />
+              <span className="text-base font-semibold text-gray-900">Останні ставки</span>
+            </div>
+            {data.recentBets.length === 0 ? (
+              <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
+            ) : (
+              <div className="space-y-3">
+                {data.recentBets.map((bet, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <img
+                      src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
+                      alt={bet.game}
+                      className="h-9 w-9 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{bet.match}</p>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${
+                          bet.result === "Win" ? "bg-green-50 text-green-600" :
+                          bet.result === "Loss" ? "bg-red-50 text-red-500" :
+                          "bg-gray-100 text-gray-500"
+                        }`}>
+                          {bet.result === "Win" ? `+${bet.profit} ₴` : bet.result === "Loss" ? `${bet.profit} ₴` : "Очікується"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                        <span>{bet.game}</span>
+                        <span>·</span>
+                        <span>{bet.date}</span>
+                        <span>·</span>
+                        <span>Коеф. {bet.odds}</span>
+                        <span>·</span>
+                        <span className={`font-medium ${bet.result === "Win" ? "text-green-500" : bet.result === "Loss" ? "text-red-400" : "text-gray-400"}`}>
+                          {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікування"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Monthly profit — compact table */}
         {data.monthlyProfit.length > 0 && (
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
