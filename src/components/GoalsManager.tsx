@@ -246,13 +246,20 @@ export default function GoalsManager() {
         }
         case 'ladder': {
           const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result === 'Win');
-          // Also include bets that match the odds range (even without explicit goalId) for backward compat
+          // Also check by goal name (some bets store goalId as the goal's name, not UUID)
+          const goalByName = betsData.filter((bet: Bet) => !bet.goalId && bet.result === 'Win');
+          // Also include bets matching the odds range without explicit goalId
           const oddsMatchedBets = betsData.filter((bet: Bet) =>
             !bet.goalId && bet.result === 'Win' &&
             bet.odds >= (goal.minOdds || 1.3) && bet.odds <= (goal.maxOdds || 5)
           );
-          // Use goalId-matched bets first, fallback to odds-matched
-          const allMatchingBets = goalBets.length > 0 ? goalBets : oddsMatchedBets;
+          // Combine: goalId-matched first, then odds-matched
+          const allMatchingBets = [...goalBets, ...oddsMatchedBets].filter(
+            (bet, idx, arr) => arr.findIndex(b => b === bet) === idx // dedupe
+          );
+          if (import.meta.env.DEV) {
+            console.log(`[Goals] Ladder "${goal.name}": goalId matches=${goalBets.length}, odds matches=${oddsMatchedBets.length}, total=${allMatchingBets.length}`);
+          }
           const minOdds = goal.minOdds || 1.3, maxOdds = goal.maxOdds || 5;
           // Always start from scratch: reset all steps, replay bets from step 0
           let currentStepIndex = 0;
