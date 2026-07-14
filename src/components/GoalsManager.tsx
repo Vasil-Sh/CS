@@ -245,7 +245,14 @@ export default function GoalsManager() {
           return { ...goal, currentAmount: totalProfit, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
         case 'ladder': {
-          const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.odds >= (goal.minOdds || 1.3) && bet.odds <= (goal.maxOdds || 5) && bet.result === 'Win');
+          const goalBets = betsData.filter((bet: Bet) => bet.goalId === goal.id && bet.result === 'Win');
+          // Also include bets that match the odds range (even without explicit goalId) for backward compat
+          const oddsMatchedBets = betsData.filter((bet: Bet) =>
+            !bet.goalId && bet.result === 'Win' &&
+            bet.odds >= (goal.minOdds || 1.3) && bet.odds <= (goal.maxOdds || 5)
+          );
+          // Use goalId-matched bets first, fallback to odds-matched
+          const allMatchingBets = goalBets.length > 0 ? goalBets : oddsMatchedBets;
           const minOdds = goal.minOdds || 1.3, maxOdds = goal.maxOdds || 5;
           // Always start from scratch: reset all steps, replay bets from step 0
           let currentStepIndex = 0;
@@ -257,13 +264,18 @@ export default function GoalsManager() {
             deviation: undefined,
             completedAt: undefined,
           }));
-          const sortedBets = goalBets.sort((a: Bet, b: Bet) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          const sortedBets = allMatchingBets.sort((a: Bet, b: Bet) => new Date(a.date).getTime() - new Date(b.date).getTime());
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             const cs = steps[currentStepIndex];
             const betAmount = bet.amount || 0, actualWinAmount = Math.round(betAmount * bet.odds * 100) / 100;
-            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= 0.50;
-            if (betAmountMatches && bet.odds >= minOdds && bet.odds <= maxOdds) {
+            // Relax amount matching for explicitly linked bets (50% → 80% tolerance)
+            const isExplicitlyLinked = !!bet.goalId;
+            const tol = isExplicitlyLinked ? 0.80 : 0.50;
+            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= tol;
+            // Relax odds check for explicitly linked bets
+            const oddsMatch = isExplicitlyLinked || (bet.odds >= minOdds && bet.odds <= maxOdds);
+            if (betAmountMatches && oddsMatch) {
               const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
               steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
               currentStepIndex++;
