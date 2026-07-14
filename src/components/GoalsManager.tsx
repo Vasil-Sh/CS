@@ -272,6 +272,9 @@ export default function GoalsManager() {
             completedAt: undefined,
           }));
           const sortedBets = allMatchingBets.sort((a: Bet, b: Bet) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          if (import.meta.env.DEV) {
+            console.log(`[Goals] Ladder "${goal.name}": steps=${steps.length}, step0.startAmount=${steps[0]?.startAmount}, bets:`, sortedBets.map(b => ({ amount: b.amount, odds: b.odds, goalId: b.goalId, result: b.result, date: b.date })));
+          }
           sortedBets.forEach((bet: Bet) => {
             if (currentStepIndex >= steps.length) return;
             const cs = steps[currentStepIndex];
@@ -279,9 +282,14 @@ export default function GoalsManager() {
             // Relax amount matching for explicitly linked bets (50% → 80% tolerance)
             const isExplicitlyLinked = !!bet.goalId;
             const tol = isExplicitlyLinked ? 0.80 : 0.50;
-            const betAmountMatches = Math.abs(betAmount - cs.startAmount) / cs.startAmount <= tol;
+            const diff = Math.abs(betAmount - cs.startAmount);
+            const diffPct = cs.startAmount ? diff / cs.startAmount : 999;
+            const betAmountMatches = diffPct <= tol;
             // Relax odds check for explicitly linked bets
             const oddsMatch = isExplicitlyLinked || (bet.odds >= minOdds && bet.odds <= maxOdds);
+            if (import.meta.env.DEV) {
+              console.log(`[Goals]   step=${cs.step} betAmount=${betAmount} stepStart=${cs.startAmount} diffPct=${diffPct.toFixed(2)} tol=${tol} amountMatch=${betAmountMatches} oddsMatch=${oddsMatch} linked=${isExplicitlyLinked}`);
+            }
             if (betAmountMatches && oddsMatch) {
               const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
               steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
