@@ -466,6 +466,15 @@ const BetTableMemo = memo(function BetTable({
       .map((b) => {
         const icon = b.result === "Win" ? "✅" : "✕";
         const odds = Number(b.odds).toFixed(2);
+        const isExpress = isExpressBet(b);
+        if (isExpress) {
+          // Express: show first event as preview
+          const count = getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
+          const events = (b.betType || "").split(" • ").filter(Boolean);
+          const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || (b.match || `Експрес ${count}x`);
+          const totalEvents = events.length || count;
+          return `${icon}~${odds}. Експрес ${totalEvents}x: ${firstEvent}`;
+        }
         const selectedTeam =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
         const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
@@ -480,11 +489,54 @@ const BetTableMemo = memo(function BetTable({
     return filteredCompletedBets.map((b, idx) => {
       const isWin = b.result === "Win";
       const odds = Number(b.odds).toFixed(2);
-      const selectedTeam =
-        b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
-      const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
-      const betDesc = humanizeBetType(rawDesc);
-      const logoUrl = getSelectedTeamLogo(b, selectedTeam);
+      const isExpress = isExpressBet(b);
+
+      // For express bets: show first event's team/selection in the team column, "Експрес Nx" as description
+      let selectedTeam: string;
+      let betDesc: string;
+      let logoUrl: string | null;
+
+      if (isExpress) {
+        const count = getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
+        const events = (b.betType || "").split(" • ").filter(Boolean);
+        const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || (b.match || "");
+        // Parse first event: "FNATIC vs BRUTE | Map 3 Winner: BRUTE @1.5"
+        const parts = firstEvent.split(" | ");
+        const matchPart = parts[0] || "";
+        const selectionPart = parts[1] || "";
+        // Extract team from matchPart: "FNATIC vs BRUTE"
+        const teams = matchPart.split(/\s+vs\s+/i);
+        if (teams.length === 2) {
+          // Try to get the winning team's logo from expressLogos
+          const selection = selectionPart.split(":")[0]?.trim() || "";
+          const selectedFromMatch = selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() || "";
+          selectedTeam = selectedFromMatch || teams[0] || selection;
+          betDesc = `Експрес ${count}x • ${events.length} подій`;
+          // Get logo from expressLogos first event
+          if (b.expressLogos && b.expressLogos.length > 0) {
+            // Determine which team logo to use based on selection
+            const sel = selectedTeam.toLowerCase().trim();
+            const t1 = teams[0].toLowerCase().trim();
+            const t2 = teams[1].toLowerCase().trim();
+            if (t1 && sel === t1) logoUrl = b.expressLogos[0]?.logoTeam1 || null;
+            else if (t2 && sel === t2) logoUrl = b.expressLogos[0]?.logoTeam2 || null;
+            else logoUrl = b.expressLogos[0]?.logoTeam1 || null;
+          } else {
+            logoUrl = getSelectedTeamLogo(b, selectedTeam);
+          }
+        } else {
+          selectedTeam = firstEvent;
+          betDesc = `Експрес ${count}x`;
+          logoUrl = null;
+        }
+      } else {
+        selectedTeam =
+          b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
+        const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
+        betDesc = humanizeBetType(rawDesc);
+        logoUrl = getSelectedTeamLogo(b, selectedTeam);
+      }
+
       const teamPlaceholder = (b.game || "").toLowerCase().startsWith("cs")
         ? "/assets/team-placeholder.svg"
         : "/assets/team-placeholder-dota.svg";
@@ -522,7 +574,7 @@ const BetTableMemo = memo(function BetTable({
             </span>
           </div>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span className="flex-1 text-center text-base text-gray-800 truncate">
+          <span className="flex-1 text-center text-base text-gray-800 truncate" title={betDesc}>
             {betDesc.replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}
           </span>
         </div>
