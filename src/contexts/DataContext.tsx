@@ -78,13 +78,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
             `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`
           )
         );
+        let cleaned = false;
+        const cleanedBets: Bet[] = [];
         for (const lb of localBets) {
           const betId = String(lb.id || "");
           // Only backfill local-only bets (local_xxx IDs) that aren't on the server
-          if (!betId.startsWith("local_")) continue;
-          if (serverIds.has(betId)) continue;
+          if (!betId.startsWith("local_")) {
+            cleanedBets.push(lb);
+            continue;
+          }
+          if (serverIds.has(betId)) {
+            // Already on server — remove from localStorage
+            cleaned = true;
+            continue;
+          }
           const fp = `${String(lb.match || '').trim()}|${parseFloat(String(lb.amount || 0)).toFixed(2)}|${parseFloat(String(lb.profit || 0)).toFixed(2)}|${String(lb.date || '').substring(0, 10)}`;
-          if (serverFingerprints.has(fp)) continue;
+          if (serverFingerprints.has(fp)) {
+            // Already on server by fingerprint — remove from localStorage
+            cleaned = true;
+            continue;
+          }
           // Strip internal/local-only fields before sending to API
           const { id: _id, createdAt, ...rawBet } = lb as any;
           // Normalize riskyTeams: if array of objects → array of names
@@ -95,6 +108,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
           api.post("/bets", cleanBet).catch((e) => {
             console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
           });
+          // Keep the bet in localStorage (it's unique)
+          cleanedBets.push(lb);
+        }
+        // Persist cleaned list (removes already-synced duplicates)
+        if (cleaned) {
+          UserDataService.setUserDataSync(currentUser, "mybets_data", cleanedBets);
         }
       } catch { /* backfill is best-effort */ }
     } catch {
