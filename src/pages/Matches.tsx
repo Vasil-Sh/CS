@@ -675,8 +675,10 @@ export default function Matches() {
         }
         // Show matches immediately — don't wait for CS2
         setMatches(allMatches);
+        setInitialLoading(false);
       } catch (e) {
         if (import.meta.env.DEV) console.warn('[Matches] Dota2 fetch failed:', e);
+        setInitialLoading(false);
       }
 
       // Fetch CS2 separately (slower external API)

@@ -72,6 +72,7 @@ async function request<T>(
   path: string,
   options: RequestInit = {},
   retry = true,
+  timeoutMs = 20000,
 ): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -83,9 +84,9 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Add timeout via AbortController (20s default)
+  // Add timeout via AbortController (configurable, 20s default)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -124,25 +125,25 @@ export { ApiError } from "./matchTypes";
 // ═══════════════════════════════════════════
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
+  get: <T>(path: string, timeoutMs?: number) => request<T>(path, undefined, true, timeoutMs),
 
-  post: <T>(path: string, body?: unknown) =>
+  post: <T>(path: string, body?: unknown, timeoutMs?: number) =>
     request<T>(path, {
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
-    }),
+    }, true, timeoutMs),
 
-  put: <T>(path: string, body?: unknown) =>
+  put: <T>(path: string, body?: unknown, timeoutMs?: number) =>
     request<T>(path, {
       method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
-    }),
+    }, true, timeoutMs),
 
-  patch: <T>(path: string, body?: unknown) =>
+  patch: <T>(path: string, body?: unknown, timeoutMs?: number) =>
     request<T>(path, {
       method: "PATCH",
       body: body ? JSON.stringify(body) : undefined,
-    }),
+    }, true, timeoutMs),
 
-  delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  delete: <T>(path: string, timeoutMs?: number) => request<T>(path, { method: "DELETE" }, true, timeoutMs),
 };

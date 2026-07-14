@@ -123,7 +123,8 @@ export async function fetchDota2Matches(
     const path = forceRefresh
       ? "/v1/dota2-matches?refresh=true"
       : "/v1/dota2-matches";
-    const data = await api.get<TipsGgApiMatch[]>(path);
+    // Use 120s timeout — first Puppeteer scrape can take ~60s
+    const data = await api.get<TipsGgApiMatch[]>(path, 120000);
     const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
     if (matches.length > 0) {
       setCache(matches);
