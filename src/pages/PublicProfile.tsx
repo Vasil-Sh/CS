@@ -201,43 +201,45 @@ export default function PublicProfile() {
             </div>
 
             {/* Numbers */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-center">
+              <div className="grid grid-cols-2 gap-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Всього ставок</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Всього ставок</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Виграші / Програші</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Середній коеф.</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Виграші / Програші</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Середній коеф.</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                  <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Активні цілі</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Активні цілі</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
+                  </div>
                 </div>
               </div>
             </div>
