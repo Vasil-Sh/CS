@@ -296,31 +296,56 @@ export default function PublicProfile() {
                 <p className="text-xs text-gray-300 mt-1">Тут з'являться останні 5 ставок</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {data.recentBets.map((bet, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-gray-100 transition-colors">
-                    <img
-                      src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
-                      alt={bet.game}
-                      className="h-8 w-8 rounded-lg object-contain bg-white p-1 border border-gray-200 flex-shrink-0 mt-0.5"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 mb-0.5">{bet.match}</p>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                        <span>{bet.game}</span>
-                        <span>·</span>
-                        <span>{bet.date}</span>
-                        <span>·</span>
-                        <span>Коеф. {bet.odds}</span>
-                        <span>·</span>
-                        <span className={`font-medium ${bet.result === "Win" ? "text-green-500" : bet.result === "Loss" ? "text-red-400" : "text-gray-400"}`}>
-                          {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікування"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
+                      <th className="text-left py-2.5 pr-3 font-medium">Дата</th>
+                      <th className="text-left py-2.5 pr-3 font-medium">Матч</th>
+                      <th className="text-left py-2.5 pr-3 font-medium hidden sm:table-cell">Тип</th>
+                      <th className="text-right py-2.5 pr-3 font-medium">Коеф.</th>
+                      <th className="text-right py-2.5 pr-3 font-medium">Профіт</th>
+                      <th className="text-right py-2.5 font-medium">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {data.recentBets.map((bet, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="py-2.5 pr-3 text-gray-500 whitespace-nowrap">{bet.date}</td>
+                        <td className="py-2.5 pr-3 max-w-[200px]">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
+                              alt={bet.game}
+                              className="h-6 w-6 rounded-md object-contain bg-white p-0.5 border border-gray-200 flex-shrink-0 hidden sm:block"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
+                              <p className="text-xs text-gray-400 sm:hidden">{bet.game}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2.5 pr-3 text-gray-500 hidden sm:table-cell">{bet.game}</td>
+                        <td className="py-2.5 pr-3 text-right tabular-nums text-gray-900 font-medium">
+                          {bet.odds}
+                        </td>
+                        <td className={`py-2.5 pr-3 text-right tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
+                          {bet.result === "Win" ? `+${bet.profit}` : bet.result === "Loss" ? `${bet.profit}` : "—"} ₴
+                        </td>
+                        <td className="py-2.5 text-right whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                            bet.result === "Win" ? "bg-green-50 text-green-600" :
+                            bet.result === "Loss" ? "bg-red-50 text-red-500" :
+                            "bg-gray-100 text-gray-500"
+                          }`}>
+                            {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікується"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
