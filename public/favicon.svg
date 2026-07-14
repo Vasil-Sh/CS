@@ -1,20 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e"/>
-      <stop offset="100%" style="stop-color:#16213e"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#447afc"/>
-      <stop offset="100%" style="stop-color:#6c9cff"/>
-    </linearGradient>
-  </defs>
-  <!-- Rounded square background -->
-  <rect width="512" height="512" rx="96" ry="96" fill="url(#bg)"/>
-  <!-- Stylized "M" letter with analytics/trend line -->
-  <path d="M128 368 L128 176 L216 288 L256 224 L296 288 L384 176 L384 368" 
-        fill="none" stroke="url(#accent)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Small crosshair dot representing IQ/precision -->
-  <circle cx="256" cy="160" r="24" fill="url(#accent)" opacity="0.9"/>
-  <circle cx="256" cy="160" r="10" fill="#1a1a2e"/>
+  <!-- Dark rounded square background — same as sidebar logo -->
+  <rect width="512" height="512" rx="112" ry="112" fill="#1a1a2e"/>
+  <!-- White TrendingUp icon -->
+  <polyline points="120,340 260,200 340,280 420,120" 
+            fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="310,120 420,120 420,230" 
+            fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
