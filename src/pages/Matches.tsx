@@ -666,34 +666,31 @@ export default function Matches() {
       if (forceRefresh) clearDota2Cache();
       const allMatches: Match[] = [];
 
-      // Fetch CS2 and Dota2 in PARALLEL — don't let CS2 hang block Dota2
-      const [csResult, dotaResult] = await Promise.allSettled([
-        fetchTodaysAndUpcomingMatches(),
-        fetchDota2Matches(forceRefresh),
-      ]);
-
-      if (csResult.status === "fulfilled" && csResult.value?.length > 0) {
-        allMatches.push(
-          ...csResult.value.map((m) => apiMatchToMatch(m, "CS2")),
-        );
-      } else if (csResult.status === "rejected") {
-        if (import.meta.env.DEV)
-          console.warn("[Matches] CS2 API error:", csResult.reason);
+      // Fetch Dota2 FIRST (fast, local) so it appears immediately
+      try {
+        const dotaMatches = await fetchDota2Matches(forceRefresh);
+        if (import.meta.env.DEV) console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
+        if (dotaMatches.length > 0) {
+          allMatches.push(...dotaMatches.map((m) => dota2ApiMatchToMatch(m)));
+        }
+        // Show matches immediately — don't wait for CS2
+        setMatches(allMatches);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[Matches] Dota2 fetch failed:', e);
       }
 
-      if (dotaResult.status === "fulfilled" && dotaResult.value?.length > 0) {
-        allMatches.push(...dotaResult.value.map(dota2ApiMatchToMatch));
-        if (import.meta.env.DEV)
-          console.log(
-            `[Matches] Loaded ${dotaResult.value.length} Dota2 matches`,
-          );
-      } else if (dotaResult.status === "rejected") {
-        if (import.meta.env.DEV)
-          console.warn("[Matches] Dota2 API error:", dotaResult.reason);
+      // Fetch CS2 separately (slower external API)
+      try {
+        const csMatches = await fetchTodaysAndUpcomingMatches();
+        if (import.meta.env.DEV) console.log(`[Matches] Loaded ${csMatches.length} CS2 matches`);
+        allMatches.push(...csMatches.map((m) => apiMatchToMatch(m, "CS2")));
+        setMatches([...allMatches]);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[Matches] CS2 fetch failed:', e);
       }
 
       if (allMatches.length > 0) {
-        setMatches(allMatches);
+        setMatches([...allMatches]);
       }
       setApiError(null);
     } catch (error) {
@@ -957,27 +954,16 @@ export default function Matches() {
       toast("🔄 Завантаження матчів...", { description: "Оновлення з API" });
       const allMatches: Match[] = [];
 
-      // Fetch CS2 and Dota2 in PARALLEL
-      const [csResult, dotaResult] = await Promise.allSettled([
-        fetchTodaysAndUpcomingMatches(),
-        fetchDota2Matches(true),
-      ]);
+      // Fetch Dota2 first (fast), then CS2
+      try {
+        const dotaMatches = await fetchDota2Matches(true);
+        if (dotaMatches.length > 0) allMatches.push(...dotaMatches.map(dota2ApiMatchToMatch));
+      } catch { /* ignore */ }
 
-      if (csResult.status === "fulfilled" && csResult.value?.length > 0) {
-        allMatches.push(
-          ...csResult.value.map((m) => apiMatchToMatch(m, "CS2")),
-        );
-      } else if (csResult.status === "rejected") {
-        if (import.meta.env.DEV)
-          console.warn("[Matches] CS2 refresh error:", csResult.reason);
-      }
-
-      if (dotaResult.status === "fulfilled" && dotaResult.value?.length > 0) {
-        allMatches.push(...dotaResult.value.map(dota2ApiMatchToMatch));
-      } else if (dotaResult.status === "rejected") {
-        if (import.meta.env.DEV)
-          console.warn("[Matches] Dota2 refresh error:", dotaResult.reason);
-      }
+      try {
+        const csMatches = await fetchTodaysAndUpcomingMatches();
+        if (csMatches.length > 0) allMatches.push(...csMatches.map((m) => apiMatchToMatch(m, "CS2")));
+      } catch { /* ignore */ }
 
       if (allMatches.length > 0) {
         setMatches(allMatches);
