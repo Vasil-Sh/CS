@@ -301,39 +301,29 @@ export default function PublicProfile() {
                   <thead>
                     <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
                       <th className="text-left py-2.5 pr-3 font-medium">Дата</th>
-                      <th className="text-left py-2.5 pr-3 font-medium">Матч</th>
-                      <th className="text-left py-2.5 pr-3 font-medium hidden sm:table-cell">Тип</th>
-                      <th className="text-right py-2.5 pr-3 font-medium">Коеф.</th>
-                      <th className="text-right py-2.5 pr-3 font-medium">Профіт</th>
-                      <th className="text-right py-2.5 font-medium">Статус</th>
+                      <th className="text-left py-2.5 px-3 font-medium border-l border-gray-100">Матч</th>
+                      <th className="text-left py-2.5 px-3 font-medium border-l border-gray-100 hidden sm:table-cell">Тип</th>
+                      <th className="text-right py-2.5 px-3 font-medium border-l border-gray-100">Коеф.</th>
+                      <th className="text-right py-2.5 px-3 font-medium border-l border-gray-100">Профіт</th>
+                      <th className="text-right py-2.5 pl-3 font-medium border-l border-gray-100">Статус</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.recentBets.map((bet, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="py-2.5 pr-3 text-gray-500 whitespace-nowrap">{bet.date}</td>
-                        <td className="py-2.5 pr-3 max-w-[200px]">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
-                              alt={bet.game}
-                              className="h-6 w-6 rounded-md object-contain bg-white p-0.5 border border-gray-200 flex-shrink-0 hidden sm:block"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                            />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
-                              <p className="text-xs text-gray-400 sm:hidden">{bet.game}</p>
-                            </div>
-                          </div>
+                        <td className="py-2.5 px-3 border-l border-gray-100 max-w-[200px]">
+                          <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
+                          <p className="text-xs text-gray-400 sm:hidden">{bet.game}</p>
                         </td>
-                        <td className="py-2.5 pr-3 text-gray-500 hidden sm:table-cell">{bet.game}</td>
-                        <td className="py-2.5 pr-3 text-right tabular-nums text-gray-900 font-medium">
+                        <td className="py-2.5 px-3 border-l border-gray-100 text-gray-500 hidden sm:table-cell">{bet.game}</td>
+                        <td className="py-2.5 px-3 border-l border-gray-100 text-right tabular-nums text-gray-900 font-medium">
                           {bet.odds}
                         </td>
-                        <td className={`py-2.5 pr-3 text-right tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
+                        <td className={`py-2.5 px-3 border-l border-gray-100 text-right tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
                           {bet.result === "Win" ? `+${bet.profit}` : bet.result === "Loss" ? `${bet.profit}` : "—"} ₴
                         </td>
-                        <td className="py-2.5 text-right whitespace-nowrap">
+                        <td className="py-2.5 pl-3 border-l border-gray-100 text-right whitespace-nowrap">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
                             bet.result === "Win" ? "bg-green-50 text-green-600" :
                             bet.result === "Loss" ? "bg-red-50 text-red-500" :
