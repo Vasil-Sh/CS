@@ -78,12 +78,12 @@ export default function PublicProfile() {
     return (
       <div className="min-h-screen bg-[#f3f3f3]">
         <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-          <div className="max-w-4xl mx-auto px-6 py-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
-              <User className="h-6 w-6 text-white" strokeWidth={1.5} />
+          <div className="max-w-[1064px] mx-auto px-6 py-6 flex items-center gap-4">
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+              <User className="h-7 w-7 text-white" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Профіль не знайдено</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">Профіль не знайдено</h1>
               <p className="text-sm text-gray-500">{error || "Цей користувач ще не поділився своєю статистикою"}</p>
             </div>
           </div>
@@ -102,13 +102,13 @@ export default function PublicProfile() {
     <div className="min-h-screen bg-[#f3f3f3]">
       {/* Header — white block matching system style */}
       <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div className="max-w-[1064px] mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
-              <User className="h-6 w-6 text-white" strokeWidth={1.5} />
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+              <User className="h-7 w-7 text-white" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">@{data.username}</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">@{data.username}</h1>
               <p className="text-sm text-gray-500">Публічний профіль беттора</p>
             </div>
           </div>
@@ -123,48 +123,48 @@ export default function PublicProfile() {
       </div>
 
       {/* KPI Cards — wrapped in stone container like analytics */}
-      <div className="max-w-4xl mx-auto px-6 pt-6 pb-6 space-y-6">
+      <div className="max-w-[1064px] mx-auto px-6 pt-6 pb-6 space-y-6">
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Wallet className="h-4 w-4 text-primary" strokeWidth={1.5} />
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
-                <span className="text-xs text-gray-500">Банк</span>
+                <span className="text-sm text-gray-500">Банк</span>
               </div>
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900">
                 <NumberTicker value={Math.round(stats.currentBank)} /> ₴
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-                  <DollarSign className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-green-500" strokeWidth={1.5} />
                 </div>
-                <span className="text-xs text-gray-500">Профіт</span>
+                <span className="text-sm text-gray-500">Профіт</span>
               </div>
-              <div className={`text-xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
+              <div className={`text-2xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
                 {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <Target className="h-4 w-4 text-amber-500" strokeWidth={1.5} />
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
                 </div>
-                <span className="text-xs text-gray-500">Вінрейт</span>
+                <span className="text-sm text-gray-500">Вінрейт</span>
               </div>
-              <div className="text-xl font-bold text-gray-900">{stats.winRate}%</div>
+              <div className="text-2xl font-bold text-gray-900">{stats.winRate}%</div>
             </div>
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
                 </div>
-                <span className="text-xs text-gray-500">ROI</span>
+                <span className="text-sm text-gray-500">ROI</span>
               </div>
-              <div className={`text-xl font-bold ${stats.roi >= 0 ? "text-green-600" : "text-red-500"}`}>
+              <div className={`text-2xl font-bold ${stats.roi >= 0 ? "text-green-600" : "text-red-500"}`}>
                 {stats.roi >= 0 ? "+" : ""}{stats.roi}%
               </div>
             </div>
@@ -176,15 +176,15 @@ export default function PublicProfile() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* ROI Circle */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center">
-              <span className="text-sm text-gray-500 mb-4">ROI</span>
+              <span className="text-base text-gray-500 mb-4">ROI</span>
               <AnimatedCircularProgressBar
                 max={100} min={0}
                 value={Math.abs(stats.roi) >= 100 ? 98 : Math.abs(stats.roi)}
                 gaugePrimaryColor={stats.roi >= 0 ? "#10B981" : "#EF4444"}
                 gaugeSecondaryColor="#E5E7EB"
-                className="!w-28 !h-28"
+                className="!w-32 !h-32"
               />
-              <span className={`text-2xl font-bold mt-3 ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+              <span className={`text-3xl font-bold mt-4 ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
                 {stats.roi >= 0 ? "+" : ""}{stats.roi}%
               </span>
               <div className="grid grid-cols-2 gap-2 mt-4 w-full">
@@ -202,43 +202,43 @@ export default function PublicProfile() {
             </div>
 
             {/* Numbers */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-5">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <BarChart3 className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Всього ставок</p>
-                  <p className="text-lg font-bold text-gray-900">{stats.totalBets}</p>
+                  <p className="text-sm text-gray-500">Всього ставок</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-green-500" strokeWidth={1.5} />
+                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Виграші / Програші</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-sm text-gray-500">Виграші / Програші</p>
+                  <p className="text-xl font-bold text-gray-900">
                     <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-sky-500" strokeWidth={1.5} />
+                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Середній коеф.</p>
-                  <p className="text-lg font-bold text-gray-900">{stats.avgOdds}</p>
+                  <p className="text-sm text-gray-500">Середній коеф.</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
-                  <Target className="h-4 w-4 text-violet-500" strokeWidth={1.5} />
+                <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Активні цілі</p>
-                  <p className="text-lg font-bold text-gray-900">{stats.activeGoals}</p>
+                  <p className="text-sm text-gray-500">Активні цілі</p>
+                  <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
                 </div>
               </div>
             </div>
@@ -246,8 +246,8 @@ export default function PublicProfile() {
             {/* Recent bets */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-semibold text-gray-900">Останні ставки</span>
+                <Calendar className="h-5 w-5 text-gray-500" />
+                <span className="text-base font-semibold text-gray-900">Останні ставки</span>
               </div>
               {data.recentBets.length === 0 ? (
                 <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
@@ -302,7 +302,7 @@ export default function PublicProfile() {
       </div>
 
       {/* Footer */}
-      <div className="text-center text-sm text-gray-400 pb-8 pt-4">
+      <div className="text-center text-base text-gray-400 pb-8 pt-4">
         Статистика оновлюється автоматично ·{" "}
         <Link to="/" className="text-primary hover:underline">
           MatchIQ
