@@ -272,29 +272,35 @@ export default function PublicProfile() {
           </div>
         </div>
 
-        {/* Monthly profit — wrapped in stone container */}
+                {/* Monthly profit — clean table */}
         {data.monthlyProfit.length > 0 && (
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
-              <div className="flex items-end gap-2 h-32">
-                {data.monthlyProfit.map((m) => {
-                  const maxAbs = Math.max(...data.monthlyProfit.map(x => Math.abs(x.profit)), 1);
-                  const h = Math.max(4, Math.round((Math.abs(m.profit) / maxAbs) * 100));
-                  return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-                      <span className="text-[10px] text-gray-500 tabular-nums">
-                        {m.profit >= 0 ? "+" : ""}{Math.round(m.profit)} ₴
-                      </span>
-                      <div
-                        className={`w-full rounded-t-md ${m.profit >= 0 ? "bg-green-400" : "bg-red-400"}`}
-                        style={{ height: `${h}%` }}
-                      />
-                      <span className="text-[10px] text-gray-400 truncate w-full text-center">{fmtMonth(m.month)}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
+                    <th className="text-left py-2 font-medium">Місяць</th>
+                    <th className="text-right py-2 font-medium">Прибуток</th>
+                    <th className="text-right py-2 font-medium">Результат</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.monthlyProfit.map((m) => (
+                    <tr key={m.month} className="hover:bg-gray-50 transition-colors">
+                      <td className="py-2.5 font-medium text-gray-900">{fmtMonth(m.month)}</td>
+                      <td className={`py-2.5 text-right tabular-nums font-semibold ${m.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
+                        {m.profit >= 0 ? "+" : ""}{Math.round(m.profit).toLocaleString("uk-UA")} ₴
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${m.profit >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                          {m.profit >= 0 ? "▲ Прибуток" : "▼ Збиток"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
