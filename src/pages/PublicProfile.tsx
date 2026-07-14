@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   TrendingUp, DollarSign, Target, Trophy, BarChart3,
-  Zap, Calendar, Loader2, Share2, ArrowLeft, Wallet,
+  Zap, Calendar, Loader2, Share2, Wallet, User,
 } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
@@ -76,15 +76,20 @@ export default function PublicProfile() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] flex flex-col items-center justify-center gap-4 p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {error || "Профіль не знайдено"}
-          </h1>
-          <p className="text-gray-500 mb-4">Цей користувач ще не поділився своєю статистикою</p>
-          <Link to="/" className="text-primary font-medium hover:underline">
-            ← На головну
-          </Link>
+      <div className="min-h-screen bg-[#f3f3f3]">
+        <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="max-w-4xl mx-auto px-6 py-6 flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+              <User className="h-6 w-6 text-white" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Профіль не знайдено</h1>
+              <p className="text-sm text-gray-500">{error || "Цей користувач ще не поділився своєю статистикою"}</p>
+            </div>
+          </div>
+        </div>
+        <div className="text-center py-20">
+          <Link to="/" className="text-primary font-medium hover:underline">← На головну</Link>
         </div>
       </div>
     );
@@ -95,13 +100,13 @@ export default function PublicProfile() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3]">
-      {/* Header */}
-      <div className="max-w-4xl mx-auto px-6 pt-8 pb-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Header — white block matching system style */}
+      <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-gray-400 hover:text-gray-600 transition-colors">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
+              <User className="h-6 w-6 text-white" strokeWidth={1.5} />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">@{data.username}</h1>
               <p className="text-sm text-gray-500">Публічний профіль беттора</p>
@@ -118,7 +123,7 @@ export default function PublicProfile() {
       </div>
 
       {/* KPI Cards — wrapped in stone container like analytics */}
-      <div className="max-w-4xl mx-auto px-6 pb-6 space-y-6">
+      <div className="max-w-4xl mx-auto px-6 pt-6 pb-6 space-y-6">
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
