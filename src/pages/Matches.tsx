@@ -661,16 +661,15 @@ export default function Matches() {
     });
   };
 
-  const loadMatchesFromApi = async () => {
+  const loadMatchesFromApi = async (forceRefresh = false) => {
     try {
-      // Clear stale Dota2 cache on mount — ensures fresh matches every page load
-      clearDota2Cache();
+      if (forceRefresh) clearDota2Cache();
       const allMatches: Match[] = [];
 
       // Fetch CS2 and Dota2 in PARALLEL — don't let CS2 hang block Dota2
       const [csResult, dotaResult] = await Promise.allSettled([
         fetchTodaysAndUpcomingMatches(),
-        fetchDota2Matches(true),
+        fetchDota2Matches(forceRefresh),
       ]);
 
       if (csResult.status === "fulfilled" && csResult.value?.length > 0) {
