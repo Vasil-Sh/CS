@@ -1004,38 +1004,35 @@ export default function CS2BettingForm({
         ]);
       };
       try {
-        const created = await UserDataService.createBet({
+        const bodyToSend: Record<string, unknown> = {
           match: record.match,
           team1: record.team1,
           team2: record.team2,
           betType: record.betType,
           odds: record.odds,
           amount: record.amount,
-          stake: isNaN(parseFloat(formData.stake))
-            ? undefined
-            : parseFloat(formData.stake),
           date: record.date,
           result: record.result,
-          profit: record.profit,
-          strategy: record.strategy,
+          profit: record.profit || 0,
+          strategy: record.strategy || "",
           format: record.format,
           game: record.game,
           currency: record.currency,
-          originalAmount: isNaN(record.originalAmount)
-            ? undefined
-            : record.originalAmount,
-          exchangeRate: record.exchangeRate,
-          roi: record.roi,
-          goalId: record.goalId,
-          matchUrl: record.matchUrl,
-          winProbability: record.winProbability,
-          notes: record.notes,
+          notes: record.notes || "",
+          goalId: record.goalId || "",
+          matchUrl: record.matchUrl || "",
+          tournament: record.tournament || "",
           riskyTeams: record.riskyTeams.map((t) => t.name),
-          tournament: record.tournament,
-          logoTeam1: record.logoTeam1,
-          logoTeam2: record.logoTeam2,
-          expressLogos: record.expressLogos,
-        } as Parameters<typeof UserDataService.createBet>[0]);
+        };
+        const stakeVal = parseFloat(formData.stake);
+        if (!isNaN(stakeVal) && stakeVal > 0) bodyToSend.stake = stakeVal;
+        if (!isNaN(record.originalAmount) && record.originalAmount > 0) bodyToSend.originalAmount = record.originalAmount;
+        if (record.exchangeRate !== null && record.exchangeRate !== undefined) bodyToSend.exchangeRate = record.exchangeRate;
+        if (record.winProbability !== undefined) bodyToSend.winProbability = record.winProbability;
+        if (record.logoTeam1) bodyToSend.logoTeam1 = record.logoTeam1;
+        if (record.logoTeam2) bodyToSend.logoTeam2 = record.logoTeam2;
+
+        const created = await UserDataService.createBet(bodyToSend as Parameters<typeof UserDataService.createBet>[0]);
         // Cache locally so "Останні записи" reads instantly
         localFallback(created.id);
       } catch (err) {
