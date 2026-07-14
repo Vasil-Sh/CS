@@ -275,28 +275,43 @@ export default function GoalsManager() {
           if (import.meta.env.DEV) {
             console.log(`[Goals] Ladder "${goal.name}": steps=${steps.length}, step0.startAmount=${steps[0]?.startAmount}, bets:`, sortedBets.map(b => ({ amount: b.amount, odds: b.odds, goalId: b.goalId, result: b.result, date: b.date })));
           }
-          sortedBets.forEach((bet: Bet) => {
-            if (currentStepIndex >= steps.length) return;
-            const cs = steps[currentStepIndex];
-            const betAmount = bet.amount || 0, actualWinAmount = Math.round(betAmount * bet.odds * 100) / 100;
-            // Relax amount matching for explicitly linked bets (50% → 80% tolerance)
-            const isExplicitlyLinked = !!bet.goalId;
-            const tol = isExplicitlyLinked ? 0.80 : 0.50;
-            const diff = Math.abs(betAmount - cs.startAmount);
-            const diffPct = cs.startAmount ? diff / cs.startAmount : 999;
-            const betAmountMatches = diffPct <= tol;
-            // Relax odds check for explicitly linked bets
-            const oddsMatch = isExplicitlyLinked || (bet.odds >= minOdds && bet.odds <= maxOdds);
-            if (import.meta.env.DEV) {
-              console.log(`[Goals]   step=${cs.step} betAmount=${betAmount} stepStart=${cs.startAmount} diffPct=${diffPct.toFixed(2)} tol=${tol} amountMatch=${betAmountMatches} oddsMatch=${oddsMatch} linked=${isExplicitlyLinked}`);
+          // Step-driven: for each ladder step, find the first unused bet (by date) that matches.
+          // Bets that don't match step N stay available for step N+1.
+          const usedBetIndices = new Set<number>();
+          for (let stepIdx = 0; stepIdx < steps.length; stepIdx++) {
+            const cs = steps[stepIdx];
+            let foundBet: Bet | null = null;
+            let foundIdx = -1;
+            for (let bi = 0; bi < sortedBets.length; bi++) {
+              if (usedBetIndices.has(bi)) continue;
+              const bet = sortedBets[bi];
+              const betAmount = bet.amount || 0;
+              const isExplicitlyLinked = !!bet.goalId;
+              const tol = isExplicitlyLinked ? 0.80 : 0.50;
+              const diff = Math.abs(betAmount - cs.startAmount);
+              const diffPct = cs.startAmount ? diff / cs.startAmount : 999;
+              const betAmountMatches = diffPct <= tol;
+              const oddsMatch = isExplicitlyLinked || (bet.odds >= minOdds && bet.odds <= maxOdds);
+              if (import.meta.env.DEV) {
+                console.log(`[Goals]   step=${cs.step} betAmount=${betAmount} stepStart=${cs.startAmount} diffPct=${diffPct.toFixed(2)} tol=${tol} amountMatch=${betAmountMatches} oddsMatch=${oddsMatch} linked=${isExplicitlyLinked}`);
+              }
+              if (betAmountMatches && oddsMatch) {
+                foundBet = bet;
+                foundIdx = bi;
+                break;
+              }
             }
-            if (betAmountMatches && oddsMatch) {
-              const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
-              steps[currentStepIndex] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
-              currentStepIndex++;
-              if (currentStepIndex < steps.length) steps[currentStepIndex] = { ...steps[currentStepIndex], startAmount: actualWinAmount, minPlannedAmount: Math.round(actualWinAmount * minOdds * 100) / 100, maxPlannedAmount: Math.round(actualWinAmount * maxOdds * 100) / 100, status: 'current' };
+            if (!foundBet) break;
+            usedBetIndices.add(foundIdx);
+            const bet = foundBet;
+            const actualWinAmount = Math.round((bet.amount || 0) * bet.odds * 100) / 100;
+            const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
+            steps[stepIdx] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
+            currentStepIndex = stepIdx + 1;
+            if (stepIdx + 1 < steps.length) {
+              steps[stepIdx + 1] = { ...steps[stepIdx + 1], startAmount: actualWinAmount, minPlannedAmount: Math.round(actualWinAmount * minOdds * 100) / 100, maxPlannedAmount: Math.round(actualWinAmount * maxOdds * 100) / 100, status: 'current' };
             }
-          });
+          }
           const prevActual = currentStepIndex > 0 ? steps[currentStepIndex - 1]?.actualAmount : undefined;
           const currentBank = prevActual != null ? prevActual : (goal.startAmount || 0);
           const remainingSteps = calculateRemainingSteps(currentBank, goal.targetLadderAmount || 100000, minOdds);
