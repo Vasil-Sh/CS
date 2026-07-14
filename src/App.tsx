@@ -34,7 +34,7 @@ function PageLoader() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <HelmetProvider>
       <Router
@@ -192,5 +192,3 @@ function App() {
     </HelmetProvider>
   );
 }
-
-export default App;
