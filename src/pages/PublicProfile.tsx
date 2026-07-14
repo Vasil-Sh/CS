@@ -258,18 +258,18 @@ export default function PublicProfile() {
                   <thead>
                     <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
                       <th className="text-left py-2 pr-4 font-medium">Місяць</th>
-                      <th className="text-right py-2 px-4 font-medium border-l border-gray-100">Прибуток</th>
-                      <th className="text-right py-2 pl-4 font-medium border-l border-gray-100">Результат</th>
+                      <th className="text-center py-2 px-4 font-medium border-l border-gray-100">Прибуток</th>
+                      <th className="text-center py-2 pl-4 font-medium border-l border-gray-100">Результат</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.monthlyProfit.map((m) => (
                       <tr key={m.month} className="hover:bg-gray-50 transition-colors">
                         <td className="py-2.5 pr-4 font-medium text-gray-900">{fmtMonth(m.month)}</td>
-                        <td className={`py-2.5 px-4 border-l border-gray-100 text-right tabular-nums font-semibold ${m.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
+                        <td className={`py-2.5 px-4 border-l border-gray-100 text-center tabular-nums font-semibold ${m.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
                           {m.profit >= 0 ? "+" : ""}{Math.round(m.profit).toLocaleString("uk-UA")} ₴
                         </td>
-                        <td className="py-2.5 pl-4 border-l border-gray-100 text-right">
+                        <td className="py-2.5 pl-4 border-l border-gray-100 text-center">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${m.profit >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
                             {m.profit >= 0 ? "▲ Прибуток" : "▼ Збиток"}
                           </span>
