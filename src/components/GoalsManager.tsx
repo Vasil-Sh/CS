@@ -275,13 +275,15 @@ export default function GoalsManager() {
           if (import.meta.env.DEV) {
             console.log(`[Goals] Ladder "${goal.name}": steps=${steps.length}, step0.startAmount=${steps[0]?.startAmount}, bets:`, sortedBets.map(b => ({ amount: b.amount, odds: b.odds, goalId: b.goalId, result: b.result, date: b.date })));
           }
-          // Step-driven: for each ladder step, find the first unused bet (by date) that matches.
-          // Bets that don't match step N stay available for step N+1.
+          // Step-driven: for each ladder step, find the BEST unused bet (by diffPct) that matches.
+          // Picking the closest amount match prevents regressions (e.g. step 2=650 gets 1118 bet,
+          // then step 3=1700 gets 650 bet → progression goes backwards).
           const usedBetIndices = new Set<number>();
           for (let stepIdx = 0; stepIdx < steps.length; stepIdx++) {
             const cs = steps[stepIdx];
-            let foundBet: Bet | null = null;
-            let foundIdx = -1;
+            let bestBet: Bet | null = null;
+            let bestIdx = -1;
+            let bestDiffPct = Infinity;
             for (let bi = 0; bi < sortedBets.length; bi++) {
               if (usedBetIndices.has(bi)) continue;
               const bet = sortedBets[bi];
@@ -295,15 +297,15 @@ export default function GoalsManager() {
               if (import.meta.env.DEV) {
                 console.log(`[Goals]   step=${cs.step} betAmount=${betAmount} stepStart=${cs.startAmount} diffPct=${diffPct.toFixed(2)} tol=${tol} amountMatch=${betAmountMatches} oddsMatch=${oddsMatch} linked=${isExplicitlyLinked}`);
               }
-              if (betAmountMatches && oddsMatch) {
-                foundBet = bet;
-                foundIdx = bi;
-                break;
+              if (betAmountMatches && oddsMatch && diffPct < bestDiffPct) {
+                bestBet = bet;
+                bestIdx = bi;
+                bestDiffPct = diffPct;
               }
             }
-            if (!foundBet) break;
-            usedBetIndices.add(foundIdx);
-            const bet = foundBet;
+            if (!bestBet) break;
+            usedBetIndices.add(bestIdx);
+            const bet = bestBet;
             const actualWinAmount = Math.round((bet.amount || 0) * bet.odds * 100) / 100;
             const minPlanned = cs.minPlannedAmount || Math.round(cs.startAmount * minOdds * 100) / 100;
             steps[stepIdx] = { ...cs, status: 'completed', completedAt: bet.date, actualAmount: actualWinAmount, actualOdds: bet.odds, deviation: actualWinAmount - minPlanned };
