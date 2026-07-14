@@ -65,14 +65,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // Backfill: push localStorage-only bets to the server
       try {
         const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
-        // fetchBets already merges local → API. Compare raw API to find truly missing bets.
         const rawApiBets = await api.get<{ data?: Array<{ id: number | string }> }>("/bets").catch(() => ({ data: [] }));
         const rawData = (rawApiBets as any).data || rawApiBets || [];
         const serverIds = new Set(rawData.map((b: any) => String(b.id)));
         for (const lb of localBets) {
-          if (!serverIds.has(String(lb.id))) {
-            api.post("/bets", lb).catch(() => {});
-          }
+          const betId = String(lb.id || "");
+          // Already on server
+          if (serverIds.has(betId)) continue;
+          // Strip internal/local-only fields before sending to API
+          const { id: _id, createdAt, ...rawBet } = lb as any;
+          // Normalize riskyTeams: if array of objects → array of names
+          const riskyTeams = Array.isArray(rawBet.riskyTeams)
+            ? rawBet.riskyTeams.map((t: any) => typeof t === "string" ? t : t?.name || "")
+            : [];
+          const cleanBet = { ...rawBet, riskyTeams, id: undefined };
+          api.post("/bets", cleanBet).catch((e) => {
+            console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
+          });
         }
       } catch { /* backfill is best-effort */ }
     } catch {
