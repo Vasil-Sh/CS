@@ -9,7 +9,6 @@ import {
   TrendingUp, DollarSign, Target, Trophy, BarChart3,
   Zap, Calendar, Loader2, Share2, Wallet, User,
 } from "lucide-react";
-import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { toast } from "sonner";
 
@@ -134,7 +133,7 @@ export default function PublicProfile() {
                 <span className="text-sm text-gray-500">Банк</span>
               </div>
               <div className="text-2xl font-bold text-gray-900">
-                <NumberTicker value={Math.round(stats.currentBank)} /> ₴
+                {Math.round(stats.currentBank).toLocaleString("uk-UA")} ₴
               </div>
             </div>
             <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -145,7 +144,7 @@ export default function PublicProfile() {
                 <span className="text-sm text-gray-500">Профіт</span>
               </div>
               <div className={`text-2xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
-                {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
+                {isUp ? "+" : ""}{Math.round(stats.totalProfit).toLocaleString("uk-UA")} ₴
               </div>
             </div>
             <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -190,12 +189,12 @@ export default function PublicProfile() {
               <div className="grid grid-cols-2 gap-2 mt-4 w-full">
                 <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
                   <div className="text-[10px] text-gray-400 uppercase">Вкладено</div>
-                  <div className="text-sm font-bold"><NumberTicker value={Math.round(stats.totalStaked)} /> ₴</div>
+                  <div className="text-sm font-bold">{Math.round(stats.totalStaked).toLocaleString("uk-UA")} ₴</div>
                 </div>
                 <div className={`rounded-xl px-3 py-2 text-center ${isUp ? "bg-emerald-50" : "bg-red-50"}`}>
                   <div className={`text-[10px] uppercase ${isUp ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
                   <div className={`text-sm font-bold ${isUp ? "text-emerald-700" : "text-red-600"}`}>
-                    {isUp ? "+" : ""}<NumberTicker value={Math.round(stats.totalProfit)} /> ₴
+                    {isUp ? "+" : ""}{Math.round(stats.totalProfit).toLocaleString("uk-UA")} ₴
                   </div>
                 </div>
               </div>
