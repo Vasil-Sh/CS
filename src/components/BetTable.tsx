@@ -468,12 +468,8 @@ const BetTableMemo = memo(function BetTable({
         const odds = Number(b.odds).toFixed(2);
         const isExpress = isExpressBet(b);
         if (isExpress) {
-          // Express: show first event as preview
           const count = getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
-          const events = (b.betType || "").split(" • ").filter(Boolean);
-          const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || (b.match || `Експрес ${count}x`);
-          const totalEvents = events.length || count;
-          return `${icon}~${odds}. Експрес ${totalEvents}x: ${firstEvent}`;
+          return `${icon}~${odds}. Експрес ${count}x`;
         }
         const selectedTeam =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
@@ -511,7 +507,7 @@ const BetTableMemo = memo(function BetTable({
           const selection = selectionPart.split(":")[0]?.trim() || "";
           const selectedFromMatch = selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() || "";
           selectedTeam = selectedFromMatch || teams[0] || selection;
-          betDesc = `Експрес ${count}x • ${events.length} подій`;
+          betDesc = "Експрес";
           // Get logo from expressLogos first event
           if (b.expressLogos && b.expressLogos.length > 0) {
             // Determine which team logo to use based on selection
@@ -525,8 +521,8 @@ const BetTableMemo = memo(function BetTable({
             logoUrl = getSelectedTeamLogo(b, selectedTeam);
           }
         } else {
-          selectedTeam = firstEvent;
-          betDesc = `Експрес ${count}x`;
+          selectedTeam = "Експрес";
+          betDesc = "Експрес";
           logoUrl = null;
         }
       } else {
