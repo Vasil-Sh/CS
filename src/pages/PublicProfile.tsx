@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   TrendingUp, DollarSign, Target, Trophy, BarChart3,
-  Zap, Calendar, Loader2, Share2, ArrowLeft,
+  Zap, Calendar, Loader2, Share2, ArrowLeft, Wallet,
 } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
