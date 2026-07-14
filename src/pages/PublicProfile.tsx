@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   TrendingUp, DollarSign, Target, Trophy, BarChart3,
-  Zap, Loader2, Share2, Wallet, User,
+  Zap, Loader2, Share2, Wallet, User, Calendar,
 } from "lucide-react";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { toast } from "sonner";
@@ -246,11 +246,19 @@ export default function PublicProfile() {
 
         {/* Monthly profit + Recent bets — side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Monthly profit — compact table */}
-          {data.monthlyProfit.length > 0 && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
+          {/* Monthly profit */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
+              {data.monthlyProfit.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+                    <Calendar className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-sm text-gray-400">Немає даних</p>
+                  <p className="text-xs text-gray-300 mt-1">З'являться після перших ставок</p>
+                </div>
+              ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
@@ -275,16 +283,22 @@ export default function PublicProfile() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Recent bets */}
           <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-full">
               <h3 className="text-base font-semibold text-gray-900 mb-4">Останні ставки</h3>
               {data.recentBets.length === 0 ? (
-                <p className="text-sm text-gray-400 py-4 text-center">Немає ставок</p>
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+                    <Trophy className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-sm text-gray-400">Немає ставок</p>
+                  <p className="text-xs text-gray-300 mt-1">Тут з'являться останні 5 ставок</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {data.recentBets.map((bet, i) => (
