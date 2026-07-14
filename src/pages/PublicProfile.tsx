@@ -270,8 +270,8 @@ export default function PublicProfile() {
                           {m.profit >= 0 ? "+" : ""}{Math.round(m.profit).toLocaleString("uk-UA")} ₴
                         </td>
                         <td className="py-2.5 pl-4 border-l border-gray-100 text-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${m.profit >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
-                            {m.profit >= 0 ? "▲ Прибуток" : "▼ Збиток"}
+                          <span className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium min-w-[100px] ${m.profit >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                            {m.profit >= 0 ? "Прибуток ▲" : "Збиток ▼"}
                           </span>
                         </td>
                       </tr>
