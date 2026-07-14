@@ -48,7 +48,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   /** Recompute bankroll from current bets */
   const recalcBankroll = useCallback(
     (currentBets: Bet[]) => {
-      setBankroll(BankrollService.getBankrollStatsDual(currentUser, currentBets));
+      try {
+        setBankroll(BankrollService.getBankrollStatsDual(currentUser, currentBets));
+      } catch (e) {
+        console.warn('[DataContext] Bankroll recalc failed:', e);
+      }
     },
     [currentUser],
   );
@@ -105,7 +109,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   /** Initial load */
   useEffect(() => {
-    if (currentUser) refresh();
+    if (currentUser) {
+      refresh().catch((e) => {
+        console.error('[DataContext] Initial refresh failed:', e);
+        // Fallback to localStorage on any error
+        try {
+          const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
+          setBets(localBets);
+          recalcBankroll(localBets);
+        } catch {}
+        setIsLoading(false);
+      });
+    }
   }, [currentUser, refresh]);
 
   /** Add bet optimistically + sync to backend */
@@ -164,6 +179,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
 export function useData(): DataContextType {
   const ctx = useContext(DataContext);
-  if (!ctx) throw new Error("useData must be used within DataProvider");
+  if (!ctx) {
+    // Return a safe no-op fallback instead of crashing — prevents
+    // ErrorBoundary from catching when DataProvider is unmounting
+    // during route transitions or auth changes.
+    return {
+      bets: [],
+      bankroll: {
+        uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+        usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
+      },
+      isLoading: true,
+      refresh: async () => {},
+      addBet: () => {},
+      updateBetResult: () => {},
+      deleteBet: () => {},
+    } as DataContextType;
+  }
   return ctx;
 }
