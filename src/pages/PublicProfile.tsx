@@ -302,7 +302,7 @@ export default function PublicProfile() {
               ) : (
                 <div className="space-y-3">
                   {data.recentBets.map((bet, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100 hover:border-gray-200 hover:bg-gray-100 transition-colors">
                       <img
                         src={bet.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder.svg"}
                         alt={bet.game}
