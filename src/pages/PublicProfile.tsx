@@ -303,27 +303,27 @@ export default function PublicProfile() {
                       <th className="text-left py-2.5 pr-3 font-medium">Дата</th>
                       <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Матч</th>
                       <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100 hidden sm:table-cell">Тип</th>
-                      <th className="text-right py-2.5 px-3 font-medium border-l border-gray-100">Коеф.</th>
-                      <th className="text-right py-2.5 px-3 font-medium border-l border-gray-100">Профіт</th>
-                      <th className="text-right py-2.5 pl-3 font-medium border-l border-gray-100">Статус</th>
+                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Коеф.</th>
+                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Профіт</th>
+                      <th className="text-center py-2.5 pl-3 font-medium border-l border-gray-100">Статус</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.recentBets.map((bet, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-2.5 pr-3 text-gray-500 whitespace-nowrap">{bet.date}</td>
+                        <td className="py-2.5 pr-3 text-gray-900 whitespace-nowrap">{bet.date}</td>
                         <td className="py-2.5 px-3 border-l border-gray-100 max-w-[200px] text-center">
                           <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
                           <p className="text-xs text-gray-400 sm:hidden">{bet.game}</p>
                         </td>
-                        <td className="py-2.5 px-3 border-l border-gray-100 text-gray-500 hidden sm:table-cell text-center">{bet.game}</td>
-                        <td className="py-2.5 px-3 border-l border-gray-100 text-right tabular-nums text-gray-900 font-medium">
+                        <td className="py-2.5 px-3 border-l border-gray-100 text-gray-900 hidden sm:table-cell text-center">{bet.game}</td>
+                        <td className="py-2.5 px-3 border-l border-gray-100 text-center tabular-nums text-gray-900 font-medium">
                           {bet.odds}
                         </td>
-                        <td className={`py-2.5 px-3 border-l border-gray-100 text-right tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
+                        <td className={`py-2.5 px-3 border-l border-gray-100 text-center tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
                           {bet.result === "Win" ? `+${bet.profit}` : bet.result === "Loss" ? `${bet.profit}` : "—"} ₴
                         </td>
-                        <td className="py-2.5 pl-3 border-l border-gray-100 text-right whitespace-nowrap">
+                        <td className="py-2.5 pl-3 border-l border-gray-100 text-center whitespace-nowrap">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
                             bet.result === "Win" ? "bg-green-50 text-green-600" :
                             bet.result === "Loss" ? "bg-red-50 text-red-500" :
