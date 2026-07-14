@@ -43,7 +43,7 @@ export default function MyBetsStatsCards({
   const bankUp = bank.totalProfit >= 0;
 
   return (
-    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       {/* Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Bank card with edit button */}
@@ -75,11 +75,11 @@ export default function MyBetsStatsCards({
           </div>
           <div className="flex items-center gap-2 text-sm">
             {bankUp ? (
-              <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
+              <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+              <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
             )}
-            <span className={bankUp ? "text-[#22C55E] font-medium" : "text-[#EF4444] font-medium"}>
+            <span className={bankUp ? "text-green-500 font-medium" : "text-red-500 font-medium"}>
               {currencyMode === "USD"
                 ? `${Number(bank.totalProfit) >= 0 ? "+" : ""}$${Number(bank.totalProfit).toFixed(2)}`
                 : `${Number(bank.totalProfit) >= 0 ? "+" : ""}${Number(bank.totalProfit).toFixed(2)} ₴`}
@@ -89,32 +89,32 @@ export default function MyBetsStatsCards({
         </div>
 
         <StatCard
-          icon={<IconBox><DollarSign className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
+          icon={<IconBox><DollarSign className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
           label="Профіт"
           value={<>{isUp ? "+" : ""}{currencyMode === "USD" ? "$" : ""}<NumberTicker value={Math.abs(Math.round(profit * 100) / 100)} decimalPlaces={2} />{currencyMode !== "USD" && " ₴"}</>}
-          valueColor={isUp ? (currencyMode === "USD" ? "text-[#22C55E]" : "text-[#111827]") : "text-[#EF4444]"}
+          valueColor={isUp ? (currencyMode === "USD" ? "text-green-500" : "text-gray-900") : "text-red-500"}
           subtext={isUp ? "Позитивна динаміка" : "Негативна динаміка"}
-          subIcon={isUp ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}
+          subIcon={isUp ? <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />}
           trend={isUp ? "up" : "down"}
         />
         <StatCard
-          icon={<IconBox><BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
+          icon={<IconBox><BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
           label="Всього записів"
           value={<NumberTicker value={stats.totalBets} />}
           subtext={activeBets.length > 0 ? `${activeBets.length} активних` : "Немає активних"}
         />
         {/* Winrate card — large donut filling the card */}
         <div
-          className="relative bg-white border border-[#F3F4F6] rounded-3xl px-5 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
+          className="relative bg-white border border-gray-100 rounded-3xl px-5 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300"
           style={{ transform: "translateY(0)" }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
-              <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
+              <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#111827]">Вінрейт</span>
+            <span className="text-lg font-semibold text-gray-900">Вінрейт</span>
           </div>
           <div className="flex items-center justify-center">
             <AnimatedCircularProgressBar
@@ -127,7 +127,7 @@ export default function MyBetsStatsCards({
             />
           </div>
           <div className="text-center mt-1">
-            <span className="text-xs text-[#9CA3AF]">{winningBets.length}W / {losingBets.length}L</span>
+            <span className="text-xs text-gray-400">{winningBets.length}W / {losingBets.length}L</span>
           </div>
         </div>
       </div>
@@ -135,27 +135,27 @@ export default function MyBetsStatsCards({
       {/* Row 2 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         <StatCard
-          icon={<IconBox><Clock className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Активні" value={<NumberTicker value={activeBets.length} />} valueColor="text-[#3B82F6]"
+          icon={<IconBox><Clock className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          label="Активні" value={<NumberTicker value={activeBets.length} />} valueColor="text-blue-500"
           subtext="Очікують результату"
         />
         <StatCard
-          icon={<IconBox><Trophy className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Виграші" value={<NumberTicker value={winningBets.length} />} valueColor="text-[#22C55E]"
+          icon={<IconBox><Trophy className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          label="Виграші" value={<NumberTicker value={winningBets.length} />} valueColor="text-green-500"
           subtext="Успішних записів" trend="up"
         />
         <StatCard
-          icon={<IconBox><AlertTriangle className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
-          label="Програші" value={<NumberTicker value={losingBets.length} />} valueColor="text-[#EF4444]"
+          icon={<IconBox><AlertTriangle className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          label="Програші" value={<NumberTicker value={losingBets.length} />} valueColor="text-red-500"
           subtext="Невдалих записів" trend="down"
         />
         <StatCard
-          icon={<IconBox><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></IconBox>}
+          icon={<IconBox><TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
           label="Середній ROI"
           value={<>{stats.averageROI >= 0 ? "+" : ""}<NumberTicker value={Math.abs(stats.averageROI)} />%</>}
-          valueColor={stats.averageROI >= 0 ? "text-[#111827]" : "text-[#EF4444]"}
+          valueColor={stats.averageROI >= 0 ? "text-gray-900" : "text-red-500"}
           subtext={stats.averageROI >= 0 ? "Позитивний" : "Негативний"}
-          subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />}
+          subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />}
           trend={stats.averageROI >= 0 ? "up" : "down"}
         />
       </div>
@@ -165,7 +165,7 @@ export default function MyBetsStatsCards({
 
 function IconBox({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
       {children}
     </div>
   );

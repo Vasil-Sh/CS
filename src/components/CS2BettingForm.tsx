@@ -1297,12 +1297,12 @@ export default function CS2BettingForm({
   };
 
   const inputClass =
-    "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] placeholder:text-[#9CA3AF] focus:border-[#111827] focus:ring-0 transition-colors";
+    "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors";
   const selectTriggerClass =
-    "rounded-2xl border-[#E5E7EB] bg-white h-11 text-[#111827] focus:border-[#111827] focus:ring-0 transition-colors";
-  const labelClass = "text-sm font-medium text-[#374151]";
+    "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 focus:border-gray-900 focus:ring-0 transition-colors";
+  const labelClass = "text-sm font-medium text-gray-700";
   const sectionTitleClass =
-    "text-base font-semibold text-[#111827] flex items-center gap-2.5 bg-[#F3F4F6] px-4 py-2.5 -mx-6";
+    "text-base font-semibold text-gray-900 flex items-center gap-2.5 bg-gray-100 px-4 py-2.5 -mx-6";
 
   void potentialProfit;
   void stakeInCurrency;
@@ -1640,7 +1640,7 @@ export default function CS2BettingForm({
                   (formData.betCategory === "Експрес" &&
                     !allExpressEventsComplete)
                 }
-                className="w-full bg-[#111827] hover:bg-[#1F2937] text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>

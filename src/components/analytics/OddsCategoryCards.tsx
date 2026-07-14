@@ -32,29 +32,29 @@ export default function OddsCategoryCards({ data, labels }: Props) {
         return (
           <div
             key={index}
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+            className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
             style={CARD_BASE_STYLE}
             onMouseEnter={(e) => { Object.assign(e.currentTarget.style, CARD_HOVER_STYLE); }}
             onMouseLeave={(e) => { Object.assign(e.currentTarget.style, CARD_BASE_STYLE); }}
           >
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h4 className="text-lg font-semibold text-[#111827]">{catLabel.label}</h4>
-                <span className="text-sm text-[#9CA3AF]">Коеф. {catLabel.sublabel}</span>
+                <h4 className="text-lg font-semibold text-gray-900">{catLabel.label}</h4>
+                <span className="text-sm text-gray-400">Коеф. {catLabel.sublabel}</span>
               </div>
-              <Badge className="bg-[#F3F4F6] text-[#111827] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
+              <Badge className="bg-gray-100 text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 font-semibold text-sm">
                 {range.count}
               </Badge>
             </div>
 
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-[#6B7280]">Вінрейт</span>
-                <span className={`text-base font-bold ${hasData ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>
+                <span className="text-sm text-gray-500">Вінрейт</span>
+                <span className={`text-base font-bold ${hasData ? 'text-gray-900' : 'text-gray-400'}`}>
                   {range.winRate}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500" style={{
                   width: `${Math.min(winRateNum, 100)}%`,
                   backgroundColor: hasData ? '#10B981' : '#D1D5DB'
@@ -63,22 +63,22 @@ export default function OddsCategoryCards({ data, labels }: Props) {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-[#6B7280]">ROI</span>
-              <span className={`text-base font-bold ${!hasData ? 'text-[#9CA3AF]' : roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+              <span className="text-sm text-gray-500">ROI</span>
+              <span className={`text-base font-bold ${!hasData ? 'text-gray-400' : roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {roi >= 0 ? '+' : ''}{roi}%
               </span>
             </div>
 
-            <div className="border-t border-[#F3F4F6] mb-4" />
+            <div className="border-t border-gray-100 mb-4" />
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#6B7280]">Прибуток</span>
+              <span className="text-sm text-gray-500">Прибуток</span>
               <div className="flex items-center gap-2">
                 {hasData && (range.profit >= 0
-                  ? <ArrowUpRight className="h-4 w-4 text-[#22C55E]" strokeWidth={2.5} />
-                  : <ArrowDownRight className="h-4 w-4 text-[#EF4444]" strokeWidth={2.5} />
+                  ? <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
+                  : <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
                 )}
-                <span className={`text-xl font-bold ${!hasData ? 'text-[#9CA3AF]' : range.profit >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                <span className={`text-xl font-bold ${!hasData ? 'text-gray-400' : range.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {range.profit >= 0 ? '+' : ''}{Math.round(range.profit).toLocaleString('uk-UA')} ₴
                 </span>
               </div>

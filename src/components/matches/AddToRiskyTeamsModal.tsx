@@ -161,8 +161,8 @@ export default function AddToRiskyTeamsModal({
                 onClick={() => setSelectedTeam(team.name)}
                 className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
                   selectedTeam === team.name
-                    ? "border-[#447afc] bg-[#EFF6FF] shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                    : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#D1D5DB] hover:bg-white"
+                    ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
+                    : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
                 }`}
               >
                 {team.logo ? (
@@ -172,15 +172,15 @@ export default function AddToRiskyTeamsModal({
                     className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-lg bg-[#E5E7EB] flex items-center justify-center text-[#6B7280] font-bold text-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0">
                     {team.name.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <span
                   className={`text-sm font-semibold truncate ${
                     selectedTeam === team.name
-                      ? "text-[#111827]"
-                      : "text-[#6B7280]"
+                      ? "text-gray-900"
+                      : "text-gray-500"
                   }`}
                 >
                   {team.name}
@@ -193,11 +193,11 @@ export default function AddToRiskyTeamsModal({
           <div className="space-y-4">
             {/* Status */}
             <div className="space-y-2">
-              <Label className="text-sm text-[#374151] font-medium">
+              <Label className="text-sm text-gray-700 font-medium">
                 Статус
               </Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="rounded-xl border-[#E5E7EB]">
+                <SelectTrigger className="rounded-xl border-gray-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -216,7 +216,7 @@ export default function AddToRiskyTeamsModal({
 
             {/* Game — toggle buttons with SVG icons */}
             <div className="space-y-2">
-              <Label className="text-sm text-[#374151] font-medium">Гра</Label>
+              <Label className="text-sm text-gray-700 font-medium">Гра</Label>
               <div className="grid grid-cols-2 gap-3">
                 {GAME_OPTIONS.map((opt) => (
                   <button
@@ -225,8 +225,8 @@ export default function AddToRiskyTeamsModal({
                     onClick={() => setGame(opt.value)}
                     className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 transition-all text-sm font-semibold ${
                       game === opt.value
-                        ? "border-[#447afc] bg-[#EFF6FF] text-[#111827] shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                        : "border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] hover:border-[#D1D5DB] hover:bg-white"
+                        ? "border-primary bg-blue-50 text-gray-900 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
+                        : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-white"
                     }`}
                   >
                     <img
@@ -242,14 +242,14 @@ export default function AddToRiskyTeamsModal({
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label className="text-sm text-[#374151] font-medium">
+              <Label className="text-sm text-gray-700 font-medium">
                 Нотатки
               </Label>
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Наприклад: Не ставити на них, коли грають фінал..."
-                className="rounded-xl border-[#E5E7EB]"
+                className="rounded-xl border-gray-200"
               />
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function AddToRiskyTeamsModal({
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-12 rounded-2xl bg-[#447afc] hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
+            className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
           >
             <Save className="h-4 w-4 mr-2" strokeWidth={2} />
             {saving ? "Збереження..." : "Зберегти"}

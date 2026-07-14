@@ -603,7 +603,7 @@ export default function MyBets() {
 
         {/* Tabs */}
         <div className="space-y-6">
-          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-3 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-3 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <div
               className="grid gap-3"
               style={{
@@ -616,7 +616,7 @@ export default function MyBets() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ${activeTab === tab.id ? "bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent" : "bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent"}`}
+                    className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ${activeTab === tab.id ? "bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent" : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent"}`}
                   >
                     <span className="flex items-center justify-center gap-2">
                       <Icon className="h-4 w-4" strokeWidth={1.5} />
@@ -629,7 +629,7 @@ export default function MyBets() {
           </div>
 
           {activeTab === "records" && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <BetTable
                 bets={recentBets}
                 activeBets={activeBets}
@@ -662,7 +662,7 @@ export default function MyBets() {
             </div>
           )}
           {activeTab === "add" && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CS2BettingForm
                 onRecordAdded={handleRecordAdded}
                 prefillData={prefillData}
@@ -673,7 +673,7 @@ export default function MyBets() {
             </div>
           )}
           {activeTab === "strategies" && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <StrategyOverview />
             </div>
           )}

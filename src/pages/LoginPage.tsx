@@ -77,7 +77,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
         <div className="absolute top-6 left-6 z-20">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-white/80 backdrop-blur-sm border-2 border-[#E8E6DC] text-[#4a4a5a] hover:text-[#1a1a2e] hover:border-[#D0CEC4] transition-all duration-200 text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-white/80 backdrop-blur-sm border-2 border-stone-200 text-[#4a4a5a] hover:text-[#1a1a2e] hover:border-[#D0CEC4] transition-all duration-200 text-sm font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
             На головну
@@ -85,7 +85,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
         </div>
 
         <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
-          <Card className="w-full max-w-lg bg-white border-2 border-[#E8E6DC] shadow-[0_16px_64px_rgba(0,0,0,0.08)] rounded-[36px] transition-colors duration-300">
+          <Card className="w-full max-w-lg bg-white border-2 border-stone-200 shadow-[0_16px_64px_rgba(0,0,0,0.08)] rounded-[36px] transition-colors duration-300">
             <div className="p-12 space-y-9">
               <div className="text-center space-y-4">
                 <div className="inline-flex items-center justify-center w-24 h-24 rounded-[32px] mb-4 bg-[#1a1a2e] shadow-[0_8px_24px_rgba(26,26,46,0.3)]">
@@ -125,7 +125,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                     placeholder="Введіть ім'я користувача"
                     required
                     disabled={isLoading}
-                    className="h-14 bg-[#F8F8F5] border-2 border-[#E8E6DC] rounded-[20px] text-[#2A2A3A] placeholder:text-[#B0B0BA] transition-all duration-300 text-base font-light hover:border-[#D0CEC4] hover:bg-[#FAFAF8] focus:border-[#3e75ff] focus:ring-[#3e75ff]/15 focus:ring-4 focus:bg-white"
+                    className="h-14 bg-[#F8F8F5] border-2 border-stone-200 rounded-[20px] text-[#2A2A3A] placeholder:text-[#B0B0BA] transition-all duration-300 text-base font-light hover:border-[#D0CEC4] hover:bg-[#FAFAF8] focus:border-[#3e75ff] focus:ring-[#3e75ff]/15 focus:ring-4 focus:bg-white"
                   />
                 </div>
 
@@ -148,7 +148,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                     placeholder="Введіть пароль"
                     required
                     disabled={isLoading}
-                    className="h-14 bg-[#F8F8F5] border-2 border-[#E8E6DC] rounded-[20px] text-[#2A2A3A] placeholder:text-[#B0B0BA] transition-all duration-300 text-base font-light hover:border-[#D0CEC4] hover:bg-[#FAFAF8] focus:border-[#3e75ff] focus:ring-[#3e75ff]/15 focus:ring-4 focus:bg-white"
+                    className="h-14 bg-[#F8F8F5] border-2 border-stone-200 rounded-[20px] text-[#2A2A3A] placeholder:text-[#B0B0BA] transition-all duration-300 text-base font-light hover:border-[#D0CEC4] hover:bg-[#FAFAF8] focus:border-[#3e75ff] focus:ring-[#3e75ff]/15 focus:ring-4 focus:bg-white"
                   />
                 </div>
 
@@ -183,11 +183,11 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
               </form>
 
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#E8E6DC] to-transparent" />
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-200 to-transparent" />
                 <span className="text-xs text-[#B0B0BA] font-light uppercase tracking-widest">
                   або
                 </span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#E8E6DC] to-transparent" />
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-200 to-transparent" />
               </div>
 
               <div className="text-center space-y-3">
@@ -200,7 +200,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                     {footerLinkLabel}
                   </a>
                 </p>
-                <p className="text-xs text-[#B0B0BA] pt-4 border-t border-[#E8E6DC]/60 font-light">
+                <p className="text-xs text-[#B0B0BA] pt-4 border-t border-stone-200/60 font-light">
                   © 2026 MatchIQ Analytics. Всі права захищені.
                 </p>
               </div>

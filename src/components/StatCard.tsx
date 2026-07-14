@@ -22,20 +22,20 @@ const StatCardMemo = memo(function StatCard({
   label,
   value,
   subtext,
-  valueColor = "text-[#111827]",
+  valueColor = "text-gray-900",
   subIcon,
   onClick,
   trend,
   extraValue,
   extraSubtext,
-  extraValueColor = "text-[#D97706]",
+  extraValueColor = "text-amber-600",
   extraSubIcon,
 }: StatCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      className={`relative bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB] ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative bg-white border border-gray-100 rounded-3xl px-6 py-5 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300 ${onClick ? "cursor-pointer" : ""}`}
       style={{ transform: isHovered ? "translateY(-3px)" : "translateY(0)" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -43,7 +43,7 @@ const StatCardMemo = memo(function StatCard({
     >
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <span className="text-lg font-semibold text-[#111827]">{label}</span>
+        <span className="text-lg font-semibold text-gray-900">{label}</span>
       </div>
       {extraValue ? (
         <>
@@ -61,12 +61,12 @@ const StatCardMemo = memo(function StatCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {subIcon}
-                <span className="text-sm text-[#9CA3AF]">{subtext}</span>
+                <span className="text-sm text-gray-400">{subtext}</span>
               </div>
               {extraSubtext && (
                 <div className="flex items-center gap-2">
                   {extraSubIcon}
-                  <span className="text-sm text-[#9CA3AF]">{extraSubtext}</span>
+                  <span className="text-sm text-gray-400">{extraSubtext}</span>
                 </div>
               )}
             </div>
@@ -82,7 +82,7 @@ const StatCardMemo = memo(function StatCard({
           {subtext && (
             <div className="flex items-center gap-2">
               {subIcon}
-              <span className="text-sm text-[#9CA3AF]">{subtext}</span>
+              <span className="text-sm text-gray-400">{subtext}</span>
             </div>
           )}
         </>

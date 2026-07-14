@@ -83,7 +83,7 @@ export default function BalanceTracker({
     : 'rgba(239,68,68,0.2)';
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-3xl overflow-hidden group transition-all duration-300 ease-out"
+    <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden group transition-all duration-300 ease-out"
       style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transform: 'translateY(0)' }}
       onMouseEnter={(e) => { Object.assign(e.currentTarget.style, { transform: 'translateY(-2px)', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }); }}
       onMouseLeave={(e) => { Object.assign(e.currentTarget.style, { transform: 'translateY(0)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }); }}
@@ -92,21 +92,21 @@ export default function BalanceTracker({
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
-              <BarChart3 className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50">
+              <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
-            <span className="text-lg font-semibold text-[#111827]">Трекер балансу</span>
+            <span className="text-lg font-semibold text-gray-900">Трекер балансу</span>
           </div>
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] hover:text-[#2563EB] transition-colors flex-shrink-0">
+                <button className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 transition-colors flex-shrink-0">
                   <Info className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" align="end" className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg">
-                <p className="text-sm font-semibold text-[#111827] mb-1">Як читати цей блок</p>
-                <p className="text-xs text-[#6B7280] leading-relaxed space-y-1">
+              <TooltipContent side="bottom" align="end" className="max-w-xs bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-lg">
+                <p className="text-sm font-semibold text-gray-900 mb-1">Як читати цей блок</p>
+                <p className="text-xs text-gray-500 leading-relaxed space-y-1">
                   <span className="block">📈 <strong>Твій банк</strong> — скільки грошей у тебе зараз у банку для ставок.</span>
                   <span className="block">🏆 <strong>Найкращий результат</strong> — найвища сума, яку ти колись мав.</span>
                   <span className="block">📊 <strong>Прогрес-бар</strong> — показує де ти зараз відносно свого максимуму.</span>
@@ -116,42 +116,42 @@ export default function BalanceTracker({
             </Tooltip>
           </TooltipProvider>
         </div>
-        <div className="border-b border-[#E5E7EB] mt-3" />
+        <div className="border-b border-gray-200 mt-3" />
       </div>
 
       {/* Status banner */}
       <div className="px-6 mb-4">
-        <div className={`rounded-2xl px-4 py-2.5 border ${!hasBets ? 'bg-[#F9FAFB] border-[#E5E7EB]' : isGrowing ? 'bg-[#F0FDF4] border-[#BBF7D0]' : isStable ? 'bg-[#EFF6FF] border-[#BFDBFE]' : isDipping ? 'bg-[#FFFBEB] border-[#FDE68A]' : 'bg-[#FEF2F2] border-[#FECACA]'}`}>
-          <p className={`text-sm font-medium ${!hasBets ? 'text-[#6B7280]' : isGrowing ? 'text-[#166534]' : isStable ? 'text-[#1E40AF]' : isDipping ? 'text-[#92400E]' : 'text-[#991B1B]'}`}>{statusText}</p>
+        <div className={`rounded-2xl px-4 py-2.5 border ${!hasBets ? 'bg-gray-50 border-gray-200' : isGrowing ? 'bg-green-50 border-green-200' : isStable ? 'bg-blue-50 border-blue-200' : isDipping ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
+          <p className={`text-sm font-medium ${!hasBets ? 'text-gray-500' : isGrowing ? 'text-[#166534]' : isStable ? 'text-[#1E40AF]' : isDipping ? 'text-amber-800' : 'text-[#991B1B]'}`}>{statusText}</p>
         </div>
       </div>
 
       {/* Bank cards */}
       <div className="grid grid-cols-2 gap-3 px-6 mb-4">
-        <div className="rounded-2xl bg-gradient-to-br from-[#F9FAFB] to-[#F3F4F6] border border-[#E5E7EB] px-4 py-3.5">
-          <p className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wider mb-1">Поточний банк</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">
+        <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 px-4 py-3.5">
+          <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider mb-1">Поточний банк</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">
             {hasBets ? currentBank.toLocaleString('uk-UA', { maximumFractionDigits: 0 }) : '0'} ₴
           </p>
           {hasBets && (
             <div className="flex items-center gap-1 mt-1">
-              {isGrowing || isStable ? <TrendingUp className="h-3 w-3 text-[#10B981]" strokeWidth={2.5} /> : <TrendingDown className="h-3 w-3 text-[#EF4444]" strokeWidth={2.5} />}
-              <span className={`text-xs font-medium ${isGrowing || isStable ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>{percentOfPeak.toFixed(1)}% від піку</span>
+              {isGrowing || isStable ? <TrendingUp className="h-3 w-3 text-emerald-500" strokeWidth={2.5} /> : <TrendingDown className="h-3 w-3 text-red-500" strokeWidth={2.5} />}
+              <span className={`text-xs font-medium ${isGrowing || isStable ? 'text-emerald-500' : 'text-red-500'}`}>{percentOfPeak.toFixed(1)}% від піку</span>
             </div>
           )}
         </div>
-        <div className="rounded-2xl bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7]/50 border border-[#FDE68A] px-4 py-3.5">
-          <p className="text-[11px] text-[#92400E]/70 font-medium uppercase tracking-wider mb-1">🏆 Найкращий результат</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">
+        <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-100/50 border border-amber-200 px-4 py-3.5">
+          <p className="text-[11px] text-amber-800/70 font-medium uppercase tracking-wider mb-1">🏆 Найкращий результат</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">
             {hasBets ? allTimeHigh.toLocaleString('uk-UA') : '—'} ₴
           </p>
-          <p className="text-xs text-[#92400E]/60 mt-0.5">Твій орієнтир</p>
+          <p className="text-xs text-amber-800/60 mt-0.5">Твій орієнтир</p>
         </div>
       </div>
 
       {/* Progress bar */}
       <div className="px-6 mb-4">
-        <div className="relative w-full h-4 bg-[#F3F4F6] rounded-full overflow-hidden" style={{ boxShadow: `0 0 14px ${progressGlow}` }}>
+        <div className="relative w-full h-4 bg-gray-100 rounded-full overflow-hidden" style={{ boxShadow: `0 0 14px ${progressGlow}` }}>
           <div className="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${Math.min(percentOfPeak, 100)}%`, background: progressGradient }} />
           {hasBets && (
@@ -159,7 +159,7 @@ export default function BalanceTracker({
               style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'shimmer 2s ease-in-out infinite' }} />
           )}
         </div>
-        <div className="flex justify-between text-[11px] text-[#9CA3AF] mt-1.5 font-medium">
+        <div className="flex justify-between text-[11px] text-gray-400 mt-1.5 font-medium">
           <span>0 ₴</span>
           <span>{hasBets ? `${allTimeHigh.toLocaleString('uk-UA')} ₴` : '—'}</span>
         </div>
@@ -167,20 +167,20 @@ export default function BalanceTracker({
 
       {/* AI Advice */}
       <div className="px-6 mb-4">
-        <div className="rounded-2xl bg-gradient-to-br from-[#F3F4F6] to-[#F9FAFB] border border-[#E5E7EB] px-4 py-3">
+        <div className="rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 border border-gray-200 px-4 py-3">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-4 w-4 text-[#6366F1]" strokeWidth={1.5} />
-            <p className="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">AI-порада</p>
+            <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">AI-порада</p>
           </div>
           {aiLoading ? (
             <div className="space-y-2">
-              <div className="h-3 bg-[#E5E7EB] rounded-full w-3/4 animate-pulse" />
-              <div className="h-3 bg-[#E5E7EB] rounded-full w-1/2 animate-pulse" />
+              <div className="h-3 bg-gray-200 rounded-full w-3/4 animate-pulse" />
+              <div className="h-3 bg-gray-200 rounded-full w-1/2 animate-pulse" />
             </div>
           ) : aiAdvice ? (
-            <p className="text-sm text-[#111827] leading-relaxed font-medium">«{aiAdvice}»</p>
+            <p className="text-sm text-gray-900 leading-relaxed font-medium">«{aiAdvice}»</p>
           ) : (
-            <p className="text-sm text-[#6B7280] leading-relaxed">{advice}</p>
+            <p className="text-sm text-gray-500 leading-relaxed">{advice}</p>
           )}
         </div>
       </div>
@@ -188,56 +188,56 @@ export default function BalanceTracker({
       {/* Game cards */}
       <div className="grid grid-cols-2 gap-3 px-6 mb-4">
         {/* CS2 */}
-        <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden">
-          <div className={`h-1 ${cs2Bets > 0 ? 'bg-gradient-to-r from-[#F59E0B] to-[#EF4444]' : 'bg-[#E5E7EB]'}`} />
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div className={`h-1 ${cs2Bets > 0 ? 'bg-gradient-to-r from-amber-500 to-red-500' : 'bg-gray-200'}`} />
           <div className="px-4 py-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-[#FFF7ED]">
                 <Crosshair className="h-3.5 w-3.5 text-[#F97316]" strokeWidth={2} />
               </div>
-              <span className="text-xs font-semibold text-[#111827]">CS2</span>
+              <span className="text-xs font-semibold text-gray-900">CS2</span>
             </div>
             {cs2Bets > 0 ? (
               <>
-                <p className="text-lg font-bold text-[#111827]">
-                  <span className={cs2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
+                <p className="text-lg font-bold text-gray-900">
+                  <span className={cs2Profit >= 0 ? 'text-green-600' : 'text-red-500'}>{cs2Profit >= 0 ? '+' : ''}{cs2Profit.toFixed(0)} ₴</span>
                 </p>
-                <p className="text-[11px] text-[#9CA3AF]">{cs2Bets} ставк{cs2Bets === 1 ? 'а' : cs2Bets < 5 ? 'и' : 'ок'}</p>
+                <p className="text-[11px] text-gray-400">{cs2Bets} ставк{cs2Bets === 1 ? 'а' : cs2Bets < 5 ? 'и' : 'ок'}</p>
               </>
             ) : (
               <>
                 <div className="flex items-end gap-1 h-8 mb-0.5">
-                  {[30, 50, 25, 60, 35, 45].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-[#F3F4F6]" style={{ height: `${h}%` }} />))}
+                  {[30, 50, 25, 60, 35, 45].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-gray-100" style={{ height: `${h}%` }} />))}
                 </div>
-                <p className="text-[11px] text-[#9CA3AF]">Немає даних</p>
+                <p className="text-[11px] text-gray-400">Немає даних</p>
               </>
             )}
           </div>
         </div>
 
         {/* Dota 2 */}
-        <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden">
-          <div className={`h-1 ${dota2Bets > 0 ? 'bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]' : 'bg-[#E5E7EB]'}`} />
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div className={`h-1 ${dota2Bets > 0 ? 'bg-gradient-to-r from-[#8B5CF6] to-[#EC4899]' : 'bg-gray-200'}`} />
           <div className="px-4 py-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-[#F5F3FF]">
                 <Shield className="h-3.5 w-3.5 text-[#8B5CF6]" strokeWidth={2} />
               </div>
-              <span className="text-xs font-semibold text-[#111827]">Dota 2</span>
+              <span className="text-xs font-semibold text-gray-900">Dota 2</span>
             </div>
             {dota2Bets > 0 ? (
               <>
-                <p className="text-lg font-bold text-[#111827]">
-                  <span className={dota2Profit >= 0 ? 'text-[#16A34A]' : 'text-[#EF4444]'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
+                <p className="text-lg font-bold text-gray-900">
+                  <span className={dota2Profit >= 0 ? 'text-green-600' : 'text-red-500'}>{dota2Profit >= 0 ? '+' : ''}{dota2Profit.toFixed(0)} ₴</span>
                 </p>
-                <p className="text-[11px] text-[#9CA3AF]">{dota2Bets} ставк{dota2Bets === 1 ? 'а' : dota2Bets < 5 ? 'и' : 'ок'}</p>
+                <p className="text-[11px] text-gray-400">{dota2Bets} ставк{dota2Bets === 1 ? 'а' : dota2Bets < 5 ? 'и' : 'ок'}</p>
               </>
             ) : (
               <>
                 <div className="flex items-end gap-1 h-8 mb-0.5">
-                  {[40, 20, 55, 30, 50, 25].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-[#F3F4F6]" style={{ height: `${h}%` }} />))}
+                  {[40, 20, 55, 30, 50, 25].map((h, i) => (<div key={i} className="flex-1 rounded-sm bg-gray-100" style={{ height: `${h}%` }} />))}
                 </div>
-                <p className="text-[11px] text-[#9CA3AF]">Немає даних</p>
+                <p className="text-[11px] text-gray-400">Немає даних</p>
               </>
             )}
           </div>
@@ -245,18 +245,18 @@ export default function BalanceTracker({
       </div>
 
       {/* Game filter */}
-      <div className="border-t border-[#F3F4F6] px-6 py-3 flex items-center gap-2">
-        <span className="text-xs text-[#9CA3AF] font-medium">Фільтр сторінки:</span>
-        <div className="flex items-center gap-1 bg-[#F3F4F6] rounded-full p-1">
+      <div className="border-t border-gray-100 px-6 py-3 flex items-center gap-2">
+        <span className="text-xs text-gray-400 font-medium">Фільтр сторінки:</span>
+        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
           {(['CS2', 'Dota2'] as const).map((g) => (
             <button key={g} onClick={() => onGameFilterChange(gameFilter === g ? 'all' : g)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${gameFilter === g ? 'bg-white text-[#111827] shadow-sm' : 'text-[#9CA3AF] hover:text-[#6B7280]'}`}>
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${gameFilter === g ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-500'}`}>
               {g === 'CS2' ? '🎯 CS2' : '🛡️ Dota 2'}
             </button>
           ))}
         </div>
         {gameFilter !== 'all' && gameHasData && (
-          <span className="text-xs text-[#9CA3AF] ml-auto">{gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴</span>
+          <span className="text-xs text-gray-400 ml-auto">{gameBets} ставок · {gameProfit >= 0 ? '+' : ''}{gameProfit.toFixed(0)} ₴</span>
         )}
       </div>
     </div>

@@ -3,13 +3,13 @@ import { Target, TrendingUp, AlertTriangle } from "lucide-react";
 export function getRiskColor(risk: string): string {
   switch (risk) {
     case "Low":
-      return "bg-[#DCFCE7] text-[#16A34A] border-0 rounded-full";
+      return "bg-[#DCFCE7] text-green-600 border-0 rounded-full";
     case "Medium":
-      return "bg-[#FEF3C7] text-[#D97706] border-0 rounded-full";
+      return "bg-yellow-100 text-amber-600 border-0 rounded-full";
     case "High":
-      return "bg-[#FEE2E2] text-[#DC2626] border-0 rounded-full";
+      return "bg-[#FEE2E2] text-red-600 border-0 rounded-full";
     default:
-      return "bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full";
+      return "bg-gray-100 text-gray-500 border-0 rounded-full";
   }
 }
 

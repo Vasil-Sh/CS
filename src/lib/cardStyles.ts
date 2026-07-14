@@ -19,10 +19,10 @@ export const CARD_HOVER_STYLE: React.CSSProperties = {
 };
 
 /** The border color a card gets on hover */
-export const CARD_HOVER_BORDER = 'hover:border-[#D1D5DB]';
+export const CARD_HOVER_BORDER = 'hover:border-gray-300';
 
 /** The default border for white stat cards */
-export const CARD_DEFAULT_BORDER = 'border border-[#F3F4F6] rounded-3xl';
+export const CARD_DEFAULT_BORDER = 'border border-gray-100 rounded-3xl';
 
 /** Convenience: apply hover style to a DOM element */
 export const applyCardHover = (el: HTMLElement) => Object.assign(el.style, CARD_HOVER_STYLE);

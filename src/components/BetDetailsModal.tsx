@@ -150,25 +150,25 @@ export default function BetDetailsModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl p-0 gap-0"
+        className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 rounded-3xl p-0 gap-0"
         style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}
       >
         <DialogHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
-              <FileText className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.5} />
+              <FileText className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
             </div>
-            <DialogTitle className="text-xl font-semibold text-[#111827]">
+            <DialogTitle className="text-xl font-semibold text-gray-900">
               Текст для Telegram
             </DialogTitle>
           </div>
         </DialogHeader>
 
-        <div className="border-t border-[#E5E7EB]" />
+        <div className="border-t border-gray-200" />
 
-        <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+        <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm font-medium text-[#111827] uppercase tracking-wide">
+            <span className="text-sm font-medium text-gray-900 uppercase tracking-wide">
               Формат тексту
             </span>
             <Button
@@ -176,8 +176,8 @@ export default function BetDetailsModal({
               size="sm"
               className={`rounded-xl text-sm font-medium h-9 px-4 transition-all duration-200 ${
                 copied
-                  ? "bg-[#DCFCE7] hover:bg-[#DCFCE7] text-[#16A34A] border border-[#86EFAC]"
-                  : "bg-[#447afc] hover:bg-[#3568d4] text-white"
+                  ? "bg-[#DCFCE7] hover:bg-[#DCFCE7] text-green-600 border border-[#86EFAC]"
+                  : "bg-primary hover:bg-blue-700 text-white"
               }`}
             >
               {copied ? (
@@ -193,15 +193,15 @@ export default function BetDetailsModal({
               )}
             </Button>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <Textarea
               ref={textareaRef}
               value={editableText}
               onChange={(e) => setEditableText(e.target.value)}
-              className="min-h-[320px] font-mono text-sm bg-white border-0 rounded-2xl p-4 resize-none focus:ring-0 focus:outline-none text-[#374151] w-full"
+              className="min-h-[320px] font-mono text-sm bg-white border-0 rounded-2xl p-4 resize-none focus:ring-0 focus:outline-none text-gray-700 w-full"
             />
           </div>
-          <p className="text-xs text-[#9CA3AF] font-normal">
+          <p className="text-xs text-gray-400 font-normal">
             💡 Ви можете відредагувати текст перед копіюванням.{" "}
             {!isExpressBet &&
               !bet.matchUrl &&

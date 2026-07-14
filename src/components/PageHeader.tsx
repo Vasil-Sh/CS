@@ -53,7 +53,7 @@ export function PageHeader({
   return (
     <div className="px-6 lg:px-8 pt-6 pb-2">
       <div className="flex items-center justify-between">
-        <h1 className="text-[48px] font-semibold text-[#111827] leading-tight tracking-tight">
+        <h1 className="text-[48px] font-semibold text-gray-900 leading-tight tracking-tight">
           {title}
         </h1>
 
@@ -70,7 +70,7 @@ export function PageHeader({
                 title="Дії"
               >
                 <MoreHorizontal
-                  className="h-5 w-5 text-[#6B7280]"
+                  className="h-5 w-5 text-gray-500"
                   strokeWidth={1.5}
                 />
               </button>
@@ -92,7 +92,7 @@ export function PageHeader({
                 title="Світла тема"
               >
                 <Sun
-                  className={`h-4 w-4 ${!isDarkTheme ? "text-[#2563EB]" : "text-[#9CA3AF]"}`}
+                  className={`h-4 w-4 ${!isDarkTheme ? "text-blue-600" : "text-gray-400"}`}
                   strokeWidth={1.5}
                 />
               </button>
@@ -106,7 +106,7 @@ export function PageHeader({
                 title="Темна тема"
               >
                 <Moon
-                  className={`h-4 w-4 ${isDarkTheme ? "text-[#2563EB]" : "text-[#9CA3AF]"}`}
+                  className={`h-4 w-4 ${isDarkTheme ? "text-blue-600" : "text-gray-400"}`}
                   strokeWidth={1.5}
                 />
               </button>
@@ -121,11 +121,11 @@ export function PageHeader({
                 onChange={onCurrencyChange}
                 hasUsdBets={hasUsdBets}
               />
-              <div className="w-px h-8 bg-[#D1D5DB]" />
+              <div className="w-px h-8 bg-gray-300" />
             </>
           )}
 
-          {!showCurrencySwitch && <div className="w-px h-8 bg-[#D1D5DB]" />}
+          {!showCurrencySwitch && <div className="w-px h-8 bg-gray-300" />}
 
           {/* User info — clickable to Profile */}
           <button
@@ -133,14 +133,14 @@ export function PageHeader({
             className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
             title="Перейти до профілю"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111827]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-900">
               <User className="h-4 w-4 text-white" strokeWidth={2} />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-[#111827] leading-tight">
+              <p className="text-sm font-medium text-gray-900 leading-tight">
                 {currentUser || "User"}
               </p>
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-[#F0FDF4] border border-[#BBF7D0] rounded px-1.5 py-0.5 leading-tight mt-0.5">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded px-1.5 py-0.5 leading-tight mt-0.5">
                 Активний
               </span>
             </div>

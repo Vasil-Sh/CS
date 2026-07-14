@@ -339,7 +339,7 @@ const cardBaseStyle = CARD_BASE_STYLE;
 const cardHoverStyle = CARD_HOVER_STYLE;
 
 /** Column divider style — right border */
-const colDivider = "border-r border-[#E5E7EB]";
+const colDivider = "border-r border-gray-200";
 
 /** All match table columns — id, label, default visibility */
 const COLUMN_DEFS = [
@@ -999,13 +999,13 @@ export default function Matches() {
   ) => {
     if (sortBy === column) {
       return sortOrder === "asc" ? (
-        <ArrowUp className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={2} />
+        <ArrowUp className="h-3.5 w-3.5 text-blue-600" strokeWidth={2} />
       ) : (
-        <ArrowDown className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={2} />
+        <ArrowDown className="h-3.5 w-3.5 text-blue-600" strokeWidth={2} />
       );
     }
     return (
-      <ArrowUpDown className="h-3.5 w-3.5 text-[#9CA3AF]" strokeWidth={1.5} />
+      <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
     );
   };
 
@@ -1033,17 +1033,17 @@ export default function Matches() {
   /** Render the table header row */
   const renderTableHeader = () => (
     <thead>
-      <tr className="bg-white border-b border-[#E5E7EB]">
+      <tr className="bg-white border-b border-gray-200">
         {visibleColumns.has("rating") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap ${colDivider}`}
           >
             Інтерес до Матчу
           </th>
         )}
         {visibleColumns.has("match") && (
           <th
-            className={`text-left py-4 px-4 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
+            className={`text-left py-4 px-4 text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none ${colDivider}`}
             onClick={() => toggleSort("date")}
           >
             <div className="flex items-center justify-between w-full">
@@ -1055,7 +1055,7 @@ export default function Matches() {
         {visibleColumns.has("time") && <th className="hidden"></th>}
         {visibleColumns.has("score") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider ${colDivider}`}
           >
             Рахунок
           </th>
@@ -1063,21 +1063,21 @@ export default function Matches() {
         {visibleColumns.has("status") && <th className="hidden"></th>}
         {visibleColumns.has("ai") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider ${colDivider}`}
           >
             AI
           </th>
         )}
         {visibleColumns.has("prediction") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider ${colDivider}`}
           >
             Прогноз
           </th>
         )}
         {visibleColumns.has("odds") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider cursor-pointer hover:bg-[#F3F4F6] transition-colors select-none ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none ${colDivider}`}
             onClick={() => toggleSort("odds")}
           >
             <div className="flex items-center justify-center gap-1">
@@ -1088,13 +1088,13 @@ export default function Matches() {
         )}
         {visibleColumns.has("notes") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap ${colDivider}`}
           >
             Нотатки
           </th>
         )}
         {visibleColumns.has("actions") && (
-          <th className="text-center py-4 px-3 text-sm font-semibold text-[#374151] uppercase tracking-wider whitespace-nowrap min-w-[110px]">
+          <th className="text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap min-w-[110px]">
             Додати до Записів
           </th>
         )}
@@ -1115,10 +1115,10 @@ export default function Matches() {
         />
         <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
           {/* ===== QUICK STATS ===== */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
               <div
-                className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
                 style={cardBaseStyle}
                 onMouseEnter={(e) => {
                   Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1128,24 +1128,24 @@ export default function Matches() {
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                     <Trophy
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <span className="text-lg font-semibold text-gray-900">
                     Всього матчів
                   </span>
                 </div>
-                <div className="text-4xl font-bold text-[#111827] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
                   {displayCount}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-[#D97706]">
+                  <span className="text-sm font-semibold text-amber-600">
                     CS2 {cs2DisplayedCount}
                   </span>
-                  <span className="text-sm text-[#9CA3AF]">—</span>
+                  <span className="text-sm text-gray-400">—</span>
                   <span className="text-sm font-semibold text-[#7C3AED]">
                     Dota {dota2DisplayedCount}
                   </span>
@@ -1154,7 +1154,7 @@ export default function Matches() {
               </div>
 
               <div
-                className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
                 style={cardBaseStyle}
                 onMouseEnter={(e) => {
                   Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1164,17 +1164,17 @@ export default function Matches() {
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                     <Radio
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <span className="text-lg font-semibold text-gray-900">
                     LIVE
                   </span>
                 </div>
-                <div className="text-4xl font-bold text-[#EF4444] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-red-500 tracking-tight mb-2">
                   {liveCount}
                 </div>
                 <div className="flex items-center gap-2">
@@ -1183,7 +1183,7 @@ export default function Matches() {
               </div>
 
               <div
-                className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
                 style={cardBaseStyle}
                 onMouseEnter={(e) => {
                   Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1193,17 +1193,17 @@ export default function Matches() {
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                     <Clock
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <span className="text-lg font-semibold text-gray-900">
                     Очікуються
                   </span>
                 </div>
-                <div className="text-4xl font-bold text-[#2563EB] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-blue-600 tracking-tight mb-2">
                   {upcomingCount}
                 </div>
                 <div className="flex items-center gap-2">
@@ -1212,7 +1212,7 @@ export default function Matches() {
               </div>
 
               <div
-                className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
                 style={cardBaseStyle}
                 onMouseEnter={(e) => {
                   Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1222,17 +1222,17 @@ export default function Matches() {
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                     <CheckCircle2
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <span className="text-lg font-semibold text-gray-900">
                     Завершені
                   </span>
                 </div>
-                <div className="text-4xl font-bold text-[#22C55E] tracking-tight mb-2">
+                <div className="text-4xl font-bold text-green-500 tracking-tight mb-2">
                   {finishedCount}
                 </div>
                 <div className="flex items-center gap-2">
@@ -1241,7 +1241,7 @@ export default function Matches() {
               </div>
 
               <div
-                className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 group"
+                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
                 style={cardBaseStyle}
                 onMouseEnter={(e) => {
                   Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -1251,13 +1251,13 @@ export default function Matches() {
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                     <Brain
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <span className="text-lg font-semibold text-gray-900">
                     Середній Прогноз
                   </span>
                 </div>
@@ -1267,17 +1267,17 @@ export default function Matches() {
                 <div className="flex items-center gap-2">
                   {avgConfidence >= 65 ? (
                     <ArrowUpRight
-                      className="h-4 w-4 text-[#22C55E]"
+                      className="h-4 w-4 text-green-500"
                       strokeWidth={2.5}
                     />
                   ) : (
                     <ArrowDownRight
-                      className="h-4 w-4 text-[#EF4444]"
+                      className="h-4 w-4 text-red-500"
                       strokeWidth={2.5}
                     />
                   )}
                   <span
-                    className={`text-sm font-semibold ${avgConfidence >= 65 ? "text-[#22C55E]" : "text-[#EF4444]"}`}
+                    className={`text-sm font-semibold ${avgConfidence >= 65 ? "text-green-500" : "text-red-500"}`}
                   >
                     {avgConfidence >= 65 ? "Хороший рівень" : "Низький рівень"}
                   </span>
@@ -1288,12 +1288,12 @@ export default function Matches() {
 
           {/* ===== PILL FILTER BAR — styled as StrategyTabNav ===== */}
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               {/* Refresh button */}
               <button
                 onClick={refreshMatches}
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -1306,14 +1306,14 @@ export default function Matches() {
               {/* Search */}
               <div className="relative min-w-[140px]">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
                   strokeWidth={1.5}
                 />
                 <Input
                   placeholder="Пошук..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 rounded-[24px] border border-[#E8E6DC] bg-transparent text-base text-[#111827] placeholder:text-[#6B7280] focus:bg-white focus:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:border-[#D1D5DB] transition-all duration-300 h-full py-4 min-h-[56px]"
+                  className="pl-10 pr-4 rounded-[24px] border border-stone-200 bg-transparent text-base text-gray-900 placeholder:text-gray-500 focus:bg-white focus:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:border-gray-300 transition-all duration-300 h-full py-4 min-h-[56px]"
                 />
               </div>
 
@@ -1323,8 +1323,8 @@ export default function Matches() {
                   <button
                     className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterStatus !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-gray-900 font-light border border-stone-200"
                     }`}
                   >
                     {filterStatus === "all"
@@ -1354,8 +1354,8 @@ export default function Matches() {
                   <button
                     className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterTier !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-gray-900 font-light border border-stone-200"
                     }`}
                   >
                     {filterTier === "all"
@@ -1382,8 +1382,8 @@ export default function Matches() {
                   <button
                     className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterMatchType !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-gray-900 font-light border border-stone-200"
                     }`}
                   >
                     {filterMatchType === "all" ? "Формат" : filterMatchType}
@@ -1405,8 +1405,8 @@ export default function Matches() {
                   <button
                     className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterTournament !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-gray-900 font-light border border-stone-200"
                     }`}
                   >
                     {filterTournament === "all"
@@ -1431,8 +1431,8 @@ export default function Matches() {
                   <button
                     className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
                       filterDayOfWeek !== "all"
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-[#111827] font-light border border-[#E8E6DC]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
+                        : "bg-transparent text-gray-900 font-light border border-stone-200"
                     }`}
                   >
                     {filterDayOfWeek === "all"
@@ -1462,7 +1462,7 @@ export default function Matches() {
               {/* Column visibility */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-5 py-4 text-base rounded-[24px] border border-[#E8E6DC] transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-[#111827] font-light">
+                  <button className="relative px-5 py-4 text-base rounded-[24px] border border-stone-200 transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-gray-900 font-light">
                     Колонки
                     <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
                   </button>
@@ -1484,7 +1484,7 @@ export default function Matches() {
               {/* Reset filters */}
               {hasActiveFilters && (
                 <>
-                  <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+                  <div className="w-px h-7 bg-stone-200 mx-0.5" />
                   <button
                     onClick={resetAllFilters}
                     className="relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 font-semibold shadow-[0_2px_8px_rgba(239,68,68,0.3)]"
@@ -1512,7 +1512,7 @@ export default function Matches() {
                 const hasLive = dateMatches.some((m) => m.matchStatus === "live");
                 return (
                   <BlurFade key={dateKey} delay={idx * 0.1} inView>
-                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                       {hasLive && (
                         <BorderBeam
                           size={200}
@@ -1524,19 +1524,19 @@ export default function Matches() {
                         />
                       )}
                       <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-x-auto">
-                      <CardHeader className="bg-white rounded-t-[24px] border-b border-[#E5E7EB] px-6 py-5">
+                      <CardHeader className="bg-white rounded-t-[24px] border-b border-gray-200 px-6 py-5">
                         <CardTitle>
                           <div className="flex items-center gap-4 flex-wrap">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#447afc]/10">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
                               <Calendar
-                                className="h-5 w-5 text-[#447afc]"
+                                className="h-5 w-5 text-primary"
                                 strokeWidth={2}
                               />
                             </div>
-                            <span className="text-2xl font-bold text-[#111827] tracking-tight">
+                            <span className="text-2xl font-bold text-gray-900 tracking-tight">
                               {formatFullDateTitle(dateKey, filterGame)}
                             </span>
-                            <Badge className="bg-[#F3F4F6] text-[#6B7280] border-0 rounded-full px-4 py-1 text-base font-bold">
+                            <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
                               {dateMatches.length}
                             </Badge>
                             {/* Game quick-toggle */}
@@ -1545,8 +1545,8 @@ export default function Matches() {
                                 onClick={() => setFilterGame("all")}
                                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
                                   filterGame === "all"
-                                    ? "bg-[#111827] text-white shadow-md"
-                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#111827] hover:border-[#D1D5DB]"
+                                    ? "bg-gray-900 text-white shadow-md"
+                                    : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
                                 }`}
                               >
                                 Всі
@@ -1555,8 +1555,8 @@ export default function Matches() {
                                 onClick={() => setFilterGame("CS2")}
                                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
                                   filterGame === "CS2"
-                                    ? "bg-[#D97706] text-white shadow-md"
-                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#D97706] hover:border-[#FCD34D]"
+                                    ? "bg-amber-600 text-white shadow-md"
+                                    : "bg-white text-gray-500 border border-gray-200 hover:text-amber-600 hover:border-[#FCD34D]"
                                 }`}
                               >
                                 CS2
@@ -1566,7 +1566,7 @@ export default function Matches() {
                                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
                                   filterGame === "Dota2"
                                     ? "bg-[#7C3AED] text-white shadow-md"
-                                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:text-[#7C3AED] hover:border-[#C4B5FD]"
+                                    : "bg-white text-gray-500 border border-gray-200 hover:text-[#7C3AED] hover:border-[#C4B5FD]"
                                 }`}
                               >
                                 Dota 2
@@ -1578,8 +1578,8 @@ export default function Matches() {
                       <CardContent className="p-0 rounded-b-[24px]">
                         {initialLoading ? (
                           <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
-                            <Loader2 className="h-8 w-8 animate-spin text-[#447afc]" strokeWidth={1.5} />
-                            <p className="text-sm text-[#9CA3AF]">Завантаження матчів...</p>
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" strokeWidth={1.5} />
+                            <p className="text-sm text-gray-400">Завантаження матчів...</p>
                           </div>
                         ) : dateMatches.length > 0 ? (
                           <div>
@@ -1589,18 +1589,18 @@ export default function Matches() {
                             </table>
                           </div>
                         ) : (
-                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-[#9CA3AF] gap-3">
-                            <div className="p-5 bg-[#F3F4F6] rounded-2xl">
-                              <Trophy className="h-10 w-10 text-[#9CA3AF]" strokeWidth={1.5} />
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
+                            <div className="p-5 bg-gray-100 rounded-2xl">
+                              <Trophy className="h-10 w-10 text-gray-400" strokeWidth={1.5} />
                             </div>
-                            <p className="text-lg font-bold text-[#6B7280]">Немає матчів</p>
+                            <p className="text-lg font-bold text-gray-500">Немає матчів</p>
                             <p className="text-sm">
                               Спробуйте обрати інший фільтр гри або натисніть «Оновити»
                             </p>
                             <button
                               onClick={refreshMatches}
                               disabled={isLoading}
-                              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-[#111827] hover:bg-[#1F2937] text-white text-sm font-medium transition-colors disabled:opacity-50"
+                              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
                             >
                               <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
                               Оновити
@@ -1663,7 +1663,7 @@ export default function Matches() {
         {selectedMatchIds.size > 0 && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
             <div
-              className="flex items-center gap-4 px-6 py-4 bg-[#111827] text-white rounded-2xl border border-[#374151]"
+              className="flex items-center gap-4 px-6 py-4 bg-gray-900 text-white rounded-2xl border border-gray-700"
               style={{
                 boxShadow:
                   "0 20px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)",
@@ -1681,15 +1681,15 @@ export default function Matches() {
                 </span>
               </div>
 
-              <div className="w-px h-8 bg-[#374151]" />
+              <div className="w-px h-8 bg-gray-700" />
 
               <Button
                 onClick={handleCreateExpress}
                 disabled={selectedMatchIds.size < 2}
                 className={`rounded-xl font-medium text-sm px-5 py-2.5 transition-all duration-200 ${
                   selectedMatchIds.size >= 2
-                    ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white"
-                    : "bg-[#374151] text-[#6B7280] cursor-not-allowed"
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "bg-gray-700 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 <PlusCircle className="h-4 w-4 mr-2" strokeWidth={1.5} />
@@ -1698,7 +1698,7 @@ export default function Matches() {
 
               <button
                 onClick={clearSelectedMatches}
-                className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-[#374151] text-[#9CA3AF] hover:text-white transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
                 title="Очистити вибір"
               >
                 <X className="h-4 w-4" strokeWidth={2} />

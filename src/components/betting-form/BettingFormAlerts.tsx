@@ -85,7 +85,7 @@ export default function BettingFormAlerts({
       {/* Strategy Violations */}
       {strategyViolations.length > 0 && (
         <div
-          className="rounded-3xl px-6 py-5 border border-red-300 bg-[#F3F4F6]"
+          className="rounded-3xl px-6 py-5 border border-red-300 bg-gray-100"
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
         >
           <div className="flex items-start gap-3">

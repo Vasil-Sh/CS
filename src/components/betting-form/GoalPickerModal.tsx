@@ -50,40 +50,40 @@ export default function GoalPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl max-w-lg w-[95vw] max-h-[85vh] overflow-hidden flex flex-col border border-[#E5E7EB] p-0 gap-0">
+      <DialogContent className="rounded-3xl max-w-lg w-[95vw] max-h-[85vh] overflow-hidden flex flex-col border border-gray-200 p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
-              <Target className="h-5 w-5 text-[#2563EB]" strokeWidth={1.5} />
+              <Target className="h-5 w-5 text-blue-600" strokeWidth={1.5} />
             </div>
             <div>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
                 Оберіть ціль
               </DialogTitle>
-              <DialogDescription className="text-[#6B7280] mt-0.5">
+              <DialogDescription className="text-gray-500 mt-0.5">
                 {goals.length} активних цілей
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="border-t border-[#E5E7EB]" />
+        <div className="border-t border-gray-200" />
 
-        <div className="bg-[#F3F4F6] px-5 py-4 space-y-3 flex-1 overflow-y-auto min-h-0">
+        <div className="bg-gray-100 px-5 py-4 space-y-3 flex-1 overflow-y-auto min-h-0">
           {/* Search */}
           <div className="relative flex-shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" strokeWidth={1.5} />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Пошук за назвою..."
-              className="pl-10 rounded-xl border-[#E5E7EB] bg-white h-10 text-sm"
+              className="pl-10 rounded-xl border-gray-200 bg-white h-10 text-sm"
               autoFocus
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#374151]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
               >
                 <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
@@ -97,18 +97,18 @@ export default function GoalPickerModal({
               onClick={() => { onSelect('all'); onOpenChange(false); }}
               className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
                 selectedGoalId === 'all' || !selectedGoalId
-                  ? 'border-[#2563EB] bg-[#EFF6FF]'
-                  : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#F3F4F6]">
-                <X className="h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100">
+                <X className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-[#111827]">Без цілі</p>
+                <p className="text-sm font-medium text-gray-900">Без цілі</p>
               </div>
               {(selectedGoalId === 'all' || !selectedGoalId) && (
-                <Check className="h-4 w-4 text-[#2563EB]" strokeWidth={2.5} />
+                <Check className="h-4 w-4 text-blue-600" strokeWidth={2.5} />
               )}
             </button>
 
@@ -120,20 +120,20 @@ export default function GoalPickerModal({
                   onClick={() => { onSelect(goal.id); onOpenChange(false); }}
                   className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
                     isSelected
-                      ? 'border-[#2563EB] bg-[#EFF6FF]'
-                      : 'border-[#E5E7EB] bg-white hover:border-[#D1D5DB]'
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
                   <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                    goal.status === 'completed' ? 'bg-[#F0FDF4]' : 'bg-[#EFF6FF]'
+                    goal.status === 'completed' ? 'bg-green-50' : 'bg-blue-50'
                   }`}>
                     <Target className={`h-4 w-4 ${
-                      goal.status === 'completed' ? 'text-[#16A34A]' : 'text-[#3B82F6]'
+                      goal.status === 'completed' ? 'text-green-600' : 'text-blue-500'
                     }`} strokeWidth={1.5} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#111827] truncate">{goal.name}</p>
-                    <p className="text-xs text-[#9CA3AF]">
+                    <p className="text-sm font-medium text-gray-900 truncate">{goal.name}</p>
+                    <p className="text-xs text-gray-400">
                       {typeLabels[goal.type] || goal.type}
                       {goal.type === 'amount' && goal.currentAmount !== undefined && ` · ${goal.currentAmount} / ${goal.targetAmount}`}
                       {goal.type === 'ladder' && ` · крок ${goal.currentStep ?? 0} / ${goal.totalSteps ?? 0}`}
@@ -142,10 +142,10 @@ export default function GoalPickerModal({
                     </p>
                   </div>
                   {isSelected && (
-                    <Check className="h-4 w-4 text-[#2563EB] flex-shrink-0" strokeWidth={2.5} />
+                    <Check className="h-4 w-4 text-blue-600 flex-shrink-0" strokeWidth={2.5} />
                   )}
                   {goal.isPrimary && (
-                    <Badge className="bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] rounded-lg font-medium text-[10px] px-1.5 py-0.5">
+                    <Badge className="bg-amber-50 text-amber-600 border border-amber-200 rounded-lg font-medium text-[10px] px-1.5 py-0.5">
                       Основна
                     </Badge>
                   )}
@@ -154,26 +154,26 @@ export default function GoalPickerModal({
             })}
 
             {filteredGoals.length === 0 && search && (
-              <div className="text-center py-8 text-[#9CA3AF] text-sm">
+              <div className="text-center py-8 text-gray-400 text-sm">
                 Нічого не знайдено
               </div>
             )}
           </div>
         </div>
 
-        <div className="border-t border-[#E5E7EB] px-5 py-3">
+        <div className="border-t border-gray-200 px-5 py-3">
           <DialogFooter className="gap-2 sm:gap-3 flex items-center">
             {selectedGoal && (
-              <div className="text-xs text-[#6B7280] mr-auto self-center bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg px-3 py-1.5 flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-[#2563EB]" strokeWidth={1.5} />
+              <div className="text-xs text-gray-500 mr-auto self-center bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                <Target className="h-3.5 w-3.5 text-blue-600" strokeWidth={1.5} />
                 <span>Обрано:</span>
-                <span className="font-medium text-[#111827]">{selectedGoal.name}</span>
+                <span className="font-medium text-gray-900">{selectedGoal.name}</span>
               </div>
             )}
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl border-[#E5E7EB] font-medium"
+              className="rounded-xl border-gray-200 font-medium"
             >
               Скасувати
             </Button>

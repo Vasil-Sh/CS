@@ -12,14 +12,14 @@ const CurrencySwitchMemo = memo(function CurrencySwitch({
   hasUsdBets,
 }: CurrencySwitchProps) {
   return (
-    <div className="flex bg-[#F3F4F6] rounded-xl p-0.5">
+    <div className="flex bg-gray-100 rounded-xl p-0.5">
       <button
         type="button"
         onClick={() => onChange("UAH")}
         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
           currency === "UAH"
-            ? "bg-[#447afc] text-white shadow-sm"
-            : "text-[#9CA3AF] hover:text-[#6B7280]"
+            ? "bg-primary text-white shadow-sm"
+            : "text-gray-400 hover:text-gray-500"
         }`}
       >
         ₴ UAH
@@ -29,8 +29,8 @@ const CurrencySwitchMemo = memo(function CurrencySwitch({
         onClick={() => onChange("USD")}
         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
           currency === "USD"
-            ? "bg-[#447afc] text-white shadow-sm"
-            : "text-[#9CA3AF] hover:text-[#6B7280]"
+            ? "bg-primary text-white shadow-sm"
+            : "text-gray-400 hover:text-gray-500"
         } ${!hasUsdBets ? "opacity-40 cursor-not-allowed" : ""}`}
         disabled={!hasUsdBets}
         title={

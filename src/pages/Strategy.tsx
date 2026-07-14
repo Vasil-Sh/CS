@@ -252,27 +252,27 @@ export default function Strategy() {
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Сьогоднішній P&L */}
-            <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+            <div className="bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                   <DollarSign
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-xl font-semibold text-[#111827]">
+                <span className="text-xl font-semibold text-gray-900">
                   Прибуток сьогодні
                 </span>
               </div>
               {todayPnL.count > 0 ? (
                 <>
                   <div
-                    className={`text-3xl font-bold mb-1 ${todayPnL.profit > 0 ? "text-[#22C55E]" : todayPnL.profit < 0 ? "text-[#EF4444]" : "text-[#111827]"}`}
+                    className={`text-3xl font-bold mb-1 ${todayPnL.profit > 0 ? "text-green-500" : todayPnL.profit < 0 ? "text-red-500" : "text-gray-900"}`}
                   >
                     {todayPnL.profit > 0 ? "+" : ""}
                     {todayPnL.profit.toFixed(0)} ₴
                   </div>
-                  <span className="text-sm text-[#6B7280]">
+                  <span className="text-sm text-gray-500">
                     {todayPnL.count} став
                     {todayPnL.count === 1
                       ? "ка"
@@ -284,10 +284,10 @@ export default function Strategy() {
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-[#9CA3AF] mb-1">
+                  <div className="text-3xl font-bold text-gray-400 mb-1">
                     —
                   </div>
-                  <span className="text-sm text-[#9CA3AF]">
+                  <span className="text-sm text-gray-400">
                     Сьогодні ставок немає
                   </span>
                 </>
@@ -339,34 +339,34 @@ export default function Strategy() {
             {/* Найкраща стратегія */}
             <button
               onClick={() => setActiveTab("strategies")}
-              className="text-left bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]"
+              className="text-left bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300"
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                   <Trophy
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-xl font-semibold text-[#111827]">
+                <span className="text-xl font-semibold text-gray-900">
                   Найкраща стратегія
                 </span>
               </div>
               {bestStrategy ? (
                 <>
                   <div
-                    className="text-3xl font-bold text-[#111827] mb-1 break-words"
+                    className="text-3xl font-bold text-gray-900 mb-1 break-words"
                     title={bestStrategy.name}
                   >
                     {bestStrategy.name}
                   </div>
                   <span
-                    className={`text-sm font-semibold ${bestStrategy.roi >= 0 ? "text-[#22C55E]" : "text-[#EF4444]"}`}
+                    className={`text-sm font-semibold ${bestStrategy.roi >= 0 ? "text-green-500" : "text-red-500"}`}
                   >
                     ROI {bestStrategy.roi >= 0 ? "+" : ""}
                     {bestStrategy.roi.toFixed(1)}%
                   </span>
-                  <span className="text-sm text-[#9CA3AF] ml-1">
+                  <span className="text-sm text-gray-400 ml-1">
                     ({bestStrategy.count} ставок)
                   </span>
                   {bestStrategy.avgRoi !== 0 && (
@@ -412,7 +412,7 @@ export default function Strategy() {
                           {bestStrategy.roi.toFixed(0)}%
                         </text>
                       </svg>
-                      <div className="flex items-center justify-between text-[10px] text-[#9CA3AF] mt-0.5">
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 mt-0.5">
                         <span>Найкраща</span>
                         <span>Середня</span>
                       </div>
@@ -421,46 +421,46 @@ export default function Strategy() {
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-[#9CA3AF] mb-1">
+                  <div className="text-3xl font-bold text-gray-400 mb-1">
                     —
                   </div>
-                  <span className="text-sm text-[#9CA3AF]">
+                  <span className="text-sm text-gray-400">
                     Потрібно мін. 3 ставки
                   </span>
                 </>
               )}
             </button>
             {/* Стратегій / Цілей */}
-            <div className="bg-white rounded-3xl px-6 py-3 border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+            <div className="bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                   <Target
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-xl font-semibold text-[#111827]">
+                <span className="text-xl font-semibold text-gray-900">
                   Стратегій / Цілей
                 </span>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#6B7280]">
+                  <span className="text-sm text-gray-500">
                     Створено стратегій
                   </span>
-                  <span className="text-2xl font-bold text-[#447afc]">
+                  <span className="text-2xl font-bold text-primary">
                     {stratsAndGoals.strategies}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#6B7280]">Створено цілей</span>
-                  <span className="text-2xl font-bold text-[#22C55E]">
+                  <span className="text-sm text-gray-500">Створено цілей</span>
+                  <span className="text-2xl font-bold text-green-500">
                     {stratsAndGoals.goals}
                   </span>
                 </div>
                 {stratsAndGoals.strategies + stratsAndGoals.goals > 0 && (
                   <div className="flex items-center gap-1">
-                    <div className="flex-1 h-1.5 rounded-full bg-[#DBEAFE]" />
+                    <div className="flex-1 h-1.5 rounded-full bg-blue-100" />
                     <div className="flex-1 h-1.5 rounded-full bg-[#DCFCE7]" />
                   </div>
                 )}
@@ -473,29 +473,29 @@ export default function Strategy() {
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             {/* Поточна стратегія */}
-            <div className="bg-white rounded-[32px] border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+            <div className="bg-white rounded-[32px] border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="px-5 pt-5 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[#EFF6FF] flex items-center justify-center flex-shrink-0">
+                  <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <Activity
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={2}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xl font-bold text-[#374151] tracking-tight">
+                    <h3 className="text-xl font-bold text-gray-700 tracking-tight">
                       Поточна стратегія
                     </h3>
-                    <p className="text-sm text-[#6B7280] mt-0.5">
+                    <p className="text-sm text-gray-500 mt-0.5">
                       Правила, яких ви дотримуєтесь
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="h-px w-full bg-[#F3F4F6]" />
+              <div className="h-px w-full bg-gray-100" />
               {activeStrategy ? (
                 <div className="space-y-5 flex-1 px-7 pb-7 pt-6">
-                  <p className="text-2xl font-bold text-[#374151]">
+                  <p className="text-2xl font-bold text-gray-700">
                     {activeStrategy.name}
                   </p>
                   {activeStrategy.description && (
@@ -504,35 +504,35 @@ export default function Strategy() {
                     </p>
                   )}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-[10%]">
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                         Мін. коеф.
                       </p>
-                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                      <p className="text-2xl font-bold text-gray-900 mt-1.5">
                         {activeStrategy.minOdds ?? "—"}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                         Макс. коеф.
                       </p>
-                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                      <p className="text-2xl font-bold text-gray-900 mt-1.5">
                         {activeStrategy.maxOdds ?? "—"}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center min-w-0 flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center min-w-0 flex flex-col items-center justify-center min-h-[80px]">
+                      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                         Формати
                       </p>
-                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                      <p className="text-2xl font-bold text-gray-900 mt-1.5">
                         {activeStrategy.allowedFormats?.join(", ") || "Усі"}
                       </p>
                     </div>
-                    <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center min-w-0 flex flex-col items-center justify-center min-h-[80px]">
-                      <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center min-w-0 flex flex-col items-center justify-center min-h-[80px]">
+                      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                         Типи ставок
                       </p>
-                      <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                      <p className="text-2xl font-bold text-gray-900 mt-1.5">
                         {activeStrategy.allowedBetTypes?.join(", ") || "Усі"}
                       </p>
                     </div>
@@ -540,16 +540,16 @@ export default function Strategy() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
-                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                  <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                     <Activity
-                      className="h-12 w-12 text-[#9CA3AF]"
+                      className="h-12 w-12 text-gray-400"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-[#111827] mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
                     Ви ще не обрали основну стратегію
                   </h3>
-                  <p className="text-sm text-[#6B7280] max-w-sm leading-relaxed">
+                  <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
                     Перейдіть у вкладку «Стратегії» та натисніть ☆, щоб
                     встановити стратегію як основну
                   </p>
@@ -557,27 +557,27 @@ export default function Strategy() {
               )}
             </div>
             {/* Поточна ціль */}
-            <div className="bg-white rounded-[32px] border border-[#F3F4F6] shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-[#D1D5DB]">
+            <div className="bg-white rounded-[32px] border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] h-full flex flex-col overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="px-5 pt-5 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[#EFF6FF] flex items-center justify-center flex-shrink-0">
-                    <Flag className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
+                  <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <Flag className="h-5 w-5 text-primary" strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xl font-bold text-[#374151] tracking-tight">
+                    <h3 className="text-xl font-bold text-gray-700 tracking-tight">
                       Поточна ціль
                     </h3>
-                    <p className="text-sm text-[#6B7280] mt-0.5">
+                    <p className="text-sm text-gray-500 mt-0.5">
                       Ціль, над якою ви працюєте
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="h-px w-full bg-[#F3F4F6]" />
+              <div className="h-px w-full bg-gray-100" />
               {primaryGoal && goalInfo ? (
                 <div className="flex flex-col flex-1 px-7 pb-7 pt-6">
                   <div>
-                    <p className="text-2xl font-bold text-[#374151]">
+                    <p className="text-2xl font-bold text-gray-700">
                       {primaryGoal.name}
                     </p>
                     <div className="mt-3">
@@ -586,10 +586,10 @@ export default function Strategy() {
                         className="h-2"
                       />
                       <div className="flex items-center justify-between mt-1.5">
-                        <span className="text-sm text-[#6B7280]">
+                        <span className="text-sm text-gray-500">
                           {goalInfo.label}
                         </span>
-                        <span className="text-sm font-semibold text-[#374151]">
+                        <span className="text-sm font-semibold text-gray-700">
                           {goalInfo.percent.toFixed(0)}%
                         </span>
                       </div>
@@ -598,27 +598,27 @@ export default function Strategy() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-auto">
                     {primaryGoal.type === "amount" && (
                       <>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ціль
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.targetAmount ?? 0).toFixed(0)}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Накопичено
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.currentAmount ?? 0).toFixed(0)}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Залишилось
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {Math.max(
                               0,
                               (primaryGoal.targetAmount ?? 0) -
@@ -626,11 +626,11 @@ export default function Strategy() {
                             ).toFixed(0)}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ставок/день
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {primaryGoal.betsPerDay || "Усі"}
                           </p>
                         </div>
@@ -638,36 +638,36 @@ export default function Strategy() {
                     )}
                     {primaryGoal.type === "ladder" && (
                       <>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Старт
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.startAmount ?? 0).toFixed(0)}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ціль
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.targetLadderAmount ?? 0).toFixed(0)}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Коеф.
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5 whitespace-nowrap">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5 whitespace-nowrap">
                             {primaryGoal.minOdds ?? "—"}-
                             {primaryGoal.maxOdds ?? "—"}
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Крок
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5 whitespace-nowrap">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5 whitespace-nowrap">
                             {primaryGoal.currentStep ?? 0}/
                             {primaryGoal.totalSteps ?? 0}
                           </p>
@@ -676,27 +676,27 @@ export default function Strategy() {
                     )}
                     {primaryGoal.type === "roi" && (
                       <>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ціль ROI
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.targetROI ?? 0).toFixed(1)}%
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Поточн.
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.currentROI ?? 0).toFixed(1)}%
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Різниця
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(
                               (primaryGoal.currentROI ?? 0) -
                               (primaryGoal.targetROI ?? 0)
@@ -704,11 +704,11 @@ export default function Strategy() {
                             %
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ставок/день
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {primaryGoal.betsPerDay || "Усі"}
                           </p>
                         </div>
@@ -716,27 +716,27 @@ export default function Strategy() {
                     )}
                     {primaryGoal.type === "winrate" && (
                       <>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ціль WR
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.targetWinRate ?? 0).toFixed(1)}%
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Поточн.
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(primaryGoal.currentWinRate ?? 0).toFixed(1)}%
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Різниця
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {(
                               (primaryGoal.currentWinRate ?? 0) -
                               (primaryGoal.targetWinRate ?? 0)
@@ -744,11 +744,11 @@ export default function Strategy() {
                             %
                           </p>
                         </div>
-                        <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center flex flex-col items-center justify-center min-h-[80px]">
-                          <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center flex flex-col items-center justify-center min-h-[80px]">
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
                             Ставок/день
                           </p>
-                          <p className="text-2xl font-bold text-[#111827] mt-1.5">
+                          <p className="text-2xl font-bold text-gray-900 mt-1.5">
                             {primaryGoal.betsPerDay || "Усі"}
                           </p>
                         </div>
@@ -758,16 +758,16 @@ export default function Strategy() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center px-7 py-12 text-center">
-                  <div className="p-6 bg-[#F3F4F6] rounded-3xl inline-block mb-4">
+                  <div className="p-6 bg-gray-100 rounded-3xl inline-block mb-4">
                     <Flag
-                      className="h-12 w-12 text-[#9CA3AF]"
+                      className="h-12 w-12 text-gray-400"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-[#111827] mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
                     У вас ще немає активної цілі
                   </h3>
-                  <p className="text-sm text-[#6B7280] max-w-sm leading-relaxed">
+                  <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
                     Перейдіть у вкладку «Цілі» та створіть нову ціль для
                     відстеження прогресу
                   </p>
@@ -793,8 +793,8 @@ export default function Strategy() {
                       transition-all duration-300 ease-in-out
                       ${
                         isActive
-                          ? "bg-[#447afc] text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent"
-                          : "bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] border border-transparent"
+                          ? "bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent"
+                          : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent"
                       }
                     `}
                   >

@@ -1,4 +1,4 @@
-﻿import { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -95,7 +95,7 @@ const BalanceChartMemo = memo(function BalanceChart({
         <div className="flex items-center justify-between flex-wrap gap-4">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
             <div className="p-2.5 bg-blue-50 rounded-2xl">
-              <Wallet className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
             Історія банкролу
           </CardTitle>

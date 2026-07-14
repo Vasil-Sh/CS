@@ -393,19 +393,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       : "opacity-70 hover:opacity-100";
     switch (status) {
       case "БАН":
-        return `bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA] ${isActive ? "ring-[#FECACA]" : ""} ${base}`;
+        return `bg-[#FEE2E2] text-red-600 border border-red-200 ${isActive ? "ring-red-200" : ""} ${base}`;
       case "Нестабільні":
-        return `bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] ${isActive ? "ring-[#FDE68A]" : ""} ${base}`;
+        return `bg-yellow-100 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""} ${base}`;
       case "Обережно":
-        return `bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] ${isActive ? "ring-[#FDE68A]" : ""} ${base}`;
+        return `bg-amber-50 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""} ${base}`;
       case "Рідко":
-        return `bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] ${isActive ? "ring-[#BFDBFE]" : ""} ${base}`;
+        return `bg-blue-50 text-blue-600 border border-blue-200 ${isActive ? "ring-blue-200" : ""} ${base}`;
       case "Надійна":
-        return `bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0] ${isActive ? "ring-[#BBF7D0]" : ""} ${base}`;
+        return `bg-green-50 text-green-600 border border-green-200 ${isActive ? "ring-green-200" : ""} ${base}`;
       case "Неоцінена":
-        return `bg-[#F9FAFB] text-[#6B7280] border border-[#E5E7EB] ${isActive ? "ring-[#E5E7EB]" : ""} ${base}`;
+        return `bg-gray-50 text-gray-500 border border-gray-200 ${isActive ? "ring-gray-200" : ""} ${base}`;
       default:
-        return `bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] ${isActive ? "ring-[#E5E7EB]" : ""} ${base}`;
+        return `bg-gray-100 text-gray-700 border border-gray-200 ${isActive ? "ring-gray-200" : ""} ${base}`;
     }
   };
 
@@ -527,8 +527,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         onClick={() => setFilter("all")}
         className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
           currentFilter === "all"
-            ? "bg-[#111827] text-white ring-2 ring-offset-1 ring-[#111827]"
-            : "bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] opacity-70 hover:opacity-100"
+            ? "bg-gray-900 text-white ring-2 ring-offset-1 ring-gray-900"
+            : "bg-gray-100 text-gray-700 border border-gray-200 opacity-70 hover:opacity-100"
         }`}
       >
         Всі ({statusCounts.all})
@@ -556,29 +556,29 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       return (
         <div
           key={globalIndex}
-          className="p-4 border border-[#D1D5DB] rounded-2xl bg-[#F9FAFB] transition-all"
+          className="p-4 border border-gray-300 rounded-2xl bg-gray-50 transition-all"
         >
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <label className="text-xs font-medium text-[#6B7280] mb-1 block">
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
                   Назва команди
                 </label>
                 <Input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="rounded-xl border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                  className="rounded-xl border border-gray-200 bg-white hover:border-gray-300 focus:border-gray-900 transition-colors text-sm"
                   placeholder="Назва команди"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-[#6B7280] mb-1 block">
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
                   Статус
                 </label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full p-2 border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl text-sm"
+                  className="w-full p-2 border border-gray-200 bg-white hover:border-gray-300 focus:border-gray-900 transition-colors rounded-xl text-sm"
                 >
                   {ALL_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -590,7 +590,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </div>
             {/* Game selector for transfer */}
             <div>
-              <label className="text-xs font-medium text-[#6B7280] mb-1 flex items-center gap-1.5">
+              <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1.5">
                 <ArrowRightLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Перенести в блок
               </label>
@@ -600,8 +600,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   onClick={() => setEditGame("CS")}
                   className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                     editGame === "CS"
-                      ? "bg-[#447afc] text-white border-[#447afc]"
-                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   🎯 CS
@@ -611,15 +611,15 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   onClick={() => setEditGame("Дота")}
                   className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                     editGame === "Дота"
-                      ? "bg-[#447afc] text-white border-[#447afc]"
-                      : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   🛡️ Дота
                 </button>
               </div>
               {editGame !== team.game && (
-                <p className="text-xs text-[#2563EB] mt-1 flex items-center gap-1">
+                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
                   <ArrowRightLeft className="h-3 w-3" strokeWidth={1.5} />
                   Команду буде перенесено в блок{" "}
                   {editGame === "CS" ? "CS" : "Dota 2"}
@@ -627,13 +627,13 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               )}
             </div>
             <div>
-              <label className="text-xs font-medium text-[#6B7280] mb-1 block">
+              <label className="text-xs font-medium text-gray-500 mb-1 block">
                 Коментар
               </label>
               <Textarea
                 value={editNotes}
                 onChange={(e) => setEditNotes(e.target.value)}
-                className="rounded-xl border border-[#E5E7EB] bg-white hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                className="rounded-xl border border-gray-200 bg-white hover:border-gray-300 focus:border-gray-900 transition-colors text-sm"
                 placeholder="Додайте коментар..."
                 rows={2}
               />
@@ -643,7 +643,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 variant="ghost"
                 size="sm"
                 onClick={cancelEditing}
-                className="text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-xl text-sm"
+                className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl text-sm"
               >
                 <X className="h-4 w-4 mr-1" strokeWidth={1.5} />
                 Скасувати
@@ -652,7 +652,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 size="sm"
                 onClick={saveEditing}
                 disabled={!editName.trim()}
-                className="bg-[#111827] hover:bg-[#1F2937] text-white rounded-xl text-sm"
+                className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm"
               >
                 <Check className="h-4 w-4 mr-1" strokeWidth={1.5} />
                 Зберегти
@@ -666,12 +666,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     return (
       <div
         key={globalIndex}
-        className="p-4 border border-[#D1D5DB] rounded-2xl bg-white hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all"
+        className="p-4 border border-gray-300 rounded-2xl bg-white hover:bg-gray-50 hover:border-gray-400 transition-all"
       >
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-medium text-base text-[#111827]">
+              <h3 className="font-medium text-base text-gray-900">
                 {getGameEmoji(team.game)} {team.name}
               </h3>
               <Badge className={getStatusBadge(team.status)}>
@@ -679,7 +679,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </Badge>
             </div>
             {team.notes && (
-              <p className="text-sm text-[#6B7280] whitespace-pre-wrap">
+              <p className="text-sm text-gray-500 whitespace-pre-wrap">
                 {team.notes}
               </p>
             )}
@@ -689,7 +689,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => startEditing(globalIndex, team)}
-              className="text-[#447afc] hover:text-[#447afc] hover:bg-[#EFF6FF] rounded-xl"
+              className="text-primary hover:text-primary hover:bg-blue-50 rounded-xl"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -697,7 +697,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               variant="ghost"
               size="sm"
               onClick={() => deleteRiskyTeam(globalIndex)}
-              className="text-[#EF4444] hover:text-[#EF4444] hover:bg-[#FEF2F2] rounded-xl"
+              className="text-red-500 hover:text-red-500 hover:bg-red-50 rounded-xl"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -711,11 +711,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     <TooltipProvider>
       <div className="flex flex-col flex-1 min-h-0 space-y-6">
         {/* Team-focused Overview Cards */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Total risky teams */}
             <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => {
                 Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -725,27 +725,27 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <Shield
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Всього команд
                 </span>
               </div>
-              <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              <div className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
                 {teamStats.total}
               </div>
-              <Badge className="bg-[#F0FDF4] text-[#16A34A] hover:bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg font-medium text-xs px-3 py-1.5">
+              <Badge className="bg-green-50 text-green-600 hover:bg-green-50 border border-green-200 rounded-lg font-medium text-xs px-3 py-1.5">
                 CS: {teamStats.csCount} · Dota: {teamStats.dotaCount}
               </Badge>
             </div>
 
             {/* БАН — forbidden teams */}
             <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => {
                 Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -755,27 +755,27 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <TrendingDown
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Заборонені
                 </span>
               </div>
-              <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              <div className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
                 {teamStats.banCount}
               </div>
-              <Badge className="bg-[#FEF2F2] text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FECACA] rounded-lg font-medium text-xs px-3 py-1.5">
+              <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border border-red-200 rounded-lg font-medium text-xs px-3 py-1.5">
                 БАН · {teamStats.banPercentage}% від усіх
               </Badge>
             </div>
 
             {/* Потребують уваги (БАН + Нестабільні) */}
             <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => {
                 Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -785,17 +785,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <AlertTriangle
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Високий ризик
                 </span>
               </div>
-              <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              <div className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
                 {teamStats.attentionCount}
               </div>
               <Badge className="bg-[#FFF7ED] text-[#EA580C] hover:bg-[#FFF7ED] border border-[#FED7AA] rounded-lg font-medium text-xs px-3 py-1.5">
@@ -806,7 +806,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             {/* Game dominance */}
             <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 group"
+              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
               style={cardBaseStyle}
               onMouseEnter={(e) => {
                 Object.assign(e.currentTarget.style, cardHoverStyle);
@@ -816,20 +816,20 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF]">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <Target
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <span className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Основна гра
                 </span>
               </div>
-              <div className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
+              <div className="text-2xl font-bold text-gray-900 tracking-tight mb-2">
                 {teamStats.dominantGame}
               </div>
-              <Badge className="bg-[#F3F4F6] text-[#374151] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-lg font-medium text-xs px-3 py-1.5">
+              <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 border border-gray-200 rounded-lg font-medium text-xs px-3 py-1.5">
                 {teamStats.dominantGameCount} команд у списку
               </Badge>
             </div>
@@ -838,23 +838,23 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Toolbar: Google Sheets, Add team, Info */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {/* Info tooltip */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#EFF6FF] text-[#3B82F6] hover:bg-[#DBEAFE] transition-colors">
+                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
                   <Info className="h-4 w-4" strokeWidth={2} />
                 </button>
               </TooltipTrigger>
               <TooltipContent
                 side="bottom"
                 align="start"
-                className="max-w-xs bg-white border border-[#E5E7EB] rounded-2xl px-4 py-3 shadow-lg"
+                className="max-w-xs bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-lg"
               >
-                <p className="text-sm font-semibold text-[#111827] mb-1">
+                <p className="text-sm font-semibold text-gray-900 mb-1">
                   Управління ризиками
                 </p>
-                <p className="text-sm text-[#6B7280] leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed">
                   Тут ви можете вести список команд, на які не варто ставити або
                   потрібно бути обережним. Кожній команді можна призначити
                   статус (БАН, Обережно, Нестабільні тощо) та додати коментар.
@@ -869,8 +869,8 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${
                 isSearchOpen
-                  ? "bg-[#447afc] text-white"
-                  : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#111827]"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
               }`}
               title="Пошук"
             >
@@ -881,7 +881,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {riskyTeams.length > 0 && (
               <button
                 onClick={() => setIsDeleteAllOpen(true)}
-                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-[#F3F4F6] text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] transition-colors"
+                className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
                 title="Видалити всі команди"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={2} />
@@ -892,7 +892,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <button
               onClick={() => setIsSheetsGuideOpen(true)}
               disabled={isUpdating}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280] transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-light text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUpdating ? (
                 <>
@@ -911,12 +911,12 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </button>
 
             {/* Divider */}
-            <div className="w-px h-7 bg-[#E8E6DC] mx-0.5" />
+            <div className="w-px h-7 bg-stone-200 mx-0.5" />
 
             {/* Add new team — accent blue */}
             <button
               onClick={() => setIsAddTeamOpen(true)}
-              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-[#447afc] text-white hover:bg-[#5b8ffd] shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
             >
               <Plus className="h-4 w-4" strokeWidth={2} />
               Додати нову команду
@@ -927,19 +927,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         {/* Inline search input — shown when toggled */}
         {isSearchOpen && (
           <div
-            className="bg-white border border-[#E5E7EB] rounded-2xl p-4"
+            className="bg-white border border-gray-200 rounded-2xl p-4"
             style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
           >
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9CA3AF]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
                 strokeWidth={1.5}
               />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Пошук за назвою, грою, статусом або примітками..."
-                className="pl-10 w-full rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                className="pl-10 w-full rounded-xl border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors text-sm"
                 autoFocus
               />
             </div>
@@ -948,42 +948,42 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Google Sheets Guide Dialog */}
         <Dialog open={isSheetsGuideOpen} onOpenChange={setIsSheetsGuideOpen}>
-          <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB] p-0 gap-0">
+          <DialogContent className="rounded-3xl max-w-2xl border border-gray-200 p-0 gap-0">
             <DialogHeader className="px-5 pt-5 pb-3">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
                   <Download
-                    className="h-5 w-5 text-[#2563EB]"
+                    className="h-5 w-5 text-blue-600"
                     strokeWidth={1.5}
                   />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-semibold text-[#111827]">
+                  <DialogTitle className="text-xl font-semibold text-gray-900">
                     Підтягнути команди з Google Sheets
                   </DialogTitle>
-                  <DialogDescription className="text-[#6B7280] mt-0.5">
+                  <DialogDescription className="text-gray-500 mt-0.5">
                     Як оформити документ, щоб дані правильно підтягнулись
                   </DialogDescription>
                 </div>
               </div>
             </DialogHeader>
 
-            <div className="border-t border-[#E5E7EB]" />
+            <div className="border-t border-gray-200" />
 
-            <div className="space-y-3 px-5 pt-4 pb-5 bg-[#F3F4F6]">
+            <div className="space-y-3 px-5 pt-4 pb-5 bg-gray-100">
               {/* Step 1 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-full bg-primary text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     1
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-base font-semibold text-[#111827] mb-1">
+                    <h4 className="text-base font-semibold text-gray-900 mb-1">
                       Створіть Google Sheets документ
                     </h4>
-                    <p className="text-sm text-[#6B7280] leading-relaxed">
+                    <p className="text-sm text-gray-500 leading-relaxed">
                       Відкрийте новий документ на{" "}
-                      <span className="font-medium text-[#111827]">
+                      <span className="font-medium text-gray-900">
                         Google Sheets
                       </span>{" "}
                       і дайте йому будь-яку назву.
@@ -993,56 +993,56 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 2 */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-full bg-primary text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     2
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-base font-semibold text-[#111827] mb-2">
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">
                       Оформіть колонки
                     </h4>
-                    <div className="overflow-hidden rounded-xl border border-[#D1D5DB] bg-white">
+                    <div className="overflow-hidden rounded-xl border border-gray-300 bg-white">
                       <table className="w-full text-sm border-collapse">
-                        <thead className="bg-[#F3F4F6]">
+                        <thead className="bg-gray-100">
                           <tr>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-r border-b border-[#D1D5DB]">
+                            <th className="text-left px-3 py-2 font-semibold text-gray-900 border-r border-b border-gray-300">
                               A — Назва команди
                             </th>
-                            <th className="text-left px-3 py-2 font-semibold text-[#111827] border-b border-[#D1D5DB]">
+                            <th className="text-left px-3 py-2 font-semibold text-gray-900 border-b border-gray-300">
                               B — Статус
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-r border-b border-gray-200">
                               Vitality
                             </td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-b border-gray-200">
                               🟩 CS: У фіналах часто вимикаються…
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-r border-b border-gray-200">
                               Team Spirit
                             </td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-b border-gray-200">
                               🟨 Dota2: Тільки на +1.5, часто заливають
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-3 py-2 text-[#374151] border-r border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-r border-b border-gray-200">
                               Virtus Pro
                             </td>
-                            <td className="px-3 py-2 text-[#374151] border-b border-[#E5E7EB]">
+                            <td className="px-3 py-2 text-gray-700 border-b border-gray-200">
                               🟥 CS: Раки — дуже рідко на них варто щось ставити
                             </td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                    <p className="text-xs text-[#9CA3AF] mt-2">
+                    <p className="text-xs text-gray-400 mt-2">
                       💡 Перший рядок може бути заголовком — він буде
                       автоматично проігнорований.
                     </p>
@@ -1051,18 +1051,18 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 3 — Open access */}
-              <div className="p-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#447afc] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-full bg-primary text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     3
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-base font-semibold text-[#111827] mb-1">
+                    <h4 className="text-base font-semibold text-gray-900 mb-1">
                       Відкрийте доступ до документу
                     </h4>
-                    <p className="text-sm text-[#6B7280] leading-relaxed">
+                    <p className="text-sm text-gray-500 leading-relaxed">
                       Натисніть{" "}
-                      <span className="font-medium text-[#111827]">
+                      <span className="font-medium text-gray-900">
                         «Поділитися» → «Усі, хто має посилання» → «Читач»
                       </span>
                       , щоб документ був доступний для читання.
@@ -1072,19 +1072,19 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Step 4 */}
-              <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#BFDBFE]">
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200">
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#2563EB] text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-semibold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                     4
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-base font-semibold text-[#111827] mb-2">
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">
                       Вставте посилання на ваш документ
                     </h4>
-                    <p className="text-sm text-[#6B7280] mb-3">
+                    <p className="text-sm text-gray-500 mb-3">
                       Скопіюйте посилання з адресного рядка браузера та вставте
                       його сюди. Ви можете використовувати{" "}
-                      <span className="font-medium text-[#111827]">
+                      <span className="font-medium text-gray-900">
                         власний
                       </span>{" "}
                       Google Sheets документ.
@@ -1093,18 +1093,18 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       value={customSheetUrl}
                       onChange={(e) => setCustomSheetUrl(e.target.value)}
                       placeholder="https://docs.google.com/spreadsheets/d/ВАШ_ID/edit"
-                      className="rounded-xl border-[#BFDBFE] focus:border-[#2563EB] bg-white text-sm"
+                      className="rounded-xl border-blue-200 focus:border-blue-600 bg-white text-sm"
                     />
                     {customSheetUrl.trim() &&
                       !extractSheetId(customSheetUrl.trim()) && (
-                        <p className="text-xs text-[#EF4444] mt-1.5">
+                        <p className="text-xs text-red-500 mt-1.5">
                           ❌ Неправильний формат посилання. Перевірте, чи
                           скопійовано повне посилання з Google Sheets.
                         </p>
                       )}
                     {customSheetUrl.trim() &&
                       extractSheetId(customSheetUrl.trim()) && (
-                        <p className="text-xs text-[#16A34A] mt-1.5">
+                        <p className="text-xs text-green-600 mt-1.5">
                           ✓ Посилання правильне. Будуть завантажені команди з
                           вашого документу.
                         </p>
@@ -1114,13 +1114,13 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
 
               {/* Warning */}
-              <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-2xl flex items-start gap-2">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2">
                 <AlertTriangle
-                  className="h-4 w-4 text-[#DC2626] flex-shrink-0 mt-0.5"
+                  className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5"
                   strokeWidth={1.75}
                 />
-                <div className="text-sm text-[#111827]">
-                  <span className="font-semibold text-[#DC2626]">Важливо:</span>{" "}
+                <div className="text-sm text-gray-900">
+                  <span className="font-semibold text-red-600">Важливо:</span>{" "}
                   при оновленні <strong>всі команди замінюються</strong> даними
                   з Google Sheets. Документ є джерелом правди — локальні зміни
                   будуть перезаписані.
@@ -1128,13 +1128,13 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               </div>
             </div>
 
-            <div className="border-t border-[#E5E7EB] px-5 py-3">
+            <div className="border-t border-gray-200 px-5 py-3">
               <DialogFooter className="gap-2">
                 <Button
                   variant="outline"
                   onClick={() => setIsSheetsGuideOpen(false)}
                   disabled={isUpdating}
-                  className="rounded-xl border-[#E5E7EB] font-medium"
+                  className="rounded-xl border-gray-200 font-medium"
                 >
                   Скасувати
                 </Button>
@@ -1144,7 +1144,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     setIsSheetsGuideOpen(false);
                   }}
                   disabled={isUpdating}
-                  className="rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white font-medium"
+                  className="rounded-xl bg-primary hover:bg-blue-700 text-white font-medium"
                 >
                   {isUpdating ? (
                     <>
@@ -1168,21 +1168,21 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Add New Team - Modal Dialog */}
         <Dialog open={isAddTeamOpen} onOpenChange={setIsAddTeamOpen}>
-          <DialogContent className="rounded-3xl max-w-2xl border border-[#E5E7EB] bg-white">
+          <DialogContent className="rounded-3xl max-w-2xl border border-gray-200 bg-white">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-[#111827]">
-                <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
-                  <Plus className="h-5 w-5 text-[#3B82F6]" strokeWidth={1.75} />
+              <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
+                <div className="p-2.5 bg-blue-50 rounded-xl">
+                  <Plus className="h-5 w-5 text-blue-500" strokeWidth={1.75} />
                 </div>
                 Додати нову команду
               </DialogTitle>
-              <DialogDescription className="text-[#6B7280]">
+              <DialogDescription className="text-gray-500">
                 Заповніть інформацію про ризикову команду
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
               <div>
-                <label className="text-sm font-medium text-[#6B7280]">
+                <label className="text-sm font-medium text-gray-500">
                   Назва команди
                 </label>
                 <Input
@@ -1191,11 +1191,11 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     setNewTeam({ ...newTeam, name: e.target.value })
                   }
                   placeholder="Введіть назву команди"
-                  className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                  className="mt-1 rounded-xl border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors text-sm"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6B7280]">
+                <label className="text-sm font-medium text-gray-500">
                   Гра
                 </label>
                 <select
@@ -1203,14 +1203,14 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   onChange={(e) =>
                     setNewTeam({ ...newTeam, game: e.target.value })
                   }
-                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
+                  className="w-full p-2 border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors rounded-xl mt-1 text-sm"
                 >
                   <option value="CS">CS</option>
                   <option value="Дота">Дота</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6B7280]">
+                <label className="text-sm font-medium text-gray-500">
                   Статус
                 </label>
                 <select
@@ -1218,7 +1218,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   onChange={(e) =>
                     setNewTeam({ ...newTeam, status: e.target.value })
                   }
-                  className="w-full p-2 border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors rounded-xl mt-1 text-sm"
+                  className="w-full p-2 border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors rounded-xl mt-1 text-sm"
                 >
                   {ALL_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -1228,7 +1228,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-[#6B7280]">
+                <label className="text-sm font-medium text-gray-500">
                   Примітки
                 </label>
                 <Textarea
@@ -1237,7 +1237,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     setNewTeam({ ...newTeam, notes: e.target.value })
                   }
                   placeholder="Додайте примітки про команду"
-                  className="mt-1 rounded-xl border border-[#E5E7EB] hover:border-[#D1D5DB] focus:border-[#111827] transition-colors text-sm"
+                  className="mt-1 rounded-xl border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors text-sm"
                   rows={3}
                 />
               </div>
@@ -1246,7 +1246,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
               <Button
                 variant="outline"
                 onClick={() => setIsAddTeamOpen(false)}
-                className="rounded-xl border-[#E5E7EB] font-medium"
+                className="rounded-xl border-gray-200 font-medium"
               >
                 Скасувати
               </Button>
@@ -1255,7 +1255,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                   addRiskyTeam();
                   if (newTeam.name.trim()) setIsAddTeamOpen(false);
                 }}
-                className="bg-[#447afc] hover:bg-[#5b8ffd] text-white rounded-xl text-sm px-6 font-semibold"
+                className="bg-primary hover:bg-blue-400 text-white rounded-xl text-sm px-6 font-semibold"
                 disabled={!newTeam.name.trim()}
               >
                 <Plus className="mr-2 h-4 w-4" strokeWidth={2} />
@@ -1267,41 +1267,41 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Delete All Confirmation Dialog */}
         <Dialog open={isDeleteAllOpen} onOpenChange={setIsDeleteAllOpen}>
-          <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+          <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
             <DialogHeader className="px-6 pt-6 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
                   <Trash2
-                    className="h-5 w-5 text-[#DC2626]"
+                    className="h-5 w-5 text-red-600"
                     strokeWidth={1.5}
                   />
                 </div>
-                <DialogTitle className="text-xl font-semibold text-[#111827]">
+                <DialogTitle className="text-xl font-semibold text-gray-900">
                   Видалити всі команди?
                 </DialogTitle>
               </div>
             </DialogHeader>
 
-            <div className="border-t border-[#E5E7EB]" />
+            <div className="border-t border-gray-200" />
 
-            <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+            <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
               <div className="text-center">
-                <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                  <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+                <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                  <DialogDescription className="text-lg font-bold text-gray-900 text-center">
                     Усі команди
                   </DialogDescription>
-                  <span className="text-4xl font-bold text-[#DC2626] mt-1">
+                  <span className="text-4xl font-bold text-red-600 mt-1">
                     {riskyTeams.length}
                   </span>
-                  <span className="text-xs text-[#6B7280] mt-0.5">
+                  <span className="text-xs text-gray-500 mt-0.5">
                     команд буде видалено
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
+              <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-red-200">
                 <AlertTriangle
-                  className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5"
+                  className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5"
                   strokeWidth={1.5}
                 />
                 <p className="text-sm text-[#991B1B]">
@@ -1314,13 +1314,13 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 <Button
                   variant="outline"
                   onClick={() => setIsDeleteAllOpen(false)}
-                  className="rounded-xl border-[#E5E7EB] font-medium"
+                  className="rounded-xl border-gray-200 font-medium"
                 >
                   Скасувати
                 </Button>
                 <Button
                   onClick={deleteAllTeams}
-                  className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium"
+                  className="rounded-xl bg-red-600 hover:bg-[#B91C1C] text-white font-medium"
                 >
                   <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Видалити всі
@@ -1331,46 +1331,46 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         </Dialog>
 
         {/* Teams by Game */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
             {/* CS Teams */}
             <Card
-              className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden flex flex-col"
+              className="border border-gray-200 rounded-[24px] bg-white overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
-                <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+              <CardHeader className="bg-white border-b border-gray-200 p-6 flex-shrink-0">
+                <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
                   <span className="flex items-center gap-3">
-                    <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <div className="p-2.5 bg-blue-50 rounded-xl">
                       <Users
-                        className="h-5 w-5 text-[#447afc]"
+                        className="h-5 w-5 text-primary"
                         strokeWidth={1.5}
                       />
                     </div>
                     CS команди
                   </span>
                 </CardTitle>
-                <div className="border-t border-[#E5E7EB] -mx-6 mt-0 mb-0" />
+                <div className="border-t border-gray-200 -mx-6 mt-0 mb-0" />
                 {renderStatusFilter(
                   csStatusFilter,
                   setCsStatusFilter,
                   csStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-[#F9FAFB] flex flex-col flex-1">
+              <CardContent className="p-0 bg-gray-50 flex flex-col flex-1">
                 <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {csTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-gray-200 shadow-sm">
                         <Users
-                          className="h-16 w-16 text-[#9CA3AF]"
+                          className="h-16 w-16 text-gray-400"
                           strokeWidth={1}
                         />
                       </div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
                         Немає команд CS
                       </h3>
-                      <p className="text-[#6B7280] text-sm mb-6">
+                      <p className="text-gray-500 text-sm mb-6">
                         {csStatusFilter !== "all"
                           ? `Немає CS команд зі статусом "${csStatusFilter}"`
                           : "Додайте ризиковані команди CS для відстеження"}
@@ -1378,7 +1378,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       {csStatusFilter !== "all" ? (
                         <Button
                           onClick={() => setCsStatusFilter("all")}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
                           <RotateCcw className="h-4 w-4" strokeWidth={2} />
                           Скинути фільтр
@@ -1386,7 +1386,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       ) : (
                         <Button
                           onClick={() => setIsAddTeamOpen(true)}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
                           <Plus className="h-4 w-4" strokeWidth={2} />
                           Додати команду
@@ -1407,42 +1407,42 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
             {/* Dota Teams */}
             <Card
-              className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden flex flex-col"
+              className="border border-gray-200 rounded-[24px] bg-white overflow-hidden flex flex-col"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
-                <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+              <CardHeader className="bg-white border-b border-gray-200 p-6 flex-shrink-0">
+                <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
                   <span className="flex items-center gap-3">
-                    <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                    <div className="p-2.5 bg-blue-50 rounded-xl">
                       <Users
-                        className="h-5 w-5 text-[#447afc]"
+                        className="h-5 w-5 text-primary"
                         strokeWidth={1.5}
                       />
                     </div>
                     Dota 2 команди
                   </span>
                 </CardTitle>
-                <div className="border-t border-[#E5E7EB] -mx-6 mt-0 mb-0" />
+                <div className="border-t border-gray-200 -mx-6 mt-0 mb-0" />
                 {renderStatusFilter(
                   dotaStatusFilter,
                   setDotaStatusFilter,
                   dotaStatusCounts,
                 )}
               </CardHeader>
-              <CardContent className="p-0 bg-[#F9FAFB] flex flex-col flex-1">
+              <CardContent className="p-0 bg-gray-50 flex flex-col flex-1">
                 <div className="space-y-3 max-h-[600px] overflow-y-auto rounded-b-[24px] p-4 flex-1">
                   {dotaTeams.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-[#E5E7EB] shadow-sm">
+                      <div className="p-8 bg-white rounded-2xl inline-block mb-6 border border-gray-200 shadow-sm">
                         <Users
-                          className="h-16 w-16 text-[#9CA3AF]"
+                          className="h-16 w-16 text-gray-400"
                           strokeWidth={1}
                         />
                       </div>
-                      <h3 className="text-xl font-semibold text-[#111827] mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
                         Немає команд Dota 2
                       </h3>
-                      <p className="text-[#6B7280] text-sm mb-6">
+                      <p className="text-gray-500 text-sm mb-6">
                         {dotaStatusFilter !== "all"
                           ? `Немає Dota 2 команд зі статусом "${dotaStatusFilter}"`
                           : "Додайте ризиковані команди Dota 2 для відстеження"}
@@ -1450,7 +1450,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       {dotaStatusFilter !== "all" ? (
                         <Button
                           onClick={() => setDotaStatusFilter("all")}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
                           <RotateCcw className="h-4 w-4" strokeWidth={2} />
                           Скинути фільтр
@@ -1458,7 +1458,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                       ) : (
                         <Button
                           onClick={() => setIsAddTeamOpen(true)}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
                           <Plus className="h-4 w-4" strokeWidth={2} />
                           Додати команду
@@ -1480,25 +1480,25 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             {/* Uncategorized Teams — teams without game/status for editing */}
             {uncategorizedTeams.length > 0 && (
               <Card
-                className="border border-[#E5E7EB] rounded-[24px] bg-white overflow-hidden lg:col-span-2 flex flex-col"
+                className="border border-gray-200 rounded-[24px] bg-white overflow-hidden lg:col-span-2 flex flex-col"
                 style={{ boxShadow: chartCardShadow }}
               >
-                <CardHeader className="bg-white border-b border-[#E5E7EB] p-6 flex-shrink-0">
-                  <CardTitle className="flex items-center justify-between text-lg font-semibold text-[#111827]">
+                <CardHeader className="bg-white border-b border-gray-200 p-6 flex-shrink-0">
+                  <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
                     <span className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#EFF6FF] rounded-xl">
+                      <div className="p-2.5 bg-blue-50 rounded-xl">
                         <Pencil
-                          className="h-5 w-5 text-[#447afc]"
+                          className="h-5 w-5 text-primary"
                           strokeWidth={1.5}
                         />
                       </div>
                       Без категорії
                     </span>
-                    <Badge className="bg-[#F3F4F6] text-[#6B7280] hover:bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-[#E5E7EB] font-semibold text-sm">
+                    <Badge className="bg-gray-100 text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 font-semibold text-sm">
                       {uncategorizedTeams.length}
                     </Badge>
                   </CardTitle>
-                  <p className="text-sm text-[#6B7280] mt-2 flex items-center gap-1.5">
+                  <p className="text-sm text-gray-500 mt-2 flex items-center gap-1.5">
                     <Info className="h-4 w-4" strokeWidth={1.5} />
                     Команди без визначеної гри або статусу. Натисніть{" "}
                     <Pencil
@@ -1525,9 +1525,9 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
 
         {/* Risk Alerts */}
         {riskMetrics.consecutiveLosses > 5 && (
-          <Alert className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4">
+          <Alert className="rounded-xl border border-red-200 bg-red-50 p-4">
             <AlertTriangle
-              className="h-4 w-4 text-[#EF4444]"
+              className="h-4 w-4 text-red-500"
               strokeWidth={1.5}
             />
             <AlertDescription className="text-sm text-[#991B1B] ml-2">

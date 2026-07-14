@@ -29,7 +29,7 @@ export default function MonthlyProfitChartCard({ data }: Props) {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
             <div className="p-2.5 bg-blue-50 rounded-2xl">
-              <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+              <Calendar className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
             Прибуток по місяцях
           </CardTitle>

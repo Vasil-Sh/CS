@@ -118,7 +118,7 @@ export default function BettingFormMatchSection({
   }) => {
     const safeValue = group.options.some(o => o.value === tempBetType) ? tempBetType : undefined;
     const isGroupSelected = tempBetType && group.options.some(o => o.value === tempBetType);
-    const selectedBorder = "border-[#22C55E] bg-[#F0FDF4]";
+    const selectedBorder = "border-green-500 bg-green-50";
     const defaultBorder = "border-gray-200/80 bg-white";
     if (group.category.includes("Фора")) {
       const seen = new Set<string>();
@@ -130,7 +130,7 @@ export default function BettingFormMatchSection({
       );
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Мінус" /></SelectTrigger>
@@ -149,7 +149,7 @@ export default function BettingFormMatchSection({
       const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Менше" /></SelectTrigger>
@@ -167,14 +167,14 @@ export default function BettingFormMatchSection({
     if (group.options.length <= 3) {
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="flex flex-wrap gap-1.5">
             {group.options.map((opt) => {
               const isSelected = tempBetType === opt.value;
               return (
                 <button key={opt.value} type="button"
                   onClick={() => setTempBetType(opt.value)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-[#447afc] text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-primary text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
                   {opt.label}
                 </button>
               );
@@ -186,7 +186,7 @@ export default function BettingFormMatchSection({
     // Larger groups get a Select dropdown
     return (
       <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-        <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+        <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
         <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
           <SelectContent className="text-gray-800">
@@ -343,10 +343,10 @@ export default function BettingFormMatchSection({
               onClick={openBetModal}
               className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
                 !data.selection
-                  ? "border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
+                  ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
                   : data.betType
-                    ? `border-[#447afc] bg-[#EFF6FF] text-[#447afc] hover:bg-[#DBEAFE] ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
-                    : `border-[#447afc] bg-[#447afc] text-white hover:bg-[#3568d4] ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
+                    ? `border-primary bg-blue-50 text-primary hover:bg-blue-100 ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
+                    : `border-primary bg-primary text-white hover:bg-blue-700 ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
               }`}
             >
               {!data.selection
@@ -392,7 +392,7 @@ export default function BettingFormMatchSection({
       {/* Bet Type Modal */}
       <Dialog open={betModalOpen} onOpenChange={(open) => { if (!open) cancelBetType(); else setBetModalOpen(true); }}>
         <DialogContent
-          className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-[#E5E7EB] p-0 gap-0"
+          className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-gray-200 p-0 gap-0"
           hideCloseButton
         >
           <DialogHeader className="px-6 py-4">
@@ -401,7 +401,7 @@ export default function BettingFormMatchSection({
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
                   <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                 </div>
-                <DialogTitle className="text-lg font-semibold text-[#111827]">Тип прогнозу</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-gray-900">Тип прогнозу</DialogTitle>
               </div>
               <button
                 type="button"
@@ -426,14 +426,14 @@ export default function BettingFormMatchSection({
                 key={tab.idx}
                 type="button"
                 onClick={() => setBetTab(tab.idx)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-[#447afc] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${betTab === tab.idx ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F3F4F6]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-100">
             {/* Tab: Основне */}
             {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
             {/* Tab: Карта N */}
@@ -468,7 +468,7 @@ export default function BettingFormMatchSection({
               type="button"
               onClick={saveBetType}
               disabled={!tempBetType}
-              className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${tempBetType ? "bg-[#447afc] text-white hover:bg-[#3568d4] shadow-sm" : "bg-[#F9FAFB] text-[#9CA3AF] border border-[#E5E7EB] cursor-not-allowed"}`}
+              className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${tempBetType ? "bg-primary text-white hover:bg-blue-700 shadow-sm" : "bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed"}`}
             >
               Зберегти
             </button>

@@ -27,10 +27,10 @@ interface StrategyKpiCardProps {
 
 const riskBadgeClass = (risk: string) => {
   switch (risk) {
-    case 'Low': return 'bg-[#DCFCE7] text-[#6B7280]';
-    case 'Medium': return 'bg-[#FEF3C7] text-[#6B7280]';
-    case 'High': return 'bg-[#FEE2E2] text-[#DC2626]';
-    default: return 'bg-[#F3F4F6] text-[#6B7280]';
+    case 'Low': return 'bg-[#DCFCE7] text-gray-500';
+    case 'Medium': return 'bg-yellow-100 text-gray-500';
+    case 'High': return 'bg-[#FEE2E2] text-red-600';
+    default: return 'bg-gray-100 text-gray-500';
   }
 };
 
@@ -61,21 +61,21 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
     <button
       type="button"
       onClick={onNavigate}
-      className="text-left bg-white border border-[#E5E7EB] hover:border-[#9CA3AF] rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between overflow-hidden"
+      className="text-left bg-white border border-gray-200 hover:border-gray-400 rounded-3xl px-6 py-5 cursor-pointer group relative flex flex-col justify-between overflow-hidden"
       style={CARD_BASE_STYLE}
       onMouseEnter={(e) => applyCardHover(e.currentTarget)}
       onMouseLeave={(e) => resetCardHover(e.currentTarget)}
     >
       <ShineBorder shineColor={["#447afc", "#7C3AED", "#F59E0B"]} duration={12} borderWidth={2} />
       <div className="flex items-center gap-2 mb-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#EFF6FF]">
-          <Target className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50">
+          <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
         </div>
-        <span className="text-lg font-semibold text-[#111827]">Активна стратегія</span>
+        <span className="text-lg font-semibold text-gray-900">Активна стратегія</span>
       </div>
       {active ? (
         <>
-          <div className="text-3xl font-bold text-[#111827] tracking-tight mb-2 break-words" title={active.name}>
+          <div className="text-3xl font-bold text-gray-900 tracking-tight mb-2 break-words" title={active.name}>
             {active.name}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -83,18 +83,18 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
               {riskLabel(active.riskLevel)}
             </Badge>
             {roi !== null ? (
-              <span className={`text-sm font-semibold ${roi >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+              <span className={`text-sm font-semibold ${roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                 ROI {roi >= 0 ? '+' : ''}{roi.toFixed(1)}%
               </span>
             ) : (
-              <span className="text-sm text-[#9CA3AF]">Немає ставок</span>
+              <span className="text-sm text-gray-400">Немає ставок</span>
             )}
           </div>
         </>
       ) : (
         <div className="flex flex-col flex-1">
-          <div className="text-3xl font-bold text-[#9CA3AF] tracking-tight mb-2">Не обрано</div>
-          <span className="text-sm text-[#9CA3AF]">Оберіть основну стратегію</span>
+          <div className="text-3xl font-bold text-gray-400 tracking-tight mb-2">Не обрано</div>
+          <span className="text-sm text-gray-400">Оберіть основну стратегію</span>
         </div>
       )}
     </button>

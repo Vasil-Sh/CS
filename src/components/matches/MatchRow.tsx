@@ -96,7 +96,7 @@ const TeamLogo = ({
   if (!src)
     return (
       <div
-        className="flex items-center justify-center rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs flex-shrink-0"
+        className="flex items-center justify-center rounded-md bg-gray-100 text-gray-700 font-bold text-xs flex-shrink-0"
         style={{ width: size, height: size, minWidth: size }}
       >
         {teamName.charAt(0).toUpperCase()}
@@ -116,7 +116,7 @@ const TeamLogo = ({
           t.style.display = "none";
           const d = document.createElement("div");
           d.className =
-            "flex items-center justify-center w-full h-full rounded-md bg-[#F3F4F6] text-[#374151] font-bold text-xs";
+            "flex items-center justify-center w-full h-full rounded-md bg-gray-100 text-gray-700 font-bold text-xs";
           d.textContent = teamName.charAt(0).toUpperCase();
           t.parentNode?.appendChild(d);
         }}
@@ -155,23 +155,23 @@ const PredictionBar = ({
         <>
           <div className="flex items-center justify-between text-xs">
             <span
-              className={isFav ? "font-bold text-[#111827]" : "text-[#4B5563]"}
+              className={isFav ? "font-bold text-gray-900" : "text-[#4B5563]"}
             >
               {percent1}%
             </span>
             <span
-              className={!isFav ? "font-bold text-[#111827]" : "text-[#4B5563]"}
+              className={!isFav ? "font-bold text-gray-900" : "text-[#4B5563]"}
             >
               {percent2}%
             </span>
           </div>
-          <div className="flex h-2 rounded-full overflow-hidden bg-[#E5E7EB]">
+          <div className="flex h-2 rounded-full overflow-hidden bg-gray-200">
             <div
-              className={`transition-all duration-300 ${isFav ? "bg-[#22C55E]" : "bg-[#3B82F6]"}`}
+              className={`transition-all duration-300 ${isFav ? "bg-green-500" : "bg-blue-500"}`}
               style={{ width: `${w1}%` }}
             />
             <div
-              className={`transition-all duration-300 ${!isFav ? "bg-[#22C55E]" : "bg-[#3B82F6]"}`}
+              className={`transition-all duration-300 ${!isFav ? "bg-green-500" : "bg-blue-500"}`}
               style={{ width: `${w2}%` }}
             />
           </div>
@@ -187,8 +187,8 @@ const PredictionBar = ({
             >
               {aiTC1}%
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-[#9CA3AF]">
-              <Brain className="h-3 w-3 text-[#9CA3AF]" strokeWidth={1.5} />
+            <span className="flex items-center gap-1 text-[10px] text-gray-400">
+              <Brain className="h-3 w-3 text-gray-400" strokeWidth={1.5} />
               AI
             </span>
             <span
@@ -199,7 +199,7 @@ const PredictionBar = ({
               {aiTC2}%
             </span>
           </div>
-          <div className="flex h-1.5 rounded-full overflow-hidden bg-[#F3F4F6]">
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-gray-100">
             <div
               className="bg-[#A78BFA] transition-all duration-300"
               style={{ width: `${aiTC1}%` }}
@@ -227,7 +227,7 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
               LIVE
             </span>
           </TooltipTrigger>
-          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
             <p className="text-xs">Зараз грають</p>
           </TooltipContent>
         </Tooltip>
@@ -236,12 +236,12 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#6B7280] leading-none bg-[#F3F4F6] rounded px-1.5 py-0.5 cursor-default">
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-gray-500 leading-none bg-gray-100 rounded px-1.5 py-0.5 cursor-default">
               <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
               ЗАВЕР
             </span>
           </TooltipTrigger>
-          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
             <p className="text-xs">Завершено</p>
           </TooltipContent>
         </Tooltip>
@@ -251,12 +251,12 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2563EB] leading-none bg-[#EFF6FF] rounded px-1.5 py-0.5 cursor-default">
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-blue-600 leading-none bg-blue-50 rounded px-1.5 py-0.5 cursor-default">
               <Clock className="h-3 w-3" strokeWidth={2} />
               ОЧІКУ
             </span>
           </TooltipTrigger>
-          <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
             <p className="text-xs">Очікується</p>
           </TooltipContent>
         </Tooltip>
@@ -390,14 +390,14 @@ export default function MatchRow({
 
   return (
     <tr
-      className={`border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isLive ? "bg-red-50/30" : ""} ${isSelected ? "bg-[#EFF6FF]/60 !border-l-[#3B82F6]" : ""}`}
+      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isLive ? "bg-red-50/30" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
     >
       {visibleColumns.has("rating") && (
         <td className={`py-4 px-3 ${colDivider}`}>
           <div className="flex items-center justify-center gap-1">
             <button
               onClick={() => onRate(match.id, "like")}
-              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "like" ? "bg-[#22C55E] text-white shadow-sm" : "text-[#6B7280] hover:bg-[#F0FDF4] hover:text-[#22C55E] border border-transparent hover:border-[#BBF7D0]"}`}
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "like" ? "bg-green-500 text-white shadow-sm" : "text-gray-500 hover:bg-green-50 hover:text-green-500 border border-transparent hover:border-green-200"}`}
               title="Цікавий"
             >
               <ThumbsUp
@@ -407,7 +407,7 @@ export default function MatchRow({
             </button>
             <button
               onClick={() => onRate(match.id, "dislike")}
-              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "dislike" ? "bg-[#EF4444] text-white shadow-sm" : "text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#EF4444] border border-transparent hover:border-[#FECACA]"}`}
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "dislike" ? "bg-red-500 text-white shadow-sm" : "text-gray-500 hover:bg-red-50 hover:text-red-500 border border-transparent hover:border-red-200"}`}
               title="Не цікавий"
             >
               <ThumbsDown
@@ -423,11 +423,11 @@ export default function MatchRow({
           {/* Tournament text — full width, no divider interference */}
           {match.context && (
             <div
-              className="text-[11px] text-[#9CA3AF] font-medium truncate flex items-center gap-1 mb-1"
+              className="text-[11px] text-gray-400 font-medium truncate flex items-center gap-1 mb-1"
               title={match.context}
             >
               <Trophy
-                className="h-3 w-3 text-[#9CA3AF] flex-shrink-0"
+                className="h-3 w-3 text-gray-400 flex-shrink-0"
                 strokeWidth={1.5}
               />
               {match.context}
@@ -436,9 +436,9 @@ export default function MatchRow({
           {/* Main row: time/status sidebar + teams/badges */}
           <div className="flex items-stretch gap-3">
             {/* Left sidebar: time (aligned with teams) + status (aligned with badges) */}
-            <div className="flex flex-col items-center min-w-[48px] pr-3 border-r border-[#E5E7EB] space-y-1">
+            <div className="flex flex-col items-center min-w-[48px] pr-3 border-r border-gray-200 space-y-1">
               <div className="flex items-center" style={{ minHeight: 28 }}>
-                <span className="text-sm font-semibold text-[#111827] leading-tight">
+                <span className="text-sm font-semibold text-gray-900 leading-tight">
                   {formatTime(match.date)}
                 </span>
               </div>
@@ -455,18 +455,18 @@ export default function MatchRow({
                     teamName={match.team1}
                     size={28}
                   />
-                  <span className="font-semibold text-[#111827] text-base">
+                  <span className="font-semibold text-gray-900 text-base">
                     {match.team1}
                   </span>
                 </div>
-                <span className="text-[#9CA3AF] text-xs font-medium">vs</span>
+                <span className="text-gray-400 text-xs font-medium">vs</span>
                 <div className="flex items-center gap-1.5">
                   <TeamLogo
                     src={match.logoTeam2}
                     teamName={match.team2}
                     size={28}
                   />
-                  <span className="font-semibold text-[#111827] text-base">
+                  <span className="font-semibold text-gray-900 text-base">
                     {match.team2}
                   </span>
                 </div>
@@ -476,17 +476,17 @@ export default function MatchRow({
                   <Badge
                     className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
                       match.game === "CS2"
-                        ? "bg-[#FEF3C7] text-[#92400E]"
-                        : "bg-[#EDE9FE] text-[#5B21B6]"
+                        ? "bg-yellow-100 text-amber-800"
+                        : "bg-violet-100 text-[#5B21B6]"
                     }`}
                   >
                     {match.game}
                   </Badge>
                 )}
-                <Badge className="bg-[#F3F4F6] text-[#1F2937] border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
+                <Badge className="bg-gray-100 text-gray-800 border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                   {match.matchType}
                 </Badge>
-                <Badge className="bg-[#111827] text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
+                <Badge className="bg-gray-900 text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
                   {match.tier}
                 </Badge>
                 <Tooltip>
@@ -498,7 +498,7 @@ export default function MatchRow({
                       <span className="truncate">{formLabelWithTeam}</span>
                     </Badge>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs bg-[#111827] text-white p-3 rounded-xl">
+                  <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
                       {match.favorite}
                     </p>
@@ -516,19 +516,19 @@ export default function MatchRow({
           {match.score1 !== undefined && match.score2 !== undefined ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
-                className={`text-base font-bold ${isFinished && match.score1! > match.score2! ? "text-[#22C55E]" : isFinished && match.score1! < match.score2! ? "text-[#EF4444]" : "text-[#111827]"}`}
+                className={`text-base font-bold ${isFinished && match.score1! > match.score2! ? "text-green-500" : isFinished && match.score1! < match.score2! ? "text-red-500" : "text-gray-900"}`}
               >
                 {match.score1}
               </span>
-              <span className="text-[#9CA3AF] text-base font-medium">:</span>
+              <span className="text-gray-400 text-base font-medium">:</span>
               <span
-                className={`text-base font-bold ${isFinished && match.score2! > match.score1! ? "text-[#22C55E]" : isFinished && match.score2! < match.score1! ? "text-[#EF4444]" : "text-[#111827]"}`}
+                className={`text-base font-bold ${isFinished && match.score2! > match.score1! ? "text-green-500" : isFinished && match.score2! < match.score1! ? "text-red-500" : "text-gray-900"}`}
               >
                 {match.score2}
               </span>
             </div>
           ) : (
-            <span className="text-[#9CA3AF] text-sm">—</span>
+            <span className="text-gray-400 text-sm">—</span>
           )}
         </td>
       )}
@@ -539,7 +539,7 @@ export default function MatchRow({
             <TooltipTrigger asChild>
               <button
                 onClick={() => onAIRecommend(match)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#DDD6FE] transition-all"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-violet-100 border border-[#DDD6FE] transition-all"
               >
                 <Lightbulb
                   className="h-4 w-4 text-[#7C3AED]"
@@ -547,7 +547,7 @@ export default function MatchRow({
                 />
               </button>
             </TooltipTrigger>
-            <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+            <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
               <p className="text-sm">AI рекомендація</p>
             </TooltipContent>
           </Tooltip>
@@ -568,12 +568,12 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <span className="inline-flex items-center justify-center cursor-help">
                   <Info
-                    className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+                    className="h-3.5 w-3.5 text-gray-400 hover:text-gray-500 transition-colors"
                     strokeWidth={1.5}
                   />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+              <TooltipContent className="max-w-[220px] bg-gray-900 text-white p-3 rounded-xl">
                 <p className="text-sm">Прогноз ще недоступний</p>
               </TooltipContent>
             </Tooltip>
@@ -591,7 +591,7 @@ export default function MatchRow({
                   size={16}
                 />
                 <span
-                  className={`font-bold ${(match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0) ? "text-[#22C55E]" : "text-[#111827]"}`}
+                  className={`font-bold ${(match.bettingCoefficientTeam1 ?? 0) < (match.bettingCoefficientTeam2 ?? 0) ? "text-green-500" : "text-gray-900"}`}
                 >
                   {formatCoeff(match.bettingCoefficientTeam1)}
                 </span>
@@ -603,7 +603,7 @@ export default function MatchRow({
                   size={16}
                 />
                 <span
-                  className={`font-bold ${(match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0) ? "text-[#22C55E]" : "text-[#111827]"}`}
+                  className={`font-bold ${(match.bettingCoefficientTeam2 ?? 0) < (match.bettingCoefficientTeam1 ?? 0) ? "text-green-500" : "text-gray-900"}`}
                 >
                   {formatCoeff(match.bettingCoefficientTeam2)}
                 </span>
@@ -614,12 +614,12 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <span className="inline-flex items-center justify-center cursor-help">
                   <Info
-                    className="h-3.5 w-3.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+                    className="h-3.5 w-3.5 text-gray-400 hover:text-gray-500 transition-colors"
                     strokeWidth={1.5}
                   />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[220px] bg-[#111827] text-white p-3 rounded-xl">
+              <TooltipContent className="max-w-[220px] bg-gray-900 text-white p-3 rounded-xl">
                 <p className="text-sm">Коефіцієнти ще не виставлені</p>
               </TooltipContent>
             </Tooltip>
@@ -635,7 +635,7 @@ export default function MatchRow({
           {!hasRiskyTeam && (
             <button
               onClick={() => onAddToRisky(match)}
-              className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#447afc] hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
+              className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
             >
               <PlusCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
               <span>Додати запис</span>
@@ -648,15 +648,15 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onShowComment(match)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] transition-all"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all"
                 >
                   <Eye
-                    className="h-3.5 w-3.5 text-[#2563EB]"
+                    className="h-3.5 w-3.5 text-blue-600"
                     strokeWidth={1.5}
                   />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
                 <p className="text-sm">Коментар</p>
               </TooltipContent>
             </Tooltip>
@@ -670,12 +670,12 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onAddToBets(match)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-[#86EFAC] text-[#16A34A] hover:text-[#15803D] transition-all"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-green-50 hover:bg-[#DCFCE7] border border-green-200 hover:border-[#86EFAC] text-green-600 hover:text-[#15803D] transition-all"
                 >
                   <PlusCircle className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
                 <p className="text-sm">Додати до Записів</p>
               </TooltipContent>
             </Tooltip>
@@ -683,7 +683,7 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onToggleSelect(match.id)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all ${isSelected ? "bg-[#3B82F6] text-white shadow-sm border border-[#3B82F6]" : "text-[#9CA3AF] hover:bg-[#EFF6FF] hover:text-[#3B82F6] border border-[#E5E7EB] hover:border-[#93C5FD]"}`}
+                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all ${isSelected ? "bg-blue-500 text-white shadow-sm border border-blue-500" : "text-gray-400 hover:bg-blue-50 hover:text-blue-500 border border-gray-200 hover:border-[#93C5FD]"}`}
                 >
                   {isSelected ? (
                     <CircleCheck className="h-4 w-4" strokeWidth={2} />
@@ -692,7 +692,7 @@ export default function MatchRow({
                   )}
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-[#111827] text-white p-2 rounded-lg">
+              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
                 <p className="text-sm">
                   {isSelected ? "Прибрати з експресу" : "Додати до експресу"}
                 </p>

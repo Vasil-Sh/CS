@@ -388,9 +388,9 @@ export default function TelegramGroups() {
 
   const resultBadge = (result: string) => {
     switch (result) {
-      case 'Win': return <Badge className="bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0] text-xs font-medium rounded-full"><CheckCircle2 className="h-3 w-3 mr-1" strokeWidth={1.5} />Виграш</Badge>;
-      case 'Loss': return <Badge className="bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] text-xs font-medium rounded-full"><XCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />Програш</Badge>;
-      default: return <Badge className="bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB] text-xs font-medium rounded-full"><Clock className="h-3 w-3 mr-1" strokeWidth={1.5} />Очікує</Badge>;
+      case 'Win': return <Badge className="bg-[#DCFCE7] text-green-600 border border-green-200 text-xs font-medium rounded-full"><CheckCircle2 className="h-3 w-3 mr-1" strokeWidth={1.5} />Виграш</Badge>;
+      case 'Loss': return <Badge className="bg-red-50 text-red-600 border border-red-200 text-xs font-medium rounded-full"><XCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />Програш</Badge>;
+      default: return <Badge className="bg-gray-100 text-gray-500 border border-gray-200 text-xs font-medium rounded-full"><Clock className="h-3 w-3 mr-1" strokeWidth={1.5} />Очікує</Badge>;
     }
   };
 
@@ -413,7 +413,7 @@ export default function TelegramGroups() {
                 value={groupForm.name}
                 onChange={e => setGroupForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="Pro Betting 🇺🇦"
-                className="rounded-xl border-[#E5E7EB]"
+                className="rounded-xl border-gray-200"
               />
             </div>
             <div>
@@ -422,13 +422,13 @@ export default function TelegramGroups() {
                 value={groupForm.link}
                 onChange={e => setGroupForm(p => ({ ...p, link: e.target.value }))}
                 placeholder="https://t.me/groupname"
-                className="rounded-xl border-[#E5E7EB]"
+                className="rounded-xl border-gray-200"
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setGroupDialogOpen(false)} className="rounded-xl">Скасувати</Button>
-            <Button onClick={handleSaveGroup} className="rounded-xl bg-[#447afc] hover:bg-[#3568d4]">
+            <Button onClick={handleSaveGroup} className="rounded-xl bg-primary hover:bg-blue-700">
               <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
               {editingGroup ? 'Зберегти' : 'Додати'}
             </Button>
@@ -438,49 +438,49 @@ export default function TelegramGroups() {
 
       {/* ===== Delete Group Confirm ===== */}
       <Dialog open={!!deleteGroupConfirm} onOpenChange={() => setDeleteGroupConfirm(null)}>
-        <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+        <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
           <DialogHeader className="px-6 pt-6 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-                <Trash2 className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
+                <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.5} />
               </div>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
                 Видалити групу?
               </DialogTitle>
             </div>
           </DialogHeader>
 
-          <div className="border-t border-[#E5E7EB]" />
+          <div className="border-t border-gray-200" />
 
-          <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+          <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
             <div className="text-center">
-              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <DialogDescription className="text-lg font-bold text-gray-900 text-center">
                   {deleteGroupConfirm && groups.find(g => g.id === deleteGroupConfirm)?.name || '—'}
                 </DialogDescription>
                 {deleteGroupConfirm && (() => {
                   const g = groups.find(x => x.id === deleteGroupConfirm);
                   return g?.link ? (
-                    <p className="text-xs text-[#9CA3AF] mt-0.5">{tgHandle(g.link)}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{tgHandle(g.link)}</p>
                   ) : null;
                 })()}
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
-              <AlertTriangle className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-red-200">
+              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
               <p className="text-sm text-[#991B1B]">
                 Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
               </p>
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl border-[#E5E7EB] font-medium">
+              <Button variant="outline" onClick={() => setDeleteGroupConfirm(null)} className="rounded-xl border-gray-200 font-medium">
                 Скасувати
               </Button>
               <Button
                 onClick={() => deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)}
-                className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
+                className="rounded-xl bg-red-600 hover:bg-[#B91C1C] text-white"
               >
                 <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Видалити
@@ -495,23 +495,23 @@ export default function TelegramGroups() {
   // ── Render ──
 
   const renderKPICards = () => (
-    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+    <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCard label="Груп" value={groups.length} icon={Users} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
-      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-[#EFF6FF]" iconColor="text-[#447afc]" />
+        <StatCard label="Груп" value={groups.length} icon={Users} color="bg-blue-50" iconColor="text-primary" />
+      <StatCard label="Ставок" value={overallStats.totalBets} icon={BarChart3} color="bg-blue-50" iconColor="text-primary" />
       <StatCard 
         label="Win Rate" 
         value={`${overallStats.winRate.toFixed(0)}%`} 
         icon={overallStats.winRate >= 50 ? TrendingUp : TrendingDown} 
-        color="bg-[#EFF6FF]" 
-        iconColor="text-[#447afc]"
+        color="bg-blue-50" 
+        iconColor="text-primary"
       />
       <StatCard 
         label="Прибуток" 
         value={`${Number(overallStats.totalProfit) >= 0 ? '+' : ''}${Number(overallStats.totalProfit).toFixed(0)}`} 
         icon={Target} 
-        color="bg-[#EFF6FF]" 
-        iconColor="text-[#447afc]"
+        color="bg-blue-50" 
+        iconColor="text-primary"
       />
     </div>    </div>  );
 
@@ -527,24 +527,24 @@ export default function TelegramGroups() {
       {renderKPICards()}
 
       {groups.length === 0 ? (
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex">
           <div
-            className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden flex-1 flex flex-col items-center justify-center"
+            className="bg-white border border-gray-100 rounded-3xl overflow-hidden flex-1 flex flex-col items-center justify-center"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           >
           <div className="py-16 text-center">
-            <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-              <MessageCircle className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+            <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+              <MessageCircle className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
             </div>
-            <h3 className="text-xl font-semibold text-[#111827] mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Немає доданих Telegram-груп
             </h3>
-            <p className="text-[#6B7280] text-sm mb-6">
+            <p className="text-gray-500 text-sm mb-6">
               Додайте Telegram-групи зі ставками для аналізу їх результатів
             </p>
             <Button
               onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-base font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
             >
               <Plus className="h-4 w-4" strokeWidth={2} />
               Додати групу
@@ -559,7 +559,7 @@ export default function TelegramGroups() {
         {rankedGroups.map((gs, idx) => (
           <div
             key={gs.groupId}
-            className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl h-full flex flex-col overflow-hidden transition-all duration-300"
+            className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl h-full flex flex-col overflow-hidden transition-all duration-300"
             style={CARD_BASE_STYLE}
             onMouseEnter={(e) => applyCardHover(e.currentTarget)}
             onMouseLeave={(e) => resetCardHover(e.currentTarget)}
@@ -567,11 +567,11 @@ export default function TelegramGroups() {
             {/* Header: icon + name */}
             <div className="px-7 pt-7 pb-5">
               <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0 mt-0.5">
-                  <MessageCircle className="h-5 w-5 text-[#447afc]" strokeWidth={2} />
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-50 flex-shrink-0 mt-0.5">
+                  <MessageCircle className="h-5 w-5 text-primary" strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1 min-h-[3.5rem] flex flex-col justify-center">
-                  <h4 className="text-xl font-bold text-[#374151] tracking-tight line-clamp-2">{gs.groupName}</h4>
+                  <h4 className="text-xl font-bold text-gray-700 tracking-tight line-clamp-2">{gs.groupName}</h4>
                   {gs.totalBets > 0 && (
                     <div className="mt-1.5">
                       <StabilityBadge stability={gs.stability} label={gs.stabilityLabel} />
@@ -582,7 +582,7 @@ export default function TelegramGroups() {
             </div>
 
             {/* Divider 1 */}
-            <div className="h-px w-full bg-[#F3F4F6]" />
+            <div className="h-px w-full bg-gray-100" />
 
             {/* Link section */}
             {(() => {
@@ -590,17 +590,17 @@ export default function TelegramGroups() {
               return g?.link ? (
                 <div className="px-7 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#EFF6FF] flex-shrink-0">
-                      <ExternalLink className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-50 flex-shrink-0">
+                      <ExternalLink className="h-5 w-5 text-primary" strokeWidth={1.5} />
                     </div>
-                    <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-[#447afc] hover:underline truncate flex-1">
+                    <a href={g.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
                       {tgHandle(g.link)}
                     </a>
                     <a
                       href={toWebPreviewUrl(g.link)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-medium text-white bg-[#447afc] hover:bg-[#3568d4] inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                      className="text-xs font-medium text-white bg-primary hover:bg-blue-700 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
                       title="Переглянути канал без Telegram"
                     >
                       <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -614,30 +614,30 @@ export default function TelegramGroups() {
             })()}
 
             {/* Divider 2 */}
-            <div className="h-px w-full bg-[#F3F4F6]" />
+            <div className="h-px w-full bg-gray-100" />
 
             {/* Content */}
             <div className="space-y-4 flex-1 px-7 pb-7 pt-6">
               {/* Streak indicator */}
               {gs.streak !== 0 && (
-                <p className={`text-sm font-medium ${gs.streak > 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                <p className={`text-sm font-medium ${gs.streak > 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {gs.streak > 0 ? '🔥' : '📉'} {Math.abs(gs.streak)} {gs.streak > 0 ? 'виграшів' : 'програшів'} поспіль
                 </p>
               )}
 
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
-                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Ставок</p>
-                  <p className="text-2xl font-bold text-[#111827] mt-1.5">{gs.totalBets}</p>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center">
+                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Ставок</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1.5">{gs.totalBets}</p>
                 </div>
-                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
-                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Виграшів</p>
-                  <p className="text-2xl font-bold text-[#16A34A] mt-1.5">{gs.wins}</p>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center">
+                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Виграшів</p>
+                  <p className="text-2xl font-bold text-green-600 mt-1.5">{gs.wins}</p>
                 </div>
-                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] text-center">
-                  <p className="text-xs text-[#6B7280] font-semibold uppercase tracking-wider">Win Rate</p>
-                  <p className={`text-2xl font-bold mt-1.5 ${gs.winRate >= 50 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center">
+                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Win Rate</p>
+                  <p className={`text-2xl font-bold mt-1.5 ${gs.winRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
                     {gs.winRate.toFixed(0)}%
                   </p>
                 </div>
@@ -653,7 +653,7 @@ export default function TelegramGroups() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center justify-end h-full" title={`${m.month}: ${m.profit >= 0 ? '+' : ''}${m.profit.toFixed(0)} ₴`}>
                           <div
-                            className={`w-full rounded-t-sm transition-all ${m.profit >= 0 ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}`}
+                            className={`w-full rounded-t-sm transition-all ${m.profit >= 0 ? 'bg-green-600' : 'bg-red-600'}`}
                             style={{ height: `${height}%`, minHeight: m.profit !== 0 ? 3 : 1 }}
                           />
                         </div>
@@ -662,7 +662,7 @@ export default function TelegramGroups() {
                   </div>
                   <div className="flex justify-between mt-1">
                     {gs.monthlyProfit.map((m, i) => (
-                      <span key={i} className="text-[9px] text-[#9CA3AF]">{m.month}</span>
+                      <span key={i} className="text-[9px] text-gray-400">{m.month}</span>
                     ))}
                   </div>
                 </div>
@@ -670,28 +670,28 @@ export default function TelegramGroups() {
 
               {/* Profit row with dividers */}
               <div className="-mx-7">
-                <div className="h-px w-full bg-[#F3F4F6]" />
+                <div className="h-px w-full bg-gray-100" />
                 <div className="flex items-center justify-between px-7 py-4">
-                  <span className="text-base font-bold text-[#111827]">Прибуток</span>
-                  <span className={`text-xl font-bold ${gs.totalProfit >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                  <span className="text-base font-bold text-gray-900">Прибуток</span>
+                  <span className={`text-xl font-bold ${gs.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {Number(gs.totalProfit) >= 0 ? '+' : ''}{Number(gs.totalProfit).toFixed(0)} ₴
                   </span>
                 </div>
-                <div className="h-px w-full bg-[#F3F4F6]" />
+                <div className="h-px w-full bg-gray-100" />
               </div>
 
               {/* Bottom row: add bet + delete */}
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => toast.info('Парсер даних з Telegram з\'явиться в наступних оновленнях', { description: 'Ми працюємо над автоматичним отриманням ставок з відкритих TG-груп' })}
-                  className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white text-sm font-semibold transition-colors"
+                  className="flex-1 rounded-xl bg-primary hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
                 >
                   <RefreshCw className="h-4 w-4 mr-1.5" strokeWidth={2} />
                   Отримати данні
                 </Button>
                 <button
                   onClick={() => setDeleteGroupConfirm(gs.groupId)}
-                  className="p-2 rounded-xl border border-[#FEE2E2] hover:bg-[#FEF2F2] text-[#EF4444] hover:text-[#DC2626] transition-colors flex-shrink-0"
+                  className="p-2 rounded-xl border border-[#FEE2E2] hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors flex-shrink-0"
                   title="Видалити групу"
                 >
                   <Trash2 className="h-4 w-4" strokeWidth={1.5} />
@@ -704,26 +704,26 @@ export default function TelegramGroups() {
         {/* Add Group Card */}
         <button
           onClick={() => { setEditingGroup(null); setGroupForm({ ...EMPTY_GROUP }); setGroupDialogOpen(true); }}
-          className="border-2 border-dashed border-[#D1D5DB] rounded-3xl bg-white/50 hover:bg-[#F9FAFB] hover:border-[#9CA3AF] transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer h-full"
+          className="border-2 border-dashed border-gray-300 rounded-3xl bg-white/50 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 p-5 flex flex-col items-center justify-center gap-2 min-h-[200px] cursor-pointer h-full"
         >
-          <div className="p-3 bg-[#F3F4F6] rounded-full">
-            <Plus className="h-5 w-5 text-[#9CA3AF]" strokeWidth={2} />
+          <div className="p-3 bg-gray-100 rounded-full">
+            <Plus className="h-5 w-5 text-gray-400" strokeWidth={2} />
           </div>
-          <span className="text-sm font-medium text-[#9CA3AF]">Додати групу</span>
+          <span className="text-sm font-medium text-gray-400">Додати групу</span>
         </button>
       </div>
 
       {/* ===== Bets Table ===== */}
       {bets.length > 0 && (
-        <Card className="border border-[#F3F4F6] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
+        <Card className="border border-gray-100 rounded-2xl bg-white overflow-hidden" style={{ boxShadow: CHART_CARD_SHADOW }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-[#111827]">
-                Ставки з Telegram <span className="text-[#9CA3AF] font-normal">({filteredBets.length})</span>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Ставки з Telegram <span className="text-gray-400 font-normal">({filteredBets.length})</span>
               </h3>
               <div className="flex items-center gap-2">
                 <Select value={selectedGroupFilter} onValueChange={setSelectedGroupFilter}>
-                  <SelectTrigger className="w-[160px] h-9 rounded-xl border-[#E5E7EB] text-xs">
+                  <SelectTrigger className="w-[160px] h-9 rounded-xl border-gray-200 text-xs">
                     <SelectValue placeholder="Всі групи" />
                   </SelectTrigger>
                   <SelectContent>
@@ -732,7 +732,7 @@ export default function TelegramGroups() {
                   </SelectContent>
                 </Select>
                 <Select value={resultFilter} onValueChange={setResultFilter}>
-                  <SelectTrigger className="w-[130px] h-9 rounded-xl border-[#E5E7EB] text-xs">
+                  <SelectTrigger className="w-[130px] h-9 rounded-xl border-gray-200 text-xs">
                     <SelectValue placeholder="Всі результати" />
                   </SelectTrigger>
                   <SelectContent>
@@ -746,7 +746,7 @@ export default function TelegramGroups() {
                   variant="outline"
                   size="sm"
                   onClick={() => toast.info('Парсер даних з Telegram з\'явиться в наступних оновленнях')}
-                  className="rounded-xl border-[#E5E7EB] hover:border-[#D1D5DB] text-[#6B7280] hover:text-[#111827] text-xs font-medium"
+                  className="rounded-xl border-gray-200 hover:border-gray-300 text-gray-500 hover:text-gray-900 text-xs font-medium"
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
                   Отримати данні
@@ -758,42 +758,42 @@ export default function TelegramGroups() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#F3F4F6]">
-                      <th className="text-left py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Група</th>
-                      <th className="text-left py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Дата</th>
-                      <th className="text-left py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Матч</th>
-                      <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Коеф.</th>
-                      <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Сума</th>
-                      <th className="text-center py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Рез-т</th>
-                      <th className="text-right py-2 px-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Прибуток</th>
+                    <tr className="border-b border-gray-100">
+                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Група</th>
+                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Дата</th>
+                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Матч</th>
+                      <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Коеф.</th>
+                      <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Сума</th>
+                      <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Рез-т</th>
+                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Прибуток</th>
                       <th className="w-10" />
                     </tr>
                   </thead>
                   <tbody>
                     {filteredBets.map(bet => (
-                      <tr key={bet.id} className="border-b border-[#F9FAFB] hover:bg-[#F9FAFB] transition-colors">
+                      <tr key={bet.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <td className="py-2.5 px-3">
-                          <span className="text-xs font-medium text-[#111827]">{getGroupName(bet.groupId)}</span>
+                          <span className="text-xs font-medium text-gray-900">{getGroupName(bet.groupId)}</span>
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="text-xs text-[#6B7280]">
+                          <span className="text-xs text-gray-500">
                             {new Date(bet.date).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' })}
                           </span>
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="text-xs font-medium text-[#111827]">
+                          <span className="text-xs font-medium text-gray-900">
                             {bet.match || (bet.team1 && bet.team2 ? `${bet.team1} vs ${bet.team2}` : '—')}
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-center">
-                          <span className="text-xs font-semibold text-[#111827]">{bet.odds}</span>
+                          <span className="text-xs font-semibold text-gray-900">{bet.odds}</span>
                         </td>
                         <td className="py-2.5 px-3 text-center">
-                          <span className="text-xs text-[#6B7280]">{bet.amount > 0 ? bet.amount : '—'}</span>
+                          <span className="text-xs text-gray-500">{bet.amount > 0 ? bet.amount : '—'}</span>
                         </td>
                         <td className="py-2.5 px-3 text-center">{resultBadge(bet.result)}</td>
                         <td className="py-2.5 px-3 text-right">
-                          <span className={`text-xs font-semibold ${(bet.profit || 0) >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`}>
+                          <span className={`text-xs font-semibold ${(bet.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {(bet.profit || 0) >= 0 ? '+' : ''}{(bet.profit || 0).toFixed(0)}
                           </span>
                         </td>
@@ -801,14 +801,14 @@ export default function TelegramGroups() {
                           <div className="flex gap-0.5">
                             <button
                               onClick={() => openEditBet(bet)}
-                              className="p-1 rounded-md hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#111827] transition-colors"
+                              className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
                               title="Редагувати"
                             >
                               <Pencil className="h-3 w-3" strokeWidth={1.5} />
                             </button>
                             <button
                               onClick={() => handleDeleteBet(bet.id)}
-                              className="p-1 rounded-md hover:bg-[#FEF2F2] text-[#9CA3AF] hover:text-[#DC2626] transition-colors"
+                              className="p-1 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
                               title="Видалити"
                             >
                               <X className="h-3 w-3" strokeWidth={1.5} />
@@ -822,7 +822,7 @@ export default function TelegramGroups() {
               </div>
             ) : (
               <div className="py-10 text-center">
-                <p className="text-sm text-[#9CA3AF]">Немає ставок за обраними фільтрами</p>
+                <p className="text-sm text-gray-400">Немає ставок за обраними фільтрами</p>
               </div>
             )}
           </CardContent>
@@ -841,12 +841,12 @@ export default function TelegramGroups() {
 function StabilityBadge({ stability, label }: { stability: number; label: string }) {
   const icon = stability >= 70 ? ShieldCheck : stability >= 40 ? Shield : ShieldAlert;
   const colors = stability >= 70
-    ? 'bg-[#DCFCE7] text-[#16A34A] border-[#BBF7D0]'
+    ? 'bg-[#DCFCE7] text-green-600 border-green-200'
     : stability >= 40
-    ? 'bg-[#FEF3C7] text-[#D97706] border-[#FED7AA]'
+    ? 'bg-yellow-100 text-amber-600 border-[#FED7AA]'
     : label === 'Немає даних'
-    ? 'bg-[#F3F4F6] text-[#9CA3AF] border-[#E5E7EB]'
-    : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]';
+    ? 'bg-gray-100 text-gray-400 border-gray-200'
+    : 'bg-red-50 text-red-600 border-red-200';
 
   return (
     <Badge className={`text-[10px] font-medium px-2 py-0.5 border rounded-full ${colors}`}>
@@ -867,7 +867,7 @@ function StatCard({ label, value, icon: Icon, color, iconColor }: {
 }) {
   return (
     <div
-      className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5 flex flex-col justify-between transition-all duration-300"
+      className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 flex flex-col justify-between transition-all duration-300"
       style={CARD_BASE_STYLE}
       onMouseEnter={(e) => applyCardHover(e.currentTarget)}
       onMouseLeave={(e) => resetCardHover(e.currentTarget)}
@@ -876,9 +876,9 @@ function StatCard({ label, value, icon: Icon, color, iconColor }: {
         <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${color}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={1.5} />
         </div>
-        <span className="text-lg font-semibold text-[#111827]">{label}</span>
+        <span className="text-lg font-semibold text-gray-900">{label}</span>
       </div>
-      <p className="text-3xl font-bold text-[#111827] tracking-tight">{value}</p>
+      <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
     </div>
   );
 }

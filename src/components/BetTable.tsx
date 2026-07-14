@@ -544,7 +544,7 @@ const BetTableMemo = memo(function BetTable({
       <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-50 rounded-xl">
-            <Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            <Calendar className="h-5 w-5 text-primary" strokeWidth={1.5} />
           </div>
           <span className="text-lg font-semibold text-gray-900">
             Останні записи
@@ -561,7 +561,7 @@ const BetTableMemo = memo(function BetTable({
           title="Стислий список результатів"
         >
           <div className="p-1 bg-blue-50 rounded-lg">
-            <ListChecks className="h-4 w-4 text-[#447afc]" strokeWidth={1.5} />
+            <ListChecks className="h-4 w-4 text-primary" strokeWidth={1.5} />
           </div>
           Стислий список
         </button>
@@ -1211,7 +1211,7 @@ const BetTableMemo = memo(function BetTable({
         }}
       >
         <DialogContent
-          className="max-w-xl max-h-[80vh] overflow-y-auto border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0"
+          className="max-w-xl max-h-[80vh] overflow-y-auto border border-gray-200 rounded-3xl bg-white p-0 gap-0"
           style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}
         >
           <DialogHeader className="px-6 pt-5 pb-4">
@@ -1219,20 +1219,20 @@ const BetTableMemo = memo(function BetTable({
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
                   <FileText
-                    className="h-5 w-5 text-[#447afc]"
+                    className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
-                <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
+                <h2 className="text-lg font-semibold text-gray-900 tracking-tight">
                   Нотатки до запису
                 </h2>
               </div>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="border-t border-[#E5E7EB]" />
+          <div className="border-t border-gray-200" />
 
-          <div className="px-6 py-5 space-y-4 bg-[#F3F4F6]">
+          <div className="px-6 py-5 space-y-4 bg-gray-100">
             <div className="space-y-3">
               {notesDialogBet
                 .split("\n")
@@ -1246,7 +1246,7 @@ const BetTableMemo = memo(function BetTable({
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm"
+                        className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-gray-200 shadow-sm"
                       >
                         <span className="text-sm text-gray-400">
                           Результат:
@@ -1263,7 +1263,7 @@ const BetTableMemo = memo(function BetTable({
                     return (
                       <div
                         key={i}
-                        className="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-4"
+                        className="rounded-2xl bg-white border border-gray-200 shadow-sm p-4"
                       >
                         <span className="text-xs text-gray-400 block mb-1">
                           Коментар:
@@ -1282,7 +1282,7 @@ const BetTableMemo = memo(function BetTable({
                   return (
                     <div
                       key={i}
-                      className="rounded-2xl bg-white border border-[#E5E7EB] shadow-sm p-3"
+                      className="rounded-2xl bg-white border border-gray-200 shadow-sm p-3"
                     >
                       <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                         {line}
@@ -1293,7 +1293,7 @@ const BetTableMemo = memo(function BetTable({
             </div>
             <Button
               onClick={() => setNotesDialogBet("")}
-              className="rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white w-full"
+              className="rounded-xl bg-primary hover:bg-blue-700 text-white w-full"
             >
               Закрити
             </Button>

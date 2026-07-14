@@ -26,13 +26,13 @@ export default function DataStatsCards({ stats, cardBaseStyle, cardHoverStyle }:
       {labels.map(({ key, label }) => (
         <div
           key={key}
-          className="bg-white border border-[#F3F4F6] hover:border-[#D1D5DB] rounded-3xl px-6 py-5"
+          className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5"
           style={cardBaseStyle}
           onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
           onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
         >
-          <p className="text-sm font-medium text-[#6B7280] uppercase tracking-wider mb-1">{label}</p>
-          <p className="text-2xl font-bold text-[#111827] tracking-tight">{stats[key]}</p>
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats[key]}</p>
         </div>
       ))}
     </div>

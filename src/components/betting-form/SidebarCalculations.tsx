@@ -48,7 +48,7 @@ export default function SidebarCalculations({
         <span className="text-lg font-semibold text-gray-900">Розрахунки</span>
       </div>
 
-      <div className={hasFormData ? "p-6 space-y-4 flex-1 flex flex-col bg-[#F3F4F6]" : "p-6 space-y-4 flex-1 flex flex-col"}>
+      <div className={hasFormData ? "p-6 space-y-4 flex-1 flex flex-col bg-gray-100" : "p-6 space-y-4 flex-1 flex flex-col"}>
         {hasFormData ? (
           <>
             {/* Express Total Odds */}

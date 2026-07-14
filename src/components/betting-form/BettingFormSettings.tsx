@@ -212,13 +212,13 @@ export default function BettingFormSettings({
                   onClick={() => setGoalPickerOpen(true)}
                   className={`flex items-center justify-between w-full rounded-xl border text-sm h-10 px-4 py-2 transition-all ${
                     selectedGoal
-                      ? "border-[#2563EB] bg-[#EFF6FF] text-[#111827]"
-                      : "border-[#E5E7EB] bg-white text-[#9CA3AF] hover:border-[#D1D5DB]"
+                      ? "border-blue-600 bg-blue-50 text-gray-900"
+                      : "border-gray-200 bg-white text-gray-400 hover:border-gray-300"
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">
                     {selectedGoal ? (
-                      <span className="font-medium text-[#111827] truncate">
+                      <span className="font-medium text-gray-900 truncate">
                         {selectedGoal.name}
                       </span>
                     ) : (
@@ -226,7 +226,7 @@ export default function BettingFormSettings({
                     )}
                   </span>
                   <ChevronDown
-                    className="h-4 w-4 flex-shrink-0 ml-2 text-[#9CA3AF]"
+                    className="h-4 w-4 flex-shrink-0 ml-2 text-gray-400"
                     strokeWidth={1.5}
                   />
                 </button>

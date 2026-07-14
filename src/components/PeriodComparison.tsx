@@ -169,11 +169,11 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
       {completedBetsCount === 0 ? (
         <div className="flex-1 flex items-center justify-center py-16 text-center">
           <div>
-            <div className="p-8 bg-[#F3F4F6] rounded-2xl inline-block mb-6">
-              <Calendar className="h-16 w-16 text-[#9CA3AF]" strokeWidth={1.5} />
+            <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+              <Calendar className="h-16 w-16 text-gray-400" strokeWidth={1.5} />
             </div>
-            <h3 className="text-xl font-semibold text-[#111827] mb-2">Немає даних для порівняння</h3>
-            <p className="text-[#6B7280] text-sm">Додайте завершені ставки для перегляду статистики по періодах</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Немає даних для порівняння</h3>
+            <p className="text-gray-500 text-sm">Додайте завершені ставки для перегляду статистики по періодах</p>
           </div>
         </div>
       ) : (
@@ -197,7 +197,7 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
               <CardHeader className="bg-white border-b border-gray-100 px-6 py-5">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                    <div className="p-2.5 bg-blue-50 rounded-2xl"><TrendingUp className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                    <div className="p-2.5 bg-blue-50 rounded-2xl"><TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} /></div>
                     Прибуток та активність
                   </CardTitle>
                   <div className="flex items-center gap-4">
@@ -245,7 +245,7 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
               <CardHeader className="bg-white border-b border-gray-100 px-6 py-5">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                    <div className="p-2.5 bg-blue-50 rounded-2xl"><Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                    <div className="p-2.5 bg-blue-50 rounded-2xl"><Calendar className="h-5 w-5 text-primary" strokeWidth={1.5} /></div>
                     Win Rate та ROI тренди
                   </CardTitle>
                   <div className="flex items-center gap-4">
@@ -284,7 +284,7 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
           <Card className="border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden">
             <CardHeader className="bg-white border-b border-gray-100 px-6 py-5">
               <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                <div className="p-2.5 bg-blue-50 rounded-2xl"><Calendar className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} /></div>
+                <div className="p-2.5 bg-blue-50 rounded-2xl"><Calendar className="h-5 w-5 text-primary" strokeWidth={1.5} /></div>
                 Детальна статистика по періодах
               </CardTitle>
             </CardHeader>

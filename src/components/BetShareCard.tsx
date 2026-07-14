@@ -300,7 +300,7 @@ export default function BetShareCard({
       return (
         <>
           {parts[0]}{" "}
-          <span className={isPending ? "text-[#3B82F6]" : ""}>vs</span>{" "}
+          <span className={isPending ? "text-blue-500" : ""}>vs</span>{" "}
           {parts[1]}
         </>
       );
@@ -391,7 +391,7 @@ export default function BetShareCard({
                 game={game}
               />
               <h3
-                className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}
+                className={`${matchFont} font-bold text-gray-900 tracking-tight truncate min-w-0`}
               >
                 {matchTitle}
               </h3>
@@ -404,7 +404,7 @@ export default function BetShareCard({
                 game={game}
               />
             </div>
-            <div className="border-t border-[#F3F4F6] -mx-6" />
+            <div className="border-t border-gray-100 -mx-6" />
           </>
         )}
 
@@ -424,7 +424,7 @@ export default function BetShareCard({
                   />
                 )}
                 <p
-                  className={`${expressHeaderFont} font-bold text-[#111827] tracking-tight`}
+                  className={`${expressHeaderFont} font-bold text-gray-900 tracking-tight`}
                 >
                   {parsedEvents.length}{" "}
                   {parsedEvents.length === 1
@@ -534,7 +534,7 @@ export default function BetShareCard({
               </div>
             )}
 
-            <div className="border-t border-[#F3F4F6] mt-3 -mx-6" />
+            <div className="border-t border-gray-100 mt-3 -mx-6" />
           </div>
         ) : isExpress && parsedEvents.length === 0 ? (
           <>
@@ -548,13 +548,13 @@ export default function BetShareCard({
                   />
                 )}
                 <h3
-                  className={`${matchFont} font-bold text-[#111827] tracking-tight truncate min-w-0`}
+                  className={`${matchFont} font-bold text-gray-900 tracking-tight truncate min-w-0`}
                 >
                   {matchTitle}
                 </h3>
               </div>
             </div>
-            <div className="border-t border-[#F3F4F6] -mx-6" />
+            <div className="border-t border-gray-100 -mx-6" />
           </>
         ) : selection ? (
           <>

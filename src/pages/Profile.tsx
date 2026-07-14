@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -476,7 +476,7 @@ export default function Profile() {
         />
 
         {/* Data Statistics + User Info — unified card */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
+        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
           {/* Data Statistics - 5 cards */}
           <DataStatsCards
             stats={stats}
@@ -486,20 +486,20 @@ export default function Profile() {
 
           {/* User Info Card */}
           <Card
-            className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white transition-all duration-300"
+            className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white transition-all duration-300"
             style={{ boxShadow: chartCardShadow }}
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-[#447afc] rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
                   <User className="h-8 w-8 text-white" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-semibold text-[#111827]">
+                  <h2 className="text-xl font-semibold text-gray-900">
                     @{username}
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge className="bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0] rounded-lg font-medium text-xs px-3 py-1">
+                    <Badge className="bg-green-50 text-green-600 border border-green-200 rounded-lg font-medium text-xs px-3 py-1">
                       <CheckCircle2 className="h-3 w-3 mr-1" strokeWidth={2} />
                       Активний
                     </Badge>
@@ -512,7 +512,7 @@ export default function Profile() {
 
         {/* Quick Navigation Tabs */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-[#E8E6DC] p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {[
               { id: "interface", label: "Інтерфейс" },
               { id: "backup", label: "Бекап" },
@@ -524,10 +524,10 @@ export default function Profile() {
                   onClick={() => setActiveTab(isActive ? null : tab.id)}
                   className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out ${
                     isActive
-                      ? "bg-[#447afc] text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+                      ? "bg-primary text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
                       : activeTab === null
-                        ? "bg-white text-[#111827] font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#D1D5DB] hover:bg-[#F5F5F3]"
-                        : "bg-transparent text-[#9CA3AF] hover:bg-[#F5F5F3] hover:text-[#6B7280]"
+                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-gray-300 hover:bg-[#F5F5F3]"
+                        : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500"
                   }`}
                 >
                   {tab.label}
@@ -539,17 +539,17 @@ export default function Profile() {
 
         {/* Theme & Language Settings */}
         {(activeTab === null || activeTab === "interface") && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <Card
               id="interface"
-              className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300"
+              className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white overflow-hidden transition-all duration-300"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+              <CardHeader className="bg-white border-b border-gray-200 p-6">
+                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+                  <div className="p-2.5 bg-gray-100 rounded-xl">
                     <Palette
-                      className="h-5 w-5 text-[#111827]"
+                      className="h-5 w-5 text-gray-900"
                       strokeWidth={1.5}
                     />
                   </div>
@@ -558,11 +558,11 @@ export default function Profile() {
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 {/* Theme Switcher */}
-                <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
                   <div className="flex items-center gap-3">
                     {theme === "light" ? (
                       <Sun
-                        className="h-5 w-5 text-[#F59E0B]"
+                        className="h-5 w-5 text-amber-500"
                         strokeWidth={1.5}
                       />
                     ) : (
@@ -572,23 +572,23 @@ export default function Profile() {
                       />
                     )}
                     <div>
-                      <p className="text-sm font-medium text-[#111827]">
+                      <p className="text-sm font-medium text-gray-900">
                         Тема оформлення
                       </p>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-gray-400">
                         Оберіть зовнішній вигляд додатку
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 p-1 rounded-full bg-[#E5E7EB]">
+                  <div className="flex items-center gap-1 p-1 rounded-full bg-gray-200">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleThemeChange("light")}
                       className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
                         theme === "light"
-                          ? "bg-white text-[#111827] shadow-sm"
-                          : "text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
                       }`}
                     >
                       <Sun className="h-3.5 w-3.5 mr-1.5" strokeWidth={2} />
@@ -600,8 +600,8 @@ export default function Profile() {
                       onClick={() => handleThemeChange("dark")}
                       className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
                         theme === "dark"
-                          ? "bg-[#111827] text-white shadow-sm"
-                          : "text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent"
+                          ? "bg-gray-900 text-white shadow-sm"
+                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
                       }`}
                     >
                       <Moon className="h-3.5 w-3.5 mr-1.5" strokeWidth={2} />
@@ -611,30 +611,30 @@ export default function Profile() {
                 </div>
 
                 {/* Language Switcher */}
-                <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
                   <div className="flex items-center gap-3">
                     <Globe
-                      className="h-5 w-5 text-[#447afc]"
+                      className="h-5 w-5 text-primary"
                       strokeWidth={1.5}
                     />
                     <div>
-                      <p className="text-sm font-medium text-[#111827]">
+                      <p className="text-sm font-medium text-gray-900">
                         Мова інтерфейсу
                       </p>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-gray-400">
                         Оберіть мову відображення
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 p-1 rounded-full bg-[#E5E7EB]">
+                  <div className="flex items-center gap-1 p-1 rounded-full bg-gray-200">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleLanguageChange("uk")}
                       className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
                         language === "uk"
-                          ? "bg-white text-[#111827] shadow-sm"
-                          : "text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
                       }`}
                     >
                       UA
@@ -645,8 +645,8 @@ export default function Profile() {
                       onClick={() => handleLanguageChange("en")}
                       className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
                         language === "en"
-                          ? "bg-white text-[#111827] shadow-sm"
-                          : "text-[#6B7280] hover:text-[#111827] !bg-transparent hover:!bg-transparent"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
                       }`}
                     >
                       ENG
@@ -655,17 +655,17 @@ export default function Profile() {
                 </div>
 
                 {/* Exchange Rate */}
-                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
                   <div className="flex items-center gap-3 mb-3">
                     <DollarSign
-                      className="h-5 w-5 text-[#22C55E]"
+                      className="h-5 w-5 text-green-500"
                       strokeWidth={1.5}
                     />
                     <div>
-                      <p className="text-sm font-medium text-[#111827]">
+                      <p className="text-sm font-medium text-gray-900">
                         Курс USD -{">"} UAH
                       </p>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-gray-400">
                         Актуальний курс для конвертації валют
                       </p>
                     </div>
@@ -688,13 +688,13 @@ export default function Profile() {
                           }).catch(() => {});
                         }
                       }}
-                      className="flex-1 h-10 px-3 rounded-xl border border-[#D1D5DB] hover:border-[#9CA3AF] focus:border-[#111827] focus:ring-1 focus:ring-[#111827] transition-colors text-sm bg-white text-[#111827] outline-none"
+                      className="flex-1 h-10 px-3 rounded-xl border border-gray-300 hover:border-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors text-sm bg-white text-gray-900 outline-none"
                     />
                     <Button
                       onClick={fetchExchangeRate}
                       disabled={isFetchingRate}
                       size="sm"
-                      className="rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-10 px-4 text-sm"
+                      className="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium h-10 px-4 text-sm"
                     >
                       <RefreshCw
                         className={`h-4 w-4 mr-1.5 ${isFetchingRate ? "animate-spin" : ""}`}
@@ -711,17 +711,17 @@ export default function Profile() {
 
         {/* Backup Section */}
         {(activeTab === null || activeTab === "backup") && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             <Card
               id="backup"
-              className="border border-[#E5E7EB] hover:border-[#D1D5DB] rounded-3xl bg-white overflow-hidden transition-all duration-300"
+              className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white overflow-hidden transition-all duration-300"
               style={{ boxShadow: chartCardShadow }}
             >
-              <CardHeader className="bg-white border-b border-[#E5E7EB] p-6">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-[#111827]">
-                  <div className="p-2.5 bg-[#F3F4F6] rounded-xl">
+              <CardHeader className="bg-white border-b border-gray-200 p-6">
+                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+                  <div className="p-2.5 bg-gray-100 rounded-xl">
                     <Database
-                      className="h-5 w-5 text-[#111827]"
+                      className="h-5 w-5 text-gray-900"
                       strokeWidth={1.5}
                     />
                   </div>
@@ -730,40 +730,40 @@ export default function Profile() {
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 {/* Storage info */}
-                <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB]">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
                   <div className="flex items-center gap-3">
                     <Shield
-                      className="h-5 w-5 text-[#6B7280]"
+                      className="h-5 w-5 text-gray-500"
                       strokeWidth={1.5}
                     />
                     <div>
-                      <p className="text-sm font-medium text-[#111827]">
+                      <p className="text-sm font-medium text-gray-900">
                         Розмір даних у localStorage
                       </p>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-gray-400">
                         Усі дані додатку зберігаються локально у вашому браузері
                       </p>
                     </div>
                   </div>
-                  <Badge className="bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] rounded-lg font-semibold text-sm px-3 py-1.5">
+                  <Badge className="bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-semibold text-sm px-3 py-1.5">
                     {storageSize} KB
                   </Badge>
                 </div>
 
                 {/* Export */}
-                <div className="p-5 border border-[#E5E7EB] rounded-2xl hover:border-[#D1D5DB] transition-colors">
+                <div className="p-5 border border-gray-200 rounded-2xl hover:border-gray-300 transition-colors">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-[#F0FDF4] rounded-xl flex-shrink-0">
+                    <div className="p-3 bg-green-50 rounded-xl flex-shrink-0">
                       <FileDown
-                        className="h-6 w-6 text-[#16A34A]"
+                        className="h-6 w-6 text-green-600"
                         strokeWidth={1.5}
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-base font-semibold text-[#111827] mb-1">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
                         Повний бекап всіх даних
                       </h3>
-                      <p className="text-sm text-[#6B7280] mb-4">
+                      <p className="text-sm text-gray-500 mb-4">
                         Експортує всі ваші дані (ставки, команди, стратегії,
                         цілі, Telegram-групи, налаштування) в один JSON файл.
                         Використовуйте для збереження копії або перенесення на
@@ -772,7 +772,7 @@ export default function Profile() {
                       <Button
                         onClick={exportFullBackup}
                         disabled={isExporting}
-                        className="bg-[#111827] hover:bg-[#1F2937] text-white rounded-xl text-sm px-6 font-semibold"
+                        className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm px-6 font-semibold"
                       >
                         {isExporting ? (
                           <>
@@ -797,34 +797,34 @@ export default function Profile() {
                 </div>
 
                 {/* Import */}
-                <div className="p-5 border border-[#E5E7EB] rounded-2xl hover:border-[#D1D5DB] transition-colors">
+                <div className="p-5 border border-gray-200 rounded-2xl hover:border-gray-300 transition-colors">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-[#EFF6FF] rounded-xl flex-shrink-0">
+                    <div className="p-3 bg-blue-50 rounded-xl flex-shrink-0">
                       <FileUp
-                        className="h-6 w-6 text-[#2563EB]"
+                        className="h-6 w-6 text-blue-600"
                         strokeWidth={1.5}
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-base font-semibold text-[#111827] mb-1">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
                         Відновити з бекапу
                       </h3>
-                      <p className="text-sm text-[#6B7280] mb-3">
+                      <p className="text-sm text-gray-500 mb-3">
                         Завантажте раніше створений файл бекапу для відновлення
                         всіх даних. Поточні дані будуть замінені даними з файлу.
                       </p>
-                      <div className="flex items-start gap-2 p-3 bg-[#FFFBEB] rounded-xl border border-[#FDE68A] mb-4">
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4">
                         <AlertTriangle
-                          className="h-4 w-4 text-[#D97706] flex-shrink-0 mt-0.5"
+                          className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5"
                           strokeWidth={1.75}
                         />
-                        <p className="text-xs text-[#92400E]">
+                        <p className="text-xs text-amber-800">
                           <span className="font-semibold">Увага:</span>{" "}
                           відновлення з бекапу замінить усі поточні дані.
                           Рекомендуємо спочатку створити бекап поточних даних.
                         </p>
                       </div>
-                      <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#447afc] hover:bg-[#5b8ffd] text-white rounded-xl text-sm font-semibold cursor-pointer transition-colors shadow-[0_2px_8px_rgba(68,122,252,0.3)]">
+                      <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-blue-400 text-white rounded-xl text-sm font-semibold cursor-pointer transition-colors shadow-[0_2px_8px_rgba(68,122,252,0.3)]">
                         <Upload className="h-4 w-4" strokeWidth={2} />
                         {isImporting ? "Відновлення..." : "Обрати файл бекапу"}
                         <input
@@ -884,28 +884,28 @@ export default function Profile() {
 
         {/* ===== Clear data confirmation dialog ===== */}
         <Dialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
-          <DialogContent className="sm:max-w-[440px] rounded-3xl border border-[#F3F4F6] bg-white p-0 gap-0">
+          <DialogContent className="sm:max-w-[440px] rounded-3xl border border-gray-100 bg-white p-0 gap-0">
             <DialogHeader className="px-6 pt-6 pb-0">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#FEF2F2]">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-50">
                   <AlertTriangle
-                    className="h-5 w-5 text-[#DC2626]"
+                    className="h-5 w-5 text-red-600"
                     strokeWidth={2}
                   />
                 </div>
                 <div>
-                  <DialogTitle className="text-lg font-bold text-[#111827]">
+                  <DialogTitle className="text-lg font-bold text-gray-900">
                     Очистити всі дані
                   </DialogTitle>
-                  <DialogDescription className="text-sm text-[#6B7280] mt-0.5">
+                  <DialogDescription className="text-sm text-gray-500 mt-0.5">
                     Цю дію неможливо скасувати
                   </DialogDescription>
                 </div>
               </div>
             </DialogHeader>
             <div className="px-6 py-5">
-              <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl">
-                <p className="text-sm text-[#92400E] leading-relaxed">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                <p className="text-sm text-amber-800 leading-relaxed">
                   Усі ваші дані будуть видалені назавжди: ставки, стратегії,
                   цілі, ризиковані команди та Telegram-групи.
                 </p>
@@ -915,14 +915,14 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={() => setClearConfirmOpen(false)}
-                className="flex-1 h-11 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-semibold text-[#374151] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-all duration-200"
+                className="flex-1 h-11 rounded-2xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
               >
                 Скасувати
               </button>
               <button
                 type="button"
                 onClick={clearAllData}
-                className="flex-1 h-11 rounded-2xl bg-[#DC2626] text-sm font-semibold text-white hover:bg-[#B91C1C] transition-all duration-200"
+                className="flex-1 h-11 rounded-2xl bg-red-600 text-sm font-semibold text-white hover:bg-[#B91C1C] transition-all duration-200"
               >
                 Видалити
               </button>

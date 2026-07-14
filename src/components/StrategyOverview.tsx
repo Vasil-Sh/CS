@@ -771,7 +771,7 @@ export default function StrategyOverview() {
           {activeTab === "overview" && (
             <div className="space-y-6">
               {strategies.length === 0 ? (
-                <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                   <StrategyEmptyState
                     onCreateStrategy={() => setShowCreateDialog(true)}
                   />
@@ -795,7 +795,7 @@ export default function StrategyOverview() {
                   )}
 
                   {/* Strategy Cards — wrapped in a white container like GoalsManager */}
-                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-[#E8E6DC] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                       {filteredAndSortedStrategies.map((strategy, index) => {
                         const stats =
@@ -864,32 +864,32 @@ export default function StrategyOverview() {
 
           {activeTab === "create" && (
             <div
-              className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden"
+              className="bg-white border border-gray-100 rounded-3xl overflow-hidden"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-[#F3F4F6]">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <Plus className="h-5 w-5 text-[#111827]" strokeWidth={1.5} />
-                  <span className="text-lg font-semibold text-[#111827]">
+                  <Plus className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
+                  <span className="text-lg font-semibold text-gray-900">
                     Створити нову стратегію
                   </span>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => setTemplateDialogOpen(true)}
-                  className="rounded-xl bg-[#447afc] hover:bg-[#3b6de0] text-white font-medium border-0"
+                  className="rounded-xl bg-primary hover:bg-[#3b6de0] text-white font-medium border-0"
                 >
                   <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Використати шаблон
                 </Button>
               </div>
               <div className="p-6 space-y-6">
-                <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#DBEAFE]">
-                  <h4 className="font-semibold text-[#3B82F6] mb-2 flex items-center gap-2 text-sm">
+                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                  <h4 className="font-semibold text-blue-500 mb-2 flex items-center gap-2 text-sm">
                     <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
                     Як додати обмеження до стратегії:
                   </h4>
-                  <div className="space-y-2 text-sm text-[#3B82F6]">
+                  <div className="space-y-2 text-sm text-blue-500">
                     <p>
                       •{" "}
                       <strong className="font-semibold">
@@ -914,10 +914,10 @@ export default function StrategyOverview() {
                       напишіть &quot;Тільки експреси&quot;, &quot;Тільки
                       ординари&quot; або &quot;Експреси та системи&quot;
                     </p>
-                    <p className="pt-2 text-xs text-[#3B82F6]/70">
+                    <p className="pt-2 text-xs text-blue-500/70">
                       Приклади критеріїв:
                     </p>
-                    <ul className="list-disc list-inside text-xs text-[#3B82F6]/70 space-y-1 ml-2">
+                    <ul className="list-disc list-inside text-xs text-blue-500/70 space-y-1 ml-2">
                       <li>&quot;Мінімальний коефіцієнт 1.3&quot;</li>
                       <li>&quot;Максимальний коефіцієнт 2.0&quot;</li>
                       <li>&quot;Формат тільки BO3&quot;</li>
@@ -928,19 +928,19 @@ export default function StrategyOverview() {
                 </div>
 
                 {/* ── Tilt Protection Settings ── */}
-                <div className="p-4 bg-[#F9FAFB] rounded-2xl border border-[#E5E7EB] space-y-4">
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#E5E7EB]">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200">
                       <Shield
-                        className="h-4 w-4 text-[#6B7280]"
+                        className="h-4 w-4 text-gray-500"
                         strokeWidth={2}
                       />
                     </div>
-                    <h4 className="font-semibold text-[#6B7280] text-sm">
+                    <h4 className="font-semibold text-gray-500 text-sm">
                       🔒 Тілт-захист (anti-tilt)
                     </h4>
                   </div>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                  <p className="text-xs text-gray-400 leading-relaxed">
                     Автоматично блокує форму ставки після N програшів поспіль,
                     щоб уникнути емоційних ставок.
                   </p>
@@ -948,7 +948,7 @@ export default function StrategyOverview() {
                     <div>
                       <Label
                         htmlFor="blockAfterLosses"
-                        className="text-[#6B7280] font-medium text-sm"
+                        className="text-gray-500 font-medium text-sm"
                       >
                         Блокувати після програшів
                       </Label>
@@ -964,16 +964,16 @@ export default function StrategyOverview() {
                             blockAfterLosses: parseInt(e.target.value) || 3,
                           })
                         }
-                        className="rounded-xl border-[#E5E7EB] bg-white mt-1.5"
+                        className="rounded-xl border-gray-200 bg-white mt-1.5"
                       />
-                      <p className="text-xs text-[#9CA3AF] mt-1">
+                      <p className="text-xs text-gray-400 mt-1">
                         К-сть програшів поспіль
                       </p>
                     </div>
                     <div>
                       <Label
                         htmlFor="blockDurationMinutes"
-                        className="text-[#6B7280] font-medium text-sm"
+                        className="text-gray-500 font-medium text-sm"
                       >
                         Тривалість блокування
                       </Label>
@@ -992,13 +992,13 @@ export default function StrategyOverview() {
                                 parseInt(e.target.value) || 60,
                             })
                           }
-                          className="rounded-xl border-[#E5E7EB] bg-white pr-12"
+                          className="rounded-xl border-gray-200 bg-white pr-12"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF]">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                           хв
                         </span>
                       </div>
-                      <p className="text-xs text-[#9CA3AF] mt-1">
+                      <p className="text-xs text-gray-400 mt-1">
                         Від 15 до 480 хв
                       </p>
                     </div>
@@ -1009,7 +1009,7 @@ export default function StrategyOverview() {
                   <div>
                     <Label
                       htmlFor="strategyName"
-                      className="text-[#111827] font-medium"
+                      className="text-gray-900 font-medium"
                     >
                       Назва стратегії *
                     </Label>
@@ -1020,14 +1020,14 @@ export default function StrategyOverview() {
                         setNewStrategy({ ...newStrategy, name: e.target.value })
                       }
                       placeholder="Наприклад: Консервативна стратегія"
-                      className="rounded-xl border-[#E5E7EB] mt-1.5"
+                      className="rounded-xl border-gray-200 mt-1.5"
                     />
                   </div>
 
                   <div>
                     <Label
                       htmlFor="riskLevel"
-                      className="text-[#111827] font-medium"
+                      className="text-gray-900 font-medium"
                     >
                       Рівень ризику *
                     </Label>
@@ -1037,7 +1037,7 @@ export default function StrategyOverview() {
                         setNewStrategy({ ...newStrategy, riskLevel: value })
                       }
                     >
-                      <SelectTrigger className="rounded-xl border-[#E5E7EB] mt-1.5">
+                      <SelectTrigger className="rounded-xl border-gray-200 mt-1.5">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1051,7 +1051,7 @@ export default function StrategyOverview() {
                   <div>
                     <Label
                       htmlFor="expectedROI"
-                      className="text-[#111827] font-medium"
+                      className="text-gray-900 font-medium"
                     >
                       Очікуваний ROI (%) *
                     </Label>
@@ -1067,7 +1067,7 @@ export default function StrategyOverview() {
                           expectedROI: parseInt(e.target.value) || 0,
                         })
                       }
-                      className="rounded-xl border-[#E5E7EB] mt-1.5"
+                      className="rounded-xl border-gray-200 mt-1.5"
                     />
                   </div>
                 </div>
@@ -1075,7 +1075,7 @@ export default function StrategyOverview() {
                 <div>
                   <Label
                     htmlFor="description"
-                    className="text-[#111827] font-medium"
+                    className="text-gray-900 font-medium"
                   >
                     Опис стратегії *
                   </Label>
@@ -1090,13 +1090,13 @@ export default function StrategyOverview() {
                     }
                     placeholder="Детальний опис стратегії, коли її використовувати..."
                     rows={3}
-                    className="rounded-xl border-[#E5E7EB] mt-1.5"
+                    className="rounded-xl border-gray-200 mt-1.5"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-[#111827] font-medium">
+                    <Label className="text-gray-900 font-medium">
                       Критерії стратегії *
                     </Label>
                     <Button
@@ -1104,7 +1104,7 @@ export default function StrategyOverview() {
                       variant="outline"
                       size="sm"
                       onClick={addCriterion}
-                      className="rounded-xl bg-[#EFF6FF] border-[#DBEAFE] font-medium text-[#3B82F6] hover:bg-[#DBEAFE]"
+                      className="rounded-xl bg-blue-50 border-blue-100 font-medium text-blue-500 hover:bg-blue-100"
                     >
                       <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                       Додати критерій
@@ -1124,7 +1124,7 @@ export default function StrategyOverview() {
                               ? "Наприклад: Мінімальний коефіцієнт 1.5"
                               : `Критерій ${index + 1}`
                           }
-                          className="rounded-xl border-[#E5E7EB]"
+                          className="rounded-xl border-gray-200"
                         />
                         {newStrategy.criteria.length > 1 && (
                           <Button
@@ -1132,7 +1132,7 @@ export default function StrategyOverview() {
                             variant="outline"
                             size="sm"
                             onClick={() => removeCriterion(index)}
-                            className="rounded-xl border-[#E5E7EB]"
+                            className="rounded-xl border-gray-200"
                           >
                             <X className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
@@ -1144,7 +1144,7 @@ export default function StrategyOverview() {
 
                 <Button
                   onClick={saveStrategy}
-                  className="w-full rounded-xl bg-[#111827] hover:bg-[#1F2937] text-white font-medium h-11"
+                  className="w-full rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium h-11"
                 >
                   <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} />
                   Зберегти стратегію
@@ -1175,13 +1175,13 @@ export default function StrategyOverview() {
 
       {/* Template Dialog */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-4xl max-h-[80vh] overflow-y-auto border border-[#E5E7EB]">
+        <DialogContent className="rounded-3xl max-w-4xl max-h-[80vh] overflow-y-auto border border-gray-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-[#111827]">
-              <Zap className="h-5 w-5 text-[#F59E0B]" strokeWidth={1.5} />
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <Zap className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
               Шаблони стратегій
             </DialogTitle>
-            <DialogDescription className="text-[#6B7280]">
+            <DialogDescription className="text-gray-500">
               Виберіть готовий шаблон для швидкого створення стратегії
             </DialogDescription>
           </DialogHeader>
@@ -1193,13 +1193,13 @@ export default function StrategyOverview() {
                   key={index}
                   className={`border transition-all rounded-2xl p-5 ${
                     alreadyExists
-                      ? "bg-[#F9FAFB] border-[#E5E7EB] opacity-60 cursor-not-allowed"
-                      : "bg-white border-[#E5E7EB] hover:border-[#D1D5DB] cursor-pointer"
+                      ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
+                      : "bg-white border-gray-200 hover:border-gray-300 cursor-pointer"
                   }`}
                   onClick={() => !alreadyExists && applyTemplate(template)}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="flex items-center gap-2 font-semibold text-[#111827]">
+                    <span className="flex items-center gap-2 font-semibold text-gray-900">
                       {getRiskIcon(template.riskLevel)}
                       <span className="text-sm">{template.name}</span>
                     </span>
@@ -1212,31 +1212,31 @@ export default function StrategyOverview() {
                       {template.riskLevel}
                     </Badge>
                   </div>
-                  <p className="text-sm text-[#6B7280] mb-3">
+                  <p className="text-sm text-gray-500 mb-3">
                     {template.description}
                   </p>
                   <div className="p-2 bg-[#DCFCE7] rounded-xl text-center mb-3">
-                    <div className="text-lg font-bold text-[#16A34A]">
+                    <div className="text-lg font-bold text-green-600">
                       +{template.expectedROI}%
                     </div>
-                    <div className="text-xs text-[#6B7280]">Очікуваний ROI</div>
+                    <div className="text-xs text-gray-500">Очікуваний ROI</div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-[#6B7280] mb-1">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">
                       Критерії:
                     </p>
                     <ul className="space-y-1">
                       {template.criteria.slice(0, 3).map((criterion, idx) => (
                         <li
                           key={idx}
-                          className="text-xs text-[#6B7280] flex items-center gap-1"
+                          className="text-xs text-gray-500 flex items-center gap-1"
                         >
-                          <div className="w-1 h-1 bg-[#3B82F6] rounded-full"></div>
+                          <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
                           {criterion}
                         </li>
                       ))}
                       {template.criteria.length > 3 && (
-                        <li className="text-xs text-[#9CA3AF]">
+                        <li className="text-xs text-gray-400">
                           + ще {template.criteria.length - 3}
                         </li>
                       )}
@@ -1245,8 +1245,8 @@ export default function StrategyOverview() {
                   <Button
                     className={`w-full rounded-xl font-medium mt-3 ${
                       alreadyExists
-                        ? "bg-[#D1D5DB] text-[#9CA3AF] cursor-not-allowed hover:bg-[#D1D5DB]"
-                        : "bg-[#111827] hover:bg-[#1F2937] text-white"
+                        ? "bg-gray-300 text-gray-400 cursor-not-allowed hover:bg-gray-300"
+                        : "bg-gray-900 hover:bg-gray-800 text-white"
                     }`}
                     size="sm"
                     disabled={alreadyExists}
@@ -1262,24 +1262,24 @@ export default function StrategyOverview() {
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-md border border-[#E5E7EB] p-0 gap-0">
+        <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
           <DialogHeader className="px-6 pt-6 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-                <Trash2 className="h-5 w-5 text-[#DC2626]" strokeWidth={1.5} />
+                <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.5} />
               </div>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
                 Видалити стратегію?
               </DialogTitle>
             </div>
           </DialogHeader>
 
-          <div className="border-t border-[#E5E7EB]" />
+          <div className="border-t border-gray-200" />
 
-          <div className="px-6 pb-6 pt-4 space-y-3 bg-[#F3F4F6]">
+          <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
             <div className="text-center">
-              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm">
-                <DialogDescription className="text-lg font-bold text-[#111827] text-center">
+              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <DialogDescription className="text-lg font-bold text-gray-900 text-center">
                   {(strategyToDelete &&
                     (() => {
                       const s = strategies.find(
@@ -1301,7 +1301,7 @@ export default function StrategyOverview() {
                       High: "Високий ризик",
                     };
                     return (
-                      <span className="text-xs text-[#6B7280] mt-0.5">
+                      <span className="text-xs text-gray-500 mt-0.5">
                         {riskLabels[s.riskLevel] || s.riskLevel}
                       </span>
                     );
@@ -1309,9 +1309,9 @@ export default function StrategyOverview() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-[#FECACA]">
+            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-red-200">
               <AlertTriangle
-                className="h-5 w-5 text-[#DC2626] flex-shrink-0 mt-0.5"
+                className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5"
                 strokeWidth={1.5}
               />
               <p className="text-sm text-[#991B1B]">
@@ -1324,13 +1324,13 @@ export default function StrategyOverview() {
               <Button
                 variant="outline"
                 onClick={() => setDeleteDialogOpen(false)}
-                className="rounded-xl border-[#E5E7EB] font-medium"
+                className="rounded-xl border-gray-200 font-medium"
               >
                 Скасувати
               </Button>
               <Button
                 onClick={deleteStrategy}
-                className="rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white"
+                className="rounded-xl bg-red-600 hover:bg-[#B91C1C] text-white"
               >
                 <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Видалити

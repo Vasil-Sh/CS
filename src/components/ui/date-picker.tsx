@@ -48,13 +48,13 @@ export function DatePicker({ value, onChange, placeholder = 'Оберіть да
         <Button
           variant="outline"
           className={cn(
-            'w-full justify-start text-left font-normal rounded-xl border-[#E5E7EB] h-10',
+            'w-full justify-start text-left font-normal rounded-xl border-gray-200 h-10',
             !value && 'text-muted-foreground',
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 text-[#9CA3AF]" strokeWidth={1.5} />
-          {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : <span className="text-[#9CA3AF]">{placeholder}</span>}
+          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" strokeWidth={1.5} />
+          {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : <span className="text-gray-400">{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 rounded-xl" align="start">

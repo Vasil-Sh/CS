@@ -484,9 +484,9 @@ export default function Landing() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-3">
-                    <div className="p-4 bg-[#f0fdf7] border border-[#22c55e]/20 rounded-xl">
-                      <p className="text-xs text-[#22c55e] mb-1">💎 EV</p>
-                      <p className="text-2xl font-medium text-[#22c55e]">
+                    <div className="p-4 bg-[#f0fdf7] border border-green-500/20 rounded-xl">
+                      <p className="text-xs text-green-500 mb-1">💎 EV</p>
+                      <p className="text-2xl font-medium text-green-500">
                         +4.2%
                       </p>
                     </div>
@@ -504,16 +504,16 @@ export default function Landing() {
               </div>
 
               {/* Alert */}
-              <div className="bg-[#fffbf5] border border-[#f59e0b]/20 rounded-2xl p-6 flex flex-col">
+              <div className="bg-[#fffbf5] border border-amber-500/20 rounded-2xl p-6 flex flex-col">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 bg-[#f59e0b]/10 rounded-[10px] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-amber-500/10 rounded-[10px] flex items-center justify-center flex-shrink-0">
                     <AlertTriangle
-                      className="w-5 h-5 text-[#f59e0b]"
+                      className="w-5 h-5 text-amber-500"
                       strokeWidth={1.5}
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-[#f59e0b] font-semibold mb-1 uppercase tracking-wide">
+                    <p className="text-xs text-amber-500 font-semibold mb-1 uppercase tracking-wide">
                       Alert · Blacklist
                     </p>
                     <p className="text-base font-medium text-[#0c0a09]">
@@ -525,7 +525,7 @@ export default function Landing() {
                   "Пам'ятаєте свій злив на Spirit місяць тому? Ваш Blacklist
                   рекомендує обережність."
                 </p>
-                <div className="mt-5 pt-5 border-t border-[#f59e0b]/20">
+                <div className="mt-5 pt-5 border-t border-amber-500/20">
                   <p className="text-xs text-[#a8a29e] leading-relaxed">
                     MatchIQ враховує вашу персональну історію помилок та
                     автоматично сигналізує про ризиковані патерни.
@@ -577,13 +577,13 @@ export default function Landing() {
                       {row.situation}
                     </div>
                     <div className="p-5 flex items-start gap-3 border-b md:border-b-0 md:border-r border-[#e8e6e5]">
-                      <XCircle className="w-4 h-4 text-[#ef4444] flex-shrink-0 mt-0.5" />
+                      <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                       <span className="text-sm text-[#78716c]">
                         {row.excel}
                       </span>
                     </div>
                     <div className="p-5 flex items-start gap-3">
-                      <CheckCircle2 className="w-4 h-4 text-[#22c55e] flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-sm text-[#0c0a09] font-medium">
                         {row.matchiq}
                       </span>
@@ -639,11 +639,11 @@ export default function Landing() {
               <div className="bg-white border border-[#e8e6e5] rounded-2xl p-8 lg:p-10">
                 {/* Not predictions */}
                 <div className="flex items-start gap-4 mb-8 pb-8 border-b border-[#e8e6e5]">
-                  <div className="w-10 h-10 bg-[#fef2f2] rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <XCircle className="w-5 h-5 text-[#ef4444]" />
+                  <div className="w-10 h-10 bg-red-50 rounded-[10px] flex items-center justify-center flex-shrink-0">
+                    <XCircle className="w-5 h-5 text-red-500" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-[#ef4444] uppercase tracking-wide mb-1">
+                    <p className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">
                       Ми не даємо прогнозів
                     </p>
                     <p className="text-sm text-[#78716c] leading-[1.64]">
@@ -681,12 +681,12 @@ export default function Landing() {
                 </div>
 
                 {/* Not for whom */}
-                <div className="flex items-start gap-4 p-5 bg-[#fef2f2] rounded-xl border border-[#ef4444]/15">
+                <div className="flex items-start gap-4 p-5 bg-red-50 rounded-xl border border-red-500/15">
                   <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center flex-shrink-0">
                     <span className="text-lg">⛔</span>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-[#ef4444] uppercase tracking-wide mb-1">
+                    <p className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">
                       Не для кого
                     </p>
                     <p className="text-sm text-[#78716c] leading-[1.64]">

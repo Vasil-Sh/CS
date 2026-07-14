@@ -178,34 +178,34 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-[#E5E7EB] p-0 gap-0">
+      <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 p-0 gap-0">
         {/* === HEADER === */}
         <DialogHeader className="pt-4 pb-3 px-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#EFF6FF] rounded-2xl">
-              <Sparkles className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+            <div className="p-2 bg-blue-50 rounded-2xl">
+              <Sparkles className="h-5 w-5 text-primary" strokeWidth={1.5} />
             </div>
             <div>
-              <DialogTitle className="text-xl font-semibold text-[#111827]">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
                 Створити нову стратегію
               </DialogTitle>
-              <DialogDescription className="text-sm text-[#6B7280] mt-0.5">
+              <DialogDescription className="text-sm text-gray-500 mt-0.5">
                 Додайте критерії та обмеження для вашої стратегії ставок
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="border-t border-[#E5E7EB]" />
+        <div className="border-t border-gray-200" />
 
         {/* === BODY === */}
-        <div className="space-y-4 pt-4 pb-4 px-6 bg-[#F3F4F6]">
+        <div className="space-y-4 pt-4 pb-4 px-6 bg-gray-100">
           {/* Template button */}
           {!showTemplates && (
             <Button
               type="button"
               onClick={() => setShowTemplates(true)}
-              className="w-full rounded-2xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-10 text-sm"
+              className="w-full rounded-2xl bg-primary hover:bg-blue-400 text-white font-medium h-10 text-sm"
             >
               <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Використати шаблон
@@ -216,8 +216,8 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           {showTemplates && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-[#111827] flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-[#F59E0B]" strokeWidth={1.5} /> Шаблони стратегій
+                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-amber-500" strokeWidth={1.5} /> Шаблони стратегій
                 </h4>
                 <Button variant="ghost" size="sm" onClick={() => setShowTemplates(false)} className="rounded-xl text-xs">
                   <X className="h-3 w-3 mr-1" /> Закрити
@@ -232,17 +232,17 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
                       onClick={() => !exists && applyTemplate(template)}
                       className={`border rounded-2xl p-4 transition-all ${
                         exists
-                          ? "bg-[#F9FAFB] border-[#E5E7EB] opacity-60 cursor-not-allowed"
-                          : "bg-white border-[#E5E7EB] hover:border-[#447afc] cursor-pointer hover:shadow-md"
+                          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
+                          : "bg-white border-gray-200 hover:border-primary cursor-pointer hover:shadow-md"
                       }`}
                     >
-                      <div className="text-sm font-semibold text-[#111827] mb-1">{template.name}</div>
-                      <div className="text-xs text-[#6B7280] mb-2 line-clamp-2">{template.description}</div>
+                      <div className="text-sm font-semibold text-gray-900 mb-1">{template.name}</div>
+                      <div className="text-xs text-gray-500 mb-2 line-clamp-2">{template.description}</div>
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="px-2 py-0.5 rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                        <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
                           ROI {template.expectedROI}%
                         </span>
-                        {exists && <span className="text-[#9CA3AF]">Вже створено</span>}
+                        {exists && <span className="text-gray-400">Вже створено</span>}
                       </div>
                     </div>
                   );
@@ -252,12 +252,12 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           )}
 
           {/* Hint box */}
-          <div className="p-4 bg-[#EFF6FF] rounded-2xl border border-[#DBEAFE]">
-            <h4 className="font-semibold text-[#3B82F6] mb-2 flex items-center gap-2 text-sm">
+          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+            <h4 className="font-semibold text-blue-500 mb-2 flex items-center gap-2 text-sm">
               <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
               Як додати обмеження до стратегії:
             </h4>
-            <div className="space-y-2 text-sm text-[#3B82F6]">
+            <div className="space-y-2 text-sm text-blue-500">
               <p>• <strong>Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5"</p>
               <p>• <strong>Для обмеження форматів:</strong> напишіть "Формат тільки BO3"</p>
               <p>• <strong>Для обмеження типів ставок:</strong> напишіть "Тільки експреси"</p>
@@ -265,39 +265,39 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </div>
 
           {/* Tilt protection */}
-          <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-[#FECACA] space-y-4">
+          <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-red-200 space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FEE2E2]">
-                <Shield className="h-4 w-4 text-[#DC2626]" strokeWidth={2} />
+                <Shield className="h-4 w-4 text-red-600" strokeWidth={2} />
               </div>
-              <h4 className="font-semibold text-[#DC2626] text-sm">🔒 Тілт-захист (anti-tilt)</h4>
+              <h4 className="font-semibold text-red-600 text-sm">🔒 Тілт-захист (anti-tilt)</h4>
             </div>
-            <p className="text-xs text-[#DC2626]/70">
+            <p className="text-xs text-red-600/70">
               Автоматично блокує форму ставки після N програшів поспіль.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#6B7280] font-medium text-sm">Блокувати після програшів</Label>
+                <Label className="text-gray-500 font-medium text-sm">Блокувати після програшів</Label>
                 <Input
                   type="number" min={1} max={10}
                   value={form.blockAfterLosses}
                   onChange={(e) => setForm({ ...form, blockAfterLosses: parseInt(e.target.value) || 3 })}
-                  className="rounded-xl border-[#E5E7EB] bg-white mt-1.5"
+                  className="rounded-xl border-gray-200 bg-white mt-1.5"
                 />
-                <p className="text-xs text-[#9CA3AF] mt-1">К-сть програшів поспіль</p>
+                <p className="text-xs text-gray-400 mt-1">К-сть програшів поспіль</p>
               </div>
               <div>
-                <Label className="text-[#6B7280] font-medium text-sm">Тривалість блокування</Label>
+                <Label className="text-gray-500 font-medium text-sm">Тривалість блокування</Label>
                 <div className="relative mt-1.5">
                   <Input
                     type="number" min={15} max={480} step={15}
                     value={form.blockDurationMinutes}
                     onChange={(e) => setForm({ ...form, blockDurationMinutes: parseInt(e.target.value) || 60 })}
-                    className="rounded-xl border-[#E5E7EB] bg-white pr-12"
+                    className="rounded-xl border-gray-200 bg-white pr-12"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF]">хв</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">хв</span>
                 </div>
-                <p className="text-xs text-[#9CA3AF] mt-1">Від 15 до 480 хв</p>
+                <p className="text-xs text-gray-400 mt-1">Від 15 до 480 хв</p>
               </div>
             </div>
           </div>
@@ -305,18 +305,18 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           {/* Name / Risk / ROI row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label className="text-base font-medium">Назва стратегії <span className="text-[#DC2626]">*</span></Label>
+              <Label className="text-base font-medium">Назва стратегії <span className="text-red-600">*</span></Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Наприклад: Консервативна"
-                className="rounded-2xl border-[#E5E7EB] mt-1.5 h-11 text-base"
+                className="rounded-2xl border-gray-200 mt-1.5 h-11 text-base"
               />
             </div>
             <div>
-              <Label className="text-base font-medium">Рівень ризику <span className="text-[#DC2626]">*</span></Label>
+              <Label className="text-base font-medium">Рівень ризику <span className="text-red-600">*</span></Label>
               <Select value={form.riskLevel} onValueChange={(v: "Low" | "Medium" | "High") => setForm({ ...form, riskLevel: v })}>
-                <SelectTrigger className="rounded-2xl border-[#E5E7EB] mt-1.5 h-11"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-2xl border-gray-200 mt-1.5 h-11"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Low">Низький</SelectItem>
                   <SelectItem value="Medium">Середній</SelectItem>
@@ -330,31 +330,31 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
                 type="number" min={0} max={100}
                 value={form.expectedROI}
                 onChange={(e) => setForm({ ...form, expectedROI: parseInt(e.target.value) || 0 })}
-                className="rounded-2xl border-[#E5E7EB] mt-1.5 h-11 text-base"
+                className="rounded-2xl border-gray-200 mt-1.5 h-11 text-base"
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <Label className="text-base font-medium">Опис стратегії <span className="text-[#DC2626]">*</span></Label>
+            <Label className="text-base font-medium">Опис стратегії <span className="text-red-600">*</span></Label>
             <Textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Детальний опис стратегії, коли її використовувати..."
               rows={3}
-              className="rounded-2xl border-[#E5E7EB] mt-1.5"
+              className="rounded-2xl border-gray-200 mt-1.5"
             />
           </div>
 
           {/* Criteria */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-base font-medium">Критерії стратегії <span className="text-[#DC2626]">*</span></Label>
+              <Label className="text-base font-medium">Критерії стратегії <span className="text-red-600">*</span></Label>
               <Button
                 type="button" variant="outline" size="sm"
                 onClick={addCriterion}
-                className="rounded-xl bg-[#EFF6FF] border-[#DBEAFE] font-medium text-[#3B82F6] hover:bg-[#DBEAFE]"
+                className="rounded-xl bg-blue-50 border-blue-100 font-medium text-blue-500 hover:bg-blue-100"
               >
                 <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} /> Додати критерій
               </Button>
@@ -366,10 +366,10 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
                     value={criterion}
                     onChange={(e) => updateCriterion(index, e.target.value)}
                     placeholder={index === 0 ? "Наприклад: Мінімальний коефіцієнт 1.5" : `Критерій ${index + 1}`}
-                    className="rounded-2xl border-[#E5E7EB]"
+                    className="rounded-2xl border-gray-200"
                   />
                   {form.criteria.length > 1 && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => removeCriterion(index)} className="rounded-xl border-[#E5E7EB]">
+                    <Button type="button" variant="outline" size="sm" onClick={() => removeCriterion(index)} className="rounded-xl border-gray-200">
                       <X className="h-4 w-4" strokeWidth={1.5} />
                     </Button>
                   )}
@@ -379,21 +379,21 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </div>
         </div>
 
-        <div className="border-t border-[#E5E7EB]" />
+        <div className="border-t border-gray-200" />
 
         {/* === FOOTER === */}
         <DialogFooter className="gap-2 pt-3 pb-4 px-6">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
-            className="rounded-3xl border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium h-11 px-5 text-base"
+            className="rounded-3xl border border-gray-200 hover:bg-gray-50 font-medium h-11 px-5 text-base"
           >
             Скасувати
           </Button>
           <Button
             onClick={handleSave}
             disabled={!isValid}
-            className="rounded-3xl bg-[#447afc] hover:bg-[#5b8ffd] text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+            className="rounded-3xl bg-primary hover:bg-blue-400 text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <Plus className="h-4 w-4 mr-2" /> Створити стратегію
           </Button>

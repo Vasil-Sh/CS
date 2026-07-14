@@ -92,9 +92,9 @@ export default function Layout() {
     <div className="min-h-screen bg-[#f3f3f3]">
       {/* Offline Banner */}
       {offline && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-[#FEF3C7] border-b border-[#F59E0B] px-4 py-2 flex items-center justify-center gap-2">
-          <WifiOff className="h-4 w-4 text-[#D97706]" strokeWidth={2} />
-          <span className="text-sm font-medium text-[#92400E]">
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-yellow-100 border-b border-amber-500 px-4 py-2 flex items-center justify-center gap-2">
+          <WifiOff className="h-4 w-4 text-amber-600" strokeWidth={2} />
+          <span className="text-sm font-medium text-amber-800">
             Ви в офлайн-режимі. Дані завантажуються локально.
           </span>
         </div>
@@ -124,10 +124,10 @@ export default function Layout() {
               </li>
               <li className="mt-auto space-y-3">
                 <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-blue-50 rounded-[24px] border border-blue-100">
-                  <span className="text-base font-semibold text-[#111827]">
+                  <span className="text-base font-semibold text-gray-900">
                     Потрібна допомога?
                   </span>
-                  <p className="text-xs text-[#111827] text-center">
+                  <p className="text-xs text-gray-900 text-center">
                     Є питання або пропозиції? Напиши нам в Telegram
                   </p>
                   <a
@@ -219,10 +219,10 @@ export default function Layout() {
                   </ul>
                   <div className="mt-8 space-y-3">
                     <div className="w-full flex flex-col items-center gap-3 px-5 py-5 bg-blue-50 rounded-[24px] border border-blue-100">
-                      <span className="text-base font-semibold text-[#111827]">
+                      <span className="text-base font-semibold text-gray-900">
                         {t("app.help")}
                       </span>
-                      <p className="text-xs text-[#111827] text-center">
+                      <p className="text-xs text-gray-900 text-center">
                         {t("app.helpDesc")}
                       </p>
                       <a

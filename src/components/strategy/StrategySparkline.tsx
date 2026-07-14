@@ -1,7 +1,7 @@
 /** Pure component: SVG sparkline chart for profit history */
 export default function StrategySparkline({ profitHistory }: { profitHistory?: number[] }) {
   if (!profitHistory || profitHistory.length < 2) {
-    return <div className="h-10 flex items-center justify-center text-xs text-[#9CA3AF]">Немає даних</div>;
+    return <div className="h-10 flex items-center justify-center text-xs text-gray-400">Немає даних</div>;
   }
 
   const max = Math.max(...profitHistory);

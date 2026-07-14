@@ -4,30 +4,30 @@
  */
 export function StatCardSkeleton() {
   return (
-    <div className="bg-white border border-[#F3F4F6] rounded-3xl px-5 py-7 min-w-0 animate-pulse">
-      <div className="h-3 w-16 bg-[#E5E7EB] rounded mb-3 mx-auto" />
-      <div className="h-10 w-12 bg-[#E5E7EB] rounded mx-auto" />
+    <div className="bg-white border border-gray-100 rounded-3xl px-5 py-7 min-w-0 animate-pulse">
+      <div className="h-3 w-16 bg-gray-200 rounded mb-3 mx-auto" />
+      <div className="h-10 w-12 bg-gray-200 rounded mx-auto" />
     </div>
   );
 }
 
 export function ChartCardSkeleton() {
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 animate-pulse">
+    <div className="bg-white border border-gray-200 rounded-3xl p-6 animate-pulse">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 bg-[#E5E7EB] rounded-xl" />
-        <div className="h-5 w-40 bg-[#E5E7EB] rounded" />
+        <div className="h-10 w-10 bg-gray-200 rounded-xl" />
+        <div className="h-5 w-40 bg-gray-200 rounded" />
       </div>
-      <div className="h-[300px] bg-[#F9FAFB] rounded-2xl" />
+      <div className="h-[300px] bg-gray-50 rounded-2xl" />
     </div>
   );
 }
 
 export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="bg-white border border-[#F3F4F6] rounded-3xl px-6 py-5 animate-pulse">
+    <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 animate-pulse">
       {Array.from({ length: lines }, (_, i) => (
-        <div key={i} className="h-4 bg-[#E5E7EB] rounded mb-2" style={{ width: `${85 - i * 20}%` }} />
+        <div key={i} className="h-4 bg-gray-200 rounded mb-2" style={{ width: `${85 - i * 20}%` }} />
       ))}
     </div>
   );
@@ -36,7 +36,7 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
 export function AnalyticsSkeleton() {
   return (
     <div className="space-y-8 px-6 lg:px-8 pb-8 pt-4">
-      <div className="h-12 w-64 bg-[#E5E7EB] rounded animate-pulse" />
+      <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* 4 stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {Array.from({ length: 4 }, (_, i) => <StatCardSkeleton key={i} />)}
@@ -63,7 +63,7 @@ export function AnalyticsSkeleton() {
 export function MyBetsSkeleton() {
   return (
     <div className="space-y-8 px-6 lg:px-8 pb-8 pt-4">
-      <div className="h-12 w-64 bg-[#E5E7EB] rounded animate-pulse" />
+      <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* 8 stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {Array.from({ length: 8 }, (_, i) => <StatCardSkeleton key={i} />)}
@@ -77,7 +77,7 @@ export function MyBetsSkeleton() {
 export function StrategySkeleton() {
   return (
     <div className="space-y-8 px-6 lg:px-8 pb-8 pt-4">
-      <div className="h-12 w-64 bg-[#E5E7EB] rounded animate-pulse" />
+      <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {Array.from({ length: 4 }, (_, i) => <StatCardSkeleton key={i} />)}

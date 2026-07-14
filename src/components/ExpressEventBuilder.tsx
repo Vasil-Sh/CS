@@ -69,7 +69,7 @@ export function ExpressEventBuilder({
   }) => {
     const safeValue = group.options.some(o => o.value === modalBetType) ? modalBetType : undefined;
     const isGroupSelected = modalBetType && group.options.some(o => o.value === modalBetType);
-    const selectedBorder = 'border-[#22C55E] bg-[#F0FDF4]';
+    const selectedBorder = 'border-green-500 bg-green-50';
     const defaultBorder = 'border-gray-200/80 bg-white';
 
     if (group.category.includes('Фора')) {
@@ -78,7 +78,7 @@ export function ExpressEventBuilder({
       const poss = group.options.filter(o => o.label.includes('+') && !seen.has(o.label) && seen.add(o.label));
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setModalBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Мінус" /></SelectTrigger>
@@ -97,7 +97,7 @@ export function ExpressEventBuilder({
       const overs = group.options.filter(o => o.label.includes('Більше'));
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={safeValue} onValueChange={(v) => setModalBetType(v || '')}>
               <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Менше" /></SelectTrigger>
@@ -114,12 +114,12 @@ export function ExpressEventBuilder({
     if (group.options.length <= 3) {
       return (
         <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
           <div className="flex flex-wrap gap-1.5">
             {group.options.map(opt => (
               <button key={opt.value} type="button"
                 onClick={() => setModalBetType(opt.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${modalBetType === opt.value ? 'bg-[#447afc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${modalBetType === opt.value ? 'bg-primary text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                 {opt.label}
               </button>
             ))}
@@ -129,7 +129,7 @@ export function ExpressEventBuilder({
     }
     return (
       <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-        <div className="text-xs font-semibold text-[#447afc] uppercase tracking-wider mb-2">{group.category}</div>
+        <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
         <Select value={safeValue} onValueChange={(v) => setModalBetType(v || '')}>
           <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
           <SelectContent className="text-gray-800">
@@ -242,7 +242,7 @@ export function ExpressEventBuilder({
                 <div className="grid grid-cols-3 gap-2">
                   <button type="button"
                     onClick={() => openModal(index)}
-                    className={`rounded-xl border bg-white h-9 text-xs text-left px-3 truncate ${event.betType ? 'border-[#447afc] text-[#447afc] bg-[#EFF6FF] font-medium' : 'border-gray-200 text-gray-400'}`}>
+                    className={`rounded-xl border bg-white h-9 text-xs text-left px-3 truncate ${event.betType ? 'border-primary text-primary bg-blue-50 font-medium' : 'border-gray-200 text-gray-400'}`}>
                     {event.betType ? getBetTypeLabel(event.betType, format) : 'Тип'}
                   </button>
                   <Select value={event.selection} onValueChange={(val) => onUpdateEvent(index, 'selection', val)}>
@@ -285,14 +285,14 @@ export function ExpressEventBuilder({
 
       {/* Bet Type Modal */}
       <Dialog open={modalOpen} onOpenChange={(open) => { if (!open) setModalOpen(false); }}>
-        <DialogContent className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-[#E5E7EB] p-0 gap-0" hideCloseButton>
+        <DialogContent className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-gray-200 p-0 gap-0" hideCloseButton>
           <DialogHeader className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
                   <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                 </div>
-                <DialogTitle className="text-lg font-semibold text-[#111827]">Тип прогнозу</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-gray-900">Тип прогнозу</DialogTitle>
               </div>
               <button type="button" onClick={() => setModalOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg">
                 <X className="h-5 w-5 text-gray-400" />
@@ -305,12 +305,12 @@ export function ExpressEventBuilder({
               ...Array.from({ length: maxMaps }, (_, i) => ({ label: `Карта ${i + 1}`, idx: i + 2 })),
             ].map(tab => (
               <button key={tab.idx} type="button" onClick={() => setModalTab(tab.idx)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${modalTab === tab.idx ? 'bg-[#447afc] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${modalTab === tab.idx ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                 {tab.label}
               </button>
             ))}
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F3F4F6]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-100">
             {modalTab === 1 && grouped.main.map((group) => renderGroup(group))}
             {modalTab >= 2 && (grouped.maps.find(m => m.mapNumber === modalTab - 1)?.groups ?? []).map(group => renderGroup(group))}
           </div>
@@ -325,7 +325,7 @@ export function ExpressEventBuilder({
               Скасувати
             </button>
             <button type="button" onClick={saveModal} disabled={!modalBetType}
-              className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${modalBetType ? 'bg-[#447afc] text-white hover:bg-[#3568d4] shadow-sm' : 'bg-[#F9FAFB] text-[#9CA3AF] border border-[#E5E7EB] cursor-not-allowed'}`}>
+              className={`flex-1 h-11 rounded-2xl font-medium text-sm transition-all ${modalBetType ? 'bg-primary text-white hover:bg-blue-700 shadow-sm' : 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'}`}>
               Зберегти
             </button>
           </DialogFooter>

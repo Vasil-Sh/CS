@@ -10,9 +10,9 @@ const getRiskBarColor = (risk: string) => {
 };
 
 const ChartCard = ({ icon: Icon, title, children }: { icon: typeof Percent; title: string; children: React.ReactNode }) => (
-  <div className="bg-white border border-[#F3F4F6] rounded-3xl overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-    <div className="px-6 py-5 border-b border-[#F3F4F6]">
-      <div className="flex items-center gap-2"><Icon className="h-5 w-5 text-[#111827]" strokeWidth={1.5} /><span className="text-base font-semibold text-[#111827]">{title}</span></div>
+  <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+    <div className="px-6 py-5 border-b border-gray-100">
+      <div className="flex items-center gap-2"><Icon className="h-5 w-5 text-gray-900" strokeWidth={1.5} /><span className="text-base font-semibold text-gray-900">{title}</span></div>
     </div>
     <div className="p-4">{children}</div>
   </div>

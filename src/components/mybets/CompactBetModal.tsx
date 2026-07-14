@@ -50,22 +50,22 @@ export default function CompactBetModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[40rem] border border-[#E5E7EB] rounded-3xl bg-white p-0 gap-0">
+      <DialogContent className="max-w-[40rem] border border-gray-200 rounded-3xl bg-white p-0 gap-0">
         <DialogHeader className="px-6 pt-5 pb-4">
           <div className="flex items-center justify-between">
             <DialogTitle>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
-                  <ListChecks className="h-5 w-5 text-[#447afc]" strokeWidth={1.5} />
+                  <ListChecks className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
-                <h2 className="text-lg font-semibold text-[#111827] tracking-tight">
+                <h2 className="text-lg font-semibold text-gray-900 tracking-tight">
                   Стислий список результатів
                 </h2>
               </div>
             </DialogTitle>
           </div>
         </DialogHeader>
-        <div className="border-t border-[#E5E7EB]" />
+        <div className="border-t border-gray-200" />
         <div className="px-6 py-3 bg-white border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
@@ -113,7 +113,7 @@ export default function CompactBetModal({
             </span>
           </div>
         </div>
-        <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-[#F3F4F6]">
+        <div className="px-4 py-4 max-h-[65vh] overflow-y-auto bg-gray-100">
           {rows.length > 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
               {rows}
@@ -129,11 +129,11 @@ export default function CompactBetModal({
             </div>
           )}
         </div>
-        <div className="border-t border-[#E5E7EB] px-6 py-4 bg-white flex gap-3">
+        <div className="border-t border-gray-200 px-6 py-4 bg-white flex gap-3">
           <Button
             onClick={onCopy}
             disabled={!copyText}
-            className="flex-1 rounded-xl bg-[#447afc] hover:bg-[#3568d4] text-white flex items-center gap-2"
+            className="flex-1 rounded-xl bg-primary hover:bg-blue-700 text-white flex items-center gap-2"
           >
             <Copy className="h-4 w-4" strokeWidth={1.5} />
             Копіювати
