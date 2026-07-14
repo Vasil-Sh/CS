@@ -165,29 +165,40 @@ export default function GoalsManager() {
 
   useEffect(() => { if (currentUser) { UserDataService.setUserData(currentUser, 'goals', goals); } }, [goals, currentUser]);
 
-  // Load goals from API on mount
+  // Load goals from API on mount — merge with localStorage to preserve progress
   useEffect(() => {
     if (!currentUser) return;
     (async () => {
       try {
         const apiGoals = await UserDataService.fetchGoals() as (Record<string, unknown> & { id: string; type: string; name: string; target?: unknown; current?: unknown; isCompleted?: boolean; config?: Record<string, unknown> })[];
         if (apiGoals && apiGoals.length > 0) {
-          const mapped = apiGoals.map(g => ({
-            id: g.id,
-            type: g.type,
-            name: g.name,
-            targetAmount: g.type === 'amount' ? Number(g.target) : undefined,
-            targetLadderAmount: g.type === 'ladder' ? Number(g.target) : undefined,
-            targetROI: g.type === 'roi' ? Number(g.target) : undefined,
-            targetWinRate: g.type === 'winrate' ? Number(g.target) : undefined,
-            currentAmount: g.type === 'amount' ? Number(g.current) : undefined,
-            currentStep: g.type === 'ladder' ? Number(g.current) : undefined,
-            currentROI: g.type === 'roi' ? Number(g.current) : undefined,
-            currentWinRate: g.type === 'winrate' ? Number(g.current) : undefined,
-            status: g.isCompleted ? 'completed' : 'active',
-            ...(g.config || {}),
-            _backendId: g.id,
-          }));
+          // Read current localStorage goals to preserve progress values
+          const localGoals = UserDataService.getUserData<Goal[]>(currentUser, 'goals', []);
+          const localMap = new Map(localGoals.map(g => [g.id, g]));
+
+          const mapped = apiGoals.map(g => {
+            const local = localMap.get(g.id);
+            const backendConfig = g.config || {};
+            const base = {
+              id: g.id,
+              type: g.type as GoalType,
+              name: g.name,
+              targetAmount: g.type === 'amount' ? Number(g.target) : undefined,
+              targetLadderAmount: g.type === 'ladder' ? Number(g.target) : undefined,
+              targetROI: g.type === 'roi' ? Number(g.target) : undefined,
+              targetWinRate: g.type === 'winrate' ? Number(g.target) : undefined,
+              // Preserve local progress — API always stores 0
+              currentAmount: local?.currentAmount ?? (g.type === 'amount' ? Number(g.current) : undefined),
+              currentStep: local?.currentStep ?? (g.type === 'ladder' ? Number(g.current) : undefined),
+              currentROI: local?.currentROI ?? (g.type === 'roi' ? Number(g.current) : undefined),
+              currentWinRate: local?.currentWinRate ?? (g.type === 'winrate' ? Number(g.current) : undefined),
+              status: local?.status ?? (g.isCompleted ? 'completed' : 'active'),
+              ...backendConfig,
+              ...(local ? { steps: local.steps, currentBank: local.currentBank } : {}),
+              _backendId: g.id,
+            };
+            return base;
+          }) as Goal[];
           setGoals(mapped);
           UserDataService.setUserDataSync(currentUser, 'goals', mapped);
         }
