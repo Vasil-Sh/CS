@@ -329,6 +329,32 @@ export default function GoalsManager() {
           const currentBank = prevActual != null ? prevActual : (goal.startAmount || 0);
           const remainingSteps = calculateRemainingSteps(currentBank, goal.targetLadderAmount || 100000, minOdds);
           const isCompleted = currentBank >= (goal.targetLadderAmount || 100000);
+
+          // Recalculate locked steps from currentBank — when user overperforms,
+          // remaining steps should adapt to the new higher base amount.
+          if (currentStepIndex > 0 && currentStepIndex < steps.length && remainingSteps > 0) {
+            let running = currentBank;
+            const totalNew = currentStepIndex + remainingSteps;
+            // Trim or extend steps array to match new total
+            steps.splice(currentStepIndex); // remove all locked + current
+            for (let i = currentStepIndex; i < totalNew; i++) {
+              const minP = Math.round(running * minOdds * 100) / 100;
+              const maxP = Math.round(running * maxOdds * 100) / 100;
+              steps.push({
+                step: i + 1,
+                startAmount: running,
+                minPlannedAmount: minP,
+                maxPlannedAmount: maxP,
+                status: i === currentStepIndex ? 'current' as const : 'locked' as const,
+                actualAmount: undefined,
+                actualOdds: undefined,
+                deviation: undefined,
+                completedAt: undefined,
+              });
+              running = Math.round(running * minOdds * 100) / 100;
+            }
+          }
+
           return { ...goal, avgOdds: minOdds, currentStep: currentStepIndex, totalSteps: currentStepIndex + remainingSteps, currentBank, steps, status: isCompleted ? 'completed' as GoalStatus : 'active' as GoalStatus, completedAt: isCompleted ? new Date().toISOString() : undefined };
         }
         case 'roi': {
