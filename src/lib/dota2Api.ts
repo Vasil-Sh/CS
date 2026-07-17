@@ -37,8 +37,8 @@ interface TipsGgApiMatch {
   coeff2: number | null;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v8";
-const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v9";
+const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes — short enough to auto-refresh
 
 /** Simple string hash for stable IDs across reloads */
 function stringHash(s: string): number {
@@ -83,12 +83,41 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
   };
 }
 
+/** Cache entry stores the day it was fetched — auto-invalidates on date change */
+interface CacheEntry {
+  data: Dota2ApiMatch[];
+  ts: number;
+  day: string; // YYYY-MM-DD
+}
+
+function getTodayStr(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
 function getCache(): Dota2ApiMatch[] | null {
   try {
     const cached = localStorage.getItem(MATCHES_CACHE_KEY);
     if (cached) {
-      const { data, ts } = JSON.parse(cached);
-      if (Date.now() - ts < MATCHES_CACHE_TTL) return data as Dota2ApiMatch[];
+      const entry: CacheEntry = JSON.parse(cached);
+      const age = Date.now() - entry.ts;
+      // Serve cache only if: not expired AND from today
+      if (age < MATCHES_CACHE_TTL && entry.day === getTodayStr()) {
+        return entry.data as Dota2ApiMatch[];
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/** Return cached data even if stale (for initial fast paint + background refresh) */
+function getStaleCache(): Dota2ApiMatch[] | null {
+  try {
+    const cached = localStorage.getItem(MATCHES_CACHE_KEY);
+    if (cached) {
+      const entry: CacheEntry = JSON.parse(cached);
+      return entry.data as Dota2ApiMatch[];
     }
   } catch {
     /* ignore */
@@ -98,10 +127,8 @@ function getCache(): Dota2ApiMatch[] | null {
 
 function setCache(data: Dota2ApiMatch[]): void {
   try {
-    localStorage.setItem(
-      MATCHES_CACHE_KEY,
-      JSON.stringify({ data, ts: Date.now() }),
-    );
+    const entry: CacheEntry = { data, ts: Date.now(), day: getTodayStr() };
+    localStorage.setItem(MATCHES_CACHE_KEY, JSON.stringify(entry));
   } catch {
     /* ignore */
   }
@@ -109,14 +136,37 @@ function setCache(data: Dota2ApiMatch[]): void {
 
 /**
  * Fetch today's and upcoming Dota 2 matches from tips.gg via backend proxy.
+ * Uses stale-while-revalidate: shows cached data instantly, refreshes from backend.
+ * Auto-invalidates when date changes (cache includes the day key).
+ *
  * @param forceRefresh — skip localStorage cache and force a fresh API call (used by refresh button)
+ * @param onUpdate — called when fresh data arrives (for SWR re-render in Matches page)
  */
 export async function fetchDota2Matches(
   forceRefresh = false,
+  onUpdate?: (matches: Dota2ApiMatch[]) => void,
 ): Promise<Dota2ApiMatch[]> {
+  // Stale-while-revalidate: if NOT forced refresh, return cache immediately
+  // but still fetch from backend in the background.
   if (!forceRefresh) {
     const cached = getCache();
-    if (cached) return cached;
+    if (cached) {
+      // Background refresh — don't await, fire-and-update
+      (async () => {
+        try {
+          const path = "/v1/dota2-matches";
+          const data = await api.get<TipsGgApiMatch[]>(path, 120000);
+          const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
+          if (matches.length > 0) {
+            setCache(matches);
+            onUpdate?.(matches);
+          }
+        } catch {
+          /* silent — cached data is good enough for now */
+        }
+      })();
+      return cached;
+    }
   }
 
   try {
@@ -130,9 +180,8 @@ export async function fetchDota2Matches(
       setCache(matches);
     } else {
       // Don't cache empty responses — keep any previous cached data alive
-      // But if user explicitly refreshed and got empty, return stale cache if available
       if (forceRefresh) {
-        const stale = getCache();
+        const stale = getStaleCache();
         if (stale) return stale;
       }
     }
@@ -141,7 +190,7 @@ export async function fetchDota2Matches(
     if (import.meta.env.DEV)
       console.error("dota2Api: fetchDota2Matches failed", e);
     // On error, serve stale cache as fallback
-    const stale = getCache();
+    const stale = getStaleCache();
     if (stale) return stale;
     return [];
   }

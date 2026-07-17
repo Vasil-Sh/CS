@@ -664,17 +664,22 @@ export default function Matches() {
   const loadMatchesFromApi = async (forceRefresh = false) => {
     try {
       if (forceRefresh) clearDota2Cache();
-      const allMatches: Match[] = [];
 
-      // Fetch Dota2 FIRST (fast, local) so it appears immediately
+      // Fetch Dota2 FIRST with stale-while-revalidate: show cache instantly,
+      // then update with fresh data from backend when it arrives.
       try {
-        const dotaMatches = await fetchDota2Matches(forceRefresh);
+        const dotaMatches = await fetchDota2Matches(
+          forceRefresh,
+          // SWR callback: when fresh data arrives from background fetch,
+          // merge it with current CS2 matches and update the table.
+          (freshDotaMatches) => {
+            setMatches((prev) => {
+              const cs2 = prev.filter((m) => m.game !== "Dota2");
+              return [...freshDotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
+            });
+          },
+        );
         if (import.meta.env.DEV) console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
-        if (dotaMatches.length > 0) {
-          allMatches.push(...dotaMatches.map((m) => dota2ApiMatchToMatch(m)));
-        }
-        // Show matches immediately — don't wait for CS2
-        setMatches(allMatches);
         setInitialLoading(false);
       } catch (e) {
         if (import.meta.env.DEV) console.warn('[Matches] Dota2 fetch failed:', e);
@@ -685,15 +690,14 @@ export default function Matches() {
       try {
         const csMatches = await fetchTodaysAndUpcomingMatches();
         if (import.meta.env.DEV) console.log(`[Matches] Loaded ${csMatches.length} CS2 matches`);
-        allMatches.push(...csMatches.map((m) => apiMatchToMatch(m, "CS2")));
-        setMatches([...allMatches]);
+        setMatches((prev) => {
+          const dota2 = prev.filter((m) => m.game === "Dota2");
+          return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
+        });
       } catch (e) {
         if (import.meta.env.DEV) console.warn('[Matches] CS2 fetch failed:', e);
       }
 
-      if (allMatches.length > 0) {
-        setMatches([...allMatches]);
-      }
       setApiError(null);
     } catch (error) {
       const msg =
