@@ -958,23 +958,34 @@ export default function Matches() {
     setIsLoading(true);
     try {
       toast("🔄 Завантаження матчів...", { description: "Оновлення з API" });
-      const allMatches: Match[] = [];
+      let loadedCount = 0;
 
-      // Fetch Dota2 first (fast), then CS2
+      // Fetch Dota2 first (fast), then CS2 — use incremental updates to avoid erasing existing data
       try {
         const dotaMatches = await fetchDota2Matches(true);
-        if (dotaMatches.length > 0) allMatches.push(...dotaMatches.map(dota2ApiMatchToMatch));
-      } catch { /* ignore */ }
+        if (dotaMatches.length > 0) {
+          setMatches((prev) => {
+            const cs2 = prev.filter((m) => m.game !== "Dota2");
+            return [...dotaMatches.map(dota2ApiMatchToMatch), ...cs2];
+          });
+          loadedCount += dotaMatches.length;
+        }
+      } catch { /* ignore — Dota2 failed, keep existing Dota2 matches */ }
 
       try {
         const csMatches = await fetchTodaysAndUpcomingMatches();
-        if (csMatches.length > 0) allMatches.push(...csMatches.map((m) => apiMatchToMatch(m, "CS2")));
-      } catch { /* ignore */ }
+        if (csMatches.length > 0) {
+          setMatches((prev) => {
+            const dota2 = prev.filter((m) => m.game === "Dota2");
+            return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
+          });
+          loadedCount += csMatches.length;
+        }
+      } catch { /* ignore — CS2 failed, keep existing CS2 matches */ }
 
-      if (allMatches.length > 0) {
-        setMatches(allMatches);
+      if (loadedCount > 0) {
         toast.success("✅ Матчі оновлено!", {
-          description: `Завантажено ${allMatches.length} матчів`,
+          description: `Завантажено ${loadedCount} матчів`,
         });
       } else {
         toast.warning("⚠️ Матчі не знайдено", {

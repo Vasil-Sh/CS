@@ -8,8 +8,8 @@ export interface BaseApiMatch {
   date: string;
   link: string;
   type: string;
-  score1: number;
-  score2: number;
+  score1: number | null;
+  score2: number | null;
   stars: number;
   nameTeam1: string;
   nameTeam2: string;

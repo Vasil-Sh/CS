@@ -9,21 +9,68 @@ export type ApiMatch = BaseApiMatch;
 
 const API_BASE_URL = "https://api.cstest.pp.ua";
 
-const MATCHES_CACHE_KEY = "matches_cache";
-const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MATCHES_CACHE_KEY = "matches_cache_v2";
+const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
-export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
-  const cached = localStorage.getItem(MATCHES_CACHE_KEY);
-  if (cached) {
-    try {
-      const { data, ts } = JSON.parse(cached);
-      if (Date.now() - ts < MATCHES_CACHE_TTL) return data as ApiMatch[];
-    } catch {
-      /* ignore */
+/** Stale-while-revalidate: return cached data instantly, fetch fresh in background */
+export async function fetchTodaysAndUpcomingMatches(
+  forceRefresh = false,
+  onUpdate?: (matches: ApiMatch[]) => void,
+): Promise<ApiMatch[]> {
+  // Serve cache instantly (stale-while-revalidate)
+  if (!forceRefresh) {
+    const cached = getCache();
+    if (cached) {
+      // Background refresh
+      (async () => {
+        try {
+          const fresh = await fetchFreshMatches();
+          if (fresh.length > 0) {
+            setCache(fresh);
+            onUpdate?.(fresh);
+          }
+        } catch { /* silent */ }
+      })();
+      return cached;
     }
   }
+
+  // No cache or forced refresh
   try {
-    const controller = new AbortController();
+    const fresh = await fetchFreshMatches();
+    if (fresh.length > 0) setCache(fresh);
+    return fresh;
+  } catch {
+    return getStaleCache();
+  }
+}
+
+function getCache(): ApiMatch[] | null {
+  try {
+    const cached = localStorage.getItem(MATCHES_CACHE_KEY);
+    if (cached) {
+      const { data, ts } = JSON.parse(cached);
+      if (Date.now() - ts < MATCHES_CACHE_TTL) return data as ApiMatch[];
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function getStaleCache(): ApiMatch[] {
+  try {
+    const cached = localStorage.getItem(MATCHES_CACHE_KEY);
+    if (cached) return JSON.parse(cached).data as ApiMatch[];
+  } catch { return []; }
+}
+
+function setCache(data: ApiMatch[]): void {
+  try {
+    localStorage.setItem(MATCHES_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch { /* ignore */ }
+}
+
+async function fetchFreshMatches(): Promise<ApiMatch[]> {
+  const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
     const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
       method: "GET",
@@ -39,17 +86,12 @@ export async function fetchTodaysAndUpcomingMatches(): Promise<ApiMatch[]> {
     }
 
     const data: ApiMatch[] = await response.json();
-    localStorage.setItem(
-      MATCHES_CACHE_KEY,
-      JSON.stringify({ data, ts: Date.now() }),
-    );
+    // Validate: ensure we got an array
+    if (!Array.isArray(data)) {
+      console.warn("csApi: expected array, got", typeof data);
+      return [];
+    }
     return data;
-  } catch (e) {
-    if (import.meta.env.DEV)
-      console.error("csApi: fetchTodaysAndUpcomingMatches failed", e);
-    return [];
-  }
-}
 
 /**
  * Determine match format from the API type field
@@ -158,18 +200,16 @@ export function determineFavorite(
 }
 
 /**
- * Check if a match is live (has started but not finished based on current time and scores)
+ * Check if a match is live (has started but not finished)
  */
 export function isMatchLive(match: ApiMatch): boolean {
   const matchDate = new Date(match.date);
   const now = new Date();
-  // Match has started (date is in the past) but might still be ongoing
-  // If both scores are 0 and match time has passed, it could be live
-  // If scores exist, the match might be finished or in progress
-  return (
-    matchDate <= now &&
-    match.score1 + match.score2 < getTotalMapsNeeded(match.type)
-  );
+  if (matchDate > now) return false;
+  const totalNeeded = getTotalMapsNeeded(match.type);
+  // BO2: if both maps played (sum=2), it's done (either 2-0 win or 1-1 draw)
+  // BO1/BO3/BO5: if score sum reached total maps, it's done
+  return match.score1 + match.score2 < totalNeeded;
 }
 
 /**
@@ -178,6 +218,10 @@ export function isMatchLive(match: ApiMatch): boolean {
 export function isMatchFinished(match: ApiMatch): boolean {
   const totalNeeded = getTotalMapsNeeded(match.type);
   const winsNeeded = Math.ceil(totalNeeded / 2);
+  // BO2: win=2 maps, or draw=1-1 when both maps played
+  if (totalNeeded === 2) {
+    return match.score1 >= 2 || match.score2 >= 2 || (match.score1 + match.score2 >= 2);
+  }
   return match.score1 >= winsNeeded || match.score2 >= winsNeeded;
 }
 
@@ -185,6 +229,7 @@ function getTotalMapsNeeded(type: string): number {
   const lower = type.toLowerCase();
   if (lower.includes("bo5")) return 5;
   if (lower.includes("bo3")) return 3;
+  if (lower.includes("bo2")) return 2;
   return 1;
 }
 

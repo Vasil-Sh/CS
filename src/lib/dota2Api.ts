@@ -38,7 +38,7 @@ interface TipsGgApiMatch {
 }
 
 const MATCHES_CACHE_KEY = "dota2_matches_cache_v9";
-const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes — short enough to auto-refresh
+const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_FRESH
 
 /** Simple string hash for stable IDs across reloads */
 function stringHash(s: string): number {
@@ -58,8 +58,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     date: m.startDate || `${m.date}T00:00:00`,
     link: m.link,
     type: m.type,
-    score1: (m.score1 ?? 0) as number,
-    score2: (m.score2 ?? 0) as number,
+    score1: m.score1 ?? null,
+    score2: m.score2 ?? null,
     stars: m.tipsCount || 0,
     nameTeam1: m.nameTeam1,
     nameTeam2: m.nameTeam2,
@@ -304,19 +304,22 @@ export function buildTipsGgUrl(link: string): string {
 export function getDota2MatchStatus(
   match: Dota2ApiMatch,
 ): "upcoming" | "live" | "finished" {
-  if (match.score1 === 0 && match.score2 === 0) {
+  const s1 = match.score1 ?? null;
+  const s2 = match.score2 ?? null;
+  if (s1 === null || s2 === null) {
     const matchDate = new Date(match.date);
     return matchDate <= new Date() ? "live" : "upcoming";
   }
-  // For BO2, a draw is possible (1-1). For BO3, first to 2 wins.
-  const totalMaps =
-    parseDota2MatchType(match.type) === "Bo5"
-      ? 5
-      : parseDota2MatchType(match.type) === "Bo3"
-        ? 3
-        : 2;
+  const matchType = parseDota2MatchType(match.type);
+  const totalMaps = matchType === "Bo5" ? 5 : matchType === "Bo3" ? 3 : 2;
   const winsNeeded = Math.ceil(totalMaps / 2);
-  if (match.score1 >= winsNeeded || match.score2 >= winsNeeded)
-    return "finished";
+
+  // BO2 special case: finished when 2 maps played (2-0, 0-2, or 1-1 draw)
+  if (matchType === "Bo2") {
+    if (s1 + s2 >= 2) return "finished";
+    return "live";
+  }
+  // BO1/BO3/BO5: finished when any team reaches wins needed
+  if (s1 >= winsNeeded || s2 >= winsNeeded) return "finished";
   return "live";
 }
