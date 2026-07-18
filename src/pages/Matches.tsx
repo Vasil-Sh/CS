@@ -130,6 +130,8 @@ interface Match {
   bettingCoefficientTeam1?: number | null;
   bettingCoefficientTeam2?: number | null;
   stars?: number;
+  /** Raw slug from tips.gg URL — used for live-score ID matching */
+  dota2Slug?: string;
 }
 
 type MatchRating = "like" | "dislike" | null;
@@ -267,15 +269,21 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
   // Use backend-supplied prediction % directly (already normalized from bookmaker coefficients)
   const pred1 = m.predictionPercentTeam1;
   const pred2 = m.predictionPercentTeam2;
-  const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+  const hasPrediction =
+    pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
 
-  const confidence = hasPrediction
-    ? Math.max(pred1 ?? 50, pred2 ?? 50)
-    : 50;
+  const confidence = hasPrediction ? Math.max(pred1 ?? 50, pred2 ?? 50) : 50;
 
   const fav = hasPrediction
-    ? ((pred1 ?? 50) >= (pred2 ?? 50) ? m.nameTeam1 : m.nameTeam2)
+    ? (pred1 ?? 50) >= (pred2 ?? 50)
+      ? m.nameTeam1
+      : m.nameTeam2
     : m.nameTeam1;
+
+  // Extract slug from link for live-score ID matching
+  // "/matches/dota2/DD-MM-YYYY/SLUG/HH-MM/" → "SLUG"
+  const slugParts = m.link.replace(/\/$/, "").split("/");
+  const dota2Slug = slugParts[slugParts.length - 2] || "";
 
   return {
     id: `dota-${m.id}`,
@@ -300,12 +308,15 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     tier: "tier2",
     matchType: parseDota2MatchType(m.type),
     upsetProbability: hasPrediction
-      ? Math.max(5, Math.min(45, 50 - (Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5)))
+      ? Math.max(
+          5,
+          Math.min(45, 50 - Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5),
+        )
       : 25,
     url: buildTipsGgUrl(m.link),
     score1: m.score1,
     score2: m.score2,
-    matchStatus: (m.status as "upcoming" | "live" | "finished"),
+    matchStatus: m.status as "upcoming" | "live" | "finished",
     positionTeam1: m.positionTeam1,
     positionTeam2: m.positionTeam2,
     logoTeam1: m.logoTeam1,
@@ -316,6 +327,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     bettingCoefficientTeam2: m.bettingCoefficientTeam2,
     stars: m.stars,
     game: "Dota2",
+    dota2Slug,
   };
 }
 
@@ -675,27 +687,33 @@ export default function Matches() {
           (freshDotaMatches) => {
             setMatches((prev) => {
               const cs2 = prev.filter((m) => m.game !== "Dota2");
-              return [...freshDotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
+              return [
+                ...freshDotaMatches.map((m) => dota2ApiMatchToMatch(m)),
+                ...cs2,
+              ];
             });
           },
         );
-        if (import.meta.env.DEV) console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
+        if (import.meta.env.DEV)
+          console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
         setInitialLoading(false);
       } catch (e) {
-        if (import.meta.env.DEV) console.warn('[Matches] Dota2 fetch failed:', e);
+        if (import.meta.env.DEV)
+          console.warn("[Matches] Dota2 fetch failed:", e);
         setInitialLoading(false);
       }
 
       // Fetch CS2 separately (slower external API)
       try {
         const csMatches = await fetchTodaysAndUpcomingMatches();
-        if (import.meta.env.DEV) console.log(`[Matches] Loaded ${csMatches.length} CS2 matches`);
+        if (import.meta.env.DEV)
+          console.log(`[Matches] Loaded ${csMatches.length} CS2 matches`);
         setMatches((prev) => {
           const dota2 = prev.filter((m) => m.game === "Dota2");
           return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
         });
       } catch (e) {
-        if (import.meta.env.DEV) console.warn('[Matches] CS2 fetch failed:', e);
+        if (import.meta.env.DEV) console.warn("[Matches] CS2 fetch failed:", e);
       }
 
       setApiError(null);
@@ -830,7 +848,13 @@ export default function Matches() {
       const matchDate = new Date(dateKey + "T12:00:00");
       const matchDayIdx = matchDate.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
       const dayMap: Record<string, number> = {
-        sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
+        sun: 0,
+        mon: 1,
+        tue: 2,
+        wed: 3,
+        thu: 4,
+        fri: 5,
+        sat: 6,
       };
       if (dayMap[filterDayOfWeek] !== matchDayIdx) return false;
     }
@@ -970,18 +994,25 @@ export default function Matches() {
           });
           loadedCount += dotaMatches.length;
         }
-      } catch { /* ignore — Dota2 failed, keep existing Dota2 matches */ }
+      } catch {
+        /* ignore — Dota2 failed, keep existing Dota2 matches */
+      }
 
       try {
         const csMatches = await fetchTodaysAndUpcomingMatches();
         if (csMatches.length > 0) {
           setMatches((prev) => {
             const dota2 = prev.filter((m) => m.game === "Dota2");
-            return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
+            return [
+              ...csMatches.map((m) => apiMatchToMatch(m, "CS2")),
+              ...dota2,
+            ];
           });
           loadedCount += csMatches.length;
         }
-      } catch { /* ignore — CS2 failed, keep existing CS2 matches */ }
+      } catch {
+        /* ignore — CS2 failed, keep existing CS2 matches */
+      }
 
       if (loadedCount > 0) {
         toast.success("✅ Матчі оновлено!", {
@@ -1182,10 +1213,7 @@ export default function Matches() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Radio
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
+                    <Radio className="h-5 w-5 text-primary" strokeWidth={1.5} />
                   </div>
                   <span className="text-lg font-semibold text-gray-900">
                     LIVE
@@ -1211,10 +1239,7 @@ export default function Matches() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Clock
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
+                    <Clock className="h-5 w-5 text-primary" strokeWidth={1.5} />
                   </div>
                   <span className="text-lg font-semibold text-gray-900">
                     Очікуються
@@ -1269,10 +1294,7 @@ export default function Matches() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Brain
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
+                    <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />
                   </div>
                   <span className="text-lg font-semibold text-gray-900">
                     Середній Прогноз
@@ -1358,10 +1380,30 @@ export default function Matches() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem onClick={() => setFilterStatus("all")} className="rounded-lg">Всі статуси</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterStatus("live")} className="rounded-lg">🔴 LIVE</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterStatus("upcoming")} className="rounded-lg">🕐 Очікуються</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterStatus("finished")} className="rounded-lg">✅ Завершені</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterStatus("all")}
+                    className="rounded-lg"
+                  >
+                    Всі статуси
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterStatus("live")}
+                    className="rounded-lg"
+                  >
+                    🔴 LIVE
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterStatus("upcoming")}
+                    className="rounded-lg"
+                  >
+                    🕐 Очікуються
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterStatus("finished")}
+                    className="rounded-lg"
+                  >
+                    ✅ Завершені
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -1382,14 +1424,37 @@ export default function Matches() {
                         : filterTier === "tier2"
                           ? "Tier 2"
                           : "Tier 3"}
-                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
+                    <ChevronDown
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem onClick={() => setFilterTier("all")} className="rounded-lg">Всі Tier</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterTier("tier1")} className="rounded-lg">Tier 1</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterTier("tier2")} className="rounded-lg">Tier 2</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterTier("tier3")} className="rounded-lg">Tier 3</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterTier("all")}
+                    className="rounded-lg"
+                  >
+                    Всі Tier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterTier("tier1")}
+                    className="rounded-lg"
+                  >
+                    Tier 1
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterTier("tier2")}
+                    className="rounded-lg"
+                  >
+                    Tier 2
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterTier("tier3")}
+                    className="rounded-lg"
+                  >
+                    Tier 3
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -1404,15 +1469,43 @@ export default function Matches() {
                     }`}
                   >
                     {filterMatchType === "all" ? "Формат" : filterMatchType}
-                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
+                    <ChevronDown
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem onClick={() => setFilterMatchType("all")} className="rounded-lg">Всі формати</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo1")} className="rounded-lg">Bo1</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo2")} className="rounded-lg">Bo2</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo3")} className="rounded-lg">Bo3</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterMatchType("Bo5")} className="rounded-lg">Bo5</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterMatchType("all")}
+                    className="rounded-lg"
+                  >
+                    Всі формати
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterMatchType("Bo1")}
+                    className="rounded-lg"
+                  >
+                    Bo1
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterMatchType("Bo2")}
+                    className="rounded-lg"
+                  >
+                    Bo2
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterMatchType("Bo3")}
+                    className="rounded-lg"
+                  >
+                    Bo3
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterMatchType("Bo5")}
+                    className="rounded-lg"
+                  >
+                    Bo5
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -1431,13 +1524,30 @@ export default function Matches() {
                       : filterTournament.length > 15
                         ? filterTournament.slice(0, 15) + "…"
                         : filterTournament}
-                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
+                    <ChevronDown
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1 max-h-64 overflow-y-auto">
-                  <DropdownMenuItem onClick={() => setFilterTournament("all")} className="rounded-lg">Всі турніри</DropdownMenuItem>
+                <DropdownMenuContent
+                  align="start"
+                  className="rounded-xl p-1 max-h-64 overflow-y-auto"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setFilterTournament("all")}
+                    className="rounded-lg"
+                  >
+                    Всі турніри
+                  </DropdownMenuItem>
                   {tournamentOptions.map((t) => (
-                    <DropdownMenuItem key={t} onClick={() => setFilterTournament(t)} className="rounded-lg text-sm">{t}</DropdownMenuItem>
+                    <DropdownMenuItem
+                      key={t}
+                      onClick={() => setFilterTournament(t)}
+                      className="rounded-lg text-sm"
+                    >
+                      {t}
+                    </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1454,25 +1564,74 @@ export default function Matches() {
                   >
                     {filterDayOfWeek === "all"
                       ? "Всі дні"
-                      : filterDayOfWeek === "mon" ? "Понеділок"
-                      : filterDayOfWeek === "tue" ? "Вівторок"
-                      : filterDayOfWeek === "wed" ? "Середа"
-                      : filterDayOfWeek === "thu" ? "Четвер"
-                      : filterDayOfWeek === "fri" ? "П'ятниця"
-                      : filterDayOfWeek === "sat" ? "Субота"
-                      : "Неділя"}
-                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
+                      : filterDayOfWeek === "mon"
+                        ? "Понеділок"
+                        : filterDayOfWeek === "tue"
+                          ? "Вівторок"
+                          : filterDayOfWeek === "wed"
+                            ? "Середа"
+                            : filterDayOfWeek === "thu"
+                              ? "Четвер"
+                              : filterDayOfWeek === "fri"
+                                ? "П'ятниця"
+                                : filterDayOfWeek === "sat"
+                                  ? "Субота"
+                                  : "Неділя"}
+                    <ChevronDown
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("all")} className="rounded-lg">Всі дні</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("mon")} className="rounded-lg">Понеділок</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("tue")} className="rounded-lg">Вівторок</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("wed")} className="rounded-lg">Середа</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("thu")} className="rounded-lg">Четвер</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("fri")} className="rounded-lg">П'ятниця</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("sat")} className="rounded-lg">Субота</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterDayOfWeek("sun")} className="rounded-lg">Неділя</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("all")}
+                    className="rounded-lg"
+                  >
+                    Всі дні
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("mon")}
+                    className="rounded-lg"
+                  >
+                    Понеділок
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("tue")}
+                    className="rounded-lg"
+                  >
+                    Вівторок
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("wed")}
+                    className="rounded-lg"
+                  >
+                    Середа
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("thu")}
+                    className="rounded-lg"
+                  >
+                    Четвер
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("fri")}
+                    className="rounded-lg"
+                  >
+                    П'ятниця
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("sat")}
+                    className="rounded-lg"
+                  >
+                    Субота
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setFilterDayOfWeek("sun")}
+                    className="rounded-lg"
+                  >
+                    Неділя
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -1481,10 +1640,16 @@ export default function Matches() {
                 <DropdownMenuTrigger asChild>
                   <button className="relative px-5 py-4 text-base rounded-[24px] border border-stone-200 transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-gray-900 font-light">
                     Колонки
-                    <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
+                    <ChevronDown
+                      className="h-4 w-4 opacity-50"
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1 min-w-[200px]">
+                <DropdownMenuContent
+                  align="start"
+                  className="rounded-xl p-1 min-w-[200px]"
+                >
                   {COLUMN_DEFS.map((col) => (
                     <DropdownMenuCheckboxItem
                       key={col.id}
@@ -1515,32 +1680,48 @@ export default function Matches() {
           </div>
 
           {/* ===== DATE GROUP CARDS — always visible ===== */}
-            {(() => {
-              const allDateKeys = Object.keys(groupedByDate).sort().filter((dk) => {
+          {(() => {
+            const allDateKeys = Object.keys(groupedByDate)
+              .sort()
+              .filter((dk) => {
                 if (filterDayOfWeek === "all") return true;
-                const dayMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
-                return new Date(dk + "T12:00:00").getDay() === dayMap[filterDayOfWeek];
-              });
-              // Only show cards that have matches — but ensure at least one card is visible
-              const withMatches = allDateKeys.filter(dk => (groupedByDate[dk]?.length || 0) > 0);
-              const finalKeys = withMatches.length > 0 ? withMatches : allDateKeys;
-              return finalKeys.map((dateKey, idx) => {
-                const dateMatches = groupedByDate[dateKey];
-                const hasLive = dateMatches.some((m) => m.matchStatus === "live");
+                const dayMap: Record<string, number> = {
+                  sun: 0,
+                  mon: 1,
+                  tue: 2,
+                  wed: 3,
+                  thu: 4,
+                  fri: 5,
+                  sat: 6,
+                };
                 return (
-                  <BlurFade key={dateKey} delay={idx * 0.1} inView>
-                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                      {hasLive && (
-                        <BorderBeam
-                          size={200}
-                          duration={4}
-                          colorFrom="#EF4444"
-                          colorTo="#F59E0B"
-                          borderWidth={2}
-                          className="rounded-[32px]"
-                        />
-                      )}
-                      <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-x-auto">
+                  new Date(dk + "T12:00:00").getDay() ===
+                  dayMap[filterDayOfWeek]
+                );
+              });
+            // Only show cards that have matches — but ensure at least one card is visible
+            const withMatches = allDateKeys.filter(
+              (dk) => (groupedByDate[dk]?.length || 0) > 0,
+            );
+            const finalKeys =
+              withMatches.length > 0 ? withMatches : allDateKeys;
+            return finalKeys.map((dateKey, idx) => {
+              const dateMatches = groupedByDate[dateKey];
+              const hasLive = dateMatches.some((m) => m.matchStatus === "live");
+              return (
+                <BlurFade key={dateKey} delay={idx * 0.1} inView>
+                  <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                    {hasLive && (
+                      <BorderBeam
+                        size={200}
+                        duration={4}
+                        colorFrom="#EF4444"
+                        colorTo="#F59E0B"
+                        borderWidth={2}
+                        className="rounded-[32px]"
+                      />
+                    )}
+                    <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-x-auto">
                       <CardHeader className="bg-white rounded-t-[24px] border-b border-gray-200 px-6 py-5">
                         <CardTitle>
                           <div className="flex items-center gap-4 flex-wrap">
@@ -1595,8 +1776,13 @@ export default function Matches() {
                       <CardContent className="p-0 rounded-b-[24px]">
                         {initialLoading ? (
                           <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" strokeWidth={1.5} />
-                            <p className="text-sm text-gray-400">Завантаження матчів...</p>
+                            <Loader2
+                              className="h-8 w-8 animate-spin text-primary"
+                              strokeWidth={1.5}
+                            />
+                            <p className="text-sm text-gray-400">
+                              Завантаження матчів...
+                            </p>
                           </div>
                         ) : dateMatches.length > 0 ? (
                           <div>
@@ -1608,18 +1794,27 @@ export default function Matches() {
                         ) : (
                           <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
                             <div className="p-5 bg-gray-100 rounded-2xl">
-                              <Trophy className="h-10 w-10 text-gray-400" strokeWidth={1.5} />
+                              <Trophy
+                                className="h-10 w-10 text-gray-400"
+                                strokeWidth={1.5}
+                              />
                             </div>
-                            <p className="text-lg font-bold text-gray-500">Немає матчів</p>
+                            <p className="text-lg font-bold text-gray-500">
+                              Немає матчів
+                            </p>
                             <p className="text-sm">
-                              Спробуйте обрати інший фільтр гри або натисніть «Оновити»
+                              Спробуйте обрати інший фільтр гри або натисніть
+                              «Оновити»
                             </p>
                             <button
                               onClick={refreshMatches}
                               disabled={isLoading}
                               className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
                             >
-                              <RefreshCw className="h-4 w-4" strokeWidth={1.5} />
+                              <RefreshCw
+                                className="h-4 w-4"
+                                strokeWidth={1.5}
+                              />
                               Оновити
                             </button>
                           </div>
@@ -1628,8 +1823,9 @@ export default function Matches() {
                     </div>
                   </div>
                 </BlurFade>
-                );
-              })})()}
+              );
+            });
+          })()}
 
           <AIRecommendationModal
             open={aiModalOpen}

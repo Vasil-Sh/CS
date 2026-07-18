@@ -156,7 +156,9 @@ export async function fetchDota2Matches(
         try {
           const path = "/v1/dota2-matches";
           const data = await api.get<TipsGgApiMatch[]>(path, 120000);
-          const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
+          const matches = (Array.isArray(data) ? data : []).map(
+            tipsGgToApiMatch,
+          );
           if (matches.length > 0) {
             setCache(matches);
             onUpdate?.(matches);
@@ -224,13 +226,18 @@ export function parseDota2MatchType(
  * Extract tournament context from the match data.
  */
 export function parseDota2MatchContext(match: Dota2ApiMatch): string {
+  // If match already has a tournament, use it
+  if (match.tournament) return match.tournament;
+
   // Try to parse tournament from the link
-  // e.g., "/matches/dota2/10-07-2026/rune-eaters-vs-gamerlegion/10-00/"
+  if (!match.link) return match.type || "Dota 2";
+
   const parts = match.link.split("/").filter(Boolean);
   const slug = parts[parts.length - 2] || parts[parts.length - 1] || "";
+  if (!slug) return match.type || "Dota 2";
 
   const vsIndex = slug.indexOf("-vs-");
-  if (vsIndex === -1) return match.type;
+  if (vsIndex === -1) return match.type || "Dota 2";
 
   const afterVs = slug.substring(vsIndex + 4);
   const segments = afterVs.split("-");
@@ -308,7 +315,12 @@ export function getDota2MatchStatus(
   const s2 = match.score2 ?? null;
   if (s1 === null || s2 === null) {
     const matchDate = new Date(match.date);
-    return matchDate <= new Date() ? "live" : "upcoming";
+    if (matchDate <= new Date()) {
+      // Heuristic: if started >2h ago with no scores, likely finished
+      const ageMs = Date.now() - matchDate.getTime();
+      return ageMs > 2 * 60 * 60 * 1000 ? "finished" : "live";
+    }
+    return "upcoming";
   }
   const matchType = parseDota2MatchType(match.type);
   const totalMaps = matchType === "Bo5" ? 5 : matchType === "Bo3" ? 3 : 2;

@@ -61,7 +61,8 @@ export default defineConfig(({ mode }) => ({
                   },
                 },
                 {
-                  urlPattern: /^https:\/\/cs-backend-production.*\.up\.railway\.app\/.*/i,
+                  urlPattern:
+                    /^https:\/\/cs-backend-production.*\.up\.railway\.app\/.*/i,
                   handler: "NetworkFirst",
                   options: {
                     cacheName: "backend-api-cache",
@@ -87,6 +88,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  server: {
+    proxy: {
+      "/api": "http://localhost:3001",
     },
   },
 }));

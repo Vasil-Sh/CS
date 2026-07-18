@@ -29,7 +29,9 @@ export async function fetchTodaysAndUpcomingMatches(
             setCache(fresh);
             onUpdate?.(fresh);
           }
-        } catch { /* silent */ }
+        } catch {
+          /* silent */
+        }
       })();
       return cached;
     }
@@ -52,7 +54,9 @@ function getCache(): ApiMatch[] | null {
       const { data, ts } = JSON.parse(cached);
       if (Date.now() - ts < MATCHES_CACHE_TTL) return data as ApiMatch[];
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
@@ -60,38 +64,47 @@ function getStaleCache(): ApiMatch[] {
   try {
     const cached = localStorage.getItem(MATCHES_CACHE_KEY);
     if (cached) return JSON.parse(cached).data as ApiMatch[];
-  } catch { return []; }
+  } catch {
+    /* ignore */
+  }
+  return [];
 }
 
 function setCache(data: ApiMatch[]): void {
   try {
-    localStorage.setItem(MATCHES_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
-  } catch { /* ignore */ }
+    localStorage.setItem(
+      MATCHES_CACHE_KEY,
+      JSON.stringify({ data, ts: Date.now() }),
+    );
+  } catch {
+    /* ignore */
+  }
 }
 
 async function fetchFreshMatches(): Promise<ApiMatch[]> {
   const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
-    const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+  const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+    signal: controller.signal,
+  });
+  clearTimeout(timeout);
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  }
 
-    const data: ApiMatch[] = await response.json();
-    // Validate: ensure we got an array
-    if (!Array.isArray(data)) {
-      console.warn("csApi: expected array, got", typeof data);
-      return [];
-    }
-    return data;
+  const data: ApiMatch[] = await response.json();
+  // Validate: ensure we got an array
+  if (!Array.isArray(data)) {
+    console.warn("csApi: expected array, got", typeof data);
+    return [];
+  }
+  return data;
+}
 
 /**
  * Determine match format from the API type field
@@ -220,7 +233,9 @@ export function isMatchFinished(match: ApiMatch): boolean {
   const winsNeeded = Math.ceil(totalNeeded / 2);
   // BO2: win=2 maps, or draw=1-1 when both maps played
   if (totalNeeded === 2) {
-    return match.score1 >= 2 || match.score2 >= 2 || (match.score1 + match.score2 >= 2);
+    return (
+      match.score1 >= 2 || match.score2 >= 2 || match.score1 + match.score2 >= 2
+    );
   }
   return match.score1 >= winsNeeded || match.score2 >= winsNeeded;
 }
