@@ -73,6 +73,7 @@ import {
   parseDota2MatchContext,
   buildTipsGgUrl,
   clearDota2Cache,
+  getDota2MatchStatus,
   type Dota2ApiMatch,
 } from "@/lib/dota2Api";
 
@@ -316,7 +317,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     url: buildTipsGgUrl(m.link),
     score1: m.score1,
     score2: m.score2,
-    matchStatus: m.status as "upcoming" | "live" | "finished",
+    matchStatus: getDota2MatchStatus(m),
     positionTeam1: m.positionTeam1,
     positionTeam2: m.positionTeam2,
     logoTeam1: m.logoTeam1,
@@ -562,8 +563,8 @@ export default function Matches() {
 
         setMatches((prev) =>
           prev.map((m) => {
-            if (m.game !== "Dota2") return m;
-            const update = updates.find((u) => m.id.endsWith(u.id));
+            if (m.game !== "Dota2" || !m.dota2Slug) return m;
+            const update = updates.find((u) => u.id === m.dota2Slug);
             if (!update) return m;
             const newStatus =
               update.status === "finished"
