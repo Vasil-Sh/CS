@@ -347,42 +347,38 @@ export default function CS2BettingForm({
   }, [currentUser]);
 
   useEffect(() => {
-    if (prefillData && !prefillConsumedRef.current) {
-      prefillConsumedRef.current = true;
-      prefillLogosRef.current = {
-        logoTeam1: prefillData.logoTeam1,
-        logoTeam2: prefillData.logoTeam2,
-      };
-
-      const formatMap: Record<string, string> = {
-        Bo1: "BO1",
-        Bo2: "BO2",
-        Bo3: "BO3",
-        Bo5: "BO5",
-      };
-      const mappedFormat =
-        formatMap[prefillData.format] || prefillData.format || "BO3";
-
-      setFormData((prev) => ({
-        ...prev,
-        team1: prefillData.team1 || "",
-        team2: prefillData.team2 || "",
-        tournament: prefillData.tournament || "",
-        format: mappedFormat,
-        date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
-        matchUrl: prefillData.matchUrl || "",
-        odds: prefillData.odds || "",
-        game: prefillData.game || prev.game,
-      }));
-      setTimeout(() => {
-        onPrefillConsumedRef.current?.();
-      }, 0);
-      toast.success("Дані матчу підставлено у форму");
-    }
-
     if (!prefillData) {
       prefillConsumedRef.current = false;
+      return;
     }
+    if (prefillConsumedRef.current) return;
+
+    prefillConsumedRef.current = true;
+    prefillLogosRef.current = {
+      logoTeam1: prefillData.logoTeam1,
+      logoTeam2: prefillData.logoTeam2,
+    };
+
+    const formatMap: Record<string, string> = {
+      Bo1: "BO1",
+      Bo2: "BO2",
+      Bo3: "BO3",
+      Bo5: "BO5",
+    };
+    const mappedFormat =
+      formatMap[prefillData.format] || prefillData.format || "BO3";
+
+    setFormData((prev) => ({
+      ...prev,
+      team1: prefillData.team1 || "",
+      team2: prefillData.team2 || "",
+      tournament: prefillData.tournament || "",
+      format: mappedFormat,
+      date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
+      matchUrl: prefillData.matchUrl || "",
+      odds: prefillData.odds || "",
+      game: prefillData.game || prev.game,
+    }));
   }, [prefillData]);
 
   useEffect(() => {
@@ -430,6 +426,7 @@ export default function CS2BettingForm({
     setStrategyViolations([]);
     setIsPrefilled(false);
     setIsExpressFromMatches(false);
+    onPrefillConsumedRef.current?.(); // reset parent state → remount with empty form
     toast.success("Форму очищено");
   };
 

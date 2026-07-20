@@ -674,6 +674,11 @@ export default function MyBets() {
           {activeTab === "add" && (
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <CS2BettingForm
+                key={
+                  prefillData
+                    ? `prefill-${prefillData.game}-${prefillData.team1}`
+                    : "default"
+                }
                 onRecordAdded={handleRecordAdded}
                 prefillData={prefillData}
                 onPrefillConsumed={() => setPrefillData(null)}
