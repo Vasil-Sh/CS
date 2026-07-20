@@ -17,7 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getGroupedBetTypeOptions, getBetTypeLabel } from "@/lib/displayHelpers";
+import {
+  getGroupedBetTypeOptions,
+  getBetTypeLabel,
+} from "@/lib/displayHelpers";
 
 interface FormMatchData {
   game: "CS2" | "Dota2";
@@ -116,8 +119,11 @@ export default function BettingFormMatchSection({
     category: string;
     options: { value: string; label: string }[];
   }) => {
-    const safeValue = group.options.some(o => o.value === tempBetType) ? tempBetType : undefined;
-    const isGroupSelected = tempBetType && group.options.some(o => o.value === tempBetType);
+    const safeValue = group.options.some((o) => o.value === tempBetType)
+      ? tempBetType
+      : undefined;
+    const isGroupSelected =
+      tempBetType && group.options.some((o) => o.value === tempBetType);
     const selectedBorder = "border-green-500 bg-green-50";
     const defaultBorder = "border-gray-200/80 bg-white";
     if (group.category.includes("Фора")) {
@@ -129,16 +135,50 @@ export default function BettingFormMatchSection({
         (o) => o.label.includes("+") && !seen.has(o.label) && seen.add(o.label),
       );
       return (
-        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
+        <div
+          className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}
+        >
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+            {group.category}
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
-              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Мінус" /></SelectTrigger>
-              <SelectContent className="text-gray-800">{negs.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
+            <Select
+              value={safeValue}
+              onValueChange={(v) => setTempBetType(v || "")}
+            >
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800">
+                <SelectValue placeholder="Мінус" />
+              </SelectTrigger>
+              <SelectContent className="text-gray-800">
+                {negs.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="text-gray-800"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
-              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Плюс" /></SelectTrigger>
-              <SelectContent className="text-gray-800">{poss.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
+            <Select
+              value={safeValue}
+              onValueChange={(v) => setTempBetType(v || "")}
+            >
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800">
+                <SelectValue placeholder="Плюс" />
+              </SelectTrigger>
+              <SelectContent className="text-gray-800">
+                {poss.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="text-gray-800"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -148,16 +188,50 @@ export default function BettingFormMatchSection({
       const unders = group.options.filter((o) => o.label.includes("Менше"));
       const overs = group.options.filter((o) => o.label.includes("Більше"));
       return (
-        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
+        <div
+          className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}
+        >
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+            {group.category}
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
-              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Менше" /></SelectTrigger>
-              <SelectContent className="text-gray-800">{unders.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
+            <Select
+              value={safeValue}
+              onValueChange={(v) => setTempBetType(v || "")}
+            >
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800">
+                <SelectValue placeholder="Менше" />
+              </SelectTrigger>
+              <SelectContent className="text-gray-800">
+                {unders.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="text-gray-800"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-            <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
-              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Більше" /></SelectTrigger>
-              <SelectContent className="text-gray-800">{overs.map(opt => (<SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>))}</SelectContent>
+            <Select
+              value={safeValue}
+              onValueChange={(v) => setTempBetType(v || "")}
+            >
+              <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800">
+                <SelectValue placeholder="Більше" />
+              </SelectTrigger>
+              <SelectContent className="text-gray-800">
+                {overs.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="text-gray-800"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -166,15 +240,22 @@ export default function BettingFormMatchSection({
     // Small groups (1-3 options) stay as buttons
     if (group.options.length <= 3) {
       return (
-        <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
+        <div
+          className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}
+        >
+          <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+            {group.category}
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {group.options.map((opt) => {
               const isSelected = tempBetType === opt.value;
               return (
-                <button key={opt.value} type="button"
+                <button
+                  key={opt.value}
+                  type="button"
                   onClick={() => setTempBetType(opt.value)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-primary text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isSelected ? "bg-primary text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+                >
                   {opt.label}
                 </button>
               );
@@ -185,13 +266,28 @@ export default function BettingFormMatchSection({
     }
     // Larger groups get a Select dropdown
     return (
-      <div className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}>
-        <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{group.category}</div>
-        <Select value={safeValue} onValueChange={(v) => setTempBetType(v || '')}>
-          <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
+      <div
+        className={`rounded-xl border shadow-sm p-3 ${isGroupSelected ? selectedBorder : defaultBorder}`}
+      >
+        <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+          {group.category}
+        </div>
+        <Select
+          value={safeValue}
+          onValueChange={(v) => setTempBetType(v || "")}
+        >
+          <SelectTrigger className="w-full rounded-xl border-gray-200 h-9 text-sm !text-gray-800 [&_span]:!text-gray-800">
+            <SelectValue placeholder="Оберіть..." />
+          </SelectTrigger>
           <SelectContent className="text-gray-800">
-            {group.options.map(opt => (
-              <SelectItem key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</SelectItem>
+            {group.options.map((opt) => (
+              <SelectItem
+                key={opt.value}
+                value={opt.value}
+                className="text-gray-800"
+              >
+                {opt.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -256,11 +352,27 @@ export default function BettingFormMatchSection({
             </Label>
             <div className="flex items-center gap-2">
               <img
-                src={data.logoTeam1 || (data.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
-                alt={data.team1 || 'Team 1'}
+                src={
+                  data.logoTeam1 ||
+                  (data.game === "Dota2"
+                    ? "/assets/team-placeholder-dota.svg"
+                    : "/assets/team-placeholder.svg")
+                }
+                alt={data.team1 || "Team 1"}
                 className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
+                  const t = e.target as HTMLImageElement;
+                  // Try Dota2 fallback first, then game placeholder
+                  if (
+                    data.game === "Dota2" &&
+                    !t.src.includes("team-placeholder-dota")
+                  ) {
+                    t.src = "/assets/team-placeholder-dota.svg";
+                  } else if (!t.src.includes("team-placeholder")) {
+                    t.src = "/assets/team-placeholder.svg";
+                  } else {
+                    t.style.display = "none";
+                  }
                 }}
               />
               <Input
@@ -281,11 +393,26 @@ export default function BettingFormMatchSection({
             </Label>
             <div className="flex items-center gap-2">
               <img
-                src={data.logoTeam2 || (data.game === 'Dota2' ? '/assets/team-placeholder-dota.svg' : '/assets/team-placeholder.svg')}
-                alt={data.team2 || 'Team 2'}
+                src={
+                  data.logoTeam2 ||
+                  (data.game === "Dota2"
+                    ? "/assets/team-placeholder-dota.svg"
+                    : "/assets/team-placeholder.svg")
+                }
+                alt={data.team2 || "Team 2"}
                 className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
+                  const t = e.target as HTMLImageElement;
+                  if (
+                    data.game === "Dota2" &&
+                    !t.src.includes("team-placeholder-dota")
+                  ) {
+                    t.src = "/assets/team-placeholder-dota.svg";
+                  } else if (!t.src.includes("team-placeholder")) {
+                    t.src = "/assets/team-placeholder.svg";
+                  } else {
+                    t.style.display = "none";
+                  }
                 }}
               />
               <Input
@@ -306,14 +433,17 @@ export default function BettingFormMatchSection({
         <div className="flex items-end gap-3">
           <div className="flex-[2] space-y-1.5">
             <Label className={classes.label}>
-              Вибір переможця {showRequired && <span className="text-red-500">*</span>}
+              Вибір переможця{" "}
+              {showRequired && <span className="text-red-500">*</span>}
             </Label>
             <Select
               value={data.selection}
               onValueChange={(value) => onFieldChange("selection", value)}
               disabled={!data.team1 || !data.team2}
             >
-              <SelectTrigger className={`${classes.selectTrigger} ${err("selection")}`}>
+              <SelectTrigger
+                className={`${classes.selectTrigger} ${err("selection")}`}
+              >
                 <SelectValue
                   placeholder={
                     data.team1 && data.team2
@@ -390,7 +520,13 @@ export default function BettingFormMatchSection({
       </div>
 
       {/* Bet Type Modal */}
-      <Dialog open={betModalOpen} onOpenChange={(open) => { if (!open) cancelBetType(); else setBetModalOpen(true); }}>
+      <Dialog
+        open={betModalOpen}
+        onOpenChange={(open) => {
+          if (!open) cancelBetType();
+          else setBetModalOpen(true);
+        }}
+      >
         <DialogContent
           className="rounded-3xl max-w-xl max-h-[80vh] flex flex-col border border-gray-200 p-0 gap-0"
           hideCloseButton
@@ -401,7 +537,9 @@ export default function BettingFormMatchSection({
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
                   <Target className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
                 </div>
-                <DialogTitle className="text-lg font-semibold text-gray-900">Тип прогнозу</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-gray-900">
+                  Тип прогнозу
+                </DialogTitle>
               </div>
               <button
                 type="button"
@@ -439,19 +577,19 @@ export default function BettingFormMatchSection({
             {/* Tab: Карта N */}
             {betTab >= 2 &&
               (
-                grouped.maps.find((m) => m.mapNumber === betTab - 1)
-                  ?.groups ?? []
+                grouped.maps.find((m) => m.mapNumber === betTab - 1)?.groups ??
+                []
               ).map((group) => renderGroup(group))}
           </div>
           {/* Footer with Clear / Cancel / Save buttons */}
           <DialogFooter className="px-6 py-4 border-t border-gray-100 flex gap-3 sm:gap-3">
             <button
               type="button"
-              onClick={() => setTempBetType('')}
+              onClick={() => setTempBetType("")}
               className={`px-4 h-11 rounded-2xl border font-medium text-sm transition-colors ${
                 tempBetType
-                  ? 'border-red-200 text-red-500 hover:bg-red-50'
-                  : 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  ? "border-red-200 text-red-500 hover:bg-red-50"
+                  : "border-gray-200 text-gray-300 cursor-not-allowed"
               }`}
               disabled={!tempBetType}
             >
