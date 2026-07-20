@@ -1,4 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { UserDataService } from "@/lib/userDataService";
@@ -208,7 +215,8 @@ export default function CS2BettingForm({
 
   // When prefillData arrives asynchronously (setPrefillData from useEffect),
   // the useState initializer has already run with null. Update game/format here.
-  useEffect(() => {
+  // useLayoutEffect runs synchronously — no flash of wrong game.
+  useLayoutEffect(() => {
     if (prefillData?.game) {
       setFormData((prev) => ({
         ...prev,
