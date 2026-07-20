@@ -40,6 +40,15 @@ interface TipsGgApiMatch {
 const MATCHES_CACHE_KEY = "dota2_matches_cache_v9";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_FRESH
 
+/** Rewrite files.tips.gg CDN URLs to our backend proxy (avoid ORB blocking) */
+function proxyLogoUrl(url: string | null): string | null {
+  if (!url) return null;
+  const match = url.match(/\/static\/image\/teams\/(.+)$/i);
+  if (!match) return url; // not a tips.gg CDN URL, return as-is
+  const API_BASE = import.meta.env.VITE_API_URL || "/api";
+  return `${API_BASE}/v1/dota2-matches/logo/${match[1]}`;
+}
+
 /** Simple string hash for stable IDs across reloads */
 function stringHash(s: string): number {
   let hash = 0;
@@ -67,8 +76,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     lastChangeDateTeam2: null,
     positionTeam1: null,
     positionTeam2: null,
-    logoTeam1: m.logoTeam1,
-    logoTeam2: m.logoTeam2,
+    logoTeam1: proxyLogoUrl(m.logoTeam1),
+    logoTeam2: proxyLogoUrl(m.logoTeam2),
     predictionPercentTeam1: m.pred1,
     predictionPercentTeam2: m.pred2,
     bettingCoefficientTeam1:
