@@ -93,15 +93,17 @@ const TeamLogo = ({
   teamName: string;
   size?: number;
 }) => {
-  if (!src)
-    return (
-      <div
-        className="flex items-center justify-center rounded-md bg-gray-100 text-gray-700 font-bold text-xs flex-shrink-0"
-        style={{ width: size, height: size, minWidth: size }}
-      >
-        {teamName.charAt(0).toUpperCase()}
-      </div>
-    );
+  const placeholder = (
+    <div
+      className="flex items-center justify-center rounded-md bg-gray-100 text-gray-700 font-bold text-xs flex-shrink-0"
+      style={{ width: size, height: size, minWidth: size }}
+    >
+      {teamName.charAt(0).toUpperCase()}
+    </div>
+  );
+
+  if (!src) return placeholder;
+
   return (
     <div
       className="flex items-center justify-center flex-shrink-0"
@@ -114,11 +116,25 @@ const TeamLogo = ({
         onError={(e) => {
           const t = e.target as HTMLImageElement;
           t.style.display = "none";
-          const d = document.createElement("div");
-          d.className =
-            "flex items-center justify-center w-full h-full rounded-md bg-gray-100 text-gray-700 font-bold text-xs";
-          d.textContent = teamName.charAt(0).toUpperCase();
-          t.parentNode?.appendChild(d);
+          // Try Dota2 fallback SVG first, then letter placeholder
+          const fallbackImg = document.createElement("img");
+          fallbackImg.src = "/assets/team-placeholder-dota.svg";
+          fallbackImg.alt = teamName;
+          fallbackImg.className = "w-full h-full object-contain";
+          fallbackImg.style.cssText = `width:${size}px;height:${size}px`;
+          fallbackImg.onerror = () => {
+            fallbackImg.remove();
+            t.parentNode?.appendChild(
+              (() => {
+                const d = document.createElement("div");
+                d.className =
+                  "flex items-center justify-center w-full h-full rounded-md bg-gray-100 text-gray-700 font-bold text-xs";
+                d.textContent = teamName.charAt(0).toUpperCase();
+                return d;
+              })(),
+            );
+          };
+          t.parentNode?.appendChild(fallbackImg);
         }}
       />
     </div>
