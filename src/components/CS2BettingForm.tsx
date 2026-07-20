@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  X,
-} from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import type { CS2Strategy } from "@/types/strategy";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { parseDota2MatchFromUrl, parseCS2MatchFromUrl } from "@/lib/matchUrlParser";
+import {
+  parseDota2MatchFromUrl,
+  parseCS2MatchFromUrl,
+} from "@/lib/matchUrlParser";
 import StrategyViolationDialog from "./StrategyViolationDialog";
 import {
   calcTotalExpressOdds,
@@ -206,6 +206,18 @@ export default function CS2BettingForm({
     return defaults;
   });
 
+  // When prefillData arrives asynchronously (setPrefillData from useEffect),
+  // the useState initializer has already run with null. Update game/format here.
+  useEffect(() => {
+    if (prefillData?.game) {
+      setFormData((prev) => ({
+        ...prev,
+        game: prefillData.game!,
+        format: prefillData.format || prev.format,
+      }));
+    }
+  }, [prefillData]);
+
   // Clear validation errors when user fills in a required field
   useEffect(() => {
     if (Object.keys(submitErrors).length === 0) return;
@@ -213,13 +225,27 @@ export default function CS2BettingForm({
     let changed = false;
     for (const field of Object.keys(cleared)) {
       const val = (formData as Record<string, unknown>)[field];
-      if (field === "odds" && val && parseFloat(String(val)) > 1) { delete cleared[field]; changed = true; }
-      else if (field === "stake" && val && parseFloat(String(val)) > 0) { delete cleared[field]; changed = true; }
-      else if (val && String(val).trim() !== "") { delete cleared[field]; changed = true; }
+      if (field === "odds" && val && parseFloat(String(val)) > 1) {
+        delete cleared[field];
+        changed = true;
+      } else if (field === "stake" && val && parseFloat(String(val)) > 0) {
+        delete cleared[field];
+        changed = true;
+      } else if (val && String(val).trim() !== "") {
+        delete cleared[field];
+        changed = true;
+      }
     }
     if (changed) setSubmitErrors(cleared);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.team1, formData.team2, formData.betType, formData.selection, formData.odds, formData.stake]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formData.team1,
+    formData.team2,
+    formData.betType,
+    formData.selection,
+    formData.odds,
+    formData.stake,
+  ]);
 
   const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>(() => {
     if (expressMatchesData && expressMatchesData.length >= 2) {
@@ -1026,13 +1052,18 @@ export default function CS2BettingForm({
         };
         const stakeVal = parseFloat(formData.stake);
         if (!isNaN(stakeVal) && stakeVal > 0) bodyToSend.stake = stakeVal;
-        if (!isNaN(record.originalAmount) && record.originalAmount > 0) bodyToSend.originalAmount = record.originalAmount;
-        if (record.exchangeRate !== null && record.exchangeRate !== undefined) bodyToSend.exchangeRate = record.exchangeRate;
-        if (record.winProbability !== undefined) bodyToSend.winProbability = record.winProbability;
+        if (!isNaN(record.originalAmount) && record.originalAmount > 0)
+          bodyToSend.originalAmount = record.originalAmount;
+        if (record.exchangeRate !== null && record.exchangeRate !== undefined)
+          bodyToSend.exchangeRate = record.exchangeRate;
+        if (record.winProbability !== undefined)
+          bodyToSend.winProbability = record.winProbability;
         if (record.logoTeam1) bodyToSend.logoTeam1 = record.logoTeam1;
         if (record.logoTeam2) bodyToSend.logoTeam2 = record.logoTeam2;
 
-        const created = await UserDataService.createBet(bodyToSend as Parameters<typeof UserDataService.createBet>[0]);
+        const created = await UserDataService.createBet(
+          bodyToSend as Parameters<typeof UserDataService.createBet>[0],
+        );
         // Cache locally so "Останні записи" reads instantly
         localFallback(created.id);
       } catch (err) {
@@ -1079,7 +1110,8 @@ export default function CS2BettingForm({
       if (!formData.betType) missing.betType = true;
       if (!formData.selection) missing.selection = true;
       if (!formData.odds || parseFloat(formData.odds) <= 1) missing.odds = true;
-      if (!formData.stake || parseFloat(formData.stake) <= 0) missing.stake = true;
+      if (!formData.stake || parseFloat(formData.stake) <= 0)
+        missing.stake = true;
       setSubmitErrors(missing);
       toast.error("Заповніть усі обов'язкові поля — вони підсвічені червоним");
       return;
@@ -1093,7 +1125,11 @@ export default function CS2BettingForm({
     const needsUSDInit =
       betCurrency === "USD" && !BankrollService.isInitializedUSD(currentUser);
     if (needsUAHInit || needsUSDInit) {
-      const existingBets = UserDataService.getUserData<BetRecord[]>(currentUser, "mybets_data", []);
+      const existingBets = UserDataService.getUserData<BetRecord[]>(
+        currentUser,
+        "mybets_data",
+        [],
+      );
       if (existingBets.length === 0) {
         const stake = parseFloat(formData.stake);
         if (stake > 0) {
@@ -1105,7 +1141,9 @@ export default function CS2BettingForm({
             betCurrency,
             rate,
           );
-          toast.info(`Початковий банк встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"}`);
+          toast.info(
+            `Початковий банк встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"}`,
+          );
         }
       }
     }
