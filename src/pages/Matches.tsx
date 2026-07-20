@@ -937,8 +937,8 @@ export default function Matches() {
   });
 
   const allKeys = Object.keys(groupedByDate);
-  const todayAndFutureKeys = allKeys.filter((k) => k >= todayKey).sort();
-  // Past days that have live or finished matches (worth showing for results)
+  // Today always first, then future days, then past days with results
+  const futureKeys = allKeys.filter((k) => k > todayKey).sort();
   const relevantPastKeys = allKeys
     .filter((k) => k < todayKey)
     .filter((k) =>
@@ -947,7 +947,7 @@ export default function Matches() {
       ),
     )
     .sort();
-  const sortedDateKeys = [...relevantPastKeys, ...todayAndFutureKeys];
+  const sortedDateKeys = [todayKey, ...futureKeys, ...relevantPastKeys];
 
   // Displayed matches — only those actually shown on screen (today+future, or all if only past)
   const displayedMatches = sortedDateKeys.flatMap(
