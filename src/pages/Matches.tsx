@@ -545,10 +545,14 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
-  // Targeted live-update: only Dota2 scores/status, not full reload
-  const hasLiveMatches = matches.some((m) => m.matchStatus === "live");
+  // Targeted live-update: Dota2 scores/status via in-memory live-scores endpoint.
+  // Polls whenever there are non-finished Dota2 matches (upcoming or live).
+  // This covers both cases: upcoming→live and upcoming→finished (if we miss the live window).
+  const hasDota2Matches = matches.some(
+    (m) => m.game === "Dota2" && m.matchStatus !== "finished",
+  );
   useEffect(() => {
-    if (!hasLiveMatches) return;
+    if (!hasDota2Matches) return;
     const interval = setInterval(async () => {
       try {
         const resp = await fetch("/api/v1/dota2-matches/live-scores");
@@ -585,7 +589,7 @@ export default function Matches() {
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [hasLiveMatches]);
+  }, [hasDota2Matches]);
 
   const handleRateMatch = (matchId: string, rating: MatchRating) => {
     setMatchRatings((prev) => {
