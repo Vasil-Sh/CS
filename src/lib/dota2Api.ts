@@ -307,21 +307,45 @@ export function buildTipsGgUrl(link: string): string {
 
 /**
  * Determine match status.
+ *
+ * Backend already sends a `status` field ("upcoming" | "live" | "finished")
+ * derived from tips.gg HTML. We trust it as the source of truth and only
+ * refine it using scores when the match is already in progress.
+ *
+ * Previously this function ignored backend status and inferred "live" from
+ * zero scores — which caused past "upcoming" matches (postponed / stale
+ * tips.gg entries) to appear as LIVE forever.
  */
 export function getDota2MatchStatus(
   match: Dota2ApiMatch,
 ): "upcoming" | "live" | "finished" {
+  const backendStatus = match.status;
+
+  // Trust backend "finished" — tips.gg HTML confirmed the match ended.
+  if (backendStatus === "finished") return "finished";
+
   const s1 = match.score1 ?? null;
   const s2 = match.score2 ?? null;
+
+  // Backend says upcoming — only flip to "live" if scores are actually present
+  // (non-null AND non-zero, since tips.gg sends 0:0 for not-started matches).
+  if (backendStatus === "upcoming") {
+    if (s1 !== null && s2 !== null && (s1 > 0 || s2 > 0)) return "live";
+    return "upcoming";
+  }
+
+  // Backend says "live" (or didn't say anything) — verify with scores.
   if (s1 === null || s2 === null) {
+    // No scores yet — keep backend status, or fall back to date heuristic.
+    if (backendStatus === "live") return "live";
     const matchDate = new Date(match.date);
     if (matchDate <= new Date()) {
-      // Heuristic: if started >2h ago with no scores, likely finished
       const ageMs = Date.now() - matchDate.getTime();
       return ageMs > 2 * 60 * 60 * 1000 ? "finished" : "live";
     }
     return "upcoming";
   }
+
   const matchType = parseDota2MatchType(match.type);
   const totalMaps = matchType === "Bo5" ? 5 : matchType === "Bo3" ? 3 : 2;
   const winsNeeded = Math.ceil(totalMaps / 2);

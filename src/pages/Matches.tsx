@@ -840,7 +840,13 @@ export default function Matches() {
   // Count per game for stats (use date-displayed matches for consistency)
 
   // Apply filters
+  const todayKey = getTodayDateKey();
   const filteredMatches = matches.filter((match) => {
+    // Hide stale "upcoming" matches from past dates — postponed tips.gg data
+    // Live and finished matches from past dates are kept (results view).
+    const matchDateKey = getDateKey(match.date);
+    if (matchDateKey < todayKey && match.matchStatus === "upcoming")
+      return false;
     if (filterGame === "CS2" && match.game !== "CS2") return false;
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
     if (filterTier !== "all" && match.tier !== filterTier) return false;
@@ -913,11 +919,9 @@ export default function Matches() {
     return sortOrder === "asc" ? comparison : -comparison;
   });
 
-  // Group matches by date. Show today + future by default, but if ALL matches are in the past, still show them.
-  const todayKey = getTodayDateKey();
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowKey = tomorrowDate.toISOString().split("T")[0];
+  // Group matches by date. Show today + future by default.
+  // Past days: only show if they contain live or finished matches (useful for results).
+  // Past "upcoming" matches are hidden — they're postponed/stale tips.gg data.
 
   const groupedByDate: Record<string, Match[]> = {};
   // Always ensure today key exists even while loading (so the card is visible with spinner)
@@ -927,14 +931,19 @@ export default function Matches() {
     if (!groupedByDate[key]) groupedByDate[key] = [];
     groupedByDate[key].push(match);
   });
-  // Only filter out past days if there are today/future matches to show
-  const futureDateKeys = Object.keys(groupedByDate)
-    .filter((k) => k >= todayKey)
+
+  const allKeys = Object.keys(groupedByDate);
+  const todayAndFutureKeys = allKeys.filter((k) => k >= todayKey).sort();
+  // Past days that have live or finished matches (worth showing for results)
+  const relevantPastKeys = allKeys
+    .filter((k) => k < todayKey)
+    .filter((k) =>
+      groupedByDate[k].some(
+        (m) => m.matchStatus === "live" || m.matchStatus === "finished",
+      ),
+    )
     .sort();
-  const sortedDateKeys =
-    futureDateKeys.length > 0
-      ? futureDateKeys
-      : Object.keys(groupedByDate).sort();
+  const sortedDateKeys = [...relevantPastKeys, ...todayAndFutureKeys];
 
   // Displayed matches — only those actually shown on screen (today+future, or all if only past)
   const displayedMatches = sortedDateKeys.flatMap(
