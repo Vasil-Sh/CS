@@ -701,6 +701,10 @@ export default function Matches() {
         );
         if (import.meta.env.DEV)
           console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
+        setMatches((prev) => {
+          const cs2 = prev.filter((m) => m.game !== "Dota2");
+          return [...dotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
+        });
         setInitialLoading(false);
       } catch (e) {
         if (import.meta.env.DEV)
