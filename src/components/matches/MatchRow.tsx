@@ -508,7 +508,7 @@ export default function MatchRow({
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
-                      className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5 max-w-[120px]`}
+                      className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5`}
                     >
                       {formInfo.icon}
                       <span className="truncate">{formLabelWithTeam}</span>
