@@ -23,6 +23,10 @@ export interface BaseApiMatch {
   predictionPercentTeam2: number | null;
   bettingCoefficientTeam1: number | null;
   bettingCoefficientTeam2: number | null;
+  /** @remarks Backend may provide these from tips.gg JSON-LD */
+  tournament?: string;
+  stage?: string;
+  status?: "upcoming" | "live" | "finished";
 }
 
 /** Typed API error with status code and optional details */

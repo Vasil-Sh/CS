@@ -20,6 +20,54 @@ function proxyLogoUrl(url: string | null): string | null {
   return `/api/v1/cs2-matches/logo/${match[1]}`;
 }
 
+/** Simple string hash for stable IDs across reloads */
+function stringHash(s: string): number {
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Convert tips.gg CS2 match format (TipsGgMatch) to unified ApiMatch format.
+ * Backend returns tips.gg JSON-LD fields; frontend expects BaseApiMatch shape.
+ */
+function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
+  return {
+    id: stringHash(String(m.id || m.link || "")),
+    date: String(m.startDate || `${m.date || ""}T00:00:00`),
+    link: String(m.link || ""),
+    type: String(m.type || "BO3"),
+    score1: (m.score1 as number | null) ?? null,
+    score2: (m.score2 as number | null) ?? null,
+    stars: (m.tipsCount as number) || 0,
+    nameTeam1: String(m.nameTeam1 || ""),
+    nameTeam2: String(m.nameTeam2 || ""),
+    lastChangeDateTeam1: null,
+    lastChangeDateTeam2: null,
+    positionTeam1: null,
+    positionTeam2: null,
+    logoTeam1: proxyLogoUrl(m.logoTeam1 as string | null),
+    logoTeam2: proxyLogoUrl(m.logoTeam2 as string | null),
+    predictionPercentTeam1: (m.pred1 as number) ?? null,
+    predictionPercentTeam2: (m.pred2 as number) ?? null,
+    bettingCoefficientTeam1:
+      (m.coeff1 as number | null) ??
+      ((m.pred1 as number) > 0
+        ? Math.round((100 / (m.pred1 as number)) * 100) / 100
+        : null),
+    bettingCoefficientTeam2:
+      (m.coeff2 as number | null) ??
+      ((m.pred2 as number) > 0
+        ? Math.round((100 / (m.pred2 as number)) * 100) / 100
+        : null),
+    tournament: String(m.tournament || ""),
+    stage: String(m.stage || ""),
+    status: (m.status as "upcoming" | "live" | "finished") || "upcoming",
+  };
+}
+
 /** Stale-while-revalidate: return cached data instantly, fetch fresh in background */
 export async function fetchTodaysAndUpcomingMatches(
   forceRefresh = false,
@@ -103,18 +151,14 @@ async function fetchFreshMatches(): Promise<ApiMatch[]> {
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
   }
 
-  const data: ApiMatch[] = await response.json();
-  if (!Array.isArray(data)) {
-    console.warn("csApi: expected array, got", typeof data);
+  const raw: Record<string, unknown>[] = await response.json();
+  if (!Array.isArray(raw)) {
+    console.warn("csApi: expected array, got", typeof raw);
     return [];
   }
 
-  // Proxy logo URLs through backend
-  return data.map((m) => ({
-    ...m,
-    logoTeam1: proxyLogoUrl(m.logoTeam1),
-    logoTeam2: proxyLogoUrl(m.logoTeam2),
-  }));
+  // Convert backend TipsGgMatch format to unified ApiMatch format
+  return raw.map(tipsGgToApiMatch);
 }
 
 /**

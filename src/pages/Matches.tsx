@@ -165,7 +165,9 @@ function apiMatchToMatch(
   const matchType = parseMatchType(apiMatch.type);
   const context =
     game === "CS2"
-      ? parseMatchContext(apiMatch.type, apiMatch.link)
+      ? apiMatch.tournament && apiMatch.stage
+        ? `${apiMatch.tournament} — ${apiMatch.stage}`
+        : apiMatch.tournament || parseMatchContext(apiMatch.type, apiMatch.link)
       : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
   const tier = determineTier(apiMatch.positionTeam1, apiMatch.positionTeam2);
   const favorite = determineFavorite(
