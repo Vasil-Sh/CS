@@ -178,9 +178,10 @@ function apiMatchToMatch(
   );
   const status = getMatchStatus(apiMatch);
 
-  const pos1 = apiMatch.positionTeam1 ?? 150;
-  const pos2 = apiMatch.positionTeam2 ?? 150;
-  const posDiff = Math.abs(pos1 - pos2);
+  const pos1 = apiMatch.positionTeam1;
+  const pos2 = apiMatch.positionTeam2;
+  const hasPositions = pos1 != null && pos2 != null;
+  const posDiff = hasPositions ? Math.abs(pos1 - pos2) : 0;
 
   const pred1 = apiMatch.predictionPercentTeam1;
   const pred2 = apiMatch.predictionPercentTeam2;
@@ -205,14 +206,71 @@ function apiMatchToMatch(
     coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
 
   let formStability: FormStability = "stable";
-  const now = new Date();
+  const hasPrediction =
+    pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+
+  // Derive form stability from prediction data
+  if (hasPrediction) {
+    const predFav = pred1! >= pred2! ? pred1! : pred2!;
+    const isFavTeam1 = pred1! >= pred2!;
+    const favPred = predFav;
+    const underdogPred = 100 - favPred;
+
+    const isFavMatch =
+      favorite === (isFavTeam1 ? apiMatch.nameTeam1 : apiMatch.nameTeam2);
+
+    if (isFavMatch) {
+      // Favorite's form
+      if (favPred >= 75) formStability = "hot_streak";
+      else if (favPred >= 65) formStability = "momentum";
+      else if (favPred >= 55) formStability = "stable";
+      else formStability = "inconsistent";
+    } else {
+      // Underdog's form
+      if (underdogPred <= 25) formStability = "slump";
+      else if (underdogPred <= 35) formStability = "falling";
+      else if (underdogPred <= 45) formStability = "inconsistent";
+      else formStability = "stable";
+    }
+  }
+
+  // Score-based override for finished matches
+  const s1 = apiMatch.score1 ?? 0;
+  const s2 = apiMatch.score2 ?? 0;
+  const hasScores = s1 + s2 > 0;
+  if (status === "finished" && hasScores) {
+    const isFavTeam1 = (pred1 ?? 50) >= (pred2 ?? 50);
+    const favWon = isFavTeam1 ? s1 > s2 : s2 > s1;
+    const isFavMatch =
+      favorite === (isFavTeam1 ? apiMatch.nameTeam1 : apiMatch.nameTeam2);
+
+    if (isFavMatch) {
+      formStability = favWon ? "hot_streak" : "slump";
+    } else {
+      formStability = favWon ? "stable" : "falling";
+    }
+
+    // Decisive score = even better form for winner
+    if (favWon) {
+      const totalMaps = s1 + s2;
+      const decWins = Math.abs(s1 - s2);
+      if (decWins >= 2 && totalMaps >= 3) formStability = "hot_streak";
+      else if (decWins >= 1 && totalMaps >= 2) formStability = "momentum";
+    }
+  }
+
+  // Old position-based logic (only when real positions available)
+  if (hasPositions && posDiff <= 10) {
+    formStability = "inconsistent";
+  }
+
+  // Old date-change logic (only when data available)
   const team1Change = apiMatch.lastChangeDateTeam1
     ? new Date(apiMatch.lastChangeDateTeam1)
     : null;
   const team2Change = apiMatch.lastChangeDateTeam2
     ? new Date(apiMatch.lastChangeDateTeam2)
     : null;
-
   const favChange = favorite === apiMatch.nameTeam1 ? team1Change : team2Change;
   if (favChange) {
     const daysSinceChange = Math.floor(
@@ -220,10 +278,6 @@ function apiMatchToMatch(
     );
     if (daysSinceChange <= 14) formStability = "inconsistent";
     else if (daysSinceChange <= 30) formStability = "momentum";
-  }
-
-  if (posDiff <= 10) {
-    formStability = "inconsistent";
   }
 
   return {
@@ -288,6 +342,53 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
   const slugParts = m.link.replace(/\/$/, "").split("/");
   const dota2Slug = slugParts[slugParts.length - 2] || "";
 
+  // --- Form stability from prediction data ---
+  let formStability: FormStability = "stable";
+  if (hasPrediction) {
+    const predFav = Math.max(pred1 ?? 50, pred2 ?? 50);
+    const isFavTeam1 = (pred1 ?? 50) >= (pred2 ?? 50);
+    const favPred = predFav;
+    const underdogPred = 100 - favPred;
+    const isFavMatch = fav === (isFavTeam1 ? m.nameTeam1 : m.nameTeam2);
+
+    if (isFavMatch) {
+      if (favPred >= 75) formStability = "hot_streak";
+      else if (favPred >= 65) formStability = "momentum";
+      else if (favPred >= 55) formStability = "stable";
+      else formStability = "inconsistent";
+    } else {
+      if (underdogPred <= 25) formStability = "slump";
+      else if (underdogPred <= 35) formStability = "falling";
+      else if (underdogPred <= 45) formStability = "inconsistent";
+      else formStability = "stable";
+    }
+  }
+
+  // Score-based override for finished matches
+  const s1 = m.score1 ?? 0;
+  const s2 = m.score2 ?? 0;
+  const hasScores = s1 + s2 > 0;
+  const matchStatus = getDota2MatchStatus(m);
+  if (matchStatus === "finished" && hasScores) {
+    const isFavTeam1 = (pred1 ?? 50) >= (pred2 ?? 50);
+    const favWon = isFavTeam1 ? s1 > s2 : s2 > s1;
+    const isFavMatch = fav === (isFavTeam1 ? m.nameTeam1 : m.nameTeam2);
+
+    if (isFavMatch) {
+      formStability = favWon ? "hot_streak" : "slump";
+    } else {
+      formStability = favWon ? "stable" : "falling";
+    }
+
+    if (favWon) {
+      const totalMaps = s1 + s2;
+      if (Math.abs(s1 - s2) >= 2 && totalMaps >= 3)
+        formStability = "hot_streak";
+      else if (Math.abs(s1 - s2) >= 1 && totalMaps >= 2)
+        formStability = "momentum";
+    }
+  }
+
   return {
     id: `dota-${m.id}`,
     date: m.date,
@@ -303,7 +404,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
       team2: m.bettingCoefficientTeam2 ?? 0,
     },
     winRate: confidence,
-    formStability: "stable",
+    formStability,
     playerForm: [],
     context: m.tournament
       ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
