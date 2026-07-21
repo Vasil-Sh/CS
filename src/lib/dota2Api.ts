@@ -76,8 +76,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     lastChangeDateTeam2: null,
     positionTeam1: null,
     positionTeam2: null,
-    logoTeam1: m.logoTeam1,
-    logoTeam2: m.logoTeam2,
+    logoTeam1: proxyLogoUrl(m.logoTeam1),
+    logoTeam2: proxyLogoUrl(m.logoTeam2),
     predictionPercentTeam1: m.pred1,
     predictionPercentTeam2: m.pred2,
     bettingCoefficientTeam1:
