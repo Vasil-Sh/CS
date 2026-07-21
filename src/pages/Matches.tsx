@@ -206,8 +206,6 @@ function apiMatchToMatch(
     coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
 
   let formStability: FormStability = "stable";
-  const hasPrediction =
-    pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
 
   // Derive form stability from prediction data
   if (hasPrediction) {
@@ -265,6 +263,7 @@ function apiMatchToMatch(
   }
 
   // Old date-change logic (only when data available)
+  const now = new Date();
   const team1Change = apiMatch.lastChangeDateTeam1
     ? new Date(apiMatch.lastChangeDateTeam1)
     : null;
@@ -676,16 +675,22 @@ export default function Matches() {
             if (m.game !== "Dota2" || !m.dota2Slug) return m;
             const update = updates.find((u) => u.id === m.dota2Slug);
             if (!update) return m;
+
+            // Don't override finished status from main API
+            if (m.matchStatus === "finished") return m;
+
+            // Only apply backend "finished" or "live" status updates
             const newStatus =
               update.status === "finished"
                 ? "finished"
                 : update.status === "live"
                   ? "live"
                   : m.matchStatus;
+
             return {
               ...m,
-              score1: update.score1 ?? m.score1 ?? 0,
-              score2: update.score2 ?? m.score2 ?? 0,
+              score1: update.score1 ?? m.score1,
+              score2: update.score2 ?? m.score2,
               matchStatus: newStatus as "upcoming" | "live" | "finished",
             };
           }),
