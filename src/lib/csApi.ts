@@ -1,16 +1,24 @@
-// CS Test API Service
-// Fetches match data from https://api.cstest.pp.ua
+// CS2 API Service
+// Fetches match data from MatchIQ backend proxy (tips.gg scraper).
 
 import type { BaseApiMatch } from "./matchTypes";
 export { ApiError } from "./matchTypes";
 
-// Re-export for backwards compatibility
 export type ApiMatch = BaseApiMatch;
 
-const API_BASE_URL = "https://api.cstest.pp.ua";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
-const MATCHES_CACHE_KEY = "matches_cache_v2";
+const MATCHES_CACHE_KEY = "cs2_matches_cache_v1";
 const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+
+/** Rewrite files.tips.gg CDN URLs to our backend proxy (avoid ORB blocking).
+ *  Uses relative path (/api/...) so it goes through Vite dev proxy (same-origin). */
+function proxyLogoUrl(url: string | null): string | null {
+  if (!url) return null;
+  const match = url.match(/\/static\/image\/teams\/(.+)$/i);
+  if (!match) return url;
+  return `/api/v1/cs2-matches/logo/${match[1]}`;
+}
 
 /** Stale-while-revalidate: return cached data instantly, fetch fresh in background */
 export async function fetchTodaysAndUpcomingMatches(
@@ -83,12 +91,10 @@ function setCache(data: ApiMatch[]): void {
 
 async function fetchFreshMatches(): Promise<ApiMatch[]> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
-  const response = await fetch(`${API_BASE_URL}/api/Game/TodaysAndUpcoming`, {
+  const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+  const response = await fetch(`${API_BASE}/v1/cs2-matches`, {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
     signal: controller.signal,
   });
   clearTimeout(timeout);
@@ -98,12 +104,17 @@ async function fetchFreshMatches(): Promise<ApiMatch[]> {
   }
 
   const data: ApiMatch[] = await response.json();
-  // Validate: ensure we got an array
   if (!Array.isArray(data)) {
     console.warn("csApi: expected array, got", typeof data);
     return [];
   }
-  return data;
+
+  // Proxy logo URLs through backend
+  return data.map((m) => ({
+    ...m,
+    logoTeam1: proxyLogoUrl(m.logoTeam1),
+    logoTeam2: proxyLogoUrl(m.logoTeam2),
+  }));
 }
 
 /**

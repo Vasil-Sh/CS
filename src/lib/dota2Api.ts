@@ -40,13 +40,14 @@ interface TipsGgApiMatch {
 const MATCHES_CACHE_KEY = "dota2_matches_cache_v9";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_FRESH
 
-/** Rewrite files.tips.gg CDN URLs to our backend proxy (avoid ORB blocking) */
+/** Rewrite files.tips.gg CDN URLs to our backend proxy (avoid ORB blocking).
+ *  Uses relative path (/api/...) so it goes through Vite dev proxy (same-origin).
+ *  Cross-origin URLs with X-Content-Type-Options: nosniff trigger Chrome ORB. */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
   const match = url.match(/\/static\/image\/teams\/(.+)$/i);
   if (!match) return url; // not a tips.gg CDN URL, return as-is
-  const API_BASE = import.meta.env.VITE_API_URL || "/api";
-  return `${API_BASE}/v1/dota2-matches/logo/${match[1]}`;
+  return `/api/v1/dota2-matches/logo/${match[1]}`;
 }
 
 /** Simple string hash for stable IDs across reloads */
