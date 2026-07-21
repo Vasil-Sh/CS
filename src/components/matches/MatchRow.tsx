@@ -88,21 +88,28 @@ const TeamLogo = ({
   src,
   teamName,
   size = 26,
+  game,
 }: {
   src?: string | null;
   teamName: string;
   size?: number;
+  game?: string;
 }) => {
-  const placeholder = (
-    <div
-      className="flex items-center justify-center rounded-md bg-gray-100 text-gray-700 font-bold text-xs flex-shrink-0"
-      style={{ width: size, height: size, minWidth: size }}
-    >
-      {teamName.charAt(0).toUpperCase()}
-    </div>
-  );
+  const placeholderSvg =
+    game === "CS2"
+      ? "/assets/team-placeholder.svg"
+      : "/assets/team-placeholder-dota.svg";
 
-  if (!src) return placeholder;
+  if (!src) {
+    return (
+      <img
+        src={placeholderSvg}
+        alt={teamName}
+        className="object-contain flex-shrink-0"
+        style={{ width: size, height: size, minWidth: size }}
+      />
+    );
+  }
 
   return (
     <div
@@ -116,9 +123,8 @@ const TeamLogo = ({
         onError={(e) => {
           const t = e.target as HTMLImageElement;
           t.style.display = "none";
-          // Try Dota2 fallback SVG first, then letter placeholder
           const fallbackImg = document.createElement("img");
-          fallbackImg.src = "/assets/team-placeholder-dota.svg";
+          fallbackImg.src = placeholderSvg;
           fallbackImg.alt = teamName;
           fallbackImg.className = "w-full h-full object-contain";
           fallbackImg.style.cssText = `width:${size}px;height:${size}px`;
@@ -469,6 +475,7 @@ export default function MatchRow({
                   <TeamLogo
                     src={match.logoTeam1}
                     teamName={match.team1}
+                    game={match.game}
                     size={28}
                   />
                   <span className="font-semibold text-gray-900 text-base">
@@ -480,6 +487,7 @@ export default function MatchRow({
                   <TeamLogo
                     src={match.logoTeam2}
                     teamName={match.team2}
+                    game={match.game}
                     size={28}
                   />
                   <span className="font-semibold text-gray-900 text-base">
@@ -604,6 +612,7 @@ export default function MatchRow({
                 <TeamLogo
                   src={match.logoTeam1}
                   teamName={match.team1}
+                  game={match.game}
                   size={16}
                 />
                 <span
@@ -616,6 +625,7 @@ export default function MatchRow({
                 <TeamLogo
                   src={match.logoTeam2}
                   teamName={match.team2}
+                  game={match.game}
                   size={16}
                 />
                 <span
