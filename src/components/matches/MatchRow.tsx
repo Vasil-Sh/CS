@@ -395,7 +395,6 @@ export default function MatchRow({
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
-  const isLive = match.matchStatus === "live";
   const hasPrediction =
     match.predictionPercentTeam1 != null &&
     match.predictionPercentTeam2 != null &&
@@ -412,7 +411,7 @@ export default function MatchRow({
 
   return (
     <tr
-      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isLive ? "bg-red-50/30" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
+      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
     >
       {visibleColumns.has("rating") && (
         <td className={`py-4 px-3 ${colDivider}`}>
@@ -537,7 +536,7 @@ export default function MatchRow({
       {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {match.score1 !== undefined && match.score2 !== undefined ? (
+          {match.score1 != null && match.score2 != null ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
                 className={`text-base font-bold ${isFinished && match.score1! > match.score2! ? "text-green-500" : isFinished && match.score1! < match.score2! ? "text-red-500" : "text-gray-900"}`}

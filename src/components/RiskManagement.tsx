@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Tooltip,
   TooltipContent,
@@ -21,26 +19,21 @@ import {
   Search,
   Info,
   RefreshCw,
-  RotateCcw,
   Download,
   Pencil,
   Check,
   X,
   ArrowRightLeft,
-  Users,
 } from "lucide-react";
-import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { getStatusBadge } from "@/lib/utils/badgeStyles";
 import { getGameEmoji } from "@/lib/utils/gameIcons";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Bet } from "@/types/betting";
 import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
@@ -57,7 +50,7 @@ const normalizeGame = (game?: string): string => {
 import { type RiskyTeam } from "@/data/riskyTeams";
 
 interface RiskManagementProps {
-  bets: Bet[];
+  bets?: Bet[];
 }
 
 const ALL_STATUSES = [
@@ -69,7 +62,7 @@ const ALL_STATUSES = [
   "Неоцінена",
 ] as const;
 
-export default function RiskManagement({ bets }: RiskManagementProps) {
+export default function RiskManagement(_props: RiskManagementProps) {
   logRender("RiskManagement");
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   const [isLoadingTeams, setIsLoadingTeams] = useState(true);
@@ -162,14 +155,6 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
       initializedRef.current = true;
     }
   }, []);
-
-  const normalizeTeamName = (name: string): string => {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "")
-      .replace(/[^a-z0-9]/g, "");
-  };
 
   /** Extract spreadsheet ID and gid from Google Sheets URL */
   const extractSheetId = (url: string): string | null => {
@@ -409,15 +394,17 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
     }
   };
 
-  const filteredTeams = riskyTeams.filter(
-    (team) =>
-      team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      team.game.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      team.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      team.notes.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredTeams = useMemo(
+    () =>
+      riskyTeams.filter(
+        (team) =>
+          team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          team.game.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          team.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          team.notes.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [riskyTeams, searchQuery],
   );
-
-  const { completedBets, riskMetrics } = useRiskMetrics(bets);
 
   // Team-based statistics for overview cards
   const teamStats = useMemo(() => {
@@ -506,16 +493,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
   const chartCardShadow =
     "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)";
 
-  const cardBaseStyle = {
-    transform: "scale(1)",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-  };
-
-  const cardHoverStyle = {
-    transform: "scale(1.03)",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)",
-  };
+  // Card style constants
 
   const renderStatusFilter = (
     currentFilter: string,
@@ -714,22 +692,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Total risky teams */}
-            <div
-              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => {
-                Object.assign(e.currentTarget.style, cardHoverStyle);
-              }}
-              onMouseLeave={(e) => {
-                Object.assign(e.currentTarget.style, cardBaseStyle);
-              }}
-            >
+            <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                  <Shield
-                    className="h-5 w-5 text-primary"
-                    strokeWidth={1.5}
-                  />
+                  <Shield className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Всього команд
@@ -744,16 +710,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </div>
 
             {/* БАН — forbidden teams */}
-            <div
-              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => {
-                Object.assign(e.currentTarget.style, cardHoverStyle);
-              }}
-              onMouseLeave={(e) => {
-                Object.assign(e.currentTarget.style, cardBaseStyle);
-              }}
-            >
+            <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <TrendingDown
@@ -774,16 +731,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </div>
 
             {/* Потребують уваги (БАН + Нестабільні) */}
-            <div
-              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => {
-                Object.assign(e.currentTarget.style, cardHoverStyle);
-              }}
-              onMouseLeave={(e) => {
-                Object.assign(e.currentTarget.style, cardBaseStyle);
-              }}
-            >
+            <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                   <AlertTriangle
@@ -805,22 +753,10 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             </div>
 
             {/* Game dominance */}
-            <div
-              className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group"
-              style={cardBaseStyle}
-              onMouseEnter={(e) => {
-                Object.assign(e.currentTarget.style, cardHoverStyle);
-              }}
-              onMouseLeave={(e) => {
-                Object.assign(e.currentTarget.style, cardBaseStyle);
-              }}
-            >
+            <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 group transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12),0_8px_16px_rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                  <Target
-                    className="h-5 w-5 text-primary"
-                    strokeWidth={1.5}
-                  />
+                  <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Основна гра
@@ -1084,9 +1020,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                     <p className="text-sm text-gray-500 mb-3">
                       Скопіюйте посилання з адресного рядка браузера та вставте
                       його сюди. Ви можете використовувати{" "}
-                      <span className="font-medium text-gray-900">
-                        власний
-                      </span>{" "}
+                      <span className="font-medium text-gray-900">власний</span>{" "}
                       Google Sheets документ.
                     </p>
                     <Input
@@ -1195,9 +1129,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Гра
-                </label>
+                <label className="text-sm font-medium text-gray-500">Гра</label>
                 <select
                   value={newTeam.game}
                   onChange={(e) =>
@@ -1271,10 +1203,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
             <DialogHeader className="px-6 pt-6 pb-4">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-                  <Trash2
-                    className="h-5 w-5 text-red-600"
-                    strokeWidth={1.5}
-                  />
+                  <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.5} />
                 </div>
                 <DialogTitle className="text-xl font-semibold text-gray-900">
                   Видалити всі команди?
@@ -1526,10 +1455,7 @@ export default function RiskManagement({ bets }: RiskManagementProps) {
         {/* Risk Alerts */}
         {riskMetrics.consecutiveLosses > 5 && (
           <Alert className="rounded-xl border border-red-200 bg-red-50 p-4">
-            <AlertTriangle
-              className="h-4 w-4 text-red-500"
-              strokeWidth={1.5}
-            />
+            <AlertTriangle className="h-4 w-4 text-red-500" strokeWidth={1.5} />
             <AlertDescription className="text-sm text-[#991B1B] ml-2">
               <strong className="font-semibold">Попередження про ризик:</strong>
               {` ${riskMetrics.consecutiveLosses} послідовних програшів вказують на необхідність перегляду стратегії.`}
