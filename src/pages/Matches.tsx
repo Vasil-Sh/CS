@@ -384,11 +384,14 @@ const loadVisibleColumns = (): Set<string> => {
   return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
 };
 
-/** Format date key for grouping: "YYYY-MM-DD". Safe for UTC-only date strings. */
+/** Format date key for grouping: "YYYY-MM-DD". Safe for timezone-aware strings. */
 const getDateKey = (dateStr: string): string => {
-  // "YYYY-MM-DD" already — use directly (avoids new Date() UTC shift)
+  // "2026-07-21" already — use directly (avoids new Date() UTC shift)
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  // Full ISO 8601 with timezone — parse normally
+  // "2026-07-21T01:04:00+0300" — extract date portion directly
+  const m = dateStr.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  // Fallback: parse normally
   const d = new Date(dateStr);
   return d.toISOString().split("T")[0];
 };

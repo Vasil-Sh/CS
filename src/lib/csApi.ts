@@ -36,7 +36,7 @@ function stringHash(s: string): number {
 function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
   return {
     id: stringHash(String(m.id || m.link || "")),
-    date: String(m.startDate || `${m.date || ""}T00:00:00`),
+    date: String(m.startDate || String(m.date) || ""),
     link: String(m.link || ""),
     type: String(m.type || "BO3"),
     score1: (m.score1 as number | null) ?? null,
@@ -309,6 +309,9 @@ function getTotalMapsNeeded(type: string): number {
 export function getMatchStatus(
   match: ApiMatch,
 ): "upcoming" | "live" | "finished" {
+  // Prefer backend-reported status (tips.gg knows better)
+  if (match.status === "live" || match.status === "finished")
+    return match.status;
   if (isMatchFinished(match)) return "finished";
   const matchDate = new Date(match.date);
   const now = new Date();
