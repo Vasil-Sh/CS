@@ -34,10 +34,16 @@ function stringHash(s: string): number {
  * Backend returns tips.gg JSON-LD fields; frontend expects BaseApiMatch shape.
  */
 function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
+  // Extract slug for live-score matching (same as cs2LiveScoresStore uses)
+  const link = String(m.link || "");
+  const csSlug =
+    link.replace(/\/$/, "").split("/").filter(Boolean).pop() ||
+    String(m.id || "");
+
   return {
     id: stringHash(String(m.id || m.link || "")),
     date: String(m.startDate || String(m.date) || ""),
-    link: String(m.link || ""),
+    link,
     type: String(m.type || "BO3"),
     score1: (m.score1 as number | null) ?? null,
     score2: (m.score2 as number | null) ?? null,
@@ -65,6 +71,7 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     tournament: String(m.tournament || ""),
     stage: String(m.stage || ""),
     status: (m.status as "upcoming" | "live" | "finished") || "upcoming",
+    cs2Slug: csSlug,
   };
 }
 

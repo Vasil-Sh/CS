@@ -27,6 +27,8 @@ export interface BaseApiMatch {
   tournament?: string;
   stage?: string;
   status?: "upcoming" | "live" | "finished";
+  /** Raw slug for CS2 live-score matching */
+  cs2Slug?: string;
 }
 
 /** Typed API error with status code and optional details */

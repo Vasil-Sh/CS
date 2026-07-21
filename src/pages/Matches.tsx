@@ -133,6 +133,8 @@ interface Match {
   stars?: number;
   /** Raw slug from tips.gg URL — used for live-score ID matching */
   dota2Slug?: string;
+  /** Raw slug for CS2 live-score matching */
+  cs2Slug?: string;
 }
 
 type MatchRating = "like" | "dislike" | null;
@@ -307,6 +309,7 @@ function apiMatchToMatch(
     score1: apiMatch.score1,
     score2: apiMatch.score2,
     matchStatus: status,
+    cs2Slug: apiMatch.cs2Slug,
     positionTeam1: apiMatch.positionTeam1,
     positionTeam2: apiMatch.positionTeam2,
     logoTeam1: apiMatch.logoTeam1,
