@@ -685,17 +685,18 @@ export default function Matches() {
             if (!update) return m;
             // Don't override "finished" from main API
             if (m.matchStatus === "finished") return m;
-            // Don't let unreliable live-scores downgrade "live" to "finished"
-            // Main API has more accurate status detection than fast HTML parser
-            if (m.matchStatus === "live" && update.status === "finished")
-              return m;
 
+            // Keep main API status ("live") even if live-scores says "finished"
+            // Live-scores HTML parser is less accurate than JSON-LD + score analysis.
+            // But ALWAYS update scores — live-scores has fresh scores from tips.gg DOM.
             const newStatus =
-              update.status === "finished"
-                ? "finished"
-                : update.status === "live"
-                  ? "live"
-                  : m.matchStatus;
+              m.matchStatus === "live" && update.status === "finished"
+                ? "live"
+                : update.status === "finished"
+                  ? "finished"
+                  : update.status === "live"
+                    ? "live"
+                    : m.matchStatus;
 
             return {
               ...m,
