@@ -205,9 +205,15 @@ export default function CS2BettingForm({
     // If prefillData has a game, use it from the start (avoids flash of CS2)
     if (prefillData?.game) {
       defaults.game = prefillData.game;
-      // Also set format to match (BO2 for Dota)
+      // Map format: API returns "Bo3", form expects "BO3"
       if (prefillData.format) {
-        defaults.format = prefillData.format;
+        const fm: Record<string, string> = {
+          Bo1: "BO1",
+          Bo2: "BO2",
+          Bo3: "BO3",
+          Bo5: "BO5",
+        };
+        defaults.format = fm[prefillData.format] || prefillData.format || "BO3";
       }
     }
     return defaults;
@@ -218,10 +224,18 @@ export default function CS2BettingForm({
   // useLayoutEffect runs synchronously — no flash of wrong game.
   useLayoutEffect(() => {
     if (prefillData?.game) {
+      const fm: Record<string, string> = {
+        Bo1: "BO1",
+        Bo2: "BO2",
+        Bo3: "BO3",
+        Bo5: "BO5",
+      };
       setFormData((prev) => ({
         ...prev,
         game: prefillData.game!,
-        format: prefillData.format || prev.format,
+        format: prefillData.format
+          ? fm[prefillData.format] || prefillData.format
+          : prev.format,
       }));
     }
   }, [prefillData]);
