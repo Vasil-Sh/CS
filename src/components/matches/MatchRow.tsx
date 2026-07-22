@@ -509,11 +509,6 @@ export default function MatchRow({
                 <Badge className="bg-gray-100 text-gray-800 border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                   {match.matchType}
                 </Badge>
-                {match.tier && (
-                  <Badge className="bg-gray-900 text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
-                    {match.tier}
-                  </Badge>
-                )}
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
