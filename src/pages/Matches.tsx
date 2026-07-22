@@ -136,6 +136,8 @@ interface Match {
   dota2Slug?: string;
   /** Raw slug for CS2 live-score matching */
   cs2Slug?: string;
+  /** Tournament logo from tips.gg (organizer.url → /static/image/tournaments/{slug}.png) */
+  tournamentLogo?: string | null;
 }
 
 type MatchRating = "like" | "dislike" | null;
@@ -435,6 +437,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     stars: m.stars,
     game: "Dota2",
     dota2Slug,
+    tournamentLogo: m.tournamentLogo,
   };
 }
 

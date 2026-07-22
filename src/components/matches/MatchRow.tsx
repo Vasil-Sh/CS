@@ -60,6 +60,7 @@ interface Match {
   logoTeam1?: string | null;
   logoTeam2?: string | null;
   stars?: number;
+  tournamentLogo?: string | null;
 }
 
 interface AIRecommendation {
@@ -444,13 +445,22 @@ export default function MatchRow({
           {/* Tournament text — full width, no divider interference */}
           {match.context && (
             <div
-              className="text-[11px] text-gray-400 font-medium truncate flex items-center gap-1 mb-1"
+              className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1 mb-1"
               title={match.context}
             >
-              <Trophy
-                className="h-3 w-3 text-gray-400 flex-shrink-0"
-                strokeWidth={1.5}
-              />
+              {match.tournamentLogo ? (
+                <img
+                  src={match.tournamentLogo}
+                  alt=""
+                  className="h-3.5 w-3.5 flex-shrink-0 object-contain rounded-sm"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              ) : (
+                <Trophy
+                  className="h-3 w-3 text-amber-500 flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+              )}
               {match.context}
             </div>
           )}
