@@ -36,9 +36,11 @@ function stringHash(s: string): number {
 function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
   // Extract slug for live-score matching (same as cs2LiveScoresStore uses)
   const link = String(m.link || "");
+  const parts = link.replace(/\/$/, "").split("/").filter(Boolean);
   const csSlug =
-    link.replace(/\/$/, "").split("/").filter(Boolean).pop() ||
-    String(m.id || "");
+    parts.length >= 2
+      ? parts[parts.length - 2]
+      : parts.pop() || String(m.id || "");
 
   return {
     id: stringHash(String(m.id || m.link || "")),

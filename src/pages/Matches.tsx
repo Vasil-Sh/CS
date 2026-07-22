@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserDataService } from "@/lib/userDataService";
@@ -653,17 +653,18 @@ export default function Matches() {
     loadRiskyTeams();
   }, []);
 
-  // Targeted live-update: Dota2 scores/status via in-memory live-scores endpoint.
-  // Polls whenever there are non-finished Dota2 matches (upcoming or live).
-  // This covers both cases: upcoming→live and upcoming→finished (if we miss the live window).
+  // ── Dota2 live-scores polling (30s) ──
   const hasDota2Matches = matches.some(
     (m) => m.game === "Dota2" && m.matchStatus !== "finished",
   );
-  useEffect(() => {
-    if (!hasDota2Matches) return;
-    const interval = setInterval(async () => {
+  const pollLiveScores = useCallback(
+    async (
+      game: "Dota2" | "CS2",
+      slugField: "dota2Slug" | "cs2Slug",
+      endpoint: string,
+    ) => {
       try {
-        const resp = await fetch("/api/v1/dota2-matches/live-scores");
+        const resp = await fetch(endpoint);
         if (!resp.ok) return;
         const updates: Array<{
           id: string;
@@ -675,14 +676,11 @@ export default function Matches() {
 
         setMatches((prev) =>
           prev.map((m) => {
-            if (m.game !== "Dota2" || !m.dota2Slug) return m;
-            const update = updates.find((u) => u.id === m.dota2Slug);
+            if (m.game !== game || !m[slugField]) return m;
+            const update = updates.find((u) => u.id === m[slugField]);
             if (!update) return m;
-
-            // Don't override finished status from main API
             if (m.matchStatus === "finished") return m;
 
-            // Only apply backend "finished" or "live" status updates
             const newStatus =
               update.status === "finished"
                 ? "finished"
@@ -699,11 +697,39 @@ export default function Matches() {
           }),
         );
       } catch {
-        // Silent fail — full refresh handles later
+        // Silent fail
       }
-    }, 30000);
+    },
+    [],
+  );
+
+  // Dota2: poll every 30s
+  useEffect(() => {
+    if (!hasDota2Matches) return;
+    const interval = setInterval(
+      () =>
+        pollLiveScores(
+          "Dota2",
+          "dota2Slug",
+          "/api/v1/dota2-matches/live-scores",
+        ),
+      30000,
+    );
     return () => clearInterval(interval);
-  }, [hasDota2Matches]);
+  }, [hasDota2Matches, pollLiveScores]);
+
+  // ── CS2 live-scores polling (15s — faster for real-time updates) ──
+  const hasCs2Matches = matches.some(
+    (m) => m.game === "CS2" && m.matchStatus !== "finished",
+  );
+  useEffect(() => {
+    if (!hasCs2Matches) return;
+    const interval = setInterval(
+      () => pollLiveScores("CS2", "cs2Slug", "/api/v1/cs2-matches/live-scores"),
+      15000,
+    );
+    return () => clearInterval(interval);
+  }, [hasCs2Matches, pollLiveScores]);
 
   const handleRateMatch = (matchId: string, rating: MatchRating) => {
     setMatchRatings((prev) => {
