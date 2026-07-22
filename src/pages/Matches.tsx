@@ -552,9 +552,6 @@ export default function Matches() {
     "date" | "confidence" | "risk" | "upset" | "status" | "odds"
   >("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [filterTier, setFilterTier] = useState<
-    "all" | "tier1" | "tier2" | "tier3"
-  >("all");
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<
     "all" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
   >("all");
@@ -626,7 +623,6 @@ export default function Matches() {
   const resetAllFilters = () => {
     setFilterGame("all");
     setFilterStatus("all");
-    setFilterTier("all");
     setFilterMatchType("all");
     setFilterDayOfWeek("all");
     setFilterRisk("all");
@@ -644,7 +640,6 @@ export default function Matches() {
   const hasActiveFilters =
     filterGame !== "all" ||
     filterStatus !== "all" ||
-    filterTier !== "all" ||
     filterMatchType !== "all" ||
     filterDayOfWeek !== "all" ||
     filterRisk !== "all" ||
@@ -1049,7 +1044,6 @@ export default function Matches() {
       return false;
     if (filterGame === "CS2" && match.game !== "CS2") return false;
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
-    if (filterTier !== "all" && match.tier !== filterTier) return false; // null tier matches only show when filter=all
     if (filterDayOfWeek !== "all") {
       const dateKey = getDateKey(match.date);
       const matchDate = new Date(dateKey + "T12:00:00");
@@ -1632,57 +1626,6 @@ export default function Matches() {
                     className="rounded-lg"
                   >
                     ✅ Завершені
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Tier filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
-                      filterTier !== "all"
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-gray-900 font-light border border-stone-200"
-                    }`}
-                  >
-                    {filterTier === "all"
-                      ? "Tier"
-                      : filterTier === "tier1"
-                        ? "Tier 1"
-                        : filterTier === "tier2"
-                          ? "Tier 2"
-                          : "Tier 3"}
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("all")}
-                    className="rounded-lg"
-                  >
-                    Всі Tier
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier1")}
-                    className="rounded-lg"
-                  >
-                    Tier 1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier2")}
-                    className="rounded-lg"
-                  >
-                    Tier 2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterTier("tier3")}
-                    className="rounded-lg"
-                  >
-                    Tier 3
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
