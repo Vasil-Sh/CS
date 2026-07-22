@@ -47,9 +47,12 @@ const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_
  *  Cross-origin URLs with X-Content-Type-Options: nosniff trigger Chrome ORB. */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
-  const match = url.match(/\/static\/image\/teams\/(.+)$/i);
-  if (!match) return url; // not a tips.gg CDN URL, return as-is
-  return `/api/v1/dota2-matches/logo/${match[1]}`;
+  // Match: /static/image/{folder}/{filename}
+  // e.g. /static/image/teams/navi.png → /api/.../logo/teams/navi.png
+  //      /static/image/tournaments/dota2-tournament.png → /api/.../logo/tournaments/dota2-tournament.png
+  const match = url.match(/\/static\/image\/(.+)$/i);
+  if (match) return `/api/v1/dota2-matches/logo/${match[1]}`;
+  return url; // not a tips.gg CDN URL, return as-is
 }
 
 /** Simple string hash for stable IDs across reloads */
@@ -86,7 +89,7 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     bettingCoefficientTeam1: m.coeff1 ?? null,
     bettingCoefficientTeam2: m.coeff2 ?? null,
     tournament: m.tournament || "",
-    tournamentLogo: m.tournamentLogo || null,
+    tournamentLogo: proxyLogoUrl(m.tournamentLogo),
     stage: m.stage || "",
     status: m.status,
   };
