@@ -17,7 +17,7 @@ interface TiltBlockResult {
 interface StrategyLimits {
   enabled?: boolean;
   blockAfterLosses?: number;
-  blockForMinutes?: number;
+  blockDurationMinutes?: number;
 }
 
 /**
@@ -98,7 +98,7 @@ export function useTiltBlock(
     }
 
     if (consecutiveLosses >= blockAfter) {
-      const blockMinutes = limits?.blockForMinutes ?? 30;
+      const blockMinutes = limits?.blockDurationMinutes ?? 60;
       const until = Date.now() + blockMinutes * 60000;
       const reason = `Заблоковано через ${consecutiveLosses} поспіль програшів (потрібно ${blockAfter})`;
       localStorage.setItem(

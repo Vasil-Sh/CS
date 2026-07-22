@@ -165,8 +165,9 @@ export function useRiskMetrics(bets: Bet[]) {
       kellyPercentage: isFinite(kellyPercentage) ? Number(kellyPercentage.toFixed(2)) : 0,
       riskOfRuin: isFinite(riskOfRuin) ? Number(riskOfRuin.toFixed(2)) : 0,
       consecutiveLosses: maxConsecutiveLosses,
-      averageStake: stakes.length > 0 ? Number((stakes.reduce((a, b) => a + b, 0) / stakes.length).toFixed(2)) : 0,
-      maxStake: stakes.length > 0 ? Math.max(...stakes) : 0,
+      averageStake: completedBets.filter(b => (b.stake || 0) > 0).length > 0
+        ? Number((sumStakes / completedBets.filter(b => (b.stake || 0) > 0).length).toFixed(2)) : 0,
+      maxStake,
       bankrollGrowth: isFinite((runningBalance - bankroll) / bankroll * 100) ? Number(((runningBalance - bankroll) / bankroll * 100).toFixed(2)) : 0,
       largestLoss: isFinite(largestLoss) ? Number(largestLoss.toFixed(2)) : 0,
       winStreakRisk: isFinite(winStreakRisk) ? Number(winStreakRisk.toFixed(2)) : 0
