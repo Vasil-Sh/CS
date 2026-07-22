@@ -10,6 +10,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { BlurFade } from "@/components/ui/blur-fade";
 import {
   Calendar,
+  CalendarDays,
   Trophy,
   RefreshCw,
   ArrowUpDown,
@@ -568,6 +569,7 @@ export default function Matches() {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "upcoming" | "live" | "finished"
   >("all");
+  const [showPastDays, setShowPastDays] = useState(false);
   const [visibleColumns, setVisibleColumns] =
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
@@ -629,6 +631,7 @@ export default function Matches() {
     setFilterDayOfWeek("all");
     setFilterRisk("all");
     setFilterTournament("all");
+    setShowPastDays(false);
     setSearchQuery("");
     const defaults = new Set(
       COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
@@ -646,6 +649,7 @@ export default function Matches() {
     filterDayOfWeek !== "all" ||
     filterRisk !== "all" ||
     filterTournament !== "all" ||
+    showPastDays ||
     searchQuery !== "";
 
   useEffect(() => {
@@ -679,7 +683,12 @@ export default function Matches() {
             if (m.game !== game || !m[slugField]) return m;
             const update = updates.find((u) => u.id === m[slugField]);
             if (!update) return m;
+            // Don't override "finished" from main API
             if (m.matchStatus === "finished") return m;
+            // Don't let unreliable live-scores downgrade "live" to "finished"
+            // Main API has more accurate status detection than fast HTML parser
+            if (m.matchStatus === "live" && update.status === "finished")
+              return m;
 
             const newStatus =
               update.status === "finished"
@@ -828,7 +837,7 @@ export default function Matches() {
         const dotaMatches = await fetchDota2Matches(
           forceRefresh,
           // SWR callback: when fresh data arrives from background fetch,
-          // merge it with current CS2 matches and update the table.
+          // merge it with current CS2 matches and re-apply live scores.
           (freshDotaMatches) => {
             setMatches((prev) => {
               const cs2 = prev.filter((m) => m.game !== "Dota2");
@@ -837,6 +846,12 @@ export default function Matches() {
                 ...cs2,
               ];
             });
+            // Immediately re-apply live scores — SWR data may have stale scores
+            pollLiveScores(
+              "Dota2",
+              "dota2Slug",
+              "/api/v1/dota2-matches/live-scores",
+            );
           },
         );
         if (import.meta.env.DEV)
@@ -846,6 +861,11 @@ export default function Matches() {
             const cs2 = prev.filter((m) => m.game !== "Dota2");
             return [...dotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
           });
+          pollLiveScores(
+            "Dota2",
+            "dota2Slug",
+            "/api/v1/dota2-matches/live-scores",
+          );
         }
         setInitialLoading(false);
       } catch (e) {
@@ -864,6 +884,8 @@ export default function Matches() {
           const dota2 = prev.filter((m) => m.game === "Dota2");
           return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
         });
+        // Re-apply live scores — fresh API data may have stale scores
+        pollLiveScores("CS2", "cs2Slug", "/api/v1/cs2-matches/live-scores");
       } catch (e) {
         if (import.meta.env.DEV) console.warn("[Matches] CS2 fetch failed:", e);
       }
@@ -996,7 +1018,11 @@ export default function Matches() {
     // Hide stale "upcoming" matches from past dates — postponed tips.gg data
     // Live and finished matches from past dates are kept (results view).
     const matchDateKey = getDateKey(match.date);
-    if (matchDateKey < todayKey && match.matchStatus === "upcoming")
+    if (
+      matchDateKey < todayKey &&
+      match.matchStatus === "upcoming" &&
+      !showPastDays
+    )
       return false;
     if (filterGame === "CS2" && match.game !== "CS2") return false;
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
@@ -1154,6 +1180,11 @@ export default function Matches() {
             return [...dotaMatches.map(dota2ApiMatchToMatch), ...cs2];
           });
           loadedCount += dotaMatches.length;
+          pollLiveScores(
+            "Dota2",
+            "dota2Slug",
+            "/api/v1/dota2-matches/live-scores",
+          );
         }
       } catch {
         /* ignore — Dota2 failed, keep existing Dota2 matches */
@@ -1170,6 +1201,7 @@ export default function Matches() {
             ];
           });
           loadedCount += csMatches.length;
+          pollLiveScores("CS2", "cs2Slug", "/api/v1/cs2-matches/live-scores");
         }
       } catch {
         /* ignore — CS2 failed, keep existing CS2 matches */
@@ -1501,6 +1533,19 @@ export default function Matches() {
                   <RefreshCw className="h-4 w-4" strokeWidth={2} />
                 )}
                 Оновити
+              </button>
+
+              {/* Show past days toggle */}
+              <button
+                onClick={() => setShowPastDays(!showPastDays)}
+                className={`flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out border ${
+                  showPastDays
+                    ? "bg-purple-100 text-purple-700 font-medium border-purple-300 shadow-[0_2px_8px_rgba(147,51,234,0.15)]"
+                    : "bg-transparent text-gray-900 font-light border-stone-200"
+                }`}
+              >
+                <CalendarDays className="h-4 w-4" strokeWidth={1.5} />
+                <span>Минулі дні</span>
               </button>
 
               {/* Search */}
