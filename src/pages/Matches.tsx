@@ -1993,7 +1993,7 @@ export default function Matches() {
             onClose={() => setAiModalOpen(false)}
             matchInfo={
               selectedMatch
-                ? `${selectedMatch.team1} vs ${selectedMatch.team2} (${selectedMatch.matchType}, ${selectedMatch.tier.toUpperCase()})`
+                ? `${selectedMatch.team1} vs ${selectedMatch.team2} (${selectedMatch.matchType}, ${selectedMatch.tier?.toUpperCase() ?? "-"})`
                 : ""
             }
             recommendation={aiRecommendation}
@@ -2005,7 +2005,7 @@ export default function Matches() {
             onClose={() => setCommentModalOpen(false)}
             matchInfo={
               selectedCommentMatch
-                ? `${selectedCommentMatch.team1} vs ${selectedCommentMatch.team2} (${selectedCommentMatch.matchType}, ${selectedCommentMatch.tier.toUpperCase()})`
+                ? `${selectedCommentMatch.team1} vs ${selectedCommentMatch.team2} (${selectedCommentMatch.matchType}, ${selectedCommentMatch.tier?.toUpperCase() ?? "-"})`
                 : ""
             }
             comment={
