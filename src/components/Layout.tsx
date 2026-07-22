@@ -45,8 +45,8 @@ function NavItems({ location }: { location: string }) {
             className={cn(
               "group relative flex items-center gap-3 px-5 py-4 rounded-[24px] text-base font-medium transition-all duration-200",
               isActive
-                ? "bg-primary text-white shadow-md"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
+                ? "border-2 border-primary bg-blue-50 text-primary font-semibold"
+                : "border-2 border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100",
             )}
           >
             <Icon className="h-5 w-5" strokeWidth={1.5} />
