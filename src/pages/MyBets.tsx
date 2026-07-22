@@ -119,6 +119,9 @@ export default function MyBets() {
   const recentBetsRef = useRef(recentBets);
   recentBetsRef.current = recentBets;
 
+  // Rollback ref for optimistic update on executeResultUpdate
+  const rollbackRef = useRef<Bet[] | null>(null);
+
   // ── Derived ──
   const { activeBets, winningBets, losingBets } = useMemo(() => {
     const active: Bet[] = [];
@@ -428,8 +431,8 @@ export default function MyBets() {
         } catch {
           /* ignore */
         }
-        setRecentBets((prev) =>
-          prev.map((b) =>
+        setRecentBets((prev) => {
+          const updated = prev.map((b) =>
             String(bet.id) === String(b.id)
               ? {
                   ...b,
@@ -440,8 +443,11 @@ export default function MyBets() {
                   notes: betWithNotes.notes || b.notes,
                 }
               : b,
-          ),
-        );
+          );
+          // Save rollback snapshot
+          rollbackRef.current = prev;
+          return updated;
+        });
         toast.success(
           `Запис позначено як ${result === "Win" ? "виграшний" : "програшний"}`,
         );
@@ -452,6 +458,11 @@ export default function MyBets() {
         // DataProvider handles bankroll recalculation — trigger refresh
         dataProvider.refresh().catch(() => {});
       } catch {
+        // Rollback optimistic update on failure
+        if (rollbackRef.current) {
+          setRecentBets(rollbackRef.current);
+          rollbackRef.current = null;
+        }
         toast.error("Помилка при оновленні результату");
       }
     },

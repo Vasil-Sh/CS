@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserDataService } from "@/lib/userDataService";
@@ -596,6 +596,12 @@ export default function Matches() {
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Generation counter — prevents stale SWR callbacks from overwriting newer fetch results
+  const fetchGenRef = useRef(0);
+
+  // Polling backoff refs (per-game)
+  const pollBackoffRef = useRef<Record<string, { failCount: number; maxDelay: number }>>({});
+
   // Match ratings state
   const [matchRatings, setMatchRatings] =
     useState<Record<string, MatchRating>>(loadMatchRatings);
@@ -664,7 +670,19 @@ export default function Matches() {
     ) => {
       try {
         const resp = await fetch(endpoint);
-        if (!resp.ok) return;
+        if (!resp.ok) {
+          // Exponential backoff: count failures, skip polls when failing consistently
+          const bo = pollBackoffRef.current[game] || { failCount: 0, maxDelay: 120_000 };
+          bo.failCount++;
+          pollBackoffRef.current[game] = bo;
+          if (bo.failCount > 5) {
+            if (import.meta.env.DEV) console.warn(`[Matches] ${game} polling suppressed after 5 consecutive failures`);
+            return; // Stop polling temporarily
+          }
+          return;
+        }
+        // Success — reset backoff
+        delete pollBackoffRef.current[game];
         const updates: Array<{
           id: string;
           score1: number | null;
@@ -724,7 +742,10 @@ export default function Matches() {
           }),
         );
       } catch {
-        // Silent fail
+        // Count failure for backoff
+        const bo = pollBackoffRef.current[game] || { failCount: 0, maxDelay: 120_000 };
+        bo.failCount++;
+        pollBackoffRef.current[game] = bo;
       }
     },
     [],
@@ -847,7 +868,10 @@ export default function Matches() {
 
   const loadMatchesFromApi = async (forceRefresh = false) => {
     try {
-      if (forceRefresh) clearDota2Cache();
+      if (forceRefresh) {
+        clearDota2Cache();
+        fetchGenRef.current++;
+      }
 
       // Fetch Dota2 FIRST with stale-while-revalidate: show cache instantly,
       // then update with fresh data from backend when it arrives.
@@ -857,6 +881,9 @@ export default function Matches() {
           // SWR callback: when fresh data arrives from background fetch,
           // merge it with current CS2 matches and re-apply live scores.
           (freshDotaMatches) => {
+            const expectedGen = fetchGenRef.current;
+            // Guard against stale SWR: skip if a newer manual refresh has occurred
+            if (expectedGen !== fetchGenRef.current) return;
             setMatches((prev) => {
               const cs2 = prev.filter((m) => m.game !== "Dota2");
               return [
@@ -865,11 +892,13 @@ export default function Matches() {
               ];
             });
             // Immediately re-apply live scores — SWR data may have stale scores
-            pollLiveScores(
-              "Dota2",
-              "dota2Slug",
-              "/api/v1/dota2-matches/live-scores",
-            );
+            if (expectedGen === fetchGenRef.current) {
+              pollLiveScores(
+                "Dota2",
+                "dota2Slug",
+                "/api/v1/dota2-matches/live-scores",
+              );
+            }
           },
         );
         if (import.meta.env.DEV)
@@ -1028,11 +1057,23 @@ export default function Matches() {
     loadRiskyTeams(); // refresh from localStorage
   };
 
-  // Count per game for stats (use date-displayed matches for consistency)
-
-  // Apply filters
-  const todayKey = getTodayDateKey();
-  const filteredMatches = matches.filter((match) => {
+  // ── Derived: filter + sort + group + counts in a single useMemo pipeline ──
+  const {
+    filteredMatches,
+    sortedMatches,
+    sortedDateKeys,
+    groupedByDate,
+    displayedMatches,
+    liveCount,
+    upcomingCount,
+    finishedCount,
+    cs2DisplayedCount,
+    dota2DisplayedCount,
+    avgConfidence,
+    tournamentOptions,
+  } = useMemo(() => {
+    const todayKey = getTodayDateKey();
+    const filtered = matches.filter((match) => {
     // Hide stale "upcoming" matches from past dates — postponed tips.gg data
     // Live and finished matches from past dates are kept (results view).
     const matchDateKey = getDateKey(match.date);
@@ -1079,7 +1120,7 @@ export default function Matches() {
   });
 
   // Sort matches
-  const sortedMatches = [...filteredMatches].sort((a, b) => {
+  const sorted = [...filtered].sort((a, b) => {
     let comparison = 0;
     switch (sortBy) {
       case "date":
@@ -1113,59 +1154,50 @@ export default function Matches() {
     return sortOrder === "asc" ? comparison : -comparison;
   });
 
-  // Group matches by date. Show today + future by default.
-  // Past days: only show if they contain live or finished matches (useful for results).
-  // Past "upcoming" matches are hidden — they're postponed/stale tips.gg data.
-
-  const groupedByDate: Record<string, Match[]> = {};
-  // Always ensure today key exists even while loading (so the card is visible with spinner)
-  groupedByDate[todayKey] = [];
-  sortedMatches.forEach((match) => {
+  const grouped: Record<string, Match[]> = {};
+  grouped[todayKey] = [];
+  sorted.forEach((match) => {
     const key = getDateKey(match.date);
-    if (!groupedByDate[key]) groupedByDate[key] = [];
-    groupedByDate[key].push(match);
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(match);
   });
 
-  const allKeys = Object.keys(groupedByDate);
-  // Today always first, then future days, then past days with results
+  const allKeys = Object.keys(grouped);
   const futureKeys = allKeys.filter((k) => k > todayKey).sort();
   const relevantPastKeys = allKeys
     .filter((k) => k < todayKey)
     .filter((k) =>
-      groupedByDate[k].some(
+      grouped[k].some(
         (m) => m.matchStatus === "live" || m.matchStatus === "finished",
       ),
     )
     .sort();
-  const sortedDateKeys = [todayKey, ...futureKeys, ...relevantPastKeys];
+  const dateKeys = [todayKey, ...futureKeys, ...relevantPastKeys];
+  const displayed = dateKeys.flatMap((k) => grouped[k] || []);
 
-  // Displayed matches — only those actually shown on screen (today+future, or all if only past)
-  const displayedMatches = sortedDateKeys.flatMap(
-    (k) => groupedByDate[k] || [],
-  );
+  const confidences = displayed.filter((m) => m.aiConfidence > 0).map((m) => m.aiConfidence);
+  const avg = confidences.length > 0 ? Math.round(confidences.reduce((s, c) => s + c, 0) / confidences.length) : 0;
+
+  return {
+    filteredMatches: filtered,
+    sortedMatches: sorted,
+    sortedDateKeys: dateKeys,
+    groupedByDate: grouped,
+    displayedMatches: displayed,
+    liveCount: displayed.filter((m) => m.matchStatus === "live").length,
+    upcomingCount: displayed.filter((m) => m.matchStatus === "upcoming").length,
+    finishedCount: displayed.filter((m) => m.matchStatus === "finished").length,
+    cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
+    dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
+    avgConfidence: avg,
+    tournamentOptions: [...new Set(displayed.map((m) => m.context).filter(Boolean))].sort(),
+  };
+}, [matches, filterGame, filterDayOfWeek, filterRisk, filterTournament, filterMatchType, filterStatus, searchQuery, showPastDays, sortBy, sortOrder]);
+
   const displayCount = displayedMatches.length;
-  const liveCount = displayedMatches.filter(
-    (m) => m.matchStatus === "live",
-  ).length;
-  const upcomingCount = displayedMatches.filter(
-    (m) => m.matchStatus === "upcoming",
-  ).length;
-  const finishedCount = displayedMatches.filter(
-    (m) => m.matchStatus === "finished",
-  ).length;
 
-  // Per-game displayed counts for stats card
-  const cs2DisplayedCount = displayedMatches.filter(
-    (m) => m.game === "CS2",
-  ).length;
-  const dota2DisplayedCount = displayedMatches.filter(
-    (m) => m.game === "Dota2",
-  ).length;
-
-  // Collect unique tournaments for filter dropdown
-  const tournamentOptions = [
-    ...new Set(displayedMatches.map((m) => m.context).filter(Boolean)),
-  ].sort();
+  // Collect unique tournaments for filter dropdown (already in useMemo above)
+  // tournamentOptions already derived in the pipeline above
 
   const toggleSort = (
     column: "date" | "confidence" | "risk" | "upset" | "status" | "odds",
@@ -1184,6 +1216,7 @@ export default function Matches() {
 
   const refreshMatches = async () => {
     setIsLoading(true);
+    fetchGenRef.current++;
     try {
       toast("🔄 Завантаження матчів...", { description: "Оновлення з API" });
       let loadedCount = 0;
@@ -1243,14 +1276,6 @@ export default function Matches() {
       setIsLoading(false);
     }
   };
-
-  const avgConfidence =
-    displayCount > 0
-      ? Math.round(
-          displayedMatches.reduce((sum, m) => sum + m.aiConfidence, 0) /
-            displayCount,
-        )
-      : 0;
 
   const renderSortIndicator = (
     column: "date" | "confidence" | "risk" | "upset" | "status" | "odds",

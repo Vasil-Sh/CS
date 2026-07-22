@@ -85,6 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Listen for auth:logout custom event (fired by apiClient on refresh failure)
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setUser(null);
+    };
+
+    window.addEventListener("auth:logout", handleAuthLogout);
+    return () => {
+      window.removeEventListener("auth:logout", handleAuthLogout);
+    };
+  }, []);
+
   const login = useCallback(
     async (username: string, password: string): Promise<LoginResult> => {
       setIsLoading(true);

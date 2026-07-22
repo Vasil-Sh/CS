@@ -80,6 +80,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         );
         let cleaned = false;
         const cleanedBets: Bet[] = [];
+        const backfillQueue: Array<() => Promise<void>> = [];
         for (const lb of localBets) {
           const betId = String(lb.id || "");
           // Only backfill local-only bets (local_xxx IDs) that aren't on the server
@@ -105,12 +106,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
             ? rawBet.riskyTeams.map((t: any) => typeof t === "string" ? t : t?.name || "")
             : [];
           const cleanBet = { ...rawBet, riskyTeams, id: undefined };
-          api.post("/bets", cleanBet).catch((e) => {
-            console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
-          });
+          backfillQueue.push(() => 
+            api.post("/bets", cleanBet).catch((e) => {
+              console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
+            })
+          );
           // Keep the bet in localStorage (it's unique)
           cleanedBets.push(lb);
         }
+        // Execute backfill with concurrency limit (3 at a time)
+        let idx = 0;
+        const CONCURRENCY = 3;
+        const worker = async (): Promise<void> => {
+          while (idx < backfillQueue.length) {
+            const i = idx++;
+            await backfillQueue[i]();
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(CONCURRENCY, backfillQueue.length) }, () => worker()));
         // Persist cleaned list (removes already-synced duplicates)
         if (cleaned) {
           UserDataService.setUserDataSync(currentUser, "mybets_data", cleanedBets);

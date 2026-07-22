@@ -301,7 +301,7 @@ export default function GoalsManager() {
     return () => clearTimeout(t);
   }, [goals, currentUser]);
 
-  // Sync goal progress + status to API when it changes
+  // Sync goal progress + status to API when it changes (batched, max 3 concurrent)
   const prevGoalSnapshotRef = useRef("");
   useEffect(() => {
     const snapshot = goals
@@ -314,30 +314,62 @@ export default function GoalsManager() {
       prevGoalSnapshotRef.current &&
       prevGoalSnapshotRef.current !== snapshot
     ) {
-      goals.forEach((g) => {
-        const backendId = (g as { _backendId?: string })._backendId || g.id;
-        const currentVal =
-          g.type === "amount"
-            ? g.currentAmount
-            : g.type === "roi"
-              ? g.currentROI
-              : g.type === "winrate"
-                ? g.currentWinRate
-                : g.currentStep;
-        const payload: Record<string, unknown> = {
-          config: g,
-          current: Number(currentVal ?? 0),
-        };
-        if (g.status === "completed") payload.isCompleted = true;
-        if (Object.keys(payload).length > 0) {
-          UserDataService.updateGoal(backendId, payload).catch(
+      // Collect pending updates, then sync with concurrency limit (3 at a time)
+      const pending = goals
+        .map((g) => {
+          const backendId = (g as { _backendId?: string })._backendId || g.id;
+          const currentVal =
+            g.type === "amount"
+              ? g.currentAmount
+              : g.type === "roi"
+                ? g.currentROI
+                : g.type === "winrate"
+                  ? g.currentWinRate
+                  : g.currentStep;
+          const payload: Record<string, unknown> = {
+            config: g,
+            current: Number(currentVal ?? 0),
+          };
+          if (g.status === "completed") payload.isCompleted = true;
+          return Object.keys(payload).length > 0
+            ? { backendId, payload }
+            : null;
+        })
+        .filter((x): x is { backendId: string; payload: Record<string, unknown> } => x !== null);
+
+      const worker = async () => {
+        for (let i = 0; i < pending.length; i++) {
+          const { backendId, payload } = pending[i];
+          await UserDataService.updateGoal(backendId, payload).catch(
             (err: unknown) => {
               if (import.meta.env.DEV)
                 console.warn("[API sync] failed:", String(err));
             },
           );
         }
-      });
+      };
+      // 3 concurrent workers, each takes a chunk
+      const CONCURRENCY = 3;
+      const chunkSize = Math.ceil(pending.length / CONCURRENCY);
+      const workers: Promise<void>[] = [];
+      for (let w = 0; w < CONCURRENCY; w++) {
+        const start = w * chunkSize;
+        const chunk = pending.slice(start, start + chunkSize);
+        if (chunk.length === 0) break;
+        workers.push(
+          (async () => {
+            for (const { backendId, payload } of chunk) {
+              await UserDataService.updateGoal(backendId, payload).catch(
+                (err: unknown) => {
+                  if (import.meta.env.DEV)
+                    console.warn("[API sync] failed:", String(err));
+                },
+              );
+            }
+          })(),
+        );
+      }
+      Promise.allSettled(workers);
     }
     prevGoalSnapshotRef.current = snapshot;
   }, [goals]);

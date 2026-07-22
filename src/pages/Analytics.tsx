@@ -155,12 +155,6 @@ export default function Analytics() {
   } = useRiskMetrics(bets);
 
   useEffect(() => {
-    loadAnalyticsData();
-    // Bankroll is computed by useEffect([bets, currentUser]) below — don't race here
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key && e.key.includes("bankroll_") && e.key.includes(currentUser)) {
         updateBankrollStats();
@@ -309,6 +303,12 @@ export default function Analytics() {
     }
   }, [currentUser]);
 
+  // Load analytics data on mount and when currentUser changes
+  useEffect(() => {
+    loadAnalyticsData();
+    // Bankroll is computed by useEffect([bets, currentUser]) below — don't race here
+  }, [currentUser, loadAnalyticsData]);
+
   // Refresh bankroll when user switches back to this tab (single listener, uses refs)
   useEffect(() => {
     const handleVisibility = async () => {
@@ -385,7 +385,7 @@ export default function Analytics() {
         (gameFilter === "Dota2" && g === "Dota")
       );
     });
-  }, [bets, gameFilter]);
+  }, [displayBets, gameFilter]);
 
   // Derive memoized metrics
   const { completedBets, winningBets, losingBets } = useMemo(() => {
@@ -692,12 +692,9 @@ export default function Analytics() {
     }));
   }, [completedBets]);
 
-  const oddsData = oddsAnalysis; // now a memoized value, not a function call
-  const betTypes = betTypeDistribution;
-  const monthlyProfit = monthlyProfitData;
-  const balanceData = balanceOverTime;
+  const oddsData = oddsAnalysis;
 
-  const oddsChartData = oddsData.map((range) => ({
+  const oddsChartData = useMemo(() => oddsData.map((range) => ({
     range: range.range.replace(/\s*\(.*?\)\s*/g, ""),
     winRate: parseFloat(range.winRate),
     roi:
@@ -705,7 +702,7 @@ export default function Analytics() {
         ? Math.round((range.profit / (range.count * 100)) * 100)
         : 0,
     bets: range.count,
-  }));
+  })), [oddsData]);
 
   const tabs = [
     { id: "profit", label: "Прибуток", icon: Wallet },
@@ -939,12 +936,12 @@ export default function Analytics() {
                     {gameFilteredBets.length > 0 ? (
                       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                         <div className="mb-6">
-                          <BalanceChart data={balanceData} />
+                          <BalanceChart data={balanceOverTime} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <MonthlyProfitChartCard
-                            data={monthlyProfit}
+                            data={monthlyProfitData}
                           />
                           <OddsVsProfitScatterCard
                             data={scatterData}

@@ -30,6 +30,14 @@ export default function BetDetailsModal({
   const [copied, setCopied] = useState(false);
   const [editableText, setEditableText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (bet && open) {
@@ -117,7 +125,7 @@ export default function BetDetailsModal({
             .then(() => {
               setCopied(true);
               toast.success("Текст скопійовано в буфер обміну!");
-              setTimeout(() => setCopied(false), 2000);
+              copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
             })
             .catch(() => {
               fallbackCopy();
@@ -137,7 +145,7 @@ export default function BetDetailsModal({
       if (successful) {
         setCopied(true);
         toast.success("Текст скопійовано в буфер обміну!");
-        setTimeout(() => setCopied(false), 2000);
+        copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
       } else {
         toast.error("Помилка при копіюванні");
       }

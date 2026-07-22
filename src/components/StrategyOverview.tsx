@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -388,8 +388,10 @@ export default function StrategyOverview() {
     setStrategyStats(stats);
   };
 
-  const getRoiChartData = () => {
-    return Object.entries(strategyStats)
+  // Unified chart data memo — single pass for ROI/WinRate/Profit charts
+  const chartData = useMemo(() => {
+    const entries = Object.entries(strategyStats);
+    const roiData = entries
       .map(([name, stats]) => {
         const strategy = strategies.find((s) => s.name === name);
         return {
@@ -402,10 +404,8 @@ export default function StrategyOverview() {
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
-  };
 
-  const getWinRateChartData = () => {
-    return Object.entries(strategyStats)
+    const winRateData = entries
       .map(([name, stats]) => {
         const strategy = strategies.find((s) => s.name === name);
         return {
@@ -418,10 +418,8 @@ export default function StrategyOverview() {
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
-  };
 
-  const getProfitChartData = () => {
-    return Object.entries(strategyStats)
+    const profitData = entries
       .map(([name, stats]) => {
         const strategy = strategies.find((s) => s.name === name);
         return {
@@ -434,7 +432,9 @@ export default function StrategyOverview() {
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
-  };
+
+    return { roiData, winRateData, profitData };
+  }, [strategyStats, strategies]);
 
   const addCriterion = () => {
     setNewStrategy((prev) => ({
@@ -721,7 +721,7 @@ export default function StrategyOverview() {
     return recommendations.slice(0, 3);
   };
 
-  const filteredAndSortedStrategies = strategies
+  const filteredAndSortedStrategies = useMemo(() => strategies
     .filter((strategy) => {
       const matchesSearch = strategy.name
         .toLowerCase()
@@ -744,15 +744,15 @@ export default function StrategyOverview() {
       }
 
       return sortOrder === "desc" ? -comparison : comparison;
-    });
+    }), [strategies, searchQuery, riskFilter, strategyStats, sortBy, sortOrder]);
 
   if (loading) {
     return <StrategyLoadingSkeleton />;
   }
 
-  const roiChartData = getRoiChartData();
-  const winRateChartData = getWinRateChartData();
-  const profitChartData = getProfitChartData();
+  const roiChartData = chartData.roiData;
+  const winRateChartData = chartData.winRateData;
+  const profitChartData = chartData.profitData;
 
   return (
     <div className="space-y-6">

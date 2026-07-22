@@ -28,6 +28,13 @@ import {
   getExpressRiskLevel,
   getEVVerdict,
 } from "@/lib/betCalculations";
+import {
+  findRiskyTeams,
+  normalizeTeamName,
+  getGameFilterValue,
+  type RiskyTeamMatch,
+} from "@/lib/riskyTeamsMatcher";
+import { useTiltBlock } from "@/hooks/useTiltBlock";
 import { logRender } from "@/lib/devLogger";
 import { BettingSidebar } from "./BettingSidebar";
 import { ExpressEventBuilder } from "./ExpressEventBuilder";
@@ -185,11 +192,14 @@ export default function CS2BettingForm({
 
   // API-synced bets cache for Kelly/tilt calculations (avoid stale localStorage)
   const apiBetsRef = useRef<BetRecord[]>([]);
+  const [apiBets, setApiBets] = useState<BetRecord[]>([]);
   useEffect(() => {
     if (!currentUser) return;
     UserDataService.fetchBets()
       .then((bets) => {
-        apiBetsRef.current = bets as unknown as BetRecord[];
+        const cast = bets as unknown as BetRecord[];
+        apiBetsRef.current = cast;
+        setApiBets(cast);
       })
       .catch(() => {
         /** keep localStorage fallback */
@@ -601,37 +611,16 @@ export default function CS2BettingForm({
 
     const gameFilter = getGameFilterValue(formData.game);
     const riskyTeamsFound: RiskyTeam[] = [];
-    const addedNames = new Set<string>();
 
-    expressEvents.forEach((event) => {
-      const teams = event.match.split(" vs ");
-      const team1 = teams[0] || "";
-      const team2 = teams[1] || "";
-      const normalizedTeam1 = normalizeTeamName(team1);
-      const normalizedTeam2 = normalizeTeamName(team2);
-
-      savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-        if (riskyTeam.game !== gameFilter) return;
-        if (addedNames.has(riskyTeam.name)) return;
-
-        const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
-
-        if (
-          normalizedTeam1 === normalizedRiskyTeam ||
-          normalizedTeam2 === normalizedRiskyTeam ||
-          normalizedTeam1.includes(normalizedRiskyTeam) ||
-          normalizedTeam2.includes(normalizedRiskyTeam)
-        ) {
-          riskyTeamsFound.push({
-            name: riskyTeam.name,
-            game: riskyTeam.game,
-            status: riskyTeam.status,
-            notes: riskyTeam.notes,
-          });
-          addedNames.add(riskyTeam.name);
+    for (const event of expressEvents) {
+      const parts = event.match.split(" vs ");
+      const found = findRiskyTeams(parts[0] || "", parts[1] || "", gameFilter, savedRiskyTeams);
+      for (const f of found) {
+        if (!riskyTeamsFound.some((r) => r.name === f.name)) {
+          riskyTeamsFound.push(f);
         }
-      });
-    });
+      }
+    }
 
     if (riskyTeamsFound.length > 0) {
       setFormData((prev) => ({ ...prev, riskyTeams: riskyTeamsFound }));
@@ -709,38 +698,15 @@ export default function CS2BettingForm({
       setFormData((prev) => ({ ...prev, riskyTeams: [] }));
       return;
     }
-
     const savedRiskyTeams = loadRiskyTeamsFromStorage();
-    const riskyTeamsFound: RiskyTeam[] = [];
+    const found = findRiskyTeams(team1, team2, getGameFilterValue(currentGame), savedRiskyTeams);
+    setFormData((prev) => ({ ...prev, riskyTeams: found }));
+  };
 
-    const normalizedTeam1 = normalizeTeamName(team1);
-    const normalizedTeam2 = normalizeTeamName(team2);
-    const gameFilter = getGameFilterValue(currentGame);
-
-    savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-      if (riskyTeam.game !== gameFilter) return;
-
-      const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
-
-      if (
-        normalizedTeam1 === normalizedRiskyTeam ||
-        normalizedTeam2 === normalizedRiskyTeam ||
-        normalizedTeam1.includes(normalizedRiskyTeam) ||
-        normalizedTeam2.includes(normalizedRiskyTeam)
-      ) {
-        riskyTeamsFound.push({
-          name: riskyTeam.name,
-          game: riskyTeam.game,
-          status: riskyTeam.status,
-          notes: riskyTeam.notes,
-        });
-      }
-    });
-
-    setFormData((prev) => ({
-      ...prev,
-      riskyTeams: riskyTeamsFound,
-    }));
+  /** Quick risky-team detection for URL parsing — returns array, no state update */
+  const detectRisky = (team1: string, team2: string, gameFilter: string): RiskyTeam[] => {
+    const saved = loadRiskyTeamsFromStorage();
+    return findRiskyTeams(team1, team2, gameFilter, saved);
   };
 
   const parseMatchFromUrl = async (url: string) => {
@@ -751,40 +717,14 @@ export default function CS2BettingForm({
       if (url.includes("dota2")) {
         result = parseDota2MatchFromUrl(url);
         if (result) {
-          const savedRiskyTeams = loadRiskyTeamsFromStorage();
-          const riskyTeamsFound: RiskyTeam[] = [];
-
-          const normalizedTeam1 = normalizeTeamName(result.team1);
-          const normalizedTeam2 = normalizeTeamName(result.team2);
-          const gameFilter = "Dota";
-
-          savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-            if (riskyTeam.game !== gameFilter) return;
-            const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
-            if (
-              normalizedTeam1 === normalizedRiskyTeam ||
-              normalizedTeam2 === normalizedRiskyTeam ||
-              normalizedTeam1.includes(normalizedRiskyTeam) ||
-              normalizedTeam2.includes(normalizedRiskyTeam)
-            ) {
-              riskyTeamsFound.push({
-                name: riskyTeam.name,
-                game: riskyTeam.game,
-                status: riskyTeam.status,
-                notes: riskyTeam.notes,
-              });
-            }
-          });
-
           setFormData((prev) => ({
             ...prev,
             game: "Dota2",
             team1: result.team1,
             team2: result.team2,
             tournament: result.tournament,
-            riskyTeams: riskyTeamsFound,
+            riskyTeams: detectRisky(result.team1, result.team2, "Dota"),
           }));
-
           toast.success("Інформацію про Dota 2 матч успішно отримано!");
         } else {
           toast.error("Не вдалося розпарсити Dota 2 URL");
@@ -792,40 +732,14 @@ export default function CS2BettingForm({
       } else if (url.includes("hltv.org/matches/")) {
         result = parseCS2MatchFromUrl(url);
         if (result) {
-          const savedRiskyTeams = loadRiskyTeamsFromStorage();
-          const riskyTeamsFound: RiskyTeam[] = [];
-
-          const normalizedTeam1 = normalizeTeamName(result.team1);
-          const normalizedTeam2 = normalizeTeamName(result.team2);
-          const gameFilter = "CS";
-
-          savedRiskyTeams.forEach((riskyTeam: RiskyTeam) => {
-            if (riskyTeam.game !== gameFilter) return;
-            const normalizedRiskyTeam = normalizeTeamName(riskyTeam.name);
-            if (
-              normalizedTeam1 === normalizedRiskyTeam ||
-              normalizedTeam2 === normalizedRiskyTeam ||
-              normalizedTeam1.includes(normalizedRiskyTeam) ||
-              normalizedTeam2.includes(normalizedRiskyTeam)
-            ) {
-              riskyTeamsFound.push({
-                name: riskyTeam.name,
-                game: riskyTeam.game,
-                status: riskyTeam.status,
-                notes: riskyTeam.notes,
-              });
-            }
-          });
-
           setFormData((prev) => ({
             ...prev,
             game: "CS2",
             team1: result.team1,
             team2: result.team2,
             tournament: result.tournament,
-            riskyTeams: riskyTeamsFound,
+            riskyTeams: detectRisky(result.team1, result.team2, "CS"),
           }));
-
           toast.success("Інформацію про CS2 матч успішно отримано!");
         } else {
           toast.error('Не вдалося знайти "vs" у посиланні');
@@ -1295,9 +1209,9 @@ export default function CS2BettingForm({
     let kelly = null;
     if (hasConfidence) {
       // Use API-synced bets (fallback to localStorage cache)
-      const apiBets =
-        apiBetsRef.current.length > 0
-          ? apiBetsRef.current
+      const betsForKelly =
+        apiBets.length > 0
+          ? apiBets
           : UserDataService.getUserData<BetRecord[]>(
               currentUser,
               "mybets_data",
@@ -1369,140 +1283,7 @@ export default function CS2BettingForm({
   void pendingSubmit;
 
   // ── Tilt protection: block after N consecutive losses ──
-  const tiltBlock = useMemo(() => {
-    const blockKey = `tilt_block_${currentUser}`;
-    const stored = localStorage.getItem(blockKey);
-    if (stored) {
-      try {
-        const block = JSON.parse(stored) as {
-          until: number;
-          reason: string;
-          strategyName?: string;
-        };
-        if (Date.now() < block.until) {
-          // Clear block if primary strategy was removed, disabled, or changed
-          if (
-            !primaryStrategy ||
-            !primaryStrategy.activityLimits?.enabled ||
-            (block.strategyName && block.strategyName !== primaryStrategy.name)
-          ) {
-            localStorage.removeItem(blockKey);
-          } else {
-            return {
-              blocked: true,
-              reason: block.reason,
-              minutesLeft: Math.ceil((block.until - Date.now()) / 60000),
-            };
-          }
-        } else {
-          // Block expired — remove
-          localStorage.removeItem(blockKey);
-        }
-      } catch {
-        localStorage.removeItem(blockKey);
-      }
-    }
-
-    const blockAfter = primaryStrategy?.activityLimits?.enabled
-      ? (primaryStrategy.activityLimits.blockAfterLosses ?? 3)
-      : null;
-
-    if (!blockAfter || blockAfter < 1)
-      return { blocked: false, reason: "", minutesLeft: 0 };
-
-    // Use API-synced bets (fallback to localStorage cache)
-    const allBets =
-      apiBetsRef.current.length > 0
-        ? apiBetsRef.current
-        : UserDataService.getUserData<BetRecord[]>(
-            currentUser,
-            "mybets_data",
-            [],
-          );
-    // Sort by date descending, count consecutive losses
-    const sorted = [...allBets]
-      .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
-      .sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return (b.createdAt || dateB) - (a.createdAt || dateA);
-      });
-
-    let consecutiveLosses = 0;
-    for (const bet of sorted) {
-      if (bet.result === "Loss") consecutiveLosses++;
-      else break;
-    }
-
-    if (consecutiveLosses >= blockAfter) {
-      const blockMinutes =
-        primaryStrategy?.activityLimits?.blockDurationMinutes ?? 60;
-      const until = Date.now() + blockMinutes * 60000;
-      const reason = `Ти програв ${consecutiveLosses} раз${consecutiveLosses === 1 ? "" : consecutiveLosses < 5 ? "и" : "ів"} поспіль. Зроби паузу на ${blockMinutes} хв — це допоможе уникнути тілт-ставок.`;
-      localStorage.setItem(
-        blockKey,
-        JSON.stringify({ until, reason, strategyName: primaryStrategy?.name }),
-      );
-      // Sync to API
-      UserDataService.createTiltBlock({
-        until: new Date(until).toISOString(),
-        reason,
-        strategyName: primaryStrategy?.name || "",
-      }).catch(() => {});
-      return { blocked: true, reason, minutesLeft: blockMinutes };
-    }
-
-    return { blocked: false, reason: "", minutesLeft: 0 };
-  }, [currentUser, primaryStrategy]);
-
-  // Auto-reset tilt block when time expires (poll every 30s)
-  const [tiltTick, setTiltTick] = useState(0);
-  useEffect(() => {
-    if (!tiltBlock.blocked) return;
-    const interval = setInterval(() => {
-      setTiltTick((t) => t + 1);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [tiltBlock.blocked]);
-
-  // Re-memo tiltBlock with tick to react to timer expiry
-  const tiltBlockWithTick = useMemo(() => {
-    const blockKey = `tilt_block_${currentUser}`;
-    const stored = localStorage.getItem(blockKey);
-    if (stored) {
-      try {
-        const block = JSON.parse(stored) as {
-          until: number;
-          reason: string;
-          strategyName?: string;
-        };
-        if (Date.now() < block.until) {
-          if (
-            !primaryStrategy ||
-            !primaryStrategy.activityLimits?.enabled ||
-            (block.strategyName && block.strategyName !== primaryStrategy.name)
-          ) {
-            localStorage.removeItem(blockKey);
-          } else {
-            return {
-              blocked: true,
-              reason: block.reason,
-              minutesLeft: Math.ceil((block.until - Date.now()) / 60000),
-            };
-          }
-        } else {
-          localStorage.removeItem(blockKey);
-        }
-      } catch {
-        localStorage.removeItem(blockKey);
-      }
-    }
-    return tiltBlock;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tiltTick, tiltBlock]);
-  const effectiveTiltBlock = tiltBlockWithTick.blocked
-    ? tiltBlockWithTick
-    : tiltBlock;
+  const tiltBlock = useTiltBlock(currentUser, primaryStrategy, apiBets);
 
   const allExpressEventsComplete =
     expressEvents.length > 0 &&
@@ -1538,14 +1319,14 @@ export default function CS2BettingForm({
       />
 
       <BettingFormAlerts
-        tiltBlock={effectiveTiltBlock}
+        tiltBlock={tiltBlock}
         primaryStrategy={primaryStrategy}
         strategyViolations={strategyViolations}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div
-          className={`lg:col-span-2 space-y-6 ${effectiveTiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
+          className={`lg:col-span-2 space-y-6 ${tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
         >
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {/* Main Form */}
@@ -1653,7 +1434,7 @@ export default function CS2BettingForm({
                       confidence: formData.confidence,
                     }}
                     isSubmitting={isSubmitting}
-                    isBlocked={effectiveTiltBlock.blocked}
+                    isBlocked={tiltBlock.blocked}
                     isHighConfidence={isHighConfidence}
                     showSection={true}
                     format={formData.format}
@@ -1696,7 +1477,7 @@ export default function CS2BettingForm({
                 id="submit-btn"
                 disabled={
                   isSubmitting ||
-                  effectiveTiltBlock.blocked ||
+                  tiltBlock.blocked ||
                   (formData.betCategory === "Експрес" &&
                     !allExpressEventsComplete)
                 }

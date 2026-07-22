@@ -1,4 +1,4 @@
-import { useMemo, useState, memo, useEffect } from "react";
+import { useMemo, useState, memo, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -93,6 +93,74 @@ function loadVisibleColumns(): Set<string> {
 function getTodayStr(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+// ── Module-level pure helpers ──
+
+export function getCurrencySymbol(currency?: string): string {
+  return currency === "USD" ? "$" : "₴";
+}
+
+export function isExpressBet(bet: Bet): boolean {
+  return bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
+}
+
+export function getExpressEventCount(bet: Bet): number {
+  const match = (bet.format ?? "").match(/(\d+)x/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+/** Translate internal bet type codes to human-readable Ukrainian */
+export function humanizeBetType(raw: string): string {
+  // Already Ukrainian — return as-is (after basic cleanup)
+  if (raw.match(/[а-яіїєґ]/i))
+    return raw
+      .replace(/Победа\s*матч/i, "Переможець матчу")
+      .replace(/\bMapWinner\b/g, "Переможець карти")
+      .replace(/\bMatchWinner\b/g, "Переможець матчу");
+
+  let desc = raw;
+  if (/^Map\d/.test(desc)) {
+    desc = desc
+      .replace(/^Map(\d+)_HC_T(\d+)\+?([\d.]+)/, "Карта $1: Фора +$3")
+      .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
+      .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
+      .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
+      .replace(/^Map(\d+)_?(.+)?/, (_: string, n: string, rest?: string) => {
+        if (!rest) return `Карта ${n}`;
+        return `Карта ${n}: ${rest
+          .replace(/_/g, " ")
+          .replace(/\btb\b/g, "тотал більше")
+          .replace(/\btm\b/g, "тотал менше")
+          .replace(/\bHC\b/g, "Фора")}`;
+      });
+  }
+  desc = desc.replace(/^Match\s*Winner$/i, "Переможець матчу");
+  desc = desc
+    .replace(/^Over\s*([\d.]+)/, "Тотал більше $1")
+    .replace(/^Under\s*([\d.]+)/, "Тотал менше $1");
+  desc = desc.replace(/_/g, " ");
+  return desc || raw;
+}
+
+/** Get logo URL for the selected team of a bet */
+export function getSelectedTeamLogo(bet: Bet, selectedTeam: string): string | null {
+  const sel = selectedTeam.toLowerCase().trim();
+  if (!sel) return null;
+  const t1 = String(bet.team1 || "").toLowerCase().trim();
+  const t2 = String(bet.team2 || "").toLowerCase().trim();
+  if (t1 && sel === t1) return bet.logoTeam1 || null;
+  if (t2 && sel === t2) return bet.logoTeam2 || null;
+  if (t1 && (t1.includes(sel) || sel.includes(t1))) return bet.logoTeam1 || null;
+  if (t2 && (t2.includes(sel) || sel.includes(t2))) return bet.logoTeam2 || null;
+  const matchParts = (bet.match || "").toLowerCase().split(/\s+vs\s+/);
+  if (matchParts.length === 2) {
+    const m1 = matchParts[0].trim();
+    const m2 = matchParts[1].trim();
+    if (sel === m1 || m1.includes(sel) || sel.includes(m1)) return bet.logoTeam1 || null;
+    if (sel === m2 || m2.includes(sel) || sel.includes(m2)) return bet.logoTeam2 || null;
+  }
+  return null;
 }
 
 interface BetTableProps {
@@ -320,9 +388,9 @@ const BetTableMemo = memo(function BetTable({
     ];
   };
 
-  const getCurrencySymbol = (currency?: string) =>
-    currency === "USD" ? "$" : "₴";
   const [cachedGoals, setCachedGoals] = useState<Goal[]>([]);
+  // Per-render goal name cache — avoid localStorage reads per row per render
+  const goalNameCacheRef = useRef<Map<string, string | null>>(new Map());
   useEffect(() => {
     let cancelled = false;
     api
@@ -340,97 +408,32 @@ const BetTableMemo = memo(function BetTable({
   }, [currentUser]);
   const getGoalName = (goalId?: string) => {
     if (!goalId) return null;
+    // In-memory cache — avoid localStorage reads per row per render
+    const cached = goalNameCacheRef.current.get(goalId);
+    if (cached !== undefined) return cached;
+
+    let result: string | null = null;
     // First try API-loaded goals
     const apiGoal = cachedGoals.find((g) => g.id === goalId);
-    if (apiGoal) return apiGoal.name;
-    // Fallback to localStorage (goals may not yet be synced to API)
-    try {
-      const username = localStorage.getItem("username") || "default";
-      const raw = localStorage.getItem(`user_${username}_goals`);
-      if (raw) {
-        const localGoals = JSON.parse(raw) as { id: string; name: string }[];
-        const localGoal = localGoals.find((g) => g.id === goalId);
-        if (localGoal) return localGoal.name;
+    if (apiGoal) result = apiGoal.name;
+    // Fallback to localStorage
+    if (!result) {
+      try {
+        const username = localStorage.getItem("username") || "default";
+        const raw = localStorage.getItem(`user_${username}_goals`);
+        if (raw) {
+          const localGoals = JSON.parse(raw) as { id: string; name: string }[];
+          const localGoal = localGoals.find((g) => g.id === goalId);
+          if (localGoal) result = localGoal.name;
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
     }
-    return "Видалена ціль";
+    if (!result) result = "Видалена ціль";
+    goalNameCacheRef.current.set(goalId, result);
+    return result;
   };
-  const isExpressBet = (bet: Bet) =>
-    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
-  const getExpressEventCount = (bet: Bet) => {
-    const match = (bet.format ?? "").match(/(\d+)x/);
-    return match ? parseInt(match[1], 10) : 0;
-  };
-
-  /** Translate internal bet type codes to human-readable Ukrainian */
-  function humanizeBetType(raw: string): string {
-    // Already Ukrainian — return as-is (after basic cleanup)
-    if (raw.match(/[а-яіїєґ]/i))
-      return raw
-        .replace(/Победа\s*матч/i, "Переможець матчу")
-        .replace(/\bMapWinner\b/g, "Переможець карти")
-        .replace(/\bMatchWinner\b/g, "Переможець матчу");
-
-    let desc = raw;
-    // Map patterns
-    if (/^Map\d/.test(desc)) {
-      desc = desc
-        .replace(/^Map(\d+)_HC_T(\d+)\+?([\d.]+)/, "Карта $1: Фора +$3")
-        .replace(/^Map(\d+)_HC_(.+)/, "Карта $1: $2")
-        .replace(/^Map(\d+)_tb\b/, "Карта $1 (тотал більше)")
-        .replace(/^Map(\d+)_tm\b/, "Карта $1 (тотал менше)")
-        .replace(/^Map(\d+)_?(.+)?/, (_: string, n: string, rest?: string) => {
-          if (!rest) return `Карта ${n}`;
-          return `Карта ${n}: ${rest
-            .replace(/_/g, " ")
-            .replace(/\btb\b/g, "тотал більше")
-            .replace(/\btm\b/g, "тотал менше")
-            .replace(/\bHC\b/g, "Фора")}`;
-        });
-    }
-    // Match Winner → Переможець матчу
-    desc = desc.replace(/^Match\s*Winner$/i, "Переможець матчу");
-    // Over/Under
-    desc = desc
-      .replace(/^Over\s*([\d.]+)/, "Тотал більше $1")
-      .replace(/^Under\s*([\d.]+)/, "Тотал менше $1");
-    // Generic underscore cleanup
-    desc = desc.replace(/_/g, " ");
-    return desc || raw;
-  }
-
-  /** Get logo URL for the selected team of a bet */
-  function getSelectedTeamLogo(bet: Bet, selectedTeam: string): string | null {
-    const sel = selectedTeam.toLowerCase().trim();
-    if (!sel) return null;
-    const t1 = String(bet.team1 || "")
-      .toLowerCase()
-      .trim();
-    const t2 = String(bet.team2 || "")
-      .toLowerCase()
-      .trim();
-    // Exact match
-    if (t1 && sel === t1) return bet.logoTeam1 || null;
-    if (t2 && sel === t2) return bet.logoTeam2 || null;
-    // Partial match (e.g. "9z" inside "9z Team")
-    if (t1 && (t1.includes(sel) || sel.includes(t1)))
-      return bet.logoTeam1 || null;
-    if (t2 && (t2.includes(sel) || sel.includes(t2)))
-      return bet.logoTeam2 || null;
-    // Try match field: "Team1 vs Team2"
-    const matchParts = (bet.match || "").toLowerCase().split(/\s+vs\s+/);
-    if (matchParts.length === 2) {
-      const m1 = matchParts[0].trim();
-      const m2 = matchParts[1].trim();
-      if (sel === m1 || m1.includes(sel) || sel.includes(m1))
-        return bet.logoTeam1 || null;
-      if (sel === m2 || m2.includes(sel) || sel.includes(m2))
-        return bet.logoTeam2 || null;
-    }
-    return null;
-  }
 
   /** Filter completed bets by compactPeriodFilter */
   const filteredCompletedBets = useMemo(() => {
@@ -933,7 +936,7 @@ const BetTableMemo = memo(function BetTable({
                     const betKey =
                       bet.id ||
                       bet.createdAt?.toString() ||
-                      `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}-${Math.random()}`;
+                      `${bet.date}-${bet.match || bet.team1}-${bet.amount}-${bet.odds}`;
 
                     return (
                       <tr
