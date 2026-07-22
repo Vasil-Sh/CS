@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import {
   Shield,
+  Users,
   AlertTriangle,
   TrendingDown,
   Target,
