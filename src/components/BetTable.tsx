@@ -352,7 +352,9 @@ const BetTableMemo = memo(function BetTable({
         const localGoal = localGoals.find((g) => g.id === goalId);
         if (localGoal) return localGoal.name;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return "Видалена ціль";
   };
   const isExpressBet = (bet: Bet) =>
@@ -468,7 +470,8 @@ const BetTableMemo = memo(function BetTable({
         const odds = Number(b.odds).toFixed(2);
         const isExpress = isExpressBet(b);
         if (isExpress) {
-          const count = getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
+          const count =
+            getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
           return `${icon}~${odds}. Експрес ${count}x`;
         }
         const selectedTeam =
@@ -493,9 +496,10 @@ const BetTableMemo = memo(function BetTable({
       let logoUrl: string | null;
 
       if (isExpress) {
-        const count = getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
+        const count =
+          getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
         const events = (b.betType || "").split(" • ").filter(Boolean);
-        const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || (b.match || "");
+        const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || b.match || "";
         // Parse first event: "FNATIC vs BRUTE | Map 3 Winner: BRUTE @1.5"
         const parts = firstEvent.split(" | ");
         const matchPart = parts[0] || "";
@@ -505,7 +509,9 @@ const BetTableMemo = memo(function BetTable({
         if (teams.length === 2) {
           // Try to get the winning team's logo from expressLogos
           const selection = selectionPart.split(":")[0]?.trim() || "";
-          const selectedFromMatch = selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() || "";
+          const selectedFromMatch =
+            selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() ||
+            "";
           selectedTeam = selectedFromMatch || teams[0] || selection;
           betDesc = `Експрес x${count || events.length}`;
           // Get logo from expressLogos first event
@@ -514,8 +520,10 @@ const BetTableMemo = memo(function BetTable({
             const sel = selectedTeam.toLowerCase().trim();
             const t1 = teams[0].toLowerCase().trim();
             const t2 = teams[1].toLowerCase().trim();
-            if (t1 && sel === t1) logoUrl = b.expressLogos[0]?.logoTeam1 || null;
-            else if (t2 && sel === t2) logoUrl = b.expressLogos[0]?.logoTeam2 || null;
+            if (t1 && sel === t1)
+              logoUrl = b.expressLogos[0]?.logoTeam1 || null;
+            else if (t2 && sel === t2)
+              logoUrl = b.expressLogos[0]?.logoTeam2 || null;
             else logoUrl = b.expressLogos[0]?.logoTeam1 || null;
           } else {
             logoUrl = getSelectedTeamLogo(b, selectedTeam);
@@ -547,8 +555,8 @@ const BetTableMemo = memo(function BetTable({
             {isWin ? "✅" : "✕"}
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span className="flex-shrink-0 w-14 text-center text-base font-bold text-gray-800 tabular-nums">
-            {odds}
+          <span className="flex-shrink-0 w-16 text-center text-base font-bold text-gray-800 tabular-nums">
+            x{odds}
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <div className="flex-shrink-0 flex items-center justify-center gap-1.5 w-48">
@@ -570,8 +578,22 @@ const BetTableMemo = memo(function BetTable({
             </span>
           </div>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span className="flex-1 text-center text-base text-gray-800 truncate" title={betDesc}>
-            {betDesc.replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}
+          <span
+            className="flex-1 text-center text-base text-gray-800 truncate"
+            title={betDesc}
+          >
+            {betDesc
+              .replace(/\bMapWinner\b/g, "Переможець карти")
+              .replace(/\bMatchWinner\b/g, "Переможець матчу")}
+          </span>
+          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
+          <span
+            className={`flex-shrink-0 w-20 text-right text-base font-bold tabular-nums ${isWin ? "text-green-500" : "text-red-500"}`}
+          >
+            {isWin
+              ? `+${Number(b.profit || b.amount * b.odds - b.amount).toFixed(0)}`
+              : `-${Number(b.amount || 0).toFixed(0)}`}
+            ₴
           </span>
         </div>
       );
@@ -945,9 +967,26 @@ const BetTableMemo = memo(function BetTable({
                                   )}
                                 >
                                   {getBetTypeLabel(
-                                    bet.betType.split(" - ")[0].replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу'),
+                                    bet.betType
+                                      .split(" - ")[0]
+                                      .replace(
+                                        /\bMapWinner\b/g,
+                                        "Переможець карти",
+                                      )
+                                      .replace(
+                                        /\bMatchWinner\b/g,
+                                        "Переможець матчу",
+                                      ),
                                     bet.format,
-                                  ).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}{" "}
+                                  )
+                                    .replace(
+                                      /\bMapWinner\b/g,
+                                      "Переможець карти",
+                                    )
+                                    .replace(
+                                      /\bMatchWinner\b/g,
+                                      "Переможець матчу",
+                                    )}{" "}
                                   {bet.betType.includes(" - ")
                                     ? `- ${bet.betType.split(" - ").slice(1).join(" - ")}`
                                     : ""}
@@ -1359,7 +1398,10 @@ const BetTableMemo = memo(function BetTable({
         betsCount={filteredCompletedBets.length}
         rows={compactRows}
         copyText={compactResultsText}
-        onPeriodChange={(val) => { setCompactPeriodFilter(val as typeof compactPeriodFilter); if (val !== "month") setCompactMonth(""); }}
+        onPeriodChange={(val) => {
+          setCompactPeriodFilter(val as typeof compactPeriodFilter);
+          if (val !== "month") setCompactMonth("");
+        }}
         onMonthChange={setCompactMonth}
         onCopy={handleCopyCompact}
       />
