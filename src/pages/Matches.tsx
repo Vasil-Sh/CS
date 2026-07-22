@@ -114,7 +114,7 @@ interface Match {
     rating: number;
   }[];
   context: string;
-  tier: "tier1" | "tier2" | "tier3";
+  tier: "tier1" | "tier2" | "tier3" | null;
   matchType: "Bo1" | "Bo2" | "Bo3" | "Bo5";
   game: "CS2" | "Dota2";
   upsetProbability: number;
@@ -928,7 +928,7 @@ export default function Matches() {
         team1: match.team1,
         team2: match.team2,
         format: match.matchType,
-        tier: match.tier.toUpperCase(),
+        tier: match.tier?.toUpperCase() ?? "UNKNOWN",
         odds: match.odds,
       });
       setAiRecommendation(recommendation);
@@ -971,7 +971,7 @@ export default function Matches() {
       return false;
     if (filterGame === "CS2" && match.game !== "CS2") return false;
     if (filterGame === "Dota2" && match.game !== "Dota2") return false;
-    if (filterTier !== "all" && match.tier !== filterTier) return false;
+    if (filterTier !== "all" && match.tier !== filterTier) return false; // null tier matches only show when filter=all
     if (filterDayOfWeek !== "all") {
       const dateKey = getDateKey(match.date);
       const matchDate = new Date(dateKey + "T12:00:00");

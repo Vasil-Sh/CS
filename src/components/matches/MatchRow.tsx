@@ -47,7 +47,7 @@ interface Match {
   risk: number;
   matchType: "Bo1" | "Bo2" | "Bo3" | "Bo5";
   game?: "CS2" | "Dota2";
-  tier: "tier1" | "tier2" | "tier3";
+  tier: "tier1" | "tier2" | "tier3" | null;
   formStability: FormStability;
   context?: string;
   matchStatus?: "upcoming" | "live" | "finished";
@@ -509,9 +509,11 @@ export default function MatchRow({
                 <Badge className="bg-gray-100 text-gray-800 border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                   {match.matchType}
                 </Badge>
-                <Badge className="bg-gray-900 text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
-                  {match.tier}
-                </Badge>
+                {match.tier && (
+                  <Badge className="bg-gray-900 text-white border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase">
+                    {match.tier}
+                  </Badge>
+                )}
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge

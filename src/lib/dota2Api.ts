@@ -81,12 +81,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     logoTeam2: proxyLogoUrl(m.logoTeam2),
     predictionPercentTeam1: m.pred1,
     predictionPercentTeam2: m.pred2,
-    bettingCoefficientTeam1:
-      m.coeff1 ??
-      (m.pred1 > 0 ? Math.round((100 / m.pred1) * 100) / 100 : null),
-    bettingCoefficientTeam2:
-      m.coeff2 ??
-      (m.pred2 > 0 ? Math.round((100 / m.pred2) * 100) / 100 : null),
+    bettingCoefficientTeam1: m.coeff1 ?? null,
+    bettingCoefficientTeam2: m.coeff2 ?? null,
     tournament: m.tournament || "",
     stage: m.stage || "",
     status: m.status,

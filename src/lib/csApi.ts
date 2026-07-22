@@ -58,16 +58,8 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     logoTeam2: proxyLogoUrl(m.logoTeam2 as string | null),
     predictionPercentTeam1: (m.pred1 as number) ?? null,
     predictionPercentTeam2: (m.pred2 as number) ?? null,
-    bettingCoefficientTeam1:
-      (m.coeff1 as number | null) ??
-      ((m.pred1 as number) > 0
-        ? Math.round((100 / (m.pred1 as number)) * 100) / 100
-        : null),
-    bettingCoefficientTeam2:
-      (m.coeff2 as number | null) ??
-      ((m.pred2 as number) > 0
-        ? Math.round((100 / (m.pred2 as number)) * 100) / 100
-        : null),
+    bettingCoefficientTeam1: (m.coeff1 as number | null) ?? null,
+    bettingCoefficientTeam2: (m.coeff2 as number | null) ?? null,
     tournament: String(m.tournament || ""),
     stage: String(m.stage || ""),
     status: (m.status as "upcoming" | "live" | "finished") || "upcoming",
@@ -251,9 +243,10 @@ export function parseMatchContext(type: string, link: string): string {
  * Determine tier based on team positions
  */
 export function determineTier(
-  pos1: number | null,
-  pos2: number | null,
-): "tier1" | "tier2" | "tier3" {
+  pos1: number | null | undefined,
+  pos2: number | null | undefined,
+): "tier1" | "tier2" | "tier3" | null {
+  if (pos1 == null && pos2 == null) return null;
   const bestPos = Math.min(pos1 ?? 999, pos2 ?? 999);
   if (bestPos <= 20) return "tier1";
   if (bestPos <= 50) return "tier2";
