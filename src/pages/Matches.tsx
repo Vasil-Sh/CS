@@ -686,12 +686,34 @@ export default function Matches() {
             // Don't override "finished" from main API
             if (m.matchStatus === "finished") return m;
 
-            // Keep main API status ("live") even if live-scores says "finished"
-            // Live-scores HTML parser is less accurate than JSON-LD + score analysis.
-            // But ALWAYS update scores — live-scores has fresh scores from tips.gg DOM.
-            const newStatus =
-              m.matchStatus === "live" && update.status === "finished"
-                ? "live"
+            // Always update scores first
+            const newScore1 = update.score1 ?? m.score1;
+            const newScore2 = update.score2 ?? m.score2;
+
+            // Determine if scores indicate a decided match (e.g. 2:0 in BO3)
+            const s1 = newScore1 ?? 0;
+            const s2 = newScore2 ?? 0;
+            const hasScores =
+              (newScore1 != null || newScore2 != null) && s1 + s2 > 0;
+            const maxScore = Math.max(s1, s2);
+            const winsNeeded =
+              m.matchType === "Bo5"
+                ? 3
+                : m.matchType === "Bo3"
+                  ? 2
+                  : m.matchType === "Bo1"
+                    ? 1
+                    : 2;
+            const isScoreDecided =
+              hasScores &&
+              maxScore >= winsNeeded &&
+              Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
+
+            // Derive status: trust scores first, fall back to live-scores status
+            const newStatus = isScoreDecided
+              ? "finished"
+              : m.matchStatus === "live" && update.status === "finished"
+                ? "live" // live-scores parser falsely marks 1:0 as finished
                 : update.status === "finished"
                   ? "finished"
                   : update.status === "live"
@@ -700,8 +722,8 @@ export default function Matches() {
 
             return {
               ...m,
-              score1: update.score1 ?? m.score1,
-              score2: update.score2 ?? m.score2,
+              score1: newScore1,
+              score2: newScore2,
               matchStatus: newStatus as "upcoming" | "live" | "finished",
             };
           }),
