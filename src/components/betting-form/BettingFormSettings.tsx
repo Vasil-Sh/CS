@@ -210,10 +210,10 @@ export default function BettingFormSettings({
                 <button
                   type="button"
                   onClick={() => setGoalPickerOpen(true)}
-                  className={`flex items-center justify-between w-full rounded-xl border text-sm h-10 px-4 py-2 transition-all ${
+                  className={`flex items-center justify-between w-full rounded-xl border text-sm h-11 px-4 py-2 transition-all ${
                     selectedGoal
                       ? "border-blue-600 bg-blue-50 text-gray-900"
-                      : "border-gray-200 bg-white text-gray-400 hover:border-gray-300"
+                      : "border-gray-200 bg-white text-gray-900 hover:border-gray-300"
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">
