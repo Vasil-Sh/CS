@@ -841,10 +841,12 @@ export default function Matches() {
         );
         if (import.meta.env.DEV)
           console.log(`[Matches] Loaded ${dotaMatches.length} Dota2 matches`);
-        setMatches((prev) => {
-          const cs2 = prev.filter((m) => m.game !== "Dota2");
-          return [...dotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
-        });
+        if (dotaMatches.length > 0) {
+          setMatches((prev) => {
+            const cs2 = prev.filter((m) => m.game !== "Dota2");
+            return [...dotaMatches.map((m) => dota2ApiMatchToMatch(m)), ...cs2];
+          });
+        }
         setInitialLoading(false);
       } catch (e) {
         if (import.meta.env.DEV)
@@ -858,6 +860,7 @@ export default function Matches() {
         if (import.meta.env.DEV)
           console.log(`[Matches] Loaded ${csMatches.length} CS2 matches`);
         setMatches((prev) => {
+          if (csMatches.length === 0) return prev; // don't overwrite with empty (cold start)
           const dota2 = prev.filter((m) => m.game === "Dota2");
           return [...csMatches.map((m) => apiMatchToMatch(m, "CS2")), ...dota2];
         });
