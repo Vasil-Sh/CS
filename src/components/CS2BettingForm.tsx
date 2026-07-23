@@ -30,8 +30,6 @@ import {
 } from "@/lib/betCalculations";
 import {
   findRiskyTeams,
-  normalizeTeamName,
-  getGameFilterValue,
   type RiskyTeamMatch,
 } from "@/lib/riskyTeamsMatcher";
 import { useTiltBlock } from "@/hooks/useTiltBlock";
@@ -687,14 +685,6 @@ export default function CS2BettingForm({
         console.error("Error loading risky teams from storage:", error);
     }
     return [];
-  }
-
-  function normalizeTeamName(name: string): string {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "")
-      .replace(/[^a-z0-9]/g, "");
   }
 
   function getGameFilterValue(formGame: "CS2" | "Dota2"): string {
