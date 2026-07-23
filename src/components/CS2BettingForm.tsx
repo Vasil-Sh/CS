@@ -454,9 +454,21 @@ export default function CS2BettingForm({
     toast.success("Форму очищено");
   };
 
-  const loadActiveGoals = () => {
-    const goals = UserDataService.getUserData(currentUser, "goals", []);
-    const active = goals.filter((g: Goal) => g.status === "active");
+  const loadActiveGoals = async () => {
+    let goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
+    // On first app load, goals may not be in localStorage yet — fetch from API
+    if (goals.length === 0) {
+      try {
+        const apiGoals = (await UserDataService.fetchGoals()) as Goal[];
+        if (apiGoals.length > 0) {
+          goals = apiGoals;
+          UserDataService.setUserDataSync(currentUser, "goals", goals);
+        }
+      } catch {
+        /* API unavailable — use empty */
+      }
+    }
+    const active = goals.filter((g) => g.status === "active");
     setActiveGoals(active);
     if (import.meta.env.DEV)
       console.log("Loaded active goals:", active.length, active);
