@@ -10,7 +10,6 @@ import type { BaseApiMatch } from "./matchTypes";
 // Extends unified match type with Dota-specific fields
 export type Dota2ApiMatch = BaseApiMatch & {
   tournament: string;
-  tournamentLogo: string | null;
   stage: string;
   status: "upcoming" | "live" | "finished";
 };
@@ -27,7 +26,6 @@ interface TipsGgApiMatch {
   logoTeam1: string | null;
   logoTeam2: string | null;
   tournament: string;
-  tournamentLogo: string | null;
   stage: string;
   status: "upcoming" | "live" | "finished";
   tipsCount: number;
@@ -87,7 +85,6 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     bettingCoefficientTeam1: m.coeff1 ?? null,
     bettingCoefficientTeam2: m.coeff2 ?? null,
     tournament: m.tournament || "",
-    tournamentLogo: proxyLogoUrl(m.tournamentLogo),
     stage: m.stage || "",
     status: m.status,
   };
