@@ -47,12 +47,10 @@ const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_
  *  Cross-origin URLs with X-Content-Type-Options: nosniff trigger Chrome ORB. */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
-  // Match: /static/image/{folder}/{filename}
-  // e.g. /static/image/teams/navi.png → /api/.../logo/teams/navi.png
-  //      /static/image/tournaments/dota2-tournament.png → /api/.../logo/tournaments/dota2-tournament.png
-  const match = url.match(/\/static\/image\/(.+)$/i);
-  if (match) return `/api/v1/dota2-matches/logo/${match[1]}`;
-  return url; // not a tips.gg CDN URL, return as-is
+  // Extract only the filename from /static/image/teams/team-name.png
+  const match = url.match(/\/static\/image\/teams\/(.+)$/i);
+  if (!match) return url;
+  return `/api/v1/dota2-matches/logo/${match[1]}`;
 }
 
 /** Simple string hash for stable IDs across reloads */
