@@ -485,6 +485,11 @@ export default function MatchRow({
                 <Badge className="bg-gray-100 text-gray-800 border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
                   {match.matchType}
                 </Badge>
+                {(match.bettingCoefficientTeam1 != null || match.bettingCoefficientTeam2 != null) ? (
+                  <Badge className="bg-white text-gray-700 border border-gray-200 rounded-md px-2 py-0.5 text-xs font-mono font-medium">
+                    {match.bettingCoefficientTeam1 != null ? Number(match.bettingCoefficientTeam1).toFixed(2) : "—"} / {match.bettingCoefficientTeam2 != null ? Number(match.bettingCoefficientTeam2).toFixed(2) : "—"}
+                  </Badge>
+                ) : null}
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
