@@ -28,6 +28,47 @@ interface HistoryMatch {
   logoTeam2: string | null;
 }
 
+/** Convert CDN URL to backend proxy URL */
+const proxyLogo = (url: string | null, game: string): string | null => {
+  if (!url) return null;
+  // Already proxied
+  if (url.startsWith("/api/")) return url;
+  // Extract filename from CDN URL
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1];
+  const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
+  return `/api/v1/${prefix}/logo/${filename}`;
+};
+
+/** Team logo with error fallback to placeholder SVG */
+function TeamLogo({ src, alt, game, size = 20 }: { src: string | null; alt: string; game: string; size?: number }) {
+  const [imgError, setImgError] = useState(false);
+  const fallback = game === "cs2"
+    ? "/assets/team-placeholder.svg"
+    : "/assets/team-placeholder-dota.svg";
+
+  if (!src || imgError) {
+    return (
+      <img
+        src={fallback}
+        alt={alt}
+        className="object-contain flex-shrink-0"
+        style={{ width: size, height: size, minWidth: size }}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={proxyLogo(src, game)}
+      alt={alt}
+      className="rounded object-contain flex-shrink-0"
+      style={{ width: size, height: size, minWidth: size }}
+      onError={() => setImgError(true)}
+    />
+  );
+}
+
 /** Format date to readable Ukrainian: "23 липня 2026" */
 const formatDate = (dateStr: string): string => {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -188,13 +229,7 @@ function PastDayGroup({
                 >
                   {match.team1}
                 </span>
-                {match.logoTeam1 && (
-                  <img
-                    src={match.logoTeam1}
-                    alt={match.team1}
-                    className="w-5 h-5 rounded object-contain flex-shrink-0"
-                  />
-                )}
+                <TeamLogo src={match.logoTeam1} alt={match.team1} game={match.game} />
               </div>
 
               <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -212,13 +247,7 @@ function PastDayGroup({
               </div>
 
               <div className="flex items-center gap-2 min-w-0 flex-[2]">
-                {match.logoTeam2 && (
-                  <img
-                    src={match.logoTeam2}
-                    alt={match.team2}
-                    className="w-5 h-5 rounded object-contain flex-shrink-0"
-                  />
-                )}
+                <TeamLogo src={match.logoTeam2} alt={match.team2} game={match.game} />
                 <span
                   className={`text-sm font-medium truncate ${team2Won ? "text-gray-900" : "text-gray-500"}`}
                 >
