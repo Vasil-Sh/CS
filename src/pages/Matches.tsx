@@ -2096,7 +2096,6 @@ export default function Matches() {
           <PastDaysModal
             open={pastDaysModalOpen}
             onClose={() => setPastDaysModalOpen(false)}
-            matches={matches}
           />
         </div>
 
