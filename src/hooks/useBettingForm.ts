@@ -277,6 +277,13 @@ export function useBettingForm({
       .catch(() => {});
   }, [currentUser]);
 
+  // ── Helpers (must be defined before effects that use them) ──
+  const loadActiveGoals = useCallback(() => {
+    if (!currentUser) return;
+    const goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
+    setActiveGoals(goals.filter((g) => g.status === "active"));
+  }, [currentUser]);
+
   useLayoutEffect(() => {
     if (prefillData?.game) {
       const fm: Record<string, string> = {
@@ -471,12 +478,6 @@ export function useBettingForm({
   }, []);
 
   // ── Helpers ──
-  const loadActiveGoals = useCallback(() => {
-    if (!currentUser) return;
-    const goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
-    setActiveGoals(goals.filter((g) => g.status === "active"));
-  }, [currentUser]);
-
   const checkRiskyTeams = (
     team1: string,
     team2: string,
