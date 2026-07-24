@@ -193,7 +193,11 @@ export default function MyBets() {
         dataProvider.refresh(),
       ]);
     };
-    init();
+    // Defer by one frame so React can process navigation clicks first
+    const id = requestAnimationFrame(() => {
+      init();
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
   useEffect(() => {
     if (users.length && currentUser) {
