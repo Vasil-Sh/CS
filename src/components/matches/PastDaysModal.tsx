@@ -41,11 +41,22 @@ const proxyLogo = (url: string | null, game: string): string | null => {
 };
 
 /** Team logo with error fallback to placeholder SVG */
-function TeamLogo({ src, alt, game, size = 20 }: { src: string | null; alt: string; game: string; size?: number }) {
+function TeamLogo({
+  src,
+  alt,
+  game,
+  size = 20,
+}: {
+  src: string | null;
+  alt: string;
+  game: string;
+  size?: number;
+}) {
   const [imgError, setImgError] = useState(false);
-  const fallback = game === "cs2"
-    ? "/assets/team-placeholder.svg"
-    : "/assets/team-placeholder-dota.svg";
+  const fallback =
+    game === "cs2"
+      ? "/assets/team-placeholder.svg"
+      : "/assets/team-placeholder-dota.svg";
 
   if (!src || imgError) {
     return (
@@ -153,7 +164,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
         </DialogHeader>
 
         {/* Scrollable body */}
-        <div className="overflow-y-auto px-6 pb-6 pt-4 bg-gray-50">
+        <div className="overflow-y-auto px-6 pb-6 pt-4 bg-gray-100">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <Loader2 className="size-10 mb-3 animate-spin" strokeWidth={1} />
@@ -168,9 +179,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
               <div className="flex items-center justify-center size-24 rounded-2xl bg-white mb-3">
                 <CalendarDays className="size-[72px]" strokeWidth={1} />
               </div>
-              <p className="text-sm text-gray-900">
-                Немає завершених матчів
-              </p>
+              <p className="text-sm text-gray-900">Немає завершених матчів</p>
             </div>
           ) : (
             dateKeys.map((dateKey) => {
@@ -220,8 +229,8 @@ function PastDayGroup({
             <div
               key={match.id}
               className={`flex items-center gap-4 px-4 py-3 ${
-                idx < matches.length - 1 ? "border-b border-gray-50" : ""
-              } hover:bg-gray-50/50 transition-colors`}
+                idx < matches.length - 1 ? "border-b border-gray-200" : ""
+              } hover:bg-gray-50 transition-colors`}
             >
               <div className="flex items-center gap-2 min-w-0 flex-[2] justify-end">
                 <span
@@ -229,7 +238,11 @@ function PastDayGroup({
                 >
                   {match.team1}
                 </span>
-                <TeamLogo src={match.logoTeam1} alt={match.team1} game={match.game} />
+                <TeamLogo
+                  src={match.logoTeam1}
+                  alt={match.team1}
+                  game={match.game}
+                />
               </div>
 
               <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -247,7 +260,11 @@ function PastDayGroup({
               </div>
 
               <div className="flex items-center gap-2 min-w-0 flex-[2]">
-                <TeamLogo src={match.logoTeam2} alt={match.team2} game={match.game} />
+                <TeamLogo
+                  src={match.logoTeam2}
+                  alt={match.team2}
+                  game={match.game}
+                />
                 <span
                   className={`text-sm font-medium truncate ${team2Won ? "text-gray-900" : "text-gray-500"}`}
                 >
