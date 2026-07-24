@@ -23,36 +23,20 @@ import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import {
-  DollarSign,
-  Filter,
-  RefreshCw,
   AlertTriangle,
   BarChart3,
   Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
   Wallet,
-  TrendingUp,
   Trophy,
   Zap,
   Percent,
 } from "lucide-react";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Legend,
-  ReferenceLine,
-} from "recharts";
 import type {
   Bet,
   BettingStats,
   OddsRange,
   BalanceData,
+  ScatterData,
 } from "@/types/betting";
 
 interface MonthlyData {
@@ -83,9 +67,6 @@ export default function Analytics() {
   const [bets, setBets] = useState<Bet[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [timeFilter, setTimeFilter] = useState("all");
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
   const [dualBank, setDualBank] = useState<DualBankrollStats>({
     uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
@@ -392,24 +373,24 @@ export default function Analytics() {
   }, [completedBets]);
 
   const bestMonth = useMemo(() => {
-    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return null;
-    return [...stats.profitByMonth].sort((a, b) => b.profit - a.profit)[0];
-  }, [stats.profitByMonth]);
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
+    return [...monthlyProfitData].sort((a, b) => b.profit - a.profit)[0];
+  }, [monthlyProfitData]);
 
   const worstMonth = useMemo(() => {
-    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return null;
-    return [...stats.profitByMonth].sort((a, b) => a.profit - b.profit)[0];
-  }, [stats.profitByMonth]);
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
+    return [...monthlyProfitData].sort((a, b) => a.profit - b.profit)[0];
+  }, [monthlyProfitData]);
 
   const avgMonthlyProfit = useMemo(() => {
-    if (!stats.profitByMonth || stats.profitByMonth.length === 0) return 0;
-    const total = stats.profitByMonth.reduce((s, m) => s + m.profit, 0);
-    return Math.round(total / stats.profitByMonth.length);
-  }, [stats.profitByMonth]);
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return 0;
+    const total = monthlyProfitData.reduce((s, m) => s + m.profit, 0);
+    return Math.round(total / monthlyProfitData.length);
+  }, [monthlyProfitData]);
 
   const totalMonthsTracked = useMemo(() => {
-    return stats.profitByMonth?.length || 0;
-  }, [stats.profitByMonth]);
+    return monthlyProfitData?.length || 0;
+  }, [monthlyProfitData]);
 
   const betsThisMonth = useMemo(() => {
     const now = new Date();
@@ -690,18 +671,15 @@ export default function Analytics() {
     { id: "comparison", label: "Періоди", icon: Calendar },
   ];
 
-  const activeFiltersCount = timeFilter !== "all" ? 1 : 0;
-
-  // Shared card style for hover shadow effect (matches StatCard)
-  const cardBaseStyle = CARD_BASE_STYLE;
-  const cardHoverStyle = CARD_HOVER_STYLE;
-
   // Odds category labels
   const oddsCategoryLabels = [
     { label: "Низькі", sublabel: "< 2.0" },
     { label: "Середні", sublabel: "2.0 – 3.0" },
     { label: "Високі", sublabel: "> 3.0" },
   ];
+
+  const cardBaseStyle = CARD_BASE_STYLE;
+  const cardHoverStyle = CARD_HOVER_STYLE;
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
@@ -744,6 +722,27 @@ export default function Analytics() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Game filter + card styles */}
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              {(["all", "CS2", "Dota2"] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setGameFilter(g)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    gameFilter === g
+                      ? g === "CS2"
+                        ? "bg-amber-600 text-white shadow-sm"
+                        : g === "Dota2"
+                          ? "bg-purple-600 text-white shadow-sm"
+                          : "bg-gray-900 text-white shadow-sm"
+                      : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
+                  }`}
+                >
+                  {g === "all" ? "Всі" : g}
+                </button>
+              ))}
+            </div>
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
