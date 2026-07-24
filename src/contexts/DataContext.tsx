@@ -9,6 +9,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -200,10 +201,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [currentUser, recalcBankroll],
   );
 
+  const ctxValue = useMemo(
+    () => ({ bets, bankroll, isLoading, refresh, addBet, updateBetResult, deleteBet }),
+    [bets, bankroll, isLoading, refresh, addBet, updateBetResult, deleteBet],
+  );
+
   return (
-    <DataContext.Provider
-      value={{ bets, bankroll, isLoading, refresh, addBet, updateBetResult, deleteBet }}
-    >
+    <DataContext.Provider value={ctxValue}>
       {children}
     </DataContext.Provider>
   );
