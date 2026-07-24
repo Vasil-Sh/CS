@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserDataService } from "@/lib/userDataService";
 import { toast } from "sonner";
 import {
   fetchTodaysAndUpcomingMatches,
@@ -56,7 +58,7 @@ export interface Match {
   url?: string;
   score1?: number;
   score2?: number;
-  matchStatus?: "upcoming" | "live" | "finished";
+  matchStatus?: "upcoming" | "live" | "finished" | "postponed" | "cancelled";
   positionTeam1?: number | null;
   positionTeam2?: number | null;
   logoTeam1?: string | null;
@@ -72,12 +74,15 @@ export interface Match {
 
 export type MatchRating = "like" | "dislike" | null;
 
-export type SortBy = "date" | "confidence" | "risk" | "upset" | "status" | "odds";
-export type FilterDay = "all" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+export type SortBy =
+  "date" | "confidence" | "risk" | "upset" | "status" | "odds";
+export type FilterDay =
+  "all" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 export type FilterRisk = "all" | "safe" | "moderate" | "high";
 export type FilterMatchType = "all" | "Bo1" | "Bo2" | "Bo3" | "Bo5";
 export type FilterGame = "all" | "CS2" | "Dota2";
-export type FilterStatus = "all" | "upcoming" | "live" | "finished";
+export type FilterStatus =
+  "all" | "upcoming" | "live" | "finished" | "postponed" | "cancelled";
 
 // ── Helpers ──
 const getDateKey = (dateStr: string): string => {
@@ -95,12 +100,18 @@ const getTodayDateKey = (): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const getStatusPriority = (status?: "upcoming" | "live" | "finished"): number => {
+const getStatusPriority = (
+  status?: "upcoming" | "live" | "finished",
+): number => {
   switch (status) {
-    case "live": return 0;
-    case "upcoming": return 1;
-    case "finished": return 2;
-    default: return 3;
+    case "live":
+      return 0;
+    case "upcoming":
+      return 1;
+    case "finished":
+      return 2;
+    default:
+      return 3;
   }
 };
 
@@ -108,7 +119,9 @@ const loadMatchRatings = (): Record<string, MatchRating> => {
   try {
     const saved = localStorage.getItem("match_ratings");
     if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return {};
 };
 
@@ -133,71 +146,153 @@ const loadVisibleColumns = (): Set<string> => {
       const arr = JSON.parse(saved) as string[];
       if (Array.isArray(arr) && arr.length > 0) return new Set(arr);
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
 };
 
 // ── Converter: API match → unified Match ──
-function apiMatchToMatch(apiMatch: ApiMatchType, game: "CS2" | "Dota2" = "CS2"): Match {
+function apiMatchToMatch(
+  apiMatch: ApiMatchType,
+  game: "CS2" | "Dota2" = "CS2",
+): Match {
   const matchType = parseMatchType(apiMatch.type);
-  const context = game === "CS2"
-    ? apiMatch.tournament && apiMatch.stage
-      ? `${apiMatch.tournament} — ${apiMatch.stage}`
-      : apiMatch.tournament || parseMatchContext(apiMatch.type, apiMatch.link)
-    : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
+  const context =
+    game === "CS2"
+      ? apiMatch.tournament && apiMatch.stage
+        ? `${apiMatch.tournament} — ${apiMatch.stage}`
+        : apiMatch.tournament || parseMatchContext(apiMatch.type, apiMatch.link)
+      : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
   const tier = determineTier(apiMatch.positionTeam1, apiMatch.positionTeam2);
-  const favorite = determineFavorite(apiMatch.nameTeam1, apiMatch.nameTeam2, apiMatch.positionTeam1, apiMatch.positionTeam2);
+  const favorite = determineFavorite(
+    apiMatch.nameTeam1,
+    apiMatch.nameTeam2,
+    apiMatch.positionTeam1,
+    apiMatch.positionTeam2,
+  );
   const status = getMatchStatus(apiMatch);
-  const pos1 = apiMatch.positionTeam1, pos2 = apiMatch.positionTeam2;
-  const posDiff = (pos1 != null && pos2 != null) ? Math.abs(pos1 - pos2) : 0;
-  const pred1 = apiMatch.predictionPercentTeam1, pred2 = apiMatch.predictionPercentTeam2;
-  const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
-  const baseConfidence = hasPrediction ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0)) : Math.min(85, 55 + Math.floor(posDiff * 0.3));
-  const risk = Math.max(10, 100 - baseConfidence - Math.floor((posDiff * 7) % 10));
-  const winRate = hasPrediction ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0)) : Math.min(80, Math.max(50, 50 + Math.floor(posDiff * 0.25)));
-  const coeff1 = apiMatch.bettingCoefficientTeam1, coeff2 = apiMatch.bettingCoefficientTeam2;
-  const hasCoeffs = coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
+  const pos1 = apiMatch.positionTeam1,
+    pos2 = apiMatch.positionTeam2;
+  const posDiff = pos1 != null && pos2 != null ? Math.abs(pos1 - pos2) : 0;
+  const pred1 = apiMatch.predictionPercentTeam1,
+    pred2 = apiMatch.predictionPercentTeam2;
+  const hasPrediction =
+    pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+  const baseConfidence = hasPrediction
+    ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
+    : Math.min(85, 55 + Math.floor(posDiff * 0.3));
+  const risk = Math.max(
+    10,
+    100 - baseConfidence - Math.floor((posDiff * 7) % 10),
+  );
+  const winRate = hasPrediction
+    ? Math.round(Math.max(pred1 ?? 0, pred2 ?? 0))
+    : Math.min(80, Math.max(50, 50 + Math.floor(posDiff * 0.25)));
+  const coeff1 = apiMatch.bettingCoefficientTeam1,
+    coeff2 = apiMatch.bettingCoefficientTeam2;
+  const hasCoeffs =
+    coeff1 != null && coeff2 != null && (coeff1 > 0 || coeff2 > 0);
 
   return {
-    id: String(apiMatch.id), date: apiMatch.date, team1: apiMatch.nameTeam1, team2: apiMatch.nameTeam2,
-    favorite, aiConfidence: baseConfidence, risk, comment: "", aiSummary: "",
-    odds: { team1: hasCoeffs ? (coeff1 ?? 0) : 0, team2: hasCoeffs ? (coeff2 ?? 0) : 0 },
-    winRate, formStability: "stable", playerForm: [], context, tier, matchType,
+    id: String(apiMatch.id),
+    date: apiMatch.date,
+    team1: apiMatch.nameTeam1,
+    team2: apiMatch.nameTeam2,
+    favorite,
+    aiConfidence: baseConfidence,
+    risk,
+    comment: "",
+    aiSummary: "",
+    odds: {
+      team1: hasCoeffs ? (coeff1 ?? 0) : 0,
+      team2: hasCoeffs ? (coeff2 ?? 0) : 0,
+    },
+    winRate,
+    formStability: "stable",
+    playerForm: [],
+    context,
+    tier,
+    matchType,
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
-    url: game === "CS2" ? buildHltvUrl(apiMatch.link) : buildTipsGgUrl(apiMatch.link),
-    score1: apiMatch.score1, score2: apiMatch.score2, matchStatus: status,
-    cs2Slug: apiMatch.cs2Slug, positionTeam1: apiMatch.positionTeam1, positionTeam2: apiMatch.positionTeam2,
-    logoTeam1: apiMatch.logoTeam1, logoTeam2: apiMatch.logoTeam2,
-    predictionPercentTeam1: apiMatch.predictionPercentTeam1, predictionPercentTeam2: apiMatch.predictionPercentTeam2,
-    bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1, bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
-    stars: apiMatch.stars, game,
+    url:
+      game === "CS2"
+        ? buildHltvUrl(apiMatch.link)
+        : buildTipsGgUrl(apiMatch.link),
+    score1: apiMatch.score1,
+    score2: apiMatch.score2,
+    matchStatus: status,
+    cs2Slug: apiMatch.cs2Slug,
+    positionTeam1: apiMatch.positionTeam1,
+    positionTeam2: apiMatch.positionTeam2,
+    logoTeam1: apiMatch.logoTeam1,
+    logoTeam2: apiMatch.logoTeam2,
+    predictionPercentTeam1: apiMatch.predictionPercentTeam1,
+    predictionPercentTeam2: apiMatch.predictionPercentTeam2,
+    bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
+    bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
+    stars: apiMatch.stars,
+    game,
   };
 }
 
 function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
-  const pred1 = m.predictionPercentTeam1, pred2 = m.predictionPercentTeam2;
-  const hasPrediction = pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
+  const pred1 = m.predictionPercentTeam1,
+    pred2 = m.predictionPercentTeam2;
+  const hasPrediction =
+    pred1 != null && pred2 != null && (pred1 > 0 || pred2 > 0);
   const confidence = hasPrediction ? Math.max(pred1 ?? 50, pred2 ?? 50) : 50;
-  const fav = hasPrediction ? ((pred1 ?? 50) >= (pred2 ?? 50) ? m.nameTeam1 : m.nameTeam2) : m.nameTeam1;
+  const fav = hasPrediction
+    ? (pred1 ?? 50) >= (pred2 ?? 50)
+      ? m.nameTeam1
+      : m.nameTeam2
+    : m.nameTeam1;
   const slugParts = m.link.replace(/\/$/, "").split("/");
   const dota2Slug = slugParts[slugParts.length - 2] || "";
 
   return {
-    id: `dota-${m.id}`, date: m.date, team1: m.nameTeam1, team2: m.nameTeam2,
-    favorite: fav, aiConfidence: confidence,
+    id: `dota-${m.id}`,
+    date: m.date,
+    team1: m.nameTeam1,
+    team2: m.nameTeam2,
+    favorite: fav,
+    aiConfidence: confidence,
     risk: hasPrediction ? Math.max(5, 100 - confidence - 5) : 30,
-    comment: "", aiSummary: "",
-    odds: { team1: m.bettingCoefficientTeam1 ?? 0, team2: m.bettingCoefficientTeam2 ?? 0 },
-    winRate: confidence, formStability: "stable", playerForm: [],
-    context: m.tournament ? `${m.tournament}${m.stage ? " — " + m.stage : ""}` : parseDota2MatchContext(m),
-    tier: "tier2", matchType: parseDota2MatchType(m.type),
-    upsetProbability: hasPrediction ? Math.max(5, Math.min(45, 50 - Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5)) : 25,
-    url: buildTipsGgUrl(m.link), score1: m.score1, score2: m.score2,
-    matchStatus: getDota2MatchStatus(m), positionTeam1: m.positionTeam1, positionTeam2: m.positionTeam2,
-    logoTeam1: m.logoTeam1, logoTeam2: m.logoTeam2,
-    predictionPercentTeam1: m.predictionPercentTeam1, predictionPercentTeam2: m.predictionPercentTeam2,
-    bettingCoefficientTeam1: m.bettingCoefficientTeam1, bettingCoefficientTeam2: m.bettingCoefficientTeam2,
-    stars: m.stars, game: "Dota2", dota2Slug,
+    comment: "",
+    aiSummary: "",
+    odds: {
+      team1: m.bettingCoefficientTeam1 ?? 0,
+      team2: m.bettingCoefficientTeam2 ?? 0,
+    },
+    winRate: confidence,
+    formStability: "stable",
+    playerForm: [],
+    context: m.tournament
+      ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
+      : parseDota2MatchContext(m),
+    tier: "tier2",
+    matchType: parseDota2MatchType(m.type),
+    upsetProbability: hasPrediction
+      ? Math.max(
+          5,
+          Math.min(45, 50 - Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5),
+        )
+      : 25,
+    url: buildTipsGgUrl(m.link),
+    score1: m.score1,
+    score2: m.score2,
+    matchStatus: getDota2MatchStatus(m),
+    positionTeam1: m.positionTeam1,
+    positionTeam2: m.positionTeam2,
+    logoTeam1: m.logoTeam1,
+    logoTeam2: m.logoTeam2,
+    predictionPercentTeam1: m.predictionPercentTeam1,
+    predictionPercentTeam2: m.predictionPercentTeam2,
+    bettingCoefficientTeam1: m.bettingCoefficientTeam1,
+    bettingCoefficientTeam2: m.bettingCoefficientTeam2,
+    stars: m.stars,
+    game: "Dota2",
+    dota2Slug,
   };
 }
 
@@ -211,27 +306,43 @@ export function useMatches() {
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<FilterDay>("all");
   const [filterRisk, setFilterRisk] = useState<FilterRisk>("all");
   const [filterTournament, setFilterTournament] = useState("all");
-  const [filterMatchType, setFilterMatchType] = useState<FilterMatchType>("all");
+  const [filterMatchType, setFilterMatchType] =
+    useState<FilterMatchType>("all");
   const [filterGame, setFilterGame] = useState<FilterGame>("all");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [pastDaysModalOpen, setPastDaysModalOpen] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(loadVisibleColumns);
+  const [visibleColumns, setVisibleColumns] =
+    useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
+  const [aiRecommendation, setAiRecommendation] =
+    useState<AIRecommendation | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiPredictions, setAiPredictions] = useState<Record<string, AIRecommendation>>({});
+  const [aiPredictions, setAiPredictions] = useState<
+    Record<string, AIRecommendation>
+  >({});
   const [commentModalOpen, setCommentModalOpen] = useState(false);
-  const [selectedCommentMatch, setSelectedCommentMatch] = useState<Match | null>(null);
+  const [selectedCommentMatch, setSelectedCommentMatch] =
+    useState<Match | null>(null);
   const [riskyModalOpen, setRiskyModalOpen] = useState(false);
-  const [selectedRiskyMatch, setSelectedRiskyMatch] = useState<Match | null>(null);
+  const [selectedRiskyMatch, setSelectedRiskyMatch] = useState<Match | null>(
+    null,
+  );
   const [riskyTeams, setRiskyTeams] = useState<RiskyTeam[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [matchRatings, setMatchRatings] = useState<Record<string, MatchRating>>(loadMatchRatings);
-  const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(new Set());
+  const [matchRatings, setMatchRatings] =
+    useState<Record<string, MatchRating>>(loadMatchRatings);
+  const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(
+    new Set(),
+  );
   const fetchGenRef = useRef(0);
-  const pollBackoffRef = useRef<Record<string, { failCount: number; maxDelay: number }>>({});
+  const pollBackoffRef = useRef<
+    Record<
+      string,
+      { failCount: number; maxDelay: number; lastAttempt?: number }
+    >
+  >({});
 
   const toggleColumn = (colId: string) => {
     setVisibleColumns((prev) => {
@@ -244,17 +355,28 @@ export function useMatches() {
   };
 
   const resetAllFilters = () => {
-    setFilterGame("all"); setFilterStatus("all"); setFilterMatchType("all");
-    setFilterDayOfWeek("all"); setFilterRisk("all"); setFilterTournament("all");
-    setPastDaysModalOpen(false); setSearchQuery("");
-    const defaults = new Set(COLUMN_DEFS.filter(c => c.defaultVisible).map(c => c.id));
+    setFilterGame("all");
+    setFilterStatus("all");
+    setFilterMatchType("all");
+    setFilterDayOfWeek("all");
+    setFilterRisk("all");
+    setFilterTournament("all");
+    setPastDaysModalOpen(false);
+    setSearchQuery("");
+    const defaults = new Set(
+      COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
+    );
     setVisibleColumns(defaults);
     localStorage.setItem(COLUMNS_STORAGE_KEY, JSON.stringify([...defaults]));
   };
 
   const hasActiveFilters =
-    filterGame !== "all" || filterStatus !== "all" || filterMatchType !== "all" ||
-    filterDayOfWeek !== "all" || filterRisk !== "all" || filterTournament !== "all" ||
+    filterGame !== "all" ||
+    filterStatus !== "all" ||
+    filterMatchType !== "all" ||
+    filterDayOfWeek !== "all" ||
+    filterRisk !== "all" ||
+    filterTournament !== "all" ||
     searchQuery !== "";
 
   // ── Load matches from API ──
@@ -269,12 +391,14 @@ export function useMatches() {
       ]);
       if (gen !== fetchGenRef.current) return;
 
-      const cs2Matches: Match[] = cs2Data.status === "fulfilled" && cs2Data.value
-        ? cs2Data.value.map((m: ApiMatch) => apiMatchToMatch(m, "CS2"))
-        : [];
-      const dotaMatches: Match[] = dotaData.status === "fulfilled" && dotaData.value
-        ? dotaData.value.map((m: Dota2ApiMatch) => dota2ApiMatchToMatch(m))
-        : [];
+      const cs2Matches: Match[] =
+        cs2Data.status === "fulfilled" && cs2Data.value
+          ? cs2Data.value.map((m: ApiMatch) => apiMatchToMatch(m, "CS2"))
+          : [];
+      const dotaMatches: Match[] =
+        dotaData.status === "fulfilled" && dotaData.value
+          ? dotaData.value.map((m: Dota2ApiMatch) => dota2ApiMatchToMatch(m))
+          : [];
 
       setMatches([...cs2Matches, ...dotaMatches]);
       if (cs2Data.status === "rejected") {
@@ -305,25 +429,37 @@ export function useMatches() {
 
   // ── Poll live scores ──
   const pollLiveScores = useCallback(
-    async (game: "Dota2" | "CS2", slugField: "dota2Slug" | "cs2Slug", endpoint: string) => {
+    async (
+      game: "Dota2" | "CS2",
+      slugField: "dota2Slug" | "cs2Slug",
+      endpoint: string,
+    ) => {
       try {
         const bo = pollBackoffRef.current[game];
         if (bo && bo.failCount >= 3) {
           const delay = Math.min(bo.maxDelay, Math.pow(2, bo.failCount) * 1000);
-          if (Date.now() - (bo as any).lastAttempt < delay) return;
+          if (bo.lastAttempt && Date.now() - bo.lastAttempt < delay) return;
         }
         const resp = await fetch(endpoint);
         if (!resp.ok) {
           if (resp.status === 429 || resp.status >= 500) {
-            const b = pollBackoffRef.current[game] || { failCount: 0, maxDelay: 120_000 };
+            const b = pollBackoffRef.current[game] || {
+              failCount: 0,
+              maxDelay: 120_000,
+            };
             b.failCount++;
-            (b as any).lastAttempt = Date.now();
+            b.lastAttempt = Date.now();
             pollBackoffRef.current[game] = b;
           }
           return;
         }
         delete pollBackoffRef.current[game];
-        const updates: Array<{ id: string; score1: number | null; score2: number | null; status: string }> = await resp.json();
+        const updates: Array<{
+          id: string;
+          score1: number | null;
+          score2: number | null;
+          status: string;
+        }> = await resp.json();
         if (!Array.isArray(updates) || updates.length === 0) return;
 
         setMatches((prev) =>
@@ -334,37 +470,78 @@ export function useMatches() {
             if (m.matchStatus === "finished") return m;
             const newScore1 = update.score1 ?? m.score1;
             const newScore2 = update.score2 ?? m.score2;
-            const s1 = newScore1 ?? 0, s2 = newScore2 ?? 0;
-            const hasScores = (newScore1 != null || newScore2 != null) && s1 + s2 > 0;
+            const s1 = newScore1 ?? 0,
+              s2 = newScore2 ?? 0;
+            const hasScores =
+              (newScore1 != null || newScore2 != null) && s1 + s2 > 0;
             const maxScore = Math.max(s1, s2);
-            const winsNeeded = m.matchType === "Bo5" ? 3 : m.matchType === "Bo3" ? 2 : m.matchType === "Bo1" ? 1 : 2;
-            const isScoreDecided = hasScores && maxScore >= winsNeeded && Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
+            const winsNeeded =
+              m.matchType === "Bo5"
+                ? 3
+                : m.matchType === "Bo3"
+                  ? 2
+                  : m.matchType === "Bo1"
+                    ? 1
+                    : 2;
+            const isScoreDecided =
+              hasScores &&
+              maxScore >= winsNeeded &&
+              Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
 
-            const newStatus: "upcoming" | "live" | "finished" = isScoreDecided ? "finished"
-              : m.matchStatus === "live" && update.status === "finished" ? "live"
-              : update.status === "finished" ? "finished"
-              : update.status === "live" ? "live"
-              : (() => {
-                  if (hasScores) return m.matchStatus;
-                  const matchDate = new Date(m.date);
-                  if (matchDate <= new Date()) {
-                    const ageMs = Date.now() - matchDate.getTime();
-                    if (ageMs < 4 * 60 * 60 * 1000) return "live";
-                  }
-                  return m.matchStatus;
-                })();
+            const newStatus: "upcoming" | "live" | "finished" = isScoreDecided
+              ? "finished"
+              : m.matchStatus === "live" && update.status === "finished"
+                ? "live"
+                : update.status === "finished"
+                  ? "finished"
+                  : update.status === "live"
+                    ? "live"
+                    : (() => {
+                        if (hasScores) return m.matchStatus;
+                        const matchDate = new Date(m.date);
+                        if (matchDate <= new Date()) {
+                          const ageMs = Date.now() - matchDate.getTime();
+                          if (ageMs < 4 * 60 * 60 * 1000) return "live";
+                        }
+                        return m.matchStatus;
+                      })();
 
-            return { ...m, score1: newScore1, score2: newScore2, matchStatus: newStatus };
+            return {
+              ...m,
+              score1: newScore1,
+              score2: newScore2,
+              matchStatus: newStatus,
+            };
           }),
         );
-      } catch { /* backoff handled above */ }
-    }, []);
+      } catch {
+        /* backoff handled above */
+      }
+    },
+    [],
+  );
 
-  const hasDota2Matches = matches.some((m) => m.game === "Dota2" && m.matchStatus !== "finished");
-  const hasCs2Matches = matches.some((m) => m.game === "CS2" && m.matchStatus !== "finished");
+  const hasDota2Matches = matches.some(
+    (m) => m.game === "Dota2" && m.matchStatus !== "finished",
+  );
+  const hasCs2Matches = matches.some(
+    (m) => m.game === "CS2" && m.matchStatus !== "finished",
+  );
 
   // ── Filtering & sorting (memoized) ──
-  const { filteredMatches, sortedDateKeys, groupedByDate, displayedMatches, liveCount, upcomingCount, finishedCount, cs2DisplayedCount, dota2DisplayedCount, avgConfidence, tournamentOptions } = useMemo(() => {
+  const {
+    filteredMatches,
+    sortedDateKeys,
+    groupedByDate,
+    displayedMatches,
+    liveCount,
+    upcomingCount,
+    finishedCount,
+    cs2DisplayedCount,
+    dota2DisplayedCount,
+    avgConfidence,
+    tournamentOptions,
+  } = useMemo(() => {
     const todayKey = getTodayDateKey();
     const filtered = matches.filter((match) => {
       const matchDateKey = getDateKey(match.date);
@@ -372,30 +549,70 @@ export function useMatches() {
       if (filterGame === "CS2" && match.game !== "CS2") return false;
       if (filterGame === "Dota2" && match.game !== "Dota2") return false;
       if (filterDayOfWeek !== "all") {
-        const dayMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
-        if (dayMap[filterDayOfWeek] !== new Date(matchDateKey + "T12:00:00").getDay()) return false;
+        const dayMap: Record<string, number> = {
+          sun: 0,
+          mon: 1,
+          tue: 2,
+          wed: 3,
+          thu: 4,
+          fri: 5,
+          sat: 6,
+        };
+        if (
+          dayMap[filterDayOfWeek] !==
+          new Date(matchDateKey + "T12:00:00").getDay()
+        )
+          return false;
       }
       if (filterRisk === "safe" && match.risk > 30) return false;
-      if (filterRisk === "moderate" && (match.risk <= 30 || match.risk > 50)) return false;
+      if (filterRisk === "moderate" && (match.risk <= 30 || match.risk > 50))
+        return false;
       if (filterRisk === "high" && match.risk <= 50) return false;
-      if (filterMatchType !== "all" && match.matchType !== filterMatchType) return false;
-      if (filterTournament !== "all" && !match.context.includes(filterTournament)) return false;
-      if (filterStatus !== "all" && match.matchStatus !== filterStatus) return false;
-      if (searchQuery && !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) && !match.team2.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (filterMatchType !== "all" && match.matchType !== filterMatchType)
+        return false;
+      if (
+        filterTournament !== "all" &&
+        !match.context.includes(filterTournament)
+      )
+        return false;
+      if (filterStatus !== "all" && match.matchStatus !== filterStatus)
+        return false;
+      if (
+        searchQuery &&
+        !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !match.team2.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+        return false;
       return true;
     });
 
     const sorted = [...filtered].sort((a, b) => {
       let cmp = 0;
       switch (sortBy) {
-        case "date": cmp = new Date(a.date).getTime() - new Date(b.date).getTime(); break;
-        case "confidence": cmp = b.aiConfidence - a.aiConfidence; break;
-        case "risk": cmp = a.risk - b.risk; break;
-        case "upset": cmp = b.upsetProbability - a.upsetProbability; break;
-        case "odds": cmp = Math.max(a.odds.team1 || 0, a.odds.team2 || 0) - Math.max(b.odds.team1 || 0, b.odds.team2 || 0); break;
+        case "date":
+          cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        case "confidence":
+          cmp = b.aiConfidence - a.aiConfidence;
+          break;
+        case "risk":
+          cmp = a.risk - b.risk;
+          break;
+        case "upset":
+          cmp = b.upsetProbability - a.upsetProbability;
+          break;
+        case "odds":
+          cmp =
+            Math.max(a.odds.team1 || 0, a.odds.team2 || 0) -
+            Math.max(b.odds.team1 || 0, b.odds.team2 || 0);
+          break;
         case "status": {
-          const d = getStatusPriority(a.matchStatus) - getStatusPriority(b.matchStatus);
-          cmp = d !== 0 ? d : new Date(a.date).getTime() - new Date(b.date).getTime();
+          const d =
+            getStatusPriority(a.matchStatus) - getStatusPriority(b.matchStatus);
+          cmp =
+            d !== 0
+              ? d
+              : new Date(a.date).getTime() - new Date(b.date).getTime();
           break;
         }
       }
@@ -410,82 +627,336 @@ export function useMatches() {
     });
 
     const allKeys = Object.keys(grouped);
-    const futureKeys = allKeys.filter(k => k > todayKey).sort();
+    const futureKeys = allKeys.filter((k) => k > todayKey).sort();
     const dateKeys = [todayKey, ...futureKeys];
-    const displayed = dateKeys.flatMap(k => grouped[k] || []);
-    const confs = displayed.filter(m => m.aiConfidence > 0).map(m => m.aiConfidence);
-    const avg = confs.length > 0 ? Math.round(confs.reduce((s, c) => s + c, 0) / confs.length) : 0;
+    const displayed = dateKeys.flatMap((k) => grouped[k] || []);
+    const confs = displayed
+      .filter((m) => m.aiConfidence > 0)
+      .map((m) => m.aiConfidence);
+    const avg =
+      confs.length > 0
+        ? Math.round(confs.reduce((s, c) => s + c, 0) / confs.length)
+        : 0;
 
     return {
-      filteredMatches: filtered, sortedDateKeys: dateKeys, groupedByDate: grouped,
-      displayedMatches: displayed, liveCount: displayed.filter(m => m.matchStatus === "live").length,
-      upcomingCount: displayed.filter(m => m.matchStatus === "upcoming").length,
-      finishedCount: displayed.filter(m => m.matchStatus === "finished").length,
-      cs2DisplayedCount: displayed.filter(m => m.game === "CS2").length,
-      dota2DisplayedCount: displayed.filter(m => m.game === "Dota2").length,
+      filteredMatches: filtered,
+      sortedDateKeys: dateKeys,
+      groupedByDate: grouped,
+      displayedMatches: displayed,
+      liveCount: displayed.filter((m) => m.matchStatus === "live").length,
+      upcomingCount: displayed.filter((m) => m.matchStatus === "upcoming")
+        .length,
+      finishedCount: displayed.filter((m) => m.matchStatus === "finished")
+        .length,
+      cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
+      dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
       avgConfidence: avg,
-      tournamentOptions: [...new Set(displayed.map(m => m.context).filter(Boolean))].sort(),
+      tournamentOptions: [
+        ...new Set(displayed.map((m) => m.context).filter(Boolean)),
+      ].sort(),
     };
-  }, [matches, filterGame, filterDayOfWeek, filterRisk, filterTournament, filterMatchType, filterStatus, searchQuery, sortBy, sortOrder]);
+  }, [
+    matches,
+    filterGame,
+    filterDayOfWeek,
+    filterRisk,
+    filterTournament,
+    filterMatchType,
+    filterStatus,
+    searchQuery,
+    sortBy,
+    sortOrder,
+  ]);
 
   // ── AI handlers ──
   const handleAiRecommend = useCallback(async (match: Match) => {
-    setSelectedMatch(match); setAiModalOpen(true); setAiLoading(true); setAiRecommendation(null);
+    setSelectedMatch(match);
+    setAiModalOpen(true);
+    setAiLoading(true);
+    setAiRecommendation(null);
     try {
       const rec = await deepSeekService.recommendMatch({
-        team1: match.team1, team2: match.team2,
+        team1: match.team1,
+        team2: match.team2,
         odds: [match.odds.team1, match.odds.team2],
-        matchType: match.matchType, tier: match.tier || undefined,
+        matchType: match.matchType,
+        tier: match.tier || undefined,
       });
       setAiRecommendation(rec);
-      setAiPredictions(prev => ({ ...prev, [match.id]: rec }));
-    } catch { toast.error("AI тимчасово недоступний"); }
-    finally { setAiLoading(false); }
+      setAiPredictions((prev) => ({ ...prev, [match.id]: rec }));
+    } catch {
+      toast.error("AI тимчасово недоступний");
+    } finally {
+      setAiLoading(false);
+    }
   }, []);
 
   const handleShowComment = useCallback((match: Match) => {
-    setSelectedCommentMatch(match); setCommentModalOpen(true);
+    setSelectedCommentMatch(match);
+    setCommentModalOpen(true);
   }, []);
 
   const handleAddToRisky = useCallback((match: Match) => {
-    setSelectedRiskyMatch(match); setRiskyModalOpen(true);
+    setSelectedRiskyMatch(match);
+    setRiskyModalOpen(true);
   }, []);
 
+  // ── Rate match ──
+  const saveMatchRatings = (ratings: Record<string, MatchRating>) => {
+    try {
+      localStorage.setItem("match_ratings", JSON.stringify(ratings));
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleRateMatch = useCallback(
+    (matchId: string, rating: MatchRating) => {
+      setMatchRatings((prev) => {
+        const current = prev[matchId];
+        const newRating = current === rating ? null : rating;
+        const updated = { ...prev, [matchId]: newRating };
+        saveMatchRatings(updated);
+        return updated;
+      });
+      if (rating) {
+        UserDataService.upsertMatchRating(matchId, rating).catch(() => {});
+      } else {
+        UserDataService.deleteMatchRating(matchId).catch(() => {});
+      }
+    },
+    [],
+  );
+
+  // ── Navigate to bets ──
+  const navigate = useNavigate();
+  const handleAddToBets = useCallback(
+    (match: Match) => {
+      navigate("/app/my-bets", {
+        state: {
+          prefillMatch: {
+            team1: match.team1,
+            team2: match.team2,
+            tournament: match.context,
+            format: match.matchType,
+            date: match.date,
+            matchUrl: match.url || "",
+            logoTeam1: match.logoTeam1,
+            logoTeam2: match.logoTeam2,
+            game: match.game,
+          },
+        },
+      });
+    },
+    [navigate],
+  );
+
+  // ── Multi-select ──
+  const toggleMatchSelection = useCallback((matchId: string) => {
+    setSelectedMatchIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(matchId)) {
+        next.delete(matchId);
+      } else {
+        if (next.size >= 10) {
+          toast.error("⚠️ Максимум 10 матчів");
+          return prev;
+        }
+        next.add(matchId);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSelectedMatches = useCallback(
+    () => setSelectedMatchIds(new Set()),
+    [],
+  );
+
+  const handleCreateExpress = useCallback(() => {
+    const selected = matches.filter((m) => selectedMatchIds.has(m.id));
+    if (selected.length < 2) {
+      toast.error("⚠️ Мінімум 2 матчі");
+      return;
+    }
+    navigate("/app/my-bets", {
+      state: {
+        expressMatches: selected.map((m) => ({
+          team1: m.team1,
+          team2: m.team2,
+          tournament: m.context,
+          format: m.matchType,
+          date: m.date,
+          matchUrl: m.url || "",
+          logoTeam1: m.logoTeam1,
+          logoTeam2: m.logoTeam2,
+        })),
+      },
+    });
+  }, [matches, selectedMatchIds, navigate]);
+
+  // ── Risky teams ──
   const loadRiskyTeams = useCallback(async () => {
     try {
       const resp = await fetch("/api/v1/risky-teams");
       if (resp.ok) setRiskyTeams(await resp.json());
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
+
+  const getTeamRiskInfo = useCallback(
+    (teamName: string): { notes: string; status: string } | null => {
+      const team = riskyTeams.find(
+        (t) =>
+          t.name.toLowerCase() === teamName.toLowerCase() ||
+          teamName.toLowerCase().includes(t.name.toLowerCase()) ||
+          t.name.toLowerCase().includes(teamName.toLowerCase()),
+      );
+      return team ? { notes: team.notes, status: team.status } : null;
+    },
+    [riskyTeams],
+  );
+
+  const getMatchRiskComments = useCallback(
+    (team1: string, team2: string): string => {
+      const r1 = getTeamRiskInfo(team1),
+        r2 = getTeamRiskInfo(team2);
+      const cmts: string[] = [];
+      for (const [r, name] of [
+        [r1, team1],
+        [r2, team2],
+      ] as const) {
+        if (!r) continue;
+        const icon =
+          r.status === "БАН"
+            ? "🔴"
+            : r.status === "Нестабільні"
+              ? "🟠"
+              : r.status === "Обережно"
+                ? "🟡"
+                : "🔵";
+        cmts.push(`${icon} ${name}: ${r.notes || r.status}`);
+      }
+      return cmts.join("\n\n");
+    },
+    [getTeamRiskInfo],
+  );
+
+  const handleRiskySaved = useCallback(() => {
+    loadRiskyTeams();
+  }, [loadRiskyTeams]);
+
+  // ── Sort ──
+  const toggleSort = useCallback(
+    (column: SortBy) => {
+      if (sortBy === column) {
+        setSortOrder((so) => (so === "asc" ? "desc" : "asc"));
+      } else {
+        setSortBy(column);
+        setSortOrder(
+          column === "confidence" || column === "upset" ? "desc" : "asc",
+        );
+      }
+    },
+    [sortBy],
+  );
+
+  const getSortIcon = useCallback(
+    (column: SortBy): "asc" | "desc" | "none" => {
+      return sortBy === column ? sortOrder : "none";
+    },
+    [sortBy, sortOrder],
+  );
 
   return {
     // Data
-    matches, sortedDateKeys, groupedByDate, displayedMatches,
-    matchRatings, setMatchRatings, aiPredictions, riskyTeams,
+    matches,
+    sortedDateKeys,
+    groupedByDate,
+    displayedMatches,
+    matchRatings,
+    setMatchRatings,
+    aiPredictions,
+    riskyTeams,
     // Loading
-    isLoading, initialLoading, apiError,
+    isLoading,
+    initialLoading,
+    apiError,
     // Stats
-    displayCount: displayedMatches.length, liveCount, upcomingCount, finishedCount,
-    cs2DisplayedCount, dota2DisplayedCount, avgConfidence,
+    displayCount: displayedMatches.length,
+    liveCount,
+    upcomingCount,
+    finishedCount,
+    cs2DisplayedCount,
+    dota2DisplayedCount,
+    avgConfidence,
     // Filters
-    filterGame, setFilterGame, filterStatus, setFilterStatus,
-    filterMatchType, setFilterMatchType, filterDayOfWeek, setFilterDayOfWeek,
-    filterRisk, setFilterRisk, filterTournament, setFilterTournament,
-    searchQuery, setSearchQuery, hasActiveFilters, resetAllFilters,
-    sortBy, setSortBy, sortOrder, setSortOrder,
+    filterGame,
+    setFilterGame,
+    filterStatus,
+    setFilterStatus,
+    filterMatchType,
+    setFilterMatchType,
+    filterDayOfWeek,
+    setFilterDayOfWeek,
+    filterRisk,
+    setFilterRisk,
+    filterTournament,
+    setFilterTournament,
+    searchQuery,
+    setSearchQuery,
+    hasActiveFilters,
+    resetAllFilters,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
     tournamentOptions,
     // Columns
-    visibleColumns, toggleColumn,
+    visibleColumns,
+    toggleColumn,
     // Modals
-    pastDaysModalOpen, setPastDaysModalOpen,
-    aiModalOpen, setAiModalOpen, selectedMatch, aiRecommendation, aiLoading, handleAiRecommend,
-    commentModalOpen, setCommentModalOpen, selectedCommentMatch, handleShowComment,
-    riskyModalOpen, setRiskyModalOpen, selectedRiskyMatch, handleAddToRisky,
+    pastDaysModalOpen,
+    setPastDaysModalOpen,
+    aiModalOpen,
+    setAiModalOpen,
+    selectedMatch,
+    aiRecommendation,
+    aiLoading,
+    handleAiRecommend,
+    commentModalOpen,
+    setCommentModalOpen,
+    selectedCommentMatch,
+    handleShowComment,
+    riskyModalOpen,
+    setRiskyModalOpen,
+    selectedRiskyMatch,
+    handleAddToRisky,
     // Actions
-    refreshMatches, loadMatchesFromApi, loadRiskyTeams,
+    refreshMatches,
+    loadMatchesFromApi,
+    loadRiskyTeams,
     // Poll
-    pollLiveScores, hasDota2Matches, hasCs2Matches,
+    pollLiveScores,
+    hasDota2Matches,
+    hasCs2Matches,
     // Multi-select
-    selectedMatchIds, setSelectedMatchIds,
+    selectedMatchIds,
+    setSelectedMatchIds,
+    toggleMatchSelection,
+    clearSelectedMatches,
+    handleCreateExpress,
+    // Bets nav
+    handleAddToBets,
+    // Rate
+    handleRateMatch,
+    // Risk comments
+    getMatchRiskComments,
+    getTeamRiskInfo,
+    handleRiskySaved,
+    // Sort
+    toggleSort,
+    getSortIcon,
   };
 }

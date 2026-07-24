@@ -1,9 +1,25 @@
-import { CalendarDays, RefreshCw, Search, Loader2, X, ChevronDown } from "lucide-react";
+import {
+  CalendarDays,
+  RefreshCw,
+  Search,
+  Loader2,
+  X,
+  ChevronDown,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { COLUMN_DEFS, type FilterStatus, type FilterMatchType, type FilterDay } from "@/hooks/useMatches";
+import {
+  COLUMN_DEFS,
+  type FilterStatus,
+  type FilterMatchType,
+  type FilterDay,
+} from "@/hooks/useMatches";
 
 interface MatchFilterBarProps {
   isLoading: boolean;
@@ -27,16 +43,35 @@ interface MatchFilterBarProps {
 }
 
 const DAY_LABELS: Record<string, string> = {
-  all: "Всі дні", mon: "Понеділок", tue: "Вівторок", wed: "Середа",
-  thu: "Четвер", fri: "П'ятниця", sat: "Субота", sun: "Неділя",
+  all: "Всі дні",
+  mon: "Понеділок",
+  tue: "Вівторок",
+  wed: "Середа",
+  thu: "Четвер",
+  fri: "П'ятниця",
+  sat: "Субота",
+  sun: "Неділя",
 };
 
 export default function MatchFilterBar({
-  isLoading, searchQuery, onSearchChange,
-  filterStatus, onStatusChange, filterMatchType, onMatchTypeChange,
-  filterTournament, tournamentOptions, onTournamentChange,
-  filterDayOfWeek, onDayChange, visibleColumns, onToggleColumn,
-  hasActiveFilters, onReset, onRefresh, onPastDaysOpen,
+  isLoading,
+  searchQuery,
+  onSearchChange,
+  filterStatus,
+  onStatusChange,
+  filterMatchType,
+  onMatchTypeChange,
+  filterTournament,
+  tournamentOptions,
+  onTournamentChange,
+  filterDayOfWeek,
+  onDayChange,
+  visibleColumns,
+  onToggleColumn,
+  hasActiveFilters,
+  onReset,
+  onRefresh,
+  onPastDaysOpen,
 }: MatchFilterBarProps) {
   return (
     <div className="flex justify-center">
@@ -47,7 +82,11 @@ export default function MatchFilterBar({
           disabled={isLoading}
           className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
         >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <RefreshCw className="h-4 w-4" strokeWidth={2} />}
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+          ) : (
+            <RefreshCw className="h-4 w-4" strokeWidth={2} />
+          )}
           Оновити
         </button>
 
@@ -62,7 +101,10 @@ export default function MatchFilterBar({
 
         {/* Search */}
         <div className="relative min-w-[140px]">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" strokeWidth={1.5} />
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+            strokeWidth={1.5}
+          />
           <Input
             placeholder="Пошук..."
             value={searchQuery}
@@ -74,15 +116,40 @@ export default function MatchFilterBar({
         {/* Status */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterStatus !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}>
-              {filterStatus === "all" ? "Статус" : filterStatus === "live" ? "🔴 LIVE" : filterStatus === "upcoming" ? "Очікуються" : "Завершені"}
+            <button
+              className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterStatus !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}
+            >
+              {filterStatus === "all"
+                ? "Статус"
+                : filterStatus === "live"
+                  ? "🔴 LIVE"
+                  : filterStatus === "upcoming"
+                    ? "Очікуються"
+                    : filterStatus === "finished"
+                      ? "Завершені"
+                      : filterStatus === "postponed"
+                        ? "⏸️ Перенесені"
+                        : "❌ Скасовані"}
               <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="rounded-xl p-1">
-            {(["all", "live", "upcoming", "finished"] as const).map(s => (
-              <DropdownMenuItem key={s} onClick={() => onStatusChange(s)} className="rounded-lg">
-                {s === "all" ? "Всі статуси" : s === "live" ? "🔴 LIVE" : s === "upcoming" ? "🕐 Очікуються" : "✅ Завершені"}
+            {(
+              [
+                ["all", "Всі статуси"],
+                ["live", "🔴 LIVE"],
+                ["upcoming", "🕐 Очікуються"],
+                ["finished", "✅ Завершені"],
+                ["postponed", "⏸️ Перенесені"],
+                ["cancelled", "❌ Скасовані"],
+              ] as const
+            ).map(([k, v]) => (
+              <DropdownMenuItem
+                key={k}
+                onClick={() => onStatusChange(k as FilterStatus)}
+                className="rounded-lg"
+              >
+                {v}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -91,14 +158,20 @@ export default function MatchFilterBar({
         {/* Format */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterMatchType !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}>
+            <button
+              className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterMatchType !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}
+            >
               {filterMatchType === "all" ? "Формат" : filterMatchType}
               <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="rounded-xl p-1">
-            {(["all", "Bo1", "Bo2", "Bo3", "Bo5"] as const).map(f => (
-              <DropdownMenuItem key={f} onClick={() => onMatchTypeChange(f)} className="rounded-lg">
+            {(["all", "Bo1", "Bo2", "Bo3", "Bo5"] as const).map((f) => (
+              <DropdownMenuItem
+                key={f}
+                onClick={() => onMatchTypeChange(f)}
+                className="rounded-lg"
+              >
                 {f === "all" ? "Всі формати" : f}
               </DropdownMenuItem>
             ))}
@@ -108,15 +181,35 @@ export default function MatchFilterBar({
         {/* Tournament */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterTournament !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}>
-              {filterTournament === "all" ? "Турнір" : filterTournament.length > 15 ? filterTournament.slice(0, 15) + "…" : filterTournament}
+            <button
+              className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterTournament !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}
+            >
+              {filterTournament === "all"
+                ? "Турнір"
+                : filterTournament.length > 15
+                  ? filterTournament.slice(0, 15) + "…"
+                  : filterTournament}
               <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="rounded-xl p-1 max-h-64 overflow-y-auto">
-            <DropdownMenuItem onClick={() => onTournamentChange("all")} className="rounded-lg">Всі турніри</DropdownMenuItem>
-            {tournamentOptions.map(t => (
-              <DropdownMenuItem key={t} onClick={() => onTournamentChange(t)} className="rounded-lg text-sm">{t}</DropdownMenuItem>
+          <DropdownMenuContent
+            align="start"
+            className="rounded-xl p-1 max-h-64 overflow-y-auto"
+          >
+            <DropdownMenuItem
+              onClick={() => onTournamentChange("all")}
+              className="rounded-lg"
+            >
+              Всі турніри
+            </DropdownMenuItem>
+            {tournamentOptions.map((t) => (
+              <DropdownMenuItem
+                key={t}
+                onClick={() => onTournamentChange(t)}
+                className="rounded-lg text-sm"
+              >
+                {t}
+              </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -124,14 +217,22 @@ export default function MatchFilterBar({
         {/* Day */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterDayOfWeek !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}>
+            <button
+              className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${filterDayOfWeek !== "all" ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent" : "bg-transparent text-gray-900 font-light border border-stone-200"}`}
+            >
               {DAY_LABELS[filterDayOfWeek]}
               <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="rounded-xl p-1">
             {Object.entries(DAY_LABELS).map(([k, v]) => (
-              <DropdownMenuItem key={k} onClick={() => onDayChange(k as FilterDay)} className="rounded-lg">{v}</DropdownMenuItem>
+              <DropdownMenuItem
+                key={k}
+                onClick={() => onDayChange(k as FilterDay)}
+                className="rounded-lg"
+              >
+                {v}
+              </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -144,8 +245,11 @@ export default function MatchFilterBar({
               <ChevronDown className="h-4 w-4 opacity-50" strokeWidth={1.5} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="rounded-xl p-1 min-w-[200px]">
-            {COLUMN_DEFS.map(col => (
+          <DropdownMenuContent
+            align="start"
+            className="rounded-xl p-1 min-w-[200px]"
+          >
+            {COLUMN_DEFS.map((col) => (
               <DropdownMenuCheckboxItem
                 key={col.id}
                 checked={visibleColumns.has(col.id)}

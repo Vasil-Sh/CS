@@ -18,6 +18,8 @@ import {
   Clock,
   CheckCircle2,
   Radio,
+  Ban,
+  CalendarX2,
   Brain,
   Flame,
   Shield,
@@ -26,41 +28,10 @@ import {
   Info,
   Star,
   Trophy,
+  X,
 } from "lucide-react";
 
-type FormStability =
-  | "hot_streak"
-  | "stable"
-  | "momentum"
-  | "falling"
-  | "slump"
-  | "inconsistent";
-type MatchRating = "like" | "dislike" | null;
-
-interface Match {
-  id: string;
-  date: string;
-  team1: string;
-  team2: string;
-  favorite: string;
-  aiConfidence: number;
-  risk: number;
-  matchType: "Bo1" | "Bo2" | "Bo3" | "Bo5";
-  game?: "CS2" | "Dota2";
-  tier: "tier1" | "tier2" | "tier3" | null;
-  formStability: FormStability;
-  context?: string;
-  matchStatus?: "upcoming" | "live" | "finished";
-  score1?: number;
-  score2?: number;
-  predictionPercentTeam1?: number | null;
-  predictionPercentTeam2?: number | null;
-  bettingCoefficientTeam1?: number | null;
-  bettingCoefficientTeam2?: number | null;
-  logoTeam1?: string | null;
-  logoTeam2?: string | null;
-  stars?: number;
-}
+import type { Match, FormStability, MatchRating } from "@/hooks/useMatches";
 
 interface AIRecommendation {
   prediction?: string;
@@ -214,7 +185,9 @@ const PredictionBar = ({
 };
 
 /** Compact status badge for inside the match column (left sidebar) */
-function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
+function getMatchStatusBadgeCompact(
+  status?: "upcoming" | "live" | "finished" | "postponed" | "cancelled",
+) {
   switch (status) {
     case "live":
       return (
@@ -241,6 +214,34 @@ function getMatchStatusBadgeCompact(status?: "upcoming" | "live" | "finished") {
           </TooltipTrigger>
           <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
             <p className="text-xs">Завершено</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    case "postponed":
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 leading-none bg-amber-50 rounded px-1.5 py-0.5 cursor-default">
+              <Clock className="h-3 w-3" strokeWidth={2} />
+              ПЕРЕН
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+            <p className="text-xs">Перенесено</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    case "cancelled":
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-600 leading-none bg-red-50 rounded px-1.5 py-0.5 cursor-default">
+              <X className="h-3 w-3" strokeWidth={2} />
+              ОТМЕН
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+            <p className="text-xs">Скасовано</p>
           </TooltipContent>
         </Tooltip>
       );
