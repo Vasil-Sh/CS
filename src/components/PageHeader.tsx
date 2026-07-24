@@ -1,6 +1,6 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Sun, Moon, MoreHorizontal } from "lucide-react";
+import { User, Sun, Moon, MoreHorizontal, Filter } from "lucide-react";
 import CurrencySwitch from "@/components/CurrencySwitch";
 
 export interface PageHeaderProps {
@@ -54,6 +54,22 @@ export function PageHeader({
   onGameFilterChange,
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filterOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node))
+        setFilterOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [filterOpen]);
+
+  const hasFilters =
+    (showCurrencySwitch && currencyMode && onCurrencyChange) ||
+    (gameFilter && onGameFilterChange);
 
   return (
     <div className="px-6 lg:px-8 pt-6 pb-2">
@@ -118,44 +134,71 @@ export function PageHeader({
             </div>
           )}
 
-          {/* Currency switch — conditional (UAH / USDT) */}
-          {showCurrencySwitch && currencyMode && onCurrencyChange && (
-            <CurrencySwitch
-              currency={currencyMode}
-              onChange={onCurrencyChange}
-              hasUsdBets={hasUsdBets}
-            />
-          )}
+          {/* Filter icon + dropdown */}
+          {hasFilters && (
+            <div className="relative" ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
+                  filterOpen ? "bg-black/10" : "hover:bg-black/5"
+                }`}
+                title="Фільтри"
+              >
+                <Filter className="h-5 w-5 text-gray-500" strokeWidth={1.5} />
+              </button>
 
-          {gameFilter && onGameFilterChange && (
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-              {(["all", "CS2", "Dota2"] as const).map((g) => (
-                <button
-                  key={g}
-                  onClick={() => onGameFilterChange(g)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                    gameFilter === g
-                      ? g === "CS2"
-                        ? "bg-amber-600 text-white shadow-sm"
-                        : g === "Dota2"
-                          ? "bg-purple-600 text-white shadow-sm"
-                          : "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {g === "all" ? "Всі" : g}
-                </button>
-              ))}
+              {filterOpen && (
+                <div className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-200 p-3 z-50 min-w-[200px]">
+                  {showCurrencySwitch && currencyMode && onCurrencyChange && (
+                    <div className="mb-3">
+                      <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1.5 px-1">
+                        Валюта
+                      </div>
+                      <CurrencySwitch
+                        currency={currencyMode}
+                        onChange={onCurrencyChange}
+                        hasUsdBets={hasUsdBets}
+                      />
+                    </div>
+                  )}
+
+                  {gameFilter && onGameFilterChange && (
+                    <div>
+                      <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1.5 px-1">
+                        Гра
+                      </div>
+                      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                        {(["all", "CS2", "Dota2"] as const).map((g) => (
+                          <button
+                            key={g}
+                            onClick={() => {
+                              onGameFilterChange(g);
+                              setFilterOpen(false);
+                            }}
+                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                              gameFilter === g
+                                ? g === "CS2"
+                                  ? "bg-amber-600 text-white shadow-sm"
+                                  : g === "Dota2"
+                                    ? "bg-purple-600 text-white shadow-sm"
+                                    : "bg-white text-gray-900 shadow-sm"
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
+                          >
+                            {g === "all" ? "Всі" : g}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {(showCurrencySwitch || gameFilter) && (
-            <div className="w-px h-8 bg-gray-300" />
-          )}
+          {hasFilters && <div className="w-px h-8 bg-gray-300" />}
 
-          {!showCurrencySwitch && !gameFilter && (
-            <div className="w-px h-8 bg-gray-300" />
-          )}
+          {!hasFilters && <div className="w-px h-8 bg-gray-300" />}
 
           {/* User info — clickable to Profile */}
           <button
