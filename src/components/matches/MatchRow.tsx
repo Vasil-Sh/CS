@@ -17,16 +17,12 @@ import {
   PlusCircle,
   Clock,
   CheckCircle2,
-  Radio,
-  Ban,
-  CalendarX2,
   Brain,
   Flame,
   Shield,
   Layers,
   CircleCheck,
   Info,
-  Star,
   Trophy,
   X,
 } from "lucide-react";
@@ -40,7 +36,6 @@ interface AIRecommendation {
 
 interface Props {
   match: Match;
-  matchRatings: Record<string, MatchRating>;
   aiPredictions: Record<string, AIRecommendation>;
   isSelected: boolean;
   currentRating: MatchRating;
@@ -310,34 +305,6 @@ const getFormInfo = (form: FormStability) => {
   return map[form];
 };
 
-const getMatchStatusBadge = (status?: "upcoming" | "live" | "finished") => {
-  switch (status) {
-    case "live":
-      return (
-        <Badge className="bg-red-500/10 text-red-600 border-red-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5 animate-pulse">
-          <Radio className="h-3.5 w-3.5" strokeWidth={2} />
-          LIVE
-        </Badge>
-      );
-    case "finished":
-      return (
-        <Badge className="bg-gray-100 text-gray-600 border-gray-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5">
-          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-          Завершено
-        </Badge>
-      );
-    case "upcoming":
-      return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-lg px-2.5 py-1 text-sm font-medium inline-flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5" strokeWidth={2} />
-          Очікується
-        </Badge>
-      );
-    default:
-      return null;
-  }
-};
-
 function formatTime(dateStr: string) {
   try {
     const d = new Date(dateStr);
@@ -356,7 +323,6 @@ function formatCoeff(c?: number | null) {
 
 export default function MatchRow({
   match,
-  matchRatings,
   aiPredictions,
   isSelected,
   currentRating,

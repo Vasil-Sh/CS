@@ -1,6 +1,7 @@
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   Calendar,
   Trophy,
@@ -154,7 +155,6 @@ export default function Matches() {
     <MatchRow
       key={match.id}
       match={match}
-      matchRatings={m.matchRatings}
       aiPredictions={m.aiPredictions}
       isSelected={m.selectedMatchIds.has(match.id)}
       currentRating={m.matchRatings[match.id] || null}
@@ -217,123 +217,110 @@ export default function Matches() {
           {m.initialLoading ? (
             <MatchesSkeleton />
           ) : (
-            Object.keys(m.groupedByDate)
-              .sort()
-              .filter((dk) => {
-                if (m.filterDayOfWeek === "all") return true;
-                const dayMap: Record<string, number> = {
-                  sun: 0,
-                  mon: 1,
-                  tue: 2,
-                  wed: 3,
-                  thu: 4,
-                  fri: 5,
-                  sat: 6,
-                };
-                return (
-                  new Date(dk + "T12:00:00").getDay() ===
-                  dayMap[m.filterDayOfWeek]
-                );
-              })
-              .filter((dk) => (m.groupedByDate[dk]?.length || 0) > 0)
-              .map((dateKey, idx) => {
-                const dateMatches = m.groupedByDate[dateKey];
-                const hasLive = dateMatches.some(
-                  (mt) => mt.matchStatus === "live",
-                );
-                return (
-                  <BlurFade key={dateKey} delay={idx * 0.1} inView>
-                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                      {hasLive && (
-                        <BorderBeam
-                          size={200}
-                          duration={4}
-                          colorFrom="#EF4444"
-                          colorTo="#F59E0B"
-                          borderWidth={2}
-                          className="rounded-[32px]"
-                        />
-                      )}
-                      <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-x-auto">
-                        <CardHeader className="bg-white rounded-t-[24px] border-b border-gray-200 px-6 py-5">
-                          <CardTitle>
-                            <div className="flex items-center gap-4 flex-wrap">
-                              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-                                <Calendar
-                                  className="h-5 w-5 text-primary"
-                                  strokeWidth={2}
-                                />
+            <ErrorBoundary>
+              {m.sortedDateKeys
+                .filter((dk) => (m.groupedByDate[dk]?.length || 0) > 0)
+                .map((dateKey, idx) => {
+                  const dateMatches = m.groupedByDate[dateKey];
+                  const hasLive = dateMatches.some(
+                    (mt) => mt.matchStatus === "live",
+                  );
+                  return (
+                    <BlurFade key={dateKey} delay={idx * 0.1} inView>
+                      <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                        {hasLive && (
+                          <BorderBeam
+                            size={200}
+                            duration={4}
+                            colorFrom="#EF4444"
+                            colorTo="#F59E0B"
+                            borderWidth={2}
+                            className="rounded-[32px]"
+                          />
+                        )}
+                        <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-x-auto">
+                          <CardHeader className="bg-white rounded-t-[24px] border-b border-gray-200 px-6 py-5">
+                            <CardTitle>
+                              <div className="flex items-center gap-4 flex-wrap">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
+                                  <Calendar
+                                    className="h-5 w-5 text-primary"
+                                    strokeWidth={2}
+                                  />
+                                </div>
+                                <span className="text-2xl font-bold text-gray-900 tracking-tight">
+                                  {formatFullDateTitle(dateKey, m.filterGame)}
+                                </span>
+                                <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
+                                  {dateMatches.length}
+                                </Badge>
+                                <div className="flex items-center gap-1 ml-auto">
+                                  {(["all", "CS2", "Dota2"] as const).map(
+                                    (g) => (
+                                      <button
+                                        key={g}
+                                        onClick={() => m.setFilterGame(g)}
+                                        className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                          m.filterGame === g
+                                            ? g === "CS2"
+                                              ? "bg-amber-600 text-white shadow-md"
+                                              : g === "Dota2"
+                                                ? "bg-[#7C3AED] text-white shadow-md"
+                                                : "bg-gray-900 text-white shadow-md"
+                                            : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
+                                        }`}
+                                      >
+                                        {g === "all" ? "Всі" : g}
+                                      </button>
+                                    ),
+                                  )}
+                                </div>
                               </div>
-                              <span className="text-2xl font-bold text-gray-900 tracking-tight">
-                                {formatFullDateTitle(dateKey, m.filterGame)}
-                              </span>
-                              <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
-                                {dateMatches.length}
-                              </Badge>
-                              <div className="flex items-center gap-1 ml-auto">
-                                {(["all", "CS2", "Dota2"] as const).map((g) => (
-                                  <button
-                                    key={g}
-                                    onClick={() => m.setFilterGame(g)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                      m.filterGame === g
-                                        ? g === "CS2"
-                                          ? "bg-amber-600 text-white shadow-md"
-                                          : g === "Dota2"
-                                            ? "bg-[#7C3AED] text-white shadow-md"
-                                            : "bg-gray-900 text-white shadow-md"
-                                        : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
-                                    }`}
-                                  >
-                                    {g === "all" ? "Всі" : g}
-                                  </button>
-                                ))}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-0 rounded-b-[24px]">
+                            {dateMatches.length > 0 ? (
+                              <div>
+                                <table className="w-full border-collapse">
+                                  {renderTableHeader()}
+                                  <tbody>{dateMatches.map(renderRow)}</tbody>
+                                </table>
                               </div>
-                            </div>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0 rounded-b-[24px]">
-                          {dateMatches.length > 0 ? (
-                            <div>
-                              <table className="w-full border-collapse">
-                                {renderTableHeader()}
-                                <tbody>{dateMatches.map(renderRow)}</tbody>
-                              </table>
-                            </div>
-                          ) : (
-                            <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
-                              <div className="p-5 bg-gray-100 rounded-2xl">
-                                <Trophy
-                                  className="h-10 w-10 text-gray-400"
-                                  strokeWidth={1.5}
-                                />
+                            ) : (
+                              <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
+                                <div className="p-5 bg-gray-100 rounded-2xl">
+                                  <Trophy
+                                    className="h-10 w-10 text-gray-400"
+                                    strokeWidth={1.5}
+                                  />
+                                </div>
+                                <p className="text-lg font-bold text-gray-500">
+                                  Немає матчів
+                                </p>
+                                <p className="text-sm">
+                                  Спробуйте обрати інший фільтр гри або
+                                  натисніть «Оновити»
+                                </p>
+                                <button
+                                  onClick={m.refreshMatches}
+                                  disabled={m.isLoading}
+                                  className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                                >
+                                  <RefreshCw
+                                    className="h-4 w-4"
+                                    strokeWidth={1.5}
+                                  />{" "}
+                                  Оновити
+                                </button>
                               </div>
-                              <p className="text-lg font-bold text-gray-500">
-                                Немає матчів
-                              </p>
-                              <p className="text-sm">
-                                Спробуйте обрати інший фільтр гри або натисніть
-                                «Оновити»
-                              </p>
-                              <button
-                                onClick={m.refreshMatches}
-                                disabled={m.isLoading}
-                                className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                              >
-                                <RefreshCw
-                                  className="h-4 w-4"
-                                  strokeWidth={1.5}
-                                />{" "}
-                                Оновити
-                              </button>
-                            </div>
-                          )}
-                        </CardContent>
+                            )}
+                          </CardContent>
+                        </div>
                       </div>
-                    </div>
-                  </BlurFade>
-                );
-              })
+                    </BlurFade>
+                  );
+                })}
+            </ErrorBoundary>
           )}
 
           <AIRecommendationModal

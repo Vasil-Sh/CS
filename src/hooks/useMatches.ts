@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { UserDataService } from "@/lib/userDataService";
 import { toast } from "sonner";
 import {
@@ -270,7 +269,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     context: m.tournament
       ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
       : parseDota2MatchContext(m),
-    tier: "tier2",
+    tier: determineDota2Tier(m.positionTeam1, m.positionTeam2),
     matchType: parseDota2MatchType(m.type),
     upsetProbability: hasPrediction
       ? Math.max(
@@ -296,6 +295,18 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
   };
 }
 
+// ── Dota 2 tier helper ──
+function determineDota2Tier(
+  pos1?: number | null,
+  pos2?: number | null,
+): "tier1" | "tier2" | "tier3" | null {
+  if (pos1 == null || pos2 == null) return null;
+  const minPos = Math.min(pos1, pos2);
+  if (minPos <= 20) return "tier1";
+  if (minPos <= 50) return "tier2";
+  return "tier3";
+}
+
 // ── Main Hook ──
 export function useMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -314,6 +325,8 @@ export function useMatches() {
   const [visibleColumns, setVisibleColumns] =
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [aiRecommendation, setAiRecommendation] =
@@ -533,6 +546,17 @@ export function useMatches() {
     (m) => m.game === "CS2" && m.matchStatus !== "finished",
   );
 
+  // ── Poll live scores periodically ──
+  useEffect(() => {
+    const dota2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/dota2-live-scores`;
+    const cs2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/cs2-live-scores`;
+    const interval = setInterval(() => {
+      if (hasDota2Matches) pollLiveScores("Dota2", "dota2Slug", dota2Endpoint);
+      if (hasCs2Matches) pollLiveScores("CS2", "cs2Slug", cs2Endpoint);
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [hasDota2Matches, hasCs2Matches, pollLiveScores]);
+
   // ── Filtering & sorting (memoized) ──
   const {
     filteredMatches,
@@ -584,8 +608,10 @@ export function useMatches() {
         return false;
       if (
         searchQuery &&
-        !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !match.team2.toLowerCase().includes(searchQuery.toLowerCase())
+        !match.team1
+          .toLowerCase()
+          .includes(debouncedSearchQuery.toLowerCase()) &&
+        !match.team2.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
       )
         return false;
       return true;
@@ -668,10 +694,20 @@ export function useMatches() {
     filterTournament,
     filterMatchType,
     filterStatus,
-    searchQuery,
+    debouncedSearchQuery,
     sortBy,
     sortOrder,
   ]);
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchQuery]);
 
   // ── AI handlers ──
   const handleAiRecommend = useCallback(async (match: Match) => {
