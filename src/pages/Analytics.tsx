@@ -16,10 +16,7 @@ import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
 import { useTheme } from "@/hooks/useTheme";
-import {
-  CARD_BASE_STYLE,
-  CARD_HOVER_STYLE,
-} from "@/lib/cardStyles";
+import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
@@ -84,26 +81,6 @@ export default function Analytics() {
   });
 
   const [bets, setBets] = useState<Bet[]>([]);
-
-  // ── Currency breakdown ──
-  const profitByCurrency = useMemo(() => {
-    const completed = bets.filter(
-      (b) => b.result === "Win" || b.result === "Loss",
-    );
-    let profitUAH = 0;
-    let profitUSD = 0;
-    for (const b of completed) {
-      const profit = b.profit || 0;
-      if (b.currency === "USD" && b.exchangeRate) {
-        profitUSD += profit / Number(b.exchangeRate);
-      } else {
-        profitUAH += profit;
-      }
-    }
-    return { profitUAH, profitUSD };
-  }, [bets]);
-
-  // exchangeRate moved after currencyMode
 
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("all");
@@ -189,16 +166,7 @@ export default function Analytics() {
   }, [bets, currentUser]);
 
   const updateBankrollStats = useCallback(async () => {
-    try {
-      const apiStats = await BankrollService.fetchBankroll();
-      if (apiStats.initialBank > 0) {
-        BankrollService.syncFromAPI(currentUser, apiStats);
-      }
-    } catch (err) {
-      if (import.meta.env.DEV)
-        console.warn("[Analytics] Bankroll update failed:", err);
-    }
-    // Use refs + localStorage fallback to always have bets available
+    // Always recalc from localStorage first (fast, no network dependency)
     const betsForBankroll =
       betsRef.current.length > 0
         ? betsRef.current
@@ -210,7 +178,14 @@ export default function Analytics() {
     setDualBank(
       BankrollService.getBankrollStatsDual(userRef.current, betsForBankroll),
     );
-  }, [currentUser]);
+    // Fire-and-forget API sync (best-effort, non-blocking)
+    BankrollService.fetchBankroll()
+      .then((apiStats) => {
+        if (apiStats.initialBank > 0)
+          BankrollService.syncFromAPI(userRef.current, apiStats);
+      })
+      .catch(() => {});
+  }, []);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
@@ -309,42 +284,30 @@ export default function Analytics() {
     // Bankroll is computed by useEffect([bets, currentUser]) below — don't race here
   }, [currentUser, loadAnalyticsData]);
 
-  // Refresh bankroll when user switches back to this tab (single listener, uses refs)
+  // Refresh bankroll when user switches back to this tab (debounced, uses refs)
   useEffect(() => {
+    let lastRun = 0;
     const handleVisibility = async () => {
-      if (document.visibilityState === "visible") {
-        try {
-          const apiStats = await BankrollService.fetchBankroll();
-          if (apiStats.initialBank > 0) {
-            BankrollService.syncFromAPI(userRef.current, apiStats);
-          }
-        } catch (err) {
-          if (import.meta.env.DEV)
-            console.warn(
-              "[Analytics] Visibility bankroll refresh failed:",
-              err,
+      if (document.visibilityState !== "visible") return;
+      const now = Date.now();
+      if (now - lastRun < 3000) return; // debounce 3s
+      lastRun = now;
+      const betsForBankroll =
+        betsRef.current.length > 0
+          ? betsRef.current
+          : UserDataService.getUserData<Bet[]>(
+              userRef.current,
+              "mybets_data",
+              [],
             );
-        }
-        const betsForBankroll =
-          betsRef.current.length > 0
-            ? betsRef.current
-            : UserDataService.getUserData<Bet[]>(
-                userRef.current,
-                "mybets_data",
-                [],
-              );
-        setDualBank(
-          BankrollService.getBankrollStatsDual(
-            userRef.current,
-            betsForBankroll,
-          ),
-        );
-      }
+      setDualBank(
+        BankrollService.getBankrollStatsDual(userRef.current, betsForBankroll),
+      );
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibility);
-  }, []); // refs keep it fresh — no deps needed
+  }, []);
 
   const clearAllData = useCallback(async () => {
     if (
@@ -623,13 +586,19 @@ export default function Analytics() {
   }, [completedBets]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
-    // Use initial bank as starting balance so chart shows actual bankroll, not just cumulative profit
-    const initialBank = dualBank.uah.initialBank || 0;
+    // Support both UAH and USD — pick correct initial bank
+    const initialBank =
+      currencyMode === "USD"
+        ? dualBank.usd.initialBank || 0
+        : dualBank.uah.initialBank || 0;
 
-    const sortedBets = [...completedBets].sort(
-      (a: Bet, b: Bet) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
+    // Use displayBets so profit values match the selected currency mode
+    const sortedBets = [...displayBets]
+      .filter((b: Bet) => b.result !== "Pending")
+      .sort(
+        (a: Bet, b: Bet) =>
+          new Date(a.date).getTime() - new Date(b.date).getTime(),
+      );
 
     if (sortedBets.length === 0) {
       // No bets yet — show just the starting point
@@ -679,30 +648,41 @@ export default function Analytics() {
     }
 
     return balanceData;
-  }, [completedBets, dualBank.uah.initialBank]);
+  }, [
+    displayBets,
+    dualBank.uah.initialBank,
+    dualBank.usd.initialBank,
+    currencyMode,
+  ]);
 
   const scatterData = useMemo((): ScatterData[] => {
-    return completedBets.map((bet: Bet) => ({
-      odds: Math.round(Number(bet.odds) * 100) / 100,
-      profit: Math.round(Number(bet.profit) * 100) / 100,
-      result: bet.result,
-      betType: bet.betType || "Winner",
-      match: bet.match || "",
-      fill: bet.result === "Win" ? "#10b981" : "#ef4444",
-    }));
-  }, [completedBets]);
+    return gameFilteredBets
+      .filter((b: Bet) => b.result !== "Pending")
+      .map((bet: Bet) => ({
+        odds: Math.round(Number(bet.odds) * 100) / 100,
+        profit: Math.round(Number(bet.profit) * 100) / 100,
+        result: bet.result,
+        betType: bet.betType || "Winner",
+        match: bet.match || "",
+        fill: bet.result === "Win" ? "#10b981" : "#ef4444",
+      }));
+  }, [gameFilteredBets]);
 
   const oddsData = oddsAnalysis;
 
-  const oddsChartData = useMemo(() => oddsData.map((range) => ({
-    range: range.range.replace(/\s*\(.*?\)\s*/g, ""),
-    winRate: parseFloat(range.winRate),
-    roi:
-      range.count > 0
-        ? Math.round((range.profit / (range.count * 100)) * 100)
-        : 0,
-    bets: range.count,
-  })), [oddsData]);
+  const oddsChartData = useMemo(
+    () =>
+      oddsData.map((range) => ({
+        range: range.range.replace(/\s*\(.*?\)\s*/g, ""),
+        winRate: parseFloat(range.winRate),
+        roi:
+          range.count > 0
+            ? Math.round((range.profit / (range.count * 100)) * 100)
+            : 0,
+        bets: range.count,
+      })),
+    [oddsData],
+  );
 
   const tabs = [
     { id: "profit", label: "Прибуток", icon: Wallet },
@@ -745,9 +725,7 @@ export default function Analytics() {
           {/* Main Content */}
           <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
             {gameFilteredBets.length === 0 && (
-              <Card
-                className="rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
-              >
+              <Card className="rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
                 <CardContent className="py-5 px-6 flex items-center gap-4">
                   <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
                     <AlertTriangle
@@ -774,36 +752,71 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
+                  onMouseEnter={(e) =>
+                    Object.assign(e.currentTarget.style, cardHoverStyle)
+                  }
+                  onMouseLeave={(e) =>
+                    Object.assign(e.currentTarget.style, cardBaseStyle)
+                  }
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50 shrink-0">
-                      <Percent className="h-5 w-5 text-emerald-500" strokeWidth={1.5} />
+                      <Percent
+                        className="h-5 w-5 text-emerald-500"
+                        strokeWidth={1.5}
+                      />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">ROI</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      ROI
+                    </span>
                   </div>
                   <div className="flex items-center gap-4 mb-3">
                     <AnimatedCircularProgressBar
-                      max={100} min={0}
+                      max={100}
+                      min={0}
                       value={Math.abs(roi) >= 100 ? 98 : Math.abs(roi)}
                       gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
                       gaugeSecondaryColor="#E5E7EB"
                       className="!w-20 !h-20 shrink-0"
                     />
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className={`text-lg font-bold leading-tight ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>{roi >= 0 ? "+" : ""}{roi}%</span>
-                      <span className="text-[11px] text-gray-400">прибуток / вкладено</span>
+                      <span
+                        className={`text-lg font-bold leading-tight ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                      >
+                        {roi >= 0 ? "+" : ""}
+                        {roi}%
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        прибуток / вкладено
+                      </span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Вкладено</div>
-                      <div className="text-base font-bold text-gray-900"><NumberTicker value={Math.round(totalStaked)} /> ₴</div>
+                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
+                        Вкладено
+                      </div>
+                      <div className="text-base font-bold text-gray-900">
+                        <NumberTicker value={Math.round(totalStaked)} /> ₴
+                      </div>
                     </div>
-                    <div className={`rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-                      <div className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
-                      <div className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}>{filteredStats.totalProfit >= 0 ? "+" : ""}<NumberTicker value={Math.round(filteredStats.totalProfit)} /> ₴</div>
+                    <div
+                      className={`rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}
+                    >
+                      <div
+                        className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                      >
+                        Прибуток
+                      </div>
+                      <div
+                        className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}
+                      >
+                        {filteredStats.totalProfit >= 0 ? "+" : ""}
+                        <NumberTicker
+                          value={Math.round(filteredStats.totalProfit)}
+                        />{" "}
+                        ₴
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -812,38 +825,91 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
+                  onMouseEnter={(e) =>
+                    Object.assign(e.currentTarget.style, cardHoverStyle)
+                  }
+                  onMouseLeave={(e) =>
+                    Object.assign(e.currentTarget.style, cardBaseStyle)
+                  }
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50 shrink-0">
-                      <Trophy className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
+                      <Trophy
+                        className="h-5 w-5 text-amber-500"
+                        strokeWidth={1.5}
+                      />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">По місяцях</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      По місяцях
+                    </span>
                   </div>
                   <div className="flex items-center gap-4 mb-3">
                     <AnimatedCircularProgressBar
-                      max={100} min={0}
-                      value={bestMonth && totalMonthsTracked > 0 ? Math.min(100, Math.round((bestMonth.profit / (Math.abs(bestMonth.profit) + Math.abs(worstMonth?.profit || 0) + 1)) * 100)) : 50}
+                      max={100}
+                      min={0}
+                      value={
+                        bestMonth && totalMonthsTracked > 0
+                          ? Math.min(
+                              100,
+                              Math.round(
+                                (bestMonth.profit /
+                                  (Math.abs(bestMonth.profit) +
+                                    Math.abs(worstMonth?.profit || 0) +
+                                    1)) *
+                                  100,
+                              ),
+                            )
+                          : 50
+                      }
                       gaugePrimaryColor="#F59E0B"
                       gaugeSecondaryColor="#E5E7EB"
                       className="!w-20 !h-20 shrink-0"
                     />
                     <div className="flex flex-col gap-1 min-w-0">
                       <span className="text-xl font-bold text-amber-500">
-                        {bestMonth ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴` : "—"}
+                        {bestMonth
+                          ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴`
+                          : "—"}
                       </span>
-                      <span className="text-[11px] text-gray-400">найкращий місяць</span>
+                      <span className="text-[11px] text-gray-400">
+                        найкращий місяць
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-end gap-2">
                     <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium uppercase tracking-wider">▲ Найкращий {bestMonth?.month}</div>
-                      <div className="text-sm font-bold text-emerald-700">{bestMonth ? <><NumberTicker value={Math.round(bestMonth.profit)} /> ₴</> : "—"}</div>
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium uppercase tracking-wider">
+                        ▲ Найкращий {bestMonth?.month}
+                      </div>
+                      <div className="text-sm font-bold text-emerald-700">
+                        {bestMonth ? (
+                          <>
+                            <NumberTicker
+                              value={Math.round(bestMonth.profit)}
+                            />{" "}
+                            ₴
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </div>
                     </div>
                     <div className="flex-1 bg-red-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-red-500 font-medium uppercase tracking-wider">▼ Найгірший {worstMonth?.month}</div>
-                      <div className="text-sm font-bold text-red-600">{worstMonth ? <><NumberTicker value={Math.round(worstMonth.profit)} /> ₴</> : "—"}</div>
+                      <div className="flex items-center gap-1 text-[10px] text-red-500 font-medium uppercase tracking-wider">
+                        ▼ Найгірший {worstMonth?.month}
+                      </div>
+                      <div className="text-sm font-bold text-red-600">
+                        {worstMonth ? (
+                          <>
+                            <NumberTicker
+                              value={Math.round(worstMonth.profit)}
+                            />{" "}
+                            ₴
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -852,40 +918,63 @@ export default function Analytics() {
                 <div
                   className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
                   style={cardBaseStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
+                  onMouseEnter={(e) =>
+                    Object.assign(e.currentTarget.style, cardHoverStyle)
+                  }
+                  onMouseLeave={(e) =>
+                    Object.assign(e.currentTarget.style, cardBaseStyle)
+                  }
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 shrink-0">
                       <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">Коефіцієнти</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      Коефіцієнти
+                    </span>
                   </div>
                   <div className="flex items-center gap-4 mb-3">
                     <AnimatedCircularProgressBar
-                      max={100} min={0}
+                      max={100}
+                      min={0}
                       value={filteredStats.winRate}
                       gaugePrimaryColor="#3B82F6"
                       gaugeSecondaryColor="#E5E7EB"
                       className="!w-20 !h-20 shrink-0"
                     />
                     <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-xl font-bold text-gray-900">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</span>
-                      <span className="text-[11px] text-gray-400">середній коеф.</span>
+                      <span className="text-xl font-bold text-gray-900">
+                        {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        середній коеф.
+                      </span>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="bg-gray-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Ставок</div>
-                      <div className="text-sm font-bold text-gray-900"><NumberTicker value={completedBets.length} /></div>
+                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
+                        Ставок
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">
+                        <NumberTicker value={completedBets.length} />
+                      </div>
                     </div>
                     <div className="bg-emerald-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">Виграші</div>
-                      <div className="text-sm font-bold text-emerald-700"><NumberTicker value={winningBets.length} /></div>
+                      <div className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">
+                        Виграші
+                      </div>
+                      <div className="text-sm font-bold text-emerald-700">
+                        <NumberTicker value={winningBets.length} />
+                      </div>
                     </div>
                     <div className="bg-red-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-red-500 font-medium uppercase tracking-wider">Програші</div>
-                      <div className="text-sm font-bold text-red-600"><NumberTicker value={losingBets.length} /></div>
+                      <div className="text-[10px] text-red-500 font-medium uppercase tracking-wider">
+                        Програші
+                      </div>
+                      <div className="text-sm font-bold text-red-600">
+                        <NumberTicker value={losingBets.length} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -940,9 +1029,7 @@ export default function Analytics() {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <MonthlyProfitChartCard
-                            data={monthlyProfitData}
-                          />
+                          <MonthlyProfitChartCard data={monthlyProfitData} />
                           <OddsVsProfitScatterCard
                             data={scatterData}
                             winCount={winningBets.length}
@@ -951,9 +1038,7 @@ export default function Analytics() {
                         </div>
                       </div>
                     ) : (
-                      <Card
-                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
-                      >
+                      <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
                         <CardContent className="py-16 text-center">
                           <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
                             <Wallet
@@ -980,18 +1065,14 @@ export default function Analytics() {
                   <div className="flex flex-col flex-1">
                     {gameFilteredBets.length > 0 ? (
                       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
-                        <OddsWinRateChartCard
-                          data={oddsChartData}
-                        />
+                        <OddsWinRateChartCard data={oddsChartData} />
                         <OddsCategoryCards
                           data={oddsData}
                           labels={oddsCategoryLabels}
                         />
                       </div>
                     ) : (
-                      <Card
-                        className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]"
-                      >
+                      <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
                         <CardContent className="py-16 text-center">
                           <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
                             <BarChart3
