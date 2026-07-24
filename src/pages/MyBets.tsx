@@ -182,22 +182,25 @@ export default function MyBets() {
 
   // Recalculate bankroll when bankrollVersion bumps (bet added/deleted/result changed)
   useEffect(() => {
-    dataProvider.refresh().catch(() => {});
-  }, [bankrollVersion, dataProvider]);
+    loadRecentBets();
+  }, [bankrollVersion]);
 
   useEffect(() => {
+    let mounted = true;
     const init = async () => {
-      await Promise.all([
-        fetchUsers(),
-        loadRecentBets(),
-        dataProvider.refresh(),
+      const [usersRes, betsRes] = await Promise.allSettled([
+        fetchUsersData(),
+        loadRecentBetsData(),
       ]);
+      if (!mounted) return;
+      if (usersRes.status === "fulfilled") setUsers(usersRes.value);
+      if (betsRes.status === "fulfilled") setRecentBets(betsRes.value);
+      setIsLoadingBets(false);
     };
-    // Defer by one frame so React can process navigation clicks first
-    const id = requestAnimationFrame(() => {
-      init();
-    });
-    return () => cancelAnimationFrame(id);
+    init();
+    return () => {
+      mounted = false;
+    };
   }, []);
   useEffect(() => {
     if (users.length && currentUser) {
@@ -216,18 +219,35 @@ export default function MyBets() {
   }, [tableFilter, resultFilter, periodFilter, sortBy, sortOrder, searchText]);
 
   // ── Data fetching ──
+  const fetchUsersData = async (): Promise<UserRecord[]> => {
+    const allUsers = await authService.fetchUsers();
+    return allUsers
+      .filter((u) => u.username)
+      .map((u) => ({
+        telegram: u.telegram,
+        username: u.username,
+        isAdmin:
+          (u as { role?: string }).role === "admin" ||
+          (u as { isAdmin?: string }).isAdmin === "так",
+      }));
+  };
+
+  const loadRecentBetsData = async (): Promise<Bet[]> => {
+    try {
+      const bets = await UserDataService.fetchBets();
+      return bets as Bet[];
+    } catch {
+      return UserDataService.getUserData(
+        currentUser,
+        "mybets_data",
+        [],
+      ) as Bet[];
+    }
+  };
+
   const fetchUsers = async () => {
     try {
-      const allUsers = await authService.fetchUsers();
-      const parsed: UserRecord[] = allUsers
-        .filter((u) => u.username)
-        .map((u) => ({
-          telegram: u.telegram,
-          username: u.username,
-          isAdmin:
-            (u as { role?: string }).role === "admin" ||
-            (u as { isAdmin?: string }).isAdmin === "так",
-        }));
+      const parsed = await fetchUsersData();
       setUsers(parsed);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching users:", err);
@@ -270,30 +290,13 @@ export default function MyBets() {
   }, [recentBets]);
 
   const loadRecentBets = useCallback(async () => {
-    setIsLoadingBets(true);
     try {
-      const bets = await UserDataService.fetchBets();
-      setRecentBets(bets as Bet[]);
-      return;
+      const bets = await loadRecentBetsData();
+      setRecentBets(bets);
     } catch {
       /* noop */
     }
-    // Fallback to localStorage when API is unavailable
-    const localBets = UserDataService.getUserData(
-      currentUser,
-      "mybets_data",
-      [],
-    );
-    setRecentBets(localBets as Bet[]);
   }, [currentUser, bankrollVersion]);
-
-  // After loadRecentBets completes, mark loading as done
-  useEffect(() => {
-    if (isLoadingBets) {
-      const timer = setTimeout(() => setIsLoadingBets(false), 0);
-      return () => clearTimeout(timer);
-    }
-  }, [recentBets, isLoadingBets]);
 
   // Recompute stats whenever bets change
   useEffect(() => {
