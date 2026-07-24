@@ -27,6 +27,9 @@ export interface PageHeaderProps {
   currencyMode?: "UAH" | "USD";
   onCurrencyChange?: (c: "UAH" | "USD") => void;
   hasUsdBets?: boolean;
+  /** Game filter (Analytics page) */
+  gameFilter?: "all" | "CS2" | "Dota2";
+  onGameFilterChange?: (g: "all" | "CS2" | "Dota2") => void;
 }
 
 /**
@@ -47,6 +50,8 @@ export function PageHeader({
   currencyMode,
   onCurrencyChange,
   hasUsdBets,
+  gameFilter,
+  onGameFilterChange,
 }: PageHeaderProps) {
   const navigate = useNavigate();
 
@@ -115,17 +120,42 @@ export function PageHeader({
 
           {/* Currency switch — conditional (UAH / USDT) */}
           {showCurrencySwitch && currencyMode && onCurrencyChange && (
-            <>
-              <CurrencySwitch
-                currency={currencyMode}
-                onChange={onCurrencyChange}
-                hasUsdBets={hasUsdBets}
-              />
-              <div className="w-px h-8 bg-gray-300" />
-            </>
+            <CurrencySwitch
+              currency={currencyMode}
+              onChange={onCurrencyChange}
+              hasUsdBets={hasUsdBets}
+            />
           )}
 
-          {!showCurrencySwitch && <div className="w-px h-8 bg-gray-300" />}
+          {gameFilter && onGameFilterChange && (
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+              {(["all", "CS2", "Dota2"] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => onGameFilterChange(g)}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                    gameFilter === g
+                      ? g === "CS2"
+                        ? "bg-amber-600 text-white shadow-sm"
+                        : g === "Dota2"
+                          ? "bg-purple-600 text-white shadow-sm"
+                          : "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {g === "all" ? "Всі" : g}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {(showCurrencySwitch || gameFilter) && (
+            <div className="w-px h-8 bg-gray-300" />
+          )}
+
+          {!showCurrencySwitch && !gameFilter && (
+            <div className="w-px h-8 bg-gray-300" />
+          )}
 
           {/* User info — clickable to Profile */}
           <button

@@ -698,9 +698,10 @@ export default function Analytics() {
             currencyMode={currencyMode}
             onCurrencyChange={setCurrencyMode}
             hasUsdBets={hasUsdBets}
+            gameFilter={gameFilter}
+            onGameFilterChange={setGameFilter}
           />
 
-          {/* Main Content */}
           <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
             {gameFilteredBets.length === 0 && (
               <Card className="rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
@@ -722,27 +723,6 @@ export default function Analytics() {
                 </CardContent>
               </Card>
             )}
-
-            {/* Game filter + card styles */}
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              {(["all", "CS2", "Dota2"] as const).map((g) => (
-                <button
-                  key={g}
-                  onClick={() => setGameFilter(g)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                    gameFilter === g
-                      ? g === "CS2"
-                        ? "bg-amber-600 text-white shadow-sm"
-                        : g === "Dota2"
-                          ? "bg-purple-600 text-white shadow-sm"
-                          : "bg-gray-900 text-white shadow-sm"
-                      : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
-                  }`}
-                >
-                  {g === "all" ? "Всі" : g}
-                </button>
-              ))}
-            </div>
 
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
