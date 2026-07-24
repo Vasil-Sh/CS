@@ -64,10 +64,12 @@
 - Multi-select → експрес-ставка
 - AI-рекомендації на кожен матч
 - **Live auto-refresh** — точкове оновлення рахунків/статусів (без повного перезавантаження)
+- **Минулі дні** — модальне вікно з результатами в стилі HLTV (групування по датах, рахунки, турніри)
 
-### 🤖 AI (DeepSeek + Gemini)
+### 🤖 AI (DeepSeek + Gemini Flash)
 
-- **DeepSeek Chat** / **Gemini Flash** — безкоштовний AI для прогнозів на матчі
+- **DeepSeek Chat** — основний AI для прогнозів на матчі
+- **Gemini Flash** — безкоштовний fallback при недоступності DeepSeek
 - AIRecommendationModal з prediction, confidence, reasoning, risk level
 
 ### 🛡️ Ризиковані команди
@@ -81,6 +83,7 @@
 - Логін через JWT (backend API) — bcrypt + httpOnly cookie
 - Мультикористувацькість — ізольовані дані через PostgreSQL + `UserDataService`
 - Адмін-панель: управління користувачами, підписки
+- Окремий репозиторій: [mathciq-admin](https://github.com/Vasil-Sh/mathciq-admin) (Vite + React 19)
 
 ---
 
@@ -94,10 +97,10 @@
 | Роутинг   | React Router 6                                            |
 | Стан      | Zustand 4 + React Hooks                                   |
 | Дані      | PostgreSQL 16 (Drizzle ORM) + API (Hono)                  |
-| AI        | DeepSeek Chat API                                         |
+| AI        | DeepSeek Chat + Gemini Flash (fallback)                   |
 | Збірка    | Vite 5                                                    |
-| Тести     | Vitest 135 (backend) + 188 (frontend) + Playwright (E2E) |
-| Шрифт     | Inter (Google Fonts), system-ui fallback |
+| Тести     | Vitest (backend + frontend) + Playwright (E2E)            |
+| Шрифт     | Inter (Google Fonts), system-ui fallback                  |
 | SEO       | react-helmet-async + JSON-LD + Sitemap + OG/Twitter Cards |
 
 ---
@@ -146,7 +149,8 @@ src/
 │   ├── GoalsManager.tsx       # CRUD цілей
 │   ├── StrategyOverview.tsx   # CRUD стратегій
 │   ├── RiskManagement.tsx     # Ризиковані команди + метрики
-│   ├── MatchCard.tsx          # Картка матчу
+│   ├── matches/               # PastDaysModal, MatchRow, MatchStates
+│   ├── MatchCard.tsx          # Картка матчу (застаріла)
 │   ├── InitialBankModal.tsx   # Початковий банк
 │   ├── SEO.tsx                # Мета-теги, OG, hreflang
 │   ├── StructuredData.tsx     # JSON-LD (WebApp, FAQ, Organization)
@@ -163,7 +167,7 @@ src/
 ├── lib/
 │   ├── api/index.ts           # apiClient, auth, CS2 API, risky teams
 │   ├── services/index.ts      # BankrollService, UserDataService
-│   ├── ai/index.ts            # DeepSeek AI
+│   ├── ai/index.ts            # DeepSeek + Gemini Flash AI
 │   ├── analytics/index.ts     # EV, Kelly, bet math
 │   ├── parsing/index.ts       # URL/express parsers
 │   ├── utils/index.ts         # cn(), i18n, cardStyles, chartColors
@@ -182,17 +186,17 @@ src/
 
 Усі дані зберігаються через backend API (PostgreSQL). `localStorage` використовується тільки як стартовий кеш для швидкого завантаження та для UI-налаштувань (тема, мова).
 
-| Джерело | Тип даних |
-|---------|------------|
-| `POST/GET /api/bets` | Ставки |
-| `POST/GET /api/goals` | Цілі |
-| `POST/GET /api/strategies` | Стратегії |
-| `POST/GET /api/bankroll` | Банкрол |
-| `POST/GET /api/risky-teams` | Ризиковані команди |
-| `POST/GET /api/telegram-groups` | Telegram групи |
-| `POST /api/admin/reset` | Очищення всіх даних |
-| `localStorage` (auth) | `authToken`, `refreshToken`, `username`, `userRole` |
-| `localStorage` (UI) | `matchiq_theme`, `matchiq_lang`, `onboarding_done` |
+| Джерело                         | Тип даних                                           |
+| ------------------------------- | --------------------------------------------------- |
+| `POST/GET /api/bets`            | Ставки                                              |
+| `POST/GET /api/goals`           | Цілі                                                |
+| `POST/GET /api/strategies`      | Стратегії                                           |
+| `POST/GET /api/bankroll`        | Банкрол                                             |
+| `POST/GET /api/risky-teams`     | Ризиковані команди                                  |
+| `POST/GET /api/telegram-groups` | Telegram групи                                      |
+| `POST /api/admin/reset`         | Очищення всіх даних                                 |
+| `localStorage` (auth)           | `authToken`, `refreshToken`, `username`, `userRole` |
+| `localStorage` (UI)             | `matchiq_theme`, `matchiq_lang`, `onboarding_done`  |
 
 ---
 
