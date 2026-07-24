@@ -183,7 +183,7 @@ export default function MyBets() {
   // Recalculate bankroll when bankrollVersion bumps (bet added/deleted/result changed)
   useEffect(() => {
     dataProvider.refresh().catch(() => {});
-  }, [bankrollVersion]);
+  }, [bankrollVersion, dataProvider]);
 
   useEffect(() => {
     const init = async () => {

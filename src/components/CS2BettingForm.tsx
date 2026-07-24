@@ -28,10 +28,7 @@ import {
   getExpressRiskLevel,
   getEVVerdict,
 } from "@/lib/betCalculations";
-import {
-  findRiskyTeams,
-  type RiskyTeamMatch,
-} from "@/lib/riskyTeamsMatcher";
+import { findRiskyTeams, type RiskyTeamMatch } from "@/lib/riskyTeamsMatcher";
 import { useTiltBlock } from "@/hooks/useTiltBlock";
 import { logRender } from "@/lib/devLogger";
 import { BettingSidebar } from "./BettingSidebar";
@@ -624,7 +621,12 @@ export default function CS2BettingForm({
 
     for (const event of expressEvents) {
       const parts = event.match.split(" vs ");
-      const found = findRiskyTeams(parts[0] || "", parts[1] || "", gameFilter, savedRiskyTeams);
+      const found = findRiskyTeams(
+        parts[0] || "",
+        parts[1] || "",
+        gameFilter,
+        savedRiskyTeams,
+      );
       for (const f of found) {
         if (!riskyTeamsFound.some((r) => r.name === f.name)) {
           riskyTeamsFound.push(f);
@@ -701,12 +703,21 @@ export default function CS2BettingForm({
       return;
     }
     const savedRiskyTeams = loadRiskyTeamsFromStorage();
-    const found = findRiskyTeams(team1, team2, getGameFilterValue(currentGame), savedRiskyTeams);
+    const found = findRiskyTeams(
+      team1,
+      team2,
+      getGameFilterValue(currentGame),
+      savedRiskyTeams,
+    );
     setFormData((prev) => ({ ...prev, riskyTeams: found }));
   };
 
   /** Quick risky-team detection for URL parsing — returns array, no state update */
-  const detectRisky = (team1: string, team2: string, gameFilter: string): RiskyTeam[] => {
+  const detectRisky = (
+    team1: string,
+    team2: string,
+    gameFilter: string,
+  ): RiskyTeam[] => {
     const saved = loadRiskyTeamsFromStorage();
     return findRiskyTeams(team1, team2, gameFilter, saved);
   };
@@ -757,12 +768,17 @@ export default function CS2BettingForm({
     }
   };
 
+  const urlDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+
   const handleUrlChange = (url: string) => {
     setFormData((prev) => ({ ...prev, matchUrl: url }));
 
-    if (url.includes("hltv.org/matches/") || url.includes("dota2")) {
-      parseMatchFromUrl(url);
-    }
+    if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
+    urlDebounceRef.current = setTimeout(() => {
+      if (url.includes("hltv.org/matches/") || url.includes("dota2")) {
+        parseMatchFromUrl(url);
+      }
+    }, 500);
   };
 
   const removeRiskyTeam = (index: number) => {
