@@ -417,6 +417,11 @@ export function useMatches() {
     }
   }, []);
 
+  // ── Auto-load matches on mount ──
+  useEffect(() => {
+    loadMatchesFromApi();
+  }, [loadMatchesFromApi]);
+
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
     try {
