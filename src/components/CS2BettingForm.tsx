@@ -1,57 +1,20 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  useLayoutEffect,
-} from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
-import { UserDataService } from "@/lib/userDataService";
-import { BankrollService } from "@/lib/bankrollService";
-import type { CS2Strategy } from "@/types/strategy";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  parseDota2MatchFromUrl,
-  parseCS2MatchFromUrl,
-} from "@/lib/matchUrlParser";
-import StrategyViolationDialog from "./StrategyViolationDialog";
-import {
-  calcTotalExpressOdds,
-  calcExpectedValue,
-  calcPotentialProfit,
-  getValueBetAnalysis,
-  getOverconfidenceWarning,
-  calcKellyCriterion,
-  getExpressRiskLevel,
-  getEVVerdict,
-} from "@/lib/betCalculations";
-import { findRiskyTeams, type RiskyTeamMatch } from "@/lib/riskyTeamsMatcher";
-import { useTiltBlock } from "@/hooks/useTiltBlock";
 import { logRender } from "@/lib/devLogger";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import StrategyViolationDialog from "./StrategyViolationDialog";
 import { BettingSidebar } from "./BettingSidebar";
 import { ExpressEventBuilder } from "./ExpressEventBuilder";
 import BettingFormAlerts from "./betting-form/BettingFormAlerts";
 import BettingFormSettings from "./betting-form/BettingFormSettings";
 import BettingFormMatchSection from "./betting-form/BettingFormMatchSection";
 import BettingFormFinances from "./betting-form/BettingFormFinances";
+import { useBettingForm } from "@/hooks/useBettingForm";
+import type { MatchPrefillData } from "@/hooks/useBettingForm";
+import { toast } from "sonner";
 
-export interface MatchPrefillData {
-  team1: string;
-  team2: string;
-  tournament: string;
-  format: string;
-  date: string;
-  matchUrl?: string;
-  odds?: string;
-  logoTeam1?: string | null;
-  logoTeam2?: string | null;
-  game?: "CS2" | "Dota2";
-}
+export type { MatchPrefillData } from "@/hooks/useBettingForm";
 
-interface CS2BettingFormProps {
+interface Props {
   onRecordAdded?: () => void;
   prefillData?: MatchPrefillData | null;
   onPrefillConsumed?: () => void;
@@ -59,1449 +22,189 @@ interface CS2BettingFormProps {
   onExpressMatchesConsumed?: () => void;
 }
 
-interface RiskyTeam {
-  name: string;
-  game: string;
-  status: string;
-  notes: string;
-}
-
-interface ExpressEvent {
-  match: string;
-  betType: string;
-  selection: string;
-  odds: string;
-  logoTeam1?: string | null;
-  logoTeam2?: string | null;
-}
-
-interface BetRecord {
-  date: string;
-  match: string;
-  team1: string;
-  team2: string;
-  tournament: string;
-  format: string;
-  game: string;
-  matchUrl: string;
-  betType: string;
-  odds: number;
-  amount: number;
-  originalAmount: number;
-  currency: string;
-  exchangeRate: number | null;
-  result: "Pending";
-  profit: number;
-  roi: number;
-  strategy: string;
-  riskyTeams: RiskyTeam[];
-  notes: string;
-  goalId?: string;
-  winProbability?: number;
-  logoTeam1?: string | null;
-  logoTeam2?: string | null;
-  expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
-}
-
-interface StrategyViolation {
-  type: "odds" | "format" | "betType";
-  message: string;
-  severity: "acceptable" | "serious";
-  explanation: string;
-}
-
-interface Goal {
-  id: string;
-  name: string;
-  type: "amount" | "ladder" | "roi" | "winrate";
-  status: "active" | "completed" | "failed";
-  currentStep?: number;
-  startAmount?: number;
-  targetLadderAmount?: number;
-  steps?: { step: number; startAmount: number; status: string }[];
-}
-
-const MAX_CONFIDENCE = 95;
-const DEFAULT_MAX_STAKE_PERCENT = 7;
-
-const getDefaultFormData = (strategyName?: string, betCategory?: string) => ({
-  date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`,
-  game: "CS2" as "CS2" | "Dota2",
-  matchUrl: "",
-  tournament: "",
-  team1: "",
-  team2: "",
-  format: "BO3",
-  riskyTeams: [] as RiskyTeam[],
-  betType: "",
-  betCategory: betCategory || "Ординар",
-  selection: "",
-  odds: "",
-  stake: "",
-  currency: "UAH",
-  exchangeRate: (() => {
-    const r = localStorage.getItem("matchiq_exchange_rate");
-    return r || "41.50";
-  })(),
-  confidence: "",
-  strategy: strategyName || "",
-  reasoning: "",
-  keyFactors: "",
-  riskLevel: "",
-  notes: "",
-  goalId: "",
-});
-
-export default function CS2BettingForm({
-  onRecordAdded,
-  prefillData,
-  onPrefillConsumed,
-  expressMatchesData,
-  onExpressMatchesConsumed,
-}: CS2BettingFormProps) {
+export default function CS2BettingForm(props: Props) {
   logRender("CS2BettingForm");
-  const { user } = useAuth();
-  const currentUser = user?.username || "";
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isParsingMatch, setIsParsingMatch] = useState(false);
-  const [primaryStrategy, setPrimaryStrategy] = useState<CS2Strategy | null>(
-    null,
-  );
-  const [strategyViolations, setStrategyViolations] = useState<
-    StrategyViolation[]
-  >([]);
-  const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
-  const [showViolationDialog, setShowViolationDialog] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState(false);
-  const [submitErrors, setSubmitErrors] = useState<Record<string, boolean>>({});
-  const [isPrefilled, setIsPrefilled] = useState(false);
-  const [isExpressFromMatches, setIsExpressFromMatches] = useState(false);
-  const [maxStakePercent, setMaxStakePercent] = useState<number>(() => {
-    const saved = UserDataService.getUserData<number>(
-      currentUser,
-      "max_stake_percent",
-      0,
-    );
-    return saved || DEFAULT_MAX_STAKE_PERCENT;
-  });
-
-  // API-synced bets cache for Kelly/tilt calculations (avoid stale localStorage)
-  const apiBetsRef = useRef<BetRecord[]>([]);
-  const [apiBets, setApiBets] = useState<BetRecord[]>([]);
-  useEffect(() => {
-    if (!currentUser) return;
-    UserDataService.fetchBets()
-      .then((bets) => {
-        const cast = bets as unknown as BetRecord[];
-        apiBetsRef.current = cast;
-        setApiBets(cast);
-      })
-      .catch(() => {
-        /** keep localStorage fallback */
-      });
-  }, [currentUser]);
-
-  const [formData, setFormData] = useState(() => {
-    const initialCategory =
-      expressMatchesData && expressMatchesData.length >= 2
-        ? "Експрес"
-        : "Ординар";
-    const defaults = getDefaultFormData(undefined, initialCategory);
-    // If prefillData has a game, use it from the start (avoids flash of CS2)
-    if (prefillData?.game) {
-      defaults.game = prefillData.game;
-      // Map format: API returns "Bo3", form expects "BO3"
-      if (prefillData.format) {
-        const fm: Record<string, string> = {
-          Bo1: "BO1",
-          Bo2: "BO2",
-          Bo3: "BO3",
-          Bo5: "BO5",
-        };
-        defaults.format = fm[prefillData.format] || prefillData.format || "BO3";
-      }
-    }
-    return defaults;
-  });
-
-  // When prefillData arrives asynchronously (setPrefillData from useEffect),
-  // the useState initializer has already run with null. Update game/format here.
-  // useLayoutEffect runs synchronously — no flash of wrong game.
-  useLayoutEffect(() => {
-    if (prefillData?.game) {
-      const fm: Record<string, string> = {
-        Bo1: "BO1",
-        Bo2: "BO2",
-        Bo3: "BO3",
-        Bo5: "BO5",
-      };
-      setFormData((prev) => ({
-        ...prev,
-        game: prefillData.game!,
-        format: prefillData.format
-          ? fm[prefillData.format] || prefillData.format
-          : prev.format,
-      }));
-    }
-  }, [prefillData]);
-
-  // Clear validation errors when user fills in a required field
-  useEffect(() => {
-    if (Object.keys(submitErrors).length === 0) return;
-    const cleared = { ...submitErrors };
-    let changed = false;
-    for (const field of Object.keys(cleared)) {
-      const val = (formData as Record<string, unknown>)[field];
-      if (field === "odds" && val && parseFloat(String(val)) > 1) {
-        delete cleared[field];
-        changed = true;
-      } else if (field === "stake" && val && parseFloat(String(val)) > 0) {
-        delete cleared[field];
-        changed = true;
-      } else if (val && String(val).trim() !== "") {
-        delete cleared[field];
-        changed = true;
-      }
-    }
-    if (changed) setSubmitErrors(cleared);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    formData.team1,
-    formData.team2,
-    formData.betType,
-    formData.selection,
-    formData.odds,
-    formData.stake,
-  ]);
-
-  const [expressEvents, setExpressEvents] = useState<ExpressEvent[]>(() => {
-    if (expressMatchesData && expressMatchesData.length >= 2) {
-      return expressMatchesData.map((m) => ({
-        match: `${m.team1} vs ${m.team2}`,
-        betType: "Match Winner",
-        selection: m.team1,
-        odds: "",
-        logoTeam1: m.logoTeam1,
-        logoTeam2: m.logoTeam2,
-      }));
-    }
-    return [];
-  });
-
-  const expressConsumedRef = useRef(
-    !!(expressMatchesData && expressMatchesData.length >= 2),
-  );
-  const prefillConsumedRef = useRef(false);
-  const prefillLogosRef = useRef<{
-    logoTeam1?: string | null;
-    logoTeam2?: string | null;
-  }>({});
-  const strategyLoadedRef = useRef(false);
-  const strategiesRef = useRef<CS2Strategy[]>([]);
-  const onPrefillConsumedRef = useRef(onPrefillConsumed);
-  onPrefillConsumedRef.current = onPrefillConsumed;
-
-  // Load strategies from localStorage on mount
-  useEffect(() => {
-    const stored = UserDataService.getUserData<CS2Strategy[]>(
-      currentUser,
-      "strategies_data",
-      [],
-    );
-    strategiesRef.current = stored;
-  }, [currentUser]);
-
-  useEffect(() => {
-    UserDataService.setUserData(
-      currentUser,
-      "max_stake_percent",
-      maxStakePercent,
-    );
-    // Sync to API
-    UserDataService.saveUserPrefs({ maxStakePercent }).catch(() => {});
-  }, [maxStakePercent, currentUser]);
-
-  useEffect(() => {
-    if (
-      expressMatchesData &&
-      expressMatchesData.length >= 2 &&
-      expressConsumedRef.current
-    ) {
-      setIsPrefilled(true);
-      setIsExpressFromMatches(true);
-      const matchCount = expressMatchesData.length;
-      setTimeout(() => {
-        onExpressMatchesConsumed?.();
-        toast.success(
-          `${matchCount} матчів додано до експресу. Заповніть коефіцієнти та вибір для кожної події.`,
-        );
-      }, 0);
-    }
-
-    if (strategyLoadedRef.current) return;
-    strategyLoadedRef.current = true;
-
-    const savedPrimaryStrategy = UserDataService.getUserData<string>(
-      currentUser,
-      "primary_strategy",
-      "",
-    );
-    if (savedPrimaryStrategy) {
-      const strategy = strategiesRef.current?.find(
-        (s: CS2Strategy) =>
-          s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy,
-      );
-      if (strategy) {
-        setPrimaryStrategy(strategy);
-        setFormData((prev) => ({ ...prev, strategy: strategy.name }));
-      }
-    }
-
-    loadActiveGoals();
-  }, []); // run once on mount only
-
-  // Reload goals when returning to this component (user might have changed goals on Strategy page)
-  useEffect(() => {
-    if (currentUser) loadActiveGoals();
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!prefillData) {
-      prefillConsumedRef.current = false;
-      return;
-    }
-    if (prefillConsumedRef.current) return;
-
-    prefillConsumedRef.current = true;
-    prefillLogosRef.current = {
-      logoTeam1: prefillData.logoTeam1,
-      logoTeam2: prefillData.logoTeam2,
-    };
-
-    const formatMap: Record<string, string> = {
-      Bo1: "BO1",
-      Bo2: "BO2",
-      Bo3: "BO3",
-      Bo5: "BO5",
-    };
-    const mappedFormat =
-      formatMap[prefillData.format] || prefillData.format || "BO3";
-
-    setFormData((prev) => ({
-      ...prev,
-      team1: prefillData.team1 || "",
-      team2: prefillData.team2 || "",
-      tournament: prefillData.tournament || "",
-      format: mappedFormat,
-      date: prefillData.date ? prefillData.date.split("T")[0] : prev.date,
-      matchUrl: prefillData.matchUrl || "",
-      odds: prefillData.odds || "",
-      game: prefillData.game || prev.game,
-    }));
-  }, [prefillData]);
-
-  useEffect(() => {
-    if (
-      expressMatchesData &&
-      expressMatchesData.length >= 2 &&
-      !expressConsumedRef.current
-    ) {
-      expressConsumedRef.current = true;
-
-      const prefilledEvents: ExpressEvent[] = expressMatchesData.map((m) => ({
-        match: `${m.team1} vs ${m.team2}`,
-        betType: "Match Winner",
-        selection: m.team1,
-        odds: "",
-        logoTeam1: m.logoTeam1,
-        logoTeam2: m.logoTeam2,
-      }));
-
-      setFormData((prev) => ({
-        ...prev,
-        betCategory: "Експрес",
-      }));
-      setExpressEvents(prefilledEvents);
-      setIsPrefilled(true);
-      setIsExpressFromMatches(true);
-
-      const matchCount = expressMatchesData.length;
-      setTimeout(() => {
-        onExpressMatchesConsumed?.();
-        toast.success(
-          `${matchCount} матчів додано до експресу. Заповніть коефіцієнти та вибір для кожної події.`,
-        );
-      }, 0);
-    }
-
-    if (!expressMatchesData) {
-      expressConsumedRef.current = false;
-    }
-  }, [expressMatchesData, onExpressMatchesConsumed]);
-
-  const clearForm = () => {
-    setFormData(getDefaultFormData(primaryStrategy?.name));
-    setExpressEvents([]);
-    setStrategyViolations([]);
-    setIsPrefilled(false);
-    setIsExpressFromMatches(false);
-    onPrefillConsumedRef.current?.(); // reset parent state → remount with empty form
-    toast.success("Форму очищено");
-  };
-
-  const loadActiveGoals = async () => {
-    let goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
-    // On first app load, goals may not be in localStorage yet — fetch from API
-    if (goals.length === 0) {
-      try {
-        const apiGoals = (await UserDataService.fetchGoals()) as Goal[];
-        if (apiGoals.length > 0) {
-          goals = apiGoals;
-          UserDataService.setUserDataSync(currentUser, "goals", goals);
-        }
-      } catch {
-        /* API unavailable — use empty */
-      }
-    }
-    const active = goals.filter((g) => g.status === "active");
-    setActiveGoals(active);
-    if (import.meta.env.DEV)
-      console.log("Loaded active goals:", active.length, active);
-  };
-
-  const getLastStakeForGoal = (goalId: string): string => {
-    try {
-      // Read directly from localStorage to get full goal data (including steps)
-      const allGoals = UserDataService.getUserData(currentUser, "goals", []);
-      const goal = allGoals.find((g: Goal) => g.id === goalId);
-      if (!goal) return "";
-
-      // For ladder goals — calculate amount from current step
-      if (goal.type === "ladder") {
-        const steps = goal.steps;
-        if (steps && steps.length > 0) {
-          // currentStep is a 0-based array index into steps[]
-          const idx = goal.currentStep ?? 0;
-          if (idx < steps.length && steps[idx].startAmount > 0) {
-            return String(Math.round(steps[idx].startAmount * 100) / 100);
-          }
-        }
-        if (goal.startAmount && goal.startAmount > 0)
-          return String(Math.round(goal.startAmount * 100) / 100);
-        return "";
-      }
-
-      // For non-ladder goals — pull last bet amount from localStorage (not stale Google Sheets)
-      const allRecords = UserDataService.getUserData<BetRecord[]>(
-        currentUser,
-        "mybets_data",
-        [],
-      );
-      const goalRecords = allRecords
-        .filter((r) => r.goalId === goalId)
-        .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
-
-      if (goalRecords.length > 0) {
-        const lastAmount =
-          goalRecords[0].originalAmount ?? goalRecords[0].amount;
-        if (lastAmount && lastAmount > 0)
-          return String(Math.round(lastAmount * 100) / 100);
-      }
-    } catch (error) {
-      if (import.meta.env.DEV)
-        console.error("Error getting last stake for goal:", error);
-    }
-    return "";
-  };
-
-  const validateAgainstStrategy = useCallback(() => {
-    if (!primaryStrategy) {
-      setStrategyViolations([]);
-      return;
-    }
-
-    const violations: StrategyViolation[] = [];
-    const currentOdds = parseFloat(formData.odds);
-
-    if (formData.betCategory !== "Ординар") {
-      setStrategyViolations([]);
-      return;
-    }
-
-    if (
-      currentOdds &&
-      primaryStrategy.minOdds &&
-      currentOdds < primaryStrategy.minOdds
-    ) {
-      const difference = primaryStrategy.minOdds - currentOdds;
-      const severity = difference > 0.3 ? "serious" : "acceptable";
-      violations.push({
-        type: "odds",
-        message: `Коефіцієнт ${currentOdds} нижче рекомендованого ${primaryStrategy.minOdds}`,
-        severity,
-        explanation:
-          severity === "serious"
-            ? "Низькі коефіцієнти зменшують потенційний прибуток та можуть не виправдати ризик."
-            : "Незначне відхилення від стратегії. Переконайтесь у впевненості в прогнозі.",
-      });
-    }
-
-    if (
-      currentOdds &&
-      primaryStrategy.maxOdds &&
-      currentOdds > primaryStrategy.maxOdds
-    ) {
-      const difference = currentOdds - primaryStrategy.maxOdds;
-      const severity = difference > 0.5 ? "serious" : "acceptable";
-      violations.push({
-        type: "odds",
-        message: `Коефіцієнт ${currentOdds} вище рекомендованого ${primaryStrategy.maxOdds}`,
-        severity,
-        explanation:
-          severity === "serious"
-            ? "Високі коефіцієнти часто означають низьку ймовірність виграшу. Перевірте аналіз."
-            : "Відхилення в межах допустимого. Переконайтесь у обґрунтованості вибору.",
-      });
-    }
-
-    if (
-      primaryStrategy.allowedFormats &&
-      primaryStrategy.allowedFormats.length > 0
-    ) {
-      if (!primaryStrategy.allowedFormats.includes(formData.format)) {
-        violations.push({
-          type: "format",
-          message: `Формат ${formData.format} не рекомендований. Рекомендовані: ${primaryStrategy.allowedFormats.join(", ")}`,
-          severity: "acceptable",
-          explanation:
-            "Ваша стратегія оптимізована для інших форматів. Це може вплинути на результативність.",
-        });
-      }
-    }
-
-    if (
-      primaryStrategy.allowedBetTypes &&
-      primaryStrategy.allowedBetTypes.length > 0
-    ) {
-      if (!primaryStrategy.allowedBetTypes.includes(formData.betCategory)) {
-        violations.push({
-          type: "betType",
-          message: `Тип прогнозу "${formData.betCategory}" не рекомендований. Рекомендовані: ${primaryStrategy.allowedBetTypes.join(", ")}`,
-          severity: "serious",
-          explanation:
-            "Ваша стратегія розроблена для інших типів ставок. Це може значно знизити ефективність.",
-        });
-      }
-    }
-
-    setStrategyViolations(violations);
-  }, [formData.odds, formData.format, formData.betCategory, primaryStrategy]);
-
-  useEffect(() => {
-    validateAgainstStrategy();
-  }, [validateAgainstStrategy]);
-
-  useEffect(() => {
-    if (formData.team1 || formData.team2) {
-      checkRiskyTeams(formData.team1, formData.team2, formData.game);
-    }
-  }, [formData.team1, formData.team2, formData.game]);
-
-  useEffect(() => {
-    if (expressEvents.length === 0) return;
-    if (formData.team1 || formData.team2) return;
-
-    const savedRiskyTeams = loadRiskyTeamsFromStorage();
-    if (savedRiskyTeams.length === 0) return;
-
-    const gameFilter = getGameFilterValue(formData.game);
-    const riskyTeamsFound: RiskyTeam[] = [];
-
-    for (const event of expressEvents) {
-      const parts = event.match.split(" vs ");
-      const found = findRiskyTeams(
-        parts[0] || "",
-        parts[1] || "",
-        gameFilter,
-        savedRiskyTeams,
-      );
-      for (const f of found) {
-        if (!riskyTeamsFound.some((r) => r.name === f.name)) {
-          riskyTeamsFound.push(f);
-        }
-      }
-    }
-
-    if (riskyTeamsFound.length > 0) {
-      setFormData((prev) => ({ ...prev, riskyTeams: riskyTeamsFound }));
-    }
-  }, [expressEvents, formData.game]);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedPrimaryStrategy = UserDataService.getUserData<string>(
-        currentUser,
-        "primary_strategy",
-        "",
-      );
-      if (savedPrimaryStrategy) {
-        const strategy = strategiesRef.current?.find(
-          (s: CS2Strategy) =>
-            s.name === savedPrimaryStrategy || s.id === savedPrimaryStrategy,
-        );
-        if (strategy) {
-          setPrimaryStrategy(strategy);
-          setFormData((prev) => ({ ...prev, strategy: strategy.name }));
-        } else {
-          setPrimaryStrategy(null);
-          setFormData((prev) => ({ ...prev, strategy: "" }));
-        }
-      } else {
-        setPrimaryStrategy(null);
-        setFormData((prev) => ({ ...prev, strategy: "" }));
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  // ── Pure utility functions (outside component, stable references) ──
-
-  function loadRiskyTeamsFromStorage(): RiskyTeam[] {
-    try {
-      const saved = localStorage.getItem("admin_risky_teams");
-      if (saved) {
-        const savedTeams = JSON.parse(saved) as RiskyTeam[];
-        return savedTeams.map((team: RiskyTeam) => ({
-          name: team.name,
-          game: team.game || "CS",
-          status: team.status || "Обережно",
-          notes: team.notes || "",
-        }));
-      }
-    } catch (error) {
-      if (import.meta.env.DEV)
-        console.error("Error loading risky teams from storage:", error);
-    }
-    return [];
-  }
-
-  function getGameFilterValue(formGame: "CS2" | "Dota2"): string {
-    return formGame === "CS2" ? "CS" : "Dota";
-  }
-
-  const checkRiskyTeams = (
-    team1: string,
-    team2: string,
-    currentGame: "CS2" | "Dota2",
-  ) => {
-    if (!team1 && !team2) {
-      setFormData((prev) => ({ ...prev, riskyTeams: [] }));
-      return;
-    }
-    const savedRiskyTeams = loadRiskyTeamsFromStorage();
-    const found = findRiskyTeams(
-      team1,
-      team2,
-      getGameFilterValue(currentGame),
-      savedRiskyTeams,
-    );
-    setFormData((prev) => ({ ...prev, riskyTeams: found }));
-  };
-
-  /** Quick risky-team detection for URL parsing — returns array, no state update */
-  const detectRisky = (
-    team1: string,
-    team2: string,
-    gameFilter: string,
-  ): RiskyTeam[] => {
-    const saved = loadRiskyTeamsFromStorage();
-    return findRiskyTeams(team1, team2, gameFilter, saved);
-  };
-
-  const parseMatchFromUrl = async (url: string) => {
-    setIsParsingMatch(true);
-    try {
-      let result = null;
-
-      if (url.includes("dota2")) {
-        result = parseDota2MatchFromUrl(url);
-        if (result) {
-          setFormData((prev) => ({
-            ...prev,
-            game: "Dota2",
-            team1: result.team1,
-            team2: result.team2,
-            tournament: result.tournament,
-            riskyTeams: detectRisky(result.team1, result.team2, "Dota"),
-          }));
-          toast.success("Інформацію про Dota 2 матч успішно отримано!");
-        } else {
-          toast.error("Не вдалося розпарсити Dota 2 URL");
-        }
-      } else if (url.includes("hltv.org/matches/")) {
-        result = parseCS2MatchFromUrl(url);
-        if (result) {
-          setFormData((prev) => ({
-            ...prev,
-            game: "CS2",
-            team1: result.team1,
-            team2: result.team2,
-            tournament: result.tournament,
-            riskyTeams: detectRisky(result.team1, result.team2, "CS"),
-          }));
-          toast.success("Інформацію про CS2 матч успішно отримано!");
-        } else {
-          toast.error('Не вдалося знайти "vs" у посиланні');
-        }
-      } else {
-        toast.error("Невідомий формат URL. Підтримуються HLTV (CS2) та Dota 2");
-      }
-    } catch (error) {
-      toast.error("Помилка при парсингу URL матчу");
-      if (import.meta.env.DEV) console.error(error);
-    } finally {
-      setIsParsingMatch(false);
-    }
-  };
-
-  const urlDebounceRef = useRef<ReturnType<typeof setTimeout>>();
-
-  const handleUrlChange = (url: string) => {
-    setFormData((prev) => ({ ...prev, matchUrl: url }));
-
-    if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
-    urlDebounceRef.current = setTimeout(() => {
-      if (url.includes("hltv.org/matches/") || url.includes("dota2")) {
-        parseMatchFromUrl(url);
-      }
-    }, 500);
-  };
-
-  const removeRiskyTeam = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      riskyTeams: prev.riskyTeams.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addExpressEvent = () => {
-    if (expressEvents.length >= 10) {
-      toast.error("Максимум 10 подій в експресі");
-      return;
-    }
-
-    const missingFields = [];
-    if (!formData.team1) missingFields.push("Команда 1");
-    if (!formData.team2) missingFields.push("Команда 2");
-    if (!formData.betType) missingFields.push("Тип прогнозу");
-    if (!formData.selection) missingFields.push("Вибір");
-    if (!formData.odds) missingFields.push("Коефіцієнт");
-
-    if (missingFields.length > 0) {
-      toast.error(`Заповніть наступні поля: ${missingFields.join(", ")}`);
-      return;
-    }
-
-    const newEvent: ExpressEvent = {
-      match: `${formData.team1} vs ${formData.team2}`,
-      betType: formData.betType,
-      selection: formData.selection,
-      odds: formData.odds,
-    };
-
-    setExpressEvents([...expressEvents, newEvent]);
-
-    setFormData((prev) => ({
-      ...prev,
-      matchUrl: "",
-      team1: "",
-      team2: "",
-      tournament: "",
-      betType: "",
-      selection: "",
-      odds: "",
-      riskyTeams: [],
-    }));
-
-    toast.success(`Подія ${expressEvents.length + 1} додана до експресу`);
-  };
-
-  const removeExpressEvent = (index: number) => {
-    setExpressEvents(expressEvents.filter((_, i) => i !== index));
-    toast.success("Подію видалено з експресу");
-  };
-
-  const clearExpressEvents = () => {
-    setExpressEvents([]);
-    setIsExpressFromMatches(false);
-    toast.success("Всі події експресу очищено");
-  };
-
-  const totalExpressOdds = calcTotalExpressOdds(expressEvents);
-  const expressRisk = getExpressRiskLevel(expressEvents.length);
-
-  const convertToUAH = (amount: number, currency: string, rate: number) => {
-    if (currency === "USD") {
-      return amount * rate;
-    }
-    return amount;
-  };
-
-  const updateExpressEvent = (
-    index: number,
-    field: keyof ExpressEvent,
-    value: string,
-  ) => {
-    setExpressEvents((prev) =>
-      prev.map((ev, i) => (i === index ? { ...ev, [field]: value } : ev)),
-    );
-  };
-
-  const processBetSubmission = async () => {
-    setIsSubmitting(true);
-
-    try {
-      const stakeAmount = parseFloat(formData.stake);
-      const exchangeRate = parseFloat(formData.exchangeRate);
-      const winProbability = parseFloat(formData.confidence);
-
-      const stakeInUAH = convertToUAH(
-        stakeAmount,
-        formData.currency,
-        exchangeRate,
-      );
-
-      let betTypeWithCategory: string;
-      let finalOdds: number;
-      let matchName: string;
-
-      if (formData.betCategory === "Експрес") {
-        const totalOdds = calcTotalExpressOdds(expressEvents);
-        finalOdds = totalOdds;
-
-        const eventsString = expressEvents
-          .map(
-            (event, index) =>
-              `${index + 1}. ${event.match} | ${event.betType}: ${event.selection} @${event.odds}`,
-          )
-          .join(" • ");
-
-        betTypeWithCategory = `Експрес ${expressEvents.length}x | ${eventsString}`;
-        matchName = `Експрес ${expressEvents.length}x`;
-      } else {
-        betTypeWithCategory = `${formData.betType} - ${formData.selection}`;
-        finalOdds = parseFloat(formData.odds);
-        matchName = `${formData.team1} vs ${formData.team2}`;
-      }
-
-      let finalGoalId: string | undefined = undefined;
-      if (
-        formData.goalId &&
-        formData.goalId !== "" &&
-        formData.goalId !== "all"
-      ) {
-        finalGoalId = formData.goalId;
-      }
-
-      const record: BetRecord = {
-        date: formData.date,
-        match: matchName,
-        team1: formData.betCategory === "Експрес" ? "Експрес" : formData.team1,
-        team2:
-          formData.betCategory === "Експрес"
-            ? `${expressEvents.length}x`
-            : formData.team2,
-        tournament:
-          formData.betCategory === "Експрес" ? "Експрес" : formData.tournament,
-        format:
-          formData.betCategory === "Експрес"
-            ? `${expressEvents.length}x`
-            : formData.format,
-        game: formData.game === "CS2" ? "CS2" : "Dota2",
-        matchUrl: formData.matchUrl || "",
-        betType: betTypeWithCategory,
-        odds: finalOdds,
-        amount: stakeInUAH,
-        originalAmount: stakeAmount,
-        currency: formData.currency,
-        exchangeRate: formData.currency === "USD" ? exchangeRate : null,
-        result: "Pending" as const,
-        profit: 0,
-        roi: 0,
-        strategy: formData.strategy,
-        riskyTeams: formData.riskyTeams,
-        notes:
-          [
-            formData.reasoning,
-            formData.keyFactors ? `Key Factors: ${formData.keyFactors}` : "",
-            formData.notes ? `Notes: ${formData.notes}` : "",
-          ]
-            .filter(Boolean)
-            .join("\n\n") || "",
-        goalId: finalGoalId,
-        winProbability: isNaN(winProbability) ? undefined : winProbability,
-        logoTeam1:
-          formData.betCategory === "Експрес"
-            ? undefined
-            : prefillLogosRef.current.logoTeam1,
-        logoTeam2:
-          formData.betCategory === "Експрес"
-            ? undefined
-            : prefillLogosRef.current.logoTeam2,
-        expressLogos:
-          formData.betCategory === "Експрес"
-            ? expressEvents.map((e) => ({
-                logoTeam1: e.logoTeam1,
-                logoTeam2: e.logoTeam2,
-              }))
-            : undefined,
-      };
-
-      // 1. Save to API (primary store)
-      const localFallback = (apiId?: string | number) => {
-        // ALWAYS read fresh from localStorage to avoid overwriting recent bet updates
-        const freshBets = UserDataService.getUserData<BetRecord[]>(
-          currentUser,
-          "mybets_data",
-          [],
-        );
-        const recordForStorage = {
-          ...record,
-          // Guarantee unique ID: API id if available, otherwise local UUID
-          id: apiId ?? `local_${crypto.randomUUID()}`,
-          riskyTeams: record.riskyTeams.map((t) => t.name),
-        };
-        UserDataService.setUserDataSync(currentUser, "mybets_data", [
-          recordForStorage as BetRecord,
-          ...freshBets,
-        ]);
-      };
-      try {
-        const bodyToSend: Record<string, unknown> = {
-          match: record.match,
-          team1: record.team1,
-          team2: record.team2,
-          betType: record.betType,
-          odds: record.odds,
-          amount: record.amount,
-          date: record.date,
-          result: record.result,
-          profit: record.profit || 0,
-          strategy: record.strategy || "",
-          format: record.format,
-          game: record.game,
-          currency: record.currency,
-          notes: record.notes || "",
-          goalId: record.goalId || "",
-          matchUrl: record.matchUrl || "",
-          tournament: record.tournament || "",
-          riskyTeams: record.riskyTeams.map((t) => t.name),
-        };
-        const stakeVal = parseFloat(formData.stake);
-        if (!isNaN(stakeVal) && stakeVal > 0) bodyToSend.stake = stakeVal;
-        if (!isNaN(record.originalAmount) && record.originalAmount > 0)
-          bodyToSend.originalAmount = record.originalAmount;
-        if (record.exchangeRate !== null && record.exchangeRate !== undefined)
-          bodyToSend.exchangeRate = record.exchangeRate;
-        if (record.winProbability !== undefined)
-          bodyToSend.winProbability = record.winProbability;
-        if (record.logoTeam1) bodyToSend.logoTeam1 = record.logoTeam1;
-        if (record.logoTeam2) bodyToSend.logoTeam2 = record.logoTeam2;
-
-        const created = await UserDataService.createBet(
-          bodyToSend as Parameters<typeof UserDataService.createBet>[0],
-        );
-        // Cache locally so "Останні записи" reads instantly
-        localFallback(created.id);
-      } catch (err) {
-        if (import.meta.env.DEV)
-          console.warn("[API] Bet save failed, caching to localStorage:", err);
-        localFallback();
-      }
-
-      if (finalGoalId) {
-        const goalName = activeGoals.find((g) => g.id === finalGoalId)?.name;
-        toast.success(
-          `✅ Запис створено та прив'язано до цілі "${goalName}". Переглянути можна на екрані "Останні записи".`,
-        );
-      } else {
-        toast.success(
-          'Ваш запис успішно створено! Переглянути його можна на екрані "Останні записи".',
-        );
-      }
-
-      setFormData(getDefaultFormData(primaryStrategy?.name));
-
-      setExpressEvents([]);
-      setStrategyViolations([]);
-      setIsPrefilled(false);
-      setIsExpressFromMatches(false);
-
-      onRecordAdded?.();
-    } catch (error) {
-      toast.error("Помилка при додаванні запису");
-      if (import.meta.env.DEV) console.error(error);
-    } finally {
-      setIsSubmitting(false);
-      setPendingSubmit(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formValid) {
-      const missing: Record<string, boolean> = {};
-      if (!formData.team1) missing.team1 = true;
-      if (!formData.team2) missing.team2 = true;
-      if (!formData.betType) missing.betType = true;
-      if (!formData.selection) missing.selection = true;
-      if (!formData.odds || parseFloat(formData.odds) <= 1) missing.odds = true;
-      if (!formData.stake || parseFloat(formData.stake) <= 0)
-        missing.stake = true;
-      setSubmitErrors(missing);
-      toast.error("Заповніть усі обов'язкові поля — вони підсвічені червоним");
-      return;
-    }
-    setSubmitErrors({});
-
-    // Auto-initialize bankroll ONLY if user has NEVER set it AND has no prior bets
-    const betCurrency = (formData.currency as "UAH" | "USD") || "UAH";
-    const needsUAHInit =
-      betCurrency === "UAH" && !BankrollService.isInitialized(currentUser);
-    const needsUSDInit =
-      betCurrency === "USD" && !BankrollService.isInitializedUSD(currentUser);
-    if (needsUAHInit || needsUSDInit) {
-      const existingBets = UserDataService.getUserData<BetRecord[]>(
-        currentUser,
-        "mybets_data",
-        [],
-      );
-      if (existingBets.length === 0) {
-        const stake = parseFloat(formData.stake);
-        if (stake > 0) {
-          const bankAmount = stake * 5;
-          const rate = parseFloat(formData.exchangeRate) || 41.5;
-          await BankrollService.setInitialBank(
-            currentUser,
-            bankAmount,
-            betCurrency,
-            rate,
-          );
-          toast.info(
-            `Початковий банк встановлено: ${bankAmount} ${betCurrency === "USD" ? "$" : "₴"}`,
-          );
-        }
-      }
-    }
-
-    // Warning if stake exceeds current bank
-    const stake = parseFloat(formData.stake);
-    const bankData = BankrollService.getBankrollData(currentUser);
-    if (stake > 0 && bankData) {
-      const currBank =
-        formData.currency === "USD"
-          ? bankData.initialBankUSD || 0
-          : bankData.initialBankUAH || 0;
-      if (stake > currBank * 1.5 && currBank > 0) {
-        toast.warning(
-          `Сума ставки (${stake} ${formData.currency === "USD" ? "$" : "₴"}) перевищує банк (${currBank} ${formData.currency === "USD" ? "$" : "₴"}) у ${(stake / currBank).toFixed(1)}×`,
-        );
-      }
-    }
-
-    if (formData.betCategory === "Експрес" && expressEvents.length === 0) {
-      toast.error("Додайте хоча б одну подію до експресу");
-      return;
-    }
-
-    if (formData.betCategory === "Експрес") {
-      const missingOdds = expressEvents.filter(
-        (e) => !e.odds || parseFloat(e.odds) <= 0,
-      );
-      if (missingOdds.length > 0) {
-        toast.error(
-          `Заповніть коефіцієнти для всіх подій експресу (${missingOdds.length} без коефіцієнта)`,
-        );
-        return;
-      }
-    }
-
-    const bets = UserDataService.getUserData<BetRecord[]>(
-      currentUser,
-      "mybets_data",
-      [],
-    );
-    const validation = BankrollService.validateBetAmount(
-      currentUser,
-      bets as unknown as Bet[],
-      parseFloat(formData.stake),
-      betCurrency,
-    );
-
-    if (validation.warning) {
-      toast.warning(validation.warning);
-    }
-
-    if (strategyViolations.length > 0) {
-      setShowViolationDialog(true);
-      setPendingSubmit(true);
-      return;
-    }
-
-    await processBetSubmission();
-  };
-
-  const handleViolationConfirm = async () => {
-    setShowViolationDialog(false);
-    await processBetSubmission();
-  };
-
-  const handleViolationCancel = () => {
-    setShowViolationDialog(false);
-    setPendingSubmit(false);
-  };
-
-  const handleConfidenceChange = (value: string) => {
-    const numValue = parseFloat(value);
-    if (value === "" || isNaN(numValue)) {
-      setFormData((prev) => ({ ...prev, confidence: value }));
-      return;
-    }
-    if (numValue > MAX_CONFIDENCE) {
-      setFormData((prev) => ({ ...prev, confidence: String(MAX_CONFIDENCE) }));
-      toast.warning(
-        `⚠️ Максимальна впевненість обмежена до ${MAX_CONFIDENCE}%. У спорті 100% впевненість нереалістична.`,
-      );
-      return;
-    }
-    if (numValue < 1) {
-      setFormData((prev) => ({ ...prev, confidence: "1" }));
-      return;
-    }
-    setFormData((prev) => ({ ...prev, confidence: value }));
-  };
-
-  const applyKellyAmount = (amount: number) => {
-    if (amount > 0) {
-      setFormData((prev) => ({ ...prev, stake: String(amount) }));
-      toast.success(`Суму змінено на ${amount} ₴ (рекомендація Келлі)`);
-    }
-  };
-
-  const hasConfidence =
-    formData.confidence !== "" && !isNaN(parseFloat(formData.confidence));
-
-  const {
-    expectedValue,
-    potentialProfit,
-    evVerdict,
-    valueBetAnalysis,
-    kellyData,
-    overconfidenceWarning,
-  } = useMemo(() => {
-    const ev = calcExpectedValue(
-      formData.betCategory,
-      expressEvents,
-      formData.odds,
-      formData.confidence,
-    );
-    const profit = calcPotentialProfit(
-      formData.betCategory,
-      expressEvents,
-      formData.odds,
-      formData.stake,
-    );
-    const verdict = getEVVerdict(parseFloat(ev));
-    const value = getValueBetAnalysis(
-      formData.betCategory,
-      expressEvents,
-      formData.odds,
-      formData.confidence,
-    );
-
-    let kelly = null;
-    if (hasConfidence) {
-      // Use API-synced bets (fallback to localStorage cache)
-      const betsForKelly =
-        apiBets.length > 0
-          ? apiBets
-          : UserDataService.getUserData<BetRecord[]>(
-              currentUser,
-              "mybets_data",
-              [],
-            );
-      const bankrollStats = BankrollService.getBankrollStats(
-        currentUser,
-        apiBets as unknown as Bet[],
-      );
-      kelly = calcKellyCriterion(
-        formData.betCategory,
-        expressEvents,
-        formData.odds,
-        formData.confidence,
-        bankrollStats.currentBank,
-        maxStakePercent,
-      );
-    }
-
-    let warning = null;
-    if (hasConfidence) {
-      warning = getOverconfidenceWarning(
-        formData.betCategory,
-        expressEvents,
-        formData.odds,
-        formData.confidence,
-      );
-    }
-
-    return {
-      expectedValue: ev,
-      potentialProfit: profit,
-      evVerdict: verdict,
-      valueBetAnalysis: value,
-      kellyData: kelly,
-      overconfidenceWarning: warning,
-    };
-  }, [
-    formData.betCategory,
-    formData.odds,
-    formData.stake,
-    formData.confidence,
-    expressEvents,
-    currentUser,
-    maxStakePercent,
-    hasConfidence,
-  ]);
-
-  const isValuePositive = parseFloat(expectedValue) > 0;
-  const confidenceValue = parseFloat(formData.confidence);
-  const isHighConfidence = hasConfidence && confidenceValue > 90;
-  const potentialProfitInCurrency = potentialProfit;
-  const stakeInCurrency = formData.stake;
-
-  const getCurrencySymbol = () => {
-    return "₴";
-  };
-
-  const inputClass =
-    "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors";
-  const selectTriggerClass =
-    "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 focus:border-gray-900 focus:ring-0 transition-colors";
-  const labelClass = "text-sm font-medium text-gray-700";
-  const sectionTitleClass =
-    "text-base font-semibold text-gray-900 flex items-center gap-2.5 bg-gray-100 px-4 py-2.5 -mx-6";
-
-  void potentialProfit;
-  void stakeInCurrency;
-  void pendingSubmit;
-
-  // ── Tilt protection: block after N consecutive losses ──
-  const tiltBlock = useTiltBlock(currentUser, primaryStrategy, apiBets);
-
-  const allExpressEventsComplete =
-    expressEvents.length > 0 &&
-    expressEvents.every(
-      (e) => e.odds && parseFloat(e.odds) > 0 && e.selection && e.betType,
-    );
-
-  const formValid =
-    formData.betCategory === "Експрес"
-      ? formData.stake &&
-        parseFloat(formData.stake) > 0 &&
-        allExpressEventsComplete
-      : !!(
-          formData.team1 &&
-          formData.team2 &&
-          formData.betType &&
-          formData.selection &&
-          formData.odds &&
-          parseFloat(formData.odds) > 1 &&
-          formData.stake &&
-          parseFloat(formData.stake) > 0
-        );
+  const h = useBettingForm(props);
 
   return (
     <div className="space-y-6">
       <StrategyViolationDialog
-        open={showViolationDialog}
-        onOpenChange={setShowViolationDialog}
-        strategyName={primaryStrategy?.name || ""}
-        violations={strategyViolations}
-        onConfirm={handleViolationConfirm}
-        onCancel={handleViolationCancel}
+        open={h.showViolationDialog}
+        onOpenChange={h.setShowViolationDialog}
+        strategyName={h.primaryStrategy?.name || ""}
+        violations={h.strategyViolations}
+        onConfirm={h.handleViolationConfirm}
+        onCancel={h.handleViolationCancel}
       />
 
       <BettingFormAlerts
-        tiltBlock={tiltBlock}
-        primaryStrategy={primaryStrategy}
-        strategyViolations={strategyViolations}
+        tiltBlock={h.tiltBlock}
+        primaryStrategy={h.primaryStrategy}
+        strategyViolations={h.strategyViolations}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div
-          className={`lg:col-span-2 space-y-6 ${tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
+          className={`lg:col-span-2 space-y-6 ${h.tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
         >
-          <form onSubmit={handleSubmit} noValidate className="space-y-6">
-            {/* Main Form */}
+          <form onSubmit={h.handleSubmit} noValidate className="space-y-6">
             <div
               className="bg-white border border-gray-300 rounded-3xl overflow-hidden"
               style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
             >
               <BettingFormSettings
                 data={{
-                  date: formData.date,
-                  game: formData.game,
-                  betCategory: formData.betCategory,
-                  format: formData.format,
-                  goalId: formData.goalId,
+                  date: h.formData.date,
+                  game: h.formData.game,
+                  betCategory: h.formData.betCategory,
+                  format: h.formData.format,
+                  goalId: h.formData.goalId,
                 }}
-                isPrefilled={isPrefilled}
-                isExpressFromMatches={isExpressFromMatches}
-                activeGoals={activeGoals}
+                isPrefilled={h.isPrefilled}
+                isExpressFromMatches={h.isExpressFromMatches}
+                activeGoals={h.activeGoals}
                 classes={{
-                  input: inputClass,
-                  selectTrigger: selectTriggerClass,
-                  label: labelClass,
-                  sectionTitle: sectionTitleClass,
+                  input: h.css.input,
+                  selectTrigger: h.css.select,
+                  label: h.css.label,
+                  sectionTitle: h.css.section,
                 }}
-                onClearForm={clearForm}
+                onClearForm={h.clearForm}
                 onFieldChange={(field, value) =>
-                  setFormData((prev) => ({ ...prev, [field]: value }))
+                  h.setFormData((prev) => ({ ...prev, [field]: value }))
                 }
                 onCategoryChange={(value) => {
-                  setFormData((prev) => ({ ...prev, betCategory: value }));
+                  h.setFormData((prev) => ({ ...prev, betCategory: value }));
                   if (value === "Ординар") {
-                    setExpressEvents([]);
-                    setIsExpressFromMatches(false);
+                    h.clearExpressEvents();
                   }
                 }}
                 onGoalSelect={(goalId) => {
                   const selectedGoalId = goalId === "all" ? "" : goalId;
                   if (selectedGoalId) {
-                    const lastStake = getLastStakeForGoal(selectedGoalId);
+                    const lastStake = h.getLastStakeForGoal(selectedGoalId);
                     if (lastStake) {
-                      setFormData((prev) => ({
+                      h.setFormData((prev) => ({
                         ...prev,
                         goalId: selectedGoalId,
                         stake: lastStake,
                       }));
                       toast.info(
-                        "Суму автоматично заповнено з останнього прогнозу цілі: " +
+                        "Суму заповнено з останнього прогнозу цілі: " +
                           lastStake +
                           " ₴",
                       );
                       return;
                     }
                   }
-                  setFormData((prev) => ({ ...prev, goalId: selectedGoalId }));
+                  h.setFormData((prev) => ({
+                    ...prev,
+                    goalId: selectedGoalId,
+                  }));
                 }}
               />
 
-              {!(isExpressFromMatches && expressEvents.length > 0) && (
+              {!(h.isExpressFromMatches && h.expressEvents.length > 0) && (
                 <>
                   <div className="border-t border-gray-100" />
                   <div className="px-6 pb-6">
                     <BettingFormMatchSection
                       data={{
-                        game: formData.game,
-                        format: formData.format,
-                        betCategory: formData.betCategory,
-                        matchUrl: formData.matchUrl,
-                        team1: formData.team1,
-                        team2: formData.team2,
-                        betType: formData.betType,
-                        selection: formData.selection,
-                        odds: formData.odds,
-                        logoTeam1: prefillLogosRef.current.logoTeam1,
-                        logoTeam2: prefillLogosRef.current.logoTeam2,
+                        game: h.formData.game,
+                        format: h.formData.format,
+                        betCategory: h.formData.betCategory,
+                        matchUrl: h.formData.matchUrl,
+                        team1: h.formData.team1,
+                        team2: h.formData.team2,
+                        betType: h.formData.betType,
+                        selection: h.formData.selection,
+                        odds: h.formData.odds,
+                        logoTeam1: h.prefillLogosRef.current.logoTeam1,
+                        logoTeam2: h.prefillLogosRef.current.logoTeam2,
                       }}
-                      isParsing={isParsingMatch}
-                      isExpressFromMatches={isExpressFromMatches}
-                      expressEventsCount={expressEvents.length}
+                      isParsing={h.isParsingMatch}
+                      isExpressFromMatches={h.isExpressFromMatches}
+                      expressEventsCount={h.expressEvents.length}
                       classes={{
-                        input: inputClass,
-                        selectTrigger: selectTriggerClass,
-                        label: labelClass,
-                        sectionTitle: sectionTitleClass,
+                        input: h.css.input,
+                        selectTrigger: h.css.select,
+                        label: h.css.label,
+                        sectionTitle: h.css.section,
                       }}
                       onFieldChange={(field, value) =>
-                        setFormData((prev) => ({ ...prev, [field]: value }))
+                        h.setFormData((prev) => ({ ...prev, [field]: value }))
                       }
-                      onParseUrl={() => parseMatchFromUrl(formData.matchUrl)}
-                      onUrlChange={(url) => handleUrlChange(url)}
-                      onAddToExpress={addExpressEvent}
-                      submitErrors={submitErrors}
+                      onParseUrl={() => {
+                        h.handleUrlChange(h.formData.matchUrl);
+                      }}
+                      onUrlChange={(url) => h.handleUrlChange(url)}
+                      onAddToExpress={h.addExpressEvent}
+                      submitErrors={h.submitErrors}
                     />
                   </div>
                 </>
               )}
 
-              {(formData.betCategory === "Ординар" ||
-                (formData.betCategory === "Експрес" &&
-                  expressEvents.length > 0)) && (
+              {(h.formData.betCategory === "Ординар" ||
+                (h.formData.betCategory === "Експрес" &&
+                  h.expressEvents.length > 0)) && (
                 <div className="px-6 pb-6">
                   <BettingFormFinances
                     data={{
-                      stake: formData.stake,
-                      currency: formData.currency,
-                      confidence: formData.confidence,
+                      stake: h.formData.stake,
+                      currency: h.formData.currency,
+                      confidence: h.formData.confidence,
                     }}
-                    isSubmitting={isSubmitting}
-                    isBlocked={tiltBlock.blocked}
-                    isHighConfidence={isHighConfidence}
+                    isSubmitting={h.isSubmitting}
+                    isBlocked={h.tiltBlock.blocked}
+                    isHighConfidence={h.isHighConfidence}
                     showSection={true}
-                    format={formData.format}
+                    format={h.formData.format}
                     classes={{
-                      input: inputClass,
-                      label: labelClass,
-                      sectionTitle: sectionTitleClass,
+                      input: h.css.input,
+                      label: h.css.label,
+                      sectionTitle: h.css.section,
                     }}
                     onFieldChange={(field, value) =>
-                      setFormData((prev) => ({ ...prev, [field]: value }))
+                      h.setFormData((prev) => ({ ...prev, [field]: value }))
                     }
-                    onConfidenceChange={handleConfidenceChange}
-                    submitErrors={submitErrors}
+                    onConfidenceChange={h.handleConfidenceChange}
+                    submitErrors={h.submitErrors}
                   />
                 </div>
               )}
             </div>
 
-            {/* Express Events Display */}
-            {formData.betCategory === "Експрес" && expressEvents.length > 0 && (
-              <ExpressEventBuilder
-                expressEvents={expressEvents}
-                totalExpressOdds={totalExpressOdds}
-                expressRisk={expressRisk}
-                allExpressEventsComplete={allExpressEventsComplete}
-                game={formData.game}
-                format={formData.format}
-                onUpdateEvent={updateExpressEvent}
-                onRemoveEvent={removeExpressEvent}
-                onClearAll={clearExpressEvents}
-              />
-            )}
+            {h.formData.betCategory === "Експрес" &&
+              h.expressEvents.length > 0 && (
+                <ExpressEventBuilder
+                  expressEvents={h.expressEvents}
+                  totalExpressOdds={h.totalExpressOdds}
+                  expressRisk={h.expressRisk}
+                  allExpressEventsComplete={h.allExpressEventsComplete}
+                  game={h.formData.game}
+                  format={h.formData.format}
+                  onUpdateEvent={h.updateExpressEvent}
+                  onRemoveEvent={h.removeExpressEvent}
+                  onClearAll={h.clearExpressEvents}
+                />
+              )}
 
-            {/* Submit Button */}
-            {(formData.betCategory === "Ординар" ||
-              (formData.betCategory === "Експрес" &&
-                expressEvents.length > 0)) && (
+            {(h.formData.betCategory === "Ординар" ||
+              (h.formData.betCategory === "Експрес" &&
+                h.expressEvents.length > 0)) && (
               <Button
                 type="submit"
                 id="submit-btn"
                 disabled={
-                  isSubmitting ||
-                  tiltBlock.blocked ||
-                  (formData.betCategory === "Експрес" &&
-                    !allExpressEventsComplete)
+                  h.isSubmitting ||
+                  h.tiltBlock.blocked ||
+                  (h.formData.betCategory === "Експрес" &&
+                    !h.allExpressEventsComplete)
                 }
                 className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
               >
-                {isSubmitting ? (
+                {h.isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
                     Додавання...
@@ -1517,30 +220,29 @@ export default function CS2BettingForm({
           </form>
         </div>
 
-        {/* Right Sidebar */}
         <BettingSidebar
-          stake={formData.stake}
-          odds={formData.odds}
-          confidence={formData.confidence}
-          betCategory={formData.betCategory}
-          currency={formData.currency}
-          totalExpressOdds={totalExpressOdds}
-          expressEventsCount={expressEvents.length}
-          potentialProfit={potentialProfit}
-          potentialProfitInCurrency={potentialProfitInCurrency}
-          expectedValue={expectedValue}
-          evVerdict={evVerdict}
-          isValuePositive={isValuePositive}
-          valueBetAnalysis={valueBetAnalysis}
-          kellyData={kellyData}
-          overconfidenceWarning={overconfidenceWarning}
-          hasConfidence={hasConfidence}
-          isHighConfidence={isHighConfidence}
-          riskyTeams={formData.riskyTeams}
-          maxStakePercent={maxStakePercent}
-          onMaxStakePercentChange={setMaxStakePercent}
-          onApplyKellyAmount={applyKellyAmount}
-          onRemoveRiskyTeam={removeRiskyTeam}
+          stake={h.formData.stake}
+          odds={h.formData.odds}
+          confidence={h.formData.confidence}
+          betCategory={h.formData.betCategory}
+          currency={h.formData.currency}
+          totalExpressOdds={h.totalExpressOdds}
+          expressEventsCount={h.expressEvents.length}
+          potentialProfit={h.potentialProfit}
+          potentialProfitInCurrency={h.potentialProfit}
+          expectedValue={h.expectedValue}
+          evVerdict={h.evVerdict}
+          isValuePositive={h.isValuePositive}
+          valueBetAnalysis={h.valueBetAnalysis}
+          kellyData={h.kellyData}
+          overconfidenceWarning={h.overconfidenceWarning}
+          hasConfidence={h.hasConfidence}
+          isHighConfidence={h.isHighConfidence}
+          riskyTeams={h.formData.riskyTeams}
+          maxStakePercent={h.maxStakePercent}
+          onMaxStakePercentChange={h.setMaxStakePercent}
+          onApplyKellyAmount={h.applyKellyAmount}
+          onRemoveRiskyTeam={h.removeRiskyTeam}
         />
       </div>
     </div>
