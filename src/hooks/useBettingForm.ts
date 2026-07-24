@@ -379,8 +379,8 @@ export function useBettingForm({
   }, []);
 
   useEffect(() => {
-    if (currentUser) loadActiveGoals();
-  }, [currentUser]);
+    loadActiveGoals();
+  }, [currentUser, loadActiveGoals]);
 
   useEffect(() => {
     if (!prefillData) {
@@ -464,27 +464,18 @@ export function useBettingForm({
         setPrimaryStrategy(null);
         setFormData((prev) => ({ ...prev, strategy: "" }));
       }
+      loadActiveGoals();
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   // ── Helpers ──
-  const loadActiveGoals = async () => {
-    let goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
-    if (goals.length === 0) {
-      try {
-        const apiGoals = (await UserDataService.fetchGoals()) as Goal[];
-        if (apiGoals.length > 0) {
-          goals = apiGoals;
-          UserDataService.setUserDataSync(currentUser, "goals", goals);
-        }
-      } catch {
-        /* ignore */
-      }
-    }
+  const loadActiveGoals = useCallback(() => {
+    if (!currentUser) return;
+    const goals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
     setActiveGoals(goals.filter((g) => g.status === "active"));
-  };
+  }, [currentUser]);
 
   const checkRiskyTeams = (
     team1: string,
