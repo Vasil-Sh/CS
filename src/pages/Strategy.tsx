@@ -3,9 +3,11 @@ import { Target, Flag, Activity, DollarSign, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import StrategyOverview from "@/components/StrategyOverview";
 import GoalsManager from "@/components/GoalsManager";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { UserDataService } from "@/lib/userDataService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
+import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
 import { PageHeader } from "@/components/PageHeader";
 import type { Bet } from "@/types/betting";
@@ -53,10 +55,7 @@ const computeTodayPnL = (bets: Bet[]) => {
       return false;
     }
   });
-  const profit = todayBets.reduce(
-    (sum, b) => sum + Number(b.profit || 0) + Number(b.originalProfit || 0),
-    0,
-  );
+  const profit = todayBets.reduce((sum, b) => sum + Number(b.profit || 0), 0);
   const pending = todayBets.filter((b) => b.result === "Pending").length;
   return { profit, count: todayBets.length, pending };
 };
@@ -73,12 +72,7 @@ const compute7DayProfit = (bets: Bet[]): number[] => {
         return false;
       }
     });
-    days.push(
-      dayBets.reduce(
-        (sum, b) => sum + Number(b.profit || 0) + Number(b.originalProfit || 0),
-        0,
-      ),
-    );
+    days.push(dayBets.reduce((sum, b) => sum + Number(b.profit || 0), 0));
   }
   return days;
 };
@@ -91,7 +85,7 @@ const computeBestStrategy = (bets: Bet[]) => {
     const name = b.strategy || "";
     if (!name) return;
     if (!byStrat[name]) byStrat[name] = { profit: 0, stake: 0, count: 0 };
-    byStrat[name].profit += (b.profit || 0) + (b.originalProfit || 0);
+    byStrat[name].profit += b.profit || 0;
     byStrat[name].stake += b.originalAmount || b.amount || 0;
     byStrat[name].count++;
   });
@@ -166,6 +160,8 @@ export default function Strategy() {
   const { user } = useAuth();
   const currentUser = user?.username || "default";
   const strategyVersion = useAppStore((s) => s.strategyVersion);
+  const { theme, toggleTheme } = useTheme();
+  const isDarkTheme = theme === "dark";
 
   useEffect(() => {
     (async () => {
@@ -241,8 +237,8 @@ export default function Strategy() {
       <PageHeader
         title="Стратегії та Цілі"
         currentUser={currentUser || "User"}
-        isDarkTheme={false}
-        onToggleTheme={() => {}}
+        isDarkTheme={isDarkTheme}
+        onToggleTheme={toggleTheme}
         showThemeToggle={false}
       />
 
@@ -284,9 +280,7 @@ export default function Strategy() {
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-gray-400 mb-1">
-                    —
-                  </div>
+                  <div className="text-3xl font-bold text-gray-400 mb-1">—</div>
                   <span className="text-sm text-gray-400">
                     Сьогодні ставок немає
                   </span>
@@ -343,10 +337,7 @@ export default function Strategy() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Trophy
-                    className="h-5 w-5 text-primary"
-                    strokeWidth={1.5}
-                  />
+                  <Trophy className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <span className="text-xl font-semibold text-gray-900">
                   Найкраща стратегія
@@ -421,9 +412,7 @@ export default function Strategy() {
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-gray-400 mb-1">
-                    —
-                  </div>
+                  <div className="text-3xl font-bold text-gray-400 mb-1">—</div>
                   <span className="text-sm text-gray-400">
                     Потрібно мін. 3 ставки
                   </span>
@@ -434,10 +423,7 @@ export default function Strategy() {
             <div className="bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Target
-                    className="h-5 w-5 text-primary"
-                    strokeWidth={1.5}
-                  />
+                  <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <span className="text-xl font-semibold text-gray-900">
                   Стратегій / Цілей
@@ -811,10 +797,14 @@ export default function Strategy() {
           {/* Tab content */}
           <div>
             <div className={activeTab === "strategies" ? "" : "hidden"}>
-              <StrategyOverview />
+              <ErrorBoundary>
+                <StrategyOverview />
+              </ErrorBoundary>
             </div>
             <div className={activeTab === "goals" ? "" : "hidden"}>
-              <GoalsManager />
+              <ErrorBoundary>
+                <GoalsManager />
+              </ErrorBoundary>
             </div>
           </div>
         </div>
