@@ -334,10 +334,17 @@ export function getDota2MatchStatus(
   const s1 = match.score1 ?? null;
   const s2 = match.score2 ?? null;
 
-  // Backend says upcoming — only flip to "live" if scores are actually present
-  // (non-null AND non-zero, since tips.gg sends 0:0 for not-started matches).
+  // Backend says upcoming — check if match has actually started (date-based).
+  // tips.gg often lags behind: match is already playing but scraper hasn't
+  // picked up the .live CSS class yet. Use a 4h window as safety against
+  // stale/postponed matches showing as live forever.
   if (backendStatus === "upcoming") {
     if (s1 !== null && s2 !== null && (s1 > 0 || s2 > 0)) return "live";
+    const matchDate = new Date(match.date);
+    if (matchDate <= new Date()) {
+      const ageMs = Date.now() - matchDate.getTime();
+      if (ageMs < 4 * 60 * 60 * 1000) return "live";
+    }
     return "upcoming";
   }
 

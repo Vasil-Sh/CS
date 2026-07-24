@@ -31,6 +31,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
+import PastDaysModal from "@/components/matches/PastDaysModal";
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
@@ -80,12 +81,7 @@ import {
 
 // Form Stability Types
 type FormStability =
-  | "hot_streak"
-  | "stable"
-  | "momentum"
-  | "falling"
-  | "slump"
-  | "inconsistent";
+  "hot_streak" | "stable" | "momentum" | "falling" | "slump" | "inconsistent";
 
 interface RiskyTeam {
   name: string;
@@ -94,7 +90,7 @@ interface RiskyTeam {
   notes: string;
 }
 
-interface Match {
+export interface Match {
   id: string;
   date: string;
   team1: string;
@@ -566,7 +562,7 @@ export default function Matches() {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "upcoming" | "live" | "finished"
   >("all");
-  const [showPastDays, setShowPastDays] = useState(false);
+  const [pastDaysModalOpen, setPastDaysModalOpen] = useState(false);
   const [visibleColumns, setVisibleColumns] =
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
@@ -600,7 +596,9 @@ export default function Matches() {
   const fetchGenRef = useRef(0);
 
   // Polling backoff refs (per-game)
-  const pollBackoffRef = useRef<Record<string, { failCount: number; maxDelay: number }>>({});
+  const pollBackoffRef = useRef<
+    Record<string, { failCount: number; maxDelay: number }>
+  >({});
 
   // Match ratings state
   const [matchRatings, setMatchRatings] =
@@ -633,7 +631,7 @@ export default function Matches() {
     setFilterDayOfWeek("all");
     setFilterRisk("all");
     setFilterTournament("all");
-    setShowPastDays(false);
+    setPastDaysModalOpen(false);
     setSearchQuery("");
     const defaults = new Set(
       COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id),
@@ -650,7 +648,6 @@ export default function Matches() {
     filterDayOfWeek !== "all" ||
     filterRisk !== "all" ||
     filterTournament !== "all" ||
-    showPastDays ||
     searchQuery !== "";
 
   useEffect(() => {
@@ -672,11 +669,17 @@ export default function Matches() {
         const resp = await fetch(endpoint);
         if (!resp.ok) {
           // Exponential backoff: count failures, skip polls when failing consistently
-          const bo = pollBackoffRef.current[game] || { failCount: 0, maxDelay: 120_000 };
+          const bo = pollBackoffRef.current[game] || {
+            failCount: 0,
+            maxDelay: 120_000,
+          };
           bo.failCount++;
           pollBackoffRef.current[game] = bo;
           if (bo.failCount > 5) {
-            if (import.meta.env.DEV) console.warn(`[Matches] ${game} polling suppressed after 5 consecutive failures`);
+            if (import.meta.env.DEV)
+              console.warn(
+                `[Matches] ${game} polling suppressed after 5 consecutive failures`,
+              );
             return; // Stop polling temporarily
           }
           return;
@@ -722,8 +725,9 @@ export default function Matches() {
               maxScore >= winsNeeded &&
               Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
 
-            // Derive status: trust scores first, fall back to live-scores status
-            const newStatus = isScoreDecided
+            // Derive status: trust scores first, fall back to live-scores status,
+            // then date-based (scraper may lag behind actual match start).
+            const newStatus: "upcoming" | "live" | "finished" = isScoreDecided
               ? "finished"
               : m.matchStatus === "live" && update.status === "finished"
                 ? "live" // live-scores parser falsely marks 1:0 as finished
@@ -731,7 +735,17 @@ export default function Matches() {
                   ? "finished"
                   : update.status === "live"
                     ? "live"
-                    : m.matchStatus;
+                    : (() => {
+                        // No clear signal from live-scores — check if match
+                        // should be live based on start time (≤4h ago).
+                        if (hasScores) return m.matchStatus;
+                        const matchDate = new Date(m.date);
+                        if (matchDate <= new Date()) {
+                          const ageMs = Date.now() - matchDate.getTime();
+                          if (ageMs < 4 * 60 * 60 * 1000) return "live";
+                        }
+                        return m.matchStatus;
+                      })();
 
             return {
               ...m,
@@ -743,7 +757,10 @@ export default function Matches() {
         );
       } catch {
         // Count failure for backoff
-        const bo = pollBackoffRef.current[game] || { failCount: 0, maxDelay: 120_000 };
+        const bo = pollBackoffRef.current[game] || {
+          failCount: 0,
+          maxDelay: 120_000,
+        };
         bo.failCount++;
         pollBackoffRef.current[game] = bo;
       }
@@ -1074,125 +1091,137 @@ export default function Matches() {
   } = useMemo(() => {
     const todayKey = getTodayDateKey();
     const filtered = matches.filter((match) => {
-    // Hide stale "upcoming" matches from past dates — postponed tips.gg data
-    // Live and finished matches from past dates are kept (results view).
-    const matchDateKey = getDateKey(match.date);
-    if (
-      matchDateKey < todayKey &&
-      match.matchStatus === "upcoming" &&
-      !showPastDays
-    )
-      return false;
-    if (filterGame === "CS2" && match.game !== "CS2") return false;
-    if (filterGame === "Dota2" && match.game !== "Dota2") return false;
-    if (filterDayOfWeek !== "all") {
-      const dateKey = getDateKey(match.date);
-      const matchDate = new Date(dateKey + "T12:00:00");
-      const matchDayIdx = matchDate.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
-      const dayMap: Record<string, number> = {
-        sun: 0,
-        mon: 1,
-        tue: 2,
-        wed: 3,
-        thu: 4,
-        fri: 5,
-        sat: 6,
-      };
-      if (dayMap[filterDayOfWeek] !== matchDayIdx) return false;
-    }
-    if (filterRisk === "safe" && match.risk > 30) return false;
-    if (filterRisk === "moderate" && (match.risk <= 30 || match.risk > 50))
-      return false;
-    if (filterRisk === "high" && match.risk <= 50) return false;
-    if (filterMatchType !== "all" && match.matchType !== filterMatchType)
-      return false;
-    if (filterTournament !== "all" && !match.context.includes(filterTournament))
-      return false;
-    if (filterStatus !== "all" && match.matchStatus !== filterStatus)
-      return false;
-    if (
-      searchQuery &&
-      !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !match.team2.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    return true;
-  });
-
-  // Sort matches
-  const sorted = [...filtered].sort((a, b) => {
-    let comparison = 0;
-    switch (sortBy) {
-      case "date":
-        comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-        break;
-      case "confidence":
-        comparison = b.aiConfidence - a.aiConfidence;
-        break;
-      case "risk":
-        comparison = a.risk - b.risk;
-        break;
-      case "upset":
-        comparison = b.upsetProbability - a.upsetProbability;
-        break;
-      case "odds":
-        comparison =
-          Math.max(a.odds.team1 || 0, a.odds.team2 || 0) -
-          Math.max(b.odds.team1 || 0, b.odds.team2 || 0);
-        break;
-      case "status": {
-        const statusDiff =
-          getStatusPriority(a.matchStatus) - getStatusPriority(b.matchStatus);
-        if (statusDiff !== 0) {
-          comparison = statusDiff;
-        } else {
-          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-        }
-        break;
+      // Past date matches are shown in the "Минулі дні" modal, not inline.
+      const matchDateKey = getDateKey(match.date);
+      if (matchDateKey < todayKey) return false;
+      if (filterGame === "CS2" && match.game !== "CS2") return false;
+      if (filterGame === "Dota2" && match.game !== "Dota2") return false;
+      if (filterDayOfWeek !== "all") {
+        const dateKey = getDateKey(match.date);
+        const matchDate = new Date(dateKey + "T12:00:00");
+        const matchDayIdx = matchDate.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+        const dayMap: Record<string, number> = {
+          sun: 0,
+          mon: 1,
+          tue: 2,
+          wed: 3,
+          thu: 4,
+          fri: 5,
+          sat: 6,
+        };
+        if (dayMap[filterDayOfWeek] !== matchDayIdx) return false;
       }
-    }
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
+      if (filterRisk === "safe" && match.risk > 30) return false;
+      if (filterRisk === "moderate" && (match.risk <= 30 || match.risk > 50))
+        return false;
+      if (filterRisk === "high" && match.risk <= 50) return false;
+      if (filterMatchType !== "all" && match.matchType !== filterMatchType)
+        return false;
+      if (
+        filterTournament !== "all" &&
+        !match.context.includes(filterTournament)
+      )
+        return false;
+      if (filterStatus !== "all" && match.matchStatus !== filterStatus)
+        return false;
+      if (
+        searchQuery &&
+        !match.team1.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !match.team2.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+        return false;
+      return true;
+    });
 
-  const grouped: Record<string, Match[]> = {};
-  grouped[todayKey] = [];
-  sorted.forEach((match) => {
-    const key = getDateKey(match.date);
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(match);
-  });
+    // Sort matches
+    const sorted = [...filtered].sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "date":
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        case "confidence":
+          comparison = b.aiConfidence - a.aiConfidence;
+          break;
+        case "risk":
+          comparison = a.risk - b.risk;
+          break;
+        case "upset":
+          comparison = b.upsetProbability - a.upsetProbability;
+          break;
+        case "odds":
+          comparison =
+            Math.max(a.odds.team1 || 0, a.odds.team2 || 0) -
+            Math.max(b.odds.team1 || 0, b.odds.team2 || 0);
+          break;
+        case "status": {
+          const statusDiff =
+            getStatusPriority(a.matchStatus) - getStatusPriority(b.matchStatus);
+          if (statusDiff !== 0) {
+            comparison = statusDiff;
+          } else {
+            comparison =
+              new Date(a.date).getTime() - new Date(b.date).getTime();
+          }
+          break;
+        }
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
 
-  const allKeys = Object.keys(grouped);
-  const futureKeys = allKeys.filter((k) => k > todayKey).sort();
-  const relevantPastKeys = allKeys
-    .filter((k) => k < todayKey)
-    .filter((k) =>
-      grouped[k].some(
-        (m) => m.matchStatus === "live" || m.matchStatus === "finished",
-      ),
-    )
-    .sort();
-  const dateKeys = [todayKey, ...futureKeys, ...relevantPastKeys];
-  const displayed = dateKeys.flatMap((k) => grouped[k] || []);
+    const grouped: Record<string, Match[]> = {};
+    grouped[todayKey] = [];
+    sorted.forEach((match) => {
+      const key = getDateKey(match.date);
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(match);
+    });
 
-  const confidences = displayed.filter((m) => m.aiConfidence > 0).map((m) => m.aiConfidence);
-  const avg = confidences.length > 0 ? Math.round(confidences.reduce((s, c) => s + c, 0) / confidences.length) : 0;
+    const allKeys = Object.keys(grouped);
+    const futureKeys = allKeys.filter((k) => k > todayKey).sort();
+    const dateKeys = [todayKey, ...futureKeys];
+    const displayed = dateKeys.flatMap((k) => grouped[k] || []);
 
-  return {
-    filteredMatches: filtered,
-    sortedMatches: sorted,
-    sortedDateKeys: dateKeys,
-    groupedByDate: grouped,
-    displayedMatches: displayed,
-    liveCount: displayed.filter((m) => m.matchStatus === "live").length,
-    upcomingCount: displayed.filter((m) => m.matchStatus === "upcoming").length,
-    finishedCount: displayed.filter((m) => m.matchStatus === "finished").length,
-    cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
-    dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
-    avgConfidence: avg,
-    tournamentOptions: [...new Set(displayed.map((m) => m.context).filter(Boolean))].sort(),
-  };
-}, [matches, filterGame, filterDayOfWeek, filterRisk, filterTournament, filterMatchType, filterStatus, searchQuery, showPastDays, sortBy, sortOrder]);
+    const confidences = displayed
+      .filter((m) => m.aiConfidence > 0)
+      .map((m) => m.aiConfidence);
+    const avg =
+      confidences.length > 0
+        ? Math.round(
+            confidences.reduce((s, c) => s + c, 0) / confidences.length,
+          )
+        : 0;
+
+    return {
+      filteredMatches: filtered,
+      sortedMatches: sorted,
+      sortedDateKeys: dateKeys,
+      groupedByDate: grouped,
+      displayedMatches: displayed,
+      liveCount: displayed.filter((m) => m.matchStatus === "live").length,
+      upcomingCount: displayed.filter((m) => m.matchStatus === "upcoming")
+        .length,
+      finishedCount: displayed.filter((m) => m.matchStatus === "finished")
+        .length,
+      cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
+      dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
+      avgConfidence: avg,
+      tournamentOptions: [
+        ...new Set(displayed.map((m) => m.context).filter(Boolean)),
+      ].sort(),
+    };
+  }, [
+    matches,
+    filterGame,
+    filterDayOfWeek,
+    filterRisk,
+    filterTournament,
+    filterMatchType,
+    filterStatus,
+    searchQuery,
+    sortBy,
+    sortOrder,
+  ]);
 
   const displayCount = displayedMatches.length;
 
@@ -1577,14 +1606,10 @@ export default function Matches() {
                 Оновити
               </button>
 
-              {/* Show past days toggle */}
+              {/* Show past days modal */}
               <button
-                onClick={() => setShowPastDays(!showPastDays)}
-                className={`flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out border ${
-                  showPastDays
-                    ? "bg-purple-100 text-purple-700 font-medium border-purple-300 shadow-[0_2px_8px_rgba(147,51,234,0.15)]"
-                    : "bg-transparent text-gray-900 font-light border-stone-200"
-                }`}
+                onClick={() => setPastDaysModalOpen(true)}
+                className="flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out bg-transparent text-gray-900 font-light border border-stone-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
               >
                 <CalendarDays className="h-4 w-4" strokeWidth={1.5} />
                 <span>Минулі дні</span>
@@ -2066,6 +2091,12 @@ export default function Matches() {
               logo: selectedRiskyMatch?.logoTeam2,
             }}
             onSaved={handleRiskySaved}
+          />
+
+          <PastDaysModal
+            open={pastDaysModalOpen}
+            onClose={() => setPastDaysModalOpen(false)}
+            matches={matches}
           />
         </div>
 
