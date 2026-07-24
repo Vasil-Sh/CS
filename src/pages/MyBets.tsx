@@ -301,7 +301,7 @@ export default function MyBets() {
 
   // Recompute stats whenever bets change
   useEffect(() => {
-    if (recentBets.length > 0) syncStats();
+    syncStats();
   }, [recentBets, syncStats]);
 
   // ── Handlers ──
@@ -587,16 +587,8 @@ export default function MyBets() {
     );
     bumpBets();
     bumpBankroll();
-    syncStats();
     toast.success("Ставку видалено");
-  }, [
-    deleteDialogBet,
-    currentUser,
-    bumpBets,
-    bumpBankroll,
-    syncStats,
-    loadRecentBets,
-  ]);
+  }, [deleteDialogBet, currentUser, bumpBets, bumpBankroll, loadRecentBets]);
 
   // ── UI ──
   const tabs = [
