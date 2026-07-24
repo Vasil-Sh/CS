@@ -327,9 +327,9 @@ export default function RiskManagement() {
               <Button
                 onClick={() => h.setIsDeleteAllOpen(true)}
                 variant="outline"
-                className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-4 py-3"
+                className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-6 py-4"
               >
-                <Trash2 className="h-4 w-4 mr-1.5" />
+                <Trash2 className="h-4 w-4 mr-2" />
                 Видалити всі
               </Button>
             )}
@@ -339,12 +339,12 @@ export default function RiskManagement() {
               onClick={() => h.setIsSheetsGuideOpen(true)}
               disabled={h.isUpdating}
               variant="outline"
-              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-3 disabled:opacity-50"
+              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-4 disabled:opacity-50"
             >
               {h.isUpdating ? (
-                <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Download className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
+                <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
               )}
               {h.isUpdating ? "Завантаження..." : "Підтягнути з Google Sheets"}
             </Button>
