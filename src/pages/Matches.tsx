@@ -56,8 +56,10 @@ import AddToRiskyTeamsModal from "@/components/matches/AddToRiskyTeamsModal";
 import {
   MatchesLoadingState,
   MatchesEmptyState,
+  MatchesSkeleton,
 } from "@/components/matches/MatchStates";
 import MatchRow from "@/components/matches/MatchRow";
+import MatchFilterBar from "@/components/matches/MatchFilterBar";
 import { deepSeekService, type AIRecommendation } from "@/lib/deepSeekService";
 import {
   fetchTodaysAndUpcomingMatches,
@@ -1589,320 +1591,33 @@ export default function Matches() {
             </div>
           </div>
 
-          {/* ===== PILL FILTER BAR — styled as StrategyTabNav ===== */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              {/* Refresh button */}
-              <button
-                onClick={refreshMatches}
-                disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                ) : (
-                  <RefreshCw className="h-4 w-4" strokeWidth={2} />
-                )}
-                Оновити
-              </button>
+          {/* ===== PILL FILTER BAR ===== */}
+          <MatchFilterBar
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            filterStatus={filterStatus}
+            onStatusChange={setFilterStatus}
+            filterMatchType={filterMatchType}
+            onMatchTypeChange={setFilterMatchType}
+            filterTournament={filterTournament}
+            tournamentOptions={tournamentOptions}
+            onTournamentChange={setFilterTournament}
+            filterDayOfWeek={filterDayOfWeek}
+            onDayChange={setFilterDayOfWeek}
+            visibleColumns={visibleColumns}
+            onToggleColumn={toggleColumn}
+            hasActiveFilters={hasActiveFilters}
+            onReset={resetAllFilters}
+            onRefresh={refreshMatches}
+            onPastDaysOpen={() => setPastDaysModalOpen(true)}
+          />
 
-              {/* Show past days modal */}
-              <button
-                onClick={() => setPastDaysModalOpen(true)}
-                className="flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out bg-transparent text-gray-900 font-light border border-stone-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
-              >
-                <CalendarDays className="h-4 w-4" strokeWidth={1.5} />
-                <span>Результати</span>
-              </button>
-
-              {/* Search */}
-              <div className="relative min-w-[140px]">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-                  strokeWidth={1.5}
-                />
-                <Input
-                  placeholder="Пошук..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 rounded-[24px] border border-stone-200 bg-transparent text-base text-gray-900 placeholder:text-gray-500 focus:bg-white focus:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:border-gray-300 transition-all duration-300 h-full py-4 min-h-[56px]"
-                />
-              </div>
-
-              {/* Status filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
-                      filterStatus !== "all"
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-gray-900 font-light border border-stone-200"
-                    }`}
-                  >
-                    {filterStatus === "all"
-                      ? "Статус"
-                      : filterStatus === "live"
-                        ? "🔴 LIVE"
-                        : filterStatus === "upcoming"
-                          ? "Очікуються"
-                          : "Завершені"}
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("all")}
-                    className="rounded-lg"
-                  >
-                    Всі статуси
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("live")}
-                    className="rounded-lg"
-                  >
-                    🔴 LIVE
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("upcoming")}
-                    className="rounded-lg"
-                  >
-                    🕐 Очікуються
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterStatus("finished")}
-                    className="rounded-lg"
-                  >
-                    ✅ Завершені
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Format filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
-                      filterMatchType !== "all"
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-gray-900 font-light border border-stone-200"
-                    }`}
-                  >
-                    {filterMatchType === "all" ? "Формат" : filterMatchType}
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("all")}
-                    className="rounded-lg"
-                  >
-                    Всі формати
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo1")}
-                    className="rounded-lg"
-                  >
-                    Bo1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo2")}
-                    className="rounded-lg"
-                  >
-                    Bo2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo3")}
-                    className="rounded-lg"
-                  >
-                    Bo3
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterMatchType("Bo5")}
-                    className="rounded-lg"
-                  >
-                    Bo5
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Tournament filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
-                      filterTournament !== "all"
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-gray-900 font-light border border-stone-200"
-                    }`}
-                  >
-                    {filterTournament === "all"
-                      ? "Турнір"
-                      : filterTournament.length > 15
-                        ? filterTournament.slice(0, 15) + "…"
-                        : filterTournament}
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="rounded-xl p-1 max-h-64 overflow-y-auto"
-                >
-                  <DropdownMenuItem
-                    onClick={() => setFilterTournament("all")}
-                    className="rounded-lg"
-                  >
-                    Всі турніри
-                  </DropdownMenuItem>
-                  {tournamentOptions.map((t) => (
-                    <DropdownMenuItem
-                      key={t}
-                      onClick={() => setFilterTournament(t)}
-                      className="rounded-lg text-sm"
-                    >
-                      {t}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Day filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`relative px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 ${
-                      filterDayOfWeek !== "all"
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-transparent"
-                        : "bg-transparent text-gray-900 font-light border border-stone-200"
-                    }`}
-                  >
-                    {filterDayOfWeek === "all"
-                      ? "Всі дні"
-                      : filterDayOfWeek === "mon"
-                        ? "Понеділок"
-                        : filterDayOfWeek === "tue"
-                          ? "Вівторок"
-                          : filterDayOfWeek === "wed"
-                            ? "Середа"
-                            : filterDayOfWeek === "thu"
-                              ? "Четвер"
-                              : filterDayOfWeek === "fri"
-                                ? "П'ятниця"
-                                : filterDayOfWeek === "sat"
-                                  ? "Субота"
-                                  : "Неділя"}
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="rounded-xl p-1">
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("all")}
-                    className="rounded-lg"
-                  >
-                    Всі дні
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("mon")}
-                    className="rounded-lg"
-                  >
-                    Понеділок
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("tue")}
-                    className="rounded-lg"
-                  >
-                    Вівторок
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("wed")}
-                    className="rounded-lg"
-                  >
-                    Середа
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("thu")}
-                    className="rounded-lg"
-                  >
-                    Четвер
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("fri")}
-                    className="rounded-lg"
-                  >
-                    П'ятниця
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("sat")}
-                    className="rounded-lg"
-                  >
-                    Субота
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setFilterDayOfWeek("sun")}
-                    className="rounded-lg"
-                  >
-                    Неділя
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Column visibility */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="relative px-5 py-4 text-base rounded-[24px] border border-stone-200 transition-all duration-300 ease-in-out flex items-center gap-2 bg-transparent text-gray-900 font-light">
-                    Колонки
-                    <ChevronDown
-                      className="h-4 w-4 opacity-50"
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="rounded-xl p-1 min-w-[200px]"
-                >
-                  {COLUMN_DEFS.map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      checked={visibleColumns.has(col.id)}
-                      onCheckedChange={() => toggleColumn(col.id)}
-                      className="rounded-lg text-sm"
-                    >
-                      {col.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Reset filters */}
-              {hasActiveFilters && (
-                <>
-                  <div className="w-px h-7 bg-stone-200 mx-0.5" />
-                  <button
-                    onClick={resetAllFilters}
-                    className="relative px-6 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 font-semibold shadow-[0_2px_8px_rgba(239,68,68,0.3)]"
-                  >
-                    <X className="h-4 w-4" strokeWidth={1.5} />
-                    Скинути
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ===== DATE GROUP CARDS — always visible ===== */}
-          {(() => {
+          {/* ===== DATE GROUP CARDS ===== */}
+          {initialLoading ? (
+            <MatchesSkeleton />
+          ) : (
+            (() => {
             const allDateKeys = Object.keys(groupedByDate)
               .sort()
               .filter((dk) => {
@@ -1996,17 +1711,7 @@ export default function Matches() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-0 rounded-b-[24px]">
-                        {initialLoading ? (
-                          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
-                            <Loader2
-                              className="h-8 w-8 animate-spin text-primary"
-                              strokeWidth={1.5}
-                            />
-                            <p className="text-sm text-gray-400">
-                              Завантаження матчів...
-                            </p>
-                          </div>
-                        ) : dateMatches.length > 0 ? (
+                        {dateMatches.length > 0 ? (
                           <div>
                             <table className="w-full border-collapse">
                               {renderTableHeader()}
@@ -2047,7 +1752,8 @@ export default function Matches() {
                 </BlurFade>
               );
             });
-          })()}
+          })()
+          )}
 
           <AIRecommendationModal
             open={aiModalOpen}
