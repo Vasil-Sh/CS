@@ -40,6 +40,7 @@ import {
 import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 /** Normalize game names from API/localStorage to internal format */
 const normalizeGame = (game?: string): string => {
@@ -53,7 +54,7 @@ const normalizeGame = (game?: string): string => {
 import { type RiskyTeam } from "@/data/riskyTeams";
 
 interface RiskManagementProps {
-  bets?: Bet[];
+  bets?: unknown[];
 }
 
 const ALL_STATUSES = [
@@ -1318,7 +1319,7 @@ export default function RiskManagement(_props: RiskManagementProps) {
                           onClick={() => setCsStatusFilter("all")}
                           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
-                          <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                          <RefreshCw className="h-4 w-4" strokeWidth={2} />
                           Скинути фільтр
                         </Button>
                       ) : (
@@ -1390,7 +1391,7 @@ export default function RiskManagement(_props: RiskManagementProps) {
                           onClick={() => setDotaStatusFilter("all")}
                           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white text-base font-semibold transition-colors"
                         >
-                          <RotateCcw className="h-4 w-4" strokeWidth={2} />
+                          <RefreshCw className="h-4 w-4" strokeWidth={2} />
                           Скинути фільтр
                         </Button>
                       ) : (
