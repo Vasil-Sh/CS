@@ -45,7 +45,7 @@ interface StrategyOverviewProps {
   onTopTabChange?: (id: string) => void;
 }
 
-export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange }: StrategyOverviewProps = {}) {
+export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange }: StrategyOverviewProps) {
   logRender("StrategyOverview");
   const { user } = useAuth();
   const currentUser = user?.username || localStorage.getItem("username") || "default";

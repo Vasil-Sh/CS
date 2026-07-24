@@ -38,7 +38,7 @@ interface GoalsManagerProps {
   onTopTabChange?: (id: string) => void;
 }
 
-export default function GoalsManager({ topTabs, topActiveTab, onTopTabChange }: GoalsManagerProps = {}) {
+export default function GoalsManager({ topTabs, topActiveTab, onTopTabChange }: GoalsManagerProps) {
   logRender("GoalsManager");
   const h = useGoals();
 
