@@ -32,6 +32,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import PastDaysModal from "@/components/matches/PastDaysModal";
+import DateStatsCards from "@/components/matches/DateStatsCards";
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
@@ -1429,167 +1430,15 @@ export default function Matches() {
         />
         <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
           {/* ===== QUICK STATS ===== */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-              <div
-                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
-                style={cardBaseStyle}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, cardHoverStyle);
-                }}
-                onMouseLeave={(e) => {
-                  Object.assign(e.currentTarget.style, cardBaseStyle);
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Trophy
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Всього матчів
-                  </span>
-                </div>
-                <div className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-                  {displayCount}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-amber-600">
-                    CS2 {cs2DisplayedCount}
-                  </span>
-                  <span className="text-sm text-gray-400">—</span>
-                  <span className="text-sm font-semibold text-[#7C3AED]">
-                    Dota {dota2DisplayedCount}
-                  </span>
-                  <span className="text-sm text-[#4B5563]">матчів</span>
-                </div>
-              </div>
-
-              <div
-                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
-                style={cardBaseStyle}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, cardHoverStyle);
-                }}
-                onMouseLeave={(e) => {
-                  Object.assign(e.currentTarget.style, cardBaseStyle);
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Radio className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    LIVE
-                  </span>
-                </div>
-                <div className="text-4xl font-bold text-red-500 tracking-tight mb-2">
-                  {liveCount}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#4B5563]">зараз грають</span>
-                </div>
-              </div>
-
-              <div
-                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
-                style={cardBaseStyle}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, cardHoverStyle);
-                }}
-                onMouseLeave={(e) => {
-                  Object.assign(e.currentTarget.style, cardBaseStyle);
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Clock className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Очікуються
-                  </span>
-                </div>
-                <div className="text-4xl font-bold text-blue-600 tracking-tight mb-2">
-                  {upcomingCount}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#4B5563]">ще не почались</span>
-                </div>
-              </div>
-
-              <div
-                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
-                style={cardBaseStyle}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, cardHoverStyle);
-                }}
-                onMouseLeave={(e) => {
-                  Object.assign(e.currentTarget.style, cardBaseStyle);
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <CheckCircle2
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Завершені
-                  </span>
-                </div>
-                <div className="text-4xl font-bold text-green-500 tracking-tight mb-2">
-                  {finishedCount}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#4B5563]">зіграні матчі</span>
-                </div>
-              </div>
-
-              <div
-                className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
-                style={cardBaseStyle}
-                onMouseEnter={(e) => {
-                  Object.assign(e.currentTarget.style, cardHoverStyle);
-                }}
-                onMouseLeave={(e) => {
-                  Object.assign(e.currentTarget.style, cardBaseStyle);
-                }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
-                    <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Середній Прогноз
-                  </span>
-                </div>
-                <div className="text-4xl font-bold text-[#8B5CF6] tracking-tight mb-2">
-                  {avgConfidence}%
-                </div>
-                <div className="flex items-center gap-2">
-                  {avgConfidence >= 65 ? (
-                    <ArrowUpRight
-                      className="h-4 w-4 text-green-500"
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <ArrowDownRight
-                      className="h-4 w-4 text-red-500"
-                      strokeWidth={2.5}
-                    />
-                  )}
-                  <span
-                    className={`text-sm font-semibold ${avgConfidence >= 65 ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {avgConfidence >= 65 ? "Хороший рівень" : "Низький рівень"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DateStatsCards
+            displayCount={displayCount}
+            cs2DisplayedCount={cs2DisplayedCount}
+            dota2DisplayedCount={dota2DisplayedCount}
+            liveCount={liveCount}
+            upcomingCount={upcomingCount}
+            finishedCount={finishedCount}
+            avgConfidence={avgConfidence}
+          />
 
           {/* ===== PILL FILTER BAR ===== */}
           <MatchFilterBar
