@@ -154,10 +154,17 @@ export class BankrollService {
 
     if (!data) {
       // No bankroll data — use zero as initial bank.
-      return { initialBank: 0, currentBank: totalProfit, totalProfit, roi: 0 };
+      return {
+        initialBank: 0,
+        currentBank: Math.max(0, totalProfit),
+        totalProfit,
+        roi: 0,
+      };
     }
-    const currentBank =
-      (data.initialBankUAH || 0) + totalProfit + data.manualAdjustments;
+    const currentBank = Math.max(
+      0,
+      (data.initialBankUAH || 0) + totalProfit + data.manualAdjustments,
+    );
     const roi =
       data.initialBankUAH > 0 ? (totalProfit / data.initialBankUAH) * 100 : 0;
     return {
@@ -177,30 +184,30 @@ export class BankrollService {
     const profitUSD = this.calculateTotalProfitUSD(bets);
 
     if (!data) {
-      // No bankroll data — use zero as initial bank.
-      // Do NOT auto-initialize; user must set bankroll explicitly via InitialBankModal.
       return {
         uah: {
           initialBank: 0,
-          currentBank: profitUAH,
+          currentBank: Math.max(0, profitUAH),
           totalProfit: profitUAH,
           roi: 0,
         },
         usd: {
           initialBank: 0,
-          currentBank: profitUSD,
+          currentBank: Math.max(0, profitUSD),
           totalProfit: profitUSD,
           roi: 0,
         },
       };
     }
 
-    const currentUAH =
-      (data.initialBankUAH || 0) + profitUAH + data.manualAdjustments;
+    const currentUAH = Math.max(
+      0,
+      (data.initialBankUAH || 0) + profitUAH + data.manualAdjustments,
+    );
     const roiUAH =
       data.initialBankUAH > 0 ? (profitUAH / data.initialBankUAH) * 100 : 0;
 
-    const currentUSD = (data.initialBankUSD || 0) + profitUSD;
+    const currentUSD = Math.max(0, (data.initialBankUSD || 0) + profitUSD);
     const roiUSD =
       data.initialBankUSD > 0 ? (profitUSD / data.initialBankUSD) * 100 : 0;
 
