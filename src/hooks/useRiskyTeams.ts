@@ -34,7 +34,9 @@ export function useRiskyTeams() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isAddTeamOpen, setIsAddTeamOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+  const [isSheetsGuideOpen, setIsSheetsGuideOpen] = useState(false);
   const [customSheetUrl, setCustomSheetUrl] = useState("");
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -157,7 +159,8 @@ export function useRiskyTeams() {
 
   return {
     riskyTeams, isLoadingTeams, searchQuery, setSearchQuery, isUpdating,
-    isAddTeamOpen, setIsAddTeamOpen, isDeleteAllOpen, setIsDeleteAllOpen,
+    isAddTeamOpen, setIsAddTeamOpen, isSearchOpen, setIsSearchOpen,
+    isDeleteAllOpen, setIsDeleteAllOpen, isSheetsGuideOpen, setIsSheetsGuideOpen,
     customSheetUrl, setCustomSheetUrl, editingIndex, editName, setEditName,
     editNotes, setEditNotes, editStatus, setEditStatus, editGame, setEditGame,
     csStatusFilter, setCsStatusFilter, dotaStatusFilter, setDotaStatusFilter,

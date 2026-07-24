@@ -8,10 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { getStatusBadge } from "@/lib/utils/badgeStyles";
 import { getGameEmoji } from "@/lib/utils/gameIcons";
 import { logRender } from "@/lib/devLogger";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { toast } from "sonner";
 import { Shield, Users, AlertTriangle, TrendingDown, Target, Plus, Trash2, Search, Info, RefreshCw, Download, Pencil, Check, X, ArrowRightLeft } from "lucide-react";
-import { useRiskyTeams, ALL_STATUSES, normalizeGame, type RiskyTeam } from "@/hooks/useRiskyTeams";
+import { useRiskyTeams, ALL_STATUSES, type RiskyTeam } from "@/hooks/useRiskyTeams";
 
 const getStatusFilterBadge = (status: string, isActive: boolean) => {
   const base = isActive ? "ring-2 ring-offset-1" : "opacity-70 hover:opacity-100";
@@ -81,14 +79,72 @@ export default function RiskManagement() {
           </div>
         </div>
 
-        {/* Toolbar */}
+        {/* Toolbar: Search, Google Sheets, Add team, Info */}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <Tooltip><TooltipTrigger asChild><button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-blue-50 text-blue-500 hover:bg-blue-100"><Info className="h-4 w-4" strokeWidth={2} /></button></TooltipTrigger><TooltipContent side="bottom" className="max-w-xs bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-lg"><p className="text-sm font-semibold text-gray-900">Управління ризикованими командами</p></TooltipContent></Tooltip>
-            <Button onClick={() => h.setIsAddTeamOpen(true)} className="rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white font-medium px-5 py-4"><Plus className="h-4 w-4 mr-2" />Додати команду</Button>
-            <Button onClick={h.updateFromGoogleSheets} disabled={h.isUpdating} className="rounded-[24px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-5 py-4"><RefreshCw className="h-4 w-4 mr-2" />Google Sheets</Button>
+            {/* Info tooltip */}
+            <Tooltip><TooltipTrigger asChild><button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-blue-50 text-blue-500 hover:bg-blue-100"><Info className="h-4 w-4" strokeWidth={2} /></button></TooltipTrigger><TooltipContent side="bottom" className="max-w-xs bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-lg"><p className="text-sm font-semibold text-gray-900 mb-1">Управління ризиками</p><p className="text-xs text-gray-500">Додавайте команди вручну або підтягуйте з Google Sheets. Статуси "БАН", "Нестабільні", "Обережно" впливають на рекомендації при створенні ставок.</p></TooltipContent></Tooltip>
+
+            {/* Search toggle */}
+            <button onClick={() => h.setIsSearchOpen(!h.isSearchOpen)} className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${h.isSearchOpen ? "bg-primary text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"}`}><Search className="h-4 w-4" strokeWidth={2} /></button>
+
+            {/* Delete all — only shown when teams exist */}
+            {h.riskyTeams.length > 0 && (
+              <Button onClick={() => h.setIsDeleteAllOpen(true)} variant="outline" className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-4 py-3"><Trash2 className="h-4 w-4 mr-1.5" />Видалити всі</Button>
+            )}
+
+            {/* Google Sheets button */}
+            <button onClick={() => h.setIsSheetsGuideOpen(true)} disabled={h.isUpdating} className="flex items-center gap-2 px-5 py-4 rounded-[24px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50">
+              {h.isUpdating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" strokeWidth={1.5} />}
+              {h.isUpdating ? "Завантаження..." : "Підтягнути команди з Google Sheets"}
+            </button>
+
+            {/* Add team */}
+            <Button onClick={() => h.setIsAddTeamOpen(true)} className="rounded-[24px] bg-primary hover:bg-blue-400 text-white font-semibold px-6 py-4 shadow-[0_2px_8px_rgba(68,122,252,0.3)]"><Plus className="h-4 w-4 mr-2" strokeWidth={2} />Додати команду</Button>
           </div>
         </div>
+
+        {/* Inline search input — shown when toggled */}
+        {h.isSearchOpen && (
+          <div className="bg-white border border-gray-200 rounded-2xl p-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" strokeWidth={1.5} /><Input value={h.searchQuery} onChange={(e) => h.setSearchQuery(e.target.value)} placeholder="Пошук за назвою, грою, статусом або примітками..." className="pl-10 w-full rounded-xl border border-gray-200 hover:border-gray-300 focus:border-gray-900 transition-colors text-sm" autoFocus /></div>
+          </div>
+        )}
+
+        {/* Google Sheets Guide Dialog */}
+        <Dialog open={h.isSheetsGuideOpen} onOpenChange={h.setIsSheetsGuideOpen}>
+          <DialogContent className="rounded-3xl max-w-2xl border border-gray-200 p-0 gap-0">
+            <DialogHeader className="px-5 pt-5 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100"><Download className="h-5 w-5 text-blue-600" strokeWidth={1.5} /></div>
+                <div><DialogTitle className="text-xl font-semibold text-gray-900">Підтягнути команди з Google Sheets</DialogTitle><DialogDescription className="text-gray-500 mt-0.5">Як оформити документ, щоб дані правильно підтягнулись</DialogDescription></div>
+              </div>
+            </DialogHeader>
+            <div className="border-t border-gray-200" />
+            <div className="px-5 pb-5 pt-3 space-y-4 bg-gray-100">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">Створіть Google Sheets документ</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">Відкрийте новий документ на <span className="font-medium text-gray-700">Google Sheets</span> і дайте йому будь-яку назву.</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">Налаштуйте колонки</h4>
+                <p className="text-sm text-gray-500 leading-relaxed mb-2">Таблиця повинна містити <strong>4 колонки</strong> в такому порядку:</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1 text-sm">
+                  <div className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span><span className="font-medium text-gray-900">Назва команди</span></div>
+                  <div className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">2</span><span className="font-medium text-gray-900">Гра (CS або Dota 2)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">3</span><span className="font-medium text-gray-900">Статус (БАН, Нестабільні, Обережно тощо)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">4</span><span className="font-medium text-gray-900">Примітки</span></div>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">Вставте посилання на документ</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">Скопіюйте URL з адресного рядка браузера або натисніть "Поділитися" → "Копіювати посилання" на вашому Google Sheets документі.</p>
+                <Input value={h.customSheetUrl} onChange={(e) => h.setCustomSheetUrl(e.target.value)} placeholder="https://docs.google.com/spreadsheets/d/..." className="rounded-xl border border-gray-200 mt-2 text-sm" />
+              </div>
+              <Button onClick={() => { h.updateFromGoogleSheets(); h.setIsSheetsGuideOpen(false); }} disabled={h.isUpdating} className="w-full rounded-xl bg-primary hover:bg-blue-700 text-white font-semibold h-11"><Download className="h-4 w-4 mr-2" />Підтягнути команди</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* CS + Dota Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
