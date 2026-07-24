@@ -21,12 +21,12 @@ import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import DeleteGoalDialog from "@/components/goals/DeleteGoalDialog";
 import {
   Target, TrendingUp, Plus, Trash2, CheckCircle, Trophy, DollarSign, Percent,
-  Info, Eye, Star, ChevronDown, ChevronUp, ArrowRight, BarChart3, Zap,
+  Info, Eye, Star, AlertTriangle, ChevronDown, ChevronUp, ArrowRight, BarChart3, Zap,
 } from "lucide-react";
 import {
   useGoals, getGoalProgress, getGoalTypeLabel, getKeyMetric, getNextBetHint,
-  calculateLadderSteps, calculateOddsScenarios, MAX_LADDER_STEPS,
-  type Goal, type GoalType, type LadderMode,
+  calculateLadderSteps, calculateOddsScenarios,
+  type GoalType, type LadderMode,
 } from "@/hooks/useGoals";
 
 const cardBaseStyle = CARD_BASE_STYLE;
@@ -41,10 +41,6 @@ export default function GoalsManager() {
     { id: "completed", label: "Завершені", icon: Trophy },
   ];
 
-  const getDisciplineStatus = (_goal: Goal) => {
-    return { status: "good" as const, label: "Дотримані", icon: <CheckCircle className="h-4 w-4" strokeWidth={1.5} /> };
-  };
-
   return (
     <div className="space-y-6">
       <GoalsToolbar
@@ -52,7 +48,7 @@ export default function GoalsManager() {
         isUpdating={h.isUpdating}
         activeGoalsCount={h.activeGoals.length}
         maxGoals={25}
-        tabs={tabs as any}
+        tabs={tabs}
         onTabChange={(id) => h.setActiveTab(id as "active" | "completed")}
         onUpdate={h.handleManualUpdate}
         onCreateGoal={() => h.setShowCreateDialog(true)}
@@ -68,7 +64,7 @@ export default function GoalsManager() {
               {h.activeGoals.map((goal) => {
                 const progress = getGoalProgress(goal);
                 const keyMetric = getKeyMetric(goal);
-                const discipline = getDisciplineStatus(goal);
+                const discipline = h.getDisciplineStatus(goal);
                 const hint = getNextBetHint(goal);
                 const isPrimary = goal.isPrimary;
 
@@ -120,7 +116,7 @@ export default function GoalsManager() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-sm font-medium text-gray-900">Правила</span>
-                                <div className={discipline.status === "good" ? "text-green-500" : "text-red-500"}>{discipline.icon}</div>
+                                <div className={discipline.status === "good" ? "text-green-500" : "text-red-500"}>{discipline.status === "good" ? <CheckCircle className="h-4 w-4" strokeWidth={1.5} /> : <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />}</div>
                                 <span className={`text-xs font-medium ${discipline.status === "good" ? "text-green-600" : "text-red-600"}`}>{discipline.label}</span>
                               </div>
                               {h.containerStates.isRulesExpanded[goal.id] ? <ChevronUp className="h-3.5 w-3.5 text-gray-500" /> : <ChevronDown className="h-3.5 w-3.5 text-gray-500" />}

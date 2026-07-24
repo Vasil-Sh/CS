@@ -796,16 +796,16 @@ export default function Strategy() {
 
           {/* Tab content */}
           <div>
-            <div className={activeTab === "strategies" ? "" : "hidden"}>
+            {activeTab === "strategies" && (
               <ErrorBoundary>
                 <StrategyOverview />
               </ErrorBoundary>
-            </div>
-            <div className={activeTab === "goals" ? "" : "hidden"}>
+            )}
+            {activeTab === "goals" && (
               <ErrorBoundary>
                 <GoalsManager />
               </ErrorBoundary>
-            </div>
+            )}
           </div>
         </div>
       </div>

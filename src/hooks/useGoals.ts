@@ -377,6 +377,18 @@ export function useGoals() {
   };
 
   const resetNewGoalForm = () => { setNewGoal(defaultNewGoalForm()); setMinOddsStr("1.3"); setMaxOddsStr("5"); setStartAmountStr("100"); setTargetLadderAmountStr("100000"); setTargetAmountStr("100000"); setTargetROIStr("50"); setTargetWinRateStr("65"); setBetsPerDayStr("5"); };
+
+  const getDisciplineStatus = (goal: Goal): { status: "good" | "warning"; label: string } => {
+    const betsData = UserDataService.getUserData(currentUser, "mybets_data", []);
+    const goalBets = betsData.filter((bet: { goalId?: string }) => bet.goalId === goal.id);
+    if (!goalBets.length) return { status: "good", label: "Дотримані" };
+    const hasViolation = goalBets.some((bet: { odds: number }) => {
+      if (goal.type === "ladder") return bet.odds < (goal.minOdds || 0) || bet.odds > (goal.maxOdds || 999);
+      return false;
+    });
+    return hasViolation ? { status: "warning", label: "Відхилення" } : { status: "good", label: "Дотримані" };
+  };
+
   const containerStates = { isStepsCalculationExpanded, setIsStepsCalculationExpanded, isLadderOverviewExpanded, setIsLadderOverviewExpanded, isStepsProgressionExpanded, setIsStepsProgressionExpanded, isRulesExpanded, setIsRulesExpanded };
 
   return {
@@ -390,7 +402,7 @@ export function useGoals() {
     completedGoals: goals.filter((g) => g.status === "completed"),
     handleManualUpdate, createGoal, deleteGoal, setPrimaryGoal, confirmDeleteGoal,
     openDetailsDialog, openCompletedGoalResult,
-    isLadderPreviewValid, containerStates,
+    isLadderPreviewValid, containerStates, getDisciplineStatus,
   };
 }
 
