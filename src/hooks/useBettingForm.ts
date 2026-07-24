@@ -1121,17 +1121,6 @@ export function useBettingForm({
   // ── Tilt block ──
   const tiltBlock = useTiltBlock(currentUser, primaryStrategy, apiBets);
 
-  // ── CSS classes (UI concern, but stable strings) ──
-  const css = {
-    input:
-      "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors",
-    select:
-      "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 focus:border-gray-900 focus:ring-0 transition-colors",
-    label: "text-sm font-medium text-gray-700",
-    section:
-      "text-base font-semibold text-gray-900 flex items-center gap-2.5 bg-gray-100 px-4 py-2.5 -mx-6",
-  };
-
   return {
     // State
     formData,
@@ -1167,7 +1156,6 @@ export function useBettingForm({
     isValuePositive,
     isHighConfidence,
     tiltBlock,
-    css,
     // Handlers
     clearForm,
     getLastStakeForGoal,
@@ -1183,5 +1171,6 @@ export function useBettingForm({
     handleViolationConfirm,
     handleViolationCancel,
     setShowViolationDialog,
+    parseMatchFromUrl,
   };
 }

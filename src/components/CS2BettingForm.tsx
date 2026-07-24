@@ -26,6 +26,17 @@ export default function CS2BettingForm(props: Props) {
   logRender("CS2BettingForm");
   const h = useBettingForm(props);
 
+  // ── CSS classes ──
+  const css = {
+    input:
+      "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors",
+    select:
+      "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 focus:border-gray-900 focus:ring-0 transition-colors",
+    label: "text-sm font-medium text-gray-700",
+    section:
+      "text-base font-semibold text-gray-900 flex items-center gap-2.5 bg-gray-100 px-4 py-2.5 -mx-6",
+  };
+
   return (
     <div className="space-y-6">
       <StrategyViolationDialog
@@ -64,10 +75,10 @@ export default function CS2BettingForm(props: Props) {
                 isExpressFromMatches={h.isExpressFromMatches}
                 activeGoals={h.activeGoals}
                 classes={{
-                  input: h.css.input,
-                  selectTrigger: h.css.select,
-                  label: h.css.label,
-                  sectionTitle: h.css.section,
+                  input: css.input,
+                  selectTrigger: css.select,
+                  label: css.label,
+                  sectionTitle: css.section,
                 }}
                 onClearForm={h.clearForm}
                 onFieldChange={(field, value) =>
@@ -126,17 +137,17 @@ export default function CS2BettingForm(props: Props) {
                       isExpressFromMatches={h.isExpressFromMatches}
                       expressEventsCount={h.expressEvents.length}
                       classes={{
-                        input: h.css.input,
-                        selectTrigger: h.css.select,
-                        label: h.css.label,
-                        sectionTitle: h.css.section,
+                        input: css.input,
+                        selectTrigger: css.select,
+                        label: css.label,
+                        sectionTitle: css.section,
                       }}
                       onFieldChange={(field, value) =>
                         h.setFormData((prev) => ({ ...prev, [field]: value }))
                       }
-                      onParseUrl={() => {
-                        h.handleUrlChange(h.formData.matchUrl);
-                      }}
+                      onParseUrl={() =>
+                        h.parseMatchFromUrl(h.formData.matchUrl)
+                      }
                       onUrlChange={(url) => h.handleUrlChange(url)}
                       onAddToExpress={h.addExpressEvent}
                       submitErrors={h.submitErrors}
@@ -161,9 +172,9 @@ export default function CS2BettingForm(props: Props) {
                     showSection={true}
                     format={h.formData.format}
                     classes={{
-                      input: h.css.input,
-                      label: h.css.label,
-                      sectionTitle: h.css.section,
+                      input: css.input,
+                      label: css.label,
+                      sectionTitle: css.section,
                     }}
                     onFieldChange={(field, value) =>
                       h.setFormData((prev) => ({ ...prev, [field]: value }))
