@@ -144,10 +144,10 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
     });
   }, [matches, gameFilter, searchQuery]);
 
-  // Group by date
+  // Group by date (YYYY-MM-DD only, ignoring time)
   const grouped: Record<string, HistoryMatch[]> = {};
   filteredMatches.forEach((m) => {
-    const key = m.date;
+    const key = m.date.slice(0, 10); // YYYY-MM-DD
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(m);
   });
@@ -258,10 +258,16 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
             </div>
           ) : (
             dateKeys.map((dateKey) => {
-              const dayMatches = grouped[dateKey].sort(
-                (a, b) =>
-                  new Date(b.date).getTime() - new Date(a.date).getTime(),
-              );
+              const dayMatches = grouped[dateKey].sort((a, b) => {
+                // Sort by tournament first (group same tournament matches together)
+                const tn = a.tournament.localeCompare(b.tournament);
+                if (tn !== 0) return tn;
+                // Then by team1 name
+                const t1 = a.team1.localeCompare(b.team1);
+                if (t1 !== 0) return t1;
+                // Then by team2 name
+                return a.team2.localeCompare(b.team2);
+              });
               return (
                 <PastDayGroup
                   key={dateKey}
