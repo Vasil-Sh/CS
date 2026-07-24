@@ -81,9 +81,9 @@ export default function PastDaysModal({
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-purple-50 flex-shrink-0">
+            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
               <CalendarDays
-                className="h-5 w-5 text-purple-500"
+                className="h-5 w-5 text-blue-500"
                 strokeWidth={1.5}
               />
             </div>
@@ -105,11 +105,15 @@ export default function PastDaysModal({
         </DialogHeader>
 
         {/* Scrollable body */}
-        <div className="overflow-y-auto px-6 pb-6 pt-4">
+        <div className="overflow-y-auto px-6 pb-6 pt-4 bg-gray-50">
           {pastMatches.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-              <CalendarDays className="h-10 w-10 mb-3" strokeWidth={1} />
-              <p className="text-sm">Немає завершених матчів за минулі дні</p>
+              <div className="flex items-center justify-center size-24 rounded-2xl bg-white mb-3">
+                <CalendarDays className="size-[72px]" strokeWidth={1} />
+              </div>
+              <p className="text-sm text-gray-900">
+                Немає завершених матчів за минулі дні
+              </p>
             </div>
           )}
           {dateKeys.map((dateKey) => {
