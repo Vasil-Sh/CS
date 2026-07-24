@@ -32,7 +32,13 @@ import {
 const cardBaseStyle = CARD_BASE_STYLE;
 const cardHoverStyle = CARD_HOVER_STYLE;
 
-export default function GoalsManager() {
+interface GoalsManagerProps {
+  topTabs?: { id: string; label: string; icon: import('lucide-react').LucideIcon }[];
+  topActiveTab?: string;
+  onTopTabChange?: (id: string) => void;
+}
+
+export default function GoalsManager({ topTabs, topActiveTab, onTopTabChange }: GoalsManagerProps = {}) {
   logRender("GoalsManager");
   const h = useGoals();
 
@@ -52,6 +58,9 @@ export default function GoalsManager() {
         onTabChange={(id) => h.setActiveTab(id as "active" | "completed")}
         onUpdate={h.handleManualUpdate}
         onCreateGoal={() => h.setShowCreateDialog(true)}
+        topTabs={topTabs}
+        topActiveTab={topActiveTab}
+        onTopTabChange={onTopTabChange}
       />
 
       {/* Active Tab */}

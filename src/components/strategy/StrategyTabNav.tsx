@@ -1,5 +1,8 @@
 import { TooltipProvider, Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Filter, Info, Eye, BarChart3, Plus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+interface TabDef { id: string; label: string; icon: LucideIcon }
 
 interface Props {
   activeTab: string;
@@ -7,6 +10,10 @@ interface Props {
   onTabChange: (tab: string) => void;
   onFilterToggle: () => void;
   onCreateClick: () => void;
+  /** Top-level tabs (e.g. Стратегії / Цілі) — prepended to the bar */
+  topTabs?: TabDef[];
+  topActiveTab?: string;
+  onTopTabChange?: (id: string) => void;
 }
 
 const tabs = [
@@ -14,11 +21,35 @@ const tabs = [
   { id: 'performance', label: 'Ефективність', icon: BarChart3 },
 ] as const;
 
-/** Pure component: tab navigation + filter + info tooltip + create button */
-export default function StrategyTabNav({ activeTab, showFilters, onTabChange, onFilterToggle, onCreateClick }: Props) {
+/** Pure component: tab navigation + filter + info tooltip + create button. Optionally includes top-level page tabs. */
+export default function StrategyTabNav({ activeTab, showFilters, onTabChange, onFilterToggle, onCreateClick, topTabs, topActiveTab, onTopTabChange }: Props) {
+  const hasTopTabs = !!(topTabs && topTabs.length && onTopTabChange);
+
   return (
     <div className="flex justify-center">
       <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        {/* Top-level tabs (Стратегії / Цілі) */}
+        {hasTopTabs && topTabs!.map((t) => {
+          const isActive = topActiveTab === t.id;
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => onTopTabChange!(t.id)}
+              className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out flex items-center gap-2 ${
+                isActive
+                  ? 'bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent'
+                  : 'bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent'
+              }`}
+            >
+              <Icon className="h-4 w-4" strokeWidth={1.5} />
+              {t.label}
+            </button>
+          );
+        })}
+
+        {hasTopTabs && <div className="w-px h-7 bg-stone-200 mx-0.5" />}
+
         <TooltipProvider>
           <UITooltip>
             <TooltipTrigger asChild>

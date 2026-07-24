@@ -226,9 +226,9 @@ export default function Strategy() {
 
   const goalInfo = primaryGoal ? goalProgress(primaryGoal) : null;
 
-  const tabs = [
-    { id: "strategies" as const, label: "Стратегії", icon: Target },
-    { id: "goals" as const, label: "Цілі", icon: Flag },
+  const topTabDefs = [
+    { id: "strategies", label: "Стратегії", icon: Target },
+    { id: "goals", label: "Цілі", icon: Flag },
   ];
 
   return (
@@ -763,50 +763,18 @@ export default function Strategy() {
           </div>
         </div>
 
-        {/* Tabs bar */}
-        <div className="space-y-6">
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
-            <div className="grid grid-cols-2 gap-3">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`
-                      relative rounded-[24px] px-6 py-4 font-light text-base
-                      transition-all duration-300 ease-in-out
-                      ${
-                        isActive
-                          ? "bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent"
-                          : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent"
-                      }
-                    `}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <Icon className="h-4 w-4" strokeWidth={1.5} />
-                      {tab.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tab content */}
-          <div>
-            {activeTab === "strategies" && (
-              <ErrorBoundary>
-                <StrategyOverview />
-              </ErrorBoundary>
-            )}
-            {activeTab === "goals" && (
-              <ErrorBoundary>
-                <GoalsManager />
-              </ErrorBoundary>
-            )}
-          </div>
+        {/* Tab content — each child now includes the unified nav bar (Стратегії/Цілі merged in) */}
+        <div>
+          {activeTab === "strategies" && (
+            <ErrorBoundary>
+              <StrategyOverview topTabs={topTabDefs} topActiveTab={activeTab} onTopTabChange={setActiveTab} />
+            </ErrorBoundary>
+          )}
+          {activeTab === "goals" && (
+            <ErrorBoundary>
+              <GoalsManager topTabs={topTabDefs} topActiveTab={activeTab} onTopTabChange={setActiveTab} />
+            </ErrorBoundary>
+          )}
         </div>
       </div>
     </div>

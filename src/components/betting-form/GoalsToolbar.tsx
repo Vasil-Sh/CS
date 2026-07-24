@@ -2,13 +2,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import {
   Info, RefreshCw, Plus, Target, Trophy,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { ReactNode, LucideIcon } from 'react';
 
 interface Tab {
   id: string;
   label: string;
   icon: React.ElementType;
 }
+
+interface TopTab { id: string; label: string; icon: LucideIcon }
 
 export interface GoalsToolbarProps {
   activeTab: string;
@@ -19,15 +21,43 @@ export interface GoalsToolbarProps {
   onTabChange: (id: string) => void;
   onUpdate: () => void;
   onCreateGoal: () => void;
+  /** Top-level tabs (e.g. Стратегії / Цілі) — prepended to the bar */
+  topTabs?: TopTab[];
+  topActiveTab?: string;
+  onTopTabChange?: (id: string) => void;
 }
 
 export default function GoalsToolbar({
   activeTab, isUpdating, activeGoalsCount, maxGoals,
   tabs, onTabChange, onUpdate, onCreateGoal,
+  topTabs, topActiveTab, onTopTabChange,
 }: GoalsToolbarProps) {
+  const hasTopTabs = !!(topTabs && topTabs.length && onTopTabChange);
+
   return (
     <div className="flex justify-center relative z-50">
       <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-gray-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        {/* Top-level tabs (Стратегії / Цілі) */}
+        {hasTopTabs && topTabs!.map((t) => {
+          const isActive = topActiveTab === t.id;
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => onTopTabChange!(t.id)}
+              className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out flex items-center gap-2 ${
+                isActive
+                  ? 'bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent'
+                  : 'bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent'
+              }`}
+            >
+              <Icon className="h-4 w-4" strokeWidth={1.5} />
+              {t.label}
+            </button>
+          );
+        })}
+
+        {hasTopTabs && <div className="w-px h-7 bg-gray-200 mx-0.5" />}
         {/* Info tooltip */}
         <TooltipProvider delayDuration={0}>
           <Tooltip>

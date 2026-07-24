@@ -289,13 +289,13 @@ export default function RiskManagement() {
           </div>
         </div>
 
-        {/* Toolbar: Search, Google Sheets, Add team, Info */}
+        {/* Toolbar — matches Matches/Strategy pill-button pattern */}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
             {/* Info tooltip */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center justify-center px-3.5 py-4 rounded-[24px] bg-blue-50 text-blue-500 hover:bg-blue-100">
+                <button className="flex items-center justify-center w-11 h-11 rounded-[24px] bg-transparent text-blue-500 hover:bg-blue-50 border border-stone-200 transition-all duration-300">
                   <Info className="h-4 w-4" strokeWidth={2} />
                 </button>
               </TooltipTrigger>
@@ -317,46 +317,50 @@ export default function RiskManagement() {
             {/* Search toggle */}
             <button
               onClick={() => h.setIsSearchOpen(!h.isSearchOpen)}
-              className={`flex items-center justify-center px-3.5 py-4 rounded-[24px] transition-colors ${h.isSearchOpen ? "bg-primary text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"}`}
+              className={`flex items-center justify-center w-11 h-11 rounded-[24px] transition-all duration-300 ${
+                h.isSearchOpen
+                  ? "bg-primary text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)]"
+                  : "bg-transparent text-gray-400 border border-stone-200 hover:bg-gray-50 hover:text-gray-900"
+              }`}
             >
               <Search className="h-4 w-4" strokeWidth={2} />
             </button>
 
-            {/* Delete all — only shown when teams exist */}
+            {/* Delete all — only when teams exist */}
             {h.riskyTeams.length > 0 && (
-              <Button
+              <button
                 onClick={() => h.setIsDeleteAllOpen(true)}
-                variant="outline"
-                className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-6 py-4 text-base"
+                className="flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out bg-transparent text-red-500 font-light border border-red-200 hover:bg-red-50 hover:text-red-600"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Видалити всі
-              </Button>
+                <Trash2 className="h-4 w-4" />
+                <span>Видалити всі</span>
+              </button>
             )}
 
-            {/* Google Sheets button */}
-            <Button
+            {/* Google Sheets */}
+            <button
               onClick={() => h.setIsSheetsGuideOpen(true)}
               disabled={h.isUpdating}
-              variant="outline"
-              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-4 text-base disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out bg-transparent text-gray-900 font-light border border-stone-200 hover:bg-gray-50 disabled:opacity-50"
             >
               {h.isUpdating ? (
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
-                <Download className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                <Download className="h-4 w-4" strokeWidth={1.5} />
               )}
-              {h.isUpdating ? "Завантаження..." : "Підтягнути з Google Sheets"}
-            </Button>
+              <span>
+                {h.isUpdating ? "Завантаження..." : "Підтягнути з Google Sheets"}
+              </span>
+            </button>
 
-            {/* Add team */}
-            <Button
+            {/* Add team — primary action */}
+            <button
               onClick={() => h.setIsAddTeamOpen(true)}
-              className="rounded-[24px] bg-primary hover:bg-blue-400 text-white font-semibold px-6 py-4 text-base shadow-[0_2px_8px_rgba(68,122,252,0.3)]"
+              className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out"
             >
-              <Plus className="h-4 w-4 mr-2" strokeWidth={2} />
-              Додати команду
-            </Button>
+              <Plus className="h-4 w-4" strokeWidth={2} />
+              <span>Додати команду</span>
+            </button>
           </div>
         </div>
 

@@ -962,13 +962,8 @@ export default function Analytics() {
 
             {/* Custom Tabs Navigation */}
             <div className="flex flex-col flex-1 min-h-0 space-y-6">
-              <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-3 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                <div
-                  className="grid gap-3"
-                  style={{
-                    gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))`,
-                  }}
-                >
+              <div className="flex justify-center">
+                <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     return (

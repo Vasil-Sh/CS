@@ -39,7 +39,13 @@ const STRATEGY_TEMPLATES: StrategyTemplate[] = [
   { name: "Агресивна стратегія", description: "Високий ризик, високий прибуток.", riskLevel: "High", expectedROI: 25, criteria: ["Мінімальний коефіцієнт 2.0", "Тільки експреси", "Формат BO1 та BO3", "Фокус на андердогах"] },
 ];
 
-export default function StrategyOverview() {
+interface StrategyOverviewProps {
+  topTabs?: { id: string; label: string; icon: import('lucide-react').LucideIcon }[];
+  topActiveTab?: string;
+  onTopTabChange?: (id: string) => void;
+}
+
+export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange }: StrategyOverviewProps = {}) {
   logRender("StrategyOverview");
   const { user } = useAuth();
   const currentUser = user?.username || localStorage.getItem("username") || "default";
@@ -185,7 +191,7 @@ export default function StrategyOverview() {
   // ── JSX ──
   return (
     <div className="space-y-6">
-      <StrategyTabNav activeTab={activeTab} showFilters={showFilters} onTabChange={setActiveTab} onFilterToggle={() => setShowFilters(!showFilters)} onCreateClick={() => setShowCreateDialog(true)} />
+      <StrategyTabNav activeTab={activeTab} showFilters={showFilters} onTabChange={setActiveTab} onFilterToggle={() => setShowFilters(!showFilters)} onCreateClick={() => setShowCreateDialog(true)} topTabs={topTabs} topActiveTab={topActiveTab} onTopTabChange={onTopTabChange} />
 
       {activeTab === "overview" && (
         <div className="space-y-6">
