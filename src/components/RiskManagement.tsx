@@ -327,7 +327,7 @@ export default function RiskManagement() {
               <Button
                 onClick={() => h.setIsDeleteAllOpen(true)}
                 variant="outline"
-                className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-6 py-4"
+                className="rounded-[24px] border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium px-6 py-4 text-base"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Видалити всі
@@ -339,7 +339,7 @@ export default function RiskManagement() {
               onClick={() => h.setIsSheetsGuideOpen(true)}
               disabled={h.isUpdating}
               variant="outline"
-              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-4 disabled:opacity-50"
+              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-4 text-base disabled:opacity-50"
             >
               {h.isUpdating ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -352,7 +352,7 @@ export default function RiskManagement() {
             {/* Add team */}
             <Button
               onClick={() => h.setIsAddTeamOpen(true)}
-              className="rounded-[24px] bg-primary hover:bg-blue-400 text-white font-semibold px-6 py-4 shadow-[0_2px_8px_rgba(68,122,252,0.3)]"
+              className="rounded-[24px] bg-primary hover:bg-blue-400 text-white font-semibold px-6 py-4 text-base shadow-[0_2px_8px_rgba(68,122,252,0.3)]"
             >
               <Plus className="h-4 w-4 mr-2" strokeWidth={2} />
               Додати команду
