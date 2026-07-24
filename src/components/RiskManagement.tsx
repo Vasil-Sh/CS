@@ -335,20 +335,19 @@ export default function RiskManagement() {
             )}
 
             {/* Google Sheets button */}
-            <button
+            <Button
               onClick={() => h.setIsSheetsGuideOpen(true)}
               disabled={h.isUpdating}
-              className="flex items-center gap-2 px-5 py-4 rounded-[24px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+              variant="outline"
+              className="rounded-[24px] border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-3 disabled:opacity-50"
             >
               {h.isUpdating ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
               ) : (
-                <Download className="h-4 w-4" strokeWidth={1.5} />
+                <Download className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
               )}
-              {h.isUpdating
-                ? "Завантаження..."
-                : "Підтягнути команди з Google Sheets"}
-            </button>
+              {h.isUpdating ? "Завантаження..." : "Підтягнути з Google Sheets"}
+            </Button>
 
             {/* Add team */}
             <Button
