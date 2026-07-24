@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CalendarDays, Trophy, X, Loader2 } from "lucide-react";
+import { CalendarDays, Trophy, X, Loader2, Search, Filter } from "lucide-react";
 
 interface PastDaysModalProps {
   open: boolean;
@@ -104,12 +104,15 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
   const [matches, setMatches] = useState<HistoryMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gameFilter, setGameFilter] = useState<"all" | "cs2" | "dota2">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [daysBack, setDaysBack] = useState(7);
 
   useEffect(() => {
     if (!open) return;
     setLoading(true);
     setError(null);
-    fetch("/api/v1/matches-history?days=7")
+    fetch(`/api/v1/matches-history?days=${daysBack}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -124,9 +127,26 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
       .finally(() => setLoading(false));
   }, [open]);
 
+  const filteredMatches = useMemo(() => {
+    return matches.filter((m) => {
+      if (gameFilter === "cs2" && m.game !== "cs2") return false;
+      if (gameFilter === "dota2" && m.game !== "dota2") return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        if (
+          !m.team1.toLowerCase().includes(q) &&
+          !m.team2.toLowerCase().includes(q) &&
+          !m.tournament.toLowerCase().includes(q)
+        )
+          return false;
+      }
+      return true;
+    });
+  }, [matches, gameFilter, searchQuery]);
+
   // Group by date
   const grouped: Record<string, HistoryMatch[]> = {};
-  matches.forEach((m) => {
+  filteredMatches.forEach((m) => {
     const key = m.date;
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(m);
@@ -151,7 +171,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
                 Результати
               </DialogTitle>
               <p className="text-sm text-gray-500 mt-0.5 font-normal">
-                {matches.length} матчів за {dateKeys.length} днів
+                {filteredMatches.length} матчів за {dateKeys.length} днів
               </p>
             </div>
             <button
@@ -161,10 +181,65 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
               <X className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
             </button>
           </div>
+
+          {/* Filters bar */}
+          {!loading && matches.length > 0 && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                {[3, 7, 14, 30].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDaysBack(d)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      daysBack === d
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {d}д
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                {(["all", "cs2", "dota2"] as const).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGameFilter(g)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      gameFilter === g
+                        ? g === "cs2"
+                          ? "bg-amber-600 text-white shadow-sm"
+                          : g === "dota2"
+                            ? "bg-purple-600 text-white shadow-sm"
+                            : "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {g === "all" ? "Всі" : g === "cs2" ? "CS2" : "Dota 2"}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative flex-1 min-w-[140px]">
+                <Search
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"
+                  strokeWidth={1.5}
+                />
+                <input
+                  type="text"
+                  placeholder="Пошук..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-100 rounded-lg border-0 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                />
+              </div>
+            </div>
+          )}
         </DialogHeader>
 
         {/* Scrollable body */}
-        <div className="overflow-y-auto px-6 pb-6 pt-4 bg-gray-100">
+        <div className="overflow-y-auto px-6 pb-6 pt-4 bg-gray-100 max-h-[calc(85vh-140px)]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <Loader2 className="size-10 mb-3 animate-spin" strokeWidth={1} />
