@@ -372,26 +372,6 @@ export default function Analytics() {
     return Math.round((sum / completedBets.length) * 100) / 100;
   }, [completedBets]);
 
-  const bestMonth = useMemo(() => {
-    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
-    return [...monthlyProfitData].sort((a, b) => b.profit - a.profit)[0];
-  }, [monthlyProfitData]);
-
-  const worstMonth = useMemo(() => {
-    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
-    return [...monthlyProfitData].sort((a, b) => a.profit - b.profit)[0];
-  }, [monthlyProfitData]);
-
-  const avgMonthlyProfit = useMemo(() => {
-    if (!monthlyProfitData || monthlyProfitData.length === 0) return 0;
-    const total = monthlyProfitData.reduce((s, m) => s + m.profit, 0);
-    return Math.round(total / monthlyProfitData.length);
-  }, [monthlyProfitData]);
-
-  const totalMonthsTracked = useMemo(() => {
-    return monthlyProfitData?.length || 0;
-  }, [monthlyProfitData]);
-
   const betsThisMonth = useMemo(() => {
     const now = new Date();
     const start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -565,6 +545,26 @@ export default function Analytics() {
         };
       });
   }, [completedBets]);
+
+  const bestMonth = useMemo(() => {
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
+    return [...monthlyProfitData].sort((a, b) => b.profit - a.profit)[0];
+  }, [monthlyProfitData]);
+
+  const worstMonth = useMemo(() => {
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
+    return [...monthlyProfitData].sort((a, b) => a.profit - b.profit)[0];
+  }, [monthlyProfitData]);
+
+  const avgMonthlyProfit = useMemo(() => {
+    if (!monthlyProfitData || monthlyProfitData.length === 0) return 0;
+    const total = monthlyProfitData.reduce((s, m) => s + m.profit, 0);
+    return Math.round(total / monthlyProfitData.length);
+  }, [monthlyProfitData]);
+
+  const totalMonthsTracked = useMemo(() => {
+    return monthlyProfitData?.length || 0;
+  }, [monthlyProfitData]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
     // Support both UAH and USD — pick correct initial bank
