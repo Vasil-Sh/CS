@@ -1612,7 +1612,7 @@ export default function Matches() {
                 className="flex items-center gap-2 px-5 py-4 text-base rounded-[24px] transition-all duration-300 ease-in-out bg-transparent text-gray-900 font-light border border-stone-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
               >
                 <CalendarDays className="h-4 w-4" strokeWidth={1.5} />
-                <span>Минулі дні</span>
+                <span>Результати</span>
               </button>
 
               {/* Search */}

@@ -96,7 +96,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
             </div>
             <div className="flex-1">
               <DialogTitle className="text-lg font-bold text-gray-900">
-                Минулі матчі
+                Результати
               </DialogTitle>
               <p className="text-sm text-gray-500 mt-0.5 font-normal">
                 {matches.length} матчів за {dateKeys.length} днів
@@ -128,7 +128,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
                 <CalendarDays className="size-[72px]" strokeWidth={1} />
               </div>
               <p className="text-sm text-gray-900">
-                Немає завершених матчів за минулі дні
+                Немає завершених матчів
               </p>
             </div>
           ) : (
@@ -164,13 +164,13 @@ function PastDayGroup({
     <div className="mb-6 last:mb-0">
       <div className="flex items-center gap-2 mb-3">
         <div className="h-px flex-1 bg-gray-100" />
-        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+        <span className="text-xs font-medium text-gray-900 uppercase tracking-wider whitespace-nowrap">
           {formatDate(dateKey)}
         </span>
         <div className="h-px flex-1 bg-gray-100" />
       </div>
 
-      <div className="rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
         {matches.map((match, idx) => {
           const team1Won = (match.score1 ?? 0) > (match.score2 ?? 0);
           const team2Won = (match.score2 ?? 0) > (match.score1 ?? 0);
@@ -226,9 +226,9 @@ function PastDayGroup({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0 text-xs text-gray-400 min-w-[120px] justify-end">
-                <Trophy className="h-3 w-3" strokeWidth={1.5} />
-                <span className="truncate max-w-[80px]">
+              <div className="flex items-center gap-1.5 flex-shrink-0 text-xs text-gray-400 min-w-[200px] justify-end">
+                <Trophy className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
+                <span className="truncate max-w-[160px]">
                   {match.tournament}
                 </span>
                 {match.matchType && (
