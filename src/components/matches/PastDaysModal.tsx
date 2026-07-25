@@ -125,7 +125,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
         setError("Не вдалося завантажити історію матчів");
       })
       .finally(() => setLoading(false));
-  }, [open]);
+  }, [open, daysBack]);
 
   const filteredMatches = useMemo(() => {
     return matches.filter((m) => {
