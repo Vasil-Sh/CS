@@ -78,7 +78,17 @@ export default function AddToRiskyTeamsModal({
       const saved = localStorage.getItem("admin_risky_teams");
       if (saved) {
         const teams: { name: string }[] = JSON.parse(saved);
-        const existing = new Set(teams.map((t) => t.name.toLowerCase()));
+        // Use same fuzzy matching as getTeamRiskInfo in useMatches
+        const isRisky = (teamName: string) =>
+          teams.some(
+            (t) =>
+              t.name.toLowerCase() === teamName.toLowerCase() ||
+              teamName.toLowerCase().includes(t.name.toLowerCase()) ||
+              t.name.toLowerCase().includes(teamName.toLowerCase()),
+          );
+        const existing = new Set(
+          [team1.name, team2.name].filter((n) => isRisky(n)).map((n) => n.toLowerCase()),
+        );
         setExistingTeams(existing);
 
         // Auto-select the first non-existing team
