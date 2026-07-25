@@ -82,12 +82,17 @@ const TeamLogo = ({
 
   if (!proxiedSrc || imgError) {
     return (
-      <img
-        src={placeholderSvg}
-        alt={teamName}
-        className="object-contain flex-shrink-0"
+      <div
+        className="flex items-center justify-center rounded-md bg-gray-200 flex-shrink-0"
         style={{ width: size, height: size, minWidth: size }}
-      />
+      >
+        <img
+          src={placeholderSvg}
+          alt={teamName}
+          className="object-contain"
+          style={{ width: size - 2, height: size - 2 }}
+        />
+      </div>
     );
   }
 
