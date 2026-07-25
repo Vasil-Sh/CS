@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShieldAlert, Save } from "lucide-react";
+import { ShieldAlert, Save, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface TeamInfo {
@@ -47,6 +47,16 @@ const GAME_OPTIONS = [
   },
 ] as const;
 
+/** Proxy a CDN logo URL through the backend */
+const proxyLogo = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("/api/")) return url;
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1];
+  // Try CS2 first, then Dota2
+  return `/api/v1/cs2-matches/logo/${filename}`;
+};
+
 export default function AddToRiskyTeamsModal({
   open,
   onClose,
@@ -59,6 +69,30 @@ export default function AddToRiskyTeamsModal({
   const [game, setGame] = useState<string>("CS");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [existingTeams, setExistingTeams] = useState<Set<string>>(new Set());
+
+  // Load existing risky teams when modal opens, detect already-added teams
+  useEffect(() => {
+    if (!open) return;
+    try {
+      const saved = localStorage.getItem("admin_risky_teams");
+      if (saved) {
+        const teams: { name: string }[] = JSON.parse(saved);
+        const existing = new Set(teams.map((t) => t.name.toLowerCase()));
+        setExistingTeams(existing);
+
+        // Auto-select the first non-existing team
+        if (existing.has(team1.name.toLowerCase()) && !existing.has(team2.name.toLowerCase())) {
+          setSelectedTeam(team2.name);
+        } else if (!existing.has(team1.name.toLowerCase())) {
+          setSelectedTeam(team1.name);
+        }
+      }
+    } catch { /* ignore */ }
+    setStatus("Обережно");
+    setGame("CS");
+    setNotes("");
+  }, [open, team1.name, team2.name]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -155,39 +189,87 @@ export default function AddToRiskyTeamsModal({
         <div className="px-6 pb-6 pt-4 space-y-5">
           {/* Team cards */}
           <div className="grid grid-cols-2 gap-3">
-            {[team1, team2].map((team) => (
-              <button
-                key={team.name}
-                onClick={() => setSelectedTeam(team.name)}
-                className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
-                  selectedTeam === team.name
-                    ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                    : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
-                }`}
-              >
-                {team.logo ? (
-                  <img
-                    src={team.logo}
-                    alt={team.name}
-                    className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0">
-                    {team.name.charAt(0).toUpperCase()}
+            {[team1, team2].map((team) => {
+              const isAlreadyAdded = existingTeams.has(team.name.toLowerCase());
+              const isSelected = selectedTeam === team.name;
+
+              if (isAlreadyAdded) {
+                return (
+                  <div
+                    key={team.name}
+                    className="flex items-center gap-3 p-4 rounded-2xl border-2 border-green-200 bg-green-50/60 relative opacity-70"
+                  >
+                    <div className="absolute -top-2 -right-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 bg-white rounded-full" strokeWidth={2} />
+                    </div>
+                    {team.logo ? (
+                      <img
+                        src={proxyLogo(team.logo) || undefined}
+                        alt={team.name}
+                        className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}>
+                      {team.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm font-semibold text-gray-500 block truncate">
+                        {team.name}
+                      </span>
+                      <span className="text-xs text-green-600 font-medium">Вже додано</span>
+                    </div>
                   </div>
-                )}
-                <span
-                  className={`text-sm font-semibold truncate ${
-                    selectedTeam === team.name
-                      ? "text-gray-900"
-                      : "text-gray-500"
+                );
+              }
+
+              return (
+                <button
+                  key={team.name}
+                  onClick={() => setSelectedTeam(team.name)}
+                  className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
+                    isSelected
+                      ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
+                      : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
                   }`}
                 >
-                  {team.name}
-                </span>
-              </button>
-            ))}
+                  {team.logo ? (
+                    <img
+                      src={proxyLogo(team.logo) || undefined}
+                      alt={team.name}
+                      className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}>
+                    {team.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span
+                    className={`text-sm font-semibold truncate ${
+                      isSelected ? "text-gray-900" : "text-gray-500"
+                    }`}
+                  >
+                    {team.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+
+          {/* Warning when both teams already added */}
+          {existingTeams.has(team1.name.toLowerCase()) && existingTeams.has(team2.name.toLowerCase()) && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-2xl text-center">
+              <p className="text-sm text-green-700 font-medium">
+                Обидві команди вже є у списку ризикованих
+              </p>
+            </div>
+          )}
 
           {/* Form */}
           <div className="space-y-4">
@@ -254,15 +336,17 @@ export default function AddToRiskyTeamsModal({
             </div>
           </div>
 
-          {/* Save button */}
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
-          >
-            <Save className="h-4 w-4 mr-2" strokeWidth={2} />
-            {saving ? "Збереження..." : "Зберегти"}
-          </Button>
+          {/* Save button — hidden when both teams already in list */}
+          {!(existingTeams.has(team1.name.toLowerCase()) && existingTeams.has(team2.name.toLowerCase())) && (
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
+            >
+              <Save className="h-4 w-4 mr-2" strokeWidth={2} />
+              {saving ? "Збереження..." : "Зберегти"}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
