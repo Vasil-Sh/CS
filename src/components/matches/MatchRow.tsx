@@ -598,36 +598,29 @@ export default function MatchRow({
           className={`py-3 px-2 text-center ${colDivider}`}
           style={{ minWidth: 170 }}
         >
-          {/* Always show "Додати запис" unless BOTH teams are already risky */}
-          {(!team1Risky || !team2Risky) && (
-            <button
-              onClick={() => onAddToRisky(match)}
-              className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
-            >
-              <PlusCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-              <span>Додати запис</span>
-            </button>
-          )}
+          <div className="flex flex-col items-center gap-2">
+            {/* Always show "Додати запис" unless BOTH teams are already risky */}
+            {(!team1Risky || !team2Risky) && (
+              <button
+                onClick={() => onAddToRisky(match)}
+                className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
+              >
+                <PlusCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>Додати запис</span>
+              </button>
+            )}
 
-          {/* Risky team comment — when at least one team is risky */}
-          {(team1Risky || team2Risky) && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => onShowComment(match)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all"
-                >
-                  <Eye
-                    className="h-3.5 w-3.5 text-blue-600"
-                    strokeWidth={1.5}
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-                <p className="text-sm">Коментар</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+            {/* Risky team comment — when at least one team is risky */}
+            {(team1Risky || team2Risky) && (
+              <button
+                onClick={() => onShowComment(match)}
+                className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 hover:text-blue-700 text-xs font-medium shadow-sm whitespace-nowrap transition-all"
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>Переглянути запис</span>
+              </button>
+            )}
+          </div>
         </td>
       )}
       {visibleColumns.has("actions") && (
