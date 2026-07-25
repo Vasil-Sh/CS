@@ -433,7 +433,8 @@ export function useMatches() {
   // ── Auto-load matches on mount ──
   useEffect(() => {
     loadMatchesFromApi();
-  }, [loadMatchesFromApi]);
+    loadRiskyTeams();
+  }, [loadMatchesFromApi, loadRiskyTeams]);
 
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
@@ -840,7 +841,25 @@ export function useMatches() {
   const loadRiskyTeams = useCallback(async () => {
     try {
       const resp = await fetch("/api/v1/risky-teams");
-      if (resp.ok) setRiskyTeams(await resp.json());
+      if (resp.ok) {
+        const data = await resp.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setRiskyTeams(data);
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    // Fallback to localStorage (primary source used by RiskyTeams page)
+    try {
+      const saved = localStorage.getItem("admin_risky_teams");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRiskyTeams(parsed);
+        }
+      }
     } catch {
       /* ignore */
     }
