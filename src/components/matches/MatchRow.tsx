@@ -40,7 +40,8 @@ interface Props {
   isSelected: boolean;
   currentRating: MatchRating;
   colDivider: string;
-  hasRiskyTeam: boolean;
+  team1Risky: boolean;
+  team2Risky: boolean;
   visibleColumns: Set<string>;
   onRate: (id: string, rating: MatchRating) => void;
   onAIRecommend: (match: Match) => void;
@@ -327,7 +328,8 @@ export default function MatchRow({
   isSelected,
   currentRating,
   colDivider,
-  hasRiskyTeam,
+  team1Risky,
+  team2Risky,
   visibleColumns,
   onRate,
   onAIRecommend,
@@ -596,8 +598,8 @@ export default function MatchRow({
           className={`py-3 px-2 text-center ${colDivider}`}
           style={{ minWidth: 170 }}
         >
-          {/* Add to bets */}
-          {!hasRiskyTeam && (
+          {/* Always show "Додати запис" unless BOTH teams are already risky */}
+          {(!team1Risky || !team2Risky) && (
             <button
               onClick={() => onAddToRisky(match)}
               className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
@@ -607,8 +609,8 @@ export default function MatchRow({
             </button>
           )}
 
-          {/* Risky team comment — only when team is already risky */}
-          {hasRiskyTeam && (
+          {/* Risky team comment — when at least one team is risky */}
+          {(team1Risky || team2Risky) && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <button

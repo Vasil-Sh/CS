@@ -168,7 +168,8 @@ export default function Matches() {
       onAddToBets={m.handleAddToBets}
       onToggleSelect={m.toggleMatchSelection}
       onAddToRisky={m.handleAddToRisky}
-      hasRiskyTeam={!!m.getMatchRiskComments(match.team1, match.team2)}
+      team1Risky={!!m.getTeamRiskInfo(match.team1)}
+      team2Risky={!!m.getTeamRiskInfo(match.team2)}
     />
   );
 
