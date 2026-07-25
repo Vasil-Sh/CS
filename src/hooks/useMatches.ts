@@ -398,8 +398,17 @@ export function useMatches() {
     setInitialLoading(true);
     setApiError(null);
     try {
+      const onCs2Update = (fresh: ApiMatch[]) => {
+        if (gen !== fetchGenRef.current) return;
+        setMatches((prev) => {
+          const dota = prev.filter((m) => m.game === "Dota2");
+          const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
+          return [...cs2, ...dota];
+        });
+      };
+
       const [cs2Data, dotaData] = await Promise.allSettled([
-        fetchTodaysAndUpcomingMatches(),
+        fetchTodaysAndUpcomingMatches(false, onCs2Update),
         fetchDota2Matches(),
       ]);
       if (gen !== fetchGenRef.current) return;
