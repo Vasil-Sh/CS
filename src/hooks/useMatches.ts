@@ -433,8 +433,7 @@ export function useMatches() {
   // ── Auto-load matches on mount ──
   useEffect(() => {
     loadMatchesFromApi();
-    loadRiskyTeams();
-  }, [loadMatchesFromApi, loadRiskyTeams]);
+  }, [loadMatchesFromApi]);
 
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
@@ -864,6 +863,9 @@ export function useMatches() {
       /* ignore */
     }
   }, []);
+
+  // ── Init risky teams on mount ──
+  useEffect(() => { loadRiskyTeams(); }, [loadRiskyTeams]);
 
   const getTeamRiskInfo = useCallback(
     (teamName: string): { notes: string; status: string } | null => {
