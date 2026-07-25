@@ -51,6 +51,16 @@ interface Props {
   onAddToRisky: (match: Match) => void;
 }
 
+/** Convert CDN URL to backend proxy URL */
+const proxyLogo = (url: string | null, game: string): string | null => {
+  if (!url) return null;
+  if (url.startsWith("/api/")) return url;
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1];
+  const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
+  return `/api/v1/${prefix}/logo/${filename}`;
+};
+
 const TeamLogo = ({
   src,
   teamName,
@@ -68,7 +78,9 @@ const TeamLogo = ({
       ? "/assets/team-placeholder.svg"
       : "/assets/team-placeholder-dota.svg";
 
-  if (!src || imgError) {
+  const proxiedSrc = game ? proxyLogo(src ?? null, game === "CS2" ? "cs2" : "dota2") : (src ?? null);
+
+  if (!proxiedSrc || imgError) {
     return (
       <img
         src={placeholderSvg}
@@ -81,7 +93,7 @@ const TeamLogo = ({
 
   return (
     <img
-      src={src}
+      src={proxiedSrc}
       alt={teamName}
       className="object-contain flex-shrink-0"
       style={{ width: size, height: size, minWidth: size }}
