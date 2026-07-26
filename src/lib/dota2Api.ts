@@ -178,31 +178,44 @@ export async function fetchDota2Matches(
     }
   }
 
-  try {
-    const path = forceRefresh
-      ? "/v1/dota2-matches?refresh=true"
-      : "/v1/dota2-matches";
-    // Use 120s timeout — first Puppeteer scrape can take ~60s
-    const data = await api.get<TipsGgApiMatch[]>(path, 120000);
-    const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
-    if (matches.length > 0) {
-      setCache(matches);
-    } else {
-      // Don't cache empty responses — keep any previous cached data alive
-      if (forceRefresh) {
-        const stale = getStaleCache();
-        if (stale) return stale;
+  // No cache or forced refresh — retry on empty (backend cold start)
+  const maxRetries = 4;
+  const retryDelays = [3000, 6000, 12000, 24000]; // 3s, 6s, 12s, 24s
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const path = forceRefresh
+        ? "/v1/dota2-matches?refresh=true"
+        : "/v1/dota2-matches";
+      // Use 120s timeout — first Puppeteer scrape can take ~60s
+      const data = await api.get<TipsGgApiMatch[]>(path, 120000);
+      const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
+      if (matches.length > 0) {
+        setCache(matches);
+        return matches;
+      }
+      // Empty response — backend may still be warming up
+      if (attempt < maxRetries) {
+        console.log(
+          `dota2Api: empty response, retrying in ${retryDelays[attempt] / 1000}s (${attempt + 1}/${maxRetries})`,
+        );
+        await new Promise((r) => setTimeout(r, retryDelays[attempt]));
+      }
+    } catch (e) {
+      if (import.meta.env.DEV)
+        console.error("dota2Api: fetchDota2Matches failed", e);
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, retryDelays[attempt]));
       }
     }
-    return matches;
-  } catch (e) {
-    if (import.meta.env.DEV)
-      console.error("dota2Api: fetchDota2Matches failed", e);
-    // On error, serve stale cache as fallback
+  }
+
+  // All retries exhausted — serve stale cache or empty
+  if (forceRefresh) {
     const stale = getStaleCache();
     if (stale) return stale;
-    return [];
   }
+  return [];
 }
 
 function clearCache(): void {

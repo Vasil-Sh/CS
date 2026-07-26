@@ -34,6 +34,14 @@ export type { Match } from "@/hooks/useMatches";
 
 const colDivider = "border-r border-gray-200";
 
+const getTodayDateKey = (): string => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const formatFullDateTitle = (
   dateKey: string,
   gameFilter: "all" | "CS2" | "Dota2",
@@ -219,9 +227,89 @@ export default function Matches() {
             <MatchesSkeleton />
           ) : (
             <ErrorBoundary>
-              {m.sortedDateKeys
-                .filter((dk) => (m.groupedByDate[dk]?.length || 0) > 0)
-                .map((dateKey, idx) => {
+              {(() => {
+                const visibleDateKeys = m.sortedDateKeys.filter(
+                  (dk) => (m.groupedByDate[dk]?.length || 0) > 0,
+                );
+
+                if (visibleDateKeys.length === 0) {
+                  return (
+                    <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                      <div className="relative z-10 bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.10)] overflow-hidden">
+                        <CardHeader className="bg-white rounded-t-[24px] border-b border-gray-200 px-6 py-5">
+                          <CardTitle>
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
+                                <Calendar
+                                  className="h-5 w-5 text-primary"
+                                  strokeWidth={2}
+                                />
+                              </div>
+                              <span className="text-2xl font-bold text-gray-900 tracking-tight">
+                                {formatFullDateTitle(
+                                  getTodayDateKey(),
+                                  m.filterGame,
+                                )}
+                              </span>
+                              <div className="flex items-center gap-1 ml-auto">
+                                {(["all", "CS2", "Dota2"] as const).map((g) => (
+                                  <button
+                                    key={g}
+                                    onClick={() => m.setFilterGame(g)}
+                                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                                      m.filterGame === g
+                                        ? g === "CS2"
+                                          ? "bg-amber-600 text-white shadow-md"
+                                          : g === "Dota2"
+                                            ? "bg-[#7C3AED] text-white shadow-md"
+                                            : "bg-gray-900 text-white shadow-md"
+                                        : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
+                                    }`}
+                                  >
+                                    {g === "all" ? "Всі" : g}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 rounded-b-[24px]">
+                          <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3 py-16">
+                            <div className="p-8 bg-gray-100 rounded-2xl mb-6">
+                              <Trophy
+                                className="h-16 w-16 text-gray-400"
+                                strokeWidth={1.5}
+                              />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                              Немає матчів
+                            </h3>
+                            <p className="text-gray-500 text-sm whitespace-nowrap mb-4">
+                              {m.filterGame === "Dota2"
+                                ? "На сьогодні Dota 2 матчів немає. Спробуйте «Всі» або «CS2»"
+                                : m.filterGame === "CS2"
+                                  ? "На сьогодні CS2 матчів немає. Спробуйте «Всі» або «Dota2»"
+                                  : "Матчів не знайдено. Спробуйте змінити фільтри або натисніть «Оновити»"}
+                            </p>
+                            <button
+                              onClick={m.refreshMatches}
+                              disabled={m.isLoading}
+                              className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                            >
+                              <RefreshCw
+                                className="h-4 w-4"
+                                strokeWidth={1.5}
+                              />{" "}
+                              Оновити
+                            </button>
+                          </div>
+                        </CardContent>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return visibleDateKeys.map((dateKey, idx) => {
                   const dateMatches = m.groupedByDate[dateKey];
                   const hasLive = dateMatches.some(
                     (mt) => mt.matchStatus === "live",
@@ -289,16 +377,16 @@ export default function Matches() {
                               </div>
                             ) : (
                               <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
-                                <div className="p-5 bg-gray-100 rounded-2xl">
+                                <div className="p-8 bg-gray-100 rounded-2xl mb-6">
                                   <Trophy
-                                    className="h-10 w-10 text-gray-400"
+                                    className="h-16 w-16 text-gray-400"
                                     strokeWidth={1.5}
                                   />
                                 </div>
-                                <p className="text-lg font-bold text-gray-500">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                                   Немає матчів
-                                </p>
-                                <p className="text-sm">
+                                </h3>
+                                <p className="text-gray-500 text-sm mb-4">
                                   Спробуйте обрати інший фільтр гри або
                                   натисніть «Оновити»
                                 </p>
@@ -320,7 +408,8 @@ export default function Matches() {
                       </div>
                     </BlurFade>
                   );
-                })}
+                });
+              })()}
             </ErrorBoundary>
           )}
 

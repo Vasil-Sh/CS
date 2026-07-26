@@ -94,14 +94,33 @@ export async function fetchTodaysAndUpcomingMatches(
     }
   }
 
-  // No cache or forced refresh
-  try {
-    const fresh = await fetchFreshMatches();
-    if (fresh.length > 0) setCache(fresh);
-    return fresh;
-  } catch {
-    return getStaleCache();
+  // No cache or forced refresh — retry on empty (backend cold start)
+  const maxRetries = 4;
+  const retryDelays = [3000, 6000, 12000, 24000]; // 3s, 6s, 12s, 24s
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const fresh = await fetchFreshMatches();
+      if (fresh.length > 0) {
+        setCache(fresh);
+        return fresh;
+      }
+      // Empty response — backend may still be warming up
+      if (attempt < maxRetries) {
+        console.log(
+          `csApi: empty response, retrying in ${retryDelays[attempt] / 1000}s (${attempt + 1}/${maxRetries})`,
+        );
+        await new Promise((r) => setTimeout(r, retryDelays[attempt]));
+      }
+    } catch {
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, retryDelays[attempt]));
+      }
+    }
   }
+
+  // All retries exhausted — serve stale cache or empty
+  return getStaleCache();
 }
 
 function getCache(): ApiMatch[] | null {
