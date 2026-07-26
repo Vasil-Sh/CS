@@ -1,4 +1,12 @@
-import { Trophy, Radio, Clock, CheckCircle2, Brain, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import {
+  Trophy,
+  Radio,
+  Clock,
+  CheckCircle2,
+  Brain,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
 
 interface StatCardsProps {
   displayCount: number;
@@ -8,6 +16,7 @@ interface StatCardsProps {
   upcomingCount: number;
   finishedCount: number;
   avgConfidence: number;
+  liveScoreAge?: number;
 }
 
 const cardBaseStyle: React.CSSProperties = {
@@ -20,8 +29,13 @@ const cardHoverStyle: React.CSSProperties = {
 };
 
 export default function DateStatsCards({
-  displayCount, cs2DisplayedCount, dota2DisplayedCount,
-  liveCount, upcomingCount, finishedCount, avgConfidence,
+  displayCount,
+  cs2DisplayedCount,
+  dota2DisplayedCount,
+  liveCount,
+  upcomingCount,
+  finishedCount,
+  avgConfidence,
 }: StatCardsProps) {
   const cards = [
     {
@@ -31,9 +45,13 @@ export default function DateStatsCards({
       color: "text-gray-900",
       sub: (
         <>
-          <span className="text-sm font-semibold text-amber-600">CS2 {cs2DisplayedCount}</span>
+          <span className="text-sm font-semibold text-amber-600">
+            CS2 {cs2DisplayedCount}
+          </span>
           <span className="text-sm text-gray-400">—</span>
-          <span className="text-sm font-semibold text-[#7C3AED]">Dota {dota2DisplayedCount}</span>
+          <span className="text-sm font-semibold text-[#7C3AED]">
+            Dota {dota2DisplayedCount}
+          </span>
           <span className="text-sm text-[#4B5563]">матчів</span>
         </>
       ),
@@ -67,11 +85,19 @@ export default function DateStatsCards({
       sub: (
         <>
           {avgConfidence >= 65 ? (
-            <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
+            <ArrowUpRight
+              className="h-4 w-4 text-green-500"
+              strokeWidth={2.5}
+            />
           ) : (
-            <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
+            <ArrowDownRight
+              className="h-4 w-4 text-red-500"
+              strokeWidth={2.5}
+            />
           )}
-          <span className={`text-sm font-semibold ${avgConfidence >= 65 ? "text-green-500" : "text-red-500"}`}>
+          <span
+            className={`text-sm font-semibold ${avgConfidence >= 65 ? "text-green-500" : "text-red-500"}`}
+          >
             {avgConfidence >= 65 ? "Хороший рівень" : "Низький рівень"}
           </span>
         </>
@@ -87,16 +113,26 @@ export default function DateStatsCards({
             key={c.label}
             className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 group"
             style={cardBaseStyle}
-            onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardBaseStyle)}
+            onMouseEnter={(e) =>
+              Object.assign(e.currentTarget.style, cardHoverStyle)
+            }
+            onMouseLeave={(e) =>
+              Object.assign(e.currentTarget.style, cardBaseStyle)
+            }
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
                 {c.icon}
               </div>
-              <span className="text-lg font-semibold text-gray-900">{c.label}</span>
+              <span className="text-lg font-semibold text-gray-900">
+                {c.label}
+              </span>
             </div>
-            <div className={`text-4xl font-bold tracking-tight mb-2 ${c.color}`}>{c.value}</div>
+            <div
+              className={`text-4xl font-bold tracking-tight mb-2 ${c.color}`}
+            >
+              {c.value}
+            </div>
             <div className="flex items-center gap-2">{c.sub}</div>
           </div>
         ))}

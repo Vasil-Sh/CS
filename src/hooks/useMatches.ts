@@ -588,15 +588,46 @@ export function useMatches() {
     (m) => m.game === "CS2" && m.matchStatus !== "finished",
   );
 
-  // ── Poll live scores periodically ──
+  // ── Poll live scores: immediate + every 10s + on window focus ──
+  const [liveScoreAge, setLiveScoreAge] = useState(0);
+  const liveIntervalRef = useRef(10_000); // start at 10s, adapt
+
   useEffect(() => {
-    const dota2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/dota2-live-scores`;
-    const cs2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/cs2-live-scores`;
-    const interval = setInterval(() => {
-      if (hasDota2Matches) pollLiveScores("Dota2", "dota2Slug", dota2Endpoint);
-      if (hasCs2Matches) pollLiveScores("CS2", "cs2Slug", cs2Endpoint);
-    }, 30_000);
-    return () => clearInterval(interval);
+    const dota2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/dota2-matches/live-scores`;
+    const cs2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/cs2-matches/live-scores`;
+
+    const poll = () => {
+      if (hasDota2Matches) {
+        pollLiveScores("Dota2", "dota2Slug", dota2Endpoint);
+        setLiveScoreAge(0);
+      }
+      if (hasCs2Matches) {
+        pollLiveScores("CS2", "cs2Slug", cs2Endpoint);
+        setLiveScoreAge(0);
+      }
+    };
+
+    // Immediate poll
+    poll();
+
+    const timer = setInterval(() => {
+      poll();
+      setLiveScoreAge((prev) => prev + liveIntervalRef.current);
+    }, liveIntervalRef.current);
+
+    // Poll on tab focus
+    const onFocus = () => {
+      if (document.visibilityState === "visible") {
+        poll();
+        setLiveScoreAge(0);
+      }
+    };
+    document.addEventListener("visibilitychange", onFocus);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [hasDota2Matches, hasCs2Matches, pollLiveScores]);
 
   // ── Filtering & sorting (memoized) ──
@@ -1050,6 +1081,7 @@ export function useMatches() {
     pollLiveScores,
     hasDota2Matches,
     hasCs2Matches,
+    liveScoreAge,
     // Multi-select
     selectedMatchIds,
     setSelectedMatchIds,
