@@ -25,6 +25,7 @@ import {
   Info,
   Trophy,
   X,
+  BarChart3,
 } from "lucide-react";
 
 import type { Match, FormStability, MatchRating } from "@/hooks/useMatches";
@@ -45,6 +46,7 @@ interface Props {
   visibleColumns: Set<string>;
   onRate: (id: string, rating: MatchRating) => void;
   onAIRecommend: (match: Match) => void;
+  onPredictions: (match: Match) => void;
   onShowComment: (match: Match) => void;
   onAddToBets: (match: Match) => void;
   onToggleSelect: (id: string) => void;
@@ -78,7 +80,9 @@ const TeamLogo = ({
       ? "/assets/team-placeholder.svg"
       : "/assets/team-placeholder-dota.svg";
 
-  const proxiedSrc = game ? proxyLogo(src ?? null, game.toLowerCase() === "dota2" ? "dota2" : "cs2") : (src ?? null);
+  const proxiedSrc = game
+    ? proxyLogo(src ?? null, game.toLowerCase() === "dota2" ? "dota2" : "cs2")
+    : (src ?? null);
 
   if (!proxiedSrc || imgError) {
     return (
@@ -355,6 +359,7 @@ export default function MatchRow({
   visibleColumns,
   onRate,
   onAIRecommend,
+  onPredictions,
   onShowComment,
   onAddToBets,
   onToggleSelect,
@@ -522,22 +527,40 @@ export default function MatchRow({
       {visibleColumns.has("status") && <td className="hidden"></td>}
       {visibleColumns.has("ai") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => onAIRecommend(match)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-violet-100 border border-[#DDD6FE] transition-all"
-              >
-                <Lightbulb
-                  className="h-4 w-4 text-[#7C3AED]"
-                  strokeWidth={1.5}
-                />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-              <p className="text-sm">AI рекомендація</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="flex items-center justify-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onPredictions(match)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all"
+                >
+                  <BarChart3
+                    className="h-4 w-4 text-blue-600"
+                    strokeWidth={1.5}
+                  />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+                <p className="text-sm">Аналіз прогнозів</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onAIRecommend(match)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-violet-100 border border-[#DDD6FE] transition-all"
+                >
+                  <Lightbulb
+                    className="h-4 w-4 text-[#7C3AED]"
+                    strokeWidth={1.5}
+                  />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+                <p className="text-sm">AI рекомендація</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </td>
       )}
       {visibleColumns.has("prediction") && (
@@ -627,7 +650,10 @@ export default function MatchRow({
                 onClick={() => onAddToRisky(match)}
                 className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-[#3568e0] text-white text-xs font-medium shadow-sm whitespace-nowrap"
               >
-                <PlusCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <PlusCircle
+                  className="h-3.5 w-3.5 shrink-0"
+                  strokeWidth={1.5}
+                />
                 <span>Додати запис</span>
               </button>
             )}

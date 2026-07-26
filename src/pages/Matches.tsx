@@ -21,6 +21,7 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageHeader } from "@/components/PageHeader";
 import AIRecommendationModal from "@/components/AIRecommendationModal";
+import PredictionsModal from "@/components/PredictionsModal";
 import CommentModal from "@/components/CommentModal";
 import AddToRiskyTeamsModal from "@/components/matches/AddToRiskyTeamsModal";
 import MatchRow from "@/components/matches/MatchRow";
@@ -122,7 +123,7 @@ export default function Matches() {
           <th
             className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider ${colDivider}`}
           >
-            AI
+            Аналіз
           </th>
         )}
         {m.visibleColumns.has("prediction") && (
@@ -171,6 +172,10 @@ export default function Matches() {
       onRate={m.handleRateMatch}
       onAIRecommend={(match: Match) => {
         void m.handleAiRecommend(match);
+      }}
+      onPredictions={(match: Match) => {
+        m.setSelectedMatch(match);
+        m.setPredictionsModalOpen(true);
       }}
       onShowComment={m.handleShowComment}
       onAddToBets={m.handleAddToBets}
@@ -423,6 +428,12 @@ export default function Matches() {
             }
             recommendation={m.aiRecommendation}
             isLoading={m.aiLoading}
+          />
+
+          <PredictionsModal
+            open={m.predictionsModalOpen}
+            onClose={() => m.setPredictionsModalOpen(false)}
+            match={m.selectedMatch}
           />
 
           <CommentModal

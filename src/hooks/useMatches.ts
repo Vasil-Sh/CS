@@ -328,6 +328,7 @@ export function useMatches() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [predictionsModalOpen, setPredictionsModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [aiRecommendation, setAiRecommendation] =
     useState<AIRecommendation | null>(null);
@@ -874,7 +875,9 @@ export function useMatches() {
   }, []);
 
   // ── Init risky teams on mount ──
-  useEffect(() => { loadRiskyTeams(); }, [loadRiskyTeams]);
+  useEffect(() => {
+    loadRiskyTeams();
+  }, [loadRiskyTeams]);
 
   const getTeamRiskInfo = useCallback(
     (teamName: string): { notes: string; status: string } | null => {
@@ -992,7 +995,10 @@ export function useMatches() {
     setPastDaysModalOpen,
     aiModalOpen,
     setAiModalOpen,
+    predictionsModalOpen,
+    setPredictionsModalOpen,
     selectedMatch,
+    setSelectedMatch,
     aiRecommendation,
     aiLoading,
     handleAiRecommend,
