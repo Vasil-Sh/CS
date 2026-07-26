@@ -24,6 +24,8 @@ import {
   ArrowUpRight,
   TrendingDown,
   Sparkles,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { Match } from "@/hooks/useMatches";
 
@@ -260,12 +262,20 @@ function formatUpsetDescription(matchType: string): {
 
 const SIM_COUNT = 10_000;
 
-function simulateSingleMatch(
+/**
+ * Simulate remaining maps from a given score state.
+ * @param startW1 current wins for team1
+ * @param startW2 current wins for team2
+ * Returns final MATCH score (accumulated from startW1/startW2)
+ */
+function simulateFromState(
   winProb: number,
   winsNeeded: number,
+  startW1: number,
+  startW2: number,
 ): { winner: 1 | 2; score: [number, number] } {
-  let w1 = 0;
-  let w2 = 0;
+  let w1 = startW1;
+  let w2 = startW2;
   while (w1 < winsNeeded && w2 < winsNeeded) {
     if (Math.random() < winProb / 100) w1++;
     else w2++;
@@ -276,13 +286,23 @@ function simulateSingleMatch(
   };
 }
 
-function runMonteCarlo(winProb: number, winsNeeded: number): SimulationResult {
+function runMonteCarlo(
+  winProb: number,
+  winsNeeded: number,
+  startW1 = 0,
+  startW2 = 0,
+): SimulationResult {
   const scores: Record<string, number> = {};
   let team1Wins = 0;
   let team2Wins = 0;
 
   for (let i = 0; i < SIM_COUNT; i++) {
-    const { winner, score } = simulateSingleMatch(winProb, winsNeeded);
+    const { winner, score } = simulateFromState(
+      winProb,
+      winsNeeded,
+      startW1,
+      startW2,
+    );
     const key = `${score[0]}:${score[1]}`;
     scores[key] = (scores[key] || 0) + 1;
     if (winner === 1) team1Wins++;
@@ -297,13 +317,82 @@ function runMonteCarlo(winProb: number, winsNeeded: number): SimulationResult {
   };
 }
 
+/**
+ * Probability that team1 wins from a given state (startW1, startW2) with winsNeeded to win.
+ * Uses the negative binomial distribution: team1 needs remW1 wins, team2 needs remW2.
+ * P(team1 wins) = Σ_{k=0}^{remW2-1} C(remW1+k-1, remW1-1) · p^remW1 · (1-p)^k
+ */
+function seriesWinFromState(
+  mapWinProb: number,
+  winsNeeded: number,
+  startW1: number,
+  startW2: number,
+): number {
+  const remW1 = Math.max(0, winsNeeded - startW1);
+  const remW2 = Math.max(0, winsNeeded - startW2);
+  if (remW1 <= 0) return 100;
+  if (remW2 <= 0) return 0;
+
+  const p = mapWinProb / 100;
+  const q = 1 - p;
+  let prob = 0;
+  for (let k = 0; k < remW2; k++) {
+    prob +=
+      binomial(remW1 + k - 1, remW1 - 1) * Math.pow(p, remW1) * Math.pow(q, k);
+  }
+  return Math.round(prob * 10000) / 100;
+}
+
+/**
+ * Exact score distributions from a given state.
+ */
+function scoreDistFromState(
+  mapWinProb: number,
+  winsNeeded: number,
+  startW1: number,
+  startW2: number,
+): Record<string, number> {
+  const remW1 = Math.max(0, winsNeeded - startW1);
+  const remW2 = Math.max(0, winsNeeded - startW2);
+  const p = mapWinProb / 100;
+  const q = 1 - p;
+  const scores: Record<string, number> = {};
+
+  // Already decided?
+  if (remW1 <= 0) {
+    scores[`${startW1}:${startW2}`] = 100;
+    return scores;
+  }
+  if (remW2 <= 0) {
+    scores[`${startW1}:${startW2}`] = 100;
+    return scores;
+  }
+
+  // Team1 wins: scores (startW1+remW1 : startW2+k) for k=0..remW2-1
+  for (let k = 0; k < remW2; k++) {
+    const ways = binomial(remW1 + k - 1, remW1 - 1);
+    const prob = ways * Math.pow(p, remW1) * Math.pow(q, k);
+    scores[`${startW1 + remW1}:${startW2 + k}`] = Math.round(prob * 1000) / 10;
+  }
+  // Team2 wins: scores (startW1+k : startW2+remW2) for k=0..remW1-1
+  for (let k = 0; k < remW1; k++) {
+    const ways = binomial(remW2 + k - 1, remW2 - 1);
+    const prob = ways * Math.pow(q, remW2) * Math.pow(p, k);
+    scores[`${startW1 + k}:${startW2 + remW2}`] = Math.round(prob * 1000) / 10;
+  }
+
+  return scores;
+}
+
 function runAnalyticSimulation(
   winProb: number,
   winsNeeded: number,
+  startW1 = 0,
+  startW2 = 0,
 ): SimulationResult {
-  const seriesProb = seriesWinProbability(winProb, winsNeeded);
+  const seriesProb = seriesWinFromState(winProb, winsNeeded, startW1, startW2);
   const team1Wins = Math.round((seriesProb / 100) * SIM_COUNT);
-  const rawScores = exactScoreDistribution(winProb, winsNeeded);
+  const rawScores = scoreDistFromState(winProb, winsNeeded, startW1, startW2);
   const scores: Record<string, number> = {};
   for (const [key, pct] of Object.entries(rawScores)) {
     scores[key] = Math.round((pct / 100) * SIM_COUNT);
@@ -457,6 +546,7 @@ export default function PredictionsModal({
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
   const [simRunning, setSimRunning] = useState(false);
   const [simAnalytic, setSimAnalytic] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   const winsNeeded =
     match?.matchType === "Bo5" ? 3 : match?.matchType === "Bo3" ? 2 : 1;
@@ -545,12 +635,52 @@ export default function PredictionsModal({
       note: format.note,
     };
 
+    // ── Live score adjustment: re-compute all methods from current match state ──
+    const isLive = match.matchStatus === "live";
+    const liveScore1 = match.score1 ?? 0;
+    const liveScore2 = match.score2 ?? 0;
+    const hasLiveScore = isLive && (liveScore1 > 0 || liveScore2 > 0);
+
+    // Helper: adjust a per-map prediction through seriesWinFromState to reflect live score
+    const adjustForLive = (
+      pred: PredictionResult | null,
+      perMapP1: number,
+    ): PredictionResult | null => {
+      if (!pred || !hasLiveScore) return pred;
+      const newP1 = seriesWinFromState(
+        perMapP1,
+        winsNeeded,
+        liveScore1,
+        liveScore2,
+      );
+      const newP2 = 100 - newP1;
+      const isFlipped = pred.team1Win > 50 !== newP1 > 50; // Favorite changed
+      return {
+        ...pred,
+        team1Win: Math.round(newP1),
+        team2Win: Math.round(newP2),
+        confidence: Math.max(20, pred.confidence - (isFlipped ? 15 : 0)),
+        weight: isFlipped ? Math.round(pred.weight * 0.7) : pred.weight,
+        note:
+          (pred.note ?? "") +
+          (hasLiveScore ? ` (від рахунку ${liveScore1}:${liveScore2})` : ""),
+      };
+    };
+
+    const consensusAdjusted = adjustForLive(consensus, pred1 ?? 50);
+    const bookmakerAdjusted = adjustForLive(
+      bookmaker,
+      bookmaker?.team1Win ?? 50,
+    );
+    const ratingAdjusted = adjustForLive(rating, rating?.team1Win ?? 50);
+    const formatAdjusted = adjustForLive(formatPred, baseP1);
+
     // ── Weighted Consensus ──
     const weightedConsensus = computeWeightedConsensus(
-      consensus,
-      bookmaker,
-      rating,
-      formatPred,
+      consensusAdjusted,
+      bookmakerAdjusted,
+      ratingAdjusted,
+      formatAdjusted,
       match.tier,
       coeff1,
       coeff2,
@@ -560,12 +690,11 @@ export default function PredictionsModal({
     const hasCoeffsOut = hasCoeffs;
     const hasRatingOut = pos1 != null && pos2 != null;
 
-    // Extract raw values needed by UI
     return {
-      consensus,
-      bookmaker,
-      rating,
-      formatPred,
+      consensus: consensusAdjusted,
+      bookmaker: bookmakerAdjusted,
+      rating: ratingAdjusted,
+      formatPred: formatAdjusted,
       weightedConsensus,
       hasPrediction: hasPredictionOut,
       hasCoeffs: hasCoeffsOut,
@@ -575,66 +704,128 @@ export default function PredictionsModal({
       pred1,
       coeff1,
       coeff2,
+      isLive,
+      liveScore1,
+      liveScore2,
+      hasLiveScore,
     };
   }, [match, winsNeeded]);
 
-  // Destructure for convenient use in JSX (analytics is never null here — guarded above)
-  const {
-    consensus,
-    bookmaker,
-    rating,
-    formatPred,
-    weightedConsensus,
-    hasPrediction,
-    hasCoeffs,
-    hasRating,
-    pos1,
-    pos2,
-    pred1,
-    coeff1,
-    coeff2,
-  } = analytics!;
-
   // ── Simulation ──
   const handleRunSimulation = useCallback(() => {
-    if (!weightedConsensus) return;
+    if (!analytics?.weightedConsensus) return;
+    const startW1 = analytics.hasLiveScore ? analytics.liveScore1 : 0;
+    const startW2 = analytics.hasLiveScore ? analytics.liveScore2 : 0;
     setSimRunning(true);
     setTimeout(
       () => {
-        const prob = weightedConsensus.team1Win;
+        const prob = analytics!.weightedConsensus!.team1Win;
         setSimResult(
           simAnalytic
-            ? runAnalyticSimulation(prob, winsNeeded)
-            : runMonteCarlo(prob, winsNeeded),
+            ? runAnalyticSimulation(prob, winsNeeded, startW1, startW2)
+            : runMonteCarlo(prob, winsNeeded, startW1, startW2),
         );
         setSimRunning(false);
       },
       simAnalytic ? 10 : 50,
     );
-  }, [weightedConsensus, winsNeeded, simAnalytic]);
+  }, [
+    analytics?.weightedConsensus,
+    analytics?.hasLiveScore,
+    analytics?.liveScore1,
+    analytics?.liveScore2,
+    winsNeeded,
+    simAnalytic,
+  ]);
 
   useEffect(() => {
-    if (open) {
+    if (open && analytics?.weightedConsensus) {
       setActiveTab("simulation");
       setSimResult(null);
+      // Auto-run simulation on open
+      const startW1 = analytics.hasLiveScore ? analytics.liveScore1 : 0;
+      const startW2 = analytics.hasLiveScore ? analytics.liveScore2 : 0;
+      setSimRunning(true);
+      const timer = setTimeout(
+        () => {
+          const prob = analytics.weightedConsensus!.team1Win;
+          setSimResult(
+            simAnalytic
+              ? runAnalyticSimulation(prob, winsNeeded, startW1, startW2)
+              : runMonteCarlo(prob, winsNeeded, startW1, startW2),
+          );
+          setSimRunning(false);
+        },
+        simAnalytic ? 10 : 50,
+      );
+      return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [
+    open,
+    analytics?.weightedConsensus,
+    analytics?.hasLiveScore,
+    analytics?.liveScore1,
+    analytics?.liveScore2,
+    winsNeeded,
+    simAnalytic,
+  ]);
 
   // ═══════════════════════════════════════════
   // RENDER HELPERS (must be before any early return)
   // ═══════════════════════════════════════════
 
   const renderDualBar = useCallback(
-    (t1: number, t2: number, l1?: string, l2?: string) => (
+    (
+      t1: number,
+      t2: number,
+      l1?: string,
+      l2?: string,
+      logo1?: string | null,
+      logo2?: string | null,
+    ) => (
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-gray-900">
+          <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+            {logo1 ? (
+              <img
+                src={logo1}
+                alt=""
+                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+              />
+            ) : (
+              <img
+                src={
+                  match?.game === "Dota2"
+                    ? "/assets/team-placeholder-dota.svg"
+                    : "/assets/team-placeholder.svg"
+                }
+                alt=""
+                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+              />
+            )}
             {l1 ?? match?.team1 ?? ""}
             <span className="ml-1.5 text-base font-bold text-green-600">
               {t1}%
             </span>
           </span>
-          <span className="font-semibold text-gray-900">
+          <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+            {logo2 ? (
+              <img
+                src={logo2}
+                alt=""
+                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+              />
+            ) : (
+              <img
+                src={
+                  match?.game === "Dota2"
+                    ? "/assets/team-placeholder-dota.svg"
+                    : "/assets/team-placeholder.svg"
+                }
+                alt=""
+                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+              />
+            )}
             {l2 ?? match?.team2 ?? ""}
             <span className="ml-1.5 text-base font-bold text-blue-600">
               {t2}%
@@ -653,7 +844,6 @@ export default function PredictionsModal({
         </div>
       </div>
     ),
-
     [match?.team1, match?.team2],
   );
 
@@ -673,7 +863,14 @@ export default function PredictionsModal({
         </div>
         {result ? (
           <div className="space-y-3">
-            {renderDualBar(result.team1Win, result.team2Win)}
+            {renderDualBar(
+              result.team1Win,
+              result.team2Win,
+              match?.team1,
+              match?.team2,
+              match?.logoTeam1,
+              match?.logoTeam2,
+            )}
             <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
               <div className="flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3 text-green-500" />
@@ -714,6 +911,27 @@ export default function PredictionsModal({
     [renderDualBar],
   );
 
+  // Destructure early — needed by edgeConfig useMemo below
+  const {
+    consensus,
+    bookmaker,
+    rating,
+    formatPred,
+    weightedConsensus,
+    hasPrediction,
+    hasCoeffs,
+    hasRating,
+    pos1,
+    pos2,
+    pred1,
+    coeff1,
+    coeff2,
+    isLive,
+    liveScore1,
+    liveScore2,
+    hasLiveScore,
+  } = analytics ?? ({} as typeof analytics);
+
   const edgeConfig = useMemo(() => {
     if (!weightedConsensus) return null;
     switch (weightedConsensus.edge) {
@@ -750,7 +968,33 @@ export default function PredictionsModal({
     }
   }, [weightedConsensus]);
 
-  // Guard after ALL hooks to keep hook count stable
+  // Copy handler
+  const handleCopy = useCallback(() => {
+    if (!match || !weightedConsensus) return;
+    const text = [
+      `📊 ${match.team1} vs ${match.team2} (${match.matchType})`,
+      `🎯 Зважений консенсус: ${weightedConsensus.team1Win}% / ${weightedConsensus.team2Win}%`,
+      weightedConsensus.evTeam1 !== null
+        ? `  EV ${match.team1}: ${weightedConsensus.evTeam1 > 0 ? "+" : ""}${weightedConsensus.evTeam1}%`
+        : "",
+      weightedConsensus.evTeam2 !== null
+        ? `  EV ${match.team2}: ${weightedConsensus.evTeam2 > 0 ? "+" : ""}${weightedConsensus.evTeam2}%`
+        : "",
+      `⚡ Розбіжність: ${weightedConsensus.disagreementIndex}% | Edge: ${weightedConsensus.edge}`,
+      "",
+      weightedConsensus.methods
+        .map((m) => `  · ${m.label}: ${m.team1Win}%/${m.team2Win}%`)
+        .join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [match, weightedConsensus]);
+
+  // Guard after ALL hooks
   if (!match || !analytics) return null;
 
   return (
@@ -762,10 +1006,42 @@ export default function PredictionsModal({
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <BarChart3 className="h-5 w-5 text-primary" strokeWidth={2} />
                 Аналіз прогнозів
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleCopy}
+                      className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs text-gray-500 font-medium transition-colors"
+                    >
+                      {copied ? (
+                        <Check
+                          className="h-3.5 w-3.5 text-green-500"
+                          strokeWidth={2}
+                        />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      )}
+                      {copied ? "Скопійовано" : "Копіювати"}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+                    <p className="text-xs">Скопіювати результати аналізу</p>
+                  </TooltipContent>
+                </Tooltip>
               </DialogTitle>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
                 {match.team1} vs {match.team2} ({match.matchType}
                 {match.tier ? `, ${match.tier.toUpperCase()}` : ""})
+                {isLive && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[11px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    LIVE
+                  </span>
+                )}
+                {hasLiveScore && (
+                  <span className="text-xs font-bold text-red-700">
+                    {liveScore1}:{liveScore2}
+                  </span>
+                )}
               </p>
             </DialogHeader>
 
@@ -977,7 +1253,30 @@ export default function PredictionsModal({
                       <h4 className="font-semibold text-gray-900">
                         Симуляція матчів
                       </h4>
+                      {isLive && (
+                        <span className="inline-flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                          LIVE
+                        </span>
+                      )}
                     </div>
+
+                    {hasLiveScore && (
+                      <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200">
+                        <p className="text-xs text-red-700 font-medium">
+                          Поточний рахунок:{" "}
+                          <span className="font-bold">
+                            {match.team1} {liveScore1}:{liveScore2}{" "}
+                            {match.team2}
+                          </span>{" "}
+                          ({match.matchType}, до {winsNeeded} перемог)
+                        </p>
+                        <p className="text-[10px] text-red-500 mt-0.5">
+                          Симуляція враховує поточний рахунок — команди
+                          продовжують з цього стану
+                        </p>
+                      </div>
+                    )}
 
                     {simResult ? (
                       <div className="space-y-4">
@@ -990,11 +1289,15 @@ export default function PredictionsModal({
                           ),
                           `${match.team1} (${simResult.team1Wins})`,
                           `${match.team2} (${simResult.team2Wins})`,
+                          match.logoTeam1,
+                          match.logoTeam2,
                         )}
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <span>
                             {simResult.totalSims.toLocaleString()} симуляцій ·{" "}
                             {match.matchType} — до {winsNeeded} перемог
+                            {hasLiveScore &&
+                              ` (від рахунку ${liveScore1}:${liveScore2})`}
                           </span>
                           {simResult.analytic && (
                             <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-semibold">
@@ -1104,6 +1407,9 @@ export default function PredictionsModal({
                           />
                         </div>
                         <p className="text-sm text-gray-500 mb-3">
+                          {hasLiveScore
+                            ? `Від рахунку ${liveScore1}:${liveScore2} — `
+                            : ""}
                           {simAnalytic
                             ? "Аналітичний розрахунок через біноміальний розподіл (миттєво, O(1))"
                             : `${SIM_COUNT.toLocaleString()} симуляцій формату ${match.matchType}`}
@@ -1171,6 +1477,10 @@ export default function PredictionsModal({
                   {renderDualBar(
                     weightedConsensus.team1Win,
                     weightedConsensus.team2Win,
+                    match.team1,
+                    match.team2,
+                    match.logoTeam1,
+                    match.logoTeam2,
                   )}
 
                   {/* EV display */}
@@ -1254,25 +1564,57 @@ export default function PredictionsModal({
                     адаптовано до рівня турніру ({match.tier ?? "невідомо"}).
                   </p>
 
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {weightedConsensus.methods.map((m) => (
-                      <Tooltip key={m.label}>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-gray-200 text-xs text-gray-600 cursor-help">
-                            {m.label}: {m.team1Win}%/{m.team2Win}%
-                            <span className="text-[10px] text-gray-400">
-                              (×{m.weight})
-                            </span>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-                          <p className="text-xs">
-                            Вага: {m.weight} — враховує надійність методу та
-                            рівень турніру
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
+                  <div className="mt-3 space-y-2">
+                    {weightedConsensus.methods.map((m) => {
+                      const pct = m.team1Win;
+                      const flip = pct < 50;
+                      const barPct = flip ? 100 - pct : pct;
+                      return (
+                        <Tooltip key={m.label}>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-2 cursor-help text-xs">
+                              <span className="w-16 text-right text-gray-500 font-medium">
+                                {m.label}
+                              </span>
+                              <div className="flex-1 h-5 rounded-full bg-white border border-gray-200 overflow-hidden flex items-center relative">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 flex items-center justify-end pr-1.5 ${
+                                    flip ? "bg-blue-100" : "bg-green-100"
+                                  }`}
+                                  style={{
+                                    width: `${barPct}%`,
+                                    minWidth: barPct > 0 ? "20px" : "0",
+                                  }}
+                                >
+                                  <span
+                                    className={`text-[10px] font-bold ${flip ? "text-blue-700" : "text-green-700"}`}
+                                  >
+                                    {m.team1Win}%
+                                  </span>
+                                </div>
+                                <span
+                                  className={`absolute right-2 text-[10px] font-bold ${!flip ? "text-blue-700" : "text-green-700"}`}
+                                  style={{
+                                    left: `${barPct + 4}%`,
+                                  }}
+                                >
+                                  {m.team2Win}%
+                                </span>
+                              </div>
+                              <span className="w-8 text-left text-[10px] text-gray-400">
+                                ×{m.weight}
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+                            <p className="text-xs">
+                              Вага: {m.weight} — враховує надійність методу та
+                              рівень турніру
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
                   </div>
                 </div>
               )}

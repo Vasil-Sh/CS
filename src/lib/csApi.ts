@@ -261,16 +261,65 @@ export function parseMatchContext(type: string, link: string): string {
 }
 
 /**
- * Determine tier based on team positions
+ * Determine tier based on tournament name (fallback when no ranking data).
+ * Recognizes major/premier tournaments vs smaller/regional events.
+ */
+const T1_TOURNAMENTS = [
+  /major/i,
+  /blast/i,
+  /iem\s/i,
+  /esl\spro\sleague/i,
+  /pgl/i,
+  /thunderpick\sworld/i,
+  /cct\sglobal/i,
+  /pinnacle\scup/i,
+  /yalla\scompass/i,
+  /skyesports\schampionship/i,
+];
+const T2_TOURNAMENTS = [
+  /cct\s/i,
+  /cct\s(?!global)/i,
+  /esl\schallenger/i,
+  /esea\sadvanced/i,
+  /esea\smain/i,
+  /elite\sseries/i,
+  /hellcase\scup/i,
+  /tipsport/i,
+  /frag/i,
+  /dust2/i,
+  /esportal/i,
+  /ace\sx/i,
+  /united\s/i,
+  /european\spro\sleague/i,
+  /paragon/i,
+];
+
+export function determineTierFromTournament(
+  tournament: string | null | undefined,
+): "tier1" | "tier2" | "tier3" | null {
+  if (!tournament) return null;
+  if (T1_TOURNAMENTS.some((r) => r.test(tournament))) return "tier1";
+  if (T2_TOURNAMENTS.some((r) => r.test(tournament))) return "tier2";
+  return "tier3";
+}
+
+/**
+ * Determine tier based on team positions, with tournament name fallback.
  */
 export function determineTier(
   pos1: number | null | undefined,
   pos2: number | null | undefined,
+  tournament?: string | null,
 ): "tier1" | "tier2" | "tier3" | null {
-  if (pos1 == null && pos2 == null) return null;
+  if (pos1 == null && pos2 == null) {
+    return determineTierFromTournament(tournament);
+  }
   const bestPos = Math.min(pos1 ?? 999, pos2 ?? 999);
   if (bestPos <= 20) return "tier1";
   if (bestPos <= 50) return "tier2";
+  // Fallback to tournament name if positions are high (tier3 teams but could be in a T1 event)
+  if (tournament && bestPos >= 999)
+    return determineTierFromTournament(tournament);
   return "tier3";
 }
 

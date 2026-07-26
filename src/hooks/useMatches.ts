@@ -163,7 +163,11 @@ function apiMatchToMatch(
         ? `${apiMatch.tournament} — ${apiMatch.stage}`
         : apiMatch.tournament || parseMatchContext(apiMatch.type, apiMatch.link)
       : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
-  const tier = determineTier(apiMatch.positionTeam1, apiMatch.positionTeam2);
+  const tier = determineTier(
+    apiMatch.positionTeam1,
+    apiMatch.positionTeam2,
+    apiMatch.tournament as string | undefined,
+  );
   const favorite = determineFavorite(
     apiMatch.nameTeam1,
     apiMatch.nameTeam2,
@@ -269,7 +273,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     context: m.tournament
       ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
       : parseDota2MatchContext(m),
-    tier: determineDota2Tier(m.positionTeam1, m.positionTeam2),
+    tier: determineDota2Tier(m.positionTeam1, m.positionTeam2, m.tournament),
     matchType: parseDota2MatchType(m.type),
     upsetProbability: hasPrediction
       ? Math.max(
@@ -296,14 +300,42 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
 }
 
 // ── Dota 2 tier helper ──
+const DOTA_T1 = [
+  /the\sinternational/i,
+  /major/i,
+  /esl\sone/i,
+  /dreamleague/i,
+  /betboom\sdacha/i,
+  /fissure\splayground/i,
+  /pgl\swallachia/i,
+  /blast\sslam/i,
+];
+const DOTA_T2 = [
+  /elite\sleague/i,
+  /cct\s/i,
+  /european\spro\sleague/i,
+  /res\sregional/i,
+  /pinnacle/i,
+  /paragon/i,
+  /1win\sseries/i,
+];
+
 function determineDota2Tier(
   pos1?: number | null,
   pos2?: number | null,
+  tournament?: string | null,
 ): "tier1" | "tier2" | "tier3" | null {
-  if (pos1 == null || pos2 == null) return null;
+  if (pos1 == null || pos2 == null) {
+    if (!tournament) return null;
+    if (DOTA_T1.some((r) => r.test(tournament))) return "tier1";
+    if (DOTA_T2.some((r) => r.test(tournament))) return "tier2";
+    return "tier3";
+  }
   const minPos = Math.min(pos1, pos2);
   if (minPos <= 20) return "tier1";
   if (minPos <= 50) return "tier2";
+  if (!tournament) return "tier3";
+  if (DOTA_T1.some((r) => r.test(tournament))) return "tier1";
   return "tier3";
 }
 

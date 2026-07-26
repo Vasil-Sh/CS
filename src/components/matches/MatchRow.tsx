@@ -116,23 +116,82 @@ const TeamLogo = ({
   );
 };
 
+/** Small binomial coefficient for live score adaptation (n ≤ 10, k ≤ n) */
+function binomialSmall(n: number, k: number): number {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  if (k > n / 2) k = n - k;
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = (r * (n - i + 1)) / i;
+  return r;
+}
+
 const PredictionBar = ({
   percent1,
   percent2,
   team1,
   team2,
   aiPrediction,
+  matchStatus,
+  score1,
+  score2,
+  matchType,
 }: {
   percent1: number;
   percent2: number;
   team1: string;
   team2: string;
   aiPrediction?: AIRecommendation | null;
+  matchStatus?: string;
+  score1?: number | null;
+  score2?: number | null;
+  matchType?: string;
 }) => {
-  const total = percent1 + percent2;
-  const w1 = total > 0 ? Math.round((percent1 / total) * 100) : 50;
-  const w2 = total > 0 ? 100 - w1 : 50;
-  const isFav = percent1 >= percent2;
+  const isLive = matchStatus === "live";
+  const hasScore =
+    isLive &&
+    score1 != null &&
+    score2 != null &&
+    ((score1 ?? 0) > 0 || (score2 ?? 0) > 0);
+
+  // For live matches with a score, adjust per-map probability to series win prob from current state
+  const winsNeeded = matchType === "Bo5" ? 3 : matchType === "Bo3" ? 2 : 1;
+  const rawP1 = percent1;
+  const rawP2 = percent2;
+  let displayP1 = rawP1;
+  let displayP2 = rawP2;
+  let scoreAdjusted = false;
+
+  if (hasScore && rawP1 > 0 && rawP2 > 0) {
+    const p = rawP1 / (rawP1 + rawP2); // normalize to 0–1
+    const remW1 = Math.max(0, winsNeeded - (score1 ?? 0));
+    const remW2 = Math.max(0, winsNeeded - (score2 ?? 0));
+    if (remW1 > 0 && remW2 > 0) {
+      // P(team1 wins series) = Σ_{k=0}^{remW2-1} C(remW1+k-1, k) · p^remW1 · (1-p)^k
+      let prob = 0;
+      const q = 1 - p;
+      for (let k = 0; k < remW2; k++) {
+        prob +=
+          binomialSmall(remW1 + k - 1, k) * Math.pow(p, remW1) * Math.pow(q, k);
+      }
+      displayP1 = Math.round(prob * 100);
+      displayP2 = 100 - displayP1;
+      scoreAdjusted = true;
+    } else if (remW1 <= 0) {
+      displayP1 = 100;
+      displayP2 = 0;
+      scoreAdjusted = true;
+    } else {
+      displayP1 = 0;
+      displayP2 = 100;
+      scoreAdjusted = true;
+    }
+  }
+
+  const total = displayP1 + displayP2;
+  const w1 = total > 0 ? displayP1 : 50;
+  const w2 = total > 0 ? displayP2 : 50;
+  const isFav = w1 >= w2;
   const hasPrediction = total > 0;
   const aiTeam1 = aiPrediction?.prediction === team1;
   const aiTeam2 = aiPrediction?.prediction === team2;
@@ -150,6 +209,7 @@ const PredictionBar = ({
             >
               {percent1}%
             </span>
+
             <span
               className={!isFav ? "font-bold text-gray-900" : "text-[#4B5563]"}
             >
@@ -166,6 +226,11 @@ const PredictionBar = ({
               style={{ width: `${w2}%` }}
             />
           </div>
+          {scoreAdjusted && (
+            <div className="text-[10px] text-amber-600 font-medium text-center">
+              Адаптовано
+            </div>
+          )}
         </>
       )}
       {hasAi && (
@@ -572,6 +637,10 @@ export default function MatchRow({
               team1={match.team1}
               team2={match.team2}
               aiPrediction={aiPredictions[match.id]}
+              matchStatus={match.matchStatus}
+              score1={match.score1}
+              score2={match.score2}
+              matchType={match.matchType}
             />
           ) : (
             <Tooltip>
