@@ -528,6 +528,23 @@ function computeWeightedConsensus(
 }
 
 // ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+
+function LogoImg({ src, fallback }: { src?: string | null; fallback: string }) {
+  const [err, setErr] = useState(false);
+  const actualSrc = !src || err ? fallback : src;
+  return (
+    <img
+      src={actualSrc}
+      alt=""
+      className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+      onError={() => setErr(true)}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════
 
@@ -782,69 +799,44 @@ export default function PredictionsModal({
       l2?: string,
       logo1?: string | null,
       logo2?: string | null,
-    ) => (
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-gray-900 flex items-center gap-1.5">
-            {logo1 ? (
-              <img
-                src={logo1}
-                alt=""
-                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
-              />
-            ) : (
-              <img
-                src={
-                  match?.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder.svg"
-                }
-                alt=""
-                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
-              />
-            )}
-            {l1 ?? match?.team1 ?? ""}
-            <span className="ml-1.5 text-base font-bold text-green-600">
-              {t1}%
+    ) => {
+      const placeholderSrc =
+        match?.game === "Dota2"
+          ? "/assets/team-placeholder-dota.svg"
+          : "/assets/team-placeholder.svg";
+
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+              <LogoImg src={logo1} fallback={placeholderSrc} />
+              {l1 ?? match?.team1 ?? ""}
+              <span className="ml-1.5 text-base font-bold text-green-600">
+                {t1}%
+              </span>
             </span>
-          </span>
-          <span className="font-semibold text-gray-900 flex items-center gap-1.5">
-            {logo2 ? (
-              <img
-                src={logo2}
-                alt=""
-                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
-              />
-            ) : (
-              <img
-                src={
-                  match?.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder.svg"
-                }
-                alt=""
-                className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
-              />
-            )}
-            {l2 ?? match?.team2 ?? ""}
-            <span className="ml-1.5 text-base font-bold text-blue-600">
-              {t2}%
+            <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+              <LogoImg src={logo2} fallback={placeholderSrc} />
+              {l2 ?? match?.team2 ?? ""}
+              <span className="ml-1.5 text-base font-bold text-blue-600">
+                {t2}%
+              </span>
             </span>
-          </span>
+          </div>
+          <div className="flex h-3 rounded-full overflow-hidden bg-gray-200">
+            <div
+              className="bg-green-500 transition-all duration-500"
+              style={{ width: `${t1}%` }}
+            />
+            <div
+              className="bg-blue-500 transition-all duration-500"
+              style={{ width: `${t2}%` }}
+            />
+          </div>
         </div>
-        <div className="flex h-3 rounded-full overflow-hidden bg-gray-200">
-          <div
-            className="bg-green-500 transition-all duration-500"
-            style={{ width: `${t1}%` }}
-          />
-          <div
-            className="bg-blue-500 transition-all duration-500"
-            style={{ width: `${t2}%` }}
-          />
-        </div>
-      </div>
-    ),
-    [match?.team1, match?.team2],
+      );
+    },
+    [match?.team1, match?.team2, match?.game],
   );
 
   const renderPredictionCard = useCallback(
