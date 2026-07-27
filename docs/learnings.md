@@ -193,4 +193,46 @@
 
 ---
 
+## [2026-07-27] tool crawlee-evaluation
+
+**Insight:** Crawlee (apify/crawlee, 25k ⭐) оцінено для заміни поточного Puppeteer-скрапера. Вирішено НЕ мігрувати зараз — скрапер стабільний. Достатньо додати `puppeteer-extra-plugin-stealth` для анти-детекту.
+
+**Context:** Оцінка показала, що Crawlee дає чергу URL, ротацію проксі, fingerprint randomization, retry логіку — все, що ми реалізували вручну (~600 рядків). Але скрапер стабільний після v1.24.11. Міграція виправдана при появі Cloudflare-блокувань або 3+ джерел скрапінгу.
+
+**Confidence:** 8/10
+**Files:** `backend/src/services/tipsggScraper.ts`, `backend/src/services/circuitBreaker.ts`
+
+---
+
+## [2026-07-27] pitfall missing-apperor
+
+**Insight:** Відсутній кастомний `AppError` клас з полями `httpStatus`, `code`, `isOperational`. Усі помилки — голі `new Error()` або Zod-валідація.
+
+**Context:** Рекомендація з nodebestpractices (#2.1): створити `AppError extends Error` з operational/programmer розрізненням. Це покращить обробку помилок і логування.
+
+**Confidence:** 9/10
+**Files:** `backend/src/index.ts`, `backend/src/routes/`
+
+---
+
+## [2026-07-27] pitfall static-openapi
+
+**Insight:** OpenAPI схема (`openapi.json`) генерується вручну скриптом `gen-openapi.cjs`. При додаванні нових роутів треба перегенеровувати — ризик розсинхрону.
+
+**Context:** Рекомендація з `hono-open-api-starter`: перейти на `@hono/zod-openapi` для автоматичної генерації OpenAPI з Zod-схем прямо в коді роутів.
+
+**Confidence:** 8/10
+**Files:** `backend/src/openapi.json`, `backend/scripts/gen-openapi.cjs`
+
+---
+
+## [2026-07-27] tool nodebestpractices-audit
+
+**Insight:** Проведено audit за 102 правилами nodebestpractices. Виявлено прогалини: P0 — `AppError` + operational/programmer errors, P1 — JWT blocklist + transaction ID у логах, P2 — `node:` протокол для імпортів + `packages/contracts`.
+
+**Confidence:** 10/10
+**Files:** `docs/reference-nodebestpractices.md`
+
+---
+
 _Останнє оновлення: 2026-07-27_
