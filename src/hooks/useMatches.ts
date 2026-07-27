@@ -647,7 +647,14 @@ export function useMatches() {
     const todayKey = getTodayDateKey();
     const filtered = matches.filter((match) => {
       const matchDateKey = getDateKey(match.date);
+      // Exclude matches from past days
       if (matchDateKey < todayKey) return false;
+      // Auto-hide finished matches from today that ended >6h ago
+      if (match.matchStatus === "finished" && matchDateKey === todayKey) {
+        const hoursSinceStart =
+          (Date.now() - new Date(match.date).getTime()) / 3600000;
+        if (hoursSinceStart > 6) return false;
+      }
       if (filterGame === "CS2" && match.game !== "CS2") return false;
       if (filterGame === "Dota2" && match.game !== "Dota2") return false;
       if (filterDayOfWeek !== "all") {
