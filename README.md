@@ -89,19 +89,19 @@
 
 ## 🛠️ Технології
 
-| Категорія | Технологія                                                |
-| --------- | --------------------------------------------------------- |
-| Фреймворк | React 19 + TypeScript 5                                   |
-| UI        | shadcn/ui + Tailwind CSS 3                                |
-| Графіки   | Recharts 2                                                |
-| Роутинг   | React Router 6                                            |
-| Стан      | Zustand 4 + React Hooks                                   |
-| Дані      | PostgreSQL 16 (Drizzle ORM) + API (Hono)                  |
-| AI        | DeepSeek Chat + Gemini Flash (fallback)                   |
-| Збірка    | Vite 5                                                    |
-| Тести     | Vitest (backend + frontend) + Playwright (E2E)            |
-| Шрифт     | Inter (Google Fonts), system-ui fallback                  |
-| SEO       | react-helmet-async + JSON-LD + Sitemap + OG/Twitter Cards |
+| Категорія | Технологія                                                                             |
+| --------- | -------------------------------------------------------------------------------------- |
+| Фреймворк | React 19 + TypeScript 5                                                                |
+| UI        | shadcn/ui + Tailwind CSS 3                                                             |
+| Графіки   | Recharts 2                                                                             |
+| Роутинг   | React Router 6                                                                         |
+| Стан      | Zustand 4 + React Hooks                                                                |
+| Дані      | PostgreSQL 16 (Drizzle ORM) + API (Hono)                                               |
+| AI        | DeepSeek Chat + Gemini Flash (fallback)                                                |
+| Збірка    | Vite 5                                                                                 |
+| Тести     | Vitest (unit) + Playwright (E2E) + MSW (моки API) + Allure (звіти) + k6 (навантаження) |
+| Шрифт     | Inter (Google Fonts), system-ui fallback                                               |
+| SEO       | react-helmet-async + JSON-LD + Sitemap + OG/Twitter Cards                              |
 
 ---
 
@@ -132,8 +132,37 @@ pnpm run dev
 ```bash
 pnpm run build     # продакшен
 pnpm run lint      # ESLint
-pnpm run test      # unit-тести
+pnpm run test      # unit-тести (Vitest + MSW)
 ```
+
+### 🧪 QA-інструменти
+
+```bash
+# Unit + Integration (Vitest + MSW)
+pnpm test              # запуск unit-тестів (MSW мокує API автоматично)
+pnpm test:watch        # watch-режим
+pnpm test:coverage     # з coverage-звітом
+
+# E2E (Playwright)
+pnpm test:e2e          # запуск e2e тестів
+pnpm test:e2e:ui       # Playwright UI mode
+pnpm test:e2e:report   # Playwright HTML звіт
+
+# E2E + Allure Reports
+pnpm test:e2e:allure          # playwright тести з Allure reporter
+pnpm test:e2e:allure:report   # генерація + відкриття Allure звіту
+
+# Load Testing (k6)
+pnpm test:load         # smoke-тест (3 VUs, 30s)
+pnpm test:load:stress  # stress-тест (20→50 VUs, 10min)
+pnpm test:load:soak    # soak-тест (10 VUs, 30min)
+```
+
+| QA-інструмент | Призначення                                   |
+| ------------- | --------------------------------------------- |
+| **MSW**       | Мокування API-запитів у тестах (fetch → mock) |
+| **Allure**    | Генерація красивих звітів після e2e тестів    |
+| **k6**        | Навантажувальне тестування backend API        |
 
 ---
 
