@@ -53,14 +53,16 @@ interface Props {
   onAddToRisky: (match: Match) => void;
 }
 
-/** Convert CDN URL to backend proxy URL */
-const proxyLogo = (url: string | null, game: string): string | null => {
+/** Convert CDN URL to backend proxy URL / pass through external URLs */
+const proxyLogo = (url: string | null): string | null => {
   if (!url) return null;
+  // External URLs (cstest.pp.ua, HLTV CDN) — pass through directly, they serve CORS
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/api/")) return url;
+  // tips.gg relative CDN path → proxy through backend
   const parts = url.split("/");
   const filename = parts[parts.length - 1];
-  const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
-  return `/api/v1/${prefix}/logo/${filename}`;
+  return `/api/v1/cs2-matches/logo/${filename}`;
 };
 
 const TeamLogo = ({
@@ -80,9 +82,7 @@ const TeamLogo = ({
       ? "/assets/team-placeholder.svg"
       : "/assets/team-placeholder-dota.svg";
 
-  const proxiedSrc = game
-    ? proxyLogo(src ?? null, game.toLowerCase() === "dota2" ? "dota2" : "cs2")
-    : (src ?? null);
+  const proxiedSrc = proxyLogo(src ?? null);
 
   if (!proxiedSrc || imgError) {
     return (

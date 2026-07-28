@@ -11,17 +11,14 @@ const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const MATCHES_CACHE_KEY = "cs2_matches_cache_v1";
 const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
-/** Rewrite external logo URLs to our backend proxy (avoid ORB/CORS blocking).
+/** Rewrite external logo URLs for CORS safety.
  *  tips.gg CDN → /api/v1/cs2-matches/logo/...
- *  cstest.pp.ua / HLTV full URLs → pass through (already proxied by backend)
- *  Other full URLs → proxy through /api/v1/cs2-hltv-matches/logo/... */
+ *  cstest.pp.ua / external full URLs → pass through as-is (public CDN) */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
-  if (url.startsWith("http")) {
-    // Full URL — proxy through backend
-    const filename = url.split("/").pop() || "unknown.png";
-    return `/api/v1/cs2-hltv-matches/logo/${encodeURIComponent(filename)}`;
-  }
+  // External full URLs (cstest.pp.ua, HLTV CDN) — pass through directly
+  if (url.startsWith("http")) return url;
+  // tips.gg relative CDN path → backend proxy
   const match = url.match(/\/static\/image\/teams\/(.+)$/i);
   if (!match) return url;
   return `/api/v1/cs2-matches/logo/${match[1]}`;
