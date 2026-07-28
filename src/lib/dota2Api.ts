@@ -37,7 +37,7 @@ interface TipsGgApiMatch {
   coeff2: number | null;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v10";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v11";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_FRESH
 
 /** Rewrite logo URLs — backend already proxies all external CDNs.
