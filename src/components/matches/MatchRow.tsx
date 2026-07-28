@@ -53,13 +53,10 @@ interface Props {
   onAddToRisky: (match: Match) => void;
 }
 
-/** Convert CDN URL to backend proxy URL / pass through external URLs */
+/** Convert CDN URL to backend proxy URL */
 const proxyLogo = (url: string | null): string | null => {
   if (!url) return null;
-  // External URLs (cstest.pp.ua, HLTV CDN) — pass through directly, they serve CORS
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/api/")) return url;
-  // tips.gg relative CDN path → proxy through backend
   const parts = url.split("/");
   const filename = parts[parts.length - 1];
   return `/api/v1/cs2-matches/logo/${filename}`;

@@ -16,9 +16,6 @@ const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
  *  cstest.pp.ua / external full URLs → pass through as-is (public CDN) */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
-  // External full URLs (cstest.pp.ua, HLTV CDN) — pass through directly
-  if (url.startsWith("http")) return url;
-  // tips.gg relative CDN path → backend proxy
   const match = url.match(/\/static\/image\/teams\/(.+)$/i);
   if (!match) return url;
   return `/api/v1/cs2-matches/logo/${match[1]}`;
@@ -164,7 +161,7 @@ function setCache(data: ApiMatch[]): void {
 async function fetchFreshMatches(): Promise<ApiMatch[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
-  const response = await fetch(`${API_BASE}/v1/cs2-hltv-matches`, {
+  const response = await fetch(`${API_BASE}/v1/cs2-matches`, {
     method: "GET",
     headers: { Accept: "application/json" },
     signal: controller.signal,
