@@ -431,8 +431,13 @@ export function useMatches() {
     setInitialLoading(true);
     setApiError(null);
     try {
+      // Track whether SWR callback already delivered fresh CS2 data.
+      // If yes, skip the stale cache returned by Promise.allSettled.
+      let freshCs2Arrived = false;
+
       const onCs2Update = (fresh: ApiMatch[]) => {
         if (gen !== fetchGenRef.current) return;
+        freshCs2Arrived = true;
         setMatches((prev) => {
           const dota = prev.filter((m) => m.game === "Dota2");
           const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
@@ -446,16 +451,30 @@ export function useMatches() {
       ]);
       if (gen !== fetchGenRef.current) return;
 
-      const cs2Matches: Match[] =
-        cs2Data.status === "fulfilled" && cs2Data.value
-          ? cs2Data.value.map((m: ApiMatch) => apiMatchToMatch(m, "CS2"))
-          : [];
-      const dotaMatches: Match[] =
-        dotaData.status === "fulfilled" && dotaData.value
-          ? dotaData.value.map((m: Dota2ApiMatch) => dota2ApiMatchToMatch(m))
-          : [];
+      // If SWR callback already delivered fresh data, don't overwrite with stale cache
+      if (!freshCs2Arrived) {
+        const cs2Matches: Match[] =
+          cs2Data.status === "fulfilled" && cs2Data.value
+            ? cs2Data.value.map((m: ApiMatch) => apiMatchToMatch(m, "CS2"))
+            : [];
+        const dotaMatches: Match[] =
+          dotaData.status === "fulfilled" && dotaData.value
+            ? dotaData.value.map((m: Dota2ApiMatch) => dota2ApiMatchToMatch(m))
+            : [];
 
-      setMatches([...cs2Matches, ...dotaMatches]);
+        setMatches([...cs2Matches, ...dotaMatches]);
+      } else {
+        // Only apply Dota matches (CS2 already set by onCs2Update)
+        if (dotaData.status === "fulfilled" && dotaData.value) {
+          const dotaMatches = dotaData.value.map((m: Dota2ApiMatch) =>
+            dota2ApiMatchToMatch(m),
+          );
+          setMatches((prev) => {
+            const cs2 = prev.filter((m) => m.game === "CS2");
+            return [...cs2, ...dotaMatches];
+          });
+        }
+      }
       if (cs2Data.status === "rejected") {
         setApiError("Не вдалося завантажити CS2 матчі");
         toast.error("CS2 матчі тимчасово недоступні");

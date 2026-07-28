@@ -8,7 +8,7 @@ export type ApiMatch = BaseApiMatch;
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
-const MATCHES_CACHE_KEY = "cs2_matches_cache_v1";
+const MATCHES_CACHE_KEY = "cs2_matches_cache_v2";
 const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
 /** Rewrite external logo URLs — backend already proxies all logos.
