@@ -588,9 +588,9 @@ export function useMatches() {
     (m) => m.game === "CS2" && m.matchStatus !== "finished",
   );
 
-  // ── Poll live scores: immediate + every 10s + on window focus ──
+  // ── Poll live scores: immediate + every 7s + on window focus ──
   const [liveScoreAge, setLiveScoreAge] = useState(0);
-  const liveIntervalRef = useRef(10_000); // start at 10s, adapt
+  const liveIntervalRef = useRef(7_000); // start at 7s, adapt (matches backend)
 
   useEffect(() => {
     const dota2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/dota2-matches/live-scores`;

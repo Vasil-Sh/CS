@@ -35,13 +35,11 @@ function stringHash(s: string): number {
  * Backend returns tips.gg JSON-LD fields; frontend expects BaseApiMatch shape.
  */
 function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
-  // Extract slug for live-score matching (same as cs2LiveScoresStore uses)
+  // Use backend `id` directly as the slug for live-score matching.
+  // Backend now sends slugs (team1-vs-team2) for both cstest and tips.gg sources,
+  // which exactly matches tips.gg live-score IDs.
+  const csSlug = String(m.id || "");
   const link = String(m.link || "");
-  const parts = link.replace(/\/$/, "").split("/").filter(Boolean);
-  const csSlug =
-    parts.length >= 2
-      ? parts[parts.length - 2]
-      : parts.pop() || String(m.id || "");
 
   return {
     id: stringHash(String(m.id || m.link || "")),
