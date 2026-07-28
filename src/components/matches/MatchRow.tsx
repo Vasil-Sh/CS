@@ -53,13 +53,19 @@ interface Props {
   onAddToRisky: (match: Match) => void;
 }
 
-/** Convert CDN URL to backend proxy URL */
-const proxyLogo = (url: string | null): string | null => {
+/** Rewrite logo URLs — backend already proxies all external CDNs.
+ *  Backend returns /api/v1/{game}-matches/logo/external/{b64}.
+ *  Just pass through; if somehow raw URL, encode as base64url. */
+const proxyLogo = (url: string | null, game?: string): string | null => {
   if (!url) return null;
   if (url.startsWith("/api/")) return url;
-  const parts = url.split("/");
-  const filename = parts[parts.length - 1];
-  return `/api/v1/cs2-matches/logo/${filename}`;
+  // Legacy: raw CDN URL not proxied by backend — encode ourselves
+  const prefix = game === "Dota2" ? "dota2" : "cs2";
+  const encoded = btoa(url)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `/api/v1/${prefix}-matches/logo/external/${encoded}`;
 };
 
 const TeamLogo = ({
@@ -79,7 +85,7 @@ const TeamLogo = ({
       ? "/assets/team-placeholder.svg"
       : "/assets/team-placeholder-dota.svg";
 
-  const proxiedSrc = proxyLogo(src ?? null);
+  const proxiedSrc = proxyLogo(src ?? null, game);
 
   if (!proxiedSrc || imgError) {
     return (

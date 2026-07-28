@@ -11,14 +11,20 @@ const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const MATCHES_CACHE_KEY = "cs2_matches_cache_v1";
 const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
-/** Rewrite external logo URLs for CORS safety.
- *  tips.gg CDN → /api/v1/cs2-matches/logo/...
- *  cstest.pp.ua / external full URLs → pass through as-is (public CDN) */
+/** Rewrite external logo URLs — backend already proxies all logos.
+ *  Backend returns /api/v1/cs2-matches/logo/external/{b64} for ALL sources.
+ *  Just pass through (already proxied) or return null for invalid. */
 function proxyLogoUrl(url: string | null): string | null {
   if (!url) return null;
-  const match = url.match(/\/static\/image\/teams\/(.+)$/i);
-  if (!match) return url;
-  return `/api/v1/cs2-matches/logo/${match[1]}`;
+  // Already proxied by backend
+  if (url.startsWith("/api/")) return url;
+  // Fallback: encode as base64url if somehow unprocessed
+  const prefix = import.meta.env.VITE_API_URL || "/api";
+  const encoded = btoa(url)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `${prefix}/v1/cs2-matches/logo/external/${encoded}`;
 }
 
 /** Simple string hash for stable IDs across reloads */
