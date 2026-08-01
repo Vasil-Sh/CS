@@ -10,6 +10,9 @@ node_modules/
 # Playwright browser automation logs
 .playwright-mcp/
 
+# HLTV team logos (downloaded locally, not tracked)
+hltv_logos/
+
 # Atoms.dev / MatchIQ config
 .mgx/
 .atoms/
