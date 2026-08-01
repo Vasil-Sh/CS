@@ -451,17 +451,30 @@ export function useMatches() {
         fetchTodaysAndUpcomingMatches(false, onCs2Update),
       ]).then(([r]) => r);
 
-      // Fire Dota2 in background — don't block initial render
-      fetchDota2Matches()
-        .then((dota) => {
-          if (gen === fetchGenRef.current && dota.length > 0) {
+      // Fire Dota2 in background with retries — don't block initial render
+      let dotaAttempt = 0;
+      const maxDotaAttempts = 10;
+      const pullDota = async () => {
+        try {
+          const dota = await fetchDota2Matches(dotaAttempt === 0);
+          if (gen !== fetchGenRef.current) return;
+          if (dota.length > 0) {
             setMatches((prev) => {
               const cs2 = prev.filter((m) => m.game === "CS2");
               return [...cs2, ...dota.map((m) => dota2ApiMatchToMatch(m))];
             });
+          } else if (dotaAttempt < maxDotaAttempts) {
+            dotaAttempt++;
+            setTimeout(pullDota, 6000);
           }
-        })
-        .catch(() => {});
+        } catch {
+          if (dotaAttempt < maxDotaAttempts) {
+            dotaAttempt++;
+            setTimeout(pullDota, 6000);
+          }
+        }
+      };
+      pullDota();
 
       if (gen !== fetchGenRef.current) return;
 
