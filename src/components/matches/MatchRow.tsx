@@ -105,7 +105,7 @@ const TeamLogo = ({
 
   return (
     <div
-      className="flex items-center justify-center rounded-md bg-gray-200 flex-shrink-0"
+      className="flex items-center justify-center rounded-md flex-shrink-0"
       style={{ width: size, height: size, minWidth: size }}
     >
       <img
