@@ -140,7 +140,7 @@ export default function BettingFormSettings({
                   <SelectItem value="CS2">
                     <span className="flex items-center gap-2">
                       <img
-                        src="/assets/team-placeholder.svg"
+                        src="/assets/game-cs2.svg"
                         alt="CS2"
                         className="h-4 w-4 object-contain"
                       />
@@ -150,7 +150,7 @@ export default function BettingFormSettings({
                   <SelectItem value="Dota2">
                     <span className="flex items-center gap-2">
                       <img
-                        src="/assets/team-placeholder-dota.svg"
+                        src="/assets/game-dota2.svg"
                         alt="Dota2"
                         className="h-4 w-4 object-contain"
                       />
