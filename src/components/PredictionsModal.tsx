@@ -538,7 +538,7 @@ function LogoImg({ src, fallback }: { src?: string | null; fallback: string }) {
     <img
       src={actualSrc}
       alt=""
-      className="w-5 h-5 rounded object-contain bg-gray-200 flex-shrink-0"
+      className="w-5 h-5 rounded object-contain flex-shrink-0"
       onError={() => setErr(true)}
     />
   );

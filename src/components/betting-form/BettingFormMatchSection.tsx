@@ -359,7 +359,7 @@ export default function BettingFormMatchSection({
                     : "/assets/team-placeholder.svg")
                 }
                 alt={data.team1 || "Team 1"}
-                className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
                 onError={(e) => {
                   const t = e.target as HTMLImageElement;
                   // Try Dota2 fallback first, then game placeholder
@@ -400,7 +400,7 @@ export default function BettingFormMatchSection({
                     : "/assets/team-placeholder.svg")
                 }
                 alt={data.team2 || "Team 2"}
-                className="h-9 w-9 rounded-xl object-contain bg-gray-100 flex-shrink-0"
+                className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
                 onError={(e) => {
                   const t = e.target as HTMLImageElement;
                   if (

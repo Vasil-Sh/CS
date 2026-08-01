@@ -144,21 +144,32 @@ export function humanizeBetType(raw: string): string {
 }
 
 /** Get logo URL for the selected team of a bet */
-export function getSelectedTeamLogo(bet: Bet, selectedTeam: string): string | null {
+export function getSelectedTeamLogo(
+  bet: Bet,
+  selectedTeam: string,
+): string | null {
   const sel = selectedTeam.toLowerCase().trim();
   if (!sel) return null;
-  const t1 = String(bet.team1 || "").toLowerCase().trim();
-  const t2 = String(bet.team2 || "").toLowerCase().trim();
+  const t1 = String(bet.team1 || "")
+    .toLowerCase()
+    .trim();
+  const t2 = String(bet.team2 || "")
+    .toLowerCase()
+    .trim();
   if (t1 && sel === t1) return bet.logoTeam1 || null;
   if (t2 && sel === t2) return bet.logoTeam2 || null;
-  if (t1 && (t1.includes(sel) || sel.includes(t1))) return bet.logoTeam1 || null;
-  if (t2 && (t2.includes(sel) || sel.includes(t2))) return bet.logoTeam2 || null;
+  if (t1 && (t1.includes(sel) || sel.includes(t1)))
+    return bet.logoTeam1 || null;
+  if (t2 && (t2.includes(sel) || sel.includes(t2)))
+    return bet.logoTeam2 || null;
   const matchParts = (bet.match || "").toLowerCase().split(/\s+vs\s+/);
   if (matchParts.length === 2) {
     const m1 = matchParts[0].trim();
     const m2 = matchParts[1].trim();
-    if (sel === m1 || m1.includes(sel) || sel.includes(m1)) return bet.logoTeam1 || null;
-    if (sel === m2 || m2.includes(sel) || sel.includes(m2)) return bet.logoTeam2 || null;
+    if (sel === m1 || m1.includes(sel) || sel.includes(m1))
+      return bet.logoTeam1 || null;
+    if (sel === m2 || m2.includes(sel) || sel.includes(m2))
+      return bet.logoTeam2 || null;
   }
   return null;
 }
@@ -563,7 +574,7 @@ const BetTableMemo = memo(function BetTable({
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <div className="flex-shrink-0 flex items-center justify-center gap-1.5 w-48">
-            <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
               <img
                 src={logoUrl || teamPlaceholder}
                 alt={selectedTeam}
