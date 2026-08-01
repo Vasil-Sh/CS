@@ -445,43 +445,43 @@ export function useMatches() {
         });
       };
 
-      const [cs2Data, dotaData] = await Promise.allSettled([
+      // CS2 loads fast (cstest API, 1-2s). Dota2 is slow (Puppeteer, 30-80s).
+      // Load CS2 first, let Dota2 arrive whenever it finishes.
+      const cs2Data = await Promise.allSettled([
         fetchTodaysAndUpcomingMatches(false, onCs2Update),
-        fetchDota2Matches(),
-      ]);
+      ]).then(([r]) => r);
+
+      // Fire Dota2 in background — don't block initial render
+      fetchDota2Matches()
+        .then((dota) => {
+          if (gen === fetchGenRef.current && dota.length > 0) {
+            setMatches((prev) => {
+              const cs2 = prev.filter((m) => m.game === "CS2");
+              return [...cs2, ...dota.map((m) => dota2ApiMatchToMatch(m))];
+            });
+          }
+        })
+        .catch(() => {});
+
       if (gen !== fetchGenRef.current) return;
 
-      // If SWR callback already delivered fresh data, don't overwrite with stale cache
+      // Apply CS2 matches now
       if (!freshCs2Arrived) {
         const cs2Matches: Match[] =
           cs2Data.status === "fulfilled" && cs2Data.value
             ? cs2Data.value.map((m: ApiMatch) => apiMatchToMatch(m, "CS2"))
             : [];
-        const dotaMatches: Match[] =
-          dotaData.status === "fulfilled" && dotaData.value
-            ? dotaData.value.map((m: Dota2ApiMatch) => dota2ApiMatchToMatch(m))
-            : [];
 
-        setMatches([...cs2Matches, ...dotaMatches]);
-      } else {
-        // Only apply Dota matches (CS2 already set by onCs2Update)
-        if (dotaData.status === "fulfilled" && dotaData.value) {
-          const dotaMatches = dotaData.value.map((m: Dota2ApiMatch) =>
-            dota2ApiMatchToMatch(m),
-          );
-          setMatches((prev) => {
-            const cs2 = prev.filter((m) => m.game === "CS2");
-            return [...cs2, ...dotaMatches];
-          });
-        }
+        setMatches((prev) => {
+          // Keep any Dota2 matches that might have already arrived via SWR
+          const dota = prev.filter((m) => m.game === "Dota2");
+          return [...cs2Matches, ...dota];
+        });
       }
+
       if (cs2Data.status === "rejected") {
         setApiError("Не вдалося завантажити CS2 матчі");
         toast.error("CS2 матчі тимчасово недоступні");
-      }
-      if (dotaData.status === "rejected") {
-        setApiError((prev) => prev || "Не вдалося завантажити Dota 2 матчі");
-        toast.error("Dota 2 матчі тимчасово недоступні");
       }
     } catch (err) {
       console.error("[Matches] Load failed:", err);
