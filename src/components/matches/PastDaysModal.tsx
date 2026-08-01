@@ -31,13 +31,15 @@ interface HistoryMatch {
 /** Convert CDN URL to backend proxy URL */
 const proxyLogo = (url: string | null, game: string): string | null => {
   if (!url) return null;
-  // Already proxied
+  // Already proxied by backend
   if (url.startsWith("/api/")) return url;
-  // Extract filename from CDN URL
-  const parts = url.split("/");
-  const filename = parts[parts.length - 1];
+  // External CDN URL → encode as base64url for /logo/external/ proxy
   const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
-  return `/api/v1/${prefix}/logo/${filename}`;
+  const encoded = btoa(url)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `/api/v1/${prefix}/logo/external/${encoded}`;
 };
 
 /** Team logo with error fallback to placeholder SVG */
