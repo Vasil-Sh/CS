@@ -155,7 +155,7 @@ function TeamIcon({
   const isDota = game?.toLowerCase() === "dota2";
   const placeholderSrc = isDota
     ? "/assets/team-placeholder-dota.svg"
-    : "/assets/team-placeholder.svg";
+    : "/assets/team-placeholder-cs2.svg";
 
   const sharedClass =
     "flex items-center justify-center flex-shrink-0 rounded-full bg-white";
@@ -476,7 +476,7 @@ export default function BetShareCard({
                             bet.expressLogos?.[index]?.logoTeam1 ||
                             (game === "Dota2"
                               ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder.svg")
+                              : "/assets/team-placeholder-cs2.svg")
                           }
                           alt=""
                           className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
@@ -493,7 +493,7 @@ export default function BetShareCard({
                             bet.expressLogos?.[index]?.logoTeam2 ||
                             (game === "Dota2"
                               ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder.svg")
+                              : "/assets/team-placeholder-cs2.svg")
                           }
                           alt=""
                           className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"

@@ -128,7 +128,9 @@ export default function Layout() {
                     Потрібна допомога?
                   </span>
                   <p className="text-xs text-gray-900 text-center">
-                    Є питання або пропозиції? Напиши нам в Telegram
+                    Є питання або пропозиції?
+                    <br />
+                    Напиши нам в Telegram
                   </p>
                   <a
                     href="https://t.me/cs2beet"

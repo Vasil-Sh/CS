@@ -171,7 +171,7 @@ export default function ExpressDetailsModal({
                               logos?.logoTeam1 ||
                               (bet.game === "Dota2"
                                 ? "/assets/team-placeholder-dota.svg"
-                                : "/assets/team-placeholder.svg")
+                                : "/assets/team-placeholder-cs2.svg")
                             }
                             alt=""
                             className="h-5 w-5 rounded-full object-contain flex-shrink-0"
@@ -188,7 +188,7 @@ export default function ExpressDetailsModal({
                               logos?.logoTeam2 ||
                               (bet.game === "Dota2"
                                 ? "/assets/team-placeholder-dota.svg"
-                                : "/assets/team-placeholder.svg")
+                                : "/assets/team-placeholder-cs2.svg")
                             }
                             alt=""
                             className="h-5 w-5 rounded-full object-contain flex-shrink-0"

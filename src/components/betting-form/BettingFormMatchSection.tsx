@@ -356,20 +356,21 @@ export default function BettingFormMatchSection({
                   data.logoTeam1 ||
                   (data.game === "Dota2"
                     ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder.svg")
+                    : "/assets/team-placeholder-cs2.svg")
                 }
                 alt={data.team1 || "Team 1"}
                 className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
                 onError={(e) => {
                   const t = e.target as HTMLImageElement;
-                  // Try Dota2 fallback first, then game placeholder
                   if (
                     data.game === "Dota2" &&
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
+                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
+                    t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
-                    t.src = "/assets/team-placeholder.svg";
+                    t.src = "/assets/team-placeholder-cs2.svg";
                   } else {
                     t.style.display = "none";
                   }
@@ -397,7 +398,7 @@ export default function BettingFormMatchSection({
                   data.logoTeam2 ||
                   (data.game === "Dota2"
                     ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder.svg")
+                    : "/assets/team-placeholder-cs2.svg")
                 }
                 alt={data.team2 || "Team 2"}
                 className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
@@ -408,8 +409,10 @@ export default function BettingFormMatchSection({
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
+                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
+                    t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
-                    t.src = "/assets/team-placeholder.svg";
+                    t.src = "/assets/team-placeholder-cs2.svg";
                   } else {
                     t.style.display = "none";
                   }

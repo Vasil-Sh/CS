@@ -82,7 +82,7 @@ const TeamLogo = ({
   const [imgError, setImgError] = useState(false);
   const placeholderSvg =
     game === "CS2"
-      ? "/assets/team-placeholder.svg"
+      ? "/assets/team-placeholder-cs2.svg"
       : "/assets/team-placeholder-dota.svg";
 
   const proxiedSrc = proxyLogo(src ?? null, game);
