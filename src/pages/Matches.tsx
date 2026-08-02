@@ -287,14 +287,18 @@ export default function Matches() {
                               />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                              Немає матчів
-                            </h3>
-                            <p className="text-gray-500 text-sm whitespace-nowrap mb-4">
                               {m.filterGame === "Dota2"
-                                ? "На сьогодні Dota 2 матчів немає. Спробуйте «Всі» або «CS2»"
+                                ? "Сьогодні немає матчів Dota 2"
                                 : m.filterGame === "CS2"
-                                  ? "На сьогодні CS2 матчів немає. Спробуйте «Всі» або «Dota2»"
-                                  : "Матчів не знайдено. Спробуйте змінити фільтри або натисніть «Оновити»"}
+                                  ? "Сьогодні немає матчів CS2"
+                                  : "Немає матчів"}
+                            </h3>
+                            <p className="text-gray-500 text-sm max-w-xs text-center mb-4">
+                              {m.filterGame === "Dota2"
+                                ? "Матчі з'являться тут, щойно розклад оновиться. Спробуйте «Всі» або «CS2»."
+                                : m.filterGame === "CS2"
+                                  ? "Матчі з'являться тут, щойно розклад оновиться. Спробуйте «Всі» або «Dota2»."
+                                  : "Спробуйте змінити фільтри або натисніть «Оновити», щоб завантажити свіжі дані."}
                             </p>
                             <button
                               onClick={m.refreshMatches}

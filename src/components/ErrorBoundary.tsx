@@ -41,10 +41,10 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               <AlertTriangle className="h-14 w-14 text-red-600" strokeWidth={1.5} />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Щось пішло не так
+              Не вдалося завантажити сторінку
             </h2>
             <p className="text-gray-500 mb-6 leading-relaxed">
-              Сталася помилка при завантаженні сторінки. Спробуйте оновити додаток.
+              Перевірте з'єднання з інтернетом і натисніть «Оновити».
             </p>
             {this.state.error && (
               <p className="text-xs text-gray-400 mb-6 p-3 bg-gray-50 rounded-xl font-mono break-all">

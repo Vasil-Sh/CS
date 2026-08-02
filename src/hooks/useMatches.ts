@@ -490,6 +490,37 @@ export function useMatches() {
           const dota = prev.filter((m) => m.game === "Dota2");
           return [...cs2Matches, ...dota];
         });
+
+        // ── CS2 auto-retry: if initial load returned empty, poll in background ──
+        // Backend cold start (Puppeteer 30-80s) may outrun the fetchFreshMatches retry
+        // loop. Keep trying until we get matches or the user navigates away.
+        if (cs2Matches.length === 0 && cs2Data.status === "fulfilled") {
+          let cs2Retry = 0;
+          const maxCs2Retries = 15;
+          const pullCs2 = async () => {
+            if (gen !== fetchGenRef.current) return;
+            try {
+              const fresh = await fetchTodaysAndUpcomingMatches(true); // forceRefresh
+              if (gen !== fetchGenRef.current) return;
+              if (fresh.length > 0) {
+                setMatches((prev) => {
+                  const dota = prev.filter((m) => m.game === "Dota2");
+                  const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
+                  return [...cs2, ...dota];
+                });
+              } else if (cs2Retry < maxCs2Retries) {
+                cs2Retry++;
+                setTimeout(pullCs2, 6000);
+              }
+            } catch {
+              if (cs2Retry < maxCs2Retries) {
+                cs2Retry++;
+                setTimeout(pullCs2, 6000);
+              }
+            }
+          };
+          pullCs2();
+        }
       }
 
       if (cs2Data.status === "rejected") {
@@ -508,6 +539,48 @@ export function useMatches() {
   useEffect(() => {
     loadMatchesFromApi();
   }, [loadMatchesFromApi]);
+
+  // ── Auto-refresh: quietly fetch full match list every 60s ──
+  // Picks up new matches and finished status changes without manual refresh.
+  useEffect(() => {
+    const INTERVAL = 60_000; // 1 minute
+    let isQuietRefreshing = false;
+
+    const quietRefresh = async () => {
+      if (isQuietRefreshing) return;
+      // Skip refresh if page is hidden — will catch up on tab focus
+      if (document.visibilityState !== 'visible') return;
+      isQuietRefreshing = true;
+      try {
+        await Promise.allSettled([
+          clearDota2Cache(),
+        ]);
+        await loadMatchesFromApi();
+      } catch {
+        /* silent — live score polling covers scores in meantime */
+      } finally {
+        isQuietRefreshing = false;
+      }
+    };
+
+    // First auto-refresh after 60s (initial load already happened on mount)
+    const timer = setInterval(quietRefresh, INTERVAL);
+
+    // Also refresh on tab focus if it's been >10s since last refresh
+    let lastQuietRefresh = Date.now();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastQuietRefresh > 10_000) {
+        lastQuietRefresh = Date.now();
+        quietRefresh();
+      }
+    };
+    document.addEventListener('visibilitychange', onFocus);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [loadMatchesFromApi, clearDota2Cache]);
 
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);

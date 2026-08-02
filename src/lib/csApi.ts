@@ -8,8 +8,8 @@ export type ApiMatch = BaseApiMatch;
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
-const MATCHES_CACHE_KEY = "cs2_matches_cache_v9";
-const MATCHES_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+const MATCHES_CACHE_KEY = "cs2_matches_cache_v10";
+const MATCHES_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 /** Rewrite external logo URLs — backend already proxies all logos.
  *  Backend returns /api/v1/cs2-matches/logo/external/{b64} for ALL sources.
@@ -80,9 +80,10 @@ export async function fetchTodaysAndUpcomingMatches(
   onUpdate?: (matches: ApiMatch[]) => void,
 ): Promise<ApiMatch[]> {
   // Serve cache instantly (stale-while-revalidate)
+  // Guard: treat empty array as no-cache ([] is truthy in JS!)
   if (!forceRefresh) {
     const cached = getCache();
-    if (cached) {
+    if (cached && cached.length > 0) {
       // Background refresh
       (async () => {
         try {
@@ -164,7 +165,7 @@ function setCache(data: ApiMatch[]): void {
 
 async function fetchFreshMatches(): Promise<ApiMatch[]> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout (accommodates backend cold-start Puppeteer scrape)
   const response = await fetch(`${API_BASE}/v1/cs2-matches`, {
     method: "GET",
     headers: { Accept: "application/json" },

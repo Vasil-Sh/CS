@@ -458,7 +458,8 @@ export default function MatchRow({
           <div className="flex items-center justify-center gap-1">
             <button
               onClick={() => onRate(match.id, "like")}
-              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "like" ? "bg-green-500 text-white shadow-sm" : "text-gray-500 hover:bg-green-50 hover:text-green-500 border border-transparent hover:border-green-200"}`}
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all active:scale-[0.96] ${currentRating === "like" ? "bg-green-500 text-white shadow-sm" : "text-gray-500 hover:bg-green-50 hover:text-green-500 border border-transparent hover:border-green-200"}`}
+              aria-label="Цікавий матч"
               title="Цікавий"
             >
               <ThumbsUp
@@ -468,7 +469,8 @@ export default function MatchRow({
             </button>
             <button
               onClick={() => onRate(match.id, "dislike")}
-              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all ${currentRating === "dislike" ? "bg-red-500 text-white shadow-sm" : "text-gray-500 hover:bg-red-50 hover:text-red-500 border border-transparent hover:border-red-200"}`}
+              className={`flex items-center justify-center w-9 h-9 rounded-md transition-all active:scale-[0.96] ${currentRating === "dislike" ? "bg-red-500 text-white shadow-sm" : "text-gray-500 hover:bg-red-50 hover:text-red-500 border border-transparent hover:border-red-200"}`}
+              aria-label="Нецікавий матч"
               title="Не цікавий"
             >
               <ThumbsDown
@@ -600,7 +602,8 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onPredictions(match)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all active:scale-[0.96]"
+                  aria-label="Аналіз прогнозів"
                 >
                   <BarChart3
                     className="h-4 w-4 text-blue-600"
@@ -616,7 +619,8 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onAIRecommend(match)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-violet-100 border border-[#DDD6FE] transition-all"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#F5F3FF] hover:bg-violet-100 border border-[#DDD6FE] transition-all active:scale-[0.96]"
+                  aria-label="AI рекомендація"
                 >
                   <Lightbulb
                     className="h-4 w-4 text-[#7C3AED]"
@@ -750,7 +754,8 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onAddToBets(match)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-green-50 hover:bg-[#DCFCE7] border border-green-200 hover:border-[#86EFAC] text-green-600 hover:text-[#15803D] transition-all"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-green-50 hover:bg-[#DCFCE7] border border-green-200 hover:border-[#86EFAC] text-green-600 hover:text-[#15803D] transition-all active:scale-[0.96]"
+                  aria-label="Додати до записів"
                 >
                   <PlusCircle className="h-4 w-4" strokeWidth={1.5} />
                 </button>
@@ -763,7 +768,8 @@ export default function MatchRow({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => onToggleSelect(match.id)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all ${isSelected ? "bg-blue-500 text-white shadow-sm border border-blue-500" : "text-gray-400 hover:bg-blue-50 hover:text-blue-500 border border-gray-200 hover:border-[#93C5FD]"}`}
+                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all active:scale-[0.96] ${isSelected ? "bg-blue-500 text-white shadow-sm border border-blue-500" : "text-gray-400 hover:bg-blue-50 hover:text-blue-500 border border-gray-200 hover:border-[#93C5FD]"}`}
+                  aria-label={isSelected ? "Прибрати з експресу" : "Додати до експресу"}
                 >
                   {isSelected ? (
                     <CircleCheck className="h-4 w-4" strokeWidth={2} />

@@ -80,7 +80,7 @@ export default function MatchFilterBar({
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-4 text-base rounded-[24px] font-semibold bg-primary text-white hover:bg-blue-400 shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-300 ease-in-out active:scale-[0.96] disabled:opacity-50"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -106,9 +106,10 @@ export default function MatchFilterBar({
             strokeWidth={1.5}
           />
           <Input
-            placeholder="Пошук..."
+            placeholder="Знайти команду або турнір…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            aria-label="Пошук матчів"
             className="pl-10 pr-4 rounded-[24px] border border-stone-200 bg-transparent text-base text-gray-900 placeholder:text-gray-500 focus:bg-white focus:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:border-gray-300 transition-all duration-300 h-full py-4 min-h-[56px]"
           />
         </div>
