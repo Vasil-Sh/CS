@@ -540,48 +540,6 @@ export function useMatches() {
     loadMatchesFromApi();
   }, [loadMatchesFromApi]);
 
-  // ── Auto-refresh: quietly fetch full match list every 60s ──
-  // Picks up new matches and finished status changes without manual refresh.
-  useEffect(() => {
-    const INTERVAL = 60_000; // 1 minute
-    let isQuietRefreshing = false;
-
-    const quietRefresh = async () => {
-      if (isQuietRefreshing) return;
-      // Skip refresh if page is hidden — will catch up on tab focus
-      if (document.visibilityState !== 'visible') return;
-      isQuietRefreshing = true;
-      try {
-        await Promise.allSettled([
-          clearDota2Cache(),
-        ]);
-        await loadMatchesFromApi();
-      } catch {
-        /* silent — live score polling covers scores in meantime */
-      } finally {
-        isQuietRefreshing = false;
-      }
-    };
-
-    // First auto-refresh after 60s (initial load already happened on mount)
-    const timer = setInterval(quietRefresh, INTERVAL);
-
-    // Also refresh on tab focus if it's been >10s since last refresh
-    let lastQuietRefresh = Date.now();
-    const onFocus = () => {
-      if (document.visibilityState === 'visible' && Date.now() - lastQuietRefresh > 10_000) {
-        lastQuietRefresh = Date.now();
-        quietRefresh();
-      }
-    };
-    document.addEventListener('visibilitychange', onFocus);
-
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener('visibilitychange', onFocus);
-    };
-  }, [loadMatchesFromApi, clearDota2Cache]);
-
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -693,7 +651,7 @@ export function useMatches() {
     (m) => m.game === "CS2" && m.matchStatus !== "finished",
   );
 
-  // ── Poll live scores: immediate + every 7s + on window focus ──
+  // ── Poll live scores (7s) + auto-refresh match list (60s) ──
   const [liveScoreAge, setLiveScoreAge] = useState(0);
   const liveIntervalRef = useRef(7_000); // start at 7s, adapt (matches backend)
 
@@ -715,12 +673,30 @@ export function useMatches() {
     // Immediate poll
     poll();
 
-    const timer = setInterval(() => {
+    const liveTimer = setInterval(() => {
       poll();
       setLiveScoreAge((prev) => prev + liveIntervalRef.current);
     }, liveIntervalRef.current);
 
-    // Poll on tab focus
+    // ── Auto-refresh full match list every 60s ──
+    let isQuietRefreshing = false;
+    const quietRefresh = async () => {
+      if (isQuietRefreshing) return;
+      if (document.visibilityState !== "visible") return;
+      isQuietRefreshing = true;
+      try {
+        await clearDota2Cache();
+        await loadMatchesFromApi();
+      } catch {
+        /* silent */
+      } finally {
+        isQuietRefreshing = false;
+      }
+    };
+
+    const refreshTimer = setInterval(quietRefresh, 60_000);
+
+    // Common focus handler
     const onFocus = () => {
       if (document.visibilityState === "visible") {
         poll();
@@ -730,10 +706,11 @@ export function useMatches() {
     document.addEventListener("visibilitychange", onFocus);
 
     return () => {
-      clearInterval(timer);
+      clearInterval(liveTimer);
+      clearInterval(refreshTimer);
       document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [hasDota2Matches, hasCs2Matches, pollLiveScores]);
+  }, [hasDota2Matches, hasCs2Matches, pollLiveScores, loadMatchesFromApi]);
 
   // ── Filtering & sorting (memoized) ──
   const {
