@@ -53,7 +53,7 @@ export function findRiskyTeams(
   const addedNames = new Set<string>();
 
   for (const rt of riskyTeams) {
-    if (rt.game !== gameFilter) continue;
+    if (gameFilter && rt.game !== gameFilter) continue;
     if (addedNames.has(rt.name)) continue;
 
     const normalizedRT = normalizeTeamName(rt.name);

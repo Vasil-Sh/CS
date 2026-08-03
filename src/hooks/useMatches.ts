@@ -1079,14 +1079,24 @@ export function useMatches() {
       teamName: string,
       game: "CS2" | "Dota2",
     ): { notes: string; status: string } | null => {
-      const results = findRiskyTeams(
+      // Try with game filter first
+      let results = findRiskyTeams(
         teamName,
         "",
         getGameFilterValue(game),
         riskyTeams,
       );
+      // Fallback: search across ALL games (team may be risky in other game)
+      if (results.length === 0) {
+        results = findRiskyTeams(teamName, "", "", riskyTeams);
+      }
       if (results.length === 0) return null;
-      return { notes: results[0].notes, status: results[0].status };
+      const gameLabel = results[0].game === "Дота" ? "Dota2" : "CS2";
+      return {
+        notes: results[0].notes,
+        status: results[0].status,
+        game: gameLabel,
+      };
     },
     [riskyTeams],
   );
@@ -1102,7 +1112,8 @@ export function useMatches() {
       ] as const) {
         if (!r) continue;
         const note = r.notes || r.status;
-        cmts.push(`${name}: ${note}|${r.status}`);
+        const gameTag = r.game || game;
+        cmts.push(`${name}: ${note}|${r.status}|${gameTag}`);
       }
       return cmts.join("\n\n");
     },

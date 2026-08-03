@@ -28,6 +28,7 @@ interface AddToRiskyTeamsModalProps {
   onClose: () => void;
   team1: TeamInfo;
   team2: TeamInfo;
+  game: string; // "CS2" or "Dota2" — current match game
   onSaved: () => void; // callback to refresh risky teams in parent
 }
 
@@ -59,16 +60,13 @@ const proxyLogo = (url: string | null | undefined): string | null => {
   return `/api/v1/cs2-matches/logo/${filename}`;
 };
 
-export default function AddToRiskyTeamsModal({
-  open,
-  onClose,
-  team1,
-  team2,
-  onSaved,
-}: AddToRiskyTeamsModalProps) {
+export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
+  const { open, onClose, team1, team2, onSaved } = props;
+  const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
+
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
   const [status, setStatus] = useState<string>("Обережно");
-  const [game, setGame] = useState<string>("CS");
+  const [selectedGame, setSelectedGame] = useState<string>(gameStorageKey);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [existingTeams, setExistingTeams] = useState<Set<string>>(new Set());
@@ -79,15 +77,18 @@ export default function AddToRiskyTeamsModal({
     try {
       const saved = localStorage.getItem("admin_risky_teams");
       if (saved) {
-        const teams: { name: string }[] = JSON.parse(saved);
-        // Use same fuzzy matching as getTeamRiskInfo in useMatches
+        const teams: Array<{ name: string; game?: string }> = JSON.parse(saved);
+        // Only count as "already added" if same game
         const isRisky = (teamName: string) =>
-          teams.some(
-            (t) =>
+          teams.some((t) => {
+            const nameMatch =
               t.name.toLowerCase() === teamName.toLowerCase() ||
               teamName.toLowerCase().includes(t.name.toLowerCase()) ||
-              t.name.toLowerCase().includes(teamName.toLowerCase()),
-          );
+              t.name.toLowerCase().includes(teamName.toLowerCase());
+            if (!nameMatch) return false;
+            const teamGame = t.game || "";
+            return !teamGame || teamGame === gameStorageKey;
+          });
         const existing = new Set(
           [team1.name, team2.name]
             .filter((n) => isRisky(n))
@@ -109,9 +110,9 @@ export default function AddToRiskyTeamsModal({
       /* ignore */
     }
     setStatus("Обережно");
-    setGame("CS");
+    setSelectedGame(gameStorageKey);
     setNotes("");
-  }, [open, team1.name, team2.name]);
+  }, [open, team1.name, team2.name, gameStorageKey]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -147,7 +148,7 @@ export default function AddToRiskyTeamsModal({
       // Add new entry
       teams.push({
         name: teamName,
-        game,
+        game: selectedGame,
         status: teamStatus,
         notes: notes.trim(),
       });
@@ -160,7 +161,7 @@ export default function AddToRiskyTeamsModal({
         const { api } = await import("@/lib/apiClient");
         await api.post("/risky-teams", {
           name: teamName,
-          game,
+          game: selectedGame,
           status: teamStatus,
           notes: notes.trim(),
         });
@@ -173,8 +174,8 @@ export default function AddToRiskyTeamsModal({
       onClose();
       setNotes("");
       setStatus("Обережно");
-      setGame("CS");
-    } catch (err) {
+      setSelectedGame("CS");
+    } catch {
       toast.error("Помилка при збереженні");
     } finally {
       setSaving(false);
@@ -343,9 +344,9 @@ export default function AddToRiskyTeamsModal({
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setGame(opt.value)}
+                    onClick={() => setSelectedGame(opt.value)}
                     className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 transition-all text-sm font-semibold ${
-                      game === opt.value
+                      selectedGame === opt.value
                         ? "border-primary bg-blue-50 text-gray-900 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
                         : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-white"
                     }`}
@@ -353,7 +354,7 @@ export default function AddToRiskyTeamsModal({
                     <img
                       src={opt.iconSrc}
                       alt={opt.label}
-                      className={`w-6 h-6 object-contain ${game !== opt.value ? "opacity-50" : ""}`}
+                      className={`w-6 h-6 object-contain ${selectedGame !== opt.value ? "opacity-50" : ""}`}
                     />
                     {opt.label}
                   </button>

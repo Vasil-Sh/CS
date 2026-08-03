@@ -468,6 +468,7 @@ export default function Matches() {
           <AddToRiskyTeamsModal
             open={m.riskyModalOpen}
             onClose={() => m.setRiskyModalOpen(false)}
+            game={m.selectedRiskyMatch?.game || "CS2"}
             team1={{
               name: m.selectedRiskyMatch?.team1 || "",
               logo: m.selectedRiskyMatch?.logoTeam1,

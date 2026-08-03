@@ -60,11 +60,11 @@ export default function CommentModal({
         {/* Content — separate card per team */}
         <div className="px-6 pb-6 pt-4 space-y-3">
           {teamComments.map((block, index) => {
-            // Format: "Team Name: notes" or "Team Name: notes|STATUS"
-            const pipeIdx = block.lastIndexOf("|");
-            const statusText =
-              pipeIdx > -1 ? block.slice(pipeIdx + 1).trim() : "";
-            const body = pipeIdx > -1 ? block.slice(0, pipeIdx).trim() : block;
+            // Format: "Team Name: notes|STATUS|GAME" or "Team Name: notes|STATUS"
+            const parts = block.split("|");
+            const gameTag = parts.length >= 3 ? parts.pop()!.trim() : "";
+            const statusText = parts.length >= 2 ? parts.pop()!.trim() : "";
+            const body = parts.join("|").trim();
             const colonIndex = body.indexOf(":");
             const teamLabel =
               colonIndex > -1 ? body.slice(0, colonIndex + 1) : "";
@@ -125,6 +125,17 @@ export default function CommentModal({
                     {statusText && (
                       <Badge className={getStatusBadge(statusText)}>
                         {statusText}
+                      </Badge>
+                    )}
+                    {gameTag && (
+                      <Badge
+                        className={
+                          gameTag === "Dota2"
+                            ? "bg-violet-100 text-[#5B21B6] hover:bg-violet-100 border border-violet-200 rounded-full font-medium text-sm px-3 py-1"
+                            : "bg-amber-100 text-amber-800 hover:bg-amber-100 border border-amber-200 rounded-full font-medium text-sm px-3 py-1"
+                        }
+                      >
+                        {gameTag === "Dota2" ? "Dota 2" : "CS2"}
                       </Badge>
                     )}
                   </p>
