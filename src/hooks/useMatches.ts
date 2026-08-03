@@ -786,12 +786,30 @@ export function useMatches() {
       return r === "like" ? 0 : r === "dislike" ? 2 : 1;
     };
 
-    const sorted = [...filtered].sort((a, b) => {
-      // Rating is always the PRIMARY sort — liked matches on top, disliked at bottom.
-      // All other sorts (date, odds, etc.) only apply within the same rating tier.
-      let cmp = ratingRank(a.id) - ratingRank(b.id);
-      if (cmp !== 0) return sortOrder === "asc" ? cmp : -cmp;
+    // Composite sort tier — determines the visible sections:
+    // 0 = liked (any status)
+    // 1 = neutral upcoming/live
+    // 2 = disliked upcoming/live
+    // 3 = neutral finished
+    // 4 = disliked finished
+    const compositeTier = (m: Match) => {
+      const r = ratingRank(m.id);
+      const isFinished = m.matchStatus === "finished";
+      if (r === 0) return 0;
+      if (r === 1 && !isFinished) return 1;
+      if (r === 2 && !isFinished) return 2;
+      if (r === 1 && isFinished) return 3;
+      return 4;
+    };
 
+    const sorted = [...filtered].sort((a, b) => {
+      // Composite tier is always primary — sections in fixed order.
+      // When sorting by "rating" column, sortOrder inverts the tier direction.
+      let cmp = compositeTier(a) - compositeTier(b);
+      if (sortBy === "rating") cmp = sortOrder === "asc" ? cmp : -cmp;
+      if (cmp !== 0) return cmp;
+
+      // Within same tier, apply the chosen sort
       switch (sortBy) {
         case "date":
           cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -810,6 +828,7 @@ export function useMatches() {
             Math.max(a.odds.team1 || 0, a.odds.team2 || 0) -
             Math.max(b.odds.team1 || 0, b.odds.team2 || 0);
           break;
+        case "rating":
         case "status": {
           const d =
             getStatusPriority(a.matchStatus) - getStatusPriority(b.matchStatus);
@@ -820,6 +839,9 @@ export function useMatches() {
           break;
         }
       }
+      // Fallback tiebreaker: by date
+      if (cmp === 0)
+        cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
       return sortOrder === "asc" ? cmp : -cmp;
     });
 
