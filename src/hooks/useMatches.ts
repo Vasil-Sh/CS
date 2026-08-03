@@ -739,8 +739,13 @@ export function useMatches() {
     const todayKey = getTodayDateKey();
     const filtered = matches.filter((match) => {
       const matchDateKey = getDateKey(match.date);
-      // Exclude matches from past days
-      if (matchDateKey < todayKey) return false;
+      // Exclude matches from past days — but keep live & upcoming ones
+      if (
+        matchDateKey < todayKey &&
+        match.matchStatus !== "live" &&
+        match.matchStatus !== "upcoming"
+      )
+        return false;
       // Auto-hide finished matches from today that ended >6h ago
       if (match.matchStatus === "finished" && matchDateKey === todayKey) {
         const hoursSinceStart =
@@ -862,8 +867,9 @@ export function useMatches() {
     });
 
     const allKeys = Object.keys(grouped);
+    const pastLiveKeys = allKeys.filter((k) => k < todayKey).sort();
     const futureKeys = allKeys.filter((k) => k > todayKey).sort();
-    const dateKeys = [todayKey, ...futureKeys];
+    const dateKeys = [...pastLiveKeys, todayKey, ...futureKeys];
     const displayed = dateKeys.flatMap((k) => grouped[k] || []);
     const confs = displayed
       .filter((m) => m.aiConfidence > 0)
