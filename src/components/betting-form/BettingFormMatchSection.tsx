@@ -347,15 +347,6 @@ export default function BettingFormMatchSection({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5" id="team1-wrapper">
             <Label htmlFor="team1" className={classes.label}>
-              <img
-                src={
-                  data.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder-cs2.svg"
-                }
-                alt=""
-                className="inline-block h-4 w-4 object-contain align-text-bottom mr-1"
-              />
               Команда 1{" "}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
@@ -376,10 +367,7 @@ export default function BettingFormMatchSection({
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (
-                    data.game === "CS2" &&
-                    !t.src.includes("team-placeholder-cs2")
-                  ) {
+                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
@@ -401,15 +389,6 @@ export default function BettingFormMatchSection({
 
           <div className="space-y-1.5">
             <Label htmlFor="team2" className={classes.label}>
-              <img
-                src={
-                  data.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder-cs2.svg"
-                }
-                alt=""
-                className="inline-block h-4 w-4 object-contain align-text-bottom mr-1"
-              />
               Команда 2{" "}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
@@ -430,10 +409,7 @@ export default function BettingFormMatchSection({
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (
-                    data.game === "CS2" &&
-                    !t.src.includes("team-placeholder-cs2")
-                  ) {
+                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
