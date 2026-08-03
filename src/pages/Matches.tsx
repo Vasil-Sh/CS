@@ -461,6 +461,8 @@ export default function Matches() {
                   )
                 : ""
             }
+            team1Logo={m.selectedCommentMatch?.logoTeam1 ?? null}
+            team2Logo={m.selectedCommentMatch?.logoTeam2 ?? null}
           />
 
           <AddToRiskyTeamsModal

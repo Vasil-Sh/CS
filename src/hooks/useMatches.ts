@@ -1092,15 +1092,8 @@ export function useMatches() {
         [r2, team2],
       ] as const) {
         if (!r) continue;
-        const icon =
-          r.status === "БАН"
-            ? "🔴"
-            : r.status === "Нестабільні"
-              ? "🟠"
-              : r.status === "Обережно"
-                ? "🟡"
-                : "🔵";
-        cmts.push(`${icon} ${name}: ${r.notes || r.status}`);
+        const note = r.notes || r.status;
+        cmts.push(`${name}: ${note}|${r.status}`);
       }
       return cmts.join("\n\n");
     },
