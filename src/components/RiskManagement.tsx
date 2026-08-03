@@ -49,9 +49,9 @@ const getStatusFilterBadge = (status: string, isActive: boolean) => {
     : "opacity-70 hover:opacity-100";
   const colors: Record<string, string> = {
     БАН: `bg-[#FEE2E2] text-red-600 border border-red-200 ${isActive ? "ring-red-200" : ""}`,
-    Нестабільні: `bg-yellow-100 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""}`,
-    Обережно: `bg-amber-50 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""}`,
-    Рідко: `bg-blue-50 text-blue-600 border border-blue-200 ${isActive ? "ring-blue-200" : ""}`,
+    Ризиковані: `bg-orange-100 text-orange-600 border border-orange-200 ${isActive ? "ring-orange-200" : ""}`,
+    'Під питанням': `bg-amber-100 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""}`,
+    Стабільні: `bg-blue-50 text-blue-600 border border-blue-200 ${isActive ? "ring-blue-200" : ""}`,
     Надійна: `bg-green-50 text-green-600 border border-green-200 ${isActive ? "ring-green-200" : ""}`,
     Неоцінена: `bg-gray-50 text-gray-500 border border-gray-200 ${isActive ? "ring-gray-200" : ""}`,
   };
@@ -308,7 +308,7 @@ export default function RiskManagement() {
                 </p>
                 <p className="text-xs text-gray-500">
                   Додавайте команди вручну або підтягуйте з Google Sheets.
-                  Статуси "БАН", "Нестабільні", "Обережно" впливають на
+                  Статуси "БАН", "Ризиковані", "Під питанням" впливають на
                   рекомендації при створенні ставок.
                 </p>
               </TooltipContent>
@@ -740,7 +740,7 @@ export default function RiskManagement() {
                 <option value="Дота">Dota 2</option>
               </select>
               <select
-                value={h.newTeam?.status || "Обережно"}
+                value={h.newTeam?.status || "Під питанням"}
                 onChange={(e) =>
                   h.setNewTeam({ ...h.newTeam!, status: e.target.value })
                 }

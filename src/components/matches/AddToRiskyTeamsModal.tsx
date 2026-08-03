@@ -34,9 +34,9 @@ interface AddToRiskyTeamsModalProps {
 
 const STATUS_OPTIONS = [
   { value: "БАН", label: "🔴 БАН", color: "text-red-600" },
-  { value: "Нестабільні", label: "🟠 Нестабільні", color: "text-orange-500" },
-  { value: "Обережно", label: "🟡 Обережно", color: "text-yellow-600" },
-  { value: "Рідко", label: "🔵 Рідко", color: "text-blue-600" },
+  { value: "Ризиковані", label: "🟠 Ризиковані", color: "text-orange-500" },
+  { value: "Під питанням", label: "🟡 Під питанням", color: "text-yellow-600" },
+  { value: "Стабільні", label: "🔵 Стабільні", color: "text-blue-600" },
   { value: "Надійна", label: "🟢 Надійна", color: "text-green-600" },
   { value: "Неоцінена", label: "⚪ Неоцінена", color: "text-gray-500" },
 ] as const;
@@ -65,7 +65,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
 
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
-  const [status, setStatus] = useState<string>("Обережно");
+  const [status, setStatus] = useState<string>("Під питанням");
   const [selectedGame, setSelectedGame] = useState<string>(gameStorageKey);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -109,7 +109,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
     } catch {
       /* ignore */
     }
-    setStatus("Обережно");
+    setStatus("Під питанням");
     setSelectedGame(gameStorageKey);
     setNotes("");
   }, [open, team1.name, team2.name, gameStorageKey]);
@@ -119,7 +119,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
     try {
       // Fallback to defaults if state wasn't initialized properly
       const teamName = selectedTeam || team1.name;
-      const teamStatus = status || "Обережно";
+      const teamStatus = status || "Під питанням";
 
       // Load existing risky teams
       let teams: Array<{
@@ -173,7 +173,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
       onSaved();
       onClose();
       setNotes("");
-      setStatus("Обережно");
+      setStatus("Під питанням");
       setSelectedGame("CS");
     } catch {
       toast.error("Помилка при збереженні");

@@ -47,17 +47,17 @@ describe("getGameFilterValue", () => {
 
 describe("findRiskyTeams", () => {
   const riskyTeams: RiskyTeamRecord[] = [
-    { name: "FaZe Clan", game: "CS", status: "Нестабільні", notes: "Слаба форма" },
-    { name: "Team Spirit", game: "Dota", status: "Обережно", notes: "Новий ростер" },
-    { name: "Navi", game: "CS", status: "Нестабільні", notes: "Часті заміни" },
-    { name: "G2", game: "CS", status: "Обережно", notes: "" },
+    { name: "FaZe Clan", game: "CS", status: "Ризиковані", notes: "Слаба форма" },
+    { name: "Team Spirit", game: "Dota", status: "Під питанням", notes: "Новий ростер" },
+    { name: "Navi", game: "CS", status: "Ризиковані", notes: "Часті заміни" },
+    { name: "G2", game: "CS", status: "Під питанням", notes: "" },
   ];
 
   it("finds exact match by normalized name", () => {
     const found = findRiskyTeams("FaZe Clan", "MOUZ", "CS", riskyTeams);
     expect(found).toHaveLength(1);
     expect(found[0].name).toBe("FaZe Clan");
-    expect(found[0].status).toBe("Нестабільні");
+    expect(found[0].status).toBe("Ризиковані");
   });
 
   it("finds match in team2 position", () => {
@@ -69,7 +69,7 @@ describe("findRiskyTeams", () => {
   it("finds by partial match (team1 includes risky team substring)", () => {
     // "Navi" should match "Navi Junior" (normalized: "navijunior" includes "navi")
     const found = findRiskyTeams("Navi Junior", "Spirit", "CS", [
-      { name: "Navi", game: "CS", status: "Обережно", notes: "" },
+      { name: "Navi", game: "CS", status: "Під питанням", notes: "" },
     ]);
     expect(found).toHaveLength(1);
     expect(found[0].name).toBe("Navi");
@@ -103,7 +103,7 @@ describe("findRiskyTeams", () => {
   it("finds multiple risky teams at once", () => {
     const multi = [
       ...riskyTeams,
-      { name: "Falcons", game: "CS", status: "Обережно", notes: "Tier 3" },
+      { name: "Falcons", game: "CS", status: "Під питанням", notes: "Tier 3" },
     ];
     const found = findRiskyTeams("FaZe Clan", "Falcons", "CS", multi);
     expect(found).toHaveLength(2);

@@ -4,7 +4,7 @@ import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { type RiskyTeam } from "@/data/riskyTeams";
 
 // ── Constants ──
-const ALL_STATUSES = ["БАН", "Нестабільні", "Обережно", "Рідко", "Надійна", "Неоцінена"] as const;
+const ALL_STATUSES = ["БАН", "Ризиковані", "Під питанням", "Стабільні", "Надійна", "Неоцінена"] as const;
 
 // ── Pure utilities ──
 const normalizeGame = (game?: string): string => {
@@ -49,7 +49,7 @@ export function useRiskyTeams() {
   const [dotaStatusFilter, setDotaStatusFilter] = useState<string>("all");
   const initializedRef = useRef(false);
 
-  const [newTeam, setNewTeam] = useState<RiskyTeam>({ name: "", game: "CS", status: "Обережно", notes: "" });
+  const [newTeam, setNewTeam] = useState<RiskyTeam>({ name: "", game: "CS", status: "Під питанням", notes: "" });
 
   // ── Effects ──
   useEffect(() => {
@@ -59,7 +59,7 @@ export function useRiskyTeams() {
   useEffect(() => {
     const saved = localStorage.getItem("admin_risky_teams");
     let parsed: RiskyTeam[] | null = null;
-    if (saved) { try { const p = JSON.parse(saved); if (Array.isArray(p) && p.length > 0) parsed = p; } catch {} }
+    if (saved) { try { const p = JSON.parse(saved); if (Array.isArray(p) && p.length > 0) parsed = p; } catch { /* ignore */ } }
 
     if (parsed) {
       setRiskyTeams(parsed.map((t) => ({ ...t, game: normalizeGame(t.game) })));
@@ -68,7 +68,7 @@ export function useRiskyTeams() {
       let cancelled = false;
       (async () => {
         try { const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams(); if (!cancelled && teams.length > 0) { setRiskyTeams(teams); localStorage.setItem("admin_risky_teams", JSON.stringify(teams)); } }
-        catch {}
+        catch { /* ignore */ }
         if (!cancelled) { setIsLoadingTeams(false); initializedRef.current = true; }
       })();
       setIsLoadingTeams(true);
@@ -94,7 +94,7 @@ export function useRiskyTeams() {
   const addRiskyTeam = async () => {
     if (!newTeam.name.trim()) return;
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
-    setNewTeam({ name: "", game: "CS", status: "Обережно", notes: "" });
+    setNewTeam({ name: "", game: "CS", status: "Під питанням", notes: "" });
     googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch(() => {});
   };
 
@@ -126,7 +126,7 @@ export function useRiskyTeams() {
     try {
       if (savedTeam._apiId) await googleSheetsRiskyTeamsService.updateTeam(savedTeam._apiId, { name: savedTeam.name, game: savedTeam.game, status: savedTeam.status, notes: savedTeam.notes });
       else { const added = await googleSheetsRiskyTeamsService.addTeamAndGet(savedTeam.name, savedTeam.game, savedTeam.status, savedTeam.notes); if (added?.id) { const wId = updated.map((t, i) => i === editingIndex ? { ...t, _apiId: added.id } : t); setRiskyTeams(wId); localStorage.setItem("admin_risky_teams", JSON.stringify(wId)); } }
-    } catch {}
+    } catch { /* ignore */ }
     if (oldGame !== newGame) toast.success(`Команду "${editName.trim()}" перенесено в блок ${newGame === "CS" ? "CS" : "Dota 2"}`);
     else toast.success("Команду оновлено");
     setEditName(""); setEditNotes(""); setEditStatus(""); setEditGame("");
@@ -142,9 +142,9 @@ export function useRiskyTeams() {
     const cs = riskyTeams.filter((t) => t.game === "CS").length;
     const dota = riskyTeams.filter((t) => t.game === "Дота").length;
     const ban = riskyTeams.filter((t) => t.status === "БАН").length;
-    const unstable = riskyTeams.filter((t) => t.status === "Нестабільні").length;
-    const careful = riskyTeams.filter((t) => t.status === "Обережно").length;
-    const rare = riskyTeams.filter((t) => t.status === "Рідко").length;
+    const unstable = riskyTeams.filter((t) => t.status === "Ризиковані").length;
+    const careful = riskyTeams.filter((t) => t.status === "Під питанням").length;
+    const rare = riskyTeams.filter((t) => t.status === "Стабільні").length;
     const reliable = riskyTeams.filter((t) => t.status === "Надійна").length;
     const noStatus = riskyTeams.filter((t) => t.status === "Неоцінена").length;
     return { total, csCount: cs, dotaCount: dota, banCount: ban, unstableCount: unstable, carefulCount: careful, rareCount: rare, reliableCount: reliable, noStatusCount: noStatus, attentionCount: ban + unstable, dominantGame: cs >= dota ? "CS" : "Dota 2", dominantGameCount: Math.max(cs, dota), banPercentage: total > 0 ? Math.round((ban / total) * 100) : 0 };

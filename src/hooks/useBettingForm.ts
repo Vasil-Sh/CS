@@ -158,7 +158,7 @@ function loadRiskyTeamsFromStorage(): RiskyTeam[] {
       return savedTeams.map((team: RiskyTeam) => ({
         name: team.name,
         game: team.game || "CS",
-        status: team.status || "Обережно",
+        status: team.status || "Під питанням",
         notes: team.notes || "",
       }));
     }

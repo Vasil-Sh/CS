@@ -22,8 +22,11 @@ interface ApiRiskyTeam {
 
 const STATUS_EMOJIS: Record<string, string> = {
   "🟥": "БАН",
-  "🟨": "Нестабільні",
-  "🟩": "Обережно",
+  "🟨": "Під питанням",
+  "🟩": "Надійна",
+  "🟧": "Ризиковані",
+  "🟦": "Стабільні",
+  "⬜": "Неоцінена",
 };
 
 const GAMES = ["CS", "CS2", "CS:GO", "Dota2", "Дота", "Dota"];
@@ -233,8 +236,11 @@ function parseStatusCell(cell: string): {
   if (!status) {
     const lower = cell.toLowerCase();
     if (lower.startsWith("бан")) status = "БАН";
-    else if (lower.startsWith("нестабільні")) status = "Нестабільні";
-    else if (lower.startsWith("обережно")) status = "Обережно";
+    else if (lower.startsWith("ризиковані")) status = "Ризиковані";
+    else if (lower.startsWith("під питанням")) status = "Під питанням";
+    else if (lower.startsWith("стабільні")) status = "Стабільні";
+    else if (lower.startsWith("нестабільні")) status = "Ризиковані";
+    else if (lower.startsWith("обережно")) status = "Під питанням";
   }
 
   // Detect game
