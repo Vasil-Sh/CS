@@ -31,7 +31,7 @@ export function normalizeTeamName(name: string): string {
 
 /** Map form-level game filter to storage-level game key */
 export function getGameFilterValue(formGame: "CS2" | "Dota2"): string {
-  return formGame === "CS2" ? "CS" : "Dota";
+  return formGame === "CS2" ? "CS" : "Дота";
 }
 
 /**
@@ -53,7 +53,18 @@ export function findRiskyTeams(
   const addedNames = new Set<string>();
 
   for (const rt of riskyTeams) {
-    if (gameFilter && rt.game !== gameFilter) continue;
+    if (gameFilter) {
+      const rtGameNorm = rt.game.toLowerCase();
+      const filterNorm = gameFilter.toLowerCase();
+      // Handle "Дота" vs "Dota" vs "dota2"
+      const rtIsDota = rtGameNorm === "дота" || rtGameNorm === "dota" || rtGameNorm === "dota2";
+      const filterIsDota = filterNorm === "дота" || filterNorm === "dota" || filterNorm === "dota2";
+      const rtIsCs = rtGameNorm === "cs" || rtGameNorm === "cs2" || rtGameNorm === "csgo";
+      const filterIsCs = filterNorm === "cs" || filterNorm === "cs2" || filterNorm === "csgo";
+      if (rtIsDota && filterIsDota) { /* match */ }
+      else if (rtIsCs && filterIsCs) { /* match */ }
+      else continue;
+    }
     if (addedNames.has(rt.name)) continue;
 
     const normalizedRT = normalizeTeamName(rt.name);

@@ -86,8 +86,20 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
               teamName.toLowerCase().includes(t.name.toLowerCase()) ||
               t.name.toLowerCase().includes(teamName.toLowerCase());
             if (!nameMatch) return false;
-            const teamGame = t.game || "";
-            return !teamGame || teamGame === gameStorageKey;
+            const teamGame = (t.game || "").toLowerCase();
+            const keyNorm = gameStorageKey.toLowerCase();
+            // Match both "Дота"/"Dota"/"Dota2" and "CS"/"CS2"
+            const teamIsDota =
+              teamGame === "дота" || teamGame === "dota" || teamGame === "dota2";
+            const keyIsDota =
+              keyNorm === "дота" || keyNorm === "dota" || keyNorm === "dota2";
+            const teamIsCs =
+              teamGame === "cs" || teamGame === "cs2" || teamGame === "csgo";
+            const keyIsCs =
+              keyNorm === "cs" || keyNorm === "cs2" || keyNorm === "csgo";
+            if (!teamGame || (teamIsDota && keyIsDota) || (teamIsCs && keyIsCs))
+              return true;
+            return false;
           });
         const existing = new Set(
           [team1.name, team2.name]

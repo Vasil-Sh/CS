@@ -1098,17 +1098,12 @@ export function useMatches() {
       teamName: string,
       game: "CS2" | "Dota2",
     ): { notes: string; status: string } | null => {
-      // Try with game filter first
-      let results = findRiskyTeams(
+      const results = findRiskyTeams(
         teamName,
         "",
         getGameFilterValue(game),
         riskyTeams,
       );
-      // Fallback: search across ALL games (team may be risky in other game)
-      if (results.length === 0) {
-        results = findRiskyTeams(teamName, "", "", riskyTeams);
-      }
       if (results.length === 0) return null;
       const gameLabel = results[0].game === "Дота" ? "Dota2" : "CS2";
       return {
@@ -1130,9 +1125,10 @@ export function useMatches() {
         [r2, team2],
       ] as const) {
         if (!r) continue;
+        // Only show same-game risky teams in the comment modal
+        if (r.game && r.game !== game) continue;
         const note = r.notes || r.status;
-        const gameTag = r.game || game;
-        cmts.push(`${name}: ${note}|${r.status}|${gameTag}`);
+        cmts.push(`${name}: ${note}|${r.status}|${game}`);
       }
       return cmts.join("\n\n");
     },
