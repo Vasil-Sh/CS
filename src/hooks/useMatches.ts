@@ -614,23 +614,30 @@ export function useMatches() {
               maxScore >= winsNeeded &&
               Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
 
-            const newStatus: "upcoming" | "live" | "finished" = isScoreDecided
-              ? "finished"
-              : m.matchStatus === "live" && update.status === "finished"
-                ? "live"
-                : update.status === "finished"
-                  ? "finished"
-                  : update.status === "live"
-                    ? "live"
-                    : (() => {
-                        if (hasScores) return m.matchStatus;
-                        const matchDate = new Date(m.date);
-                        if (matchDate <= new Date()) {
-                          const ageMs = Date.now() - matchDate.getTime();
-                          if (ageMs < 4 * 60 * 60 * 1000) return "live";
-                        }
-                        return m.matchStatus;
-                      })();
+            const newStatus: "upcoming" | "live" | "finished" | "postponed" =
+              (() => {
+                if (isScoreDecided) return "finished";
+
+                // Auto-postponed: live, no scores, >30min past scheduled start
+                if (!hasScores && m.matchStatus === "live") {
+                  const matchDate = new Date(m.date);
+                  const ageMs = Date.now() - matchDate.getTime();
+                  if (ageMs > 30 * 60 * 1000) return "postponed";
+                }
+
+                if (m.matchStatus === "live" && update.status === "finished")
+                  return "live";
+                if (update.status === "finished") return "finished";
+                if (update.status === "live") return "live";
+
+                if (hasScores) return m.matchStatus;
+                const matchDate = new Date(m.date);
+                if (matchDate <= new Date()) {
+                  const ageMs = Date.now() - matchDate.getTime();
+                  if (ageMs < 4 * 60 * 60 * 1000) return "live";
+                }
+                return m.matchStatus;
+              })();
 
             return {
               ...m,
