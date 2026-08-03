@@ -737,20 +737,33 @@ export function useMatches() {
     tournamentOptions,
   } = useMemo(() => {
     const todayKey = getTodayDateKey();
+    // Yesterday's date key for keeping recently completed matches visible
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yyyy = yesterdayDate.getFullYear();
+    const ymm = String(yesterdayDate.getMonth() + 1).padStart(2, "0");
+    const ydd = String(yesterdayDate.getDate()).padStart(2, "0");
+    const yesterdayKey = `${yyyy}-${ymm}-${ydd}`;
+
     const filtered = matches.filter((match) => {
       const matchDateKey = getDateKey(match.date);
-      // Exclude matches from past days — but keep live & upcoming ones
+      // Exclude matches from past days — but keep:
+      // - live & upcoming (still playing or about to start)
+      // - yesterday's matches (users want to see results)
       if (
         matchDateKey < todayKey &&
+        matchDateKey !== yesterdayKey &&
         match.matchStatus !== "live" &&
         match.matchStatus !== "upcoming"
       )
         return false;
       // Auto-hide finished matches from today that ended >6h ago
-      if (match.matchStatus === "finished" && matchDateKey === todayKey) {
+      // For yesterday's matches, auto-hide >30h ago
+      if (match.matchStatus === "finished") {
         const hoursSinceStart =
           (Date.now() - new Date(match.date).getTime()) / 3600000;
-        if (hoursSinceStart > 6) return false;
+        const maxHours = matchDateKey === yesterdayKey ? 30 : 6;
+        if (hoursSinceStart > maxHours) return false;
       }
       if (filterGame === "CS2" && match.game !== "CS2") return false;
       if (filterGame === "Dota2" && match.game !== "Dota2") return false;
