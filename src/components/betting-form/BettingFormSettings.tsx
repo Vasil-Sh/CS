@@ -125,6 +125,15 @@ export default function BettingFormSettings({
 
             <div className="space-y-1.5">
               <Label htmlFor="game" className={classes.label}>
+                <img
+                  src={
+                    data.game === "Dota2"
+                      ? "/assets/game-dota2.svg"
+                      : "/assets/game-cs2.svg"
+                  }
+                  alt=""
+                  className="inline-block h-4 w-4 object-contain align-text-bottom mr-1"
+                />
                 Гра
               </Label>
               <Select
