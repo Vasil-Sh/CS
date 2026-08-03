@@ -23,6 +23,7 @@ import {
   type Dota2ApiMatch,
 } from "@/lib/dota2Api";
 import { deepSeekService, type AIRecommendation } from "@/lib/deepSeekService";
+import { findRiskyTeams, getGameFilterValue } from "@/lib/riskyTeamsMatcher";
 
 // ── Types ──
 export type FormStability =
@@ -74,7 +75,7 @@ export interface Match {
 export type MatchRating = "like" | "dislike" | null;
 
 export type SortBy =
-  "date" | "confidence" | "risk" | "upset" | "status" | "odds";
+  "date" | "confidence" | "risk" | "upset" | "status" | "odds" | "rating";
 export type FilterDay =
   "all" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 export type FilterRisk = "all" | "safe" | "moderate" | "high";
@@ -779,8 +780,18 @@ export function useMatches() {
       return true;
     });
 
+    // Rating rank helper: like=0, neutral=1, dislike=2
+    const ratingRank = (id: string) => {
+      const r = matchRatings[id] || null;
+      return r === "like" ? 0 : r === "dislike" ? 2 : 1;
+    };
+
     const sorted = [...filtered].sort((a, b) => {
-      let cmp = 0;
+      // Rating is always the PRIMARY sort — liked matches on top, disliked at bottom.
+      // All other sorts (date, odds, etc.) only apply within the same rating tier.
+      let cmp = ratingRank(a.id) - ratingRank(b.id);
+      if (cmp !== 0) return sortOrder === "asc" ? cmp : -cmp;
+
       switch (sortBy) {
         case "date":
           cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -859,6 +870,7 @@ export function useMatches() {
     debouncedSearchQuery,
     sortBy,
     sortOrder,
+    matchRatings,
   ]);
 
   useEffect(() => {
@@ -1032,22 +1044,26 @@ export function useMatches() {
   }, [loadRiskyTeams]);
 
   const getTeamRiskInfo = useCallback(
-    (teamName: string): { notes: string; status: string } | null => {
-      const team = riskyTeams.find(
-        (t) =>
-          t.name.toLowerCase() === teamName.toLowerCase() ||
-          teamName.toLowerCase().includes(t.name.toLowerCase()) ||
-          t.name.toLowerCase().includes(teamName.toLowerCase()),
+    (
+      teamName: string,
+      game: "CS2" | "Dota2",
+    ): { notes: string; status: string } | null => {
+      const results = findRiskyTeams(
+        teamName,
+        "",
+        getGameFilterValue(game),
+        riskyTeams,
       );
-      return team ? { notes: team.notes, status: team.status } : null;
+      if (results.length === 0) return null;
+      return { notes: results[0].notes, status: results[0].status };
     },
     [riskyTeams],
   );
 
   const getMatchRiskComments = useCallback(
-    (team1: string, team2: string): string => {
-      const r1 = getTeamRiskInfo(team1),
-        r2 = getTeamRiskInfo(team2);
+    (team1: string, team2: string, game: "CS2" | "Dota2"): string => {
+      const r1 = getTeamRiskInfo(team1, game),
+        r2 = getTeamRiskInfo(team2, game);
       const cmts: string[] = [];
       for (const [r, name] of [
         [r1, team1],

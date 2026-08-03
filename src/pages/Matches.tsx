@@ -96,9 +96,13 @@ export default function Matches() {
       <tr className="bg-white border-b border-gray-200">
         {m.visibleColumns.has("rating") && (
           <th
-            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap ${colDivider}`}
+            className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors select-none ${colDivider}`}
+            onClick={() => m.toggleSort("rating")}
           >
-            Інтерес до Матчу
+            <div className="flex items-center justify-center gap-1">
+              <span>Інтерес</span>
+              {renderSortIndicator("rating")}
+            </div>
           </th>
         )}
         {m.visibleColumns.has("match") && (
@@ -181,8 +185,8 @@ export default function Matches() {
       onAddToBets={m.handleAddToBets}
       onToggleSelect={m.toggleMatchSelection}
       onAddToRisky={m.handleAddToRisky}
-      team1Risky={!!m.getTeamRiskInfo(match.team1)}
-      team2Risky={!!m.getTeamRiskInfo(match.team2)}
+      team1Risky={!!m.getTeamRiskInfo(match.team1, match.game)}
+      team2Risky={!!m.getTeamRiskInfo(match.team2, match.game)}
     />
   );
 
@@ -453,6 +457,7 @@ export default function Matches() {
                 ? m.getMatchRiskComments(
                     m.selectedCommentMatch.team1,
                     m.selectedCommentMatch.team2,
+                    m.selectedCommentMatch.game,
                   )
                 : ""
             }
