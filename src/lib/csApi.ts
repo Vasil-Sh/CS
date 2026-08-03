@@ -8,7 +8,7 @@ export type ApiMatch = BaseApiMatch;
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
-const MATCHES_CACHE_KEY = "cs2_matches_cache_v10";
+const MATCHES_CACHE_KEY = "cs2_matches_cache_v11";
 const MATCHES_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 /** Rewrite external logo URLs — backend already proxies all logos.
@@ -191,10 +191,11 @@ async function fetchFreshMatches(): Promise<ApiMatch[]> {
  * Determine match format from the API type field
  * e.g. "bo3", "bo3 (Online)", "bo3 (LAN)", "def" -> Bo3, Bo1, etc.
  */
-export function parseMatchType(type: string): "Bo1" | "Bo3" | "Bo5" {
+export function parseMatchType(type: string): "Bo1" | "Bo2" | "Bo3" | "Bo5" {
   const lower = type.toLowerCase();
   if (lower.includes("bo5")) return "Bo5";
   if (lower.includes("bo3")) return "Bo3";
+  if (lower.includes("bo2")) return "Bo2";
   if (lower.includes("bo1")) return "Bo1";
   if (lower === "def") return "Bo1";
   return "Bo3";

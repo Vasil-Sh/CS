@@ -435,6 +435,7 @@ export default function MatchRow({
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
+  const isLive = match.matchStatus === "live";
   const hasPrediction =
     match.predictionPercentTeam1 != null &&
     match.predictionPercentTeam2 != null &&
@@ -578,17 +579,43 @@ export default function MatchRow({
           {match.score1 != null && match.score2 != null ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
-                className={`text-base font-bold ${isFinished && match.score1! > match.score2! ? "text-green-500" : isFinished && match.score1! < match.score2! ? "text-red-500" : "text-gray-900"}`}
+                className={`text-base font-bold ${
+                  isFinished && match.score1! > match.score2!
+                    ? "text-green-500"
+                    : isFinished && match.score1! < match.score2!
+                      ? "text-red-500"
+                      : isLive && match.score1! > match.score2!
+                        ? "text-emerald-600"
+                        : isLive && match.score1! < match.score2!
+                          ? "text-red-400"
+                          : "text-gray-900"
+                }`}
               >
                 {match.score1}
               </span>
-              <span className="text-gray-400 text-base font-medium">:</span>
               <span
-                className={`text-base font-bold ${isFinished && match.score2! > match.score1! ? "text-green-500" : isFinished && match.score2! < match.score1! ? "text-red-500" : "text-gray-900"}`}
+                className={`text-base font-medium ${isLive ? "text-gray-500" : "text-gray-400"}`}
+              >
+                :
+              </span>
+              <span
+                className={`text-base font-bold ${
+                  isFinished && match.score2! > match.score1!
+                    ? "text-green-500"
+                    : isFinished && match.score2! < match.score1!
+                      ? "text-red-500"
+                      : isLive && match.score2! > match.score1!
+                        ? "text-emerald-600"
+                        : isLive && match.score2! < match.score1!
+                          ? "text-red-400"
+                          : "text-gray-900"
+                }`}
               >
                 {match.score2}
               </span>
             </div>
+          ) : isLive ? (
+            <span className="text-gray-900 text-base font-bold">0:0</span>
           ) : (
             <span className="text-gray-400 text-sm">—</span>
           )}
@@ -769,7 +796,9 @@ export default function MatchRow({
                 <button
                   onClick={() => onToggleSelect(match.id)}
                   className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all active:scale-[0.96] ${isSelected ? "bg-blue-500 text-white shadow-sm border border-blue-500" : "text-gray-400 hover:bg-blue-50 hover:text-blue-500 border border-gray-200 hover:border-[#93C5FD]"}`}
-                  aria-label={isSelected ? "Прибрати з експресу" : "Додати до експресу"}
+                  aria-label={
+                    isSelected ? "Прибрати з експресу" : "Додати до експресу"
+                  }
                 >
                   {isSelected ? (
                     <CircleCheck className="h-4 w-4" strokeWidth={2} />

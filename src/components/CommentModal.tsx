@@ -65,11 +65,32 @@ export default function CommentModal({
             const teamNotes =
               colonIndex > -1 ? body.slice(colonIndex + 1).trim() : body;
 
-            // Determine which logo to show: match the team name from the label.
-            // Simple index-based: team1 gets index 0, team2 gets index 1.
+            // Determine which logo to show by matching team name from the label
+            // against the team names in matchInfo (which always has "team1 vs team2").
             let logoToShow: string | null = null;
-            if (teamComments.length <= 2) {
-              logoToShow = (index === 0 ? team1Logo : team2Logo) || null;
+            if (teamLabel && (team1Logo || team2Logo)) {
+              const rawName = teamLabel
+                .replace(/:\s*$/, "") // strip trailing colon
+                .replace(/^[^\w\sа-яіїєґa-z]+/i, "") // strip leading emoji
+                .toLowerCase()
+                .trim();
+
+              // MatchInfo format: "Team1 vs Team2 (Bo3, TIER3)"
+              const infoParts = matchInfo.split(" vs ");
+              const t1 = infoParts[0]?.toLowerCase().trim() || "";
+              const t2 =
+                infoParts[1]?.split(" (")[0]?.toLowerCase().trim() || "";
+
+              if (t1 && (t1.includes(rawName) || rawName.includes(t1))) {
+                logoToShow = team1Logo || null;
+              } else if (t2 && (t2.includes(rawName) || rawName.includes(t2))) {
+                logoToShow = team2Logo || null;
+              }
+
+              // Fallback: use index order
+              if (!logoToShow && teamComments.length <= 2) {
+                logoToShow = (index === 0 ? team1Logo : team2Logo) || null;
+              }
             }
 
             return (

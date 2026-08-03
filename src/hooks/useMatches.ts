@@ -604,9 +604,11 @@ export function useMatches() {
                 ? 3
                 : m.matchType === "Bo3"
                   ? 2
-                  : m.matchType === "Bo1"
-                    ? 1
-                    : 2;
+                  : m.matchType === "Bo2"
+                    ? 2 // BO2 needs 2 wins to be decided (2-0), a draw (1-1) is possible
+                    : m.matchType === "Bo1"
+                      ? 1
+                      : 2;
             const isScoreDecided =
               hasScores &&
               maxScore >= winsNeeded &&
