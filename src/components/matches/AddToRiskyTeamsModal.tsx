@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShieldAlert, Save, CheckCircle2 } from "lucide-react";
+import { ShieldAlert, Save, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface TeamInfo {
@@ -36,6 +36,8 @@ const STATUS_OPTIONS = [
   { value: "Нестабільні", label: "🟠 Нестабільні", color: "text-orange-500" },
   { value: "Обережно", label: "🟡 Обережно", color: "text-yellow-600" },
   { value: "Рідко", label: "🔵 Рідко", color: "text-blue-600" },
+  { value: "Надійна", label: "🟢 Надійна", color: "text-green-600" },
+  { value: "Неоцінена", label: "⚪ Неоцінена", color: "text-gray-500" },
 ] as const;
 
 const GAME_OPTIONS = [
@@ -87,18 +89,25 @@ export default function AddToRiskyTeamsModal({
               t.name.toLowerCase().includes(teamName.toLowerCase()),
           );
         const existing = new Set(
-          [team1.name, team2.name].filter((n) => isRisky(n)).map((n) => n.toLowerCase()),
+          [team1.name, team2.name]
+            .filter((n) => isRisky(n))
+            .map((n) => n.toLowerCase()),
         );
         setExistingTeams(existing);
 
         // Auto-select the first non-existing team
-        if (existing.has(team1.name.toLowerCase()) && !existing.has(team2.name.toLowerCase())) {
+        if (
+          existing.has(team1.name.toLowerCase()) &&
+          !existing.has(team2.name.toLowerCase())
+        ) {
           setSelectedTeam(team2.name);
         } else if (!existing.has(team1.name.toLowerCase())) {
           setSelectedTeam(team1.name);
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setStatus("Обережно");
     setGame("CS");
     setNotes("");
@@ -184,7 +193,7 @@ export default function AddToRiskyTeamsModal({
                 strokeWidth={1.5}
               />
             </div>
-            <div>
+            <div className="flex-1">
               <DialogTitle className="text-lg font-bold text-gray-900">
                 Додати до ризикованих команд
               </DialogTitle>
@@ -192,6 +201,12 @@ export default function AddToRiskyTeamsModal({
                 Додайте команду до списку ризикованих
               </p>
             </div>
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+            >
+              <X className="h-4 w-4" strokeWidth={2} />
+            </button>
           </div>
         </DialogHeader>
 
@@ -210,7 +225,10 @@ export default function AddToRiskyTeamsModal({
                     className="flex items-center gap-3 p-4 rounded-2xl border-2 border-green-200 bg-green-50/60 relative opacity-70"
                   >
                     <div className="absolute -top-2 -right-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 bg-white rounded-full" strokeWidth={2} />
+                      <CheckCircle2
+                        className="h-5 w-5 text-green-500 bg-white rounded-full"
+                        strokeWidth={2}
+                      />
                     </div>
                     {team.logo ? (
                       <img
@@ -219,18 +237,24 @@ export default function AddToRiskyTeamsModal({
                         className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                          (
+                            e.target as HTMLImageElement
+                          ).nextElementSibling?.classList.remove("hidden");
                         }}
                       />
                     ) : null}
-                    <div className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}>
+                    <div
+                      className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
+                    >
                       {team.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="text-sm font-semibold text-gray-500 block truncate">
                         {team.name}
                       </span>
-                      <span className="text-xs text-green-600 font-medium">Вже додано</span>
+                      <span className="text-xs text-green-600 font-medium">
+                        Вже додано
+                      </span>
                     </div>
                   </div>
                 );
@@ -253,11 +277,15 @@ export default function AddToRiskyTeamsModal({
                       className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                        (
+                          e.target as HTMLImageElement
+                        ).nextElementSibling?.classList.remove("hidden");
                       }}
                     />
                   ) : null}
-                  <div className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}>
+                  <div
+                    className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
+                  >
                     {team.name.charAt(0).toUpperCase()}
                   </div>
                   <span
@@ -273,13 +301,14 @@ export default function AddToRiskyTeamsModal({
           </div>
 
           {/* Warning when both teams already added */}
-          {existingTeams.has(team1.name.toLowerCase()) && existingTeams.has(team2.name.toLowerCase()) && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-2xl text-center">
-              <p className="text-sm text-green-700 font-medium">
-                Обидві команди вже є у списку ризикованих
-              </p>
-            </div>
-          )}
+          {existingTeams.has(team1.name.toLowerCase()) &&
+            existingTeams.has(team2.name.toLowerCase()) && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-2xl text-center">
+                <p className="text-sm text-green-700 font-medium">
+                  Обидві команди вже є у списку ризикованих
+                </p>
+              </div>
+            )}
 
           {/* Form */}
           <div className="space-y-4">
@@ -347,7 +376,10 @@ export default function AddToRiskyTeamsModal({
           </div>
 
           {/* Save button — hidden when both teams already in list */}
-          {!(existingTeams.has(team1.name.toLowerCase()) && existingTeams.has(team2.name.toLowerCase())) && (
+          {!(
+            existingTeams.has(team1.name.toLowerCase()) &&
+            existingTeams.has(team2.name.toLowerCase())
+          ) && (
             <Button
               onClick={handleSave}
               disabled={saving}

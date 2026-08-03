@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, X } from "lucide-react";
 import { getStatusBadge } from "@/lib/displayHelpers";
 
 interface CommentModalProps {
@@ -40,7 +40,7 @@ export default function CommentModal({
                 strokeWidth={1.5}
               />
             </div>
-            <div>
+            <div className="flex-1">
               <DialogTitle className="text-lg font-bold text-gray-900">
                 Коментар
               </DialogTitle>
@@ -48,6 +48,12 @@ export default function CommentModal({
                 {matchInfo}
               </p>
             </div>
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+            >
+              <X className="h-4 w-4" strokeWidth={2} />
+            </button>
           </div>
         </DialogHeader>
 
