@@ -71,7 +71,6 @@ export default function MyBets() {
   // ── State ──
   const [stats, setStats] = useState<BetStats>(DEFAULT_STATS);
   const [recentBets, setRecentBets] = useState<Bet[]>([]);
-  const [isLoadingBets, setIsLoadingBets] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -196,7 +195,6 @@ export default function MyBets() {
       if (!mounted) return;
       if (usersRes.status === "fulfilled") setUsers(usersRes.value);
       if (betsRes.status === "fulfilled") setRecentBets(betsRes.value);
-      setIsLoadingBets(false);
     };
     init();
     return () => {

@@ -46,8 +46,6 @@ import { t, setLang, getLang, type Lang } from "@/lib/i18n";
 import { logRender } from "@/lib/devLogger";
 import BackupStatusCard from "@/components/profile/BackupStatusCard";
 import DataStatsCards from "@/components/profile/DataStatsCards";
-import InterfaceSettings from "@/components/profile/InterfaceSettings";
-import BackupSection from "@/components/profile/BackupSection";
 
 export default function Profile() {
   logRender("Profile");
@@ -62,7 +60,6 @@ export default function Profile() {
   const [isClearing, setIsClearing] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>("interface");
-  const [simResetKey, setSimResetKey] = useState(0);
 
   // -- Exchange rate --
   const [exchangeRate, setExchangeRate] = useState<number>(() => {
@@ -217,7 +214,13 @@ export default function Profile() {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && (key.startsWith("user_") || key.startsWith("match_ratings") || key.startsWith("ai_recommendations_history")) && !FORBIDDEN_BACKUP_KEYS.has(key)) {
+      if (
+        key &&
+        (key.startsWith("user_") ||
+          key.startsWith("match_ratings") ||
+          key.startsWith("ai_recommendations_history")) &&
+        !FORBIDDEN_BACKUP_KEYS.has(key)
+      ) {
         keys.push(key);
       }
     }
@@ -485,8 +488,12 @@ export default function Profile() {
                 <Share2 className="h-6 w-6 text-white" strokeWidth={1.5} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Публічний профіль</h3>
-                <p className="text-sm text-gray-500">Поділися своєю статистикою з друзями</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Публічний профіль
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Поділися своєю статистикою з друзями
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -496,7 +503,9 @@ export default function Profile() {
               <Button
                 onClick={() => {
                   const url = `${window.location.origin}/user/${username}`;
-                  navigator.clipboard.writeText(url).then(() => toast.success("Посилання скопійовано!"));
+                  navigator.clipboard
+                    .writeText(url)
+                    .then(() => toast.success("Посилання скопійовано!"));
                 }}
                 size="sm"
                 className="rounded-xl bg-primary hover:bg-blue-700 text-white gap-2"
@@ -655,10 +664,7 @@ export default function Profile() {
                 {/* Language Switcher */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
                   <div className="flex items-center gap-3">
-                    <Globe
-                      className="h-5 w-5 text-primary"
-                      strokeWidth={1.5}
-                    />
+                    <Globe className="h-5 w-5 text-primary" strokeWidth={1.5} />
                     <div>
                       <p className="text-sm font-medium text-gray-900">
                         Мова інтерфейсу

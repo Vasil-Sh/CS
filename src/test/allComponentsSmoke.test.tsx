@@ -8,7 +8,13 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
   localStorage.setItem("authToken", "mock");
   localStorage.setItem("username", "test");
   localStorage.setItem("userRole", "user");
-  return <MemoryRouter><AuthProvider><DataProvider>{children}</DataProvider></AuthProvider></MemoryRouter>;
+  return (
+    <MemoryRouter>
+      <AuthProvider>
+        <DataProvider>{children}</DataProvider>
+      </AuthProvider>
+    </MemoryRouter>
+  );
 }
 
 afterEach(() => localStorage.clear());
@@ -18,12 +24,27 @@ describe("Previously uncovered components — smoke tests", () => {
 
   it("PublicProfile renders", async () => {
     const { default: P } = await import("@/pages/PublicProfile");
-    expect(render(<MemoryRouter><P /></MemoryRouter>).container).toBeTruthy();
+    expect(
+      render(
+        <MemoryRouter>
+          <P />
+        </MemoryRouter>,
+      ).container,
+    ).toBeTruthy();
   });
 
   it("AIRecommendationModal renders (closed)", async () => {
     const { default: M } = await import("@/components/AIRecommendationModal");
-    expect(render(<M open={false} onClose={() => {}} recommendation={null} loading={false} />).container).toBeTruthy();
+    expect(
+      render(
+        <M
+          open={false}
+          onClose={() => {}}
+          recommendation={null}
+          loading={false}
+        />,
+      ).container,
+    ).toBeTruthy();
   });
 
   it("CurrencySwitch renders", async () => {
@@ -34,14 +55,19 @@ describe("Previously uncovered components — smoke tests", () => {
 
   it("ErrorBoundary renders children", async () => {
     const { default: E } = await import("@/components/ErrorBoundary");
-    expect(render(<E><div>OK</div></E>).container.textContent).toContain("OK");
+    expect(
+      render(
+        <E>
+          <div>OK</div>
+        </E>,
+      ).container.textContent,
+    ).toContain("OK");
   });
 
   it("InitialBankModal renders", async () => {
     const { default: M } = await import("@/components/InitialBankModal");
-    expect(render(<M open={true} onClose={() => { }} />).container).toBeTruthy();
+    expect(render(<M open={true} onClose={() => {}} />).container).toBeTruthy();
   });
-
 
   // ── Module load tests (import without render — validates export + dependencies) ──
 
@@ -52,7 +78,6 @@ describe("Previously uncovered components — smoke tests", () => {
     ["PageSkeleton", "@/components/PageSkeleton"],
     ["StatCard", "@/components/StatCard"],
     ["StrategyKpiCard", "@/components/StrategyKpiCard"],
-    ["MiniDonut", "@/components/MiniDonut"],
     ["PeriodComparison", "@/components/PeriodComparison"],
     ["PageHeader", "@/components/PageHeader"],
     ["ProtectedRoute", "@/components/ProtectedRoute"],
@@ -64,6 +89,7 @@ describe("Previously uncovered components — smoke tests", () => {
   ] as const;
 
   for (const [name, path] of modules) {
-    it(`${name} module loads`, () => expect(import(path)).resolves.toBeDefined());
+    it(`${name} module loads`, () =>
+      expect(import(path)).resolves.toBeDefined());
   }
 });
