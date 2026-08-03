@@ -5,6 +5,8 @@ export interface RiskyTeam {
   game: string;
   status: string;
   notes: string;
+  /** Logo URL (from prefill data or match context) */
+  logo?: string | null;
 }
 
 export interface EVVerdict {
@@ -30,7 +32,7 @@ export interface KellyData {
   uncappedHalfKellyAmount: number;
   currentBankroll: number;
   maxAllowedAmount: number;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   recommendation: string;
   recommendedAmount: number;
   isNegative: boolean;

@@ -9,6 +9,7 @@ export interface RiskyTeamMatch {
   game: string;
   status: string;
   notes: string;
+  logo?: string | null;
 }
 
 export interface RiskyTeamRecord {
@@ -16,6 +17,7 @@ export interface RiskyTeamRecord {
   game: string;
   status: string;
   notes: string;
+  logo?: string | null;
 }
 
 /** Normalize team name for fuzzy matching: lowercase, strip whitespace & non-alnum */
@@ -41,6 +43,7 @@ export function findRiskyTeams(
   team2: string,
   gameFilter: string,
   riskyTeams: RiskyTeamRecord[],
+  logos?: { logoTeam1?: string | null; logoTeam2?: string | null },
 ): RiskyTeamMatch[] {
   if (!team1 && !team2) return [];
 
@@ -54,13 +57,23 @@ export function findRiskyTeams(
     if (addedNames.has(rt.name)) continue;
 
     const normalizedRT = normalizeTeamName(rt.name);
-    if (
+    const matchesT1 =
       normalizedTeam1 === normalizedRT ||
+      normalizedTeam1.includes(normalizedRT);
+    const matchesT2 =
       normalizedTeam2 === normalizedRT ||
-      normalizedTeam1.includes(normalizedRT) ||
-      normalizedTeam2.includes(normalizedRT)
-    ) {
-      found.push({ name: rt.name, game: rt.game, status: rt.status, notes: rt.notes });
+      normalizedTeam2.includes(normalizedRT);
+
+    if (matchesT1 || matchesT2) {
+      // Attach the logo of the matched team (from prefill)
+      const logo = matchesT1 ? logos?.logoTeam1 : logos?.logoTeam2;
+      found.push({
+        name: rt.name,
+        game: rt.game,
+        status: rt.status,
+        notes: rt.notes,
+        logo: logo || rt.logo || null,
+      });
       addedNames.add(rt.name);
     }
   }

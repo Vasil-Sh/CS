@@ -5,20 +5,21 @@ export interface RiskyTeam {
   game: string;
   status: string;
   notes: string;
+  logo?: string | null;
 }
 
 export interface StrategyViolation {
-  type: 'odds' | 'format' | 'betType';
+  type: "odds" | "format" | "betType";
   message: string;
-  severity: 'acceptable' | 'serious';
+  severity: "acceptable" | "serious";
   explanation: string;
 }
 
 export interface Goal {
   id: string;
   name: string;
-  type: 'amount' | 'ladder' | 'roi' | 'winrate';
-  status: 'active' | 'completed' | 'failed';
+  type: "amount" | "ladder" | "roi" | "winrate";
+  status: "active" | "completed" | "failed";
   // Shared optional fields
   isPrimary?: boolean;
   createdAt?: string;
@@ -36,7 +37,7 @@ export interface Goal {
   maxOdds?: number;
   avgOdds?: number;
   currentBank?: number;
-  ladderMode?: 'soft' | 'strict';
+  ladderMode?: "soft" | "strict";
   steps?: {
     step: number;
     startAmount: number;

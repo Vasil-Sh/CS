@@ -10,6 +10,8 @@ export interface RiskyTeam {
   game: string;
   status: string;
   notes: string;
+  /** Logo URL from backend */
+  logo?: string | null;
   /** API ID from backend (populated after fetch) */
   _apiId?: number;
 }

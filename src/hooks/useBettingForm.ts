@@ -56,6 +56,7 @@ export interface RiskyTeam {
   game: string;
   status: string;
   notes: string;
+  logo?: string | null;
 }
 
 export interface ExpressEvent {
@@ -494,6 +495,7 @@ export function useBettingForm({
         team2,
         getGameFilterValue(currentGame),
         loadRiskyTeamsFromStorage(),
+        prefillLogosRef.current,
       ),
     }));
   };
@@ -522,6 +524,7 @@ export function useBettingForm({
         parts[1] || "",
         getGameFilterValue(formData.game),
         saved,
+        { logoTeam1: event.logoTeam1, logoTeam2: event.logoTeam2 },
       )) {
         if (!found.some((r) => r.name === f.name)) found.push(f);
       }
