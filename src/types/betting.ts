@@ -8,7 +8,7 @@ export interface Bet {
   amount: number;
   stake?: number;
   date: string;
-  result: 'Win' | 'Loss' | 'Pending';
+  result: "Win" | "Loss" | "Pending";
   profit?: number;
   strategy?: string;
   format?: string;
@@ -73,6 +73,7 @@ export interface BalanceData {
   profit: number;
   betName?: string;
   odds?: number;
+  isPending?: boolean;
 }
 
 export interface ScatterData {

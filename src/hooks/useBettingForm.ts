@@ -64,6 +64,7 @@ export interface ExpressEvent {
   betType: string;
   selection: string;
   odds: string;
+  game?: string;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
 }
@@ -244,6 +245,7 @@ export function useBettingForm({
         betType: "Match Winner",
         selection: m.team1,
         odds: "",
+        game: m.game || "CS2",
         logoTeam1: m.logoTeam1,
         logoTeam2: m.logoTeam2,
       }));
@@ -434,6 +436,7 @@ export function useBettingForm({
           betType: "Match Winner",
           selection: m.team1,
           odds: "",
+          game: m.game || "CS2",
           logoTeam1: m.logoTeam1,
           logoTeam2: m.logoTeam2,
         })),
@@ -707,6 +710,7 @@ export function useBettingForm({
         betType: formData.betType,
         selection: formData.selection,
         odds: formData.odds,
+        game: formData.game,
       },
     ]);
     setFormData((prev) => ({
@@ -809,7 +813,18 @@ export function useBettingForm({
           formData.betCategory === "Експрес"
             ? `${expressEvents.length}x`
             : formData.format,
-        game: formData.game === "CS2" ? "CS2" : "Dota2",
+        game:
+          formData.betCategory === "Експрес"
+            ? expressEvents.every((e) => e.game === "Dota2")
+              ? "Dota2"
+              : expressEvents.every((e) => e.game === "CS2")
+                ? "CS2"
+                : formData.game === "CS2"
+                  ? "CS2"
+                  : "Dota2"
+            : formData.game === "CS2"
+              ? "CS2"
+              : "Dota2",
         matchUrl: formData.matchUrl || "",
         betType: betTypeWithCategory,
         odds: finalOdds,

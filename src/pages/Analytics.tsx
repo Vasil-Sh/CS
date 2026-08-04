@@ -573,13 +573,12 @@ export default function Analytics() {
         ? dualBank.usd.initialBank || 0
         : dualBank.uah.initialBank || 0;
 
-    // Use displayBets so profit values match the selected currency mode
-    const sortedBets = [...displayBets]
-      .filter((b: Bet) => b.result !== "Pending")
-      .sort(
-        (a: Bet, b: Bet) =>
-          new Date(a.date).getTime() - new Date(b.date).getTime(),
-      );
+    // Include ALL bets (including Pending) so the chart extends to the last placed bet.
+    // Pending bets contribute profit=0 — they mark the bet date without changing balance.
+    const sortedBets = [...displayBets].sort(
+      (a: Bet, b: Bet) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
 
     if (sortedBets.length === 0) {
       // No bets yet — show just the starting point
@@ -607,13 +606,18 @@ export default function Analytics() {
 
     let runningBalance = initialBank;
     sortedBets.forEach((bet: Bet) => {
-      runningBalance += bet.profit || 0;
+      const isPending = bet.result === "Pending";
+      // Pending bets don't change the balance — they just mark a point in time
+      if (!isPending) {
+        runningBalance += bet.profit || 0;
+      }
       balanceData.push({
         date: bet.date,
         balance: runningBalance,
-        profit: bet.profit || 0,
+        profit: isPending ? 0 : bet.profit || 0,
         betName: bet.match || bet.betType || "Ставка",
         odds: bet.odds,
+        isPending,
       });
     });
 

@@ -12,7 +12,13 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import type { BalanceData } from "@/types/betting";
 
@@ -37,7 +43,7 @@ const BalanceChartMemo = memo(function BalanceChart({
     for (const d of data) {
       if (d.balance > peak) peak = d.balance;
       if (d.balance < lowest) lowest = d.balance;
-      totalProfit += (d.profit || 0);
+      totalProfit += d.profit || 0;
     }
     if (peak === -Infinity) peak = initialBalance;
     if (lowest === Infinity) lowest = initialBalance;
@@ -73,14 +79,22 @@ const BalanceChartMemo = memo(function BalanceChart({
       return (
         <div className="bg-white/95 backdrop-blur-sm p-3.5 rounded-2xl shadow-lg border border-gray-200 text-xs min-w-[160px]">
           <p className="font-semibold text-gray-500 mb-1.5">{date}</p>
-          {d.profit !== 0 && (
-            <p className={`font-bold text-base ${d.profit >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-              {d.profit >= 0 ? "+" : ""}{Number(d.profit).toFixed(0)} ₴
+          {d.isPending ? (
+            <p className="text-amber-500 font-medium text-sm">⏳ Очікується</p>
+          ) : d.profit !== 0 ? (
+            <p
+              className={`font-bold text-base ${d.profit >= 0 ? "text-emerald-500" : "text-red-500"}`}
+            >
+              {d.profit >= 0 ? "+" : ""}
+              {Number(d.profit).toFixed(0)} ₴
             </p>
-          )}
+          ) : null}
           <div className="w-full h-px bg-gray-100 my-1.5" />
           <p className="text-gray-700 font-medium">
-            Банк: <span className="font-bold text-gray-900">{Number(d.balance).toFixed(0)} ₴</span>
+            Банк:{" "}
+            <span className="font-bold text-gray-900">
+              {Number(d.balance).toFixed(0)} ₴
+            </span>
           </p>
         </div>
       );
@@ -103,24 +117,42 @@ const BalanceChartMemo = memo(function BalanceChart({
           <div className="flex items-center gap-4 flex-wrap">
             {/* Current balance */}
             <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Поточний</span>
-              <span className="text-sm font-bold text-gray-900"><NumberTicker value={Math.round(stats.currentBalance)} /> ₴</span>
+              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                Поточний
+              </span>
+              <span className="text-sm font-bold text-gray-900">
+                <NumberTicker value={Math.round(stats.currentBalance)} /> ₴
+              </span>
             </div>
             <div className="w-px h-8 bg-gray-200" />
             {/* Profit/Loss */}
             <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Зміна</span>
-              <span className={`text-sm font-bold flex items-center gap-1 ${stats.isUp ? "text-emerald-500" : "text-red-500"}`}>
-                {stats.isUp ? <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} /> : <ArrowDownRight className="h-3.5 w-3.5" strokeWidth={2.5} />}
-                {stats.totalChange >= 0 ? "+" : ""}<NumberTicker value={Math.round(stats.totalChange)} /> ₴
+              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                Зміна
+              </span>
+              <span
+                className={`text-sm font-bold flex items-center gap-1 ${stats.isUp ? "text-emerald-500" : "text-red-500"}`}
+              >
+                {stats.isUp ? (
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                ) : (
+                  <ArrowDownRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                )}
+                {stats.totalChange >= 0 ? "+" : ""}
+                <NumberTicker value={Math.round(stats.totalChange)} /> ₴
               </span>
             </div>
             <div className="w-px h-8 bg-gray-200" />
             {/* ROI */}
             <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">ROI</span>
-              <span className={`text-sm font-bold ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                {stats.roi >= 0 ? "+" : ""}{stats.roi}%
+              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                ROI
+              </span>
+              <span
+                className={`text-sm font-bold ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}
+              >
+                {stats.roi >= 0 ? "+" : ""}
+                {stats.roi}%
               </span>
             </div>
             <div className="w-px h-8 bg-gray-200" />
@@ -186,7 +218,11 @@ const BalanceChartMemo = memo(function BalanceChart({
                 border: "none",
                 padding: 0,
               }}
-              cursor={{ stroke: "#D1D5DB", strokeWidth: 1, strokeDasharray: "4 4" }}
+              cursor={{
+                stroke: "#D1D5DB",
+                strokeWidth: 1,
+                strokeDasharray: "4 4",
+              }}
             />
             <ReferenceLine
               y={stats.initialBalance}
