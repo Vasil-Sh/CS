@@ -57,7 +57,7 @@ function TeamLogo({
   const [imgError, setImgError] = useState(false);
   const fallback =
     game === "cs2"
-      ? "/assets/team-placeholder.svg"
+      ? "/assets/team-placeholder-cs2.svg"
       : "/assets/team-placeholder-dota.svg";
 
   if (!src || imgError) {
@@ -135,11 +135,10 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
       if (gameFilter === "dota2" && m.game !== "dota2") return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        const t1 = String(m.team1 ?? '').toLowerCase();
-        const t2 = String(m.team2 ?? '').toLowerCase();
-        const tn = String(m.tournament ?? '').toLowerCase();
-        if (!t1.includes(q) && !t2.includes(q) && !tn.includes(q))
-          return false;
+        const t1 = String(m.team1 ?? "").toLowerCase();
+        const t2 = String(m.team2 ?? "").toLowerCase();
+        const tn = String(m.tournament ?? "").toLowerCase();
+        if (!t1.includes(q) && !t2.includes(q) && !tn.includes(q)) return false;
       }
       return true;
     });
@@ -261,17 +260,19 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
             dateKeys.map((dateKey) => {
               const dayMatches = grouped[dateKey].sort((a, b) => {
                 // Sort by tournament first (group same tournament matches together)
-                const at = String(a.tournament ?? '');
-                const bt = String(b.tournament ?? '');
+                const at = String(a.tournament ?? "");
+                const bt = String(b.tournament ?? "");
                 const tn = at.localeCompare(bt);
                 if (tn !== 0) return tn;
                 // Then by team1 name
-                const a1 = String(a.team1 ?? '');
-                const b1 = String(b.team1 ?? '');
+                const a1 = String(a.team1 ?? "");
+                const b1 = String(b.team1 ?? "");
                 const t1 = a1.localeCompare(b1);
                 if (t1 !== 0) return t1;
                 // Then by team2 name
-                return String(a.team2 ?? '').localeCompare(String(b.team2 ?? ''));
+                return String(a.team2 ?? "").localeCompare(
+                  String(b.team2 ?? ""),
+                );
               });
               return (
                 <PastDayGroup

@@ -803,7 +803,7 @@ export default function PredictionsModal({
       const placeholderSrc =
         match?.game === "Dota2"
           ? "/assets/team-placeholder-dota.svg"
-          : "/assets/team-placeholder.svg";
+          : "/assets/team-placeholder-cs2.svg";
 
       return (
         <div className="space-y-2">

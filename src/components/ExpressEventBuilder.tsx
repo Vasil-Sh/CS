@@ -398,7 +398,7 @@ export function ExpressEventBuilder({
                             event.logoTeam1 ||
                             (game === "Dota2"
                               ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder.svg")
+                              : "/assets/team-placeholder-cs2.svg")
                           }
                           alt={team1Name}
                           className="h-5 w-5 rounded-full object-contain"
@@ -415,7 +415,7 @@ export function ExpressEventBuilder({
                             event.logoTeam2 ||
                             (game === "Dota2"
                               ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder.svg")
+                              : "/assets/team-placeholder-cs2.svg")
                           }
                           alt={team2Name}
                           className="h-5 w-5 rounded-full object-contain"

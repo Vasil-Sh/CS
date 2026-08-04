@@ -556,7 +556,7 @@ const BetTableMemo = memo(function BetTable({
       }
 
       const teamPlaceholder = (b.game || "").toLowerCase().startsWith("cs")
-        ? "/assets/team-placeholder.svg"
+        ? "/assets/team-placeholder-cs2.svg"
         : "/assets/team-placeholder-dota.svg";
       return (
         <div
@@ -1012,7 +1012,7 @@ const BetTableMemo = memo(function BetTable({
                                     src={
                                       bet.game.toLowerCase() === "dota2"
                                         ? "/assets/team-placeholder-dota.svg"
-                                        : "/assets/team-placeholder.svg"
+                                        : "/assets/team-placeholder-cs2.svg"
                                     }
                                     alt={bet.game}
                                     className="h-3.5 w-3.5 object-contain opacity-80 flex-shrink-0"

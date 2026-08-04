@@ -42,7 +42,7 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const GAME_OPTIONS = [
-  { value: "CS", label: "CS2", iconSrc: "/assets/team-placeholder.svg" },
+  { value: "CS", label: "CS2", iconSrc: "/assets/team-placeholder-cs2.svg" },
   {
     value: "Дота",
     label: "Dota 2",
@@ -90,7 +90,9 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
             const keyNorm = gameStorageKey.toLowerCase();
             // Match both "Дота"/"Dota"/"Dota2" and "CS"/"CS2"
             const teamIsDota =
-              teamGame === "дота" || teamGame === "dota" || teamGame === "dota2";
+              teamGame === "дота" ||
+              teamGame === "dota" ||
+              teamGame === "dota2";
             const keyIsDota =
               keyNorm === "дота" || keyNorm === "dota" || keyNorm === "dota2";
             const teamIsCs =
