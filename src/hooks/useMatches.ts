@@ -641,12 +641,22 @@ export function useMatches() {
               (() => {
                 if (isScoreDecided) return "finished";
 
-                // Auto-postponed: live, no scores, >30min past scheduled start
-                if (!hasScores && m.matchStatus === "live") {
+                // Age-based auto-finish for stale live matches
+                // If a match has been live for >2h with no scores, it likely completed
+                // but the data source never sent final results → finish it.
+                if (!hasScores) {
                   const matchDate = new Date(m.date);
                   const ageMs = Date.now() - matchDate.getTime();
-                  if (ageMs > 30 * 60 * 1000) return "postponed";
+                  // >4h of live with no score update → auto-finish
+                  if (m.matchStatus === "live" && ageMs > 4 * 60 * 60 * 1000)
+                    return "finished";
+                  // >30min of live with no score update → postpone
+                  if (m.matchStatus === "live" && ageMs > 30 * 60 * 1000)
+                    return "postponed";
                 }
+
+                // Already postponed — keep it, don't let API re-activate
+                if (m.matchStatus === "postponed") return "postponed";
 
                 if (m.matchStatus === "live" && update.status === "finished")
                   return "live";
