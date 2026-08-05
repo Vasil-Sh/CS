@@ -478,15 +478,19 @@ export function useMatches() {
       // Fire Dota2 in background with retries — don't block initial render
       let dotaAttempt = 0;
       const maxDotaAttempts = 10;
+      const onDotaUpdate = (fresh: Dota2ApiMatch[]) => {
+        if (gen !== fetchGenRef.current) return;
+        setMatches((prev) => {
+          const cs2 = prev.filter((m) => m.game === "CS2");
+          return [...cs2, ...fresh.map((m) => dota2ApiMatchToMatch(m))];
+        });
+      };
       const pullDota = async () => {
         try {
-          const dota = await fetchDota2Matches(dotaAttempt === 0);
+          const dota = await fetchDota2Matches(dotaAttempt === 0, onDotaUpdate);
           if (gen !== fetchGenRef.current) return;
           if (dota.length > 0) {
-            setMatches((prev) => {
-              const cs2 = prev.filter((m) => m.game === "CS2");
-              return [...cs2, ...dota.map((m) => dota2ApiMatchToMatch(m))];
-            });
+            onDotaUpdate(dota);
           } else if (dotaAttempt < maxDotaAttempts) {
             dotaAttempt++;
             setTimeout(pullDota, 6000);
