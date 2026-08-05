@@ -794,12 +794,12 @@ export function useMatches() {
         match.matchStatus !== "upcoming"
       )
         return false;
-      // Auto-hide finished matches from today that ended >6h ago
-      // For yesterday's matches, auto-hide >30h ago
+      // Auto-hide finished matches from today that ended >3h ago
+      // For yesterday's matches, auto-hide >12h ago
       if (match.matchStatus === "finished") {
         const hoursSinceStart =
           (Date.now() - new Date(match.date).getTime()) / 3600000;
-        const maxHours = matchDateKey === yesterdayKey ? 30 : 6;
+        const maxHours = matchDateKey === yesterdayKey ? 12 : 3;
         if (hoursSinceStart > maxHours) return false;
       }
       if (filterGame === "CS2" && match.game !== "CS2") return false;
