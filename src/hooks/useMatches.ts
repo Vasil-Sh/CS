@@ -391,6 +391,29 @@ export function useMatches() {
     >
   >({});
 
+  // ── Keep selectedMatch synced with latest match data (live scores) ──
+  useEffect(() => {
+    if (!predictionsModalOpen || !selectedMatch) return;
+    const latest = matches.find((m) => m.id === selectedMatch.id);
+    if (latest) {
+      // Only update if scores or status changed — avoids infinite loop
+      if (
+        latest.score1 !== selectedMatch.score1 ||
+        latest.score2 !== selectedMatch.score2 ||
+        latest.matchStatus !== selectedMatch.matchStatus ||
+        latest.predictionPercentTeam1 !==
+          selectedMatch.predictionPercentTeam1 ||
+        latest.predictionPercentTeam2 !==
+          selectedMatch.predictionPercentTeam2 ||
+        latest.bettingCoefficientTeam1 !==
+          selectedMatch.bettingCoefficientTeam1 ||
+        latest.bettingCoefficientTeam2 !== selectedMatch.bettingCoefficientTeam2
+      ) {
+        setSelectedMatch(latest);
+      }
+    }
+  }, [matches, predictionsModalOpen, selectedMatch?.id]);
+
   const toggleColumn = (colId: string) => {
     setVisibleColumns((prev) => {
       const next = new Set(prev);
@@ -1055,6 +1078,7 @@ export function useMatches() {
           matchUrl: m.url || "",
           logoTeam1: m.logoTeam1,
           logoTeam2: m.logoTeam2,
+          game: m.game,
         })),
       },
     });

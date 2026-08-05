@@ -522,10 +522,15 @@ export function useBettingForm({
     const found: RiskyTeam[] = [];
     for (const event of expressEvents) {
       const parts = event.match.split(" vs ");
+      // Use each event's own game, defaulting to formData.game for old events without game field
+      const eventGame =
+        event.game === "Dota2" || event.game === "CS2"
+          ? event.game
+          : formData.game;
       for (const f of findRiskyTeams(
         parts[0] || "",
         parts[1] || "",
-        getGameFilterValue(formData.game),
+        getGameFilterValue(eventGame),
         saved,
         { logoTeam1: event.logoTeam1, logoTeam2: event.logoTeam2 },
       )) {

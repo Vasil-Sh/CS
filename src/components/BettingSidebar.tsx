@@ -1,6 +1,11 @@
-import SidebarCalculations from './betting-form/SidebarCalculations';
-import SidebarRiskyTeams from './betting-form/SidebarRiskyTeams';
-import type { RiskyTeam, EVVerdict, ValueBetAnalysis, KellyData } from './betting-form/sidebar-types';
+import SidebarCalculations from "./betting-form/SidebarCalculations";
+import SidebarRiskyTeams from "./betting-form/SidebarRiskyTeams";
+import type {
+  RiskyTeam,
+  EVVerdict,
+  ValueBetAnalysis,
+  KellyData,
+} from "./betting-form/sidebar-types";
 
 export type { RiskyTeam, EVVerdict, ValueBetAnalysis, KellyData };
 
@@ -31,11 +36,24 @@ export interface BettingSidebarProps {
 
 export function BettingSidebar(props: BettingSidebarProps) {
   const {
-    stake, betCategory, currency, totalExpressOdds, expressEventsCount,
-    potentialProfitInCurrency, expectedValue, evVerdict, isValuePositive,
-    valueBetAnalysis, kellyData, overconfidenceWarning, hasConfidence,
-    riskyTeams, maxStakePercent, onMaxStakePercentChange,
-    onApplyKellyAmount, onRemoveRiskyTeam,
+    stake,
+    betCategory,
+    currency,
+    totalExpressOdds,
+    expressEventsCount,
+    potentialProfitInCurrency,
+    expectedValue,
+    evVerdict,
+    isValuePositive,
+    valueBetAnalysis,
+    kellyData,
+    overconfidenceWarning,
+    hasConfidence,
+    riskyTeams,
+    maxStakePercent,
+    onMaxStakePercentChange,
+    onApplyKellyAmount,
+    onRemoveRiskyTeam,
   } = props;
 
   return (
@@ -59,10 +77,7 @@ export function BettingSidebar(props: BettingSidebarProps) {
           onMaxStakePercentChange={onMaxStakePercentChange}
           onApplyKellyAmount={onApplyKellyAmount}
         />
-        <SidebarRiskyTeams
-          riskyTeams={riskyTeams}
-          onRemoveTeam={onRemoveRiskyTeam}
-        />
+        <SidebarRiskyTeams riskyTeams={riskyTeams} />
       </div>
     </div>
   );

@@ -56,14 +56,18 @@ export function findRiskyTeams(
     if (gameFilter) {
       const rtGameNorm = rt.game.toLowerCase();
       const filterNorm = gameFilter.toLowerCase();
-      // Handle "Дота" vs "Dota" vs "dota2"
-      const rtIsDota = rtGameNorm === "дота" || rtGameNorm === "dota" || rtGameNorm === "dota2";
-      const filterIsDota = filterNorm === "дота" || filterNorm === "dota" || filterNorm === "dota2";
-      const rtIsCs = rtGameNorm === "cs" || rtGameNorm === "cs2" || rtGameNorm === "csgo";
-      const filterIsCs = filterNorm === "cs" || filterNorm === "cs2" || filterNorm === "csgo";
-      if (rtIsDota && filterIsDota) { /* match */ }
-      else if (rtIsCs && filterIsCs) { /* match */ }
-      else continue;
+      // Use includes to handle variants like "dota 2", "dota2", "дота 2", "cs 2", etc.
+      const rtIsDota =
+        rtGameNorm.includes("дота") || rtGameNorm.includes("dota");
+      const filterIsDota =
+        filterNorm.includes("дота") || filterNorm.includes("dota");
+      const rtIsCs = rtGameNorm.includes("cs") || rtGameNorm.includes("кс");
+      const filterIsCs = filterNorm.includes("cs") || filterNorm.includes("кс");
+      if (rtIsDota && filterIsDota) {
+        /* match */
+      } else if (rtIsCs && filterIsCs) {
+        /* match */
+      } else continue;
     }
     if (addedNames.has(rt.name)) continue;
 
