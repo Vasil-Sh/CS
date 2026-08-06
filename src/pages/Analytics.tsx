@@ -6,7 +6,7 @@ import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCar
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
 import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
 import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
-import SparklineStatCard from "@/components/analytics/SparklineStatCard";
+import MetricCard from "@/components/analytics/MetricCard";
 import RiskManagement from "@/components/RiskManagement";
 import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
@@ -22,7 +22,7 @@ import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 
-import { AlertTriangle, BarChart3, Calendar, Wallet } from "lucide-react";
+import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
 import type {
   Bet,
   BettingStats,
@@ -538,38 +538,21 @@ export default function Analytics() {
       });
   }, [completedBets]);
 
-  const bestMonth = useMemo(() => {
-    if (!monthlyProfitData || monthlyProfitData.length === 0) return null;
-    return [...monthlyProfitData].sort((a, b) => b.profit - a.profit)[0];
-  }, [monthlyProfitData]);
-
-  const avgMonthlyProfit = useMemo(() => {
-    if (!monthlyProfitData || monthlyProfitData.length === 0) return 0;
-    const total = monthlyProfitData.reduce((s, m) => s + m.profit, 0);
-    return Math.round(total / monthlyProfitData.length);
-  }, [monthlyProfitData]);
-
-  // ── Sparkline data for stat cards ──
-  const profitSparkline = useMemo(() => {
-    return monthlyProfitData.map((m) => ({
-      label: m.month,
-      value: Math.round(m.profit),
-    }));
-  }, [monthlyProfitData]);
-
-  const cumulativeSparkline = useMemo(() => {
-    return monthlyProfitData.map((m) => ({
-      label: m.month,
-      value: Math.round(m.cumulative),
-    }));
-  }, [monthlyProfitData]);
-
-  const winRateSparkline = useMemo(() => {
-    return monthlyProfitData.map((m) => ({
-      label: m.month,
-      value: m.winRate,
-    }));
-  }, [monthlyProfitData]);
+  const dateRange = useMemo(() => {
+    if (completedBets.length === 0) return "—";
+    const dates = completedBets
+      .map((b: Bet) => new Date(b.date))
+      .sort((a, b) => a.getTime() - b.getTime());
+    const first = dates[0];
+    const last = dates[dates.length - 1];
+    const fmt = (d: Date) =>
+      d.toLocaleDateString("uk-UA", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    return `${fmt(first)} – ${fmt(last)}`;
+  }, [completedBets]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
     // Support both UAH and USD — pick correct initial bank
@@ -733,53 +716,68 @@ export default function Analytics() {
             {/* ===== QUICK STATS ===== */}
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                {/* 1. ROI */}
-                <SparklineStatCard
-                  period="Всього"
-                  bigValue={`${roi >= 0 ? "+" : ""}${roi}%`}
-                  changeLabel={
-                    filteredStats.totalProfit !== 0
-                      ? `${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`
+                {/* 1. Прибуток */}
+                <MetricCard
+                  value={`${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`}
+                  label="прибуток / вкладено"
+                  change={
+                    totalStaked > 0
+                      ? `${roi >= 0 ? "+" : ""}${roi}%`
                       : undefined
                   }
-                  isUp={filteredStats.totalProfit >= 0}
-                  data={profitSparkline}
-                  color={roi >= 0 ? "#10b981" : "#ef4444"}
-                  gradientId="roiSpark"
+                  isPositive={filteredStats.totalProfit >= 0}
+                  dateRange={dateRange}
+                  icon={Wallet}
+                  iconColor={
+                    filteredStats.totalProfit >= 0
+                      ? "text-emerald-600"
+                      : "text-red-600"
+                  }
+                  badgeClass={
+                    filteredStats.totalProfit >= 0
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-700"
+                  }
                 />
 
-                {/* 2. По місяцях */}
-                <SparklineStatCard
-                  period={bestMonth?.month || "По місяцях"}
-                  bigValue={
-                    bestMonth
-                      ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴`
-                      : "—"
-                  }
-                  changeLabel={
-                    bestMonth
-                      ? `${bestMonth.profit >= 0 ? "найкращий" : "найгірший"}`
+                {/* 2. Ставки */}
+                <MetricCard
+                  value={completedBets.length.toString()}
+                  label="ставок"
+                  change={
+                    completedBets.length > 0
+                      ? `${winningBets.length}W / ${losingBets.length}L`
                       : undefined
                   }
-                  isUp={(bestMonth?.profit ?? 0) >= 0}
-                  data={cumulativeSparkline}
-                  color={(bestMonth?.profit ?? 0) >= 0 ? "#10b981" : "#f97316"}
-                  gradientId="monthSpark"
+                  isPositive={winningBets.length >= losingBets.length}
+                  dateRange={dateRange}
+                  icon={BarChart3}
+                  iconColor="text-blue-600"
+                  badgeClass={
+                    winningBets.length >= losingBets.length
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-orange-100 text-orange-700"
+                  }
                 />
 
-                {/* 3. Коефіцієнти / Ставки */}
-                <SparklineStatCard
-                  period={`${completedBets.length} ставок`}
-                  bigValue={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
-                  changeLabel={
-                    winningBets.length + losingBets.length > 0
+                {/* 3. Коефіцієнти */}
+                <MetricCard
+                  value={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
+                  label="середній коеф."
+                  change={
+                    filteredStats.winRate > 0
                       ? `${filteredStats.winRate}% виграшів`
                       : undefined
                   }
-                  isUp={filteredStats.winRate >= 50}
-                  data={winRateSparkline}
-                  color={filteredStats.winRate >= 50 ? "#10b981" : "#f97316"}
-                  gradientId="oddsSpark"
+                  isPositive={filteredStats.winRate >= 50}
+                  dateRange={dateRange}
+                  icon={Zap}
+                  iconColor="text-violet-600"
+                  badgeClass={
+                    filteredStats.winRate >= 50
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-orange-100 text-orange-700"
+                  }
                 />
               </div>
             </div>
