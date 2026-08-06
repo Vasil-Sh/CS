@@ -30,6 +30,12 @@ interface AddToRiskyTeamsModalProps {
   team2: TeamInfo;
   game: string; // "CS2" or "Dota2" — current match game
   onSaved: () => void; // callback to refresh risky teams in parent
+  riskyTeams: Array<{
+    name: string;
+    game: string;
+    status: string;
+    notes: string;
+  }>;
 }
 
 const STATUS_OPTIONS = [
@@ -61,7 +67,7 @@ const proxyLogo = (url: string | null | undefined): string | null => {
 };
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
-  const { open, onClose, team1, team2, onSaved } = props;
+  const { open, onClose, team1, team2, onSaved, riskyTeams } = props;
   const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
 
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
@@ -74,59 +80,50 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   // Load existing risky teams when modal opens, detect already-added teams
   useEffect(() => {
     if (!open) return;
-    try {
-      const saved = localStorage.getItem("admin_risky_teams");
-      if (saved) {
-        const teams: Array<{ name: string; game?: string }> = JSON.parse(saved);
-        // Only count as "already added" if same game
-        const isRisky = (teamName: string) =>
-          teams.some((t) => {
-            const nameMatch =
-              t.name.toLowerCase() === teamName.toLowerCase() ||
-              teamName.toLowerCase().includes(t.name.toLowerCase()) ||
-              t.name.toLowerCase().includes(teamName.toLowerCase());
-            if (!nameMatch) return false;
-            const teamGame = (t.game || "").toLowerCase();
-            const keyNorm = gameStorageKey.toLowerCase();
-            // Match both "Дота"/"Dota"/"Dota2" and "CS"/"CS2"
-            const teamIsDota =
-              teamGame === "дота" ||
-              teamGame === "dota" ||
-              teamGame === "dota2";
-            const keyIsDota =
-              keyNorm === "дота" || keyNorm === "dota" || keyNorm === "dota2";
-            const teamIsCs =
-              teamGame === "cs" || teamGame === "cs2" || teamGame === "csgo";
-            const keyIsCs =
-              keyNorm === "cs" || keyNorm === "cs2" || keyNorm === "csgo";
-            if (!teamGame || (teamIsDota && keyIsDota) || (teamIsCs && keyIsCs))
-              return true;
-            return false;
-          });
-        const existing = new Set(
-          [team1.name, team2.name]
-            .filter((n) => isRisky(n))
-            .map((n) => n.toLowerCase()),
-        );
-        setExistingTeams(existing);
+    // Use the same riskyTeams data that the parent hook loaded from API
+    const teams = riskyTeams.length > 0 ? riskyTeams : [];
+    if (teams.length > 0) {
+      const isRisky = (teamName: string) =>
+        teams.some((t) => {
+          const nameMatch =
+            t.name.toLowerCase() === teamName.toLowerCase() ||
+            teamName.toLowerCase().includes(t.name.toLowerCase()) ||
+            t.name.toLowerCase().includes(teamName.toLowerCase());
+          if (!nameMatch) return false;
+          const teamGame = (t.game || "").toLowerCase();
+          const keyNorm = gameStorageKey.toLowerCase();
+          const teamIsDota =
+            teamGame === "дота" || teamGame === "dota" || teamGame === "dota2";
+          const keyIsDota =
+            keyNorm === "дота" || keyNorm === "dota" || keyNorm === "dota2";
+          const teamIsCs =
+            teamGame === "cs" || teamGame === "cs2" || teamGame === "csgo";
+          const keyIsCs =
+            keyNorm === "cs" || keyNorm === "cs2" || keyNorm === "csgo";
+          if (!teamGame || (teamIsDota && keyIsDota) || (teamIsCs && keyIsCs))
+            return true;
+          return false;
+        });
+      const existing = new Set(
+        [team1.name, team2.name]
+          .filter((n) => isRisky(n))
+          .map((n) => n.toLowerCase()),
+      );
+      setExistingTeams(existing);
 
-        // Auto-select the first non-existing team
-        if (
-          existing.has(team1.name.toLowerCase()) &&
-          !existing.has(team2.name.toLowerCase())
-        ) {
-          setSelectedTeam(team2.name);
-        } else if (!existing.has(team1.name.toLowerCase())) {
-          setSelectedTeam(team1.name);
-        }
+      if (
+        existing.has(team1.name.toLowerCase()) &&
+        !existing.has(team2.name.toLowerCase())
+      ) {
+        setSelectedTeam(team2.name);
+      } else if (!existing.has(team1.name.toLowerCase())) {
+        setSelectedTeam(team1.name);
       }
-    } catch {
-      /* ignore */
     }
     setStatus("Під питанням");
     setSelectedGame(gameStorageKey);
     setNotes("");
-  }, [open, team1.name, team2.name, gameStorageKey]);
+  }, [open, team1.name, team2.name, gameStorageKey, riskyTeams]);
 
   const handleSave = async () => {
     setSaving(true);

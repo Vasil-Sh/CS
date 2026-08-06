@@ -477,6 +477,7 @@ export default function Matches() {
               name: m.selectedRiskyMatch?.team2 || "",
               logo: m.selectedRiskyMatch?.logoTeam2,
             }}
+            riskyTeams={m.riskyTeams}
             onSaved={m.handleRiskySaved}
           />
 
