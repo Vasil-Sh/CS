@@ -8,6 +8,7 @@
  */
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { TrendingUp, TrendingDown, type LucideIcon } from "lucide-react";
 
 export interface MetricCardProps {
@@ -25,6 +26,10 @@ export interface MetricCardProps {
   icon: LucideIcon;
   /** Badge background + text class */
   badgeClass: string;
+  /** Optional circular progress (0-100). When set, renders a donut chart. */
+  circularValue?: number;
+  /** Subtext below the circular progress, e.g. "1W / 2L" */
+  circularSubtext?: string;
 }
 
 export default function MetricCard({
@@ -35,6 +40,8 @@ export default function MetricCard({
   dateRange,
   icon: Icon,
   badgeClass,
+  circularValue,
+  circularSubtext,
 }: MetricCardProps) {
   return (
     <Card className="bg-card border border-border rounded-2xl p-5 shadow-xs h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
@@ -58,20 +65,38 @@ export default function MetricCard({
           )}
         </div>
 
-        {/* Title & Large Value */}
+        {/* Middle: label + value (with optional circular progress) */}
         <div className="space-y-1">
           <span className="text-sm font-medium text-muted-foreground">
             {label}
           </span>
-          <div className="text-3xl font-bold tracking-tight text-foreground">
-            {value}
-          </div>
+          {circularValue != null ? (
+            <div className="flex items-center gap-4">
+              <div className="text-3xl font-bold tracking-tight text-foreground">
+                {value}
+              </div>
+              <div className="flex items-center justify-center">
+                <AnimatedCircularProgressBar
+                  max={100}
+                  min={0}
+                  value={circularValue}
+                  gaugePrimaryColor="#22C55E"
+                  gaugeSecondaryColor="#E5E7EB"
+                  className="!w-24 !h-24"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="text-3xl font-bold tracking-tight text-foreground">
+              {value}
+            </div>
+          )}
         </div>
 
-        {/* Divider + Date Range */}
+        {/* Divider + Date Range (or circular subtext) */}
         <div className="pt-2 border-t border-border/50">
           <span className="text-xs text-muted-foreground font-normal">
-            {dateRange}
+            {circularSubtext || dateRange}
           </span>
         </div>
       </CardContent>
