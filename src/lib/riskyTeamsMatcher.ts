@@ -29,40 +29,21 @@ export function normalizeTeamName(name: string): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
-/**
- * Relaxed normalization — also strips common suffixes (esports, gaming, etc.)
- * to handle cases like "Nuclear TigRES" (tips.gg) vs "Nuclear Tigers" (stored).
- */
-function normalizeRelaxed(name: string): string {
-  return normalizeTeamName(name)
-    .replace(/esports$/, "")
-    .replace(/gaming$/, "")
-    .replace(/academy$/, "")
-    .replace(/team$/, "");
-}
-
-/** Check if two normalized names match: exact, substring (with length guard), relaxed, or prefix match */
+/** Check if two normalized names match: exact, substring, or prefix (with length guard) */
 function namesMatch(a: string, b: string): boolean {
   if (!a || !b) return false;
   if (a === b) return true;
-  // Substring match — but guard against false positives where one name is much longer.
-  // E.g. "Eternal Fire" ⊂ "ex-Eternal Fire Academy" but they're different teams.
-  // Require the shorter name to be ≥70% of the longer name's length.
+  // Substring match — guard against false positives like "Eternal Fire" ⊂ "ex-Eternal Fire Academy".
+  // Require ≥70% length ratio so parent/academy pairs don't match.
   if (a.includes(b) || b.includes(a)) {
     const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
     if (ratio >= 0.7) return true;
   }
-  const ra = normalizeRelaxed(a);
-  const rb = normalizeRelaxed(b);
-  if (ra === rb) return true;
-  if (ra.includes(rb) || rb.includes(ra)) {
-    const ratio =
-      Math.min(ra.length, rb.length) / Math.max(ra.length, rb.length);
-    if (ratio >= 0.7) return true;
-  }
-  // Last resort: prefix match — first 8 chars must be identical,
-  // BUT only if length ratio ≥70% (prevents "Natus Vincere" matching "Natus Vincere Junior").
-  // Catches "Nuclear TigRES" vs "Nuclear Tigers" where suffix differs.
+  // Prefix match — catches "Nuclear TigRES" vs "Nuclear Tigers" (typo in suffix).
+  // Requires identical first 8 chars AND ≥70% length ratio so parent/academy pairs
+  // (Natus Vincere vs Natus Vincere Junior, Team Spirit vs Team Spirit Academy,
+  //  Astralis vs Astralis Talent, ENCE vs ENCE Prospects, MOUZ vs MOUZ NXT,
+  //  FaZe vs FaZe Up Next, B8 vs B8 Academy, Spirit vs Spirit Academy, etc.) don't match.
   if (a.length >= 8 && b.length >= 8 && a.slice(0, 8) === b.slice(0, 8)) {
     const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
     if (ratio >= 0.7) return true;
