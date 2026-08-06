@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CalendarDays, Trophy, X, Loader2, Search, Filter } from "lucide-react";
+import { CalendarDays, X, Loader2, Search, Clock } from "lucide-react";
 
 interface PastDaysModalProps {
   open: boolean;
@@ -28,12 +28,12 @@ interface HistoryMatch {
   logoTeam2: string | null;
 }
 
+const LOGO_SIZE = 24;
+
 /** Convert CDN URL to backend proxy URL */
 const proxyLogo = (url: string | null, game: string): string | null => {
   if (!url) return null;
-  // Already proxied by backend
   if (url.startsWith("/api/")) return url;
-  // External CDN URL → encode as base64url for /logo/external/ proxy
   const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
   const encoded = btoa(url)
     .replace(/\+/g, "-")
@@ -47,7 +47,7 @@ function TeamLogo({
   src,
   alt,
   game,
-  size = 20,
+  size = LOGO_SIZE,
 }: {
   src: string | null;
   alt: string;
@@ -66,7 +66,7 @@ function TeamLogo({
         src={fallback}
         alt={alt}
         className="object-contain flex-shrink-0"
-        style={{ width: size, height: size, minWidth: size }}
+        style={{ width: size, height: size }}
       />
     );
   }
@@ -76,7 +76,7 @@ function TeamLogo({
       src={proxyLogo(src, game)}
       alt={alt}
       className="rounded object-contain flex-shrink-0"
-      style={{ width: size, height: size, minWidth: size }}
+      style={{ width: size, height: size }}
       onError={() => setImgError(true)}
     />
   );
@@ -102,6 +102,19 @@ const formatDate = (dateStr: string): string => {
   return `${d} ${months[m - 1]} ${y}`;
 };
 
+/** Get hours since match completion */
+const hoursAgo = (dateStr: string): number => {
+  return (Date.now() - new Date(dateStr).getTime()) / 3600000;
+};
+
+const AGE_OPTIONS = [
+  { value: "all", label: "Весь час" },
+  { value: "3", label: "3 год" },
+  { value: "6", label: "6 год" },
+  { value: "12", label: "12 год" },
+  { value: "24", label: "24 год" },
+] as const;
+
 export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
   const [matches, setMatches] = useState<HistoryMatch[]>([]);
   const [loading, setLoading] = useState(false);
@@ -109,6 +122,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
   const [gameFilter, setGameFilter] = useState<"all" | "cs2" | "dota2">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [daysBack, setDaysBack] = useState(7);
+  const [ageFilter, setAgeFilter] = useState<string>("all");
 
   useEffect(() => {
     if (!open) return;
@@ -130,9 +144,11 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
   }, [open, daysBack]);
 
   const filteredMatches = useMemo(() => {
+    const ageHours = ageFilter === "all" ? Infinity : Number(ageFilter);
     return matches.filter((m) => {
       if (gameFilter === "cs2" && m.game !== "cs2") return false;
       if (gameFilter === "dota2" && m.game !== "dota2") return false;
+      if (ageFilter !== "all" && hoursAgo(m.date) > ageHours) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const t1 = String(m.team1 ?? "").toLowerCase();
@@ -142,7 +158,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
       }
       return true;
     });
-  }, [matches, gameFilter, searchQuery]);
+  }, [matches, gameFilter, searchQuery, ageFilter]);
 
   // Group by date (YYYY-MM-DD only, ignoring time)
   const grouped: Record<string, HistoryMatch[]> = {};
@@ -221,6 +237,23 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
                 ))}
               </div>
 
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                {AGE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAgeFilter(opt.value)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      ageFilter === opt.value
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Clock className="h-3 w-3" strokeWidth={1.5} />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="relative flex-1 min-w-[140px]">
                 <Search
                   className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"
@@ -289,7 +322,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
   );
 }
 
-/** Single date group with match rows */
+/** Single date group with match rows — grid layout for perfect alignment */
 function PastDayGroup({
   dateKey,
   matches,
@@ -300,14 +333,15 @@ function PastDayGroup({
   return (
     <div className="mb-6 last:mb-0">
       <div className="flex items-center gap-2 mb-3">
-        <div className="h-px flex-1 bg-gray-100" />
+        <div className="h-px flex-1 bg-gray-200" />
         <span className="text-xs font-medium text-gray-900 uppercase tracking-wider whitespace-nowrap">
           {formatDate(dateKey)}
         </span>
-        <div className="h-px flex-1 bg-gray-100" />
+        <div className="h-px flex-1 bg-gray-200" />
       </div>
 
       <div className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
+        {/* Grid: logo(24px) + gap(8px) + name(flex) | score(48px center) | logo(24px) + gap(8px) + name(flex) | tournament(flex, right) */}
         {matches.map((match, idx) => {
           const team1Won = (match.score1 ?? 0) > (match.score2 ?? 0);
           const team2Won = (match.score2 ?? 0) > (match.score1 ?? 0);
@@ -315,11 +349,15 @@ function PastDayGroup({
           return (
             <div
               key={match.id}
-              className={`flex items-center gap-4 px-4 py-3 ${
+              className={`grid items-center gap-x-3 px-4 py-2.5 ${
                 idx < matches.length - 1 ? "border-b border-gray-200" : ""
               } hover:bg-gray-50 transition-colors`}
+              style={{
+                gridTemplateColumns: "1fr 64px 1fr",
+              }}
             >
-              <div className="flex items-center gap-2 min-w-0 flex-[2] justify-end">
+              {/* ── Left column: logo + team1 ── */}
+              <div className="flex items-center gap-2 min-w-0 justify-end">
                 <span
                   className={`text-sm font-medium truncate ${team1Won ? "text-gray-900" : "text-gray-500"}`}
                 >
@@ -332,7 +370,8 @@ function PastDayGroup({
                 />
               </div>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0">
+              {/* ── Center: score ── */}
+              <div className="flex items-center justify-center gap-1.5">
                 <span
                   className={`text-sm font-bold tabular-nums ${team1Won ? "text-green-600" : "text-gray-400"}`}
                 >
@@ -346,7 +385,8 @@ function PastDayGroup({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 min-w-0 flex-[2]">
+              {/* ── Right column: logo + team2 + tournament ── */}
+              <div className="flex items-center gap-2 min-w-0">
                 <TeamLogo
                   src={match.logoTeam2}
                   alt={match.team2}
@@ -357,21 +397,9 @@ function PastDayGroup({
                 >
                   {match.team2}
                 </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 flex-shrink-0 text-xs text-gray-400 min-w-[200px] justify-end">
-                <Trophy className="h-3 w-3 flex-shrink-0" strokeWidth={1.5} />
-                <span className="truncate max-w-[160px]">
+                <span className="text-xs text-gray-400 truncate ml-auto">
                   {match.tournament}
                 </span>
-                {match.matchType && (
-                  <>
-                    <span className="text-gray-300">·</span>
-                    <span className="font-medium text-gray-500">
-                      {match.matchType}
-                    </span>
-                  </>
-                )}
               </div>
             </div>
           );
