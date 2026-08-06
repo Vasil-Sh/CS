@@ -659,7 +659,15 @@ export function useMatches() {
                     return "postponed";
                 }
 
-                // Already postponed — keep it, don't let API re-activate
+                // Allow postponed matches to re-activate if live scores arrive
+                // (e.g. tips.gg-only matches that were auto-postponed due to
+                // missing live store entries — once scores appear, go live/finished).
+                if (m.matchStatus === "postponed" && hasScores) {
+                  if (isScoreDecided) return "finished";
+                  return "live";
+                }
+
+                // Already postponed with no scores — keep it
                 if (m.matchStatus === "postponed") return "postponed";
 
                 if (m.matchStatus === "live" && update.status === "finished")
@@ -794,12 +802,13 @@ export function useMatches() {
         match.matchStatus !== "upcoming"
       )
         return false;
-      // Auto-hide finished matches from today that ended >3h ago
-      // For yesterday's matches, auto-hide >12h ago
+      // Auto-hide finished matches that are very old.
+      // Today: 8h from start — keeps matches visible all day (BO3 takes 2-3h).
+      // Yesterday: 12h from start — covers late-night matches checked in the morning.
       if (match.matchStatus === "finished") {
         const hoursSinceStart =
           (Date.now() - new Date(match.date).getTime()) / 3600000;
-        const maxHours = matchDateKey === yesterdayKey ? 12 : 3;
+        const maxHours = matchDateKey === yesterdayKey ? 12 : 8;
         if (hoursSinceStart > maxHours) return false;
       }
       if (filterGame === "CS2" && match.game !== "CS2") return false;
