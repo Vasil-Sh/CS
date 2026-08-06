@@ -21,6 +21,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
+import { BlurFade } from "@/components/ui/blur-fade";
 
 import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
 import type {
@@ -717,61 +718,67 @@ export default function Analytics() {
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 {/* 1. Прибуток */}
-                <MetricCard
-                  value={`${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`}
-                  label="прибуток / вкладено"
-                  change={
-                    totalStaked > 0
-                      ? `${roi >= 0 ? "+" : ""}${roi}%`
-                      : undefined
-                  }
-                  isPositive={filteredStats.totalProfit >= 0}
-                  dateRange={dateRange}
-                  icon={Wallet}
-                  badgeClass={
-                    filteredStats.totalProfit >= 0
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
-                  }
-                />
+                <BlurFade delay={0} inView>
+                  <MetricCard
+                    value={`${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`}
+                    label="прибуток / вкладено"
+                    change={
+                      totalStaked > 0
+                        ? `${roi >= 0 ? "+" : ""}${roi}%`
+                        : undefined
+                    }
+                    isPositive={filteredStats.totalProfit >= 0}
+                    dateRange={dateRange}
+                    icon={Wallet}
+                    badgeClass={
+                      filteredStats.totalProfit >= 0
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-red-100 text-red-700"
+                    }
+                  />
+                </BlurFade>
 
                 {/* 2. Ставки */}
-                <MetricCard
-                  value={completedBets.length.toString()}
-                  label="ставок"
-                  change={
-                    completedBets.length > 0
-                      ? `${winningBets.length}W / ${losingBets.length}L`
-                      : undefined
-                  }
-                  isPositive={winningBets.length >= losingBets.length}
-                  dateRange={dateRange}
-                  icon={BarChart3}
-                  badgeClass={
-                    winningBets.length >= losingBets.length
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-orange-100 text-orange-700"
-                  }
-                />
+                <BlurFade delay={0.1} inView>
+                  <MetricCard
+                    value={completedBets.length.toString()}
+                    label="ставок"
+                    change={
+                      completedBets.length > 0
+                        ? `${winningBets.length}W / ${losingBets.length}L`
+                        : undefined
+                    }
+                    isPositive={winningBets.length >= losingBets.length}
+                    dateRange={dateRange}
+                    icon={BarChart3}
+                    badgeClass={
+                      winningBets.length >= losingBets.length
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-orange-100 text-orange-700"
+                    }
+                  />
+                </BlurFade>
 
                 {/* 3. Коефіцієнти */}
-                <MetricCard
-                  value={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
-                  label="середній коеф."
-                  change={
-                    filteredStats.winRate > 0
-                      ? `${filteredStats.winRate}% виграшів`
-                      : undefined
-                  }
-                  isPositive={filteredStats.winRate >= 50}
-                  dateRange={dateRange}
-                  icon={Zap}
-                  badgeClass={
-                    filteredStats.winRate >= 50
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-orange-100 text-orange-700"
-                  }
-                />
+                <BlurFade delay={0.2} inView>
+                  <MetricCard
+                    value={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
+                    label="середній коеф."
+                    change={
+                      filteredStats.winRate > 0
+                        ? `${filteredStats.winRate}% виграшів`
+                        : undefined
+                    }
+                    isPositive={filteredStats.winRate >= 50}
+                    dateRange={dateRange}
+                    icon={Zap}
+                    badgeClass={
+                      filteredStats.winRate >= 50
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-orange-100 text-orange-700"
+                    }
+                  />
+                </BlurFade>
               </div>
             </div>
 
