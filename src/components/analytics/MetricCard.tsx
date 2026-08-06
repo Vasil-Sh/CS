@@ -23,8 +23,6 @@ export interface MetricCardProps {
   dateRange: string;
   /** Lucide icon */
   icon: LucideIcon;
-  /** Icon color class, e.g. "text-emerald-600" */
-  iconColor: string;
   /** Badge background + text class */
   badgeClass: string;
 }
@@ -36,7 +34,6 @@ export default function MetricCard({
   isPositive = true,
   dateRange,
   icon: Icon,
-  iconColor = "text-blue-600",
   badgeClass,
 }: MetricCardProps) {
   return (
@@ -44,7 +41,9 @@ export default function MetricCard({
       <CardContent className="p-0 space-y-4">
         {/* Header: Icon + Pill Badge */}
         <div className="flex items-center justify-between">
-          <Icon className={`size-6 ${iconColor}`} />
+          <div className="p-2 bg-blue-50 rounded-xl">
+            <Icon className="size-5 text-blue-600" strokeWidth={1.5} />
+          </div>
           {change && (
             <Badge
               className={`px-2.5 py-1 rounded-full text-xs font-semibold border-0 flex items-center gap-1 ${badgeClass}`}
