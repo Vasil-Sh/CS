@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Area,
+  Cell,
 } from "recharts";
 
 interface MonthlyData {
@@ -63,6 +64,10 @@ export default function MonthlyProfitChartCard({ data }: Props) {
               <linearGradient id="profitBarGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
                 <stop offset="100%" stopColor="#10B981" stopOpacity={0.3} />
+              </linearGradient>
+              <linearGradient id="lossBarGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#EF4444" stopOpacity={0.3} />
               </linearGradient>
               <linearGradient
                 id="cumulativeAreaGrad"
@@ -142,13 +147,19 @@ export default function MonthlyProfitChartCard({ data }: Props) {
               stroke="none"
             />
 
-            {/* Monthly profit bars — always green, matches legend */}
-            <Bar
-              dataKey="profit"
-              fill="url(#profitBarGrad)"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={48}
-            />
+            {/* Monthly profit bars — green for profit, red for loss */}
+            <Bar dataKey="profit" radius={[4, 4, 0, 0]} maxBarSize={48}>
+              {data.map((entry, i) => (
+                <Cell
+                  key={i}
+                  fill={
+                    entry.profit >= 0
+                      ? "url(#profitBarGrad)"
+                      : "url(#lossBarGrad)"
+                  }
+                />
+              ))}
+            </Bar>
 
             {/* Cumulative line (blue, dots) */}
             <Line
