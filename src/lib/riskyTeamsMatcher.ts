@@ -60,10 +60,13 @@ function namesMatch(a: string, b: string): boolean {
       Math.min(ra.length, rb.length) / Math.max(ra.length, rb.length);
     if (ratio >= 0.7) return true;
   }
-  // Last resort: prefix match — first 8 chars must be identical.
+  // Last resort: prefix match — first 8 chars must be identical,
+  // BUT only if length ratio ≥70% (prevents "Natus Vincere" matching "Natus Vincere Junior").
   // Catches "Nuclear TigRES" vs "Nuclear Tigers" where suffix differs.
-  if (a.length >= 8 && b.length >= 8 && a.slice(0, 8) === b.slice(0, 8))
-    return true;
+  if (a.length >= 8 && b.length >= 8 && a.slice(0, 8) === b.slice(0, 8)) {
+    const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
+    if (ratio >= 0.7) return true;
+  }
   return false;
 }
 
