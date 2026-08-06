@@ -1,8 +1,20 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area } from 'recharts';
-import { NumberTicker } from '@/components/ui/number-ticker';
+/**
+ * MonthlyProfitChartCard — dual-line chart (profit + cumulative),
+ * restyled in 21st Sales Overview style.
+ */
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
+import {
+  ComposedChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Area,
+} from "recharts";
 
 interface MonthlyData {
   month: string;
@@ -15,68 +27,142 @@ interface Props {
   data: MonthlyData[];
 }
 
-/** Monthly profit line chart with cumulative line — modern redesign */
 export default function MonthlyProfitChartCard({ data }: Props) {
-  const maxProfit = Math.max(...data.map(m => m.profit));
-  const minProfit = Math.min(...data.map(m => m.profit));
-  const avgProfit = Math.round(data.reduce((sum, m) => sum + m.profit, 0) / data.length);
-
   return (
-    <Card
-      className="border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden"
-    >
-      <CardHeader className="bg-white border-b border-gray-100 px-6 py-5">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-            <div className="p-2.5 bg-blue-50 rounded-2xl">
-              <Calendar className="h-5 w-5 text-primary" strokeWidth={1.5} />
-            </div>
-            Прибуток по місяцях
-          </CardTitle>
+    <Card className="w-full border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-2xl bg-white overflow-hidden">
+      {/* ── Header: title (left) + legend dots (right) ── */}
+      <CardHeader className="flex flex-row items-center justify-between p-0 pt-5 pb-3 px-5 space-y-0 border-0">
+        <CardTitle className="flex items-center gap-2.5 text-base font-semibold text-gray-900">
+          <div className="p-2 bg-blue-50 rounded-xl">
+            <Calendar className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          </div>
+          Прибуток по місяцях
+        </CardTitle>
 
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <div className="w-3 h-0.5 rounded-full bg-emerald-500" /> Прибуток за місяць
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <div className="w-3 h-0.5 rounded-full bg-blue-500" /> Загальний
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-                ▲ <NumberTicker value={maxProfit} />
-              </Badge>
-              <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-                ▼ <NumberTicker value={minProfit} />
-              </Badge>
-              <Badge className="bg-gray-50 text-gray-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-                ─ <NumberTicker value={avgProfit} />
-              </Badge>
-            </div>
+        <div className="flex items-center gap-4 text-sm font-medium">
+          <div className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-emerald-500 inline-block" />
+            <span className="text-muted-foreground text-xs">За місяць</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-blue-500 inline-block" />
+            <span className="text-muted-foreground text-xs">Загальний</span>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-0 sm:p-4">
-        <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+
+      {/* ── Chart ── */}
+      <CardContent className="p-0 h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 10, right: 10, left: 5, bottom: 5 }}
+          >
             <defs>
-              <linearGradient id="monthlyProfitGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id="monthlyCumulativeGrad"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop offset="0%" stopColor="#447afc" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#447afc" stopOpacity={0} />
+                <stop offset="100%" stopColor="#447afc" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }} tickLine={false} dy={8} />
-            <YAxis tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }} axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} width={50} />
-            <Tooltip
-              contentStyle={{ backgroundColor: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '12px', padding: '8px 12px' }}
-              formatter={(value: number | string, name: string) => { if (name === 'profit') return [`${value} ₴`, 'За місяць']; if (name === 'cumulative') return [`${value} ₴`, 'Загалом']; return [value, name]; }}
-              cursor={{ stroke: '#D1D5DB', strokeWidth: 1, strokeDasharray: '4 4' }}
+
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#E5E7EB"
+              opacity={0.7}
+              vertical={false}
             />
-            <ReferenceLine y={0} stroke="#E5E7EB" strokeWidth={1} />
-            <Area type="monotone" dataKey="cumulative" fill="url(#monthlyProfitGrad)" stroke="none" />
-            <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={2} dot={{ r: 4, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }} name="profit" />
-            <Line type="monotone" dataKey="cumulative" stroke="#447afc" strokeWidth={2.5} dot={false} activeDot={{ r: 6, fill: '#447afc', stroke: '#fff', strokeWidth: 2 }} name="cumulative" />
-          </LineChart>
+
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tickMargin={8}
+            />
+
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tickFormatter={(v: number) =>
+                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
+              }
+              width={50}
+              tickMargin={8}
+            />
+
+            <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
+
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="bg-background/95 backdrop-blur-sm border border-border shadow-md rounded-lg p-2.5 text-xs space-y-1">
+                      <p className="font-semibold text-foreground">
+                        {payload[0].payload.month}
+                      </p>
+                      <p className="text-emerald-600 font-medium">
+                        За місяць: {payload[0].value} ₴
+                      </p>
+                      <p className="text-blue-600 font-medium">
+                        Загалом: {payload[1]?.value} ₴
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+              cursor={{
+                stroke: "#D1D5DB",
+                strokeWidth: 1,
+                strokeDasharray: "4 4",
+              }}
+            />
+
+            {/* Area fill for cumulative line */}
+            <Area
+              type="monotone"
+              dataKey="cumulative"
+              fill="url(#monthlyCumulativeGrad)"
+              stroke="none"
+            />
+
+            {/* Profit line (green, dots) */}
+            <Line
+              type="monotone"
+              dataKey="profit"
+              stroke="#10B981"
+              strokeWidth={2}
+              dot={{ r: 4, fill: "#fff", stroke: "#10B981", strokeWidth: 2 }}
+              activeDot={{
+                r: 6,
+                fill: "#10B981",
+                stroke: "#fff",
+                strokeWidth: 2,
+              }}
+            />
+
+            {/* Cumulative line (blue, no dots) */}
+            <Line
+              type="monotone"
+              dataKey="cumulative"
+              stroke="#447afc"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{
+                r: 6,
+                fill: "#447afc",
+                stroke: "#fff",
+                strokeWidth: 2,
+              }}
+            />
+          </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
