@@ -40,7 +40,6 @@ const SparklineStatCard = memo(function SparklineStatCard({
   color,
   gradientId,
 }: SparklineStatCardProps) {
-  const hasData = data.length > 1;
   const badgeColor = isUp ? "text-emerald-500" : "text-orange-500";
 
   return (
@@ -68,32 +67,30 @@ const SparklineStatCard = memo(function SparklineStatCard({
           </div>
         </div>
 
-        {/* ── Right: sparkline ── */}
-        {hasData && (
-          <div className="h-14 w-36 shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={data}
-                margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={color} stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke={color}
-                  strokeWidth={2.5}
-                  fill={`url(#${gradientId})`}
-                  isAnimationActive
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        {/* ── Right: sparkline — render even with 1 point ── */}
+        <div className="h-14 w-36 shrink-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={data.length > 0 ? data : [{ value: 0 }, { value: 0 }]}
+              margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={color} stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={color}
+                strokeWidth={2.5}
+                fill={`url(#${gradientId})`}
+                isAnimationActive
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
