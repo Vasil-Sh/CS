@@ -85,10 +85,16 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
     if (teams.length > 0) {
       const isRisky = (teamName: string) =>
         teams.some((t) => {
-          const nameMatch =
-            t.name.toLowerCase() === teamName.toLowerCase() ||
-            teamName.toLowerCase().includes(t.name.toLowerCase()) ||
-            t.name.toLowerCase().includes(teamName.toLowerCase());
+          // Use the same matching logic as the main screen (riskyTeamsMatcher)
+          const a = teamName.toLowerCase().trim();
+          const b = t.name.toLowerCase().trim();
+          let nameMatch = a === b;
+          if (!nameMatch && (a.includes(b) || b.includes(a))) {
+            // Substring match with length guard — prevents "Eternal Fire" matching "ex-Eternal Fire Academy"
+            const ratio =
+              Math.min(a.length, b.length) / Math.max(a.length, b.length);
+            nameMatch = ratio >= 0.7;
+          }
           if (!nameMatch) return false;
           const teamGame = (t.game || "").toLowerCase();
           const keyNorm = gameStorageKey.toLowerCase();

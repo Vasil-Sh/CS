@@ -41,15 +41,25 @@ function normalizeRelaxed(name: string): string {
     .replace(/team$/, "");
 }
 
-/** Check if two normalized names match: exact, substring, relaxed, or prefix match */
+/** Check if two normalized names match: exact, substring (with length guard), relaxed, or prefix match */
 function namesMatch(a: string, b: string): boolean {
   if (!a || !b) return false;
   if (a === b) return true;
-  if (a.includes(b) || b.includes(a)) return true;
+  // Substring match — but guard against false positives where one name is much longer.
+  // E.g. "Eternal Fire" ⊂ "ex-Eternal Fire Academy" but they're different teams.
+  // Require the shorter name to be ≥70% of the longer name's length.
+  if (a.includes(b) || b.includes(a)) {
+    const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
+    if (ratio >= 0.7) return true;
+  }
   const ra = normalizeRelaxed(a);
   const rb = normalizeRelaxed(b);
   if (ra === rb) return true;
-  if (ra.includes(rb) || rb.includes(ra)) return true;
+  if (ra.includes(rb) || rb.includes(ra)) {
+    const ratio =
+      Math.min(ra.length, rb.length) / Math.max(ra.length, rb.length);
+    if (ratio >= 0.7) return true;
+  }
   // Last resort: prefix match — first 8 chars must be identical.
   // Catches "Nuclear TigRES" vs "Nuclear Tigers" where suffix differs.
   if (a.length >= 8 && b.length >= 8 && a.slice(0, 8) === b.slice(0, 8))

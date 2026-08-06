@@ -17,6 +17,16 @@ interface CommentModalProps {
   team2Logo?: string | null;
 }
 
+/** Substring match with length ratio guard — prevents "Eternal Fire" matching "ex-Eternal Fire Academy". */
+function namesMatchLenient(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) {
+    const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
+    return ratio >= 0.7;
+  }
+  return false;
+}
+
 export default function CommentModal({
   open,
   onClose,
@@ -87,9 +97,9 @@ export default function CommentModal({
               const t2 =
                 infoParts[1]?.split(" (")[0]?.toLowerCase().trim() || "";
 
-              if (t1 && (t1.includes(rawName) || rawName.includes(t1))) {
+              if (t1 && namesMatchLenient(t1, rawName)) {
                 logoToShow = team1Logo || null;
-              } else if (t2 && (t2.includes(rawName) || rawName.includes(t2))) {
+              } else if (t2 && namesMatchLenient(t2, rawName)) {
                 logoToShow = team2Logo || null;
               }
 
