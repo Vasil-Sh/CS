@@ -503,10 +503,9 @@ export default function Analytics() {
     completedBets.forEach((bet: Bet) => {
       const date = new Date(bet.date);
       const sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      const monthName = date.toLocaleDateString("uk-UA", {
-        month: "short",
-        year: "numeric",
-      });
+      const rawMonth = date.toLocaleDateString("uk-UA", { month: "short" });
+      const monthName =
+        rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1).replace(/\.$/, "");
 
       if (!monthlyData[monthName]) {
         monthlyData[monthName] = { profit: 0, wins: 0, losses: 0, sortKey };
