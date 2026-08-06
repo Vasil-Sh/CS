@@ -23,14 +23,7 @@ import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { BlurFade } from "@/components/ui/blur-fade";
 
-import {
-  AlertTriangle,
-  BarChart3,
-  Calendar,
-  Wallet,
-  Zap,
-  Target,
-} from "lucide-react";
+import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
 import type {
   Bet,
   BettingStats,
@@ -749,25 +742,19 @@ export default function Analytics() {
                 <BlurFade delay={0.1} inView>
                   <MetricCard
                     value={completedBets.length.toString()}
-                    label="ставок / вінрейт"
+                    label="ставок"
                     change={
                       completedBets.length > 0
-                        ? `${filteredStats.winRate}%`
-                        : undefined
-                    }
-                    isPositive={filteredStats.winRate >= 50}
-                    dateRange={dateRange}
-                    icon={Target}
-                    badgeClass={
-                      filteredStats.winRate >= 50
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-orange-100 text-orange-700"
-                    }
-                    circularValue={filteredStats.winRate}
-                    circularSubtext={
-                      winningBets.length + losingBets.length > 0
                         ? `${winningBets.length}W / ${losingBets.length}L`
                         : undefined
+                    }
+                    isPositive={winningBets.length >= losingBets.length}
+                    dateRange={dateRange}
+                    icon={BarChart3}
+                    badgeClass={
+                      winningBets.length >= losingBets.length
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-orange-100 text-orange-700"
                     }
                   />
                 </BlurFade>
