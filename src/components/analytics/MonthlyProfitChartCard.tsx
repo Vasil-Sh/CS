@@ -116,7 +116,9 @@ export default function MonthlyProfitChartCard({ data }: Props) {
                   return (
                     <div className="bg-background/95 backdrop-blur-sm border border-border shadow-md rounded-lg p-2.5 text-xs space-y-1">
                       <p className="font-semibold text-foreground">{d.month}</p>
-                      <p className="text-emerald-600 font-medium">
+                      <p
+                        className={`font-medium ${d.profit >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                      >
                         За місяць: {d.profit.toLocaleString("uk-UA")} ₴
                       </p>
                       <p className="text-blue-600 font-medium">
