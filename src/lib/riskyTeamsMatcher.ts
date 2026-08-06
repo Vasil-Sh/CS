@@ -43,6 +43,7 @@ function normalizeRelaxed(name: string): string {
 
 /** Check if two normalized names match: exact, substring, relaxed, or prefix match */
 function namesMatch(a: string, b: string): boolean {
+  if (!a || !b) return false;
   if (a === b) return true;
   if (a.includes(b) || b.includes(a)) return true;
   const ra = normalizeRelaxed(a);
