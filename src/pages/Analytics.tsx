@@ -6,6 +6,7 @@ import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCar
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
 import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
 import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
+import AreaChartCard from "@/components/analytics/AreaChartCard";
 import RiskManagement from "@/components/RiskManagement";
 import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
@@ -16,12 +17,11 @@ import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
 import { useTheme } from "@/hooks/useTheme";
-import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
+
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { useRiskMetrics } from "@/hooks/useRiskMetrics";
-import { NumberTicker } from "@/components/ui/number-ticker";
-import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
+
 import {
   AlertTriangle,
   BarChart3,
@@ -562,8 +562,33 @@ export default function Analytics() {
     return Math.round(total / monthlyProfitData.length);
   }, [monthlyProfitData]);
 
-  const totalMonthsTracked = useMemo(() => {
-    return monthlyProfitData?.length || 0;
+  // ── Sparkline data for area-chart stat cards ──
+  const profitSparkline = useMemo(() => {
+    return monthlyProfitData.map((m) => ({
+      label: m.month,
+      value: Math.round(m.profit),
+    }));
+  }, [monthlyProfitData]);
+
+  const cumulativeSparkline = useMemo(() => {
+    return monthlyProfitData.map((m) => ({
+      label: m.month,
+      value: Math.round(m.cumulative),
+    }));
+  }, [monthlyProfitData]);
+
+  const betsSparkline = useMemo(() => {
+    return monthlyProfitData.map((m) => ({
+      label: m.month,
+      value: m.totalBets,
+    }));
+  }, [monthlyProfitData]);
+
+  const winRateSparkline = useMemo(() => {
+    return monthlyProfitData.map((m) => ({
+      label: m.month,
+      value: m.winRate,
+    }));
   }, [monthlyProfitData]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
@@ -682,9 +707,6 @@ export default function Analytics() {
     { label: "Високі", sublabel: "> 3.0" },
   ];
 
-  const cardBaseStyle = CARD_BASE_STYLE;
-  const cardHoverStyle = CARD_HOVER_STYLE;
-
   return (
     <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
       {loading ? (
@@ -732,235 +754,98 @@ export default function Analytics() {
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 {/* 1. ROI */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
-                  }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-50 shrink-0">
-                      <Percent
-                        className="h-5 w-5 text-emerald-500"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      ROI
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100}
-                      min={0}
-                      value={Math.abs(roi) >= 100 ? 98 : Math.abs(roi)}
-                      gaugePrimaryColor={roi >= 0 ? "#10B981" : "#EF4444"}
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span
-                        className={`text-lg font-bold leading-tight ${roi >= 0 ? "text-emerald-500" : "text-red-500"}`}
-                      >
-                        {roi >= 0 ? "+" : ""}
-                        {roi}%
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        прибуток / вкладено
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
-                        Вкладено
-                      </div>
-                      <div className="text-base font-bold text-gray-900">
-                        <NumberTicker value={Math.round(totalStaked)} /> ₴
-                      </div>
-                    </div>
-                    <div
-                      className={`rounded-xl px-3 py-2 text-center ${filteredStats.totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}
-                    >
-                      <div
-                        className={`text-[10px] font-medium uppercase tracking-wider ${filteredStats.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
-                      >
-                        Прибуток
-                      </div>
-                      <div
-                        className={`text-base font-bold ${filteredStats.totalProfit >= 0 ? "text-emerald-700" : "text-red-600"}`}
-                      >
-                        {filteredStats.totalProfit >= 0 ? "+" : ""}
-                        <NumberTicker
-                          value={Math.round(filteredStats.totalProfit)}
-                        />{" "}
-                        ₴
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <AreaChartCard
+                  title="ROI"
+                  icon={Percent}
+                  color="#10B981"
+                  gradientId="roiSparkline"
+                  bigValue={`${roi >= 0 ? "+" : ""}${roi}%`}
+                  bigValueColor={roi >= 0 ? "text-emerald-500" : "text-red-500"}
+                  subtitle="прибуток / вкладено"
+                  data={profitSparkline}
+                  footerItems={[
+                    {
+                      label: "Вкладено",
+                      value: `${Math.round(totalStaked).toLocaleString("uk-UA")} ₴`,
+                    },
+                    {
+                      label: "Прибуток",
+                      value: `${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`,
+                      valueColor:
+                        filteredStats.totalProfit >= 0
+                          ? "text-emerald-700"
+                          : "text-red-600",
+                      accentBg:
+                        filteredStats.totalProfit >= 0
+                          ? "bg-emerald-50"
+                          : "bg-red-50",
+                    },
+                  ]}
+                />
 
                 {/* 2. По місяцях */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
+                <AreaChartCard
+                  title="По місяцях"
+                  icon={Trophy}
+                  color="#F59E0B"
+                  gradientId="monthlySparkline"
+                  bigValue={
+                    bestMonth
+                      ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴`
+                      : "—"
                   }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-50 shrink-0">
-                      <Trophy
-                        className="h-5 w-5 text-amber-500"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      По місяцях
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100}
-                      min={0}
-                      value={
-                        bestMonth && totalMonthsTracked > 0
-                          ? Math.min(
-                              100,
-                              Math.round(
-                                (bestMonth.profit /
-                                  (Math.abs(bestMonth.profit) +
-                                    Math.abs(worstMonth?.profit || 0) +
-                                    1)) *
-                                  100,
-                              ),
-                            )
-                          : 50
-                      }
-                      gaugePrimaryColor="#F59E0B"
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-xl font-bold text-amber-500">
-                        {bestMonth
-                          ? `${bestMonth.profit >= 0 ? "+" : ""}${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴`
-                          : "—"}
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        найкращий місяць
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 bg-emerald-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium uppercase tracking-wider">
-                        ▲ Найкращий {bestMonth?.month}
-                      </div>
-                      <div className="text-sm font-bold text-emerald-700">
-                        {bestMonth ? (
-                          <>
-                            <NumberTicker
-                              value={Math.round(bestMonth.profit)}
-                            />{" "}
-                            ₴
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1 bg-red-50 rounded-xl px-3 py-2">
-                      <div className="flex items-center gap-1 text-[10px] text-red-500 font-medium uppercase tracking-wider">
-                        ▼ Найгірший {worstMonth?.month}
-                      </div>
-                      <div className="text-sm font-bold text-red-600">
-                        {worstMonth ? (
-                          <>
-                            <NumberTicker
-                              value={Math.round(worstMonth.profit)}
-                            />{" "}
-                            ₴
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  bigValueColor="text-amber-500"
+                  subtitle="найкращий місяць"
+                  data={cumulativeSparkline}
+                  footerItems={[
+                    {
+                      label: `▲ Найкращий ${bestMonth?.month || ""}`,
+                      value: bestMonth
+                        ? `${Math.round(bestMonth.profit).toLocaleString("uk-UA")} ₴`
+                        : "—",
+                      valueColor: "text-emerald-700",
+                      accentBg: "bg-emerald-50",
+                    },
+                    {
+                      label: `▼ Найгірший ${worstMonth?.month || ""}`,
+                      value: worstMonth
+                        ? `${Math.round(worstMonth.profit).toLocaleString("uk-UA")} ₴`
+                        : "—",
+                      valueColor: "text-red-600",
+                      accentBg: "bg-red-50",
+                    },
+                  ]}
+                />
 
-                {/* 3. Коефіцієнти */}
-                <div
-                  className="stat-card bg-white border border-gray-200 rounded-3xl px-5 py-4 group relative overflow-hidden h-full"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
-                  }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 shrink-0">
-                      <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      Коефіцієнти
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    <AnimatedCircularProgressBar
-                      max={100}
-                      min={0}
-                      value={filteredStats.winRate}
-                      gaugePrimaryColor="#3B82F6"
-                      gaugeSecondaryColor="#E5E7EB"
-                      className="!w-20 !h-20 shrink-0"
-                    />
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-xl font-bold text-gray-900">
-                        {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        середній коеф.
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-gray-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
-                        Ставок
-                      </div>
-                      <div className="text-sm font-bold text-gray-900">
-                        <NumberTicker value={completedBets.length} />
-                      </div>
-                    </div>
-                    <div className="bg-emerald-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-emerald-600 font-medium uppercase tracking-wider">
-                        Виграші
-                      </div>
-                      <div className="text-sm font-bold text-emerald-700">
-                        <NumberTicker value={winningBets.length} />
-                      </div>
-                    </div>
-                    <div className="bg-red-50 rounded-xl px-2 py-2 text-center">
-                      <div className="text-[10px] text-red-500 font-medium uppercase tracking-wider">
-                        Програші
-                      </div>
-                      <div className="text-sm font-bold text-red-600">
-                        <NumberTicker value={losingBets.length} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* 3. Коефіцієнти / Ставки */}
+                <AreaChartCard
+                  title="Коефіцієнти"
+                  icon={Zap}
+                  color="#3B82F6"
+                  gradientId="oddsSparkline"
+                  bigValue={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
+                  bigValueColor="text-gray-900"
+                  subtitle="середній коеф."
+                  data={winRateSparkline}
+                  footerItems={[
+                    {
+                      label: "Ставок",
+                      value: completedBets.length.toString(),
+                    },
+                    {
+                      label: "Виграші",
+                      value: winningBets.length.toString(),
+                      valueColor: "text-emerald-700",
+                      accentBg: "bg-emerald-50",
+                    },
+                    {
+                      label: "Програші",
+                      value: losingBets.length.toString(),
+                      valueColor: "text-red-600",
+                      accentBg: "bg-red-50",
+                    },
+                  ]}
+                />
               </div>
             </div>
 
