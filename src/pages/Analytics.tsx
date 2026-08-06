@@ -503,18 +503,22 @@ export default function Analytics() {
     completedBets.forEach((bet: Bet) => {
       const date = new Date(bet.date);
       const sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      const rawMonth = date.toLocaleDateString("uk-UA", { month: "short" });
-      const monthName =
-        rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1).replace(/\.$/, "");
+      const monthName = date.toLocaleDateString("uk-UA", {
+        month: "short",
+        year: "numeric",
+      });
+      // Capitalize first letter: "серп." → "Серп."
+      const capitalized =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
-      if (!monthlyData[monthName]) {
-        monthlyData[monthName] = { profit: 0, wins: 0, losses: 0, sortKey };
+      if (!monthlyData[capitalized]) {
+        monthlyData[capitalized] = { profit: 0, wins: 0, losses: 0, sortKey };
       }
-      monthlyData[monthName].profit += bet.profit || 0;
+      monthlyData[capitalized].profit += bet.profit || 0;
       if (bet.result === "Win") {
-        monthlyData[monthName].wins += 1;
+        monthlyData[capitalized].wins += 1;
       } else {
-        monthlyData[monthName].losses += 1;
+        monthlyData[capitalized].losses += 1;
       }
     });
 
