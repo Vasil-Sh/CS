@@ -172,7 +172,7 @@ export default function PastDaysModal({ open, onClose }: PastDaysModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] rounded-3xl border border-gray-100 bg-white p-0 gap-0 [&>button]:hidden">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] rounded-3xl border border-gray-100 bg-white p-0 gap-0 [&>button]:hidden">
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -353,7 +353,7 @@ function PastDayGroup({
                 idx < matches.length - 1 ? "border-b border-gray-200" : ""
               } hover:bg-gray-50 transition-colors`}
               style={{
-                gridTemplateColumns: "1fr 64px 1fr",
+                gridTemplateColumns: "minmax(0, 1fr) 52px minmax(0, 2fr)",
               }}
             >
               {/* ── Left column: logo + team1 ── */}
