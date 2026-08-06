@@ -523,12 +523,6 @@ export default function MatchRow({
                   <span className="font-semibold text-gray-900 text-base">
                     {match.team1}
                   </span>
-                  {team1Risky && (
-                    <CheckCircle2
-                      className="h-4 w-4 text-green-500 flex-shrink-0"
-                      strokeWidth={2}
-                    />
-                  )}
                 </div>
                 <span className="text-gray-400 text-xs font-medium">vs</span>
                 <div className="flex items-center gap-1.5">
@@ -541,12 +535,6 @@ export default function MatchRow({
                   <span className="font-semibold text-gray-900 text-base">
                     {match.team2}
                   </span>
-                  {team2Risky && (
-                    <CheckCircle2
-                      className="h-4 w-4 text-green-500 flex-shrink-0"
-                      strokeWidth={2}
-                    />
-                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -759,23 +747,6 @@ export default function MatchRow({
           style={{ minWidth: 170 }}
         >
           <div className="flex flex-col items-center gap-2">
-            {/* Teams already in risky list — show checkmark + view button */}
-            {(team1Risky || team2Risky) && (
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2
-                  className="h-4 w-4 text-green-500 flex-shrink-0"
-                  strokeWidth={2}
-                />
-                <button
-                  onClick={() => onShowComment(match)}
-                  className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 hover:text-green-800 text-xs font-medium shadow-sm whitespace-nowrap transition-all"
-                >
-                  <Eye className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-                  <span>Переглянути запис</span>
-                </button>
-              </div>
-            )}
-
             {/* Always show "Додати запис" unless BOTH teams are already risky */}
             {(!team1Risky || !team2Risky) && (
               <button
@@ -787,6 +758,17 @@ export default function MatchRow({
                   strokeWidth={1.5}
                 />
                 <span>Додати запис</span>
+              </button>
+            )}
+
+            {/* Risky team comment — when at least one team is risky */}
+            {(team1Risky || team2Risky) && (
+              <button
+                onClick={() => onShowComment(match)}
+                className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 hover:text-blue-700 text-xs font-medium shadow-sm whitespace-nowrap transition-all"
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>Переглянути запис</span>
               </button>
             )}
           </div>
