@@ -747,7 +747,7 @@ export default function MatchRow({
           style={{ minWidth: 170 }}
         >
           <div className="flex flex-col items-center gap-2">
-            {/* Always show "Додати запис" unless BOTH teams are already risky */}
+            {/* Always show "Додати нотатку" unless BOTH teams are already risky */}
             {(!team1Risky || !team2Risky) && (
               <button
                 onClick={() => onAddToRisky(match)}
@@ -757,7 +757,7 @@ export default function MatchRow({
                   className="h-3.5 w-3.5 shrink-0"
                   strokeWidth={1.5}
                 />
-                <span>Додати запис</span>
+                <span>Додати нотатку</span>
               </button>
             )}
 
@@ -768,7 +768,7 @@ export default function MatchRow({
                 className="!inline-flex !flex-row !flex-nowrap items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 hover:text-blue-700 text-xs font-medium shadow-sm whitespace-nowrap transition-all"
               >
                 <Eye className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-                <span>Переглянути запис</span>
+                <span>Переглянути нотатку</span>
               </button>
             )}
           </div>
