@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import BalanceChart from "@/components/BalanceChart";
+import BankrollChart from "@/components/BankrollChart";
 import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCard";
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
 import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
@@ -888,7 +888,7 @@ export default function Analytics() {
                     {gameFilteredBets.length > 0 ? (
                       <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
                         <div className="mb-6">
-                          <BalanceChart data={balanceOverTime} />
+                          <BankrollChart data={balanceOverTime} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
