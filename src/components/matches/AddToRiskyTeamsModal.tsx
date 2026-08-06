@@ -29,13 +29,9 @@ interface AddToRiskyTeamsModalProps {
   team1: TeamInfo;
   team2: TeamInfo;
   game: string; // "CS2" or "Dota2" — current match game
+  team1Risky: boolean; // already computed by parent via getTeamRiskInfo
+  team2Risky: boolean;
   onSaved: () => void; // callback to refresh risky teams in parent
-  riskyTeams: Array<{
-    name: string;
-    game: string;
-    status: string;
-    notes: string;
-  }>;
 }
 
 const STATUS_OPTIONS = [
@@ -67,7 +63,8 @@ const proxyLogo = (url: string | null | undefined): string | null => {
 };
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
-  const { open, onClose, team1, team2, onSaved, riskyTeams } = props;
+  const { open, onClose, team1, team2, onSaved, team1Risky, team2Risky } =
+    props;
   const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
 
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
@@ -75,61 +72,24 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   const [selectedGame, setSelectedGame] = useState<string>(gameStorageKey);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [existingTeams, setExistingTeams] = useState<Set<string>>(new Set());
 
-  // Load existing risky teams when modal opens, detect already-added teams
+  // Use parent's pre-computed risky status — single source of truth.
+  const existingTeams = new Set<string>();
+  if (team1Risky) existingTeams.add(team1.name.toLowerCase());
+  if (team2Risky) existingTeams.add(team2.name.toLowerCase());
+
+  // Auto-select team & reset form when modal opens
   useEffect(() => {
     if (!open) return;
-    // Use the same riskyTeams data that the parent hook loaded from API
-    const teams = riskyTeams.length > 0 ? riskyTeams : [];
-    if (teams.length > 0) {
-      const isRisky = (teamName: string) =>
-        teams.some((t) => {
-          // Use the same matching logic as the main screen (riskyTeamsMatcher)
-          const a = teamName.toLowerCase().trim();
-          const b = t.name.toLowerCase().trim();
-          let nameMatch = a === b;
-          if (!nameMatch && (a.includes(b) || b.includes(a))) {
-            // Substring match with length guard — prevents "Eternal Fire" matching "ex-Eternal Fire Academy"
-            const ratio =
-              Math.min(a.length, b.length) / Math.max(a.length, b.length);
-            nameMatch = ratio >= 0.7;
-          }
-          if (!nameMatch) return false;
-          const teamGame = (t.game || "").toLowerCase();
-          const keyNorm = gameStorageKey.toLowerCase();
-          const teamIsDota =
-            teamGame === "дота" || teamGame === "dota" || teamGame === "dota2";
-          const keyIsDota =
-            keyNorm === "дота" || keyNorm === "dota" || keyNorm === "dota2";
-          const teamIsCs =
-            teamGame === "cs" || teamGame === "cs2" || teamGame === "csgo";
-          const keyIsCs =
-            keyNorm === "cs" || keyNorm === "cs2" || keyNorm === "csgo";
-          if (!teamGame || (teamIsDota && keyIsDota) || (teamIsCs && keyIsCs))
-            return true;
-          return false;
-        });
-      const existing = new Set(
-        [team1.name, team2.name]
-          .filter((n) => isRisky(n))
-          .map((n) => n.toLowerCase()),
-      );
-      setExistingTeams(existing);
-
-      if (
-        existing.has(team1.name.toLowerCase()) &&
-        !existing.has(team2.name.toLowerCase())
-      ) {
-        setSelectedTeam(team2.name);
-      } else if (!existing.has(team1.name.toLowerCase())) {
-        setSelectedTeam(team1.name);
-      }
+    if (team1Risky && !team2Risky) {
+      setSelectedTeam(team2.name);
+    } else if (!team1Risky) {
+      setSelectedTeam(team1.name);
     }
     setStatus("Під питанням");
     setSelectedGame(gameStorageKey);
     setNotes("");
-  }, [open, team1.name, team2.name, gameStorageKey, riskyTeams]);
+  }, [open, team1.name, team2.name, gameStorageKey, team1Risky, team2Risky]);
 
   const handleSave = async () => {
     setSaving(true);
