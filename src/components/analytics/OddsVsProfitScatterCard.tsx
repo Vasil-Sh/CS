@@ -1,78 +1,148 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Target } from 'lucide-react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { NumberTicker } from '@/components/ui/number-ticker';
-import ScatterTooltip from '@/components/analytics/ScatterTooltip';
+/**
+ * OddsVsProfitScatterCard — scatter plot of odds vs profit,
+ * restyled in 21st Sales Overview style (clean header, no axis lines).
+ */
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Target } from "lucide-react";
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
+import type { ScatterData } from "@/types/betting";
 
 interface Props {
-  data: Array<{ odds: string | number; profit: string | number }>;
+  data: ScatterData[];
   winCount: number;
   lossCount: number;
 }
 
-/** Odds vs Profit scatter chart — modern redesign */
-export default function OddsVsProfitScatterCard({ data, winCount, lossCount }: Props) {
+export default function OddsVsProfitScatterCard({
+  data,
+  winCount,
+  lossCount,
+}: Props) {
   return (
-    <Card
-      className="border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-[32px] bg-white overflow-hidden"
-    >
-      <CardHeader className="bg-white border-b border-gray-100 px-6 py-5">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-            <div className="p-2.5 bg-blue-50 rounded-2xl">
-              <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
-            </div>
-            Коефіцієнти vs Прибуток
-          </CardTitle>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Виграш
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Програш
-            </div>
-            <div className="w-px h-6 bg-gray-200" />
-            <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-              ✅ <NumberTicker value={winCount} />
-            </Badge>
-            <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-              ✕ <NumberTicker value={lossCount} />
-            </Badge>
+    <Card className="w-full border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-2xl bg-white overflow-hidden">
+      {/* ── Header: title (left) + legend + badges (right) ── */}
+      <CardHeader className="flex flex-row items-center justify-between p-0 pt-5 pb-3 px-5 space-y-0 border-0">
+        <CardTitle className="flex items-center gap-2.5 text-base font-semibold text-gray-900">
+          <div className="p-2 bg-blue-50 rounded-xl">
+            <Target className="h-4 w-4 text-primary" strokeWidth={1.5} />
           </div>
+          Коефіцієнти vs Прибуток
+        </CardTitle>
+
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-emerald-500 inline-block" />
+            <span className="text-muted-foreground text-xs">Виграш</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-red-500 inline-block" />
+            <span className="text-muted-foreground text-xs">Програш</span>
+          </div>
+          <div className="w-px h-5 bg-gray-200" />
+          <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
+            ✅ {winCount}
+          </Badge>
+          <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
+            ✕ {lossCount}
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="p-0 sm:p-4">
-        <ResponsiveContainer width="100%" height={320}>
-          <ScatterChart margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+
+      {/* ── Chart ── */}
+      <CardContent className="p-0 h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart margin={{ top: 10, right: 10, left: 5, bottom: 5 }}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#E5E7EB"
+              opacity={0.7}
+            />
+
             <XAxis
               dataKey="odds"
               name="Коефіцієнт"
-              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
-              axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }}
+              axisLine={false}
               tickLine={false}
-              tickFormatter={(value) => Number(value).toFixed(2)}
-              dy={8}
+              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tickFormatter={(v) => Number(v).toFixed(2)}
+              tickMargin={8}
             />
+
             <YAxis
               dataKey="profit"
               name="Прибуток"
-              tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
-              axisLine={{ stroke: '#D1D5DB', strokeWidth: 1 }}
+              axisLine={false}
               tickLine={false}
-              tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tickFormatter={(v: number) =>
+                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
+              }
               width={50}
+              tickMargin={8}
             />
-            <Tooltip content={<ScatterTooltip />} cursor={{ stroke: '#D1D5DB', strokeWidth: 1, strokeDasharray: '4 4' }} />
-            <ReferenceLine y={0} stroke="#E5E7EB" strokeWidth={1} />
+
+            <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
+
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const p = payload[0].payload as ScatterData;
+                  return (
+                    <div className="bg-background/95 backdrop-blur-sm border border-border shadow-md rounded-lg p-2.5 text-xs space-y-1">
+                      <p className="font-semibold text-foreground">
+                        {p.match || "Ставка"}
+                      </p>
+                      <p className="text-muted-foreground">
+                        Коеф.: {Number(p.odds).toFixed(2)}
+                      </p>
+                      <p
+                        className={`font-medium ${Number(p.profit) >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                      >
+                        {Number(p.profit) >= 0 ? "+" : ""}
+                        {Number(p.profit).toFixed(0)} ₴
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+              cursor={{
+                stroke: "#D1D5DB",
+                strokeWidth: 1,
+                strokeDasharray: "4 4",
+              }}
+            />
+
             <Scatter
               data={data}
               shape={(props: Record<string, unknown>) => {
-                const { cx, cy, payload } = props as { cx?: number; cy?: number; payload?: { fill?: string; result?: string } };
-                const isWin = (payload?.result || 'Win') === 'Win';
-                return <circle cx={cx} cy={cy} r={6} fill={isWin ? '#10B981' : '#EF4444'} opacity={0.85} stroke="#fff" strokeWidth={2} />;
+                const { cx, cy, payload } = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: { result?: string };
+                };
+                const isWin = (payload?.result || "Win") === "Win";
+                return (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill={isWin ? "#10B981" : "#EF4444"}
+                    opacity={0.85}
+                    stroke="#fff"
+                    strokeWidth={2}
+                  />
+                );
               }}
               legendType="none"
             />
