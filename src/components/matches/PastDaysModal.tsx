@@ -370,18 +370,29 @@ function PastDayGroup({
                 />
               </div>
 
-              {/* ── Center: score ── */}
-              <div className="flex items-center justify-center gap-1.5">
+              {/* ── Center: score + game badge ── */}
+              <div className="flex flex-col items-center justify-center gap-0.5">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span
+                    className={`text-sm font-bold tabular-nums ${team1Won ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    {match.score1 ?? "-"}
+                  </span>
+                  <span className="text-xs text-gray-300">:</span>
+                  <span
+                    className={`text-sm font-bold tabular-nums ${team2Won ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    {match.score2 ?? "-"}
+                  </span>
+                </div>
                 <span
-                  className={`text-sm font-bold tabular-nums ${team1Won ? "text-green-600" : "text-gray-400"}`}
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                    match.game === "cs2"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-purple-100 text-purple-800"
+                  }`}
                 >
-                  {match.score1 ?? "-"}
-                </span>
-                <span className="text-xs text-gray-300">:</span>
-                <span
-                  className={`text-sm font-bold tabular-nums ${team2Won ? "text-green-600" : "text-gray-400"}`}
-                >
-                  {match.score2 ?? "-"}
+                  {match.game === "cs2" ? "CS2" : "Dota 2"}
                 </span>
               </div>
 
