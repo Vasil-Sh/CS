@@ -728,11 +728,6 @@ export default function Analytics() {
                   isPositive={filteredStats.totalProfit >= 0}
                   dateRange={dateRange}
                   icon={Wallet}
-                  iconColor={
-                    filteredStats.totalProfit >= 0
-                      ? "text-emerald-600"
-                      : "text-red-600"
-                  }
                   badgeClass={
                     filteredStats.totalProfit >= 0
                       ? "bg-emerald-100 text-emerald-700"
@@ -752,7 +747,6 @@ export default function Analytics() {
                   isPositive={winningBets.length >= losingBets.length}
                   dateRange={dateRange}
                   icon={BarChart3}
-                  iconColor="text-blue-600"
                   badgeClass={
                     winningBets.length >= losingBets.length
                       ? "bg-emerald-100 text-emerald-700"
@@ -772,7 +766,6 @@ export default function Analytics() {
                   isPositive={filteredStats.winRate >= 50}
                   dateRange={dateRange}
                   icon={Zap}
-                  iconColor="text-violet-600"
                   badgeClass={
                     filteredStats.winRate >= 50
                       ? "bg-emerald-100 text-emerald-700"

@@ -36,11 +36,11 @@ export default function MetricCard({
   isPositive = true,
   dateRange,
   icon: Icon,
-  iconColor,
+  iconColor = "text-blue-600",
   badgeClass,
 }: MetricCardProps) {
   return (
-    <Card className="bg-card border border-border rounded-2xl p-5 shadow-xs h-full">
+    <Card className="bg-card border border-border rounded-2xl p-5 shadow-xs h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
       <CardContent className="p-0 space-y-4">
         {/* Header: Icon + Pill Badge */}
         <div className="flex items-center justify-between">
