@@ -125,8 +125,8 @@ export default function MonthlyProfitChartCard({ data }: Props) {
                         Загалом: {d.cumulative.toLocaleString("uk-UA")} ₴
                       </p>
                       {d.totalBets > 0 && (
-                        <p className="text-muted-foreground">
-                          {d.totalBets} ставок
+                        <p className="text-gray-500 font-medium">
+                          Ставок: {d.totalBets}
                         </p>
                       )}
                     </div>
