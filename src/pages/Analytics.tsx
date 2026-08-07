@@ -567,14 +567,19 @@ export default function Analytics() {
 
     // Include ALL bets (including Pending) so the chart extends to the last placed bet.
     // Pending bets contribute profit=0 — they mark the bet date without changing balance.
-    // Sort by date first, then by createdAt (PostgreSQL timestamp) to preserve
-    // the real order of bets placed on the same day.
+    // Sort by createdAt (when the bet was actually placed) to preserve
+    // real chronological order on the balance chart.
+    // Date is the match date — two bets can have the same match date but
+    // different creation times. Fall back to date if createdAt is missing
+    // (old bets from localStorage before createdAt was added).
     const sortedBets = [...displayBets].sort((a: Bet, b: Bet) => {
-      const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (dateDiff !== 0) return dateDiff;
       const aTs = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bTs = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return aTs - bTs;
+      if (aTs && bTs) return aTs - bTs;
+      if (aTs) return 1;
+      if (bTs) return -1;
+      // Neither has createdAt — fall back to match date
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
     if (sortedBets.length === 0) {
