@@ -462,6 +462,7 @@ export function useMatches() {
       const onCs2Update = (fresh: ApiMatch[]) => {
         if (gen !== fetchGenRef.current) return;
         freshCs2Arrived = true;
+        setInitialLoading(false);
         setMatches((prev) => {
           const dota = prev.filter((m) => m.game === "Dota2");
           const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
@@ -477,9 +478,10 @@ export function useMatches() {
 
       // Fire Dota2 in background with retries — don't block initial render
       let dotaAttempt = 0;
-      const maxDotaAttempts = 10;
+      const maxDotaAttempts = 8; // reduced from 10 — avoid hammering rate-limited backend
       const onDotaUpdate = (fresh: Dota2ApiMatch[]) => {
         if (gen !== fetchGenRef.current) return;
+        setInitialLoading(false);
         setMatches((prev) => {
           const cs2 = prev.filter((m) => m.game === "CS2");
           return [...cs2, ...fresh.map((m) => dota2ApiMatchToMatch(m))];
@@ -493,12 +495,12 @@ export function useMatches() {
             onDotaUpdate(dota);
           } else if (dotaAttempt < maxDotaAttempts) {
             dotaAttempt++;
-            setTimeout(pullDota, 6000);
+            setTimeout(pullDota, 12000); // 12s between retries (was 6s)
           }
         } catch {
           if (dotaAttempt < maxDotaAttempts) {
             dotaAttempt++;
-            setTimeout(pullDota, 6000);
+            setTimeout(pullDota, 12000); // 12s between retries (was 6s)
           }
         }
       };
@@ -524,7 +526,7 @@ export function useMatches() {
         // loop. Keep trying until we get matches or the user navigates away.
         if (cs2Matches.length === 0 && cs2Data.status === "fulfilled") {
           let cs2Retry = 0;
-          const maxCs2Retries = 15;
+          const maxCs2Retries = 8; // reduced from 15 — avoid hammering rate-limited backend
           const pullCs2 = async () => {
             if (gen !== fetchGenRef.current) return;
             try {
@@ -538,12 +540,12 @@ export function useMatches() {
                 });
               } else if (cs2Retry < maxCs2Retries) {
                 cs2Retry++;
-                setTimeout(pullCs2, 6000);
+                setTimeout(pullCs2, 12000); // 12s between retries (was 6s)
               }
             } catch {
               if (cs2Retry < maxCs2Retries) {
                 cs2Retry++;
-                setTimeout(pullCs2, 6000);
+                setTimeout(pullCs2, 12000); // 12s between retries (was 6s)
               }
             }
           };
@@ -1110,7 +1112,12 @@ export function useMatches() {
   // ── Risky teams ──
   const loadRiskyTeams = useCallback(async () => {
     try {
-      const resp = await fetch("/api/v1/risky-teams");
+      const token = localStorage.getItem("authToken");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const resp = await fetch("/api/v1/risky-teams", { headers });
       if (resp.ok) {
         const data = await resp.json();
         if (Array.isArray(data) && data.length > 0) {

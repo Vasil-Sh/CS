@@ -232,7 +232,7 @@ export default function Matches() {
             onPastDaysOpen={() => m.setPastDaysModalOpen(true)}
           />
 
-          {m.initialLoading ? (
+          {m.initialLoading && m.displayedMatches.length === 0 ? (
             <MatchesSkeleton />
           ) : (
             <ErrorBoundary>
