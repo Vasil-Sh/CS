@@ -28,7 +28,7 @@ import MatchRow from "@/components/matches/MatchRow";
 import MatchFilterBar from "@/components/matches/MatchFilterBar";
 import DateStatsCards from "@/components/matches/DateStatsCards";
 import PastDaysModal from "@/components/matches/PastDaysModal";
-import { MatchesSkeleton } from "@/components/matches/MatchStates";
+import { MatchesLoadingState } from "@/components/matches/MatchStates";
 import { useMatches, type Match, type SortBy } from "@/hooks/useMatches";
 
 export type { Match } from "@/hooks/useMatches";
@@ -233,7 +233,7 @@ export default function Matches() {
           />
 
           {m.initialLoading && m.displayedMatches.length === 0 ? (
-            <MatchesSkeleton />
+            <MatchesLoadingState />
           ) : (
             <ErrorBoundary>
               {(() => {
