@@ -866,6 +866,40 @@ export function useMatches() {
     };
   }, [loadMatchesFromApi]);
 
+  // ── Auto-refresh TBD matches at start time ──
+  // When a match has no team names (TBD/placeholder), schedule a force-refresh
+  // 2 minutes after its scheduled start to pull in the actual teams.
+  useEffect(() => {
+    if (matches.length === 0) return;
+    const now = Date.now();
+    const tbdTimers: ReturnType<typeof setTimeout>[] = [];
+
+    for (const m of matches) {
+      const isTbd =
+        !m.team1 ||
+        !m.team2 ||
+        /quarter|semi|round\s*of|final|tbd|decided/i.test(m.team1 + m.team2);
+      if (!isTbd) continue;
+
+      const startMs = new Date(m.date).getTime();
+      const refreshAt = startMs + 2 * 60 * 1000; // 2 min after start
+      const delay = refreshAt - now;
+
+      if (delay > 0 && delay < 30 * 60 * 1000) {
+        // within 30 min from now
+        const timer = setTimeout(async () => {
+          await clearDota2Cache();
+          await loadMatchesFromApi();
+        }, delay);
+        tbdTimers.push(timer);
+      }
+    }
+
+    return () => {
+      tbdTimers.forEach(clearTimeout);
+    };
+  }, [matches, loadMatchesFromApi]);
+
   // ── Filtering & sorting (memoized) ──
   const {
     filteredMatches,

@@ -357,6 +357,13 @@ export default function MatchRow({
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
   const isLive = match.matchStatus === "live";
+  // TBD match: no team names, or placeholder text (Quarter-final etc.)
+  const isTbd =
+    !match.team1 ||
+    !match.team2 ||
+    /quarter|semi|round\s*(of|one|two|three|four|five|six|seven|eight)|final|tbd|decided/i.test(
+      match.team1 + match.team2,
+    );
   const hasPrediction =
     match.predictionPercentTeam1 != null &&
     match.predictionPercentTeam2 != null &&
@@ -435,31 +442,39 @@ export default function MatchRow({
             </div>
             {/* Right: teams + badges */}
             <div className="space-y-1 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5">
-                  <TeamLogo
-                    src={match.logoTeam1}
-                    teamName={match.team1}
-                    game={match.game}
-                    size={28}
-                  />
-                  <span className="font-semibold text-gray-900 text-base">
-                    {match.team1}
+              {isTbd ? (
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-800 text-base truncate">
+                    {match.context || match.team1 || match.team2 || "TBD"}
                   </span>
                 </div>
-                <span className="text-gray-400 text-xs font-medium">vs</span>
-                <div className="flex items-center gap-1.5">
-                  <TeamLogo
-                    src={match.logoTeam2}
-                    teamName={match.team2}
-                    game={match.game}
-                    size={28}
-                  />
-                  <span className="font-semibold text-gray-900 text-base">
-                    {match.team2}
-                  </span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <TeamLogo
+                      src={match.logoTeam1}
+                      teamName={match.team1}
+                      game={match.game}
+                      size={28}
+                    />
+                    <span className="font-semibold text-gray-900 text-base">
+                      {match.team1}
+                    </span>
+                  </div>
+                  <span className="text-gray-400 text-xs font-medium">vs</span>
+                  <div className="flex items-center gap-1.5">
+                    <TeamLogo
+                      src={match.logoTeam2}
+                      teamName={match.team2}
+                      game={match.game}
+                      size={28}
+                    />
+                    <span className="font-semibold text-gray-900 text-base">
+                      {match.team2}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="flex items-center gap-1">
                 {match.game && (
                   <Badge
