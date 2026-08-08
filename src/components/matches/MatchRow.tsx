@@ -577,11 +577,13 @@ export default function MatchRow({
       {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {isFinished && match.score1 != null && match.score2 != null ? (
+          {isFinished &&
+          typeof match.score1 === "number" &&
+          typeof match.score2 === "number" ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
                 className={`text-base font-bold ${
-                  match.score1! > match.score2!
+                  match.score1 > match.score2
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
@@ -591,7 +593,7 @@ export default function MatchRow({
               <span className="text-base font-medium text-gray-400">:</span>
               <span
                 className={`text-base font-bold ${
-                  match.score2! > match.score1!
+                  match.score2 > match.score1
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
@@ -599,7 +601,7 @@ export default function MatchRow({
                 {match.score2}
               </span>
             </div>
-          ) : match.url ? (
+          ) : typeof match.url === "string" ? (
             <a
               href={match.url}
               target="_blank"
