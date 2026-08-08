@@ -428,7 +428,7 @@ export default function MatchRow({
                 </span>
               </div>
               <div className="flex items-center" style={{ minHeight: 22 }}>
-                <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 rounded px-1.5 py-0.5">
+                <span className="text-[10px] font-bold text-gray-900 bg-gray-100 rounded px-1.5 py-0.5">
                   {match.matchType}
                 </span>
               </div>
@@ -472,9 +472,6 @@ export default function MatchRow({
                     {match.game}
                   </Badge>
                 )}
-                <Badge className="bg-gray-100 text-gray-800 border-0 rounded-md px-1.5 py-0.5 text-xs font-semibold">
-                  {match.matchType}
-                </Badge>
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
