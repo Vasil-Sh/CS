@@ -407,7 +407,9 @@ function PastDayGroup({
                   {match.game === "cs2" ? "CS2" : "Dota2"}
                 </span>
                 <span className="text-xs text-gray-400 truncate ml-auto">
-                  {match.tournament}
+                  {typeof match.tournament === "string"
+                    ? match.tournament
+                    : String(match.tournament ?? "")}
                 </span>
               </div>
             </div>

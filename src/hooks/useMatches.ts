@@ -352,8 +352,25 @@ function determineDota2Tier(
 }
 
 // ── SessionStorage cache — prevents loading flash on page revisit ──
-const MATCHES_CACHE_KEY = "matchiq_matches_cache_v2";
-const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v2";
+// Key versioned to invalidate corrupt data from previous app versions.
+const MATCHES_CACHE_KEY = "matchiq_matches_cache_v3";
+const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v3";
+
+// Nuke old cache keys on mount to prevent stale/corrupt data from crashing React.
+function clearOldCaches(): void {
+  for (const key of [
+    "matchiq_matches_cache",
+    "matchiq_matches_cache_v2",
+    "matchiq_matches_cache_ts",
+    "matchiq_matches_cache_ts_v2",
+  ]) {
+    try {
+      sessionStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
   try {
@@ -362,15 +379,34 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
     if (!raw || !ts) return null;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
-    // Safety: ensure all entries have primitive url/context fields (not objects)
+    // Aggressive sanitization: force EVERY field that JSX renders to be a primitive
     for (const m of parsed) {
-      if (typeof m.url !== "string" && m.url != null) m.url = "";
-      if (typeof m.context !== "string") m.context = "";
-      if (typeof m.team1 !== "string") m.team1 = String(m.team1 ?? "");
-      if (typeof m.team2 !== "string") m.team2 = String(m.team2 ?? "");
-      if (typeof m.favorite !== "string") m.favorite = "";
-      if (typeof m.matchType !== "string") m.matchType = "";
-      if (typeof m.game !== "string") m.game = "";
+      m.id = String(m.id ?? "");
+      m.date = String(m.date ?? "");
+      m.team1 = String(m.team1 ?? "");
+      m.team2 = String(m.team2 ?? "");
+      m.favorite = String(m.favorite ?? "");
+      m.context = String(m.context ?? "");
+      m.matchType = String(m.matchType ?? "");
+      m.game = String(m.game ?? "");
+      m.url = String(m.url ?? "");
+      m.comment = String(m.comment ?? "");
+      m.aiSummary = String(m.aiSummary ?? "");
+      m.tier = m.tier || null;
+      m.matchStatus = m.matchStatus || "upcoming";
+      m.formStability = m.formStability || "stable";
+      m.dota2Slug = String(m.dota2Slug ?? "");
+      m.cs2Slug = String(m.cs2Slug ?? "");
+      m.aiConfidence = Number(m.aiConfidence) || 0;
+      m.risk = Number(m.risk) || 0;
+      m.winRate = Number(m.winRate) || 0;
+      m.upsetProbability = Number(m.upsetProbability) || 0;
+      m.score1 = typeof m.score1 === "number" ? m.score1 : null;
+      m.score2 = typeof m.score2 === "number" ? m.score2 : null;
+      m.stars = typeof m.stars === "number" ? m.stars : 0;
+      if (!m.odds || typeof m.odds !== "object")
+        m.odds = { team1: 0, team2: 0 };
+      if (!Array.isArray(m.playerForm)) m.playerForm = [];
     }
     return { matches: parsed as Match[], timestamp: parseInt(ts, 10) };
   } catch {
@@ -389,6 +425,8 @@ function saveCachedMatches(matches: Match[]): void {
 
 // ── Main Hook ──
 export function useMatches() {
+  // One-time: nuke old corrupt sessionStorage caches
+  clearOldCaches();
   const cached = loadCachedMatches();
   const [matches, setMatches] = useState<Match[]>(cached?.matches ?? []);
   const [isLoading, setIsLoading] = useState(false);
