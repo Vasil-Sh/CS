@@ -486,7 +486,7 @@ export default function MatchRow({
       {visibleColumns.has("match") && (
         <td className={`py-3 px-4 ${colDivider}`}>
           {/* Tournament text — full width, no divider interference */}
-          {match.context && (
+          {typeof match.context === "string" && match.context && (
             <div
               className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1 mb-1"
               title={match.context}

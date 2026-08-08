@@ -158,12 +158,16 @@ function apiMatchToMatch(
   game: "CS2" | "Dota2" = "CS2",
 ): Match {
   const matchType = parseMatchType(apiMatch.type);
-  const context =
+  const rawContext =
     game === "CS2"
       ? apiMatch.tournament && apiMatch.stage
-        ? `${apiMatch.tournament} — ${apiMatch.stage}`
-        : apiMatch.tournament || parseMatchContext(apiMatch.type, apiMatch.link)
+        ? `${String(apiMatch.tournament)} — ${String(apiMatch.stage)}`
+        : String(apiMatch.tournament || "") ||
+          parseMatchContext(apiMatch.type, apiMatch.link)
       : parseDota2MatchContext(apiMatch as unknown as Dota2ApiMatch);
+  // Safety: force string to prevent React "Cannot convert object to primitive value"
+  const context =
+    typeof rawContext === "string" ? rawContext : String(rawContext ?? "");
   const tier = determineTier(
     apiMatch.positionTeam1,
     apiMatch.positionTeam2,
@@ -200,10 +204,10 @@ function apiMatchToMatch(
 
   return {
     id: String(apiMatch.id),
-    date: apiMatch.date,
-    team1: apiMatch.nameTeam1,
-    team2: apiMatch.nameTeam2,
-    favorite,
+    date: String(apiMatch.date ?? ""),
+    team1: String(apiMatch.nameTeam1 ?? ""),
+    team2: String(apiMatch.nameTeam2 ?? ""),
+    favorite: String(favorite ?? ""),
     aiConfidence: baseConfidence,
     risk,
     comment: "",
@@ -217,14 +221,15 @@ function apiMatchToMatch(
     playerForm: [],
     context,
     tier,
-    matchType,
+    matchType: String(matchType ?? ""),
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
-    url:
-      game === "CS2"
-        ? buildHltvUrl(apiMatch.link)
-        : buildTipsGgUrl(apiMatch.link),
-    score1: apiMatch.score1,
-    score2: apiMatch.score2,
+    url: String(
+      (game === "CS2"
+        ? buildHltvUrl(String(apiMatch.link ?? ""))
+        : buildTipsGgUrl(String(apiMatch.link ?? ""))) || "",
+    ),
+    score1: typeof apiMatch.score1 === "number" ? apiMatch.score1 : null,
+    score2: typeof apiMatch.score2 === "number" ? apiMatch.score2 : null,
     matchStatus: status,
     cs2Slug: apiMatch.cs2Slug,
     positionTeam1: apiMatch.positionTeam1,
@@ -248,18 +253,26 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
   const confidence = hasPrediction ? Math.max(pred1 ?? 50, pred2 ?? 50) : 50;
   const fav = hasPrediction
     ? (pred1 ?? 50) >= (pred2 ?? 50)
-      ? m.nameTeam1
-      : m.nameTeam2
-    : m.nameTeam1;
-  const slugParts = m.link.replace(/\/$/, "").split("/");
+      ? String(m.nameTeam1 ?? "")
+      : String(m.nameTeam2 ?? "")
+    : String(m.nameTeam1 ?? "");
+  const slugParts = String(m.link ?? "")
+    .replace(/\/$/, "")
+    .split("/");
   const dota2Slug = slugParts[slugParts.length - 2] || "";
+
+  const rawContext = m.tournament
+    ? `${String(m.tournament)}${m.stage ? " — " + String(m.stage) : ""}`
+    : parseDota2MatchContext(m);
+  const context =
+    typeof rawContext === "string" ? rawContext : String(rawContext ?? "");
 
   return {
     id: `dota-${m.id}`,
-    date: m.date,
-    team1: m.nameTeam1,
-    team2: m.nameTeam2,
-    favorite: fav,
+    date: String(m.date ?? ""),
+    team1: String(m.nameTeam1 ?? ""),
+    team2: String(m.nameTeam2 ?? ""),
+    favorite: String(fav ?? ""),
     aiConfidence: confidence,
     risk: hasPrediction ? Math.max(5, 100 - confidence - 5) : 30,
     comment: "",
@@ -271,9 +284,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     winRate: confidence,
     formStability: "stable",
     playerForm: [],
-    context: m.tournament
-      ? `${m.tournament}${m.stage ? " — " + m.stage : ""}`
-      : parseDota2MatchContext(m),
+    context,
     tier: determineDota2Tier(m.positionTeam1, m.positionTeam2, m.tournament),
     matchType: parseDota2MatchType(m.type),
     upsetProbability: hasPrediction
@@ -282,9 +293,9 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
           Math.min(45, 50 - Math.abs((pred1 ?? 50) - (pred2 ?? 50)) * 0.5),
         )
       : 25,
-    url: buildTipsGgUrl(m.link),
-    score1: m.score1,
-    score2: m.score2,
+    url: buildTipsGgUrl(String(m.link ?? "")),
+    score1: typeof m.score1 === "number" ? m.score1 : null,
+    score2: typeof m.score2 === "number" ? m.score2 : null,
     matchStatus: getDota2MatchStatus(m),
     positionTeam1: m.positionTeam1,
     positionTeam2: m.positionTeam2,
