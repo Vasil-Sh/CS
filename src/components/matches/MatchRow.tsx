@@ -428,7 +428,7 @@ export default function MatchRow({
                 </span>
               </div>
               <div className="flex items-center" style={{ minHeight: 22 }}>
-                <span className="text-[10px] font-bold text-gray-900 bg-gray-100 rounded px-1.5 py-0.5">
+                <span className="text-xs font-bold text-gray-900 bg-gray-100 rounded px-1.5 py-0.5">
                   {match.matchType}
                 </span>
               </div>
