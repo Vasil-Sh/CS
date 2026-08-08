@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ComponentType } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,17 +14,54 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Landing from "@/pages/Landing";
 import LoginPage from "@/pages/LoginPage";
 
-// Lazy-loaded (heavy pages — code split per route)
-const Layout = lazy(() => import("@/components/Layout"));
-const Analytics = lazy(() => import("@/pages/Analytics"));
-const Matches = lazy(() => import("@/pages/Matches"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const MyBets = lazy(() => import("@/pages/MyBets"));
-const Strategy = lazy(() => import("@/pages/Strategy"));
-const RiskyTeams = lazy(() => import("@/pages/RiskyTeams"));
-const TelegramPage = lazy(() => import("@/pages/Telegram"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const PublicProfile = lazy(() => import("@/pages/PublicProfile"));
+// ── Safe lazy wrapper — catches module import errors and shows which
+//     component failed instead of crashing with "object to primitive".
+function safeLazy(
+  name: string,
+  importFn: () => Promise<{ default: ComponentType<unknown> }>,
+) {
+  return lazy(() =>
+    importFn().catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err ?? "");
+      console.error(`[lazy] Failed to import ${name}:`, msg);
+      return {
+        default: (() => (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center p-8 bg-white rounded-2xl border border-red-200 shadow-sm max-w-md">
+              <h3 className="text-lg font-semibold text-red-600 mb-2">
+                Не вдалося завантажити: {name}
+              </h3>
+              <p className="text-sm text-gray-500 mb-4 font-mono break-all">
+                {msg}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold"
+              >
+                Оновити сторінку
+              </button>
+            </div>
+          </div>
+        )) as unknown as ComponentType<unknown>,
+      };
+    }),
+  );
+}
+
+// Lazy-loaded with safe wrapper (shows which module fails)
+const Layout = safeLazy("Layout", () => import("@/components/Layout"));
+const Analytics = safeLazy("Analytics", () => import("@/pages/Analytics"));
+const Matches = safeLazy("Matches", () => import("@/pages/Matches"));
+const Profile = safeLazy("Profile", () => import("@/pages/Profile"));
+const MyBets = safeLazy("MyBets", () => import("@/pages/MyBets"));
+const Strategy = safeLazy("Strategy", () => import("@/pages/Strategy"));
+const RiskyTeams = safeLazy("RiskyTeams", () => import("@/pages/RiskyTeams"));
+const TelegramPage = safeLazy("TelegramPage", () => import("@/pages/Telegram"));
+const NotFound = safeLazy("NotFound", () => import("@/pages/NotFound"));
+const PublicProfile = safeLazy(
+  "PublicProfile",
+  () => import("@/pages/PublicProfile"),
+);
 
 function PageLoader() {
   return (
