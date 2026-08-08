@@ -398,9 +398,34 @@ export function getMatchStatus(
 
 const HLTV_BASE_URL = "https://www.hltv.org";
 
-/** Build a full HLTV URL from an API link (which may be relative) */
-export function buildHltvUrl(link: string): string {
-  if (!link) return "";
-  if (link.startsWith("http://") || link.startsWith("https://")) return link;
-  return `${HLTV_BASE_URL}${link.startsWith("/") ? "" : "/"}${link}`;
+/** Build a working HLTV URL. Uses numeric ID URL if valid, or search as fallback. */
+export function buildHltvUrl(
+  link: string,
+  team1?: string,
+  team2?: string,
+): string {
+  // If it's already a valid HLTV matches URL (with numeric ID) — use directly
+  if (/^https?:\/\/www\.hltv\.org\/matches\/\d+/.test(link)) return link;
+
+  // Build search query from team names if available
+  if (team1 && team2) {
+    const query = `${encodeURIComponent(team1)}+vs+${encodeURIComponent(team2)}`;
+    return `${HLTV_BASE_URL}/search?query=${query}`;
+  }
+
+  // Fallback: try to extract team names from link slug
+  const parts = link.split("/").filter(Boolean);
+  const lastSegment = parts[parts.length - 1] || "";
+  const vsIdx = lastSegment.indexOf("-vs-");
+  if (vsIdx !== -1) {
+    const t1 = lastSegment.substring(0, vsIdx).replace(/-/g, "+");
+    const t2 = lastSegment
+      .substring(vsIdx + 4)
+      .split("-")
+      .slice(0, 2)
+      .join("+");
+    return `${HLTV_BASE_URL}/search?query=${encodeURIComponent(t1 + "+vs+" + t2)}`;
+  }
+
+  return HLTV_BASE_URL;
 }

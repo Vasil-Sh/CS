@@ -225,7 +225,11 @@ function apiMatchToMatch(
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
     url: String(
       (game === "CS2"
-        ? buildHltvUrl(String(apiMatch.link ?? ""))
+        ? buildHltvUrl(
+            String(apiMatch.link ?? ""),
+            String(apiMatch.nameTeam1 ?? ""),
+            String(apiMatch.nameTeam2 ?? ""),
+          )
         : buildTipsGgUrl(String(apiMatch.link ?? ""))) || "",
     ),
     score1: typeof apiMatch.score1 === "number" ? apiMatch.score1 : null,

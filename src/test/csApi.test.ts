@@ -262,31 +262,29 @@ describe("getMatchStatus", () => {
 // ═══════════════════════════════════════════════════════════════════
 // buildHltvUrl
 describe("buildHltvUrl", () => {
-  it('[29] відносний шлях "/matches/123/team1-vs-team2" → повний HLTV URL', () => {
-    expect(buildHltvUrl("/matches/123/team1-vs-team2")).toBe(
-      "https://www.hltv.org/matches/123/team1-vs-team2",
+  it("[29] valid HLTV URL with numeric ID → pass-through", () => {
+    expect(
+      buildHltvUrl("https://www.hltv.org/matches/12345/team1-vs-team2"),
+    ).toBe("https://www.hltv.org/matches/12345/team1-vs-team2");
+  });
+
+  it("[30] with team names → search URL", () => {
+    expect(buildHltvUrl("", "Navi", "Spirit")).toBe(
+      "https://www.hltv.org/search?query=Navi+vs+Spirit",
     );
   });
 
-  it('[30] відносний без слеша "matches/456" → додає /', () => {
-    expect(buildHltvUrl("matches/456")).toBe(
-      "https://www.hltv.org/matches/456",
-    );
+  it("[31] non-standard path + team names → search URL", () => {
+    expect(
+      buildHltvUrl(
+        "https://www.hltv.org/matches/counter-strike/08-08-2026/prestige-vs-metizport/12-30/",
+        "Prestige",
+        "Metizport",
+      ),
+    ).toBe("https://www.hltv.org/search?query=Prestige+vs+Metizport");
   });
 
-  it("[31] вже повний https URL → pass-through", () => {
-    expect(buildHltvUrl("https://example.com/match")).toBe(
-      "https://example.com/match",
-    );
-  });
-
-  it("[32] вже повний http URL → pass-through", () => {
-    expect(buildHltvUrl("http://example.com/match")).toBe(
-      "http://example.com/match",
-    );
-  });
-
-  it('[33] порожній рядок → ""', () => {
-    expect(buildHltvUrl("")).toBe("");
+  it("[32] empty string + no team names → HLTV home", () => {
+    expect(buildHltvUrl("")).toBe("https://www.hltv.org");
   });
 });
