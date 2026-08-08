@@ -106,7 +106,7 @@ export async function fetchTodaysAndUpcomingMatches(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const fresh = await fetchFreshMatches();
+      const fresh = await fetchFreshMatches(forceRefresh);
       if (fresh.length > 0) {
         setCache(fresh);
         return fresh;
@@ -163,10 +163,13 @@ function setCache(data: ApiMatch[]): void {
   }
 }
 
-async function fetchFreshMatches(): Promise<ApiMatch[]> {
+async function fetchFreshMatches(forceRefresh = false): Promise<ApiMatch[]> {
+  const path = forceRefresh
+    ? `${API_BASE}/v1/cs2-matches?refresh=true`
+    : `${API_BASE}/v1/cs2-matches`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout (accommodates backend cold-start Puppeteer scrape)
-  const response = await fetch(`${API_BASE}/v1/cs2-matches`, {
+  const timeout = setTimeout(() => controller.abort(), 60000);
+  const response = await fetch(path, {
     method: "GET",
     headers: { Accept: "application/json" },
     signal: controller.signal,

@@ -680,11 +680,31 @@ export function useMatches() {
     setIsLoading(true);
     try {
       await Promise.allSettled([clearDota2Cache()]);
-      await loadMatchesFromApi();
+      // Force-refresh: skip all caches, trigger full backend re-scrape.
+      // Uses ?refresh=true on backend which forces tips.gg/cstest re-fetch.
+      await Promise.allSettled([
+        fetchTodaysAndUpcomingMatches(true, onCs2Refresh),
+        fetchDota2Matches(true, onDotaRefresh),
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }, [loadMatchesFromApi]);
+
+    async function onCs2Refresh(fresh: ApiMatch[]) {
+      setMatches((prev) => {
+        const dota = prev.filter((m) => m.game === "Dota2");
+        const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
+        return [...cs2, ...dota];
+      });
+    }
+
+    async function onDotaRefresh(fresh: Dota2ApiMatch[]) {
+      setMatches((prev) => {
+        const cs2 = prev.filter((m) => m.game === "CS2");
+        return [...cs2, ...fresh.map((m) => dota2ApiMatchToMatch(m))];
+      });
+    }
+  }, []);
 
   // ── Poll live scores ──
   const pollLiveScores = useCallback(
