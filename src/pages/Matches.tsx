@@ -205,9 +205,9 @@ export default function Matches() {
             displayCount={m.displayCount}
             cs2DisplayedCount={m.cs2DisplayedCount}
             dota2DisplayedCount={m.dota2DisplayedCount}
-            liveCount={m.liveCount}
-            upcomingCount={m.upcomingCount}
-            finishedCount={m.finishedCount}
+            bo1Count={m.bo1Count}
+            bo3Count={m.bo3Count}
+            bo5Count={m.bo5Count}
             avgConfidence={m.avgConfidence}
           />
 

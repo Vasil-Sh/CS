@@ -814,34 +814,10 @@ export function useMatches() {
     (m) => m.game === "CS2" && m.matchStatus !== "finished",
   );
 
-  // ── Poll live scores (7s) + auto-refresh match list (60s) ──
+  // ── Auto-refresh match list every 60s (no live score polling) ──
   const [liveScoreAge, setLiveScoreAge] = useState(0);
-  const liveIntervalRef = useRef(7_000); // start at 7s, adapt (matches backend)
 
   useEffect(() => {
-    const dota2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/dota2-matches/live-scores`;
-    const cs2Endpoint = `${import.meta.env.VITE_API_URL || "/api"}/v1/cs2-matches/live-scores`;
-
-    const poll = () => {
-      if (hasDota2Matches) {
-        pollLiveScores("Dota2", "dota2Slug", dota2Endpoint);
-        setLiveScoreAge(0);
-      }
-      if (hasCs2Matches) {
-        pollLiveScores("CS2", "cs2Slug", cs2Endpoint);
-        setLiveScoreAge(0);
-      }
-    };
-
-    // Immediate poll
-    poll();
-
-    const liveTimer = setInterval(() => {
-      poll();
-      setLiveScoreAge((prev) => prev + liveIntervalRef.current);
-    }, liveIntervalRef.current);
-
-    // ── Auto-refresh full match list every 60s ──
     let isQuietRefreshing = false;
     const quietRefresh = async () => {
       if (isQuietRefreshing) return;
@@ -859,21 +835,16 @@ export function useMatches() {
 
     const refreshTimer = setInterval(quietRefresh, 60_000);
 
-    // Common focus handler
     const onFocus = () => {
-      if (document.visibilityState === "visible") {
-        poll();
-        setLiveScoreAge(0);
-      }
+      if (document.visibilityState === "visible") quietRefresh();
     };
     document.addEventListener("visibilitychange", onFocus);
 
     return () => {
-      clearInterval(liveTimer);
       clearInterval(refreshTimer);
       document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [hasDota2Matches, hasCs2Matches, pollLiveScores, loadMatchesFromApi]);
+  }, [loadMatchesFromApi]);
 
   // ── Filtering & sorting (memoized) ──
   const {
@@ -881,9 +852,9 @@ export function useMatches() {
     sortedDateKeys,
     groupedByDate,
     displayedMatches,
-    liveCount,
-    upcomingCount,
-    finishedCount,
+    bo1Count,
+    bo3Count,
+    bo5Count,
     cs2DisplayedCount,
     dota2DisplayedCount,
     avgConfidence,
@@ -1051,11 +1022,9 @@ export function useMatches() {
       sortedDateKeys: dateKeys,
       groupedByDate: grouped,
       displayedMatches: displayed,
-      liveCount: displayed.filter((m) => m.matchStatus === "live").length,
-      upcomingCount: displayed.filter((m) => m.matchStatus === "upcoming")
-        .length,
-      finishedCount: displayed.filter((m) => m.matchStatus === "finished")
-        .length,
+      bo1Count: displayed.filter((m) => m.matchType === "Bo1").length,
+      bo3Count: displayed.filter((m) => m.matchType === "Bo3").length,
+      bo5Count: displayed.filter((m) => m.matchType === "Bo5").length,
       cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
       dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
       avgConfidence: avg,
@@ -1337,9 +1306,9 @@ export function useMatches() {
     apiError,
     // Stats
     displayCount: displayedMatches.length,
-    liveCount,
-    upcomingCount,
-    finishedCount,
+    bo1Count,
+    bo3Count,
+    bo5Count,
     cs2DisplayedCount,
     dota2DisplayedCount,
     avgConfidence,

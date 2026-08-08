@@ -1,6 +1,6 @@
 import {
   Trophy,
-  Radio,
+  Layers,
   Clock,
   CheckCircle2,
   Brain,
@@ -12,11 +12,10 @@ interface StatCardsProps {
   displayCount: number;
   cs2DisplayedCount: number;
   dota2DisplayedCount: number;
-  liveCount: number;
-  upcomingCount: number;
-  finishedCount: number;
+  bo1Count: number;
+  bo3Count: number;
+  bo5Count: number;
   avgConfidence: number;
-  liveScoreAge?: number;
 }
 
 const cardBaseStyle: React.CSSProperties = {
@@ -32,9 +31,9 @@ export default function DateStatsCards({
   displayCount,
   cs2DisplayedCount,
   dota2DisplayedCount,
-  liveCount,
-  upcomingCount,
-  finishedCount,
+  bo1Count,
+  bo3Count,
+  bo5Count,
   avgConfidence,
 }: StatCardsProps) {
   const cards = [
@@ -57,25 +56,41 @@ export default function DateStatsCards({
       ),
     },
     {
-      icon: <Radio className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "LIVE",
-      value: liveCount,
-      color: "text-red-500",
-      sub: <span className="text-sm text-[#4B5563]">зараз грають</span>,
+      icon: <Layers className="h-5 w-5 text-primary" strokeWidth={1.5} />,
+      label: "Формат",
+      value: `${bo3Count + bo5Count}`,
+      color: "text-amber-600",
+      sub: (
+        <>
+          <span className="text-sm font-semibold text-amber-600">
+            Bo3 {bo3Count}
+          </span>
+          <span className="text-sm text-gray-400">·</span>
+          <span className="text-sm font-semibold text-orange-600">
+            Bo5 {bo5Count}
+          </span>
+          {bo1Count > 0 && (
+            <>
+              <span className="text-sm text-gray-400">·</span>
+              <span className="text-sm text-gray-500">Bo1 {bo1Count}</span>
+            </>
+          )}
+        </>
+      ),
     },
     {
       icon: <Clock className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "Очікуються",
-      value: upcomingCount,
+      label: "Сьогодні",
+      value: displayCount,
       color: "text-blue-600",
-      sub: <span className="text-sm text-[#4B5563]">ще не почались</span>,
+      sub: <span className="text-sm text-[#4B5563]">за розкладом</span>,
     },
     {
       icon: <CheckCircle2 className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "Завершені",
-      value: finishedCount,
+      label: "За посиланням",
+      value: "→",
       color: "text-green-500",
-      sub: <span className="text-sm text-[#4B5563]">зіграні матчі</span>,
+      sub: <span className="text-sm text-[#4B5563]">HLTV / tips.gg</span>,
     },
     {
       icon: <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />,
