@@ -1,5 +1,4 @@
 import { createRoot } from "react-dom/client";
-import { Component, type ReactNode } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // PANIC CLEANUP: Nuke all known localStorage/sessionStorage caches
@@ -32,88 +31,70 @@ import { Component, type ReactNode } from "react";
   }
 })();
 
-import App from "./App.tsx";
-import { AuthProvider } from "./contexts/AuthContext";
-import { DataProvider } from "./contexts/DataContext";
-import { UserDataService } from "./lib/userDataService";
-import { validateEnv, getMissingEnvVars } from "./lib/envValidation";
-import { initErrorMonitoring } from "./lib/errorMonitor";
-import "./index.css";
+// ── Bootstrap with error isolation ──
+// Module-level import errors (corrupt cache, bad parse, etc.) during
+// React.lazy() evaluation crash the entire app. Use dynamic imports to
+// catch and display the exact failing module.
+async function bootstrap() {
+  const rootEl = document.getElementById("root");
+  if (!rootEl) return;
 
-// Validate environment variables
-const env = validateEnv();
-if (import.meta.env.DEV) {
-  const missing = getMissingEnvVars(env);
-  if (missing.length > 0) console.warn("[Env] Missing optional vars:", missing);
-}
+  try {
+    const [AppMod, AuthCtx, DataCtx] = await Promise.all([
+      import("./App.tsx"),
+      import("./contexts/AuthContext"),
+      import("./contexts/DataContext"),
+    ]);
+    const App = AppMod.default;
+    const { AuthProvider } = AuthCtx;
+    const { DataProvider } = DataCtx;
 
-// Repair any user-scoped keys corrupted by old backup import
-UserDataService.repairAllUserKeys();
+    // Side-effect imports (no exports needed)
+    await Promise.all([
+      import("./lib/userDataService"),
+      import("./lib/envValidation"),
+      import("./lib/errorMonitor"),
+      import("./index.css"),
+    ]);
 
-// In dev mode, aggressively unregister any stale service worker to prevent caching issues
-if (import.meta.env.DEV && "serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const reg of registrations) {
-      reg.unregister();
-      console.log("[Dev] Unregistered stale SW:", reg.scope);
+    const { validateEnv, getMissingEnvVars } =
+      await import("./lib/envValidation");
+    const { initErrorMonitoring } = await import("./lib/errorMonitor");
+
+    // Validate environment variables
+    const env = validateEnv();
+    if (import.meta.env.DEV) {
+      const missing = getMissingEnvVars(env);
+      if (missing.length > 0)
+        console.warn("[Env] Missing optional vars:", missing);
     }
-  });
-  // Also clear any Vite-related caches
-  if ("caches" in window) {
-    caches.keys().then((names) => {
-      for (const name of names) {
-        if (name.includes("workbox") || name.includes("vite")) {
-          caches.delete(name);
-          console.log("[Dev] Deleted cache:", name);
-        }
-      }
-    });
-  }
-}
 
-// Initialize error monitoring in production
-if (import.meta.env.PROD) initErrorMonitoring();
+    initErrorMonitoring();
 
-class ErrorBoundary extends Component<
-  { children: ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <div className="text-center space-y-4 p-8">
-            <h1 className="text-2xl font-bold">Щось пішло не так</h1>
-            <p className="text-muted-foreground">
-              Будь ласка, оновіть сторінку
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-            >
-              Оновити
-            </button>
-          </div>
+    const root = createRoot(rootEl);
+    root.render(
+      <AuthProvider>
+        <DataProvider>
+          <App />
+        </DataProvider>
+      </AuthProvider>,
+    );
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error(String(err));
+    console.error("[boot] Fatal import error:", e);
+    rootEl.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui;background:#f3f3f3">
+        <div style="text-align:center;max-width:600px;padding:2rem">
+          <h2 style="color:#dc2626;font-size:1.5rem;margin-bottom:1rem">Помилка завантаження модуля</h2>
+          <p style="color:#6b7280;margin-bottom:1rem">${e.message}</p>
+          <details style="text-align:left;margin-bottom:1rem">
+            <summary style="cursor:pointer;color:#9ca3af;font-size:0.8rem">Stack trace</summary>
+            <pre style="font-size:0.65rem;color:#9ca3af;overflow:auto;max-height:300px;background:#f9fafb;padding:0.5rem;border-radius:8px">${e.stack || "—"}</pre>
+          </details>
+          <button onclick="location.reload()" style="padding:0.6rem 1.5rem;background:#2563eb;color:white;border:none;border-radius:12px;font-size:1rem;cursor:pointer">Оновити</button>
         </div>
-      );
-    }
-    return this.props.children;
+      </div>`;
   }
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <AuthProvider>
-      <DataProvider>
-        <App />
-      </DataProvider>
-    </AuthProvider>
-  </ErrorBoundary>,
-);
+bootstrap();
