@@ -1,38 +1,70 @@
-import { createRoot } from 'react-dom/client';
-import { Component, type ReactNode } from 'react';
-import App from './App.tsx';
-import { AuthProvider } from './contexts/AuthContext';
-import { DataProvider } from './contexts/DataContext';
-import { UserDataService } from './lib/userDataService';
-import { validateEnv, getMissingEnvVars } from './lib/envValidation';
-import { initErrorMonitoring } from './lib/errorMonitor';
-import './index.css';
+import { createRoot } from "react-dom/client";
+import { Component, type ReactNode } from "react";
+
+// ═══════════════════════════════════════════════════════════════════
+// PANIC CLEANUP: Nuke all known localStorage/sessionStorage caches
+// BEFORE any module imports. Corrupt data from previous app versions
+// causes "Cannot convert object to primitive value" during React.lazy().
+// ═══════════════════════════════════════════════════════════════════
+(function nukeCorruptCaches() {
+  const sessionKeys = [
+    "matchiq_matches_cache",
+    "matchiq_matches_cache_v2",
+    "matchiq_matches_cache_v3",
+    "matchiq_matches_cache_ts",
+    "matchiq_matches_cache_ts_v2",
+    "matchiq_matches_cache_ts_v3",
+  ];
+  const localKeys = ["cs2_matches_cache_v11", "dota2_matches_cache_v18"];
+  for (const k of sessionKeys) {
+    try {
+      sessionStorage.removeItem(k);
+    } catch {
+      /* swipe */
+    }
+  }
+  for (const k of localKeys) {
+    try {
+      localStorage.removeItem(k);
+    } catch {
+      /* swipe */
+    }
+  }
+})();
+
+import App from "./App.tsx";
+import { AuthProvider } from "./contexts/AuthContext";
+import { DataProvider } from "./contexts/DataContext";
+import { UserDataService } from "./lib/userDataService";
+import { validateEnv, getMissingEnvVars } from "./lib/envValidation";
+import { initErrorMonitoring } from "./lib/errorMonitor";
+import "./index.css";
 
 // Validate environment variables
 const env = validateEnv();
 if (import.meta.env.DEV) {
   const missing = getMissingEnvVars(env);
-  if (missing.length > 0) console.warn('[Env] Missing optional vars:', missing);
+  if (missing.length > 0) console.warn("[Env] Missing optional vars:", missing);
 }
 
 // Repair any user-scoped keys corrupted by old backup import
 UserDataService.repairAllUserKeys();
 
 // In dev mode, aggressively unregister any stale service worker to prevent caching issues
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
+if (import.meta.env.DEV && "serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const reg of registrations) {
       reg.unregister();
-      console.log('[Dev] Unregistered stale SW:', reg.scope);
+      console.log("[Dev] Unregistered stale SW:", reg.scope);
     }
   });
   // Also clear any Vite-related caches
-  if ('caches' in window) {
-    caches.keys().then(names => {
+  if ("caches" in window) {
+    caches.keys().then((names) => {
       for (const name of names) {
-        if (name.includes('workbox') || name.includes('vite')) {
+        if (name.includes("workbox") || name.includes("vite")) {
           caches.delete(name);
-          console.log('[Dev] Deleted cache:', name);
+          console.log("[Dev] Deleted cache:", name);
         }
       }
     });
@@ -42,7 +74,10 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
 // Initialize error monitoring in production
 if (import.meta.env.PROD) initErrorMonitoring();
 
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
   constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false };
@@ -56,7 +91,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
         <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center space-y-4 p-8">
             <h1 className="text-2xl font-bold">Щось пішло не так</h1>
-            <p className="text-muted-foreground">Будь ласка, оновіть сторінку</p>
+            <p className="text-muted-foreground">
+              Будь ласка, оновіть сторінку
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
@@ -71,12 +108,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <AuthProvider>
       <DataProvider>
         <App />
       </DataProvider>
     </AuthProvider>
-  </ErrorBoundary>
+  </ErrorBoundary>,
 );
