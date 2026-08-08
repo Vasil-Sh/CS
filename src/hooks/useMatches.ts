@@ -341,8 +341,8 @@ function determineDota2Tier(
 }
 
 // ── SessionStorage cache — prevents loading flash on page revisit ──
-const MATCHES_CACHE_KEY = "matchiq_matches_cache";
-const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts";
+const MATCHES_CACHE_KEY = "matchiq_matches_cache_v2";
+const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v2";
 
 function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
   try {
@@ -351,6 +351,16 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
     if (!raw || !ts) return null;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    // Safety: ensure all entries have primitive url/context fields (not objects)
+    for (const m of parsed) {
+      if (typeof m.url !== "string" && m.url != null) m.url = "";
+      if (typeof m.context !== "string") m.context = "";
+      if (typeof m.team1 !== "string") m.team1 = String(m.team1 ?? "");
+      if (typeof m.team2 !== "string") m.team2 = String(m.team2 ?? "");
+      if (typeof m.favorite !== "string") m.favorite = "";
+      if (typeof m.matchType !== "string") m.matchType = "";
+      if (typeof m.game !== "string") m.game = "";
+    }
     return { matches: parsed as Match[], timestamp: parseInt(ts, 10) };
   } catch {
     return null;
