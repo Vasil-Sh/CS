@@ -1,5 +1,5 @@
-import { Component, type ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Component, type ReactNode } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -12,7 +12,10 @@ interface ErrorBoundaryState {
   retryKey: number;
 }
 
-export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export default class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, retryKey: 0 };
@@ -23,11 +26,15 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('🚨 ErrorBoundary caught:', error, errorInfo);
+    console.error("🚨 ErrorBoundary caught:", error, errorInfo);
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null, retryKey: this.state.retryKey + 1 });
+    this.setState({
+      hasError: false,
+      error: null,
+      retryKey: this.state.retryKey + 1,
+    });
   };
 
   render() {
@@ -38,7 +45,10 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <div className="min-h-screen flex items-center justify-center bg-[#f3f3f3] p-8">
           <div className="text-center max-w-md">
             <div className="p-6 bg-[#FEE2E2] rounded-3xl inline-block mb-6">
-              <AlertTriangle className="h-14 w-14 text-red-600" strokeWidth={1.5} />
+              <AlertTriangle
+                className="h-14 w-14 text-red-600"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
               Не вдалося завантажити сторінку
@@ -47,9 +57,14 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               Перевірте з'єднання з інтернетом і натисніть «Оновити».
             </p>
             {this.state.error && (
-              <p className="text-xs text-gray-400 mb-6 p-3 bg-gray-50 rounded-xl font-mono break-all">
-                {this.state.error.message}
-              </p>
+              <details className="mb-6">
+                <summary className="text-xs text-gray-400 cursor-pointer p-3 bg-gray-50 rounded-xl">
+                  {this.state.error.message}
+                </summary>
+                <pre className="text-left text-[10px] text-gray-400 p-3 bg-gray-50 rounded-b-xl overflow-auto max-h-40">
+                  {this.state.error.stack}
+                </pre>
+              </details>
             )}
             <button
               type="button"

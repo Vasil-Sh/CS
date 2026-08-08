@@ -356,8 +356,9 @@ function determineDota2Tier(
 const MATCHES_CACHE_KEY = "matchiq_matches_cache_v3";
 const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v3";
 
-// Nuke old cache keys on mount to prevent stale/corrupt data from crashing React.
-function clearOldCaches(): void {
+// Nuke old cache keys + localStorage caches on mount to prevent crashes.
+function clearAllCaches(): void {
+  // SessionStorage
   for (const key of [
     "matchiq_matches_cache",
     "matchiq_matches_cache_v2",
@@ -366,6 +367,14 @@ function clearOldCaches(): void {
   ]) {
     try {
       sessionStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
+  }
+  // LocalStorage — API-level caches from csApi.ts / dota2Api.ts
+  for (const key of ["cs2_matches_cache_v11", "dota2_matches_cache_v18"]) {
+    try {
+      localStorage.removeItem(key);
     } catch {
       /* ignore */
     }
@@ -426,7 +435,7 @@ function saveCachedMatches(matches: Match[]): void {
 // ── Main Hook ──
 export function useMatches() {
   // One-time: nuke old corrupt sessionStorage caches
-  clearOldCaches();
+  clearAllCaches();
   const cached = loadCachedMatches();
   const [matches, setMatches] = useState<Match[]>(cached?.matches ?? []);
   const [isLoading, setIsLoading] = useState(false);
