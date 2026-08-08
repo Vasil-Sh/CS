@@ -129,7 +129,7 @@ const loadMatchRatings = (): Record<string, MatchRating> => {
 export const COLUMN_DEFS = [
   { id: "rating", label: "Інтерес до Матчу", defaultVisible: true },
   { id: "match", label: "Матч", defaultVisible: true },
-  { id: "score", label: "Рахунок", defaultVisible: true },
+  { id: "score", label: "Гра", defaultVisible: true },
   { id: "ai", label: "AI", defaultVisible: true },
   { id: "prediction", label: "Прогноз", defaultVisible: false },
   { id: "odds", label: "Коеф.", defaultVisible: false },

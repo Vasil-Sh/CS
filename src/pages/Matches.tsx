@@ -120,7 +120,7 @@ export default function Matches() {
           <th
             className={`text-center py-4 px-3 text-sm font-semibold text-gray-700 uppercase tracking-wider ${colDivider}`}
           >
-            Рахунок
+            Гра
           </th>
         )}
         {m.visibleColumns.has("ai") && (

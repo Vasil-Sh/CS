@@ -26,6 +26,7 @@ import {
   Trophy,
   X,
   BarChart3,
+  ExternalLink,
 } from "lucide-react";
 
 import type { Match, FormStability, MatchRating } from "@/hooks/useMatches";
@@ -576,46 +577,48 @@ export default function MatchRow({
       {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {match.score1 != null && match.score2 != null ? (
+          {isFinished && match.score1 != null && match.score2 != null ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
                 className={`text-base font-bold ${
-                  isFinished && match.score1! > match.score2!
+                  match.score1! > match.score2!
                     ? "text-green-500"
-                    : isFinished && match.score1! < match.score2!
-                      ? "text-red-500"
-                      : isLive && match.score1! > match.score2!
-                        ? "text-emerald-600"
-                        : isLive && match.score1! < match.score2!
-                          ? "text-red-400"
-                          : "text-gray-900"
+                    : "text-red-500"
                 }`}
               >
                 {match.score1}
               </span>
-              <span
-                className={`text-base font-medium ${isLive ? "text-gray-500" : "text-gray-400"}`}
-              >
-                :
-              </span>
+              <span className="text-base font-medium text-gray-400">:</span>
               <span
                 className={`text-base font-bold ${
-                  isFinished && match.score2! > match.score1!
+                  match.score2! > match.score1!
                     ? "text-green-500"
-                    : isFinished && match.score2! < match.score1!
-                      ? "text-red-500"
-                      : isLive && match.score2! > match.score1!
-                        ? "text-emerald-600"
-                        : isLive && match.score2! < match.score1!
-                          ? "text-red-400"
-                          : "text-gray-900"
+                    : "text-red-500"
                 }`}
               >
                 {match.score2}
               </span>
             </div>
-          ) : isLive ? (
-            <span className="text-gray-900 text-base font-bold">0:0</span>
+          ) : match.url ? (
+            <a
+              href={match.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                isLive
+                  ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                  : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              {isLive && (
+                <span className="relative flex h-2 w-2 mr-0.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+              )}
+              <ExternalLink className="h-3 w-3" />
+              {isLive ? "LIVE" : "Огляд"}
+            </a>
           ) : (
             <span className="text-gray-400 text-sm">—</span>
           )}
