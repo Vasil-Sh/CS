@@ -340,11 +340,39 @@ function determineDota2Tier(
   return "tier3";
 }
 
+// ── SessionStorage cache — prevents loading flash on page revisit ──
+const MATCHES_CACHE_KEY = "matchiq_matches_cache";
+const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts";
+
+function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
+  try {
+    const raw = sessionStorage.getItem(MATCHES_CACHE_KEY);
+    const ts = sessionStorage.getItem(MATCHES_CACHE_TS_KEY);
+    if (!raw || !ts) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    return { matches: parsed as Match[], timestamp: parseInt(ts, 10) };
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedMatches(matches: Match[]): void {
+  try {
+    sessionStorage.setItem(MATCHES_CACHE_KEY, JSON.stringify(matches));
+    sessionStorage.setItem(MATCHES_CACHE_TS_KEY, String(Date.now()));
+  } catch {
+    /* quota exceeded, ignore */
+  }
+}
+
 // ── Main Hook ──
 export function useMatches() {
-  const [matches, setMatches] = useState<Match[]>([]);
+  const cached = loadCachedMatches();
+  const [matches, setMatches] = useState<Match[]>(cached?.matches ?? []);
   const [isLoading, setIsLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  // Skip loader if restored from cache — SWR refreshes silently in background
+  const [initialLoading, setInitialLoading] = useState(cached ? false : true);
   const [sortBy, setSortBy] = useState<SortBy>("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<FilterDay>("all");
@@ -452,7 +480,12 @@ export function useMatches() {
   // ── Load matches from API ──
   const loadMatchesFromApi = useCallback(async () => {
     const gen = ++fetchGenRef.current;
-    setInitialLoading(true);
+    // Only show loader if we have no matches at all (cold start).
+    // If matches were restored from sessionStorage, refresh silently.
+    setMatches((prev) => {
+      if (prev.length === 0) setInitialLoading(true);
+      return prev;
+    });
     setApiError(null);
     try {
       // Track whether SWR callback already delivered fresh CS2 data.
@@ -569,6 +602,11 @@ export function useMatches() {
   useEffect(() => {
     loadMatchesFromApi();
   }, [loadMatchesFromApi]);
+
+  // ── Persist matches to sessionStorage for instant restore on revisit ──
+  useEffect(() => {
+    if (matches.length > 0) saveCachedMatches(matches);
+  }, [matches]);
 
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
