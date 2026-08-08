@@ -15,8 +15,6 @@ import {
   Lightbulb,
   Eye,
   PlusCircle,
-  Clock,
-  CheckCircle2,
   Brain,
   Flame,
   Shield,
@@ -276,76 +274,6 @@ const PredictionBar = ({
 };
 
 /** Compact status badge for inside the match column (left sidebar) */
-function getMatchStatusBadgeCompact(
-  status?: "upcoming" | "live" | "finished" | "postponed" | "cancelled",
-) {
-  switch (status) {
-    case "live":
-      return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-gray-400 leading-none bg-gray-50 rounded px-1.5 py-0.5 cursor-default">
-          ●
-        </span>
-      );
-    case "finished":
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-gray-500 leading-none bg-gray-100 rounded px-1.5 py-0.5 cursor-default">
-              <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
-              ЗАВЕР
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-            <p className="text-xs">Завершено</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    case "postponed":
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 leading-none bg-amber-50 rounded px-1.5 py-0.5 cursor-default">
-              <Clock className="h-3 w-3" strokeWidth={2} />
-              ПЕРЕН
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-            <p className="text-xs">Перенесено</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    case "cancelled":
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-600 leading-none bg-red-50 rounded px-1.5 py-0.5 cursor-default">
-              <X className="h-3 w-3" strokeWidth={2} />
-              ОТМЕН
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-            <p className="text-xs">Скасовано</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    case "upcoming":
-    default:
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-blue-600 leading-none bg-blue-50 rounded px-1.5 py-0.5 cursor-default">
-              <Clock className="h-3 w-3" strokeWidth={2} />
-              ОЧІКУ
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-            <p className="text-xs">Очікується</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-  }
-}
-
 const getFormInfo = (form: FormStability) => {
   const map: Record<
     FormStability,
@@ -500,7 +428,9 @@ export default function MatchRow({
                 </span>
               </div>
               <div className="flex items-center" style={{ minHeight: 22 }}>
-                {getMatchStatusBadgeCompact(match.matchStatus)}
+                <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 rounded px-1.5 py-0.5">
+                  {match.matchType}
+                </span>
               </div>
             </div>
             {/* Right: teams + badges */}
