@@ -262,29 +262,27 @@ describe("getMatchStatus", () => {
 // ═══════════════════════════════════════════════════════════════════
 // buildHltvUrl
 describe("buildHltvUrl", () => {
-  it("[29] valid HLTV URL with numeric ID → pass-through", () => {
-    expect(
-      buildHltvUrl("https://www.hltv.org/matches/12345/team1-vs-team2"),
-    ).toBe("https://www.hltv.org/matches/12345/team1-vs-team2");
-  });
-
-  it("[30] with team names → search URL", () => {
-    expect(buildHltvUrl("", "Navi", "Spirit")).toBe(
-      "https://www.hltv.org/search?query=Navi+vs+Spirit",
+  it("[29] relative path → full HLTV URL", () => {
+    expect(buildHltvUrl("/matches/123/team1-vs-team2")).toBe(
+      "https://www.hltv.org/matches/123/team1-vs-team2",
     );
   });
 
-  it("[31] non-standard path + team names → search URL", () => {
-    expect(
-      buildHltvUrl(
-        "https://www.hltv.org/matches/counter-strike/08-08-2026/prestige-vs-metizport/12-30/",
-        "Prestige",
-        "Metizport",
-      ),
-    ).toBe("https://www.hltv.org/search?query=Prestige+vs+Metizport");
+  it("[30] relative without slash → adds /", () => {
+    expect(buildHltvUrl("matches/456")).toBe(
+      "https://www.hltv.org/matches/456",
+    );
   });
 
-  it("[32] empty string + no team names → HLTV home", () => {
-    expect(buildHltvUrl("")).toBe("https://www.hltv.org");
+  it("[31] already full https URL → pass-through", () => {
+    expect(
+      buildHltvUrl(
+        "https://www.hltv.org/matches/2396526/genone-vs-galactik-rebels",
+      ),
+    ).toBe("https://www.hltv.org/matches/2396526/genone-vs-galactik-rebels");
+  });
+
+  it("[32] empty string → empty string", () => {
+    expect(buildHltvUrl("")).toBe("");
   });
 });
