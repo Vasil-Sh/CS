@@ -282,17 +282,9 @@ function getMatchStatusBadgeCompact(
   switch (status) {
     case "live":
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-white leading-none bg-red-500 rounded px-1.5 py-0.5 cursor-default">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              LIVE
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
-            <p className="text-xs">Зараз грають</p>
-          </TooltipContent>
-        </Tooltip>
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-gray-400 leading-none bg-gray-50 rounded px-1.5 py-0.5 cursor-default">
+          ●
+        </span>
       );
     case "finished":
       return (

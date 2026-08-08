@@ -441,7 +441,7 @@ export function useMatches() {
   const [isLoading, setIsLoading] = useState(false);
   // Skip loader if restored from cache — SWR refreshes silently in background
   const [initialLoading, setInitialLoading] = useState(cached ? false : true);
-  const [sortBy, setSortBy] = useState<SortBy>("status");
+  const [sortBy, setSortBy] = useState<SortBy>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<FilterDay>("all");
   const [filterRisk, setFilterRisk] = useState<FilterRisk>("all");
