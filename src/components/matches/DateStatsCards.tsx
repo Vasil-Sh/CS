@@ -2,7 +2,6 @@ import {
   Trophy,
   Layers,
   Clock,
-  CheckCircle2,
   Brain,
   ArrowUpRight,
   ArrowDownRight,
@@ -86,13 +85,6 @@ export default function DateStatsCards({
       sub: <span className="text-sm text-[#4B5563]">за розкладом</span>,
     },
     {
-      icon: <CheckCircle2 className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "За посиланням",
-      value: "→",
-      color: "text-green-500",
-      sub: <span className="text-sm text-[#4B5563]">HLTV / tips.gg</span>,
-    },
-    {
       icon: <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />,
       label: "Середній Прогноз",
       value: `${avgConfidence}%`,
@@ -122,7 +114,7 @@ export default function DateStatsCards({
 
   return (
     <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {cards.map((c) => (
           <div
             key={c.label}
