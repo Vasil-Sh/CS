@@ -606,20 +606,10 @@ export default function MatchRow({
               href={match.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                isLive
-                  ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-                  : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
-              }`}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all text-gray-500"
+              title="Відкрити матч"
             >
-              {isLive && (
-                <span className="relative flex h-2 w-2 mr-0.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                </span>
-              )}
-              <ExternalLink className="h-3 w-3" />
-              {isLive ? "LIVE" : "Огляд"}
+              <ExternalLink className="h-4 w-4" />
             </a>
           ) : (
             <span className="text-gray-400 text-sm">—</span>
