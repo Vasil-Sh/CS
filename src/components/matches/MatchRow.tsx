@@ -467,7 +467,15 @@ export default function MatchRow({
                 </span>
               </div>
               <div className="flex items-center" style={{ minHeight: 22 }}>
-                <span className="text-xs font-bold text-gray-900 bg-gray-100 rounded px-1.5 py-0.5">
+                <span
+                  className={`text-xs font-bold rounded px-1.5 py-0.5 ${
+                    match.matchType === "Bo5"
+                      ? "bg-purple-100 text-purple-700"
+                      : match.matchType === "Bo3"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-blue-100 text-blue-700"
+                  }`}
+                >
                   {match.matchType}
                 </span>
               </div>
