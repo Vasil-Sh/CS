@@ -31,6 +31,9 @@ export interface BaseApiMatch {
   cs2Slug?: string;
   /** Whether this match was user-submitted (custom/placeholder) */
   isCustom?: boolean;
+  /** Team form stability from match history (computed by backend) */
+  formTeam1?: string;
+  formTeam2?: string;
 }
 
 /** Typed API error with status code and optional details */

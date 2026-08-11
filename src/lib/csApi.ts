@@ -72,6 +72,8 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     status: (m.status as "upcoming" | "live" | "finished") || "upcoming",
     cs2Slug: csSlug,
     isCustom: (m.isCustom as boolean) ?? false,
+    formTeam1: m.formTeam1 as string | undefined,
+    formTeam2: m.formTeam2 as string | undefined,
   };
 }
 

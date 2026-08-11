@@ -35,6 +35,8 @@ interface TipsGgApiMatch {
   pred2: number;
   coeff1: number | null;
   coeff2: number | null;
+  formTeam1?: string;
+  formTeam2?: string;
 }
 
 const MATCHES_CACHE_KEY = "dota2_matches_cache_v18";
@@ -89,6 +91,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     tournament: m.tournament || "",
     stage: m.stage || "",
     status: m.status,
+    formTeam1: m.formTeam1,
+    formTeam2: m.formTeam2,
   };
 }
 

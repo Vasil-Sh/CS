@@ -218,7 +218,9 @@ function apiMatchToMatch(
       team2: hasCoeffs ? (coeff2 ?? 0) : 0,
     },
     winRate,
-    formStability: "stable",
+    formStability: (apiMatch.formTeam1 ||
+      apiMatch.formTeam2 ||
+      "stable") as FormStability,
     playerForm: [],
     context,
     tier,
@@ -280,7 +282,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
       team2: m.bettingCoefficientTeam2 ?? 0,
     },
     winRate: confidence,
-    formStability: "stable",
+    formStability: (m.formTeam1 || m.formTeam2 || "stable") as FormStability,
     playerForm: [],
     context,
     tier: determineDota2Tier(m.positionTeam1, m.positionTeam2, m.tournament),
@@ -763,19 +765,19 @@ export function useMatches() {
                 if (isScoreDecided) return "finished";
 
                 // Format-dependent auto-finish for stale live matches.
-                // Bo1 rarely exceeds 1.5h, Bo3 3h, Bo5 5h. After that time,
+                // Bo1 rarely exceeds 1h, Bo3 2.5h, Bo5 4.5h. After that time,
                 // the match is almost certainly finished — finish it locally.
                 // The backend will backfill the correct score later.
                 const matchDate = new Date(m.date);
                 const ageMs = Date.now() - matchDate.getTime();
                 const maxHours =
                   m.matchType === "Bo5"
-                    ? 5
+                    ? 4.5
                     : m.matchType === "Bo3"
-                      ? 3
+                      ? 2.5
                       : m.matchType === "Bo2"
-                        ? 3
-                        : 1.5; // Bo1 default
+                        ? 2.5
+                        : 1; // Bo1
                 const maxAgeMs = maxHours * 60 * 60 * 1000;
                 if (m.matchStatus === "live" && ageMs > maxAgeMs)
                   return "finished";
@@ -932,10 +934,10 @@ export function useMatches() {
       const ageMs = now - new Date(m.date).getTime();
       const maxHours =
         m.matchType === "Bo5"
-          ? 5
+          ? 4.5
           : m.matchType === "Bo3" || m.matchType === "Bo2"
-            ? 3
-            : 1.5; // Bo1
+            ? 2.5
+            : 1; // Bo1
       if (ageMs > maxHours * 60 * 60 * 1000) {
         return { ...m, matchStatus: "finished" as const };
       }
