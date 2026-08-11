@@ -490,6 +490,11 @@ export default function MatchRow({
                     <span className="font-semibold text-gray-900 text-base">
                       {match.team1}
                     </span>
+                    {match.positionTeam1 != null && match.positionTeam1 > 0 && (
+                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px">
+                        #{match.positionTeam1}
+                      </span>
+                    )}
                   </div>
                   <span className="text-gray-400 text-xs font-medium">vs</span>
                   <div className="flex items-center gap-1.5">
@@ -502,6 +507,11 @@ export default function MatchRow({
                     <span className="font-semibold text-gray-900 text-base">
                       {match.team2}
                     </span>
+                    {match.positionTeam2 != null && match.positionTeam2 > 0 && (
+                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px">
+                        #{match.positionTeam2}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
