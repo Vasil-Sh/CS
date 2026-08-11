@@ -430,7 +430,7 @@ export default function MatchRow({
                 strokeWidth={1.5}
               />
               {match.context}
-              {isOngoing && (
+              {match.matchStatus === "live" ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-px flex-shrink-0">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
@@ -438,7 +438,15 @@ export default function MatchRow({
                   </span>
                   Зараз грають
                 </span>
-              )}
+              ) : match.matchStatus === "upcoming" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-px flex-shrink-0">
+                  Очікується
+                </span>
+              ) : match.matchStatus === "finished" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 bg-gray-100 rounded-full px-2 py-px flex-shrink-0">
+                  Завершено
+                </span>
+              ) : null}
             </div>
           )}
           {/* Main row: time/status sidebar + teams/badges */}
