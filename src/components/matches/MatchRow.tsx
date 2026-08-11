@@ -577,7 +577,8 @@ export default function MatchRow({
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           {isFinished &&
           typeof match.score1 === "number" &&
-          typeof match.score2 === "number" ? (
+          typeof match.score2 === "number" &&
+          (match.score1 > 0 || match.score2 > 0) ? (
             <div className="flex items-center justify-center gap-0.5">
               <span
                 className={`text-base font-bold ${

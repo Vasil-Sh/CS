@@ -762,16 +762,30 @@ export function useMatches() {
               (() => {
                 if (isScoreDecided) return "finished";
 
-                // Age-based auto-finish for stale live matches
-                // If a match has been live for >2h with no scores, it likely completed
-                // but the data source never sent final results → finish it.
+                // Format-dependent auto-finish for stale live matches.
+                // Bo1 rarely exceeds 1.5h, Bo3 3h, Bo5 5h. After that time,
+                // the match is almost certainly finished — finish it locally.
+                // The backend will backfill the correct score later.
+                const matchDate = new Date(m.date);
+                const ageMs = Date.now() - matchDate.getTime();
+                const maxHours =
+                  m.matchType === "Bo5"
+                    ? 5
+                    : m.matchType === "Bo3"
+                      ? 3
+                      : m.matchType === "Bo2"
+                        ? 3
+                        : 1.5; // Bo1 default
+                const maxAgeMs = maxHours * 60 * 60 * 1000;
+                if (m.matchStatus === "live" && ageMs > maxAgeMs)
+                  return "finished";
+
+                // Age-based auto-finish for live matches with no scores.
                 if (!hasScores) {
-                  const matchDate = new Date(m.date);
-                  const ageMs = Date.now() - matchDate.getTime();
-                  // >4h of live with no score update → auto-finish
+                  // >4h of live with no scores → auto-finish (fallback)
                   if (m.matchStatus === "live" && ageMs > 4 * 60 * 60 * 1000)
                     return "finished";
-                  // >30min of live with no score update → postpone
+                  // >30min of live with no scores → postpone
                   if (m.matchStatus === "live" && ageMs > 30 * 60 * 1000)
                     return "postponed";
                 }
@@ -793,9 +807,7 @@ export function useMatches() {
                 if (update.status === "live") return "live";
 
                 if (hasScores) return m.matchStatus;
-                const matchDate = new Date(m.date);
                 if (matchDate <= new Date()) {
-                  const ageMs = Date.now() - matchDate.getTime();
                   if (ageMs < 4 * 60 * 60 * 1000) return "live";
                 }
                 return m.matchStatus;
@@ -908,7 +920,28 @@ export function useMatches() {
     tournamentOptions,
     tournamentCount,
   } = useMemo(() => {
+    const now = Date.now();
     const todayKey = getTodayDateKey();
+
+    // ── Pre-process: auto-finish stale live matches based on format max duration ──
+    // This runs on every render/recalculation, so it overrides the backend "live"
+    // status for matches past their expected duration. Backend will backfill
+    // the correct score later.
+    const statusFixed = matches.map((m) => {
+      if (m.matchStatus !== "live") return m;
+      const ageMs = now - new Date(m.date).getTime();
+      const maxHours =
+        m.matchType === "Bo5"
+          ? 5
+          : m.matchType === "Bo3" || m.matchType === "Bo2"
+            ? 3
+            : 1.5; // Bo1
+      if (ageMs > maxHours * 60 * 60 * 1000) {
+        return { ...m, matchStatus: "finished" as const };
+      }
+      return m;
+    });
+
     // Yesterday's date key for keeping recently completed matches visible
     const yesterdayDate = new Date();
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
@@ -917,7 +950,7 @@ export function useMatches() {
     const ydd = String(yesterdayDate.getDate()).padStart(2, "0");
     const yesterdayKey = `${yyyy}-${ymm}-${ydd}`;
 
-    const filtered = matches.filter((match) => {
+    const filtered = statusFixed.filter((match) => {
       const matchDateKey = getDateKey(match.date);
       // Exclude matches from past days — but keep:
       // - live & upcoming (still playing or about to start)
