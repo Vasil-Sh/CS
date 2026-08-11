@@ -189,7 +189,7 @@ export async function fetchDota2Matches(
       const path = forceRefresh
         ? "/v1/dota2-matches?refresh=true"
         : "/v1/dota2-matches";
-      // Use 25s timeout — composite fetcher falls back from tips.gg to OpenDota in 15s
+      // Use 25s timeout — tips.gg Puppeteer scrape can take up to 60s
       const data = await api.get<TipsGgApiMatch[]>(path, 25000);
       const matches = (Array.isArray(data) ? data : []).map(tipsGgToApiMatch);
       if (matches.length > 0) {
