@@ -431,7 +431,7 @@ export default function MatchRow({
               />
               {match.context}
               {match.matchStatus === "live" ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-px flex-shrink-0">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-300 rounded-full px-2 py-px flex-shrink-0">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
@@ -439,14 +439,14 @@ export default function MatchRow({
                   Зараз грають
                 </span>
               ) : match.matchStatus === "upcoming" ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-px flex-shrink-0">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-300 rounded-full px-2 py-px flex-shrink-0">
                   <span className="relative flex h-2 w-2">
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                   </span>
                   Очікується
                 </span>
               ) : match.matchStatus === "finished" ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 rounded-full px-2 py-px flex-shrink-0">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 border border-red-300 rounded-full px-2 py-px flex-shrink-0">
                   <span className="relative flex h-2 w-2">
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                   </span>
