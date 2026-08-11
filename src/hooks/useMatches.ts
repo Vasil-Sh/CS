@@ -70,6 +70,8 @@ export interface Match {
   stars?: number;
   dota2Slug?: string;
   cs2Slug?: string;
+  /** Whether this match is a custom/placeholder from user input */
+  isCustom?: boolean;
 }
 
 export type MatchRating = "like" | "dislike" | null;
@@ -225,13 +227,18 @@ function apiMatchToMatch(
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
     url: String(
       (game === "CS2"
-        ? buildHltvUrl(String(apiMatch.link ?? ""))
+        ? buildHltvUrl(
+            String(apiMatch.link ?? ""),
+            String(apiMatch.nameTeam1 ?? ""),
+            String(apiMatch.nameTeam2 ?? ""),
+          )
         : buildTipsGgUrl(String(apiMatch.link ?? ""))) || "",
     ),
     score1: typeof apiMatch.score1 === "number" ? apiMatch.score1 : null,
     score2: typeof apiMatch.score2 === "number" ? apiMatch.score2 : null,
     matchStatus: status,
     cs2Slug: apiMatch.cs2Slug,
+    isCustom: apiMatch.isCustom ?? false,
     positionTeam1: apiMatch.positionTeam1,
     positionTeam2: apiMatch.positionTeam2,
     logoTeam1: apiMatch.logoTeam1,

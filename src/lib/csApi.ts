@@ -71,6 +71,7 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     stage: String(m.stage || ""),
     status: (m.status as "upcoming" | "live" | "finished") || "upcoming",
     cs2Slug: csSlug,
+    isCustom: (m.isCustom as boolean) ?? false,
   };
 }
 
@@ -401,9 +402,22 @@ export function getMatchStatus(
 
 const HLTV_BASE_URL = "https://www.hltv.org";
 
-/** Build a full HLTV URL from an API link. */
-export function buildHltvUrl(link: string): string {
+/** Build a full HLTV URL. Uses search as fallback for non-numeric-ID links. */
+export function buildHltvUrl(
+  link: string,
+  team1?: string,
+  team2?: string,
+): string {
   if (!link) return "";
-  if (link.startsWith("http://") || link.startsWith("https://")) return link;
-  return `https://www.hltv.org${link.startsWith("/") ? "" : "/"}${link}`;
+  if (link.startsWith("http://") || link.startsWith("https://")) {
+    // If it's already a valid HLTV matches URL with numeric ID, use directly
+    if (/matches\/\d+/.test(link)) return link;
+    // Otherwise fall through to search
+  }
+  // Build HLTV search URL from team names — always works
+  if (team1 && team2) {
+    const q = encodeURIComponent(`${team1}+vs+${team2}`);
+    return `${HLTV_BASE_URL}/search?query=${q}`;
+  }
+  return HLTV_BASE_URL;
 }

@@ -29,6 +29,8 @@ export interface BaseApiMatch {
   status?: "upcoming" | "live" | "finished";
   /** Raw slug for CS2 live-score matching */
   cs2Slug?: string;
+  /** Whether this match was user-submitted (custom/placeholder) */
+  isCustom?: boolean;
 }
 
 /** Typed API error with status code and optional details */
