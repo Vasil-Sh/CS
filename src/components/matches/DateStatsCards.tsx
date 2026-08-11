@@ -55,9 +55,9 @@ export default function DateStatsCards({
     {
       icon: <TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} />,
       label: "Середній коефіцієнт",
-      value: avgCoefficient > 0 ? avgCoefficient.toFixed(2) : "—",
+      value: avgCoefficient > 0 ? `x${avgCoefficient.toFixed(2)}` : "—",
       color: "text-emerald-600",
-      sub: <span className="text-sm text-[#4B5563]">оцінка валу</span>,
+      sub: <span className="text-sm text-[#4B5563]">середня виплата</span>,
     },
     {
       icon: <Globe className="h-5 w-5 text-primary" strokeWidth={1.5} />,

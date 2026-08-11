@@ -538,20 +538,6 @@ export default function MatchRow({
                   </Badge>
                 )}
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-all cursor-help text-[10px] font-bold flex-shrink-0">
-                      ?
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[260px] bg-gray-900 text-white p-3 rounded-xl text-xs leading-relaxed">
-                    <p>
-                      Статус матчу оновлюється із затримкою, оскільки MatchIQ не
-                      є стрімінговою платформою. Для точних рахунків у реальному
-                      часі перейдіть за посиланням на tips.gg.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
                   <TooltipTrigger>
                     <Badge
                       className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5`}
@@ -565,6 +551,20 @@ export default function MatchRow({
                       {match.favorite}
                     </p>
                     <p className="text-sm">{formInfo.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-all cursor-help text-[10px] font-bold flex-shrink-0">
+                      ?
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[260px] bg-gray-900 text-white p-3 rounded-xl text-xs leading-relaxed">
+                    <p>
+                      Статус матчу оновлюється із затримкою, оскільки MatchIQ не
+                      є стрімінговою платформою. Для точних рахунків у реальному
+                      часі перейдіть за посиланням на tips.gg.
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </div>
