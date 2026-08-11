@@ -1,7 +1,7 @@
 import {
   Trophy,
-  Layers,
-  Clock,
+  TrendingUp,
+  Globe,
   Brain,
   ArrowUpRight,
   ArrowDownRight,
@@ -11,9 +11,8 @@ interface StatCardsProps {
   displayCount: number;
   cs2DisplayedCount: number;
   dota2DisplayedCount: number;
-  bo1Count: number;
-  bo3Count: number;
-  bo5Count: number;
+  avgCoefficient: number;
+  tournamentCount: number;
   avgConfidence: number;
 }
 
@@ -30,9 +29,8 @@ export default function DateStatsCards({
   displayCount,
   cs2DisplayedCount,
   dota2DisplayedCount,
-  bo1Count,
-  bo3Count,
-  bo5Count,
+  avgCoefficient,
+  tournamentCount,
   avgConfidence,
 }: StatCardsProps) {
   const cards = [
@@ -55,34 +53,18 @@ export default function DateStatsCards({
       ),
     },
     {
-      icon: <Layers className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "Формат",
-      value: `${bo3Count + bo5Count}`,
-      color: "text-amber-600",
-      sub: (
-        <>
-          <span className="text-sm font-semibold text-amber-600">
-            Bo3 {bo3Count}
-          </span>
-          <span className="text-sm text-gray-400">·</span>
-          <span className="text-sm font-semibold text-orange-600">
-            Bo5 {bo5Count}
-          </span>
-          {bo1Count > 0 && (
-            <>
-              <span className="text-sm text-gray-400">·</span>
-              <span className="text-sm text-gray-500">Bo1 {bo1Count}</span>
-            </>
-          )}
-        </>
-      ),
+      icon: <TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} />,
+      label: "Середній коефіцієнт",
+      value: avgCoefficient > 0 ? avgCoefficient.toFixed(2) : "—",
+      color: "text-emerald-600",
+      sub: <span className="text-sm text-[#4B5563]">оцінка валу</span>,
     },
     {
-      icon: <Clock className="h-5 w-5 text-primary" strokeWidth={1.5} />,
-      label: "Сьогодні",
-      value: displayCount,
-      color: "text-blue-600",
-      sub: <span className="text-sm text-[#4B5563]">за розкладом</span>,
+      icon: <Globe className="h-5 w-5 text-primary" strokeWidth={1.5} />,
+      label: "Турнірів",
+      value: tournamentCount,
+      color: "text-sky-600",
+      sub: <span className="text-sm text-[#4B5563]">сьогодні</span>,
     },
     {
       icon: <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />,

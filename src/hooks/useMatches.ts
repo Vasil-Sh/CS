@@ -901,8 +901,12 @@ export function useMatches() {
     cs2DisplayedCount,
     dota2DisplayedCount,
     ongoingCount,
+    topMatchesCount,
+    topMatches,
+    avgCoefficient,
     avgConfidence,
     tournamentOptions,
+    tournamentCount,
   } = useMemo(() => {
     const todayKey = getTodayDateKey();
     // Yesterday's date key for keeping recently completed matches visible
@@ -1078,10 +1082,29 @@ export function useMatches() {
       cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
       dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
       ongoingCount,
+      topMatchesCount: displayed.filter((m) => (m.stars ?? 0) >= 4).length,
+      topMatches: displayed
+        .filter((m) => (m.stars ?? 0) >= 4)
+        .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0))
+        .slice(0, 3)
+        .map((m) => ({ team1: m.team1, team2: m.team2, stars: m.stars ?? 0 })),
+      avgCoefficient: (() => {
+        const cs = displayed
+          .flatMap((m) => [
+            m.bettingCoefficientTeam1 ?? 0,
+            m.bettingCoefficientTeam2 ?? 0,
+          ])
+          .filter((c) => c > 0);
+        return cs.length > 0
+          ? Math.round((cs.reduce((s, c) => s + c, 0) / cs.length) * 100) / 100
+          : 0;
+      })(),
       avgConfidence: avg,
       tournamentOptions: [
         ...new Set(displayed.map((m) => m.context).filter(Boolean)),
       ].sort(),
+      tournamentCount: new Set(displayed.map((m) => m.context).filter(Boolean))
+        .size,
     };
   }, [
     matches,
@@ -1363,6 +1386,8 @@ export function useMatches() {
     bo5Count,
     cs2DisplayedCount,
     dota2DisplayedCount,
+    avgCoefficient,
+    tournamentCount,
     avgConfidence,
     // Filters
     filterGame,

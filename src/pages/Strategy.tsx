@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Target, Flag, Activity, DollarSign, Trophy } from "lucide-react";
+import { Target, Flag, Activity, CheckCircle, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import StrategyOverview from "@/components/StrategyOverview";
 import GoalsManager from "@/components/GoalsManager";
@@ -46,36 +46,6 @@ interface StoredGoal {
   isPrimary?: boolean;
 }
 
-const computeTodayPnL = (bets: Bet[]) => {
-  const today = new Date().toISOString().split("T")[0];
-  const todayBets = bets.filter((b) => {
-    try {
-      return new Date(b.date).toISOString().split("T")[0] === today;
-    } catch {
-      return false;
-    }
-  });
-  const profit = todayBets.reduce((sum, b) => sum + Number(b.profit || 0), 0);
-  const pending = todayBets.filter((b) => b.result === "Pending").length;
-  return { profit, count: todayBets.length, pending };
-};
-const compute7DayProfit = (bets: Bet[]): number[] => {
-  const days: number[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().split("T")[0];
-    const dayBets = bets.filter((b) => {
-      try {
-        return new Date(b.date).toISOString().split("T")[0] === key;
-      } catch {
-        return false;
-      }
-    });
-    days.push(dayBets.reduce((sum, b) => sum + Number(b.profit || 0), 0));
-  }
-  return days;
-};
 const computeBestStrategy = (bets: Bet[]) => {
   const byStrat: Record<
     string,
@@ -200,8 +170,6 @@ export default function Strategy() {
   }, [resolvedUser, primaryStrategyId, strategyVersion]);
 
   const [primaryGoal, setPrimaryGoal] = useState<StoredGoal | null>(null);
-  const todayPnL = useMemo(() => computeTodayPnL(bets), [bets]);
-  const sevenDayProfit = useMemo(() => compute7DayProfit(bets), [bets]);
   const bestStrategy = useMemo(() => computeBestStrategy(bets), [bets]);
   const stratsAndGoals = useMemo(() => {
     const strats =
@@ -213,7 +181,8 @@ export default function Strategy() {
     const goals =
       UserDataService.getUserData<StoredGoal[]>(resolvedUser, "goals", []) ||
       [];
-    return { strategies: strats.length, goals: goals.length };
+    const completed = goals.filter((g) => g.status === "completed").length;
+    return { strategies: strats.length, goals: goals.length, completed };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUser, strategyVersion]);
 
@@ -247,93 +216,53 @@ export default function Strategy() {
         {/* ===== KPI CARDS ===== */}
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Сьогоднішній P&L */}
+            {/* Досягнень */}
             <div className="bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <DollarSign
+                  <CheckCircle
                     className="h-5 w-5 text-primary"
                     strokeWidth={1.5}
                   />
                 </div>
                 <span className="text-xl font-semibold text-gray-900">
-                  Прибуток сьогодні
+                  Досягнень
                 </span>
               </div>
-              {todayPnL.count > 0 ? (
+              {stratsAndGoals.goals > 0 ? (
                 <>
-                  <div
-                    className={`text-3xl font-bold mb-1 ${todayPnL.profit > 0 ? "text-green-500" : todayPnL.profit < 0 ? "text-red-500" : "text-gray-900"}`}
-                  >
-                    {todayPnL.profit > 0 ? "+" : ""}
-                    {todayPnL.profit.toFixed(0)} ₴
+                  <div className="text-3xl font-bold text-green-500 mb-1">
+                    {stratsAndGoals.completed}/{stratsAndGoals.goals}
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {todayPnL.count} став
-                    {todayPnL.count === 1
-                      ? "ка"
-                      : todayPnL.count < 5
-                        ? "ки"
-                        : "ок"}
-                    {todayPnL.pending > 0 ? `, ${todayPnL.pending} очікує` : ""}
-                  </span>
+                  <span className="text-sm text-gray-500">цілей виконано</span>
                 </>
               ) : (
                 <>
                   <div className="text-3xl font-bold text-gray-400 mb-1">—</div>
                   <span className="text-sm text-gray-400">
-                    Сьогодні ставок немає
+                    Немає створених цілей
                   </span>
                 </>
               )}
-              <div className="mt-2" style={{ height: 28 }}>
-                <svg
-                  width="100%"
-                  height="28"
-                  viewBox="0 0 100 28"
-                  preserveAspectRatio="none"
-                >
-                  {(() => {
-                    const arr = sevenDayProfit;
-                    const max = Math.max(...arr.map(Math.abs));
-                    const rng = max || 1;
-                    const ys = arr.map((v) => 14 - (v / rng) * 12);
-                    const d = ys
-                      .map(
-                        (y, i) =>
-                          `${i === 0 ? "M" : "L"} ${(i / 6) * 100} ${y}`,
-                      )
-                      .join(" ");
-                    const area = d + ` L 100 28 L 0 28 Z`;
-                    const lastUp = todayPnL.profit >= 0;
-                    return (
-                      <>
-                        <path
-                          d={area}
-                          fill={
-                            lastUp
-                              ? "rgba(34,197,94,0.08)"
-                              : "rgba(239,68,68,0.08)"
-                          }
-                        />
-                        <path
-                          d={d}
-                          fill="none"
-                          stroke={lastUp ? "#22C55E" : "#EF4444"}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      </>
-                    );
-                  })()}
-                </svg>
-              </div>
+              {stratsAndGoals.goals > 0 && (
+                <div className="mt-2">
+                  <Progress
+                    value={Math.max(
+                      Math.min(
+                        (stratsAndGoals.completed / stratsAndGoals.goals) * 100,
+                        100,
+                      ),
+                      2,
+                    )}
+                    className="h-2"
+                  />
+                </div>
+              )}
             </div>
             {/* Найкраща стратегія */}
-            <button
+            <div
               onClick={() => setActiveTab("strategies")}
-              className="text-left bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300"
+              className="cursor-pointer text-left bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300"
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -418,7 +347,7 @@ export default function Strategy() {
                   </span>
                 </>
               )}
-            </button>
+            </div>
             {/* Стратегій / Цілей */}
             <div className="bg-white rounded-3xl px-6 py-3 border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300">
               <div className="flex items-center gap-2 mb-2">
@@ -767,12 +696,20 @@ export default function Strategy() {
         <div>
           {activeTab === "strategies" && (
             <ErrorBoundary>
-              <StrategyOverview topTabs={topTabDefs} topActiveTab={activeTab} onTopTabChange={setActiveTab} />
+              <StrategyOverview
+                topTabs={topTabDefs}
+                topActiveTab={activeTab}
+                onTopTabChange={setActiveTab}
+              />
             </ErrorBoundary>
           )}
           {activeTab === "goals" && (
             <ErrorBoundary>
-              <GoalsManager topTabs={topTabDefs} topActiveTab={activeTab} onTopTabChange={setActiveTab} />
+              <GoalsManager
+                topTabs={topTabDefs}
+                topActiveTab={activeTab}
+                onTopTabChange={setActiveTab}
+              />
             </ErrorBoundary>
           )}
         </div>
