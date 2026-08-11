@@ -422,7 +422,7 @@ export default function MatchRow({
           {/* Tournament text — full width, no divider interference */}
           {typeof match.context === "string" && match.context && (
             <div
-              className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1 mb-1"
+              className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1.5 mb-1"
               title={match.context}
             >
               <Trophy
@@ -430,6 +430,11 @@ export default function MatchRow({
                 strokeWidth={1.5}
               />
               {match.context}
+              {isOngoing && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-px animate-pulse flex-shrink-0">
+                  🟢 зараз грають
+                </span>
+              )}
             </div>
           )}
           {/* Main row: time/status sidebar + teams/badges */}

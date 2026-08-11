@@ -324,16 +324,17 @@ export default function Matches() {
 
                 return visibleDateKeys.map((dateKey, idx) => {
                   const dateMatches = m.groupedByDate[dateKey];
-                  const nowMs = Date.now();
-                  const todayOngoing = dateMatches.filter((mt) => {
-                    if (mt.matchStatus === "finished") return false;
-                    const start = new Date(mt.date).getTime();
-                    return start <= nowMs && nowMs - start < 3 * 60 * 60 * 1000;
-                  }).length;
                   return (
                     <BlurFade key={dateKey} delay={idx * 0.1} inView>
                       <div className="relative bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                        {todayOngoing > 0 && (
+                        {dateMatches.some((mt) => {
+                          if (mt.matchStatus === "finished") return false;
+                          const start = new Date(mt.date).getTime();
+                          return (
+                            start <= Date.now() &&
+                            Date.now() - start < 3 * 60 * 60 * 1000
+                          );
+                        }) && (
                           <BorderBeam
                             size={200}
                             duration={4}
@@ -359,11 +360,6 @@ export default function Matches() {
                                 <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
                                   {dateMatches.length}
                                 </Badge>
-                                {todayOngoing > 0 && (
-                                  <Badge className="bg-green-100 text-green-700 border border-green-300 rounded-full px-3 py-1 text-sm font-semibold animate-pulse">
-                                    🟢 {todayOngoing} зараз грають
-                                  </Badge>
-                                )}
                                 <div className="flex items-center gap-1 ml-auto">
                                   {(["all", "CS2", "Dota2"] as const).map(
                                     (g) => (
