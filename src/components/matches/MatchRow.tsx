@@ -356,7 +356,14 @@ export default function MatchRow({
 }: Props) {
   const formInfo = getFormInfo(match.formStability);
   const isFinished = match.matchStatus === "finished";
-  const isLive = match.matchStatus === "live";
+  // Ongoing: match has started (date ≤ now) but not yet finished.
+  // Assumes CS2 BO3 lasts ~3h max. No server call needed.
+  const nowMs = Date.now();
+  const matchStart = new Date(match.date).getTime();
+  const isOngoing =
+    !isFinished &&
+    matchStart <= nowMs &&
+    nowMs - matchStart < 3 * 60 * 60 * 1000;
   // TBD match: no team names, or placeholder text (Quarter-final etc.)
   const isTbd =
     !match.team1 ||
@@ -380,7 +387,7 @@ export default function MatchRow({
 
   return (
     <tr
-      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
+      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isOngoing ? "border-l-[3px] border-l-green-500 bg-green-50/30" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
     >
       {visibleColumns.has("rating") && (
         <td className={`py-4 px-3 ${colDivider}`}>
