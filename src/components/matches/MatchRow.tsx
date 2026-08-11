@@ -431,7 +431,7 @@ export default function MatchRow({
               />
               {match.context}
               {isOngoing && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-px animate-pulse flex-shrink-0">
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-px flex-shrink-0">
                   🟢 зараз грають
                 </span>
               )}
