@@ -567,7 +567,12 @@ export default function MatchRow({
             </div>
           ) : (
             <a
-              href={match.url || "https://tips.gg/matches"}
+              href={
+                match.url ||
+                (match.game === "Dota2"
+                  ? "https://tips.gg/dota2/matches"
+                  : "https://tips.gg/csgo/matches")
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all text-gray-500"

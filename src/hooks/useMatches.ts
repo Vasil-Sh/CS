@@ -9,7 +9,6 @@ import {
   determineTier,
   determineFavorite,
   getMatchStatus,
-  buildHltvUrl,
   type ApiMatch,
   type ApiMatch as ApiMatchType,
 } from "@/lib/csApi";
@@ -225,15 +224,7 @@ function apiMatchToMatch(
     tier,
     matchType: String(matchType ?? ""),
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
-    url: String(
-      (game === "CS2"
-        ? buildHltvUrl(
-            String(apiMatch.link ?? ""),
-            String(apiMatch.nameTeam1 ?? ""),
-            String(apiMatch.nameTeam2 ?? ""),
-          )
-        : buildTipsGgUrl(String(apiMatch.link ?? ""))) || "",
-    ),
+    url: String(buildTipsGgUrl(String(apiMatch.link ?? "")) || ""),
     score1: typeof apiMatch.score1 === "number" ? apiMatch.score1 : null,
     score2: typeof apiMatch.score2 === "number" ? apiMatch.score2 : null,
     matchStatus: status,
