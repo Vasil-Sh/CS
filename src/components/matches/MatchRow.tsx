@@ -537,11 +537,19 @@ export default function MatchRow({
             </div>
           ) : (
             <a
-              href="https://www.hltv.org/matches"
+              href={
+                match.game === "Dota2"
+                  ? "https://tips.gg/dota2/matches"
+                  : "https://www.hltv.org/matches"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all text-gray-500"
-              title="Дивитись матчі на HLTV"
+              title={
+                match.game === "Dota2"
+                  ? "Дивитись матчі на tips.gg"
+                  : "Дивитись матчі на HLTV"
+              }
             >
               <ExternalLink className="h-4 w-4" />
             </a>
