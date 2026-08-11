@@ -110,6 +110,7 @@ export async function fetchTodaysAndUpcomingMatches(
       const fresh = await fetchFreshMatches(forceRefresh);
       if (fresh.length > 0) {
         setCache(fresh);
+        onUpdate?.(fresh);
         return fresh;
       }
       // Empty response — backend may still be warming up

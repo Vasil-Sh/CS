@@ -686,32 +686,23 @@ export function useMatches() {
   const refreshMatches = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Clear both caches to force fresh data from backend
       await Promise.allSettled([clearDota2Cache()]);
-      // Force-refresh: skip all caches, trigger full backend re-scrape.
-      // Uses ?refresh=true on backend which forces tips.gg/cstest re-fetch.
-      await Promise.allSettled([
-        fetchTodaysAndUpcomingMatches(true, onCs2Refresh),
-        fetchDota2Matches(true, onDotaRefresh),
-      ]);
+      try {
+        localStorage.removeItem("cs2_matches_cache_v11");
+      } catch {
+        /* ok */
+      }
+      try {
+        localStorage.removeItem("dota2_matches_cache_v18");
+      } catch {
+        /* ok */
+      }
+      await loadMatchesFromApi();
     } finally {
       setIsLoading(false);
     }
-
-    async function onCs2Refresh(fresh: ApiMatch[]) {
-      setMatches((prev) => {
-        const dota = prev.filter((m) => m.game === "Dota2");
-        const cs2 = fresh.map((m) => apiMatchToMatch(m, "CS2"));
-        return [...cs2, ...dota];
-      });
-    }
-
-    async function onDotaRefresh(fresh: Dota2ApiMatch[]) {
-      setMatches((prev) => {
-        const cs2 = prev.filter((m) => m.game === "CS2");
-        return [...cs2, ...fresh.map((m) => dota2ApiMatchToMatch(m))];
-      });
-    }
-  }, []);
+  }, [loadMatchesFromApi]);
 
   // ── Poll live scores ──
   const pollLiveScores = useCallback(
