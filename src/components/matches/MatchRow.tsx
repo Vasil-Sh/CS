@@ -538,9 +538,10 @@ export default function MatchRow({
           ) : (
             <a
               href={
-                match.game === "Dota2"
+                match.url ||
+                (match.game === "Dota2"
                   ? "https://tips.gg/dota2/matches"
-                  : "https://www.hltv.org/matches"
+                  : "https://www.hltv.org/matches")
               }
               target="_blank"
               rel="noopener noreferrer"
