@@ -419,22 +419,47 @@ export default function MatchRow({
       )}
       {visibleColumns.has("match") && (
         <td className={`py-3 px-4 ${colDivider}`}>
-          {/* Tournament text — left aligned */}
+          {/* Tournament text with status badge inline */}
           {typeof match.context === "string" && match.context && (
-            <div
-              className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1 mb-1"
-              title={match.context}
-            >
-              <Trophy
-                className="h-3 w-3 text-amber-500 flex-shrink-0"
-                strokeWidth={1.5}
-              />
-              {match.context}
+            <div className="flex items-center gap-2 mb-1">
+              <div
+                className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1"
+                title={match.context}
+              >
+                <Trophy
+                  className="h-3 w-3 text-amber-500 flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+                {match.context}
+              </div>
+              {match.matchStatus === "live" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-300 rounded-full px-2 py-px flex-shrink-0">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  Зараз грають
+                </span>
+              ) : match.matchStatus === "upcoming" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-300 rounded-full px-2 py-px flex-shrink-0">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                  </span>
+                  Очікується
+                </span>
+              ) : match.matchStatus === "finished" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 border border-red-300 rounded-full px-2 py-px flex-shrink-0">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                  </span>
+                  Завершено
+                </span>
+              ) : null}
             </div>
           )}
           {/* Main row: time/status sidebar + teams/badges */}
           <div className="flex items-stretch gap-3">
-            {/* Left sidebar: time + status badge */}
+            {/* Left sidebar: time + Bo3 */}
             <div className="flex flex-col items-center min-w-[48px] pr-3 border-r border-gray-200 space-y-1">
               <div className="flex items-center" style={{ minHeight: 28 }}>
                 <span className="text-sm font-semibold text-gray-900 leading-tight">
@@ -447,34 +472,8 @@ export default function MatchRow({
                 </span>
               </div>
             </div>
-            {/* Right: teams + badges + status */}
+            {/* Right: teams + badges */}
             <div className="space-y-1 flex-1 min-w-0">
-              {/* Status badge — inline with team names */}
-              <div className="flex items-center gap-2 mb-0.5">
-                {match.matchStatus === "live" ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-300 rounded-full px-2 py-px flex-shrink-0">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                    </span>
-                    Зараз грають
-                  </span>
-                ) : match.matchStatus === "upcoming" ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-300 rounded-full px-2 py-px flex-shrink-0">
-                    <span className="relative flex h-2 w-2">
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                    </span>
-                    Очікується
-                  </span>
-                ) : match.matchStatus === "finished" ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 border border-red-300 rounded-full px-2 py-px flex-shrink-0">
-                    <span className="relative flex h-2 w-2">
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                    </span>
-                    Завершено
-                  </span>
-                ) : null}
-              </div>
               {isTbd ? (
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-800 text-base truncate">
