@@ -440,10 +440,16 @@ export default function MatchRow({
                 </span>
               ) : match.matchStatus === "upcoming" ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 rounded-full px-2 py-px flex-shrink-0">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                  </span>
                   Очікується
                 </span>
               ) : match.matchStatus === "finished" ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 bg-gray-100 rounded-full px-2 py-px flex-shrink-0">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 rounded-full px-2 py-px flex-shrink-0">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                  </span>
                   Завершено
                 </span>
               ) : null}
