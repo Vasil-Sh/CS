@@ -419,17 +419,19 @@ export default function MatchRow({
       )}
       {visibleColumns.has("match") && (
         <td className={`py-3 px-4 ${colDivider}`}>
-          {/* Tournament text — full width, no divider interference */}
+          {/* Tournament text + status badge — centered */}
           {typeof match.context === "string" && match.context && (
-            <div
-              className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1.5 mb-1"
-              title={match.context}
-            >
-              <Trophy
-                className="h-3 w-3 text-amber-500 flex-shrink-0"
-                strokeWidth={1.5}
-              />
-              {match.context}
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <div
+                className="text-[11px] text-gray-700 font-medium truncate flex items-center gap-1"
+                title={match.context}
+              >
+                <Trophy
+                  className="h-3 w-3 text-amber-500 flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+                {match.context}
+              </div>
               {match.matchStatus === "live" ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-300 rounded-full px-2 py-px flex-shrink-0">
                   <span className="relative flex h-2 w-2">
