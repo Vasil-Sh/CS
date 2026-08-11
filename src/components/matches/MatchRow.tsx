@@ -575,7 +575,7 @@ export default function MatchRow({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all text-gray-500"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-all text-violet-500"
               title="Дивитись матч на tips.gg"
             >
               <ExternalLink className="h-4 w-4" />
