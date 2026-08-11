@@ -387,7 +387,7 @@ export default function MatchRow({
 
   return (
     <tr
-      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isOngoing ? "border-l-[3px] border-l-green-500 bg-green-50/30" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
+      className={`border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ${isFinished ? "opacity-60" : ""} ${isOngoing ? "border-t-2 border-t-green-400 bg-green-50/20" : ""} ${isSelected ? "bg-blue-50/60 !border-l-blue-500" : ""}`}
     >
       {visibleColumns.has("rating") && (
         <td className={`py-4 px-3 ${colDivider}`}>
