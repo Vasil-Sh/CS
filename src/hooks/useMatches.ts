@@ -765,18 +765,25 @@ export function useMatches() {
                 if (isScoreDecided) return "finished";
 
                 // Format-dependent auto-finish for stale live matches.
-                // Bo1 rarely exceeds 1h, Bo3 2.5h, Bo5 4.5h. After that time,
-                // the match is almost certainly finished — finish it locally.
+                // CS2:  Bo1=1h, Bo3=2.5h, Bo5=4.5h
+                // Dota2: Bo1=1h, Bo3=3.5h, Bo5=5.5h
                 // The backend will backfill the correct score later.
                 const matchDate = new Date(m.date);
                 const ageMs = Date.now() - matchDate.getTime();
+                const isDota = m.game === "Dota2";
                 const maxHours =
                   m.matchType === "Bo5"
-                    ? 4.5
+                    ? isDota
+                      ? 5.5
+                      : 4.5
                     : m.matchType === "Bo3"
-                      ? 2.5
+                      ? isDota
+                        ? 3.5
+                        : 2.5
                       : m.matchType === "Bo2"
-                        ? 2.5
+                        ? isDota
+                          ? 3.5
+                          : 2.5
                         : 1; // Bo1
                 const maxAgeMs = maxHours * 60 * 60 * 1000;
                 if (m.matchStatus === "live" && ageMs > maxAgeMs)
@@ -929,14 +936,20 @@ export function useMatches() {
     // This runs on every render/recalculation, so it overrides the backend "live"
     // status for matches past their expected duration. Backend will backfill
     // the correct score later.
+    // CS2: Bo1=1h, Bo3=2.5h, Bo5=4.5h | Dota2: Bo1=1h, Bo3=3.5h, Bo5=5.5h
     const statusFixed = matches.map((m) => {
       if (m.matchStatus !== "live") return m;
       const ageMs = now - new Date(m.date).getTime();
+      const isDota = m.game === "Dota2";
       const maxHours =
         m.matchType === "Bo5"
-          ? 4.5
+          ? isDota
+            ? 5.5
+            : 4.5
           : m.matchType === "Bo3" || m.matchType === "Bo2"
-            ? 2.5
+            ? isDota
+              ? 3.5
+              : 2.5
             : 1; // Bo1
       if (ageMs > maxHours * 60 * 60 * 1000) {
         return { ...m, matchStatus: "finished" as const };
