@@ -918,6 +918,7 @@ export function useMatches() {
     bo5Count,
     cs2DisplayedCount,
     dota2DisplayedCount,
+    ongoingCount,
     avgConfidence,
     tournamentOptions,
   } = useMemo(() => {
@@ -1070,6 +1071,12 @@ export function useMatches() {
     const futureKeys = allKeys.filter((k) => k > todayKey).sort();
     const dateKeys = [...pastLiveKeys, todayKey, ...futureKeys];
     const displayed = dateKeys.flatMap((k) => grouped[k] || []);
+    const nowMs = Date.now();
+    const ongoingCount = displayed.filter((m) => {
+      if (m.matchStatus === "finished") return false;
+      const start = new Date(m.date).getTime();
+      return start <= nowMs && nowMs - start < 3 * 60 * 60 * 1000;
+    }).length;
     const confs = displayed
       .filter((m) => m.aiConfidence > 0)
       .map((m) => m.aiConfidence);
@@ -1088,6 +1095,7 @@ export function useMatches() {
       bo5Count: displayed.filter((m) => m.matchType === "Bo5").length,
       cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
       dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
+      ongoingCount,
       avgConfidence: avg,
       tournamentOptions: [
         ...new Set(displayed.map((m) => m.context).filter(Boolean)),
@@ -1367,6 +1375,7 @@ export function useMatches() {
     apiError,
     // Stats
     displayCount: displayedMatches.length,
+    ongoingCount,
     bo1Count,
     bo3Count,
     bo5Count,
