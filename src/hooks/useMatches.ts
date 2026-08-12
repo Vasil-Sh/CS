@@ -48,6 +48,8 @@ export interface Match {
   odds: { team1: number; team2: number };
   winRate: number;
   formStability: FormStability;
+  formStabilityTeam1: string;
+  formStabilityTeam2: string;
   playerForm: { player: string; rating: number }[];
   context: string;
   tier: "tier1" | "tier2" | "tier3" | null;
@@ -221,6 +223,8 @@ function apiMatchToMatch(
     formStability: ((apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown' ? apiMatch.formTeam1 : undefined) ||
       (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown' ? apiMatch.formTeam2 : undefined) ||
       "") as FormStability,
+    formStabilityTeam1: (apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown') ? String(apiMatch.formTeam1) : "",
+    formStabilityTeam2: (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown') ? String(apiMatch.formTeam2) : "",
     playerForm: [],
     context,
     tier,
@@ -283,6 +287,8 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     },
     winRate: confidence,
     formStability: (m.formTeam1 || m.formTeam2 || "stable") as FormStability,
+    formStabilityTeam1: (m.formTeam1 && m.formTeam1 !== 'unknown') ? String(m.formTeam1) : "",
+    formStabilityTeam2: (m.formTeam2 && m.formTeam2 !== 'unknown') ? String(m.formTeam2) : "",
     playerForm: [],
     context,
     tier: determineDota2Tier(m.positionTeam1, m.positionTeam2, m.tournament),
@@ -404,6 +410,8 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
       m.tier = m.tier || null;
       m.matchStatus = m.matchStatus || "upcoming";
       m.formStability = (m.formStability && m.formStability !== 'unknown') ? m.formStability : ("" as FormStability);
+      m.formStabilityTeam1 = (m.formStabilityTeam1 && m.formStabilityTeam1 !== 'unknown') ? String(m.formStabilityTeam1) : "";
+      m.formStabilityTeam2 = (m.formStabilityTeam2 && m.formStabilityTeam2 !== 'unknown') ? String(m.formStabilityTeam2) : "";
       m.dota2Slug = String(m.dota2Slug ?? "");
       m.cs2Slug = String(m.cs2Slug ?? "");
       m.aiConfidence = Number(m.aiConfidence) || 0;

@@ -27,7 +27,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import type { Match, FormStability, MatchRating } from "@/hooks/useMatches";
+import type { Match, MatchRating } from "@/hooks/useMatches";
 
 interface AIRecommendation {
   prediction?: string;
@@ -274,7 +274,7 @@ const PredictionBar = ({
 };
 
 /** Compact status badge for inside the match column (left sidebar) */
-const getFormInfo = (form: string): { icon: React.ReactNode; label: string; color: string; tooltip: string } | null => {
+const getFormInfo = (form: string): { icon: React.ReactNode; label: string; color: string; tooltip: string } => {
   const map: Record<string, { icon: React.ReactNode; label: string; color: string; tooltip: string }> = {
     hot_streak: {
       icon: <Flame className="h-3.5 w-3.5" strokeWidth={1.5} />,
@@ -315,7 +315,12 @@ const getFormInfo = (form: string): { icon: React.ReactNode; label: string; colo
       tooltip: "⚡ Непередбачувана",
     },
   };
-  return map[form] || null;
+  return map[form] || {
+    icon: <Info className="h-3.5 w-3.5" strokeWidth={1.5} />,
+    label: "Нема даних",
+    color: "bg-gray-200 text-gray-500 border-0",
+    tooltip: "❓ Недостатньо даних для оцінки форми",
+  };
 };
 
 function formatTime(dateStr: string) {
@@ -351,7 +356,8 @@ export default function MatchRow({
   onToggleSelect,
   onAddToRisky,
 }: Props) {
-  const formInfo = getFormInfo(match.formStability);
+  const formInfo1 = getFormInfo(match.formStabilityTeam1 || "");
+  const formInfo2 = getFormInfo(match.formStabilityTeam2 || "");
   const isFinished = match.matchStatus === "finished";
   // Ongoing: match has started (date ≤ now) but not yet finished.
   // Assumes CS2 BO3 lasts ~3h max. No server call needed.
@@ -380,7 +386,8 @@ export default function MatchRow({
     match.bettingCoefficientTeam2 != null &&
     ((match.bettingCoefficientTeam1 ?? 0) > 0 ||
       (match.bettingCoefficientTeam2 ?? 0) > 0);
-  const formLabelWithTeam = formInfo ? `${match.favorite}: ${formInfo.label}` : "";
+  const formLabel1 = `${match.team1}: ${formInfo1.label}`;
+  const formLabel2 = `${match.team2}: ${formInfo2.label}`;
 
   return (
     <tr
@@ -534,24 +541,38 @@ export default function MatchRow({
                     {match.game}
                   </Badge>
                 )}
-                {formInfo && (
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
-                      className={`${formInfo.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5`}
+                      className={`${formInfo1.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5`}
                     >
-                      {formInfo.icon}
-                      <span className="truncate">{formLabelWithTeam}</span>
+                      {formInfo1.icon}
+                      <span>{formLabel1}</span>
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
-                      {match.favorite}
+                      {match.team1}
                     </p>
-                    <p className="text-sm">{formInfo.tooltip}</p>
+                    <p className="text-sm">{formInfo1.tooltip}</p>
                   </TooltipContent>
                 </Tooltip>
-                )}
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge
+                      className={`${formInfo2.color} rounded-md px-1.5 py-0.5 text-xs font-semibold inline-flex items-center gap-0.5`}
+                    >
+                      {formInfo2.icon}
+                      <span>{formLabel2}</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
+                    <p className="text-sm font-semibold mb-1">
+                      {match.team2}
+                    </p>
+                    <p className="text-sm">{formInfo2.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-all cursor-help text-[10px] font-bold flex-shrink-0">
