@@ -1316,6 +1316,23 @@ export function useMatches() {
 
   // ── Risky teams ──
   const loadRiskyTeams = useCallback(async () => {
+    // Primary source: localStorage `admin_risky_teams` — same source of truth
+    // used by the Risky Teams page. This keeps the Matches comment badges in
+    // sync with the Risky Teams screen (backend DB can be stale / out of sync).
+    try {
+      const saved = localStorage.getItem("admin_risky_teams");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRiskyTeams(parsed);
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    // Fallback: backend API (per-user storage)
     try {
       const token = localStorage.getItem("authToken");
       const headers: Record<string, string> = {
@@ -1327,19 +1344,6 @@ export function useMatches() {
         const data = await resp.json();
         if (Array.isArray(data) && data.length > 0) {
           setRiskyTeams(data);
-          return;
-        }
-      }
-    } catch {
-      /* ignore */
-    }
-    // Fallback to localStorage (primary source used by RiskyTeams page)
-    try {
-      const saved = localStorage.getItem("admin_risky_teams");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRiskyTeams(parsed);
         }
       }
     } catch {
@@ -1357,12 +1361,18 @@ export function useMatches() {
       teamName: string,
       game: "CS2" | "Dota2",
     ): { notes: string; status: string } | null => {
-      const results = findRiskyTeams(
+      // 1) Try same-game match first (game-specific entries take priority)
+      let results = findRiskyTeams(
         teamName,
         "",
         getGameFilterValue(game),
         riskyTeams,
       );
+      // 2) Fallback to cross-game match — a team in risky list for the other
+      //    game should still be flagged (e.g. Natus Vincere CS note on a Dota2 match)
+      if (results.length === 0) {
+        results = findRiskyTeams(teamName, "", "", riskyTeams);
+      }
       if (results.length === 0) return null;
       const matched = results[0]; // findRiskyTeams already deduplicates & picks best
       const gameLabel = matched.game === "Дота" ? "Dota2" : "CS2";
@@ -1385,9 +1395,8 @@ export function useMatches() {
         [r2, team2],
       ] as const) {
         if (!r) continue;
-        // Only show same-game risky teams in the comment modal
-        if (r.game && r.game !== game) continue;
         const note = r.notes || r.status;
+        // Tag with the current match's game — the comment is about THIS match.
         cmts.push(`${name}: ${note}|${r.status}|${game}`);
       }
       return cmts.join("\n\n");
