@@ -492,6 +492,14 @@ export default function Matches() {
                 (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
               )
             }
+            team1Existing={m.getTeamRiskInfo(
+              m.selectedRiskyMatch?.team1 || "",
+              (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
+            )}
+            team2Existing={m.getTeamRiskInfo(
+              m.selectedRiskyMatch?.team2 || "",
+              (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
+            )}
             onSaved={m.handleRiskySaved}
           />
 

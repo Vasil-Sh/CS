@@ -274,11 +274,8 @@ const PredictionBar = ({
 };
 
 /** Compact status badge for inside the match column (left sidebar) */
-const getFormInfo = (form: FormStability) => {
-  const map: Record<
-    FormStability,
-    { icon: React.ReactNode; label: string; color: string; tooltip: string }
-  > = {
+const getFormInfo = (form: string): { icon: React.ReactNode; label: string; color: string; tooltip: string } | null => {
+  const map: Record<string, { icon: React.ReactNode; label: string; color: string; tooltip: string }> = {
     hot_streak: {
       icon: <Flame className="h-3.5 w-3.5" strokeWidth={1.5} />,
       label: "Серія перемог",
@@ -318,7 +315,7 @@ const getFormInfo = (form: FormStability) => {
       tooltip: "⚡ Непередбачувана",
     },
   };
-  return map[form];
+  return map[form] || null;
 };
 
 function formatTime(dateStr: string) {
@@ -383,7 +380,7 @@ export default function MatchRow({
     match.bettingCoefficientTeam2 != null &&
     ((match.bettingCoefficientTeam1 ?? 0) > 0 ||
       (match.bettingCoefficientTeam2 ?? 0) > 0);
-  const formLabelWithTeam = `${match.favorite}: ${formInfo.label}`;
+  const formLabelWithTeam = formInfo ? `${match.favorite}: ${formInfo.label}` : "";
 
   return (
     <tr
@@ -537,6 +534,7 @@ export default function MatchRow({
                     {match.game}
                   </Badge>
                 )}
+                {formInfo && (
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge
@@ -553,6 +551,7 @@ export default function MatchRow({
                     <p className="text-sm">{formInfo.tooltip}</p>
                   </TooltipContent>
                 </Tooltip>
+                )}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-all cursor-help text-[10px] font-bold flex-shrink-0">

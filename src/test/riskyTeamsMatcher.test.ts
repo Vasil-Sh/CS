@@ -38,8 +38,8 @@ describe("getGameFilterValue", () => {
     expect(getGameFilterValue("CS2")).toBe("CS");
   });
 
-  it('maps Dota2 → "Dota"', () => {
-    expect(getGameFilterValue("Dota2")).toBe("Dota");
+  it('maps Dota2 → "Дота"', () => {
+    expect(getGameFilterValue("Dota2")).toBe("Дота");
   });
 });
 

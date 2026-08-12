@@ -122,9 +122,15 @@ const goalProgress = (goal: StoredGoal): { percent: number; label: string } => {
 
 export default function Strategy() {
   logRender("Strategy");
-  const [activeTab, setActiveTab] = useState<"strategies" | "goals">(
-    "strategies",
-  );
+  const [activeTab, setActiveTabState] = useState<"strategies" | "goals">(() => {
+    // Persist tab selection across navigations
+    const saved = sessionStorage.getItem("strategy_active_tab");
+    return (saved === "goals" ? "goals" : "strategies") as "strategies" | "goals";
+  });
+  const setActiveTab = (tab: "strategies" | "goals") => {
+    setActiveTabState(tab);
+    sessionStorage.setItem("strategy_active_tab", tab);
+  };
   const [bets, setBets] = useState<Bet[]>([]);
 
   const { user } = useAuth();

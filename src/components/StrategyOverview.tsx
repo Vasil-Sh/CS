@@ -55,7 +55,13 @@ export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange
   const [loading, setLoading] = useState(true);
   const [bettingData, setBettingData] = useState<{ strategy?: string; amount?: number; result?: string; profit?: number; date?: string }[]>([]);
   const [strategyStats, setStrategyStats] = useState<Record<string, StrategyStats>>({});
-  const [primaryStrategy, setPrimaryStrategy] = useState<string | null>(null);
+  // Initialize from zustand store (persists across route navigations) + localStorage fallback
+  const [primaryStrategy, setPrimaryStrategy] = useState<string | null>(() => {
+    const storeId = useAppStore.getState().primaryStrategyId;
+    if (storeId) return storeId;
+    const saved = UserDataService.getUserData<string>(currentUser, "primary_strategy", "");
+    return saved || null;
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [strategyToDelete, setStrategyToDelete] = useState<string | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -88,7 +94,8 @@ export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange
     setStrategies(strats);
     setBettingData(bets);
     calcStats(bets);
-    const saved = UserDataService.getUserData<string>(currentUser, "primary_strategy", "");
+    const saved = UserDataService.getUserData<string>(currentUser, "primary_strategy", "")
+      || useAppStore.getState().primaryStrategyId;
     if (saved) { setPrimaryStrategy(saved); useAppStore.getState().setPrimaryStrategyId(saved); }
     setLoading(false);
   };

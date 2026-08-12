@@ -218,9 +218,9 @@ function apiMatchToMatch(
       team2: hasCoeffs ? (coeff2 ?? 0) : 0,
     },
     winRate,
-    formStability: (apiMatch.formTeam1 ||
-      apiMatch.formTeam2 ||
-      "stable") as FormStability,
+    formStability: ((apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown' ? apiMatch.formTeam1 : undefined) ||
+      (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown' ? apiMatch.formTeam2 : undefined) ||
+      "") as FormStability,
     playerForm: [],
     context,
     tier,
@@ -403,7 +403,7 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
       m.aiSummary = String(m.aiSummary ?? "");
       m.tier = m.tier || null;
       m.matchStatus = m.matchStatus || "upcoming";
-      m.formStability = m.formStability || "stable";
+      m.formStability = (m.formStability && m.formStability !== 'unknown') ? m.formStability : ("" as FormStability);
       m.dota2Slug = String(m.dota2Slug ?? "");
       m.cs2Slug = String(m.cs2Slug ?? "");
       m.aiConfidence = Number(m.aiConfidence) || 0;

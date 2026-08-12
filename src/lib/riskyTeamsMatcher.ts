@@ -36,7 +36,14 @@ function namesMatch(a: string, b: string): boolean {
   // Substring match — guard against false positives like "Eternal Fire" ⊂ "ex-Eternal Fire Academy".
   // Require ≥70% length ratio so parent/academy pairs don't match.
   if (a.includes(b) || b.includes(a)) {
-    const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length);
+    const shorter = a.length < b.length ? a : b;
+    const longer = a.length < b.length ? b : a;
+    const ratio = shorter.length / longer.length;
+    // Short prefix names (≤5 chars, e.g. "FUT" → "FUT Esports", "VP" → "Virtus.pro")
+    // are almost certainly the same team when they appear at the start of the longer name.
+    if (shorter.length <= 5 && longer.indexOf(shorter) === 0) {
+      if (ratio >= 0.25) return true;
+    }
     if (ratio >= 0.7) return true;
   }
   // Prefix match — catches "Nuclear TigRES" vs "Nuclear Tigers" (typo in suffix).

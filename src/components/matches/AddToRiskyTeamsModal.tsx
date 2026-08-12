@@ -23,6 +23,12 @@ interface TeamInfo {
   logo?: string | null;
 }
 
+interface ExistingTeamInfo {
+  notes: string;
+  status: string;
+  game?: string;
+}
+
 interface AddToRiskyTeamsModalProps {
   open: boolean;
   onClose: () => void;
@@ -31,6 +37,8 @@ interface AddToRiskyTeamsModalProps {
   game: string; // "CS2" or "Dota2" — current match game
   team1Risky: boolean; // already computed by parent via getTeamRiskInfo
   team2Risky: boolean;
+  team1Existing: ExistingTeamInfo | null; // existing data for team1 if already in list
+  team2Existing: ExistingTeamInfo | null; // existing data for team2 if already in list
   onSaved: () => void; // callback to refresh risky teams in parent
 }
 
@@ -63,7 +71,7 @@ const proxyLogo = (url: string | null | undefined): string | null => {
 };
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
-  const { open, onClose, team1, team2, onSaved, team1Risky, team2Risky } =
+  const { open, onClose, team1, team2, onSaved, team1Risky, team2Risky, team1Existing, team2Existing } =
     props;
   const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
 
@@ -78,17 +86,38 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   if (team1Risky) existingTeams.add(team1.name.toLowerCase());
   if (team2Risky) existingTeams.add(team2.name.toLowerCase());
 
+  // Get existing data for a team by name
+  const getExistingData = (teamName: string): ExistingTeamInfo | null => {
+    if (teamName.toLowerCase() === team1.name.toLowerCase()) return team1Existing;
+    if (teamName.toLowerCase() === team2.name.toLowerCase()) return team2Existing;
+    return null;
+  };
+
+  // Check if selected team is being edited (already exists)
+  const isEditingExisting = existingTeams.has(selectedTeam.toLowerCase());
+
   // Auto-select team & reset form when modal opens
   useEffect(() => {
     if (!open) return;
+    let autoTeam = team1.name;
     if (team1Risky && !team2Risky) {
-      setSelectedTeam(team2.name);
+      autoTeam = team2.name;
     } else if (!team1Risky) {
-      setSelectedTeam(team1.name);
+      autoTeam = team1.name;
     }
-    setStatus("Під питанням");
-    setSelectedGame(gameStorageKey);
-    setNotes("");
+    setSelectedTeam(autoTeam);
+
+    // Pre-fill with existing data if the auto-selected team already exists
+    const existing = getExistingData(autoTeam);
+    if (existing) {
+      setStatus(existing.status || "Під питанням");
+      setSelectedGame(existing.game || gameStorageKey);
+      setNotes(existing.notes || "");
+    } else {
+      setStatus("Під питанням");
+      setSelectedGame(gameStorageKey);
+      setNotes("");
+    }
   }, [open, team1.name, team2.name, gameStorageKey, team1Risky, team2Risky]);
 
   const handleSave = async () => {
@@ -113,40 +142,64 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
       }
 
       // Check if team already exists
-      const exists = teams.some(
+      const existingIndex = teams.findIndex(
         (t) => t.name.toLowerCase() === teamName.toLowerCase(),
       );
-      if (exists) {
-        toast.error(`Команда "${teamName}" вже є у списку ризикованих`);
-        setSaving(false);
-        return;
-      }
 
-      // Add new entry
-      teams.push({
-        name: teamName,
-        game: selectedGame,
-        status: teamStatus,
-        notes: notes.trim(),
-      });
+      if (existingIndex >= 0) {
+        // Update existing entry
+        teams[existingIndex] = {
+          ...teams[existingIndex],
+          game: selectedGame,
+          status: teamStatus,
+          notes: notes.trim(),
+        };
 
-      // Save to localStorage
-      localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
+        // Save to localStorage
+        localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
 
-      // Sync to backend API
-      try {
-        const { api } = await import("@/lib/apiClient");
-        await api.post("/risky-teams", {
+        // Sync update to backend API
+        try {
+          const { api } = await import("@/lib/apiClient");
+          await api.put(`/risky-teams/${encodeURIComponent(teamName)}`, {
+            name: teamName,
+            game: selectedGame,
+            status: teamStatus,
+            notes: notes.trim(),
+          });
+        } catch {
+          // Backend sync failed — data is saved locally
+        }
+
+        toast.success(`"${teamName}" оновлено!`);
+      } else {
+        // Add new entry
+        teams.push({
           name: teamName,
           game: selectedGame,
           status: teamStatus,
           notes: notes.trim(),
         });
-      } catch {
-        // Backend sync failed — data is saved locally
+
+        // Save to localStorage
+        localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
+
+        // Sync to backend API
+        try {
+          const { api } = await import("@/lib/apiClient");
+          await api.post("/risky-teams", {
+            name: teamName,
+            game: selectedGame,
+            status: teamStatus,
+            notes: notes.trim(),
+          });
+        } catch {
+          // Backend sync failed — data is saved locally
+        }
+
+        toast.success(`"${teamName}" додано до ризикованих команд!`);
       }
 
-      toast.success(`"${teamName}" додано до ризикованих команд!`);
       onSaved();
       onClose();
       setNotes("");
@@ -195,46 +248,66 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
             {[team1, team2].map((team) => {
               const isAlreadyAdded = existingTeams.has(team.name.toLowerCase());
               const isSelected = selectedTeam === team.name;
+              const existingData = getExistingData(team.name);
 
+              // Team already in risky list — show with notes and allow selecting for edit
               if (isAlreadyAdded) {
                 return (
-                  <div
+                  <button
                     key={team.name}
-                    className="flex items-center gap-3 p-4 rounded-2xl border-2 border-green-200 bg-green-50/60 relative opacity-70"
+                    onClick={() => {
+                      setSelectedTeam(team.name);
+                      // Load existing data into form
+                      if (existingData) {
+                        setStatus(existingData.status || "Під питанням");
+                        setSelectedGame(existingData.game || gameStorageKey);
+                        setNotes(existingData.notes || "");
+                      }
+                    }}
+                    className={`flex flex-col gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
+                      isSelected
+                        ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
+                        : "border-green-200 bg-green-50/60 hover:border-green-300"
+                    }`}
                   >
-                    <div className="absolute -top-2 -right-2">
-                      <CheckCircle2
-                        className="h-5 w-5 text-green-500 bg-white rounded-full"
-                        strokeWidth={2}
-                      />
+                    <div className="flex items-center gap-3 w-full">
+                      {team.logo ? (
+                        <img
+                          src={proxyLogo(team.logo) || undefined}
+                          alt={team.name}
+                          className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                            (
+                              e.target as HTMLImageElement
+                            ).nextElementSibling?.classList.remove("hidden");
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
+                      >
+                        {team.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-semibold text-gray-700 block truncate">
+                          {team.name}
+                        </span>
+                        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
+                          {isSelected ? "Редагувати" : "Вже додано"}
+                        </span>
+                      </div>
                     </div>
-                    {team.logo ? (
-                      <img
-                        src={proxyLogo(team.logo) || undefined}
-                        alt={team.name}
-                        className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                          (
-                            e.target as HTMLImageElement
-                          ).nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
-                    >
-                      {team.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm font-semibold text-gray-500 block truncate">
-                        {team.name}
-                      </span>
-                      <span className="text-xs text-green-600 font-medium">
-                        Вже додано
-                      </span>
-                    </div>
-                  </div>
+                    {/* Show existing notes if any */}
+                    {existingData?.notes && (
+                      <div className="bg-white/70 rounded-xl p-2.5 border border-green-100">
+                        <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                          {existingData.notes}
+                        </p>
+                      </div>
+                    )}
+                  </button>
                 );
               }
 
@@ -353,20 +426,26 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
             </div>
           </div>
 
-          {/* Save button — hidden when both teams already in list */}
-          {!(
-            existingTeams.has(team1.name.toLowerCase()) &&
-            existingTeams.has(team2.name.toLowerCase())
-          ) && (
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
-            >
-              <Save className="h-4 w-4 mr-2" strokeWidth={2} />
-              {saving ? "Збереження..." : "Зберегти"}
-            </Button>
-          )}
+          {/* Save / Update button — always visible (can add or edit) */}
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
+          >
+            {saving ? (
+              "Збереження..."
+            ) : isEditingExisting ? (
+              <>
+                <Save className="h-4 w-4 mr-2" strokeWidth={2} />
+                Оновити
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" strokeWidth={2} />
+                Зберегти
+              </>
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
