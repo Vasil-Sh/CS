@@ -45,6 +45,8 @@ interface AddToRiskyTeamsModalProps {
 const STATUS_OPTIONS = [
   { value: "БАН", label: "🔴 БАН", color: "text-red-600" },
   { value: "Ризиковані", label: "🟠 Ризиковані", color: "text-orange-500" },
+  { value: "Нестабільні", label: "🟠 Нестабільні", color: "text-orange-500" },
+  { value: "Обережно", label: "🟡 Обережно", color: "text-amber-500" },
   { value: "Під питанням", label: "🟡 Під питанням", color: "text-yellow-600" },
   { value: "Стабільні", label: "🔵 Стабільні", color: "text-blue-600" },
   { value: "Надійна", label: "🟢 Надійна", color: "text-green-600" },
@@ -299,14 +301,6 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
                         </span>
                       </div>
                     </div>
-                    {/* Show existing notes if any */}
-                    {existingData?.notes && (
-                      <div className="bg-white/70 rounded-xl p-2.5 border border-green-100">
-                        <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
-                          {existingData.notes}
-                        </p>
-                      </div>
-                    )}
                   </button>
                 );
               }

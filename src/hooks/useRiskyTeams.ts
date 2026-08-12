@@ -4,7 +4,7 @@ import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { type RiskyTeam } from "@/data/riskyTeams";
 
 // ── Constants ──
-const ALL_STATUSES = ["БАН", "Ризиковані", "Під питанням", "Стабільні", "Надійна", "Неоцінена"] as const;
+const ALL_STATUSES = ["БАН", "Ризиковані", "Нестабільні", "Обережно", "Під питанням", "Стабільні", "Надійна", "Неоцінена"] as const;
 
 // ── Pure utilities ──
 const normalizeGame = (game?: string): string => {

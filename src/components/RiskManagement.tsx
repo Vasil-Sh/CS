@@ -50,6 +50,8 @@ const getStatusFilterBadge = (status: string, isActive: boolean) => {
   const colors: Record<string, string> = {
     БАН: `bg-[#FEE2E2] text-red-600 border border-red-200 ${isActive ? "ring-red-200" : ""}`,
     Ризиковані: `bg-orange-100 text-orange-600 border border-orange-200 ${isActive ? "ring-orange-200" : ""}`,
+    Нестабільні: `bg-orange-100 text-orange-600 border border-orange-200 ${isActive ? "ring-orange-200" : ""}`,
+    Обережно: `bg-amber-100 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""}`,
     'Під питанням': `bg-amber-100 text-amber-600 border border-amber-200 ${isActive ? "ring-amber-200" : ""}`,
     Стабільні: `bg-blue-50 text-blue-600 border border-blue-200 ${isActive ? "ring-blue-200" : ""}`,
     Надійна: `bg-green-50 text-green-600 border border-green-200 ${isActive ? "ring-green-200" : ""}`,

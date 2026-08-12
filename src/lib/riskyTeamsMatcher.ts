@@ -39,11 +39,14 @@ function namesMatch(a: string, b: string): boolean {
     const shorter = a.length < b.length ? a : b;
     const longer = a.length < b.length ? b : a;
     const ratio = shorter.length / longer.length;
+    const startsAt = longer.indexOf(shorter);
+    // Position-0 prefix: the shorter name appears at the start of the longer.
+    // This catches "Falcons" → "Falcons Esports" (7/15 ≈ 47%), "FUT" → "FUT Esports" (3/11 ≈ 27%).
+    // Require ≥35% length ratio AND ≥3 chars to avoid false positives like "CS" → "CSe-teams".
+    if (startsAt === 0 && ratio >= 0.35 && shorter.length >= 3) return true;
     // Short prefix names (≤5 chars, e.g. "FUT" → "FUT Esports", "VP" → "Virtus.pro")
     // are almost certainly the same team when they appear at the start of the longer name.
-    if (shorter.length <= 5 && longer.indexOf(shorter) === 0) {
-      if (ratio >= 0.25) return true;
-    }
+    if (shorter.length <= 5 && startsAt === 0 && ratio >= 0.25) return true;
     if (ratio >= 0.7) return true;
   }
   // Prefix match — catches "Nuclear TigRES" vs "Nuclear Tigers" (typo in suffix).
@@ -65,7 +68,9 @@ export function getGameFilterValue(formGame: "CS2" | "Dota2"): string {
 
 /**
  * Match teams against a risky-team list. Returns matched records.
- * Deduplicates by name — each risky team appears at most once.
+ * Deduplicates by normalized name — each team appears at most once.
+ * When duplicates exist, keeps the entry with the most specific (longest) name,
+ * then falls back to later array position (most recently updated).
  */
 export function findRiskyTeams(
   team1: string,
@@ -78,51 +83,42 @@ export function findRiskyTeams(
 
   const normalizedTeam1 = normalizeTeamName(team1);
   const normalizedTeam2 = normalizeTeamName(team2);
-  const found: RiskyTeamMatch[] = [];
-  const addedNames = new Set<string>();
+  // Use a Map keyed by normalized name to handle duplicates — keep the best match
+  const foundMap = new Map<string, { record: RiskyTeamRecord; index: number; matchT1: boolean }>();
 
-  for (const rt of riskyTeams) {
+  for (let i = 0; i < riskyTeams.length; i++) {
+    const rt = riskyTeams[i];
+    const normalizedRT = normalizeTeamName(rt.name);
     if (gameFilter) {
       const rtGameNorm = (rt.game || "").toLowerCase().trim();
-      // Empty game = wildcard (match any game)
-      if (!rtGameNorm) {
-        /* match all */
-      } else {
+      if (!rtGameNorm) { /* match all */ }
+      else {
         const filterNorm = gameFilter.toLowerCase();
-        // Use includes to handle variants like "dota 2", "dota2", "дота 2", "cs 2", etc.
-        const rtIsDota =
-          rtGameNorm.includes("дота") || rtGameNorm.includes("dota");
-        const filterIsDota =
-          filterNorm.includes("дота") || filterNorm.includes("dota");
+        const rtIsDota = rtGameNorm.includes("дота") || rtGameNorm.includes("dota");
+        const filterIsDota = filterNorm.includes("дота") || filterNorm.includes("dota");
         const rtIsCs = rtGameNorm.includes("cs") || rtGameNorm.includes("кс");
-        const filterIsCs =
-          filterNorm.includes("cs") || filterNorm.includes("кс");
-        if (rtIsDota && filterIsDota) {
-          /* match */
-        } else if (rtIsCs && filterIsCs) {
-          /* match */
-        } else continue;
+        const filterIsCs = filterNorm.includes("cs") || filterNorm.includes("кс");
+        if (!((rtIsDota && filterIsDota) || (rtIsCs && filterIsCs))) continue;
       }
     }
-    if (addedNames.has(rt.name)) continue;
 
-    const normalizedRT = normalizeTeamName(rt.name);
     const matchesT1 = namesMatch(normalizedTeam1, normalizedRT);
     const matchesT2 = namesMatch(normalizedTeam2, normalizedRT);
 
     if (matchesT1 || matchesT2) {
-      // Attach the logo of the matched team (from prefill)
-      const logo = matchesT1 ? logos?.logoTeam1 : logos?.logoTeam2;
-      found.push({
-        name: rt.name,
-        game: rt.game,
-        status: rt.status,
-        notes: rt.notes,
-        logo: logo || rt.logo || null,
-      });
-      addedNames.add(rt.name);
+      const existing = foundMap.get(normalizedRT);
+      // Keep the most specific match: prefer longer name, then later in array (most recent)
+      if (!existing || (rt.name?.length ?? 0) > (existing.record.name?.length ?? 0) || i > existing.index) {
+        foundMap.set(normalizedRT, { record: rt, index: i, matchT1: matchesT1 });
+      }
     }
   }
 
-  return found;
+  return [...foundMap.values()].map(({ record: rt, matchT1 }) => ({
+    name: rt.name,
+    game: rt.game,
+    status: rt.status,
+    notes: rt.notes,
+    logo: (matchT1 ? logos?.logoTeam1 : logos?.logoTeam2) || rt.logo || null,
+  }));
 }

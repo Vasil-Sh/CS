@@ -1364,10 +1364,11 @@ export function useMatches() {
         riskyTeams,
       );
       if (results.length === 0) return null;
-      const gameLabel = results[0].game === "Дота" ? "Dota2" : "CS2";
+      const matched = results[0]; // findRiskyTeams already deduplicates & picks best
+      const gameLabel = matched.game === "Дота" ? "Dota2" : "CS2";
       return {
-        notes: results[0].notes,
-        status: results[0].status,
+        notes: matched.notes,
+        status: matched.status,
         game: gameLabel,
       };
     },
