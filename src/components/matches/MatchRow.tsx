@@ -595,47 +595,53 @@ export default function MatchRow({
       {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
-          {isFinished &&
-          typeof match.score1 === "number" &&
-          typeof match.score2 === "number" &&
-          (match.score1 > 0 || match.score2 > 0) ? (
-            <div className="flex items-center justify-center gap-0.5">
-              <span
-                className={`text-base font-bold ${
-                  match.score1 > match.score2
-                    ? "text-green-500"
-                    : "text-red-500"
-                }`}
+          {(() => {
+            const s1 = typeof match.score1 === "number" ? match.score1 : 0;
+            const s2 = typeof match.score2 === "number" ? match.score2 : 0;
+            const maxWins =
+              match.matchType === "Bo5" ? 3 :
+              match.matchType === "Bo3" ? 2 :
+              match.matchType === "Bo2" ? 2 : 1;
+            const scoreComplete = Math.max(s1, s2) >= maxWins;
+            return isFinished && (s1 > 0 || s2 > 0) && scoreComplete ? (
+              <div className="flex items-center justify-center gap-0.5">
+                <span
+                  className={`text-base font-bold ${
+                    s1 > s2
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {s1}
+                </span>
+                <span className="text-base font-medium text-gray-400">:</span>
+                <span
+                  className={`text-base font-bold ${
+                    s2 > s1
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {s2}
+                </span>
+              </div>
+            ) : (
+              <a
+                href={
+                  match.url ||
+                  (match.game === "Dota2"
+                    ? "https://tips.gg/dota2/matches"
+                    : "https://tips.gg/csgo/matches")
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-all text-violet-500"
+                title="Дивитись матч на tips.gg"
               >
-                {match.score1}
-              </span>
-              <span className="text-base font-medium text-gray-400">:</span>
-              <span
-                className={`text-base font-bold ${
-                  match.score2 > match.score1
-                    ? "text-green-500"
-                    : "text-red-500"
-                }`}
-              >
-                {match.score2}
-              </span>
-            </div>
-          ) : (
-            <a
-              href={
-                match.url ||
-                (match.game === "Dota2"
-                  ? "https://tips.gg/dota2/matches"
-                  : "https://tips.gg/csgo/matches")
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-all text-violet-500"
-              title="Дивитись матч на tips.gg"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          )}
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            );
+          })()}
         </td>
       )}
       {visibleColumns.has("status") && <td className="hidden"></td>}
