@@ -1403,18 +1403,14 @@ export function useMatches() {
       teamName: string,
       game: "CS2" | "Dota2",
     ): { notes: string; status: string } | null => {
-      // 1) Try same-game match first (game-specific entries take priority)
-      let results = findRiskyTeams(
+      // Only match risky teams of the SAME game as the current match.
+      // A CS risky note must NOT leak into a Dota2 match (different rosters).
+      const results = findRiskyTeams(
         teamName,
         "",
         getGameFilterValue(game),
         riskyTeams,
       );
-      // 2) Fallback to cross-game match — a team in risky list for the other
-      //    game should still be flagged (e.g. Natus Vincere CS note on a Dota2 match)
-      if (results.length === 0) {
-        results = findRiskyTeams(teamName, "", "", riskyTeams);
-      }
       if (results.length === 0) return null;
       const matched = results[0]; // findRiskyTeams already deduplicates & picks best
       const gameLabel = matched.game === "Дота" ? "Dota2" : "CS2";
