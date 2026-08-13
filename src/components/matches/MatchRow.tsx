@@ -575,9 +575,8 @@ export default function MatchRow({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
-                      {match.team1}
+                      {match.team1} <span className="font-normal text-gray-300">{formInfo1.tooltip}</span>
                     </p>
-                    <p className="text-sm">{formInfo1.tooltip}</p>
                     {formStats1 && (
                       <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
                         <p className="text-xs text-gray-300">
@@ -589,10 +588,13 @@ export default function MatchRow({
                             {formStats1.dots.map((d, i) => (
                               <span
                                 key={i}
-                                className={`inline-block w-2.5 h-2.5 rounded-full ${d.won ? "bg-green-400" : "bg-red-400"}`}
-                              />
+                                className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
+                                  d.won ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                }`}
+                              >
+                                {d.won ? "W" : "L"}
+                              </span>
                             ))}
-                            <span className="text-[10px] text-gray-400 ml-1">останні 5</span>
                           </div>
                         )}
                       </div>
@@ -610,9 +612,8 @@ export default function MatchRow({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
-                      {match.team2}
+                      {match.team2} <span className="font-normal text-gray-300">{formInfo2.tooltip}</span>
                     </p>
-                    <p className="text-sm">{formInfo2.tooltip}</p>
                     {formStats2 && (
                       <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
                         <p className="text-xs text-gray-300">
@@ -624,10 +625,13 @@ export default function MatchRow({
                             {formStats2.dots.map((d, i) => (
                               <span
                                 key={i}
-                                className={`inline-block w-2.5 h-2.5 rounded-full ${d.won ? "bg-green-400" : "bg-red-400"}`}
-                              />
+                                className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
+                                  d.won ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                }`}
+                              >
+                                {d.won ? "W" : "L"}
+                              </span>
                             ))}
-                            <span className="text-[10px] text-gray-400 ml-1">останні 5</span>
                           </div>
                         )}
                       </div>

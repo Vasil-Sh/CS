@@ -40,6 +40,9 @@ function namesMatch(a: string, b: string): boolean {
     const longer = a.length < b.length ? b : a;
     const ratio = shorter.length / longer.length;
     const startsAt = longer.indexOf(shorter);
+    // "Team X" vs "X" — e.g. "Team Liquid" ↔ "Liquid", "Team Spirit" ↔ "Spirit".
+    // The "team" prefix is purely organizational and always means the same squad.
+    if (longer.startsWith("team" + shorter)) return true;
     // Position-0 prefix: the shorter name appears at the start of the longer.
     // This catches "Falcons" → "Falcons Esports" (7/15 ≈ 47%), "FUT" → "FUT Esports" (3/11 ≈ 27%).
     // Require ≥35% length ratio AND ≥3 chars to avoid false positives like "CS" → "CSe-teams".
