@@ -36,10 +36,18 @@ interface TipsGgApiMatch {
   coeff1: number | null;
   coeff2: number | null;
   formTeam1?: string;
+  formWins1?: number;
+  formLosses1?: number;
+  formStreak1?: number;
+  formLast1?: string;
+  formWins2?: number;
+  formLosses2?: number;
+  formStreak2?: number;
+  formLast2?: string;
   formTeam2?: string;
 }
 
-const MATCHES_CACHE_KEY = "dota2_matches_cache_v18";
+const MATCHES_CACHE_KEY = "dota2_matches_cache_v19";
 const MATCHES_CACHE_TTL = 5 * 60 * 1000; // 5 min — matches backend CACHE_TTL_FRESH
 
 /** Rewrite logo URLs — backend already proxies all external CDNs.
@@ -93,6 +101,14 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     status: m.status,
     formTeam1: m.formTeam1,
     formTeam2: m.formTeam2,
+    formWins1: m.formWins1,
+    formLosses1: m.formLosses1,
+    formStreak1: m.formStreak1,
+    formLast1: m.formLast1,
+    formWins2: m.formWins2,
+    formLosses2: m.formLosses2,
+    formStreak2: m.formStreak2,
+    formLast2: m.formLast2,
   };
 }
 

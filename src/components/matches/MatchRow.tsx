@@ -323,6 +323,27 @@ const getFormInfo = (form: string): { icon: React.ReactNode; label: string; colo
   };
 };
 
+/** Build a compact "W-L (W3)" + last-5 results dots string from form stats */
+const formatFormStats = (
+  wins: number,
+  losses: number,
+  streak: number,
+  lastResults: string,
+): { record: string; streakLabel: string; dots: { r: string; won: boolean }[] } | null => {
+  if (!wins && !losses && !lastResults) return null;
+  const record = `${wins}-${losses}`;
+  const streakLabel = streak > 0
+    ? `W${streak}`
+    : streak < 0
+      ? `L${Math.abs(streak)}`
+      : "";
+  const dots = (lastResults || "")
+    .split("")
+    .slice(0, 5)
+    .map((r) => ({ r: r.toUpperCase(), won: r.toUpperCase() === "W" }));
+  return { record, streakLabel, dots };
+};
+
 function formatTime(dateStr: string) {
   try {
     const d = new Date(dateStr);
@@ -358,6 +379,8 @@ export default function MatchRow({
 }: Props) {
   const formInfo1 = getFormInfo(match.formStabilityTeam1 || "");
   const formInfo2 = getFormInfo(match.formStabilityTeam2 || "");
+  const formStats1 = formatFormStats(match.formWins1, match.formLosses1, match.formStreak1, match.formLast1);
+  const formStats2 = formatFormStats(match.formWins2, match.formLosses2, match.formStreak2, match.formLast2);
   const isFinished = match.matchStatus === "finished";
   // Ongoing: match has started (date ≤ now) but not yet finished.
   // Assumes CS2 BO3 lasts ~3h max. No server call needed.
@@ -555,6 +578,25 @@ export default function MatchRow({
                       {match.team1}
                     </p>
                     <p className="text-sm">{formInfo1.tooltip}</p>
+                    {formStats1 && (
+                      <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
+                        <p className="text-xs text-gray-300">
+                          Рекорд: {formStats1.record}
+                          {formStats1.streakLabel && ` · Стрік: ${formStats1.streakLabel}`}
+                        </p>
+                        {formStats1.dots.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {formStats1.dots.map((d, i) => (
+                              <span
+                                key={i}
+                                className={`inline-block w-2.5 h-2.5 rounded-full ${d.won ? "bg-green-400" : "bg-red-400"}`}
+                              />
+                            ))}
+                            <span className="text-[10px] text-gray-400 ml-1">останні 5</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -571,6 +613,25 @@ export default function MatchRow({
                       {match.team2}
                     </p>
                     <p className="text-sm">{formInfo2.tooltip}</p>
+                    {formStats2 && (
+                      <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
+                        <p className="text-xs text-gray-300">
+                          Рекорд: {formStats2.record}
+                          {formStats2.streakLabel && ` · Стрік: ${formStats2.streakLabel}`}
+                        </p>
+                        {formStats2.dots.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {formStats2.dots.map((d, i) => (
+                              <span
+                                key={i}
+                                className={`inline-block w-2.5 h-2.5 rounded-full ${d.won ? "bg-green-400" : "bg-red-400"}`}
+                              />
+                            ))}
+                            <span className="text-[10px] text-gray-400 ml-1">останні 5</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>

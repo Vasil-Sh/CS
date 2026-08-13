@@ -8,7 +8,7 @@ export type ApiMatch = BaseApiMatch;
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
-const MATCHES_CACHE_KEY = "cs2_matches_cache_v11";
+const MATCHES_CACHE_KEY = "cs2_matches_cache_v12";
 const MATCHES_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 /** Rewrite external logo URLs — backend already proxies all logos.
@@ -74,6 +74,14 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     isCustom: (m.isCustom as boolean) ?? false,
     formTeam1: m.formTeam1 as string | undefined,
     formTeam2: m.formTeam2 as string | undefined,
+    formWins1: m.formWins1 as number | undefined,
+    formLosses1: m.formLosses1 as number | undefined,
+    formStreak1: m.formStreak1 as number | undefined,
+    formLast1: m.formLast1 as string | undefined,
+    formWins2: m.formWins2 as number | undefined,
+    formLosses2: m.formLosses2 as number | undefined,
+    formStreak2: m.formStreak2 as number | undefined,
+    formLast2: m.formLast2 as string | undefined,
   };
 }
 

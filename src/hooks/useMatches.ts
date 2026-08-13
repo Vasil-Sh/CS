@@ -50,6 +50,14 @@ export interface Match {
   formStability: FormStability;
   formStabilityTeam1: string;
   formStabilityTeam2: string;
+  formWins1: number;
+  formLosses1: number;
+  formStreak1: number;
+  formLast1: string;
+  formWins2: number;
+  formLosses2: number;
+  formStreak2: number;
+  formLast2: string;
   playerForm: { player: string; rating: number }[];
   context: string;
   tier: "tier1" | "tier2" | "tier3" | null;
@@ -225,6 +233,14 @@ function apiMatchToMatch(
       "") as FormStability,
     formStabilityTeam1: (apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown') ? String(apiMatch.formTeam1) : "",
     formStabilityTeam2: (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown') ? String(apiMatch.formTeam2) : "",
+    formWins1: apiMatch.formWins1 ?? 0,
+    formLosses1: apiMatch.formLosses1 ?? 0,
+    formStreak1: apiMatch.formStreak1 ?? 0,
+    formLast1: apiMatch.formLast1 ?? "",
+    formWins2: apiMatch.formWins2 ?? 0,
+    formLosses2: apiMatch.formLosses2 ?? 0,
+    formStreak2: apiMatch.formStreak2 ?? 0,
+    formLast2: apiMatch.formLast2 ?? "",
     playerForm: [],
     context,
     tier,
@@ -289,6 +305,14 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     formStability: (m.formTeam1 || m.formTeam2 || "stable") as FormStability,
     formStabilityTeam1: (m.formTeam1 && m.formTeam1 !== 'unknown') ? String(m.formTeam1) : "",
     formStabilityTeam2: (m.formTeam2 && m.formTeam2 !== 'unknown') ? String(m.formTeam2) : "",
+    formWins1: m.formWins1 ?? 0,
+    formLosses1: m.formLosses1 ?? 0,
+    formStreak1: m.formStreak1 ?? 0,
+    formLast1: m.formLast1 ?? "",
+    formWins2: m.formWins2 ?? 0,
+    formLosses2: m.formLosses2 ?? 0,
+    formStreak2: m.formStreak2 ?? 0,
+    formLast2: m.formLast2 ?? "",
     playerForm: [],
     context,
     tier: determineDota2Tier(m.positionTeam1, m.positionTeam2, m.tournament),
@@ -359,8 +383,8 @@ function determineDota2Tier(
 
 // ── SessionStorage cache — prevents loading flash on page revisit ──
 // Key versioned to invalidate corrupt data from previous app versions.
-const MATCHES_CACHE_KEY = "matchiq_matches_cache_v3";
-const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v3";
+const MATCHES_CACHE_KEY = "matchiq_matches_cache_v4";
+const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v4";
 
 // Nuke old cache keys + localStorage caches on mount to prevent crashes.
 function clearAllCaches(): void {
@@ -378,7 +402,7 @@ function clearAllCaches(): void {
     }
   }
   // LocalStorage — API-level caches from csApi.ts / dota2Api.ts
-  for (const key of ["cs2_matches_cache_v11", "dota2_matches_cache_v18"]) {
+  for (const key of ["cs2_matches_cache_v11", "dota2_matches_cache_v18", "cs2_matches_cache_v12", "dota2_matches_cache_v19"]) {
     try {
       localStorage.removeItem(key);
     } catch {
@@ -412,6 +436,14 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
       m.formStability = (m.formStability && m.formStability !== 'unknown') ? m.formStability : ("" as FormStability);
       m.formStabilityTeam1 = (m.formStabilityTeam1 && m.formStabilityTeam1 !== 'unknown') ? String(m.formStabilityTeam1) : "";
       m.formStabilityTeam2 = (m.formStabilityTeam2 && m.formStabilityTeam2 !== 'unknown') ? String(m.formStabilityTeam2) : "";
+      m.formWins1 = Number(m.formWins1) || 0;
+      m.formLosses1 = Number(m.formLosses1) || 0;
+      m.formStreak1 = Number(m.formStreak1) || 0;
+      m.formLast1 = String(m.formLast1 ?? "");
+      m.formWins2 = Number(m.formWins2) || 0;
+      m.formLosses2 = Number(m.formLosses2) || 0;
+      m.formStreak2 = Number(m.formStreak2) || 0;
+      m.formLast2 = String(m.formLast2 ?? "");
       m.dota2Slug = String(m.dota2Slug ?? "");
       m.cs2Slug = String(m.cs2Slug ?? "");
       m.aiConfidence = Number(m.aiConfidence) || 0;
@@ -695,7 +727,17 @@ export function useMatches() {
         /* ok */
       }
       try {
+        localStorage.removeItem("cs2_matches_cache_v12");
+      } catch {
+        /* ok */
+      }
+      try {
         localStorage.removeItem("dota2_matches_cache_v18");
+      } catch {
+        /* ok */
+      }
+      try {
+        localStorage.removeItem("dota2_matches_cache_v19");
       } catch {
         /* ok */
       }

@@ -34,6 +34,16 @@ export interface BaseApiMatch {
   /** Team form stability from match history (computed by backend) */
   formTeam1?: string;
   formTeam2?: string;
+  /** Form stats for team 1 */
+  formWins1?: number;
+  formLosses1?: number;
+  formStreak1?: number;
+  formLast1?: string;
+  /** Form stats for team 2 */
+  formWins2?: number;
+  formLosses2?: number;
+  formStreak2?: number;
+  formLast2?: string;
 }
 
 /** Typed API error with status code and optional details */
