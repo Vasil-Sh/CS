@@ -45,7 +45,7 @@ interface AddToRiskyTeamsModalProps {
 const STATUS_OPTIONS = [
   { value: "БАН", label: "🔴 БАН", color: "text-red-600" },
   { value: "Ризиковані", label: "🟠 Ризиковані", color: "text-orange-500" },
-  { value: "Нестабільні", label: "🟠 Нестабільні", color: "text-orange-500" },
+  { value: "Нестабільні", label: "� Нестабільні", color: "text-red-600" },
   { value: "Обережно", label: "🟡 Обережно", color: "text-amber-500" },
   { value: "Під питанням", label: "🟡 Під питанням", color: "text-yellow-600" },
   { value: "Стабільні", label: "🔵 Стабільні", color: "text-blue-600" },
@@ -73,8 +73,17 @@ const proxyLogo = (url: string | null | undefined): string | null => {
 };
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
-  const { open, onClose, team1, team2, onSaved, team1Risky, team2Risky, team1Existing, team2Existing } =
-    props;
+  const {
+    open,
+    onClose,
+    team1,
+    team2,
+    onSaved,
+    team1Risky,
+    team2Risky,
+    team1Existing,
+    team2Existing,
+  } = props;
   const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
 
   const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
@@ -90,8 +99,10 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
 
   // Get existing data for a team by name
   const getExistingData = (teamName: string): ExistingTeamInfo | null => {
-    if (teamName.toLowerCase() === team1.name.toLowerCase()) return team1Existing;
-    if (teamName.toLowerCase() === team2.name.toLowerCase()) return team2Existing;
+    if (teamName.toLowerCase() === team1.name.toLowerCase())
+      return team1Existing;
+    if (teamName.toLowerCase() === team2.name.toLowerCase())
+      return team2Existing;
     return null;
   };
 
@@ -279,7 +290,8 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
                           alt={team.name}
                           className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
                             (
                               e.target as HTMLImageElement
                             ).nextElementSibling?.classList.remove("hidden");
