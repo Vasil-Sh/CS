@@ -92,6 +92,7 @@ async function request<T>(
     ...options,
     headers,
     signal: controller.signal,
+    cache: "no-store",
   });
   clearTimeout(timeoutId);
 
@@ -125,25 +126,42 @@ export { ApiError } from "./matchTypes";
 // ═══════════════════════════════════════════
 
 export const api = {
-  get: <T>(path: string, timeoutMs?: number) => request<T>(path, undefined, true, timeoutMs),
+  get: <T>(path: string, timeoutMs?: number) =>
+    request<T>(path, undefined, true, timeoutMs),
 
   post: <T>(path: string, body?: unknown, timeoutMs?: number) =>
-    request<T>(path, {
-      method: "POST",
-      body: body ? JSON.stringify(body) : undefined,
-    }, true, timeoutMs),
+    request<T>(
+      path,
+      {
+        method: "POST",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      true,
+      timeoutMs,
+    ),
 
   put: <T>(path: string, body?: unknown, timeoutMs?: number) =>
-    request<T>(path, {
-      method: "PUT",
-      body: body ? JSON.stringify(body) : undefined,
-    }, true, timeoutMs),
+    request<T>(
+      path,
+      {
+        method: "PUT",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      true,
+      timeoutMs,
+    ),
 
   patch: <T>(path: string, body?: unknown, timeoutMs?: number) =>
-    request<T>(path, {
-      method: "PATCH",
-      body: body ? JSON.stringify(body) : undefined,
-    }, true, timeoutMs),
+    request<T>(
+      path,
+      {
+        method: "PATCH",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      true,
+      timeoutMs,
+    ),
 
-  delete: <T>(path: string, timeoutMs?: number) => request<T>(path, { method: "DELETE" }, true, timeoutMs),
+  delete: <T>(path: string, timeoutMs?: number) =>
+    request<T>(path, { method: "DELETE" }, true, timeoutMs),
 };

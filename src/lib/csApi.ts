@@ -185,6 +185,7 @@ async function fetchFreshMatches(forceRefresh = false): Promise<ApiMatch[]> {
     method: "GET",
     headers: { Accept: "application/json" },
     signal: controller.signal,
+    cache: "no-store",
   });
   clearTimeout(timeout);
 
