@@ -1,21 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { DataProvider } from "@/contexts/DataContext";
-
-function TestWrapper({ children }: { children: React.ReactNode }) {
-  localStorage.setItem("authToken", "mock");
-  localStorage.setItem("username", "test");
-  localStorage.setItem("userRole", "user");
-  return (
-    <MemoryRouter>
-      <AuthProvider>
-        <DataProvider>{children}</DataProvider>
-      </AuthProvider>
-    </MemoryRouter>
-  );
-}
 
 afterEach(() => localStorage.clear());
 
@@ -40,8 +25,9 @@ describe("Previously uncovered components — smoke tests", () => {
         <M
           open={false}
           onClose={() => {}}
+          matchInfo="Team A vs Team B"
           recommendation={null}
-          loading={false}
+          isLoading={false}
         />,
       ).container,
     ).toBeTruthy();
@@ -49,7 +35,7 @@ describe("Previously uncovered components — smoke tests", () => {
 
   it("CurrencySwitch renders", async () => {
     const { default: C } = await import("@/components/CurrencySwitch");
-    render(<C mode="UAH" onChange={() => {}} hasUsdBets={false} />);
+    render(<C currency="UAH" onChange={() => {}} hasUsdBets={false} />);
     expect(document.body.textContent).toContain("₴");
   });
 

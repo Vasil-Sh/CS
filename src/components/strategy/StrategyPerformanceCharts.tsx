@@ -19,8 +19,8 @@ const ChartCard = ({ icon: Icon, title, children }: { icon: typeof Percent; titl
 );
 
 const tooltipStyle = { backgroundColor: 'rgba(255,255,255,0.98)', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '8px 12px', fontSize: '12px' };
-const labelFormatter = (_label: string, payload: { payload: ChartItem }[] | undefined) => {
-  if (payload && payload[0]) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; }
+const labelFormatter = (_label: string, payload?: Array<{ payload?: ChartItem }>) => {
+  if (payload && payload[0] && payload[0].payload) { const data = payload[0].payload; return `${data.fullName} (${data.totalBets} ставок)`; }
   return _label;
 };
 

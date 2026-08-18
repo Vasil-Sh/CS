@@ -64,11 +64,6 @@ export function useRiskMetrics(bets: Bet[]) {
     let sumSquares = 0;
     let sumStakes = 0;
     let maxStake = 0;
-    let winCount = 0;
-    let winReturnSum = 0;
-    let winReturnCount = 0;
-    let lossReturnSum = 0;
-    let lossReturnCount = 0;
     let minReturn = Infinity;
 
     const returns: number[] = [];
@@ -105,7 +100,6 @@ export function useRiskMetrics(bets: Bet[]) {
         currentLossStreak = 0;
         if (bet.result === 'Win') {
           currentWinStreak++;
-          winCount++;
         }
         if (currentWinStreak > 0) {
           winStreaks.push(currentWinStreak);

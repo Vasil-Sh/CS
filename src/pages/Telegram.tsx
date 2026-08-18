@@ -23,7 +23,7 @@ export default function Telegram() {
       betsCount: bets.length,
       wins: bets.filter((b) => b.result === 'Win').length,
       losses: bets.filter((b) => b.result === 'Loss').length,
-      lastSent: lastSend ? new Date(lastSend.date || lastSend.createdAt).toLocaleDateString('uk-UA') : null,
+      lastSent: lastSend ? new Date(lastSend.date ?? lastSend.createdAt ?? 0).toLocaleDateString('uk-UA') : null,
     };
   }, [currentUser]);
 

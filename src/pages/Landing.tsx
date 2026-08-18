@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
-import { t, setLang, getLang, type Lang } from "@/lib/i18n";
+import { setLang, getLang, type Lang } from "@/lib/i18n";
 import { SEO } from "@/components/SEO";
 import {
   OrganizationStructuredData,

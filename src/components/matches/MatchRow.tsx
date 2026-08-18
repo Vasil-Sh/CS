@@ -22,7 +22,6 @@ import {
   CircleCheck,
   Info,
   Trophy,
-  X,
   BarChart3,
   ExternalLink,
 } from "lucide-react";

@@ -70,15 +70,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // Backfill: push localStorage-only bets (not yet on server) to the API
       try {
         const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
-        const rawApiBets = await api.get<{ data?: Array<{ id: number | string }> }>("/bets").catch(() => ({ data: [] }));
-        const rawData = (rawApiBets as any).data || rawApiBets || [];
-        const serverIds = new Set(rawData.map((b: any) => String(b.id)));
+        type RawBetRow = {
+          id?: number | string;
+          match?: unknown;
+          amount?: unknown;
+          profit?: unknown;
+          date?: unknown;
+        };
+        const betFingerprint = (b: RawBetRow) =>
+          `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`;
+        const rawApiBets = await api
+          .get<{ data?: RawBetRow[] } | RawBetRow[]>("/bets")
+          .catch(() => [] as RawBetRow[]);
+        const rawData: RawBetRow[] = Array.isArray(rawApiBets)
+          ? rawApiBets
+          : (rawApiBets?.data ?? []);
+        const serverIds = new Set(rawData.map((b) => String(b.id)));
         // Also dedup by fingerprint to avoid pushing already-existing bets
-        const serverFingerprints = new Set(
-          rawData.map((b: any) =>
-            `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`
-          )
-        );
+        const serverFingerprints = new Set(rawData.map(betFingerprint));
         let cleaned = false;
         const cleanedBets: Bet[] = [];
         const backfillQueue: Array<() => Promise<void>> = [];
@@ -94,21 +103,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
             cleaned = true;
             continue;
           }
-          const fp = `${String(lb.match || '').trim()}|${parseFloat(String(lb.amount || 0)).toFixed(2)}|${parseFloat(String(lb.profit || 0)).toFixed(2)}|${String(lb.date || '').substring(0, 10)}`;
+          const fp = betFingerprint(lb);
           if (serverFingerprints.has(fp)) {
             // Already on server by fingerprint — remove from localStorage
             cleaned = true;
             continue;
           }
-          // Strip internal/local-only fields before sending to API
-          const { id: _id, createdAt, ...rawBet } = lb as any;
           // Normalize riskyTeams: if array of objects → array of names
-          const riskyTeams = Array.isArray(rawBet.riskyTeams)
-            ? rawBet.riskyTeams.map((t: any) => typeof t === "string" ? t : t?.name || "")
+          const riskyTeams = Array.isArray(lb.riskyTeams)
+            ? (lb.riskyTeams as Array<string | { name?: string }>)
+                .map((t) => (typeof t === "string" ? t : t?.name || ""))
             : [];
-          const cleanBet = { ...rawBet, riskyTeams, id: undefined };
-          backfillQueue.push(() => 
-            api.post("/bets", cleanBet).catch((e) => {
+          const cleanBet: Bet = { ...lb, id: undefined, createdAt: undefined, riskyTeams };
+          backfillQueue.push(() =>
+            api.post<void>("/bets", cleanBet).catch((e) => {
               console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
             })
           );
@@ -150,7 +158,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
           const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
           setBets(localBets);
           recalcBankroll(localBets);
-        } catch {}
+        } catch {
+          /* ignore fallback errors */
+        }
         setIsLoading(false);
       });
     }

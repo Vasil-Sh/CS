@@ -230,11 +230,19 @@ function filterBets(
 }
 
 describe("filterBets (table filters)", () => {
+  // Dates are generated relative to the current day so period filters
+  // ("week"/"month"/"quarter") stay valid regardless of when the suite runs.
+  const day = (offset: number): string => {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.toISOString().split("T")[0];
+  };
+
   const bets: Bet[] = [
-    { result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21" },
-    { result: "Loss", profit: -50, amount: 50, odds: 2, date: "2026-07-20" },
-    { result: "Pending", profit: 0, amount: 200, odds: 1.5, date: "2026-07-19" },
-    { result: "Win", profit: 300, amount: 150, odds: 3, date: "2026-07-10" },
+    { result: "Win", profit: 100, amount: 100, odds: 2, date: day(1) },
+    { result: "Loss", profit: -50, amount: 50, odds: 2, date: day(2) },
+    { result: "Pending", profit: 0, amount: 200, odds: 1.5, date: day(3) },
+    { result: "Win", profit: 300, amount: 150, odds: 3, date: day(12) },
   ];
 
   it("no filters → all bets", () => {
@@ -254,19 +262,12 @@ describe("filterBets (table filters)", () => {
   });
 
   it("period filter: week (≤7 days)", () => {
-    // Today is 2026-07-22, so "2026-07-21" is 1 day ago, "2026-07-20" is 2, "2026-07-10" is 12
-    const filtered = filterBets(bets, "all", "all", "week", "");
-    expect(filtered.length).toBeGreaterThanOrEqual(2); // At least the 2 recent ones
-    expect(filtered.every((b) => {
-      const d = new Date(b.date).getTime();
-      const now = new Date("2026-07-22").getTime();
-      return (now - d) / 86400000 <= 7;
-    })).toBe(true);
+    // days 1, 2, 3 are within 7 days; day(12) is excluded
+    expect(filterBets(bets, "all", "all", "week", "")).toHaveLength(3);
   });
 
   it("period filter: month (≤30 days)", () => {
-    const filtered = filterBets(bets, "all", "all", "month", "");
-    expect(filtered.length).toBe(4); // All within 30 days of 2026-07-22
+    expect(filterBets(bets, "all", "all", "month", "")).toHaveLength(4);
   });
 
   it("period filter: quarter (≤90 days)", () => {
@@ -275,8 +276,8 @@ describe("filterBets (table filters)", () => {
 
   it("combined: Win + week", () => {
     const filtered = filterBets(bets, "all", "Win", "week", "");
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].date).toBe("2026-07-21");
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].date).toBe(day(1));
   });
 
   it("combined: Loss + week", () => {

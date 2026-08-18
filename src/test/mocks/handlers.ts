@@ -83,7 +83,7 @@ export const cs2Handlers = [
     ]);
   }),
 
-  http.get("*/api/v1/cs2-matches/logo/*", async ({ request }) => {
+  http.get("*/api/v1/cs2-matches/logo/*", async () => {
     // Return a tiny transparent SVG as placeholder
     return new HttpResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="#eee" rx="8"/><text x="32" y="40" text-anchor="middle" font-size="28">?</text></svg>`,

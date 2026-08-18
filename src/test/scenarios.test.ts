@@ -156,7 +156,6 @@ describe("📅 СЦЕНАРІЙ 1: Ідеальний тиждень (+3500₴, 
   });
 
   it("🏦 bankrollStats: initial=10000 → current=14475 → roi=44.75%", () => {
-    const stats = BankrollService.getBankrollStats("week_player", weeksBets);
     // getBankrollStats повертає 0, бо 'week_player' не має даних у localStorage
     // Перевіряємо логіку calculateTotalProfit окремо
     const profit = BankrollService.calculateTotalProfit(weeksBets);

@@ -24,8 +24,8 @@ export default function ScatterTooltip({ active, payload }: ScatterTooltipProps)
         {data.match && (
           <p className="text-sm text-gray-700 mb-1">Ставка: {data.match}</p>
         )}
-        <p className={`text-sm font-bold mb-1 ${data.profit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-          Профіт: {data.profit >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
+        <p className={`text-sm font-bold mb-1 ${Number(data.profit) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+          Профіт: {Number(data.profit) >= 0 ? '+' : ''}{Number(data.profit).toFixed(2)} ₴
         </p>
         {data.betType && (
           <p className="text-sm text-gray-600">Тип: {data.betType}</p>

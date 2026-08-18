@@ -67,17 +67,19 @@ const computeBestStrategy = (bets: Bet[]) => {
   } | null = null;
   let totalRoi = 0;
   let stratCount = 0;
-  Object.entries(byStrat).forEach(([name, s]) => {
+  for (const [name, s] of Object.entries(byStrat)) {
     const roi = s.stake > 0 ? (s.profit / s.stake) * 100 : 0;
     if (s.count >= 3) {
       totalRoi += roi;
       stratCount++;
     }
-    if (!best || roi > best.roi)
+    if (!best || roi > best.roi) {
       best = { name, roi, count: s.count, avgRoi: 0 };
-  });
-  if (best)
+    }
+  }
+  if (best) {
     best.avgRoi = stratCount > 1 ? (totalRoi - best.roi) / (stratCount - 1) : 0;
+  }
   return best;
 };
 const pickPrimaryGoal = (goals: StoredGoal[]): StoredGoal | null => {
@@ -127,7 +129,8 @@ export default function Strategy() {
     const saved = sessionStorage.getItem("strategy_active_tab");
     return (saved === "goals" ? "goals" : "strategies") as "strategies" | "goals";
   });
-  const setActiveTab = (tab: "strategies" | "goals") => {
+  const setActiveTab = (tab: string) => {
+    if (tab !== "strategies" && tab !== "goals") return;
     setActiveTabState(tab);
     sessionStorage.setItem("strategy_active_tab", tab);
   };

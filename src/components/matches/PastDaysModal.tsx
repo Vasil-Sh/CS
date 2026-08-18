@@ -73,7 +73,7 @@ function TeamLogo({
 
   return (
     <img
-      src={proxyLogo(src, game)}
+      src={proxyLogo(src, game) ?? undefined}
       alt={alt}
       className="rounded object-contain flex-shrink-0"
       style={{ width: size, height: size }}

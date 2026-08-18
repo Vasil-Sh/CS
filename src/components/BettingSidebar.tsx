@@ -53,7 +53,6 @@ export function BettingSidebar(props: BettingSidebarProps) {
     maxStakePercent,
     onMaxStakePercentChange,
     onApplyKellyAmount,
-    onRemoveRiskyTeam,
   } = props;
 
   return (

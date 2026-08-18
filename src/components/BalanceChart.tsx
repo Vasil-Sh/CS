@@ -14,8 +14,6 @@ import {
 } from "recharts";
 import {
   Wallet,
-  TrendingUp,
-  TrendingDown,
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";

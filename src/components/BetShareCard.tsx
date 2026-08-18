@@ -18,7 +18,7 @@ interface BetShareCardProps {
     team2?: string;
     date: string;
     betType: string;
-    format: string;
+    format?: string;
     currency?: string;
     amount: number;
     originalAmount?: number;
@@ -26,7 +26,7 @@ interface BetShareCardProps {
     result: string;
     profit?: number;
     originalProfit?: number;
-    exchangeRate?: number;
+    exchangeRate?: number | null;
     logoTeam1?: string | null;
     logoTeam2?: string | null;
     expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
@@ -221,18 +221,8 @@ export default function BetShareCard({
     }
   }
 
-  const isExpress = bet.betType.includes("Експрес") || bet.format.includes("x");
+  const isExpress = bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
 
-  const logoSettings = {
-    win: { border: "#059669", fallback: "#059669" },
-    loss: { border: "#DC2626", fallback: "#DC2626" },
-    pending: { border: "#3B82F6", fallback: "#3B82F6" },
-  };
-  const logoStyle = isWin
-    ? logoSettings.win
-    : isLoss
-      ? logoSettings.loss
-      : logoSettings.pending;
   const logoSize = compact ? 75 : 94;
   const game = bet.game || "CS2";
 
@@ -386,7 +376,6 @@ export default function BetShareCard({
               <TeamIcon
                 logo={bet.logoTeam1}
                 name={bet.team1}
-                style={logoStyle}
                 size={logoSize}
                 game={game}
               />
@@ -399,7 +388,6 @@ export default function BetShareCard({
               <TeamIcon
                 logo={bet.logoTeam2}
                 name={bet.team2}
-                style={logoStyle}
                 size={logoSize}
                 game={game}
               />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wallet } from "lucide-react";
 import { BankrollService } from "@/lib/bankrollService";
-import { UserDataService } from "@/lib/userDataService";
 import { toast } from "sonner";
 
 interface InitialBankModalProps {
@@ -24,7 +23,6 @@ interface InitialBankModalProps {
 export default function InitialBankModal({
   open,
   onClose,
-  mode = "setup",
 }: InitialBankModalProps) {
   const currentUser = localStorage.getItem("username") || "";
   const existingBank = BankrollService.getBankrollData(currentUser);
@@ -35,13 +33,6 @@ export default function InitialBankModal({
     existingBank?.initialBank.toString() || "1000",
   );
   const [currency, setCurrency] = useState<"UAH" | "USD">("UAH");
-
-  const displayAmount =
-    currency === "USD"
-      ? (parseFloat(amount || "0") * savedRate).toFixed(0)
-      : amount;
-  const label =
-    currency === "USD" ? "Стартовий банк ($)" : "Стартовий банк (₴)";
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,14 +55,6 @@ export default function InitialBankModal({
       setIsSubmitting(false);
     }
     onClose(true);
-  };
-
-  const handleSkip = () => {
-    if (mode === "setup") {
-      BankrollService.setInitialBank(currentUser, 0);
-      toast.info("Ви можете встановити стартовий банк пізніше");
-    }
-    onClose(false);
   };
 
   const handleClose = () => {

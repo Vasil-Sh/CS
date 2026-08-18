@@ -65,8 +65,8 @@ export interface Match {
   game: "CS2" | "Dota2";
   upsetProbability: number;
   url?: string;
-  score1?: number;
-  score2?: number;
+  score1?: number | null;
+  score2?: number | null;
   matchStatus?: "upcoming" | "live" | "finished" | "postponed" | "cancelled";
   positionTeam1?: number | null;
   positionTeam2?: number | null;
@@ -112,7 +112,7 @@ const getTodayDateKey = (): string => {
 };
 
 const getStatusPriority = (
-  status?: "upcoming" | "live" | "finished",
+  status?: Match["matchStatus"],
 ): number => {
   switch (status) {
     case "live":
@@ -244,7 +244,7 @@ function apiMatchToMatch(
     playerForm: [],
     context,
     tier,
-    matchType: String(matchType ?? ""),
+    matchType,
     upsetProbability: Math.max(5, Math.min(45, 50 - Math.floor(posDiff * 0.3))),
     url: String(buildTipsGgUrl(String(apiMatch.link ?? "")) || ""),
     score1: typeof apiMatch.score1 === "number" ? apiMatch.score1 : null,
@@ -495,7 +495,7 @@ export function useMatches() {
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [predictionsModalOpen, setPredictionsModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -810,7 +810,7 @@ export function useMatches() {
               maxScore >= winsNeeded &&
               Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
 
-            const newStatus: "upcoming" | "live" | "finished" | "postponed" =
+            const newStatus: Match["matchStatus"] =
               (() => {
                 if (isScoreDecided) return "finished";
 
@@ -895,7 +895,6 @@ export function useMatches() {
   );
 
   // ── Auto-refresh match list every 60s (no live score polling) ──
-  const [liveScoreAge, setLiveScoreAge] = useState(0);
 
   useEffect(() => {
     let isQuietRefreshing = false;
@@ -962,7 +961,6 @@ export function useMatches() {
 
   // ── Filtering & sorting (memoized) ──
   const {
-    filteredMatches,
     sortedDateKeys,
     groupedByDate,
     displayedMatches,
@@ -972,8 +970,6 @@ export function useMatches() {
     cs2DisplayedCount,
     dota2DisplayedCount,
     ongoingCount,
-    topMatchesCount,
-    topMatches,
     avgCoefficient,
     avgConfidence,
     tournamentOptions,
@@ -1170,7 +1166,6 @@ export function useMatches() {
         : 0;
 
     return {
-      filteredMatches: filtered,
       sortedDateKeys: dateKeys,
       groupedByDate: grouped,
       displayedMatches: displayed,
@@ -1180,12 +1175,6 @@ export function useMatches() {
       cs2DisplayedCount: displayed.filter((m) => m.game === "CS2").length,
       dota2DisplayedCount: displayed.filter((m) => m.game === "Dota2").length,
       ongoingCount,
-      topMatchesCount: displayed.filter((m) => (m.stars ?? 0) >= 4).length,
-      topMatches: displayed
-        .filter((m) => (m.stars ?? 0) >= 4)
-        .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0))
-        .slice(0, 3)
-        .map((m) => ({ team1: m.team1, team2: m.team2, stars: m.stars ?? 0 })),
       avgCoefficient: (() => {
         const cs = displayed
           .flatMap((m) => [
@@ -1235,12 +1224,12 @@ export function useMatches() {
     setAiLoading(true);
     setAiRecommendation(null);
     try {
-      const rec = await deepSeekService.recommendMatch({
+      const rec = await deepSeekService.getMatchRecommendation({
         team1: match.team1,
         team2: match.team2,
-        odds: [match.odds.team1, match.odds.team2],
-        matchType: match.matchType,
-        tier: match.tier || undefined,
+        format: match.matchType,
+        tier: match.tier || "unknown",
+        odds: { team1: match.odds.team1, team2: match.odds.team2 },
       });
       setAiRecommendation(rec);
       setAiPredictions((prev) => ({ ...prev, [match.id]: rec }));
@@ -1402,7 +1391,7 @@ export function useMatches() {
     (
       teamName: string,
       game: "CS2" | "Dota2",
-    ): { notes: string; status: string } | null => {
+    ): { notes: string; status: string; game: string } | null => {
       // Only match risky teams of the SAME game as the current match.
       // A CS risky note must NOT leak into a Dota2 match (different rosters).
       const results = findRiskyTeams(
@@ -1546,7 +1535,6 @@ export function useMatches() {
     pollLiveScores,
     hasDota2Matches,
     hasCs2Matches,
-    liveScoreAge,
     // Multi-select
     selectedMatchIds,
     setSelectedMatchIds,

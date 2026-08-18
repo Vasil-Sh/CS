@@ -25,7 +25,6 @@ const StatCardMemo = memo(function StatCard({
   valueColor = "text-gray-900",
   subIcon,
   onClick,
-  trend,
   extraValue,
   extraSubtext,
   extraValueColor = "text-amber-600",

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, ReferenceLine, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Bar, ComposedChart, ReferenceLine, Area } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import type { Bet } from '@/types/betting';
@@ -155,8 +155,6 @@ const PeriodComparisonMemo = memo(function PeriodComparison({ bets }: PeriodComp
     }
     return period;
   };
-
-  const chartCardShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06)';
 
   const completedBetsCount = bets.filter(bet => bet.result !== 'Pending').length;
 

@@ -18,7 +18,6 @@ interface BalanceTrackerProps {
 export default function BalanceTracker({
   currentBank,
   allTimeHigh,
-  allTimeLow,
   gameFilter,
   onGameFilterChange,
   cs2Bets,
@@ -42,7 +41,6 @@ export default function BalanceTracker({
   const isGrowing = hasBets && percentOfPeak >= 98;
   const isStable = hasBets && percentOfPeak >= 85 && percentOfPeak < 98;
   const isDipping = hasBets && percentOfPeak >= 50 && percentOfPeak < 85;
-  const isFalling = hasBets && percentOfPeak < 50;
 
   // AI advice
   const [aiAdvice, setAiAdvice] = useState<string | null>(null);

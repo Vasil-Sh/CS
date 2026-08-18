@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { UserDataService } from "@/lib/userDataService";
-import type { BetRecord } from "@/types/betting";
+import type { BetRecord } from "@/hooks/useBettingForm";
 import type { CS2Strategy } from "@/types/strategy";
 
 interface TiltBlockResult {

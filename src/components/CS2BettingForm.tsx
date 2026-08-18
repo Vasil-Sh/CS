@@ -170,7 +170,6 @@ export default function CS2BettingForm(props: Props) {
                     isBlocked={h.tiltBlock.blocked}
                     isHighConfidence={h.isHighConfidence}
                     showSection={true}
-                    format={h.formData.format}
                     classes={{
                       input: css.input,
                       label: css.label,

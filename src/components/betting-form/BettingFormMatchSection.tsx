@@ -75,7 +75,7 @@ export default function BettingFormMatchSection({
   const err = (field: string) => {
     // Only highlight if error is set AND field is still empty/invalid
     if (!submitErrors[field]) return "";
-    const val = (data as Record<string, unknown>)[field];
+    const val = (data as unknown as Record<string, unknown>)[field];
     if (field === "odds") {
       const n = parseFloat(String(val || ""));
       if (!isNaN(n) && n > 1) return "";

@@ -70,6 +70,7 @@ export interface ExpressEvent {
 }
 
 export interface BetRecord {
+  id?: string | number;
   date: string;
   match: string;
   team1: string;
@@ -84,7 +85,7 @@ export interface BetRecord {
   originalAmount: number;
   currency: string;
   exchangeRate: number | null;
-  result: "Pending";
+  result: "Win" | "Loss" | "Pending";
   profit: number;
   roi: number;
   strategy: string;
@@ -92,6 +93,7 @@ export interface BetRecord {
   notes: string;
   goalId?: string;
   winProbability?: number;
+  createdAt?: number;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
   expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
@@ -266,7 +268,7 @@ export function useBettingForm({
   const strategiesRef = useRef<CS2Strategy[]>([]);
   const onPrefillConsumedRef = useRef(onPrefillConsumed);
   onPrefillConsumedRef.current = onPrefillConsumed;
-  const urlDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const urlDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // ── Effects ──
   useEffect(() => {
@@ -612,7 +614,7 @@ export function useBettingForm({
   };
 
   const getLastStakeForGoal = (goalId: string): string => {
-    const allGoals = UserDataService.getUserData(currentUser, "goals", []);
+    const allGoals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
     const goal = allGoals.find((g: Goal) => g.id === goalId);
     if (!goal) return "";
     if (goal.type === "ladder") {
@@ -879,7 +881,7 @@ export function useBettingForm({
             ...record,
             id: apiId ?? `local_${crypto.randomUUID()}`,
             riskyTeams: record.riskyTeams.map((t) => t.name),
-          } as BetRecord,
+          } as unknown as BetRecord,
           ...freshBets,
         ]);
       };
@@ -1081,14 +1083,6 @@ export function useBettingForm({
     );
     let kelly = null;
     if (hasConfidence) {
-      const betsForKelly =
-        apiBets.length > 0
-          ? apiBets
-          : UserDataService.getUserData<BetRecord[]>(
-              currentUser,
-              "mybets_data",
-              [],
-            );
       const bankrollStats = BankrollService.getBankrollStats(
         currentUser,
         apiBets as unknown as Bet[],

@@ -1,7 +1,5 @@
 export type Lang = "uk" | "en";
 
-import { useState, useEffect } from "react";
-
 type TranslationMap = Record<string, Record<Lang, string>>;
 
 /**
@@ -317,33 +315,4 @@ export function t(key: string, fallback?: string): string {
   const entry = T[key];
   if (!entry) return fallback || key;
   return entry[currentLang] || entry["uk"] || fallback || key;
-}
-
-/**
- * React hook to subscribe to language changes.
- * Returns current language — re-renders component when language switches.
- */
-function useLang(): Lang {
-  const [lang, setLangState] = useState<Lang>(currentLang);
-  useEffect(() => onLangChange(setLangState), []);
-  return lang;
-}
-
-/**
- * Plural-aware record count: tPlural(count, 'mybets.records1', 'mybets.records2', 'mybets.records3')
- * For English we always use plural, Ukrainian uses 1/2-4/5+ forms.
- */
-function tPlural(
-  count: number,
-  one: string,
-  few: string,
-  many: string,
-): string {
-  if (currentLang === "en") return `${count} ${t(many)}`;
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${count} ${t(one)}`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20))
-    return `${count} ${t(few)}`;
-  return `${count} ${t(many)}`;
 }

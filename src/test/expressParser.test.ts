@@ -22,7 +22,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseExpressEvents } from '@/lib/parser/expressParser';
-import type { ParsedEvent } from '@/lib/parser/expressParser';
 
 describe('parseExpressEvents (Express-парсинг)', () => {
   it('[1] звичайна ставка "П1" (без |) → порожній масив', () => {

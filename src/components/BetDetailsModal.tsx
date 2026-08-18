@@ -13,7 +13,6 @@ import { getBetTypeLabel } from '@/lib/displayHelpers';
 import type { Bet } from "@/types/betting";
 import {
   parseExpressEvents,
-  type ParsedEvent,
 } from "@/lib/parser/expressParser";
 
 interface BetDetailsModalProps {
@@ -30,7 +29,7 @@ export default function BetDetailsModal({
   const [copied, setCopied] = useState(false);
   const [editableText, setEditableText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -51,7 +50,7 @@ export default function BetDetailsModal({
   const displayAmount = bet.originalAmount || bet.amount;
 
   const isExpressBet =
-    bet.betType.includes("Експрес") || bet.format.includes("x");
+    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
 
   const generateTelegramText = () => {
     if (isExpressBet) {
@@ -133,7 +132,7 @@ export default function BetDetailsModal({
         } else {
           fallbackCopy();
         }
-      } catch (error) {
+      } catch {
         fallbackCopy();
       }
     }

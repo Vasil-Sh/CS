@@ -79,8 +79,8 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
             {active.name}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className={`${riskBadgeClass(active.riskLevel)} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}>
-              {riskLabel(active.riskLevel)}
+            <Badge className={`${riskBadgeClass(active.riskLevel ?? '')} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}>
+              {riskLabel(active.riskLevel ?? '')}
             </Badge>
             {roi !== null ? (
               <span className={`text-sm font-semibold ${roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>

@@ -77,7 +77,7 @@ export default function StrategySuccessDialog({
                   <Target className="h-4 w-4 text-blue-500" strokeWidth={1.5} />
                   <span className="text-sm font-medium text-blue-500">Критеріїв</span>
                 </div>
-                <div className="text-2xl font-bold text-blue-500">{strategy.criteria.length}</div>
+                <div className="text-2xl font-bold text-blue-500">{(strategy.criteria ?? []).length}</div>
               </div>
             </div>
 
@@ -87,7 +87,7 @@ export default function StrategySuccessDialog({
                 Критерії стратегії:
               </h4>
               <ul className="space-y-2">
-                {strategy.criteria.map((criterion, idx) => (
+                {(strategy.criteria ?? []).map((criterion, idx) => (
                   <li key={idx} className="text-sm text-gray-500 flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-1.5 flex-shrink-0"></div>
                     <span>{criterion}</span>

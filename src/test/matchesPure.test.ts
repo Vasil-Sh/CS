@@ -217,7 +217,6 @@ describe("formStability derivation", () => {
 
 describe("scoreBasedStabilityOverride", () => {
   function overrideByScore(
-    currentStability: FormStability,
     isFavTeam1: boolean,
     s1: number,
     s2: number,
@@ -233,20 +232,20 @@ describe("scoreBasedStabilityOverride", () => {
   }
 
   it("favorite wins BO3 2-0 → hot_streak", () => {
-    expect(overrideByScore("stable", true, 2, 0, "TeamA", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(overrideByScore(true, 2, 0, "TeamA", "TeamA", "TeamB")).toBe("hot_streak");
   });
 
   it("favorite loses BO3 1-2 → slump", () => {
-    expect(overrideByScore("momentum", true, 1, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
+    expect(overrideByScore(true, 1, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
   });
 
   it("underdog wins → stable (favorite perspective)", () => {
     // TeamA is favorite, but TeamB wins — from TeamA perspective: slump
-    expect(overrideByScore("hot_streak", true, 0, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
+    expect(overrideByScore(true, 0, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
   });
 
   it("favorite=team2, team2 wins → hot_streak", () => {
-    expect(overrideByScore("stable", false, 1, 2, "TeamB", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(overrideByScore(false, 1, 2, "TeamB", "TeamA", "TeamB")).toBe("hot_streak");
   });
 });
 

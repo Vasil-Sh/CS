@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Eye, Trash2 } from "lucide-react";
+import type { ReactElement } from "react";
 import type { CS2Strategy } from "@/types/strategy";
 import StrategySparkline from "./StrategySparkline";
 import TrendIndicator from "./TrendIndicator";
@@ -21,7 +22,7 @@ interface Props {
   strategy: CS2Strategy;
   stats: StrategyStats;
   isPrimary: boolean;
-  getRiskIcon: (risk: string) => JSX.Element;
+  getRiskIcon: (risk: string) => ReactElement;
   getRiskColor: (risk: string) => string;
   onDetails: (s: CS2Strategy) => void;
   onTogglePrimary: (s: CS2Strategy) => void;

@@ -1,13 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { act } from "@testing-library/react";
 
 // We test the pure calculation logic by importing the internal algorithm
 // Since useTiltBlock is a React hook that depends on localStorage,
 // we extract the core logic into describable pure test cases.
 
 import { useTiltBlock } from "@/hooks/useTiltBlock";
-import type { BetRecord } from "@/types/betting";
+import type { BetRecord } from "@/hooks/useBettingForm";
 import type { CS2Strategy } from "@/types/strategy";
 
 // Helper: build strategy with activityLimits

@@ -370,7 +370,9 @@ export function isMatchLive(match: ApiMatch): boolean {
   const totalNeeded = getTotalMapsNeeded(match.type);
   // BO2: if both maps played (sum=2), it's done (either 2-0 win or 1-1 draw)
   // BO1/BO3/BO5: if score sum reached total maps, it's done
-  return match.score1 + match.score2 < totalNeeded;
+  const score1 = match.score1 ?? 0;
+  const score2 = match.score2 ?? 0;
+  return score1 + score2 < totalNeeded;
 }
 
 /**
@@ -379,13 +381,13 @@ export function isMatchLive(match: ApiMatch): boolean {
 export function isMatchFinished(match: ApiMatch): boolean {
   const totalNeeded = getTotalMapsNeeded(match.type);
   const winsNeeded = Math.ceil(totalNeeded / 2);
+  const score1 = match.score1 ?? 0;
+  const score2 = match.score2 ?? 0;
   // BO2: win=2 maps, or draw=1-1 when both maps played
   if (totalNeeded === 2) {
-    return (
-      match.score1 >= 2 || match.score2 >= 2 || match.score1 + match.score2 >= 2
-    );
+    return score1 >= 2 || score2 >= 2 || score1 + score2 >= 2;
   }
-  return match.score1 >= winsNeeded || match.score2 >= winsNeeded;
+  return score1 >= winsNeeded || score2 >= winsNeeded;
 }
 
 function getTotalMapsNeeded(type: string): number {
@@ -414,7 +416,7 @@ export function getMatchStatus(
 
 const HLTV_BASE_URL = "https://www.hltv.org";
 
-/** Build a full HLTV URL. Uses search as fallback for non-numeric-ID links. */
+/** Build a full HLTV URL from an API link (may be relative or absolute). */
 export function buildHltvUrl(
   link: string,
   team1?: string,
@@ -422,14 +424,17 @@ export function buildHltvUrl(
 ): string {
   if (!link) return "";
   if (link.startsWith("http://") || link.startsWith("https://")) {
-    // If it's already a valid HLTV matches URL with numeric ID, use directly
-    if (/matches\/\d+/.test(link)) return link;
-    // Otherwise fall through to search
+    return link;
   }
-  // Build HLTV search URL from team names — always works
+  const path = link.startsWith("/") ? link : `/${link}`;
+  // Relative match path → prepend HLTV base (numeric-ID links are direct matches)
+  if (/^\/matches\/\d+/.test(path)) {
+    return `${HLTV_BASE_URL}${path}`;
+  }
+  // Otherwise use search fallback from team names
   if (team1 && team2) {
     const q = encodeURIComponent(`${team1}+vs+${team2}`);
     return `${HLTV_BASE_URL}/search?query=${q}`;
   }
-  return HLTV_BASE_URL;
+  return `${HLTV_BASE_URL}${path}`;
 }

@@ -2,7 +2,7 @@
  * Page-level smoke tests: Analytics
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Analytics from '@/pages/Analytics';
@@ -40,12 +40,21 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({ user: { username: 'test', role: 'user' }, isAuthenticated: true })),
 }));
 
-// Mock app store
+// Mock app store — must return STABLE values. Analytics reads
+// `useAppStore((s) => s.bankrollVersion)` and re-runs an effect when it
+// changes; a fresh object per call would cause an infinite render loop.
+const storeState = vi.hoisted(() => ({
+  bumpBankroll: vi.fn(),
+  bankrollVersion: 0,
+  strategyVersion: 0,
+  betsVersion: 0,
+  primaryStrategyId: '',
+}));
+
 vi.mock('@/stores/appStore', () => ({
-  useAppStore: vi.fn(() => ({
-    bumpBankroll: vi.fn(),
-    bankrollVersion: 0,
-  })),
+  useAppStore: vi.fn((selector?: (s: typeof storeState) => unknown) =>
+    typeof selector === 'function' ? selector(storeState) : storeState,
+  ),
 }));
 
 // Mock theme

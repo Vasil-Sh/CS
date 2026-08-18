@@ -1233,7 +1233,7 @@ export default function GoalsManager({
                                     </div>
                                   )}
                                   {step.status === "completed" &&
-                                    index < h.selectedGoal.steps.length - 1 && (
+                                    index < (h.selectedGoal?.steps?.length ?? 0) - 1 && (
                                       <div className="absolute -bottom-3.5 left-1/2 transform -translate-x-1/2 z-10">
                                         <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center shadow-md">
                                           <ArrowRight

@@ -25,7 +25,6 @@ import {
   Sun,
   Moon,
   Trash2,
-  Clock,
   RefreshCw,
   DollarSign,
   Share2,
@@ -42,7 +41,7 @@ import { api } from "@/lib/apiClient";
 import { PageHeader } from "@/components/PageHeader";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
-import { t, setLang, getLang, type Lang } from "@/lib/i18n";
+import { setLang, getLang, type Lang } from "@/lib/i18n";
 import { logRender } from "@/lib/devLogger";
 import BackupStatusCard from "@/components/profile/BackupStatusCard";
 import DataStatsCards from "@/components/profile/DataStatsCards";

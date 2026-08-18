@@ -33,7 +33,6 @@ import {
   X,
   Trash2,
   Columns,
-  Copy,
   ListChecks,
 } from "lucide-react";
 import {
@@ -207,7 +206,6 @@ const BetTableMemo = memo(function BetTable({
   bets,
   activeBets,
   currentUser,
-  isAdmin: _isAdmin,
   tableFilter,
   onTableFilterChange,
   showAdvancedFilters,

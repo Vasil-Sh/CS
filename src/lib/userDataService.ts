@@ -201,7 +201,7 @@ export class UserDataService {
         ).data ||
         (data as { bets?: Record<string, unknown>[] }).bets ||
         [];
-    const mapped = rawBets.map((b: Record<string, unknown>) => {
+    const mapped: ApiBet[] = rawBets.map((b: Record<string, unknown>) => {
       const rawCurrency = String(b.currency || "").toUpperCase();
       const currency =
         rawCurrency === "USD" || rawCurrency === "UAH" ? rawCurrency : "UAH";
@@ -226,7 +226,7 @@ export class UserDataService {
         winProbability: b.winProbability
           ? parseFloat(String(b.winProbability))
           : undefined,
-      };
+      } as unknown as ApiBet;
     });
     // Merge API data with localStorage — never downgrade local "Win"/"Loss" to "Pending"
     // NEVER overwrite localStorage with empty API response
@@ -239,14 +239,14 @@ export class UserDataService {
 
       // Build dedup fingerprint: match|amount|profit|date — prevents duplicates
       // when local bet IDs differ from API UUIDs (e.g. local_xxx vs real UUID)
-      const fingerprint = (b: any) =>
+      const fingerprint = (b: { match?: unknown; amount?: unknown; profit?: unknown; date?: unknown }) =>
         `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`;
       const localFingerprints = new Set(localBets.map(fingerprint));
 
       if (localBets.length > 0) {
         const localMap = new Map(localBets.map((b: ApiBet) => [b.id, b]));
         for (const apiBet of mapped) {
-          const local = localMap.get(apiBet.id as string | number);
+          const local = localMap.get(apiBet.id);
           if (local) {
             // Keep local non-Pending result if newer; otherwise use API data
             if (local.result && local.result !== 'Pending') {

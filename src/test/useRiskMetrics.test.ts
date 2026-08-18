@@ -4,7 +4,7 @@ import type { Bet } from "@/types/betting";
 
 // Extract the pure calculation logic from useRiskMetrics for direct testing.
 // The hook itself is React-based; we test it via renderHook.
-import { useRiskMetrics, type RiskMetrics, type DrawdownPeriod } from "@/hooks/useRiskMetrics";
+import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 
 /** Build a minimal Bet record for testing */
 const mkBet = (overrides: Partial<Bet> = {}): Bet =>
@@ -48,10 +48,10 @@ describe("useRiskMetrics", () => {
 
   it("counts consecutive losses (simple)", () => {
     const bets = [
-      mkBet({ result: "Loss", profit: -100, stake: 100, date: "2026-07-21", createdAt: 4000 }),
-      mkBet({ result: "Loss", profit: -200, stake: 200, date: "2026-07-20", createdAt: 3000 }),
-      mkBet({ result: "Win", profit: 300, stake: 150, date: "2026-07-19", createdAt: 2000 }),
-      mkBet({ result: "Loss", profit: -50, stake: 100, date: "2026-07-18", createdAt: 1000 }),
+      mkBet({ result: "Loss", profit: -100, stake: 100, date: "2026-07-21" }),
+      mkBet({ result: "Loss", profit: -200, stake: 200, date: "2026-07-20" }),
+      mkBet({ result: "Win", profit: 300, stake: 150, date: "2026-07-19" }),
+      mkBet({ result: "Loss", profit: -50, stake: 100, date: "2026-07-18" }),
     ];
     const { result } = renderHook(() => useRiskMetrics(bets));
     // Max consecutive losses in history: 2 (first two losses at start)

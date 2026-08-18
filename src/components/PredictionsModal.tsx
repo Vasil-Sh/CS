@@ -189,48 +189,6 @@ function seriesWinProbability(mapWinProb: number, winsNeeded: number): number {
   return prob * 100;
 }
 
-/**
- * Exact score distribution — pre-computed O(1) formulas.
- *
- * Bo3 (winsNeeded=2):  2:0 = p²,  2:1 = 2p²q,  1:2 = 2q²p,  0:2 = q²   (always sums to 100%)
- * Bo5 (winsNeeded=3):  3:0 = p³,  3:1 = 3p³q,  3:2 = 6p³q²,
- *                      2:3 = 6q³p²,  1:3 = 3q³p,  0:3 = q³
- */
-function exactScoreDistribution(
-  mapWinProb: number,
-  winsNeeded: number,
-): Record<string, number> {
-  const p = mapWinProb / 100;
-  const q = 1 - p;
-
-  // Pre-computed O(1) for Bo3 & Bo5 — faster and more readable
-  if (winsNeeded === 2) {
-    return {
-      "2:0": Math.round(p * p * 1000) / 10,
-      "2:1": Math.round(2 * p * p * q * 1000) / 10,
-      "1:2": Math.round(2 * q * q * p * 1000) / 10,
-      "0:2": Math.round(q * q * 1000) / 10,
-    };
-  }
-
-  if (winsNeeded === 3) {
-    return {
-      "3:0": Math.round(p * p * p * 1000) / 10,
-      "3:1": Math.round(3 * p * p * p * q * 1000) / 10,
-      "3:2": Math.round(6 * p * p * p * q * q * 1000) / 10,
-      "2:3": Math.round(6 * q * q * q * p * p * 1000) / 10,
-      "1:3": Math.round(3 * q * q * q * p * 1000) / 10,
-      "0:3": Math.round(q * q * q * 1000) / 10,
-    };
-  }
-
-  // Bo1 or other — simple
-  return {
-    "1:0": Math.round(p * 1000) / 10,
-    "0:1": Math.round(q * 1000) / 10,
-  };
-}
-
 function formatUpsetDescription(matchType: string): {
   label: string;
   note: string;
@@ -922,7 +880,7 @@ export default function PredictionsModal({
     liveScore1,
     liveScore2,
     hasLiveScore,
-  } = analytics ?? ({} as typeof analytics);
+  } = analytics ?? ({} as unknown as NonNullable<typeof analytics>);
 
   const edgeConfig = useMemo(() => {
     if (!weightedConsensus) return null;

@@ -467,7 +467,7 @@ function computeLadderProgress(goal: Goal, betsData: Bet[]): Goal {
   const sorted = allBets.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   let stepIdx = 0;
-  const steps = (goal.steps || []).map((s, i) => ({ ...s, status: i === 0 ? "current" as const : "locked" as const, actualAmount: undefined, actualOdds: undefined, deviation: undefined, completedAt: undefined }));
+  const steps: LadderStep[] = (goal.steps || []).map((s, i) => ({ ...s, status: i === 0 ? "current" as const : "locked" as const, actualAmount: undefined, actualOdds: undefined, deviation: undefined, completedAt: undefined }));
   const used = new Set<number>();
 
   for (let si = 0; si < steps.length; si++) {
@@ -478,7 +478,7 @@ function computeLadderProgress(goal: Goal, betsData: Bet[]): Goal {
       const bet = sorted[bi];
       const diff = Math.abs((bet.amount || 0) - cs.startAmount);
       const diffPct = cs.startAmount ? diff / cs.startAmount : 999;
-      const tol = !!bet.goalId ? 0.8 : 0.5;
+      const tol = bet.goalId ? 0.8 : 0.5;
       if (diffPct <= tol && bet.odds >= minOdds && bet.odds <= maxOdds && diffPct < bestDiff) { bestBet = bet; bestIdx = bi; bestDiff = diffPct; }
     }
     if (!bestBet) break;

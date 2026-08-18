@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { googleSheetsRiskyTeamsService } from "@/lib/googleSheetsRiskyTeams";
 import { type RiskyTeam } from "@/data/riskyTeams";
 
+export type { RiskyTeam };
+
 // ── Constants ──
 const ALL_STATUSES = ["БАН", "Ризиковані", "Нестабільні", "Обережно", "Під питанням", "Стабільні", "Надійна", "Неоцінена"] as const;
 

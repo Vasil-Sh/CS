@@ -1,8 +1,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  Info, RefreshCw, Plus, Target, Trophy,
+  Info, RefreshCw, Plus, type LucideIcon,
 } from 'lucide-react';
-import type { ReactNode, LucideIcon } from 'react';
 
 interface Tab {
   id: string;

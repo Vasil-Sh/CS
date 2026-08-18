@@ -17,7 +17,6 @@ import {
   Trash2, 
   TrendingUp,
   TrendingDown,
-  Minus,
   Target,
   BarChart3,
   ExternalLink,
@@ -28,17 +27,12 @@ import {
   Pencil,
   Save,
   X,
-  Search,
-  ArrowUpDown,
-  Info,
   AlertTriangle,
   Shield,
   ShieldAlert,
   ShieldCheck,
   Eye,
-  Link,
   RefreshCw,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { CHART_CARD_SHADOW, CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
 
@@ -67,6 +61,7 @@ interface TelegramGroup {
   name: string;
   link: string;
   createdAt: string;
+  _backendId?: string;
 }
 
 interface TelegramGroupBet {
@@ -115,7 +110,6 @@ export default function TelegramGroups() {
   const [groups, setGroups] = useState<TelegramGroup[]>([]);
   const [bets, setBets] = useState<TelegramGroupBet[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [activeTool, setActiveTool] = useState<string | null>(null);
 
   // Load user data: try API first, fallback to localStorage
   useEffect(() => {
@@ -183,8 +177,8 @@ export default function TelegramGroups() {
   // Filters & sort
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
   const [resultFilter, setResultFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'odds' | 'profit'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy] = useState<'date' | 'odds' | 'profit'>('date');
+  const [sortOrder] = useState<'asc' | 'desc'>('desc');
 
   // ── Group CRUD ──
 
@@ -217,8 +211,8 @@ export default function TelegramGroups() {
     if (currentUser) UserDataService.setUserDataSync(currentUser, 'tg_groups', newGroups);
     // Sync to backend and save backend UUID
     if (!editingGroup && freshGroupId) {
-      api.post('/telegram-groups', { name: groupForm.name.trim(), link: groupForm.link.trim() })
-        .then((backend: { id?: string }) => {
+      api.post<{ id?: string }>('/telegram-groups', { name: groupForm.name.trim(), link: groupForm.link.trim() })
+        .then((backend) => {
           if (backend?.id) {
             const saved = UserDataService.getUserData<TelegramGroup[]>(currentUser, 'tg_groups', []);
             const idx = saved.findIndex(g => g.id === freshGroupId);
@@ -252,12 +246,6 @@ export default function TelegramGroups() {
     setDeleteGroupConfirm(null);
   };
 
-  const openEditGroup = (group: TelegramGroup) => {
-    setEditingGroup(group);
-    setGroupForm({ name: group.name, link: group.link });
-    setGroupDialogOpen(true);
-  };
-
   const handleDeleteBet = (betId: string) => {
     const newBets = betsRef.current.filter(b => b.id !== betId);
     setBets(newBets);
@@ -265,7 +253,7 @@ export default function TelegramGroups() {
     toast.success('Ставку видалено');
   };
 
-  const openEditBet = (bet: TelegramGroupBet) => {
+  const openEditBet = () => {
     toast.info('Редагування ставок з Telegram буде доступне в наступних оновленнях');
   };
 
@@ -556,7 +544,7 @@ export default function TelegramGroups() {
       <>
       {/* ===== Cards View ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {rankedGroups.map((gs, idx) => (
+        {rankedGroups.map((gs) => (
           <div
             key={gs.groupId}
             className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl h-full flex flex-col overflow-hidden transition-all duration-300"
@@ -800,7 +788,7 @@ export default function TelegramGroups() {
                         <td className="py-2.5 px-1">
                           <div className="flex gap-0.5">
                             <button
-                              onClick={() => openEditBet(bet)}
+                              onClick={() => openEditBet()}
                               className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
                               title="Редагувати"
                             >
@@ -839,7 +827,7 @@ export default function TelegramGroups() {
 // ── Stability Badge ──
 
 function StabilityBadge({ stability, label }: { stability: number; label: string }) {
-  const icon = stability >= 70 ? ShieldCheck : stability >= 40 ? Shield : ShieldAlert;
+  const Icon = stability >= 70 ? ShieldCheck : stability >= 40 ? Shield : ShieldAlert;
   const colors = stability >= 70
     ? 'bg-[#DCFCE7] text-green-600 border-green-200'
     : stability >= 40

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 interface Stats {
   bets: number;
   riskyTeams: number;
@@ -8,8 +10,8 @@ interface Stats {
 
 interface Props {
   stats: Stats;
-  cardBaseStyle: Record<string, string>;
-  cardHoverStyle: Record<string, string>;
+  cardBaseStyle: CSSProperties;
+  cardHoverStyle: CSSProperties;
 }
 
 export default function DataStatsCards({ stats, cardBaseStyle, cardHoverStyle }: Props) {

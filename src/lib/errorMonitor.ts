@@ -70,13 +70,3 @@ export function initErrorMonitoring() {
     console.log('[ErrorMonitor] Initialized');
   }
 }
-
-/** Get current pending error count (for debugging) */
-function getPendingErrors(): number {
-  return queue.length;
-}
-
-/** Manually report an error */
-function reportError(error: Error) {
-  queue.push(createReport(error));
-}

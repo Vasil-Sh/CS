@@ -58,4 +58,10 @@ export interface CS2Strategy {
   customRules?: string[];
   criteria?: string[];
   maxOdds?: number;
+  /** Flat runtime props parsed from criteria via parseCriteriaForValidation */
+  minOdds?: number;
+  allowedFormats?: string[];
+  allowedBetTypes?: string[];
+  /** Backend DB id (populated after create/sync) */
+  _backendId?: string;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import type { Bet } from "@/types/betting";
 import type { RiskyTeam, ValueBetAnalysis, KellyData } from "@/components/BettingSidebar";
 
@@ -32,7 +32,7 @@ describe("BettingSidebar", () => {
       stake="100" odds="2.00" confidence="60" betCategory="Ординар" currency="UAH"
       totalExpressOdds={1} expressEventsCount={0} potentialProfit="100"
       potentialProfitInCurrency="100₴" expectedValue="20"
-      evVerdict={{ label: "OK", color: "text-green-500" }}
+      evVerdict={{ icon: "check", text: "OK", color: "text-green-500", description: "" }}
       isValuePositive={true}
       valueBetAnalysis={null as ValueBetAnalysis | null}
       kellyData={null as KellyData | null}

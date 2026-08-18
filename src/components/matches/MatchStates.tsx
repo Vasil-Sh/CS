@@ -1,4 +1,4 @@
-import { RefreshCw, Trophy, CalendarDays } from "lucide-react";
+import { RefreshCw, CalendarDays } from "lucide-react";
 
 export function MatchesLoadingState() {
   return (

@@ -70,8 +70,8 @@ export default function StrategyDetailsDialog({
               <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Деталі стратегії</h2>
               {strategy && (
                 <p className="text-sm text-gray-500 mt-0.5">
-                  {strategy.criteria.length}{" "}
-                  {strategy.criteria.length === 1 ? "критерій" : strategy.criteria.length < 5 ? "критерії" : "критеріїв"}{" "}
+                  {(strategy.criteria ?? []).length}{" "}
+                  {(strategy.criteria ?? []).length === 1 ? "критерій" : (strategy.criteria ?? []).length < 5 ? "критерії" : "критеріїв"}{" "}
                   • Ризик: {getRiskLabel(strategy.riskLevel)}
                 </p>
               )}
@@ -157,8 +157,8 @@ export default function StrategyDetailsDialog({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 pt-2">
                     {strategy.minOdds && <DetailBadgeCard label="Мінімальний коефіцієнт" value={String(strategy.minOdds)} />}
                     {strategy.maxOdds && <DetailBadgeCard label="Максимальний коефіцієнт" value={String(strategy.maxOdds)} />}
-                    {strategy.allowedFormats?.length > 0 && <BadgeListCard label="Дозволені формати" items={strategy.allowedFormats} dark />}
-                    {strategy.allowedBetTypes?.length > 0 && <BadgeListCard label="Дозволені типи ставок" items={strategy.allowedBetTypes} />}
+                    {strategy.allowedFormats && strategy.allowedFormats.length > 0 && <BadgeListCard label="Дозволені формати" items={strategy.allowedFormats} dark />}
+                    {strategy.allowedBetTypes && strategy.allowedBetTypes.length > 0 && <BadgeListCard label="Дозволені типи ставок" items={strategy.allowedBetTypes} />}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -209,7 +209,7 @@ export default function StrategyDetailsDialog({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 pt-2">
-                  {strategy.criteria.map((criterion, idx) => (
+                  {strategy.criteria?.map((criterion, idx) => (
                     <div key={idx} className="p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:border-gray-300 transition-all" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
                       <div className="flex items-start gap-3">
                         <Badge className="rounded-xl bg-gray-100 text-gray-500 border border-gray-200 font-medium text-sm px-3 py-1 hover:bg-gray-100 flex-shrink-0">#{idx + 1}</Badge>

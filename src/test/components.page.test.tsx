@@ -1,5 +1,5 @@
 /** Smoke tests: StrategyOverview, GoalsManager, RiskManagement */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -40,7 +40,21 @@ vi.mock('@/lib/bankrollService', () => ({
 vi.mock('@/lib/devLogger', () => ({ logRender: vi.fn() }));
 vi.mock('@/hooks/useRiskMetrics', () => ({ useRiskMetrics: vi.fn(() => ({ completedBets: [], riskMetrics: {}, drawdownPeriods: [] })) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: vi.fn(() => ({ user: { username: 'test' } })) }));
-vi.mock('@/stores/appStore', () => ({ useAppStore: vi.fn(() => ({ bumpStrategy: vi.fn(), strategyVersion: 0, setPrimaryStrategyId: vi.fn(), getState: vi.fn(() => ({ bumpStrategy: vi.fn() })) })) }));
+vi.mock('@/stores/appStore', () => {
+  const getState = vi.fn(() => ({
+    primaryStrategyId: '',
+    bumpStrategy: vi.fn(),
+    setPrimaryStrategyId: vi.fn(),
+    bumpBets: vi.fn(),
+    bumpBankroll: vi.fn(),
+  }));
+  const useAppStore = vi.fn(
+    (selector?: (s: ReturnType<typeof getState>) => unknown) =>
+      selector ? selector(getState()) : getState(),
+  ) as ReturnType<typeof vi.fn> & { getState: typeof getState };
+  useAppStore.getState = getState;
+  return { useAppStore };
+});
 vi.mock('@/hooks/useTheme', () => ({ useTheme: vi.fn(() => ({ theme: 'light' })) }));
 vi.mock('@/lib/googleSheetsRiskyTeams', () => ({ googleSheetsRiskyTeamsService: { fetchRiskyTeams: vi.fn(() => Promise.resolve([])), addTeam: vi.fn(() => Promise.resolve({})), removeTeam: vi.fn(() => Promise.resolve()) } }));
 
@@ -67,7 +81,7 @@ describe('GoalsManager', () => {
 describe('RiskManagement', () => {
   it('renders without crashing', async () => {
     const { default: RiskManagement } = await import('@/components/RiskManagement');
-    renderWithProviders(<RiskManagement bets={[]} />);
+    renderWithProviders(<RiskManagement />);
     expect(document.body).toBeDefined();
   });
 });

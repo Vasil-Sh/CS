@@ -125,7 +125,7 @@ export default function OddsVsProfitScatterCard({
 
             <Scatter
               data={data}
-              shape={(props: Record<string, unknown>) => {
+              shape={(props: unknown) => {
                 const { cx, cy, payload } = props as {
                   cx?: number;
                   cy?: number;

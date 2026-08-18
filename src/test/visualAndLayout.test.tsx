@@ -37,7 +37,7 @@ describe("Layout", () => {
 describe("OnboardingTour", () => {
   it("does not render when already completed", () => {
     localStorage.setItem("matchiq_onboarding_completed", "true");
-    render(<TestWrapper><OnboardingTour /></TestWrapper>);
+    render(<TestWrapper><OnboardingTour isOpen={false} onClose={() => {}} /></TestWrapper>);
     expect(screen.queryByText(/команди/)).toBeNull();
   });
 });

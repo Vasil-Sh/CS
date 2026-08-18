@@ -106,7 +106,7 @@ export default function MyBets() {
   const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const sortOrder: "asc" | "desc" = "desc";
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -244,16 +244,6 @@ export default function MyBets() {
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const parsed = await fetchUsersData();
-      setUsers(parsed);
-    } catch (err) {
-      if (import.meta.env.DEV) console.error("Error fetching users:", err);
-      toast.error("Помилка завантаження списку користувачів");
-    }
-  };
-
   const loadStats = useCallback(async () => {
     try {
       const data = await UserDataService.fetchBetStats();
@@ -316,68 +306,6 @@ export default function MyBets() {
     bumpBets();
     bumpBankroll();
   }, [currentUser, bumpBets, bumpBankroll]);
-
-  const clearRecentBets = useCallback(async () => {
-    if (
-      !window.confirm(
-        "Ви впевнені, що хочете очистити ВСІ дані (ставки, цілі, стратегії, групи, банкрол)?",
-      )
-    )
-      return;
-
-    let apiOk = false;
-    try {
-      const body = await api.post<{
-        success: boolean;
-        counts: Record<string, number>;
-      }>("/admin/reset", {});
-      apiOk = body.success;
-      if (import.meta.env.DEV) console.log("[Reset] API OK:", body.counts);
-    } catch (err: unknown) {
-      if (import.meta.env.DEV)
-        console.error(
-          "[Reset] Error:",
-          err instanceof Error ? err.message : err,
-        );
-    }
-
-    // Always clear localStorage (regardless of API result)
-    [
-      "mybets_data",
-      "mybets_stats",
-      "analytics_bets",
-      "analytics_stats",
-      "goals",
-      "strategies_data",
-      "primary_strategy",
-      "tg_groups",
-      "tg_bets",
-      "bankroll_data",
-    ].forEach((k) => UserDataService.clearUserData(currentUser, k));
-
-    // Reset state
-    BankrollService.setInitialBank(currentUser, 0);
-    setRecentBets([]);
-    setStats(DEFAULT_STATS);
-    setBankrollRefreshKey((p) => p + 1);
-    useAppStore.getState().bumpBets();
-    useAppStore.getState().bumpStrategy();
-    useAppStore.getState().bumpBankroll();
-
-    if (apiOk) {
-      toast.success(
-        "✅ Всі дані очищено — ставки, цілі, стратегії, групи, банкрол",
-      );
-    } else {
-      toast.error(
-        "⚠️ Дані очищено локально, але сервер повернув помилку. Перевір консоль (F12).",
-      );
-    }
-    setTimeout(() => {
-      loadStats();
-      loadRecentBets();
-    }, 200);
-  }, [currentUser, loadStats, loadRecentBets]);
 
   const executeResultUpdate = useCallback(
     async (bet: Bet, result: "Win" | "Loss", note: string = "") => {

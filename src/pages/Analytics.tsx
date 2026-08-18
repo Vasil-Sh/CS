@@ -12,7 +12,6 @@ import PeriodComparison from "@/components/PeriodComparison";
 import { PageHeader } from "@/components/PageHeader";
 import GoalsManager from "@/components/GoalsManager";
 import { UserDataService } from "@/lib/userDataService";
-import { api } from "@/lib/apiClient";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
@@ -20,13 +19,11 @@ import { useTheme } from "@/hooks/useTheme";
 
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
-import { useRiskMetrics } from "@/hooks/useRiskMetrics";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
 import type {
   Bet,
-  BettingStats,
   OddsRange,
   BalanceData,
   ScatterData,
@@ -46,16 +43,6 @@ export default function Analytics() {
   logRender("Analytics");
   const { user } = useAuth();
   const currentUser = user?.username || "";
-  const isAdmin = user?.role === "admin";
-
-  const [stats, setStats] = useState<BettingStats>({
-    totalBets: 0,
-    winRate: 0,
-    totalProfit: 0,
-    averageROI: 0,
-    profitByMonth: [],
-    profitByStrategy: [],
-  });
 
   const [bets, setBets] = useState<Bet[]>([]);
 
@@ -73,12 +60,6 @@ export default function Analytics() {
     [bets, dualBank.usd.initialBank],
   );
   const [activeTab, setActiveTab] = useState("profit");
-
-  const exchangeRate = useMemo(() => {
-    const usdBets = bets.filter((b) => b.currency === "USD" && b.exchangeRate);
-    if (usdBets.length === 0) return 0;
-    return Number(usdBets[0].exchangeRate) || 0;
-  }, [bets]);
 
   // Convert all bets to display currency — used by ALL charts
   const displayBets = useMemo(() => {
@@ -98,12 +79,6 @@ export default function Analytics() {
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
   const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("all");
-
-  const {
-    completedBets: completedBetsForMetrics,
-    riskMetrics,
-    drawdownPeriods,
-  } = useRiskMetrics(bets);
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -175,77 +150,10 @@ export default function Analytics() {
       }
 
       setBets(myBetsData);
-
-      if (myBetsData.length > 0) {
-        const completedBets = myBetsData.filter(
-          (bet: Bet) => bet.result !== "Pending",
-        );
-        const winningBets = completedBets.filter(
-          (bet: Bet) => bet.result === "Win",
-        );
-
-        const totalBets = completedBets.length;
-        const winRate =
-          totalBets > 0
-            ? Math.round((winningBets.length / totalBets) * 100)
-            : 0;
-        const totalProfit = completedBets.reduce(
-          (sum: number, bet: Bet) => sum + (bet.profit || 0),
-          0,
-        );
-        const averageROI =
-          totalBets > 0
-            ? Math.round(
-                (totalProfit /
-                  completedBets.reduce(
-                    (sum: number, bet: Bet) => sum + bet.amount,
-                    0,
-                  )) *
-                  100,
-              )
-            : 0;
-
-        let profitByMonth: { month: string; profit: number }[] = [];
-        let profitByStrategy: { strategy: string; profit: number }[] = [];
-        try {
-          const apiStats = await UserDataService.fetchBetStats();
-          profitByMonth = apiStats.profitByMonth || [];
-          profitByStrategy = apiStats.profitByStrategy || [];
-        } catch (err) {
-          if (import.meta.env.DEV)
-            console.warn("[Analytics] Stats fetch failed:", err);
-        }
-
-        setStats({
-          totalBets,
-          winRate,
-          totalProfit,
-          averageROI,
-          profitByMonth,
-          profitByStrategy,
-        });
-      } else {
-        setStats({
-          totalBets: 0,
-          winRate: 0,
-          totalProfit: 0,
-          averageROI: 0,
-          profitByMonth: [],
-          profitByStrategy: [],
-        });
-      }
     } catch (error) {
       if (import.meta.env.DEV)
         console.warn("[Analytics] Error loading:", error);
       setBets([]);
-      setStats({
-        totalBets: 0,
-        winRate: 0,
-        totalProfit: 0,
-        averageROI: 0,
-        profitByMonth: [],
-        profitByStrategy: [],
-      });
     } finally {
       setLoading(false);
       // Bankroll is computed by useEffect([bets, currentUser]) — don't race here
@@ -281,34 +189,6 @@ export default function Analytics() {
     document.addEventListener("visibilitychange", handleVisibility);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
-
-  const clearAllData = useCallback(async () => {
-    if (
-      window.confirm(
-        "Ви впевнені, що хочете очистити всі дані аналітики? Ця дія незворотна.",
-      )
-    ) {
-      try {
-        await api.post("/admin/reset", {}); // API handles all cleanup
-      } catch {
-        /* noop */
-      }
-
-      setBets([]);
-      setStats({
-        totalBets: 0,
-        winRate: 0,
-        totalProfit: 0,
-        averageROI: 0,
-        profitByMonth: [],
-        profitByStrategy: [],
-      });
-      setDualBank({
-        uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-        usd: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
-      });
-    }
   }, []);
 
   // Filter bets by game
@@ -365,14 +245,6 @@ export default function Analytics() {
     return Math.round((sum / completedBets.length) * 100) / 100;
   }, [completedBets]);
 
-  const betsThisMonth = useMemo(() => {
-    const now = new Date();
-    const start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    return completedBets.filter((b: Bet) => {
-      const d = b.date || "";
-      return d.startsWith(start);
-    }).length;
-  }, [completedBets]);
 
   const oddsAnalysis = useMemo((): OddsRange[] => {
     const lowOdds = completedBets.filter((bet: Bet) => bet.odds < 2.0);
@@ -429,66 +301,6 @@ export default function Analytics() {
       },
     ];
   }, [completedBets]);
-
-  const shortenBetTypeName = (betType: string): string => {
-    if (betType.includes("Експрес") || betType.includes("|")) {
-      const formatMatch = betType.match(/(\d+)x/);
-      if (formatMatch) {
-        return `Експрес ${formatMatch[1]}x`;
-      }
-      const eventCount = (betType.match(/•/g) || []).length + 1;
-      if (eventCount > 1) {
-        return `Експрес ${eventCount}x`;
-      }
-    }
-    return betType;
-  };
-
-  const betTypeDistribution = useMemo(() => {
-    const distribution: {
-      [key: string]: {
-        count: number;
-        profit: number;
-        wins: number;
-        originalName: string;
-      };
-    } = {};
-    gameFilteredBets.forEach((bet: Bet) => {
-      const originalType = bet.betType || "Winner";
-      const shortType = shortenBetTypeName(originalType);
-
-      if (!distribution[shortType]) {
-        distribution[shortType] = {
-          count: 0,
-          profit: 0,
-          wins: 0,
-          originalName: originalType,
-        };
-      }
-      distribution[shortType].count += 1;
-      distribution[shortType].profit += bet.profit || 0;
-      if (bet.result === "Win") {
-        distribution[shortType].wins += 1;
-      }
-    });
-
-    const colors = [
-      "#8b5cf6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#3b82f6",
-      "#ec4899",
-    ];
-    return Object.entries(distribution).map(([type, data], index) => ({
-      name: type,
-      originalName: data.originalName,
-      value: data.count,
-      profit: Math.round(data.profit * 100) / 100,
-      winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
-      color: colors[index % colors.length],
-    }));
-  }, [gameFilteredBets]);
 
   const monthlyProfitData = useMemo((): MonthlyData[] => {
     const monthlyData: {
@@ -911,7 +723,7 @@ export default function Analytics() {
                     </div>
                   </TooltipProvider>
                 )}
-                {activeTab === "risks" && <RiskManagement bets={bets} />}
+                {activeTab === "risks" && <RiskManagement />}
               </div>
             </div>
           </div>

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,16 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { CS2Strategy } from "@/types/strategy";
 import { api } from "@/lib/apiClient";
-import { Target, AlertTriangle, Plus, BarChart3, Trophy, Brain, Lightbulb, Trash2, Star, X, Zap, Percent, CheckCircle2, Sparkles, ChevronDown, Shield, ListChecks, Activity, Info } from "lucide-react";
+import { AlertTriangle, Plus, Trash2, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useAppStore } from "@/stores/appStore";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserDataService } from "@/lib/userDataService";
 import { logRender } from "@/lib/devLogger";
-import { getRiskColor, getRiskIcon, getRiskLabel, parseCriteriaForValidation } from "@/lib/strategyHelpers";
+import { getRiskColor, getRiskIcon, parseCriteriaForValidation } from "@/lib/strategyHelpers";
 import StrategyTabNav from "@/components/strategy/StrategyTabNav";
 import StrategyEmptyState from "@/components/strategy/StrategyEmptyState";
 import StrategyLoadingSkeleton from "@/components/strategy/StrategyLoadingSkeleton";
@@ -90,7 +88,7 @@ export default function StrategyOverview({ topTabs, topActiveTab, onTopTabChange
     try { const j = await api.get<{ data?: unknown[] } | unknown[]>("/bets?page=1&limit=200"); bets = (Array.isArray(j) ? j : (j as { data?: unknown[] }).data || []) as typeof bets; } catch { bets = UserDataService.getUserData(currentUser, "mybets_data", []) as typeof bets; }
 
     let strats = UserDataService.getUserData<CS2Strategy[]>(currentUser, "strategies_data", []);
-    try { const apiStrats = (await UserDataService.fetchStrategies()) as (Record<string, unknown> & { id?: string; config?: Record<string, unknown> })[]; if (apiStrats?.length) { strats = apiStrats.map((s) => ({ id: s.id, ...(s.config || {}), _backendId: s.id } as CS2Strategy)); UserDataService.setUserDataSync(currentUser, "strategies_data", strats); } } catch { /* ignore */ }
+    try { const apiStrats = (await UserDataService.fetchStrategies()) as (Record<string, unknown> & { id?: string; config?: Record<string, unknown> })[]; if (apiStrats?.length) { strats = apiStrats.map((s) => ({ ...(s.config || {}), id: s.id, _backendId: s.id } as unknown as CS2Strategy)); UserDataService.setUserDataSync(currentUser, "strategies_data", strats); } } catch { /* ignore */ }
     setStrategies(strats);
     setBettingData(bets);
     calcStats(bets);

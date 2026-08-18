@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 
 // ── DeepSeekService pure logic (caching, dedup, fallback) ──
 
@@ -18,7 +18,6 @@ interface MatchData {
 }
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
-const CACHE_PREFIX = "ds_cache_v3_";
 
 function buildCacheKey(data: MatchData): string {
   return `${data.team1}_vs_${data.team2}_${data.format}_${data.tier}`;
