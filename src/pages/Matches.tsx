@@ -72,11 +72,49 @@ const formatFullDateTitle = (
   return `${prefix} (${dayFull}, ${formatted})`;
 };
 
+type GameFilter = "all" | "CS2" | "Dota2";
+
+const GAME_FILTERS: GameFilter[] = ["all", "CS2", "Dota2"];
+
+const GameFilterTabs = ({
+  filterGame,
+  onSelect,
+}: {
+  filterGame: GameFilter;
+  onSelect: (g: GameFilter) => void;
+}) => (
+  <div className="flex items-center gap-1 ml-auto">
+    {GAME_FILTERS.map((g) => (
+      <button
+        key={g}
+        onClick={() => onSelect(g)}
+        className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+          filterGame === g
+            ? g === "CS2"
+              ? "bg-amber-600 text-white shadow-md"
+              : g === "Dota2"
+                ? "bg-[#7C3AED] text-white shadow-md"
+                : "bg-gray-900 text-white shadow-md"
+            : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
+        }`}
+      >
+        {g === "all" ? "Всі" : g}
+      </button>
+    ))}
+  </div>
+);
+
 export default function Matches() {
   logRender("Matches");
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const m = useMatches();
+
+  // Precompute risky-team lookups once (used by AddToRiskyTeamsModal below).
+  const riskyMatch = m.selectedRiskyMatch;
+  const riskyGame = (riskyMatch?.game || "CS2") as "CS2" | "Dota2";
+  const team1RiskInfo = m.getTeamRiskInfo(riskyMatch?.team1 || "", riskyGame);
+  const team2RiskInfo = m.getTeamRiskInfo(riskyMatch?.team2 || "", riskyGame);
 
   const renderSortIndicator = (column: SortBy) => {
     const dir = m.getSortIcon(column);
@@ -259,25 +297,10 @@ export default function Matches() {
                                   m.filterGame,
                                 )}
                               </span>
-                              <div className="flex items-center gap-1 ml-auto">
-                                {(["all", "CS2", "Dota2"] as const).map((g) => (
-                                  <button
-                                    key={g}
-                                    onClick={() => m.setFilterGame(g)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                      m.filterGame === g
-                                        ? g === "CS2"
-                                          ? "bg-amber-600 text-white shadow-md"
-                                          : g === "Dota2"
-                                            ? "bg-[#7C3AED] text-white shadow-md"
-                                            : "bg-gray-900 text-white shadow-md"
-                                        : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
-                                    }`}
-                                  >
-                                    {g === "all" ? "Всі" : g}
-                                  </button>
-                                ))}
-                              </div>
+                              <GameFilterTabs
+                                filterGame={m.filterGame}
+                                onSelect={m.setFilterGame}
+                              />
                             </div>
                           </CardTitle>
                         </CardHeader>
@@ -359,66 +382,20 @@ export default function Matches() {
                                 <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
                                   {dateMatches.length}
                                 </Badge>
-                                <div className="flex items-center gap-1 ml-auto">
-                                  {(["all", "CS2", "Dota2"] as const).map(
-                                    (g) => (
-                                      <button
-                                        key={g}
-                                        onClick={() => m.setFilterGame(g)}
-                                        className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
-                                          m.filterGame === g
-                                            ? g === "CS2"
-                                              ? "bg-amber-600 text-white shadow-md"
-                                              : g === "Dota2"
-                                                ? "bg-[#7C3AED] text-white shadow-md"
-                                                : "bg-gray-900 text-white shadow-md"
-                                            : "bg-white text-gray-500 border border-gray-200 hover:text-gray-900 hover:border-gray-300"
-                                        }`}
-                                      >
-                                        {g === "all" ? "Всі" : g}
-                                      </button>
-                                    ),
-                                  )}
-                                </div>
+                                <GameFilterTabs
+                                  filterGame={m.filterGame}
+                                  onSelect={m.setFilterGame}
+                                />
                               </div>
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="p-0 rounded-b-[24px]">
-                            {dateMatches.length > 0 ? (
-                              <div>
-                                <table className="w-full border-collapse">
-                                  {renderTableHeader()}
-                                  <tbody>{dateMatches.map(renderRow)}</tbody>
-                                </table>
-                              </div>
-                            ) : (
-                              <div className="min-h-[50vh] flex flex-col items-center justify-center text-gray-400 gap-3">
-                                <div className="p-8 bg-gray-100 rounded-2xl mb-6">
-                                  <Trophy
-                                    className="h-16 w-16 text-gray-400"
-                                    strokeWidth={1.5}
-                                  />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                  Немає матчів
-                                </h3>
-                                <p className="text-gray-500 text-sm mb-4">
-                                  Спробуйте обрати інший фільтр гри або
-                                  натисніть «Оновити»
-                                </p>
-                                <button
-                                  onClick={m.refreshMatches}
-                                  disabled={m.isLoading}
-                                  className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                                >
-                                  <RefreshCw
-                                    className="h-4 w-4"
-                                    strokeWidth={1.5}
-                                  />{" "}
-                                  Оновити
-                                </button>
-                              </div>
-                            )}
+                            <div>
+                              <table className="w-full border-collapse">
+                                {renderTableHeader()}
+                                <tbody>{dateMatches.map(renderRow)}</tbody>
+                              </table>
+                            </div>
                           </CardContent>
                         </div>
                       </div>
@@ -480,26 +457,10 @@ export default function Matches() {
               name: m.selectedRiskyMatch?.team2 || "",
               logo: m.selectedRiskyMatch?.logoTeam2,
             }}
-            team1Risky={
-              !!m.getTeamRiskInfo(
-                m.selectedRiskyMatch?.team1 || "",
-                (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
-              )
-            }
-            team2Risky={
-              !!m.getTeamRiskInfo(
-                m.selectedRiskyMatch?.team2 || "",
-                (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
-              )
-            }
-            team1Existing={m.getTeamRiskInfo(
-              m.selectedRiskyMatch?.team1 || "",
-              (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
-            )}
-            team2Existing={m.getTeamRiskInfo(
-              m.selectedRiskyMatch?.team2 || "",
-              (m.selectedRiskyMatch?.game || "CS2") as "CS2" | "Dota2",
-            )}
+            team1Risky={!!team1RiskInfo}
+            team2Risky={!!team2RiskInfo}
+            team1Existing={team1RiskInfo}
+            team2Existing={team2RiskInfo}
             onSaved={m.handleRiskySaved}
           />
 

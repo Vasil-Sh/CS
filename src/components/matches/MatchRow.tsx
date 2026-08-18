@@ -656,7 +656,6 @@ export default function MatchRow({
           </div>
         </td>
       )}
-      {visibleColumns.has("time") && <td className="hidden"></td>}
       {visibleColumns.has("score") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           {(() => {
@@ -708,7 +707,6 @@ export default function MatchRow({
           })()}
         </td>
       )}
-      {visibleColumns.has("status") && <td className="hidden"></td>}
       {visibleColumns.has("ai") && (
         <td className={`py-3 px-2 text-center ${colDivider}`}>
           <div className="flex items-center justify-center gap-1">
