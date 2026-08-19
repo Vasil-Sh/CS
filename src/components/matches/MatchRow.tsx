@@ -62,7 +62,7 @@ const proxyLogo = (url: string | null, game?: string): string | null =>
 /** 5-star "interest" rating — filled vs. empty based on team rank. */
 const StarRating = ({ stars }: { stars: number }) => (
   <span
-    className="inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 bg-gray-50"
+    className="inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 border border-gray-200"
     title={`Цікавість матчу: ${stars}/5`}
   >
     {[0, 1, 2, 3, 4].map((i) => (
