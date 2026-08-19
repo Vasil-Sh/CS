@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CalendarDays, X, Loader2, Search, Clock } from "lucide-react";
+import { proxyLogoUrl } from "@/lib/logoProxy";
 
 interface PastDaysModalProps {
   open: boolean;
@@ -31,16 +32,8 @@ interface HistoryMatch {
 const LOGO_SIZE = 24;
 
 /** Convert CDN URL to backend proxy URL */
-const proxyLogo = (url: string | null, game: string): string | null => {
-  if (!url) return null;
-  if (url.startsWith("/api/")) return url;
-  const prefix = game === "cs2" ? "cs2-matches" : "dota2-matches";
-  const encoded = btoa(url)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return `/api/v1/${prefix}/logo/external/${encoded}`;
-};
+const proxyLogo = (url: string | null, game: string): string | null =>
+  proxyLogoUrl(url, game);
 
 /** Team logo with error fallback to placeholder SVG */
 function TeamLogo({

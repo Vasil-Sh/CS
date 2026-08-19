@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { ShieldAlert, Save, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
+import { proxyLogoUrl } from "@/lib/logoProxy";
 
 interface TeamInfo {
   name: string;
@@ -63,14 +64,8 @@ const GAME_OPTIONS = [
 ] as const;
 
 /** Proxy a CDN logo URL through the backend */
-const proxyLogo = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("/api/")) return url;
-  const parts = url.split("/");
-  const filename = parts[parts.length - 1];
-  // Try CS2 first, then Dota2
-  return `/api/v1/cs2-matches/logo/${filename}`;
-};
+const proxyLogo = (url: string | null | undefined, game: string): string | null =>
+  proxyLogoUrl(url, game);
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   const {
@@ -286,7 +281,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
                     <div className="flex items-center gap-3 w-full">
                       {team.logo ? (
                         <img
-                          src={proxyLogo(team.logo) || undefined}
+                          src={proxyLogo(team.logo, props.game) || undefined}
                           alt={team.name}
                           className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                           onError={(e) => {
@@ -329,7 +324,7 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
                 >
                   {team.logo ? (
                     <img
-                      src={proxyLogo(team.logo) || undefined}
+                      src={proxyLogo(team.logo, props.game) || undefined}
                       alt={team.name}
                       className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
                       onError={(e) => {

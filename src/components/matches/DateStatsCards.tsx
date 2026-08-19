@@ -64,7 +64,7 @@ export default function DateStatsCards({
       label: "Турнірів",
       value: tournamentCount,
       color: "text-sky-600",
-      sub: <span className="text-sm text-[#4B5563]">сьогодні</span>,
+      sub: <span className="text-sm text-[#4B5563]">видимі дні</span>,
     },
     {
       icon: <Brain className="h-5 w-5 text-primary" strokeWidth={1.5} />,

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
@@ -116,6 +117,15 @@ export default function Matches() {
   const team1RiskInfo = m.getTeamRiskInfo(riskyMatch?.team1 || "", riskyGame);
   const team2RiskInfo = m.getTeamRiskInfo(riskyMatch?.team2 || "", riskyGame);
 
+  // Stable handlers so memoized <MatchRow> doesn't re-render on every tick.
+  const handleRowPredictions = useCallback(
+    (match: Match) => {
+      m.setSelectedMatch(match);
+      m.setPredictionsModalOpen(true);
+    },
+    [m.setSelectedMatch, m.setPredictionsModalOpen],
+  );
+
   const renderSortIndicator = (column: SortBy) => {
     const dir = m.getSortIcon(column);
     if (dir === "asc")
@@ -212,13 +222,8 @@ export default function Matches() {
       colDivider={colDivider}
       visibleColumns={m.visibleColumns}
       onRate={m.handleRateMatch}
-      onAIRecommend={(match: Match) => {
-        void m.handleAiRecommend(match);
-      }}
-      onPredictions={(match: Match) => {
-        m.setSelectedMatch(match);
-        m.setPredictionsModalOpen(true);
-      }}
+      onAIRecommend={m.handleAiRecommend}
+      onPredictions={handleRowPredictions}
       onShowComment={m.handleShowComment}
       onAddToBets={m.handleAddToBets}
       onToggleSelect={m.toggleMatchSelection}

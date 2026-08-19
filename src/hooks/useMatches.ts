@@ -386,9 +386,12 @@ function determineDota2Tier(
 const MATCHES_CACHE_KEY = "matchiq_matches_cache_v4";
 const MATCHES_CACHE_TS_KEY = "matchiq_matches_cache_ts_v4";
 
-// Nuke old cache keys + localStorage caches on mount to prevent crashes.
+// Nuke DEPRECATED cache keys once on mount to prevent crashes from corrupt
+// data written by older app versions. IMPORTANT: do NOT delete the CURRENT
+// localStorage keys (cs2_matches_cache_v12 / dota2_matches_cache_v19) — those
+// are the SWR caches that let the page show matches instantly on revisit.
 function clearAllCaches(): void {
-  // SessionStorage
+  // SessionStorage — old (pre-v4) keys
   for (const key of [
     "matchiq_matches_cache",
     "matchiq_matches_cache_v2",
@@ -401,8 +404,8 @@ function clearAllCaches(): void {
       /* ignore */
     }
   }
-  // LocalStorage — API-level caches from csApi.ts / dota2Api.ts
-  for (const key of ["cs2_matches_cache_v11", "dota2_matches_cache_v18", "cs2_matches_cache_v12", "dota2_matches_cache_v19"]) {
+  // LocalStorage — superseded API-level cache versions only
+  for (const key of ["cs2_matches_cache_v11", "dota2_matches_cache_v18"]) {
     try {
       localStorage.removeItem(key);
     } catch {
@@ -474,13 +477,22 @@ function saveCachedMatches(matches: Match[]): void {
 
 // ── Main Hook ──
 export function useMatches() {
-  // One-time: nuke old corrupt sessionStorage caches
-  clearAllCaches();
-  const cached = loadCachedMatches();
-  const [matches, setMatches] = useState<Match[]>(cached?.matches ?? []);
+  // Seed initial state from sessionStorage ONCE (lazy initializer). Also runs
+  // the one-time cleanup of deprecated cache keys exactly once per mount —
+  // previously clearAllCaches() ran on every render and also wiped the current
+  // SWR caches, forcing a slow network fetch each visit.
+  const [initialCache] = useState(() => {
+    clearAllCaches();
+    return loadCachedMatches();
+  });
+  const [matches, setMatches] = useState<Match[]>(
+    initialCache?.matches ?? [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   // Skip loader if restored from cache — SWR refreshes silently in background
-  const [initialLoading, setInitialLoading] = useState(cached ? false : true);
+  const [initialLoading, setInitialLoading] = useState(
+    initialCache ? false : true,
+  );
   const [sortBy, setSortBy] = useState<SortBy>("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<FilterDay>("all");
@@ -520,12 +532,11 @@ export function useMatches() {
     new Set(),
   );
   const fetchGenRef = useRef(0);
-  const pollBackoffRef = useRef<
-    Record<
-      string,
-      { failCount: number; maxDelay: number; lastAttempt?: number }
-    >
-  >({});
+  // Track in-flight retry timers so we can clear them on unmount and avoid
+  // leaving orphaned network request loops after navigating away.
+  const retryTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(
+    new Set(),
+  );
 
   // ── Keep selectedMatch synced with latest match data (live scores) ──
   useEffect(() => {
@@ -588,6 +599,15 @@ export function useMatches() {
   // ── Load matches from API ──
   const loadMatchesFromApi = useCallback(async () => {
     const gen = ++fetchGenRef.current;
+    // Schedule a retry while tracking its timer for unmount cleanup.
+    const scheduleRetry = (fn: () => void, delayMs: number) => {
+      const id = setTimeout(() => {
+        retryTimersRef.current.delete(id);
+        fn();
+      }, delayMs);
+      retryTimersRef.current.add(id);
+    };
+
     // Only show loader if we have no matches at all (cold start).
     // If matches were restored from sessionStorage, refresh silently.
     setMatches((prev) => {
@@ -617,9 +637,10 @@ export function useMatches() {
         fetchTodaysAndUpcomingMatches(false, onCs2Update),
       ]).then(([r]) => r);
 
-      // Fire Dota2 in background with retries — don't block initial render
+      // Fire Dota2 in background with retries — don't block initial render.
+      // Kept low (3 attempts) to avoid hammering the rate-limited backend.
       let dotaAttempt = 0;
-      const maxDotaAttempts = 8; // reduced from 10 — avoid hammering rate-limited backend
+      const maxDotaAttempts = 3;
       const onDotaUpdate = (fresh: Dota2ApiMatch[]) => {
         if (gen !== fetchGenRef.current) return;
         setInitialLoading(false);
@@ -636,12 +657,12 @@ export function useMatches() {
             onDotaUpdate(dota);
           } else if (dotaAttempt < maxDotaAttempts) {
             dotaAttempt++;
-            setTimeout(pullDota, 12000); // 12s between retries (was 6s)
+            scheduleRetry(pullDota, 12000);
           }
         } catch {
           if (dotaAttempt < maxDotaAttempts) {
             dotaAttempt++;
-            setTimeout(pullDota, 12000); // 12s between retries (was 6s)
+            scheduleRetry(pullDota, 12000);
           }
         }
       };
@@ -663,15 +684,16 @@ export function useMatches() {
         });
 
         // ── CS2 auto-retry: if initial load returned empty, poll in background ──
-        // Backend cold start (Puppeteer 30-80s) may outrun the fetchFreshMatches retry
-        // loop. Keep trying until we get matches or the user navigates away.
+        // Backend cold start (Puppeteer 30-80s) may outrun the fetchFreshMatches
+        // retry loop. Keep trying until we get matches or the user navigates away.
+        // NOTE: no forceRefresh — SWR already revalidates on its own.
         if (cs2Matches.length === 0 && cs2Data.status === "fulfilled") {
           let cs2Retry = 0;
-          const maxCs2Retries = 8; // reduced from 15 — avoid hammering rate-limited backend
+          const maxCs2Retries = 3;
           const pullCs2 = async () => {
             if (gen !== fetchGenRef.current) return;
             try {
-              const fresh = await fetchTodaysAndUpcomingMatches(true); // forceRefresh
+              const fresh = await fetchTodaysAndUpcomingMatches(false);
               if (gen !== fetchGenRef.current) return;
               if (fresh.length > 0) {
                 setMatches((prev) => {
@@ -681,12 +703,12 @@ export function useMatches() {
                 });
               } else if (cs2Retry < maxCs2Retries) {
                 cs2Retry++;
-                setTimeout(pullCs2, 12000); // 12s between retries (was 6s)
+                scheduleRetry(pullCs2, 12000);
               }
             } catch {
               if (cs2Retry < maxCs2Retries) {
                 cs2Retry++;
-                setTimeout(pullCs2, 12000); // 12s between retries (was 6s)
+                scheduleRetry(pullCs2, 12000);
               }
             }
           };
@@ -710,6 +732,14 @@ export function useMatches() {
   useEffect(() => {
     loadMatchesFromApi();
   }, [loadMatchesFromApi]);
+
+  // ── Clear any in-flight retry timers on unmount ──
+  useEffect(() => {
+    return () => {
+      retryTimersRef.current.forEach((id) => clearTimeout(id));
+      retryTimersRef.current.clear();
+    };
+  }, []);
 
   // ── Persist matches to sessionStorage for instant restore on revisit ──
   useEffect(() => {
@@ -747,155 +777,9 @@ export function useMatches() {
     }
   }, [loadMatchesFromApi]);
 
-  // ── Poll live scores ──
-  const pollLiveScores = useCallback(
-    async (
-      game: "Dota2" | "CS2",
-      slugField: "dota2Slug" | "cs2Slug",
-      endpoint: string,
-    ) => {
-      try {
-        const bo = pollBackoffRef.current[game];
-        if (bo && bo.failCount >= 3) {
-          const delay = Math.min(bo.maxDelay, Math.pow(2, bo.failCount) * 1000);
-          if (bo.lastAttempt && Date.now() - bo.lastAttempt < delay) return;
-        }
-        const resp = await fetch(endpoint);
-        if (!resp.ok) {
-          if (resp.status === 429 || resp.status >= 500) {
-            const b = pollBackoffRef.current[game] || {
-              failCount: 0,
-              maxDelay: 120_000,
-            };
-            b.failCount++;
-            b.lastAttempt = Date.now();
-            pollBackoffRef.current[game] = b;
-          }
-          return;
-        }
-        delete pollBackoffRef.current[game];
-        const updates: Array<{
-          id: string;
-          score1: number | null;
-          score2: number | null;
-          status: string;
-        }> = await resp.json();
-        if (!Array.isArray(updates) || updates.length === 0) return;
-
-        setMatches((prev) =>
-          prev.map((m) => {
-            if (m.game !== game || !m[slugField]) return m;
-            const update = updates.find((u) => u.id === m[slugField]);
-            if (!update) return m;
-            if (m.matchStatus === "finished") return m;
-            const newScore1 = update.score1 ?? m.score1;
-            const newScore2 = update.score2 ?? m.score2;
-            const s1 = newScore1 ?? 0,
-              s2 = newScore2 ?? 0;
-            const hasScores =
-              (newScore1 != null || newScore2 != null) && s1 + s2 > 0;
-            const maxScore = Math.max(s1, s2);
-            const winsNeeded =
-              m.matchType === "Bo5"
-                ? 3
-                : m.matchType === "Bo3"
-                  ? 2
-                  : m.matchType === "Bo2"
-                    ? 2 // BO2 needs 2 wins to be decided (2-0), a draw (1-1) is possible
-                    : m.matchType === "Bo1"
-                      ? 1
-                      : 2;
-            const isScoreDecided =
-              hasScores &&
-              maxScore >= winsNeeded &&
-              Math.abs(s1 - s2) >= (m.matchType === "Bo1" ? 0 : 1);
-
-            const newStatus: Match["matchStatus"] =
-              (() => {
-                if (isScoreDecided) return "finished";
-
-                // Format-dependent auto-finish for stale live matches.
-                // CS2:  Bo1=1h, Bo3=2.5h, Bo5=4.5h
-                // Dota2: Bo1=1h, Bo3=3.5h, Bo5=5.5h
-                // The backend will backfill the correct score later.
-                const matchDate = new Date(m.date);
-                const ageMs = Date.now() - matchDate.getTime();
-                const isDota = m.game === "Dota2";
-                const maxHours =
-                  m.matchType === "Bo5"
-                    ? isDota
-                      ? 5.5
-                      : 4.5
-                    : m.matchType === "Bo3"
-                      ? isDota
-                        ? 3.5
-                        : 2.5
-                      : m.matchType === "Bo2"
-                        ? isDota
-                          ? 3.5
-                          : 2.5
-                        : 1; // Bo1
-                const maxAgeMs = maxHours * 60 * 60 * 1000;
-                if (m.matchStatus === "live" && ageMs > maxAgeMs)
-                  return "finished";
-
-                // Age-based auto-finish for live matches with no scores.
-                if (!hasScores) {
-                  // >4h of live with no scores → auto-finish (fallback)
-                  if (m.matchStatus === "live" && ageMs > 4 * 60 * 60 * 1000)
-                    return "finished";
-                  // >30min of live with no scores → postpone
-                  if (m.matchStatus === "live" && ageMs > 30 * 60 * 1000)
-                    return "postponed";
-                }
-
-                // Allow postponed matches to re-activate if live scores arrive
-                // (e.g. tips.gg-only matches that were auto-postponed due to
-                // missing live store entries — once scores appear, go live/finished).
-                if (m.matchStatus === "postponed" && hasScores) {
-                  if (isScoreDecided) return "finished";
-                  return "live";
-                }
-
-                // Already postponed with no scores — keep it
-                if (m.matchStatus === "postponed") return "postponed";
-
-                if (m.matchStatus === "live" && update.status === "finished")
-                  return "live";
-                if (update.status === "finished") return "finished";
-                if (update.status === "live") return "live";
-
-                if (hasScores) return m.matchStatus;
-                if (matchDate <= new Date()) {
-                  if (ageMs < 4 * 60 * 60 * 1000) return "live";
-                }
-                return m.matchStatus;
-              })();
-
-            return {
-              ...m,
-              score1: newScore1,
-              score2: newScore2,
-              matchStatus: newStatus,
-            };
-          }),
-        );
-      } catch {
-        /* backoff handled above */
-      }
-    },
-    [],
-  );
-
-  const hasDota2Matches = matches.some(
-    (m) => m.game === "Dota2" && m.matchStatus !== "finished",
-  );
-  const hasCs2Matches = matches.some(
-    (m) => m.game === "CS2" && m.matchStatus !== "finished",
-  );
-
   // ── Auto-refresh match list every 60s (no live score polling) ──
-
+  // SWR inside csApi/dota2Api already revalidates in the background, so this
+  // only re-reads the list without clearing caches or restarting retry loops.
   useEffect(() => {
     let isQuietRefreshing = false;
     const quietRefresh = async () => {
@@ -903,7 +787,6 @@ export function useMatches() {
       if (document.visibilityState !== "visible") return;
       isQuietRefreshing = true;
       try {
-        await clearDota2Cache();
         await loadMatchesFromApi();
       } catch {
         /* silent */
@@ -947,7 +830,6 @@ export function useMatches() {
       if (delay > 0 && delay < 30 * 60 * 1000) {
         // within 30 min from now
         const timer = setTimeout(async () => {
-          await clearDota2Cache();
           await loadMatchesFromApi();
         }, delay);
         tbdTimers.push(timer);
@@ -1531,10 +1413,6 @@ export function useMatches() {
     refreshMatches,
     loadMatchesFromApi,
     loadRiskyTeams,
-    // Poll
-    pollLiveScores,
-    hasDota2Matches,
-    hasCs2Matches,
     // Multi-select
     selectedMatchIds,
     setSelectedMatchIds,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 import type { Match, MatchRating } from "@/hooks/useMatches";
+import { proxyLogoUrl } from "@/lib/logoProxy";
 
 interface AIRecommendation {
   prediction?: string;
@@ -54,17 +55,8 @@ interface Props {
 /** Rewrite logo URLs — backend already proxies all external CDNs.
  *  Backend returns /api/v1/{game}-matches/logo/external/{b64}.
  *  Just pass through; if somehow raw URL, encode as base64url. */
-const proxyLogo = (url: string | null, game?: string): string | null => {
-  if (!url) return null;
-  if (url.startsWith("/api/")) return url;
-  // Legacy: raw CDN URL not proxied by backend — encode ourselves
-  const prefix = game === "Dota2" ? "dota2" : "cs2";
-  const encoded = btoa(url)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return `/api/v1/${prefix}-matches/logo/external/${encoded}`;
-};
+const proxyLogo = (url: string | null, game?: string): string | null =>
+  proxyLogoUrl(url, game);
 
 const TeamLogo = ({
   src,
@@ -359,7 +351,7 @@ function formatCoeff(c?: number | null) {
   return c.toFixed(2);
 }
 
-export default function MatchRow({
+function MatchRowInner({
   match,
   aiPredictions,
   isSelected,
@@ -904,3 +896,5 @@ export default function MatchRow({
     </tr>
   );
 }
+
+export default memo(MatchRowInner);
