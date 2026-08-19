@@ -81,7 +81,7 @@ const StarRating = ({ stars }: { stars: number }) => (
 const RankBadge = ({ rank }: { rank: number }) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <span className="inline-flex items-center text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px cursor-help">
+      <span className="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-px cursor-help">
         #{rank}
       </span>
     </TooltipTrigger>
@@ -573,7 +573,9 @@ function MatchRowInner({
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <StarRating stars={match.interestStars ?? 0} />
+                {(match.interestStars ?? 0) > 0 && (
+                  <StarRating stars={match.interestStars ?? 0} />
+                )}
                 {match.game && (
                   <Badge
                     className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
