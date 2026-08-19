@@ -212,26 +212,29 @@ export default function Matches() {
     </thead>
   );
 
-  const renderRow = (match: Match) => (
-    <MatchRow
-      key={match.id}
-      match={match}
-      aiPredictions={m.aiPredictions}
-      isSelected={m.selectedMatchIds.has(match.id)}
-      currentRating={m.matchRatings[match.id] || null}
-      colDivider={colDivider}
-      visibleColumns={m.visibleColumns}
-      onRate={m.handleRateMatch}
-      onAIRecommend={m.handleAiRecommend}
-      onPredictions={handleRowPredictions}
-      onShowComment={m.handleShowComment}
-      onAddToBets={m.handleAddToBets}
-      onToggleSelect={m.toggleMatchSelection}
-      onAddToRisky={m.handleAddToRisky}
-      team1Risky={!!m.getTeamRiskInfo(match.team1, match.game)}
-      team2Risky={!!m.getTeamRiskInfo(match.team2, match.game)}
-    />
-  );
+  const renderRow = (match: Match) => {
+    const flags = m.riskFlags.get(match.id);
+    return (
+      <MatchRow
+        key={match.id}
+        match={match}
+        aiPredictions={m.aiPredictions}
+        isSelected={m.selectedMatchIds.has(match.id)}
+        currentRating={m.matchRatings[match.id] || null}
+        colDivider={colDivider}
+        visibleColumns={m.visibleColumns}
+        onRate={m.handleRateMatch}
+        onAIRecommend={m.handleAiRecommend}
+        onPredictions={handleRowPredictions}
+        onShowComment={m.handleShowComment}
+        onAddToBets={m.handleAddToBets}
+        onToggleSelect={m.toggleMatchSelection}
+        onAddToRisky={m.handleAddToRisky}
+        team1Risky={flags?.team1Risky ?? false}
+        team2Risky={flags?.team2Risky ?? false}
+      />
+    );
+  };
 
   return (
     <TooltipProvider>
@@ -342,6 +345,15 @@ export default function Matches() {
                               />{" "}
                               Оновити
                             </button>
+                            {m.hasActiveFilters && (
+                              <button
+                                onClick={m.resetAllFilters}
+                                className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-[24px] border border-stone-200 bg-white text-gray-900 text-sm font-medium transition-colors hover:bg-gray-50"
+                              >
+                                <X className="h-4 w-4" strokeWidth={1.5} />{" "}
+                                Скинути фільтри
+                              </button>
+                            )}
                           </div>
                         </CardContent>
                       </div>

@@ -77,6 +77,8 @@ export interface Match {
   bettingCoefficientTeam1?: number | null;
   bettingCoefficientTeam2?: number | null;
   stars?: number;
+  /** How "interesting" a match is (0–5), derived from HLTV team positions. */
+  interestStars?: number;
   dota2Slug?: string;
   cs2Slug?: string;
   /** Whether this match is a custom/placeholder from user input */
@@ -162,6 +164,28 @@ const loadVisibleColumns = (): Set<string> => {
   }
   return new Set(COLUMN_DEFS.filter((c) => c.defaultVisible).map((c) => c.id));
 };
+
+// ── Interest stars (0–5) ──
+// Derived deterministically from world ranking positions (lower = better).
+// A missing rank is treated as "very low" (Infinity) so a top team still earns
+// stars even against a no-name opponent. Both unranked → 0 stars. No network.
+function computeInterestStars(
+  pos1: number | null | undefined,
+  pos2: number | null | undefined,
+): number {
+  const p1 = pos1 != null && pos1 > 0 ? pos1 : Infinity;
+  const p2 = pos2 != null && pos2 > 0 ? pos2 : Infinity;
+  // Both teams have no ranking data → no-name match.
+  if (p1 === Infinity && p2 === Infinity) return 0;
+  const best = Math.min(p1, p2);
+  const worst = Math.max(p1, p2);
+  if (worst <= 5) return 5;
+  if (worst <= 10) return 4;
+  if (worst <= 20) return 3;
+  if (best <= 20) return 2;
+  if (best <= 30) return 1;
+  return 0;
+}
 
 // ── Converter: API match → unified Match ──
 function apiMatchToMatch(
@@ -261,6 +285,10 @@ function apiMatchToMatch(
     bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
     bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
     stars: apiMatch.stars,
+    interestStars: computeInterestStars(
+      apiMatch.positionTeam1,
+      apiMatch.positionTeam2,
+    ),
     game,
   };
 }
@@ -336,6 +364,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     bettingCoefficientTeam1: m.bettingCoefficientTeam1,
     bettingCoefficientTeam2: m.bettingCoefficientTeam2,
     stars: m.stars,
+    interestStars: computeInterestStars(m.positionTeam1, m.positionTeam2),
     game: "Dota2",
     dota2Slug,
   };
@@ -489,11 +518,12 @@ export function useMatches() {
     initialCache?.matches ?? [],
   );
   const [isLoading, setIsLoading] = useState(false);
-  // Skip loader if restored from cache — SWR refreshes silently in background
+  // Only true on the very first cold start (no cache restored) — drives the
+  // full-screen skeleton. `isLoading` drives the refresh button spinner.
   const [initialLoading, setInitialLoading] = useState(
     initialCache ? false : true,
   );
-  const [sortBy, setSortBy] = useState<SortBy>("status");
+  const [sortBy, setSortBy] = useState<SortBy>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterDayOfWeek, setFilterDayOfWeek] = useState<FilterDay>("all");
   const [filterRisk, setFilterRisk] = useState<FilterRisk>("all");
@@ -608,12 +638,9 @@ export function useMatches() {
       retryTimersRef.current.add(id);
     };
 
-    // Only show loader if we have no matches at all (cold start).
-    // If matches were restored from sessionStorage, refresh silently.
-    setMatches((prev) => {
-      if (prev.length === 0) setInitialLoading(true);
-      return prev;
-    });
+    // `initialLoading` is already set by the useState initializer (true only on
+    // cold start with no restored cache). No need to touch it here — calling
+    // setState inside a setMatches updater is a React anti-pattern.
     setApiError(null);
     try {
       // Track whether SWR callback already delivered fresh CS2 data.
@@ -1313,6 +1340,22 @@ export function useMatches() {
     [getTeamRiskInfo],
   );
 
+  // ── Precompute risky-team flags for all displayed matches (memoized) ──
+  // Avoids calling getTeamRiskInfo for every row on every render.
+  const riskFlags = useMemo(() => {
+    const map = new Map<
+      string,
+      { team1Risky: boolean; team2Risky: boolean }
+    >();
+    for (const match of displayedMatches) {
+      map.set(match.id, {
+        team1Risky: !!getTeamRiskInfo(match.team1, match.game),
+        team2Risky: !!getTeamRiskInfo(match.team2, match.game),
+      });
+    }
+    return map;
+  }, [displayedMatches, getTeamRiskInfo]);
+
   const handleRiskySaved = useCallback(() => {
     loadRiskyTeams();
   }, [loadRiskyTeams]);
@@ -1349,6 +1392,7 @@ export function useMatches() {
     setMatchRatings,
     aiPredictions,
     riskyTeams,
+    riskFlags,
     // Loading
     isLoading,
     initialLoading,

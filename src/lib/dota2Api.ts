@@ -35,6 +35,8 @@ interface TipsGgApiMatch {
   pred2: number;
   coeff1: number | null;
   coeff2: number | null;
+  positionTeam1?: number | null;
+  positionTeam2?: number | null;
   formTeam1?: string;
   formWins1?: number;
   formLosses1?: number;
@@ -88,8 +90,8 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     nameTeam2: m.nameTeam2,
     lastChangeDateTeam1: null,
     lastChangeDateTeam2: null,
-    positionTeam1: null,
-    positionTeam2: null,
+    positionTeam1: m.positionTeam1 ?? null,
+    positionTeam2: m.positionTeam2 ?? null,
     logoTeam1: proxyLogoUrl(m.logoTeam1),
     logoTeam2: proxyLogoUrl(m.logoTeam2),
     predictionPercentTeam1: m.pred1,

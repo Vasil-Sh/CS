@@ -24,6 +24,7 @@ import {
   Trophy,
   BarChart3,
   ExternalLink,
+  Star,
 } from "lucide-react";
 
 import type { Match, MatchRating } from "@/hooks/useMatches";
@@ -57,6 +58,38 @@ interface Props {
  *  Just pass through; if somehow raw URL, encode as base64url. */
 const proxyLogo = (url: string | null, game?: string): string | null =>
   proxyLogoUrl(url, game);
+
+/** 5-star "interest" rating — filled vs. empty based on team rank. */
+const StarRating = ({ stars }: { stars: number }) => (
+  <span
+    className="inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 bg-white border border-gray-200"
+    title={`Цікавість матчу: ${stars}/5`}
+  >
+    {[0, 1, 2, 3, 4].map((i) => (
+      <Star
+        key={i}
+        className={`h-3 w-3 ${
+          i < stars ? "text-amber-500 fill-amber-500" : "text-gray-300"
+        }`}
+        strokeWidth={1.5}
+      />
+    ))}
+  </span>
+);
+
+/** Team world-rank badge with a tooltip explaining what the number means. */
+const RankBadge = ({ rank }: { rank: number }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <span className="inline-flex items-center text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px cursor-help">
+        #{rank}
+      </span>
+    </TooltipTrigger>
+    <TooltipContent className="bg-gray-900 text-white p-2 rounded-lg">
+      <p className="text-sm">Місце у світовому рейтингу HLTV</p>
+    </TooltipContent>
+  </Tooltip>
+);
 
 const TeamLogo = ({
   src,
@@ -519,9 +552,7 @@ function MatchRowInner({
                       {match.team1}
                     </span>
                     {match.positionTeam1 != null && match.positionTeam1 > 0 && (
-                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px">
-                        #{match.positionTeam1}
-                      </span>
+                      <RankBadge rank={match.positionTeam1} />
                     )}
                   </div>
                   <span className="text-gray-400 text-xs font-medium">vs</span>
@@ -536,14 +567,13 @@ function MatchRowInner({
                       {match.team2}
                     </span>
                     {match.positionTeam2 != null && match.positionTeam2 > 0 && (
-                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 rounded px-1.5 py-px">
-                        #{match.positionTeam2}
-                      </span>
+                      <RankBadge rank={match.positionTeam2} />
                     )}
                   </div>
                 </div>
               )}
               <div className="flex items-center gap-1">
+                <StarRating stars={match.interestStars ?? 0} />
                 {match.game && (
                   <Badge
                     className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
