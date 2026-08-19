@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Layers,
   X,
+  Star,
 } from "lucide-react";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -399,6 +400,23 @@ export default function Matches() {
                                 <Badge className="bg-gray-100 text-gray-500 border-0 rounded-full px-4 py-1 text-base font-bold">
                                   {dateMatches.length}
                                 </Badge>
+                                {dateMatches.some((mt) => (mt.interestStars ?? 0) > 0) && (
+                                  <button
+                                    onClick={() => m.setFilterInteresting(!m.filterInteresting)}
+                                    title="Показати тільки цікаві матчі"
+                                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold transition-colors ${
+                                      m.filterInteresting
+                                        ? "bg-amber-500 text-white"
+                                        : "bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100"
+                                    }`}
+                                  >
+                                    <Star
+                                      className={`h-3.5 w-3.5 ${m.filterInteresting ? "fill-white text-white" : "fill-amber-400 text-amber-400"}`}
+                                      strokeWidth={1.5}
+                                    />
+                                    {dateMatches.filter((mt) => (mt.interestStars ?? 0) > 0).length}
+                                  </button>
+                                )}
                                 <GameFilterTabs
                                   filterGame={m.filterGame}
                                   onSelect={m.setFilterGame}

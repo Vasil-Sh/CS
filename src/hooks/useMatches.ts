@@ -532,6 +532,7 @@ export function useMatches() {
     useState<FilterMatchType>("all");
   const [filterGame, setFilterGame] = useState<FilterGame>("all");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [filterInteresting, setFilterInteresting] = useState(false);
   const [pastDaysModalOpen, setPastDaysModalOpen] = useState(false);
   const [visibleColumns, setVisibleColumns] =
     useState<Set<string>>(loadVisibleColumns);
@@ -608,6 +609,7 @@ export function useMatches() {
     setFilterDayOfWeek("all");
     setFilterRisk("all");
     setFilterTournament("all");
+    setFilterInteresting(false);
     setPastDaysModalOpen(false);
     setSearchQuery("");
     const defaults = new Set(
@@ -624,6 +626,7 @@ export function useMatches() {
     filterDayOfWeek !== "all" ||
     filterRisk !== "all" ||
     filterTournament !== "all" ||
+    filterInteresting ||
     searchQuery !== "";
 
   // ── Load matches from API ──
@@ -972,6 +975,7 @@ export function useMatches() {
         return false;
       if (filterStatus !== "all" && match.matchStatus !== filterStatus)
         return false;
+      if (filterInteresting && (match.interestStars ?? 0) <= 0) return false;
       if (
         searchQuery &&
         !match.team1
@@ -1110,6 +1114,7 @@ export function useMatches() {
     filterTournament,
     filterMatchType,
     filterStatus,
+    filterInteresting,
     debouncedSearchQuery,
     sortBy,
     sortOrder,
@@ -1421,6 +1426,8 @@ export function useMatches() {
     setFilterRisk,
     filterTournament,
     setFilterTournament,
+    filterInteresting,
+    setFilterInteresting,
     searchQuery,
     setSearchQuery,
     hasActiveFilters,
