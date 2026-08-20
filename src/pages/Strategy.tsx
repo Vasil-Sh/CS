@@ -14,6 +14,7 @@ import type { Bet } from "@/types/betting";
 
 interface StoredStrategy {
   id?: string;
+  _backendId?: string;
   name: string;
   description?: string;
   riskLevel: "Low" | "Medium" | "High";
@@ -124,11 +125,14 @@ const goalProgress = (goal: StoredGoal): { percent: number; label: string } => {
 
 export default function Strategy() {
   logRender("Strategy");
-  const [activeTab, setActiveTabState] = useState<"strategies" | "goals">(() => {
-    // Persist tab selection across navigations
-    const saved = sessionStorage.getItem("strategy_active_tab");
-    return (saved === "goals" ? "goals" : "strategies") as "strategies" | "goals";
-  });
+  const [activeTab, setActiveTabState] = useState<"strategies" | "goals">(
+    () => {
+      // Persist tab selection across navigations
+      const saved = sessionStorage.getItem("strategy_active_tab");
+      return (saved === "goals" ? "goals" : "strategies") as
+        "strategies" | "goals";
+    },
+  );
   const setActiveTab = (tab: string) => {
     if (tab !== "strategies" && tab !== "goals") return;
     setActiveTabState(tab);
@@ -173,7 +177,10 @@ export default function Strategy() {
       [],
     );
     return (
-      strats.find((s: StoredStrategy) => s.id === pid || s.name === pid) || null
+      strats.find(
+        (s: StoredStrategy) =>
+          s.id === pid || s.name === pid || s._backendId === pid,
+      ) || null
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUser, primaryStrategyId, strategyVersion]);
