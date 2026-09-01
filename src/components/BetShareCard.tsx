@@ -568,7 +568,7 @@ export default function BetShareCard({
               y1="1"
               x2="100"
               y2="1"
-              stroke="#E5E7EB"
+              stroke="#6B7280"
               strokeWidth="2"
               strokeDasharray="3.33 3.33"
               strokeOpacity="0.7"
@@ -605,7 +605,7 @@ export default function BetShareCard({
               </>
             )}
           </div>
-          <div className="mt-6 h-px w-full bg-slate-200" />
+          <div className="mt-6 h-px w-full bg-gray-400 opacity-40" />
         </div>
 
         {/* Amount → payout */}
