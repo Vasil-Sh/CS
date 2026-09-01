@@ -622,49 +622,6 @@ export default function BetShareCard({
           </div>
         </div>
       </div>
-
-      {/* Semicircle outlines around the transparent notches (drawn outside the
-          masked element so they survive the mask cutout). */}
-      {notchY > 0 && (
-        <>
-          <svg
-            className="absolute pointer-events-none"
-            style={{
-              left: 0,
-              top: notchY,
-              transform: "translateY(-50%)",
-              width: notchR,
-              height: notchR * 2,
-            }}
-            viewBox={`0 0 ${notchR} ${notchR * 2}`}
-          >
-            <path
-              d={`M 0 0 A ${notchR} ${notchR} 0 0 1 0 ${notchR * 2}`}
-              fill="none"
-              stroke="#E5E7EB"
-              strokeWidth="1"
-            />
-          </svg>
-          <svg
-            className="absolute pointer-events-none"
-            style={{
-              right: 0,
-              top: notchY,
-              transform: "translateY(-50%)",
-              width: notchR,
-              height: notchR * 2,
-            }}
-            viewBox={`0 0 ${notchR} ${notchR * 2}`}
-          >
-            <path
-              d={`M ${notchR} 0 A ${notchR} ${notchR} 0 0 0 ${notchR} ${notchR * 2}`}
-              fill="none"
-              stroke="#E5E7EB"
-              strokeWidth="1"
-            />
-          </svg>
-        </>
-      )}
     </div>
   );
 }
