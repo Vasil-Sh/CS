@@ -584,7 +584,7 @@ export default function BetShareCard({
               </>
             )}
           </div>
-          <div className="mt-2 h-px w-full bg-slate-200" />
+          <div className="mt-[10.4px] h-px w-full bg-slate-200" />
         </div>
 
         {/* Amount → payout */}
