@@ -49,7 +49,7 @@ export default function BetShareModal({
       <DialogContent
         className="p-0 gap-0 bg-white border border-gray-200 rounded-3xl overflow-visible"
         style={{
-          width: "fit-content",
+          width: minW,
           minWidth: minW,
           maxWidth: "90vw",
           height: "fit-content",

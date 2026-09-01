@@ -383,7 +383,7 @@ export default function BetShareCard({
           className="flex items-center justify-center px-6 py-4 text-white"
           style={{ background: theme.gradient }}
         >
-          <div className="text-lg font-light tracking-wider uppercase leading-snug text-center line-clamp-2">
+          <div className="w-full text-lg font-light tracking-wider uppercase leading-snug text-center break-words line-clamp-2">
             {bet.tournament || matchName}
           </div>
         </div>
