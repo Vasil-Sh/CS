@@ -36,6 +36,7 @@ export interface MatchPrefillData {
   tournament: string;
   format: string;
   date: string;
+  time?: string;
   matchUrl?: string;
   odds?: string;
   logoTeam1?: string | null;
@@ -264,11 +265,14 @@ export function useBettingForm({
     logoTeam1?: string | null;
     logoTeam2?: string | null;
   }>({});
+  const prefillTimeRef = useRef<string | undefined>(undefined);
   const strategyLoadedRef = useRef(false);
   const strategiesRef = useRef<CS2Strategy[]>([]);
   const onPrefillConsumedRef = useRef(onPrefillConsumed);
   onPrefillConsumedRef.current = onPrefillConsumed;
-  const urlDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const urlDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   // ── Effects ──
   useEffect(() => {
@@ -405,6 +409,7 @@ export function useBettingForm({
       logoTeam1: prefillData.logoTeam1,
       logoTeam2: prefillData.logoTeam2,
     };
+    prefillTimeRef.current = prefillData.time;
     const formatMap: Record<string, string> = {
       Bo1: "BO1",
       Bo2: "BO2",
@@ -609,12 +614,18 @@ export function useBettingForm({
     setStrategyViolations([]);
     setIsPrefilled(false);
     setIsExpressFromMatches(false);
+    prefillTimeRef.current = undefined;
+    prefillLogosRef.current = {};
     onPrefillConsumedRef.current?.();
     toast.success("Форму очищено");
   };
 
   const getLastStakeForGoal = (goalId: string): string => {
-    const allGoals = UserDataService.getUserData<Goal[]>(currentUser, "goals", []);
+    const allGoals = UserDataService.getUserData<Goal[]>(
+      currentUser,
+      "goals",
+      [],
+    );
     const goal = allGoals.find((g: Goal) => g.id === goalId);
     if (!goal) return "";
     if (goal.type === "ladder") {
@@ -807,7 +818,9 @@ export function useBettingForm({
           ? formData.goalId
           : undefined;
       const record: BetRecord = {
-        date: formData.date,
+        date: prefillTimeRef.current
+          ? `${formData.date}T${prefillTimeRef.current}:00`
+          : formData.date,
         match: matchName,
         team1: formData.betCategory === "Експрес" ? "Експрес" : formData.team1,
         team2:

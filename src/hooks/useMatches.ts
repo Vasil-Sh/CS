@@ -113,9 +113,7 @@ const getTodayDateKey = (): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const getStatusPriority = (
-  status?: Match["matchStatus"],
-): number => {
+const getStatusPriority = (status?: Match["matchStatus"]): number => {
   switch (status) {
     case "live":
       return 0;
@@ -252,11 +250,21 @@ function apiMatchToMatch(
       team2: hasCoeffs ? (coeff2 ?? 0) : 0,
     },
     winRate,
-    formStability: ((apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown' ? apiMatch.formTeam1 : undefined) ||
-      (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown' ? apiMatch.formTeam2 : undefined) ||
+    formStability: ((apiMatch.formTeam1 && apiMatch.formTeam1 !== "unknown"
+      ? apiMatch.formTeam1
+      : undefined) ||
+      (apiMatch.formTeam2 && apiMatch.formTeam2 !== "unknown"
+        ? apiMatch.formTeam2
+        : undefined) ||
       "") as FormStability,
-    formStabilityTeam1: (apiMatch.formTeam1 && apiMatch.formTeam1 !== 'unknown') ? String(apiMatch.formTeam1) : "",
-    formStabilityTeam2: (apiMatch.formTeam2 && apiMatch.formTeam2 !== 'unknown') ? String(apiMatch.formTeam2) : "",
+    formStabilityTeam1:
+      apiMatch.formTeam1 && apiMatch.formTeam1 !== "unknown"
+        ? String(apiMatch.formTeam1)
+        : "",
+    formStabilityTeam2:
+      apiMatch.formTeam2 && apiMatch.formTeam2 !== "unknown"
+        ? String(apiMatch.formTeam2)
+        : "",
     formWins1: apiMatch.formWins1 ?? 0,
     formLosses1: apiMatch.formLosses1 ?? 0,
     formStreak1: apiMatch.formStreak1 ?? 0,
@@ -331,8 +339,10 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     },
     winRate: confidence,
     formStability: (m.formTeam1 || m.formTeam2 || "stable") as FormStability,
-    formStabilityTeam1: (m.formTeam1 && m.formTeam1 !== 'unknown') ? String(m.formTeam1) : "",
-    formStabilityTeam2: (m.formTeam2 && m.formTeam2 !== 'unknown') ? String(m.formTeam2) : "",
+    formStabilityTeam1:
+      m.formTeam1 && m.formTeam1 !== "unknown" ? String(m.formTeam1) : "",
+    formStabilityTeam2:
+      m.formTeam2 && m.formTeam2 !== "unknown" ? String(m.formTeam2) : "",
     formWins1: m.formWins1 ?? 0,
     formLosses1: m.formLosses1 ?? 0,
     formStreak1: m.formStreak1 ?? 0,
@@ -465,9 +475,18 @@ function loadCachedMatches(): { matches: Match[]; timestamp: number } | null {
       m.aiSummary = String(m.aiSummary ?? "");
       m.tier = m.tier || null;
       m.matchStatus = m.matchStatus || "upcoming";
-      m.formStability = (m.formStability && m.formStability !== 'unknown') ? m.formStability : ("" as FormStability);
-      m.formStabilityTeam1 = (m.formStabilityTeam1 && m.formStabilityTeam1 !== 'unknown') ? String(m.formStabilityTeam1) : "";
-      m.formStabilityTeam2 = (m.formStabilityTeam2 && m.formStabilityTeam2 !== 'unknown') ? String(m.formStabilityTeam2) : "";
+      m.formStability =
+        m.formStability && m.formStability !== "unknown"
+          ? m.formStability
+          : ("" as FormStability);
+      m.formStabilityTeam1 =
+        m.formStabilityTeam1 && m.formStabilityTeam1 !== "unknown"
+          ? String(m.formStabilityTeam1)
+          : "";
+      m.formStabilityTeam2 =
+        m.formStabilityTeam2 && m.formStabilityTeam2 !== "unknown"
+          ? String(m.formStabilityTeam2)
+          : "";
       m.formWins1 = Number(m.formWins1) || 0;
       m.formLosses1 = Number(m.formLosses1) || 0;
       m.formStreak1 = Number(m.formStreak1) || 0;
@@ -514,9 +533,7 @@ export function useMatches() {
     clearAllCaches();
     return loadCachedMatches();
   });
-  const [matches, setMatches] = useState<Match[]>(
-    initialCache?.matches ?? [],
-  );
+  const [matches, setMatches] = useState<Match[]>(initialCache?.matches ?? []);
   const [isLoading, setIsLoading] = useState(false);
   // Only true on the very first cold start (no cache restored) — drives the
   // full-screen skeleton. `isLoading` drives the refresh button spinner.
@@ -538,7 +555,9 @@ export function useMatches() {
     useState<Set<string>>(loadVisibleColumns);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [predictionsModalOpen, setPredictionsModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -565,9 +584,7 @@ export function useMatches() {
   const fetchGenRef = useRef(0);
   // Track in-flight retry timers so we can clear them on unmount and avoid
   // leaving orphaned network request loops after navigating away.
-  const retryTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(
-    new Set(),
-  );
+  const retryTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   // ── Keep selectedMatch synced with latest match data (live scores) ──
   useEffect(() => {
@@ -1195,6 +1212,9 @@ export function useMatches() {
   const navigate = useNavigate();
   const handleAddToBets = useCallback(
     (match: Match) => {
+      const dateOnly = match.date ? match.date.split("T")[0] : match.date;
+      const timeMatch = match.date ? match.date.match(/T(\d{2}:\d{2})/) : null;
+      const time = timeMatch ? timeMatch[1] : undefined;
       navigate("/app/my-bets", {
         state: {
           prefillMatch: {
@@ -1202,7 +1222,8 @@ export function useMatches() {
             team2: match.team2,
             tournament: match.context,
             format: match.matchType,
-            date: match.date,
+            date: dateOnly,
+            time,
             matchUrl: match.url || "",
             logoTeam1: match.logoTeam1,
             logoTeam2: match.logoTeam2,
@@ -1348,10 +1369,7 @@ export function useMatches() {
   // ── Precompute risky-team flags for all displayed matches (memoized) ──
   // Avoids calling getTeamRiskInfo for every row on every render.
   const riskFlags = useMemo(() => {
-    const map = new Map<
-      string,
-      { team1Risky: boolean; team2Risky: boolean }
-    >();
+    const map = new Map<string, { team1Risky: boolean; team2Risky: boolean }>();
     for (const match of displayedMatches) {
       map.set(match.id, {
         team1Risky: !!getTeamRiskInfo(match.team1, match.game),

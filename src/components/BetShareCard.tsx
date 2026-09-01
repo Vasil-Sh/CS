@@ -1,14 +1,5 @@
-import { useState } from "react";
-import {
-  Trophy,
-  TrendingDown,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
 
 interface BetShareCardProps {
@@ -31,6 +22,7 @@ interface BetShareCardProps {
     logoTeam2?: string | null;
     expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
     game?: string;
+    tournament?: string | null;
   };
   compact?: boolean;
 }
@@ -158,7 +150,7 @@ function TeamIcon({
     : "/assets/team-placeholder-cs2.svg";
 
   const sharedClass =
-    "flex items-center justify-center flex-shrink-0 rounded-full bg-white";
+    "flex items-center justify-center flex-shrink-0 rounded-xl bg-slate-50";
   const sharedStyle = { width: size, height: size };
 
   if (logo) {
@@ -167,7 +159,7 @@ function TeamIcon({
         <img
           src={logo}
           alt={name}
-          className="w-3/5 h-3/5 object-contain"
+          className="w-full h-full object-contain p-1"
           onError={(e) => {
             const el = e.target as HTMLImageElement;
             el.style.display = "none";
@@ -176,7 +168,7 @@ function TeamIcon({
             const img = document.createElement("img");
             img.src = placeholderSrc;
             img.alt = name;
-            img.className = "w-3/5 h-3/5 object-contain opacity-70";
+            img.className = "w-full h-full object-contain p-1 opacity-70";
             parent.appendChild(img);
           }}
         />
@@ -189,10 +181,31 @@ function TeamIcon({
       <img
         src={placeholderSrc}
         alt={name}
-        className="w-3/5 h-3/5 object-contain opacity-70"
+        className="w-full h-full object-contain p-1 opacity-70"
       />
     </div>
   );
+}
+
+/** Format a match date into ticket date/time parts. */
+function formatTicketDate(dateStr: string): { date: string; time: string } {
+  if (!dateStr) return { date: "", time: "" };
+  // Only show time when the string actually carries a time component
+  // (e.g. "2026-09-01T08:25:00"). Date-only strings like "2026-09-01" must
+  // NOT be parsed as UTC midnight — that shifts the hour by the local offset.
+  const hasTime = /T\d{2}:\d{2}/.test(dateStr);
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { date: dateStr, time: "" };
+  const date = d.toLocaleDateString("uk-UA", {
+    day: "numeric",
+    month: "long",
+  });
+  if (!hasTime) return { date, time: "" };
+  const time = d.toLocaleTimeString("uk-UA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return { date, time };
 }
 
 export default function BetShareCard({
@@ -200,6 +213,43 @@ export default function BetShareCard({
   compact = false,
 }: BetShareCardProps) {
   const [isEventsOpen, setIsEventsOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const [notchY, setNotchY] = useState(0);
+
+  // Measure the dashed line's vertical center so the mask cutouts land on it.
+  // Uses offsetTop (layout-based) instead of getBoundingClientRect, because the
+  // dialog's open animation applies a scale transform which would skew rects.
+  useEffect(() => {
+    const measure = () => {
+      const card = cardRef.current;
+      const line = lineRef.current;
+      if (!card || !line) return;
+      // Walk offsetTop relative to the card (line's offsetParent is the card).
+      let y = 0;
+      let el: HTMLElement | null = line;
+      while (el && el !== card) {
+        y += el.offsetTop;
+        el = el.offsetParent as HTMLElement | null;
+      }
+      setNotchY(Math.round(y + line.offsetHeight / 2));
+    };
+    measure();
+    const card = cardRef.current;
+    let ro: ResizeObserver | null = null;
+    if (card && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(measure);
+      ro.observe(card);
+    }
+    window.addEventListener("resize", measure);
+    // Re-measure after the dialog open animation finishes (transform settles).
+    const t = window.setTimeout(measure, 350);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", measure);
+      window.clearTimeout(t);
+    };
+  }, [isEventsOpen]);
 
   const isWin = bet.result === "Win";
   const isLoss = bet.result === "Loss";
@@ -221,9 +271,10 @@ export default function BetShareCard({
     }
   }
 
-  const isExpress = bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
+  const isExpress =
+    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
 
-  const logoSize = compact ? 75 : 94;
+  const logoSize = compact ? 80 : 88;
   const game = bet.game || "CS2";
 
   interface ParsedEvent {
@@ -275,7 +326,9 @@ export default function BetShareCard({
     getBetTypeLabel(betTypeParts[0] || bet.betType, bet.format) ||
     translateBetType(betTypeParts[0]) ||
     translateBetType(bet.betType);
-  const betCategory = betCategoryRaw.replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу');
+  const betCategory = betCategoryRaw
+    .replace(/\bMapWinner\b/g, "Переможець карти")
+    .replace(/\bMatchWinner\b/g, "Переможець матчу");
 
   const totalAmount = isPending
     ? displayAmount * bet.odds
@@ -284,222 +337,146 @@ export default function BetShareCard({
       : 0;
 
   const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
-  const matchTitle = (() => {
-    const parts = matchName.split(" vs ");
-    if (parts.length === 2) {
-      return (
-        <>
-          {parts[0]}{" "}
-          <span className={isPending ? "text-blue-500" : ""}>vs</span>{" "}
-          {parts[1]}
-        </>
-      );
-    }
-    return matchName;
-  })();
+  const team1 = bet.team1 || matchName.split(" vs ")[0]?.trim();
+  const team2 = bet.team2 || matchName.split(" vs ")[1]?.trim();
   const statusText = isWin ? "Виграш" : isLoss ? "Програш" : "Очікується";
 
   const expressLabel = isExpress ? `Експрес ${bet.format}` : "";
 
   const theme = isWin ? themes.Win : isLoss ? themes.Loss : themes.Pending;
 
-  // Sizing: compact (used in modal) vs full
-  const bannerPx = compact ? "px-5" : "px-6";
-  const bannerPy = compact ? "py-3.5" : "py-5";
-  const bodyPadding = compact ? "p-4" : "p-6";
-  const bodyGap = compact ? "space-y-3" : "space-y-4";
-  const iconSize = compact ? "w-12 h-12" : "w-14 h-14";
-  const iconRound = compact ? "rounded-xl" : "rounded-2xl";
-  const statusFont = compact ? "text-xl" : "text-2xl";
-  const matchFont = compact ? "text-xl" : "text-2xl";
-  const expressHeaderFont = compact ? "text-xl" : "text-2xl";
-  const selectionFont = compact ? "text-2xl" : "text-3xl";
-  const cellPadding = compact ? "p-4" : "p-5";
-  const cellRadius = compact ? "16px" : "20px";
-  const cellValueFont = compact ? "text-xl" : "text-2xl";
-  const profitPadding = compact ? "p-5" : "p-6";
-  const profitValueFont = compact ? "text-2xl" : "text-4xl";
-  const badgePx = compact ? "px-4 py-2" : "px-4 py-2.5";
-  const badgeFont = compact ? "text-sm" : "text-base";
-  const cardRadius = compact ? "26px" : "32px";
-  const eventPadding = compact ? "p-3" : "p-3.5";
-  const eventRadius = compact ? "16px" : "20px";
+  const { date: dateLabel, time: timeLabel } = formatTicketDate(bet.date);
+
+  // Payout badge value
+  const payoutLabel = isLoss ? "0" : totalAmount.toFixed(2);
+
+  // True transparent ticket notches: punch two semicircular holes at the
+  // dashed line's height so the modal background shows through.
+  const notchR = 12;
+  const maskStyle: React.CSSProperties | undefined =
+    notchY > 0
+      ? {
+          WebkitMaskImage: `radial-gradient(circle ${notchR}px at 0px ${notchY}px, transparent calc(${notchR}px - 0.5px), #000 ${notchR}px), radial-gradient(circle ${notchR}px at 100% ${notchY}px, transparent calc(${notchR}px - 0.5px), #000 ${notchR}px)`,
+          maskImage: `radial-gradient(circle ${notchR}px at 0px ${notchY}px, transparent calc(${notchR}px - 0.5px), #000 ${notchR}px), radial-gradient(circle ${notchR}px at 100% ${notchY}px, transparent calc(${notchR}px - 0.5px), #000 ${notchR}px)`,
+          WebkitMaskComposite: "source-in",
+          maskComposite: "intersect",
+        }
+      : undefined;
 
   return (
-    <div
-      className="w-full overflow-hidden bg-white"
-      style={{
-        borderRadius: cardRadius,
-        border: "1px solid #E5E7EB",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
-      }}
-    >
-      {/* Status Banner */}
+    <div className="relative w-full">
       <div
-        className={`flex items-center justify-between ${bannerPx} ${bannerPy} text-white`}
-        style={{ background: theme.gradient }}
+        ref={cardRef}
+        className="relative w-full bg-white select-none overflow-hidden"
+        style={{
+          borderRadius: "13px 13px 26px 26px",
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+          ...maskStyle,
+        }}
       >
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`flex items-center justify-center ${iconSize} ${iconRound} bg-white/20 backdrop-blur-sm`}
-          >
-            {isWin ? (
-              <Trophy className="h-8 w-8 text-white" strokeWidth={1.5} />
-            ) : isLoss ? (
-              <TrendingDown className="h-8 w-8 text-white" strokeWidth={1.5} />
-            ) : (
-              <Clock className="h-8 w-8 text-white" strokeWidth={1.5} />
-            )}
-          </div>
-          <div>
-            <p className={`font-bold ${statusFont} leading-tight`}>
-              {statusText}
-            </p>
-            <p className="text-sm text-white/70 font-medium">{bet.date}</p>
-          </div>
-        </div>
+        {/* Header — tournament name */}
         <div
-          className={`flex items-center gap-1.5 ${badgeFont} font-medium text-white/80 bg-white/15 ${badgePx} rounded-2xl backdrop-blur-sm`}
+          className="flex items-center justify-center px-6 py-4 text-white"
+          style={{ background: theme.gradient }}
         >
-          <Calendar className="h-5 w-5" strokeWidth={1.5} />
-          <span>{isExpress ? expressLabel : bet.format}</span>
+          <div className="text-lg font-bold tracking-wider uppercase leading-snug text-center line-clamp-2">
+            {bet.tournament || matchName}
+          </div>
         </div>
-      </div>
 
-      {/* Card body */}
-      <div className={`${bodyPadding} ${bodyGap} bg-white`}>
-        {/* Match Name — only for non-express */}
-        {!isExpress && (
-          <>
-            <div className="flex items-center justify-center py-1 gap-2.5 flex-nowrap">
-              {/* Team 1 icon */}
-              <TeamIcon
-                logo={bet.logoTeam1}
-                name={bet.team1}
-                size={logoSize}
-                game={game}
-              />
-              <h3
-                className={`${matchFont} font-bold text-gray-900 tracking-tight truncate min-w-0`}
-              >
-                {matchTitle}
-              </h3>
-              {/* Team 2 icon */}
-              <TeamIcon
-                logo={bet.logoTeam2}
-                name={bet.team2}
-                size={logoSize}
-                game={game}
-              />
-            </div>
-            <div className="border-t border-gray-100 -mx-6" />
-          </>
-        )}
-
-        {/* Express Events or Regular Selection */}
+        {/* Express events */}
         {isExpress && parsedEvents.length > 0 ? (
-          <div>
+          <div className="px-5 mt-3">
             <button
               onClick={() => setIsEventsOpen(!isEventsOpen)}
-              className="w-full relative flex items-center justify-center py-1.5 hover:opacity-80 transition-opacity cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-1.5 text-sm font-semibold text-slate-700 hover:opacity-75 transition-opacity"
             >
-              <div className="flex items-center gap-2">
-                {isWin && (
-                  <CheckCircle2
-                    className="h-4 w-4"
-                    style={{ color: theme.accent }}
-                    strokeWidth={1.5}
-                  />
-                )}
-                <p
-                  className={`${expressHeaderFont} font-bold text-gray-900 tracking-tight`}
-                >
-                  {parsedEvents.length}{" "}
-                  {parsedEvents.length === 1
-                    ? "подія"
-                    : parsedEvents.length < 5
-                      ? "події"
-                      : "подій"}
-                </p>
-              </div>
-              <span className="absolute right-0 top-1/2 -translate-y-1/2">
-                {isEventsOpen ? (
-                  <ChevronUp
-                    className="h-4 w-4 text-gray-400"
-                    strokeWidth={1.5}
-                  />
-                ) : (
-                  <ChevronDown
-                    className="h-4 w-4 text-gray-400"
-                    strokeWidth={1.5}
-                  />
-                )}
+              {isWin && (
+                <CheckCircle2
+                  className="h-4 w-4"
+                  style={{ color: theme.accent }}
+                  strokeWidth={1.5}
+                />
+              )}
+              <span>
+                {parsedEvents.length}{" "}
+                {parsedEvents.length === 1
+                  ? "подія"
+                  : parsedEvents.length < 5
+                    ? "події"
+                    : "подій"}
               </span>
+              {isEventsOpen ? (
+                <ChevronUp
+                  className="h-4 w-4 text-slate-400"
+                  strokeWidth={1.5}
+                />
+              ) : (
+                <ChevronDown
+                  className="h-4 w-4 text-slate-400"
+                  strokeWidth={1.5}
+                />
+              )}
             </button>
 
             {isEventsOpen && (
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-1">
                 {parsedEvents.map((event, index) => (
                   <div
                     key={index}
-                    className={eventPadding}
+                    className="rounded-xl p-2.5"
                     style={{
-                      borderRadius: eventRadius,
                       backgroundColor: theme.accentBg,
                       border: `1px solid ${theme.accentLight}`,
-                      boxShadow:
-                        "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div className="flex items-start gap-2 mb-1.5">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className="flex items-center justify-center min-w-[28px] h-[28px] rounded-full text-sm font-bold text-white"
+                        className="flex items-center justify-center min-w-[22px] h-[22px] rounded-full text-xs font-bold text-white"
                         style={{ backgroundColor: theme.accent }}
                       >
                         {event.number}
                       </span>
-                      <div className="flex items-center gap-1 min-w-0 flex-1 flex-wrap">
-                        <img
-                          src={
-                            bet.expressLogos?.[index]?.logoTeam1 ||
-                            (game === "Dota2"
-                              ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder-cs2.svg")
-                          }
-                          alt=""
-                          className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                          }}
-                        />
-                        <p className="text-lg font-semibold text-gray-900 leading-tight break-words">
-                          {event.match}
-                        </p>
-                        <img
-                          src={
-                            bet.expressLogos?.[index]?.logoTeam2 ||
-                            (game === "Dota2"
-                              ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder-cs2.svg")
-                          }
-                          alt=""
-                          className="h-8 w-8 rounded-full object-contain bg-white flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-0.5 ml-9">
-                      <p className="text-sm text-gray-400 font-medium uppercase tracking-wide">
-                        {getBetTypeLabel(event.betType, bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}
+                      <img
+                        src={
+                          bet.expressLogos?.[index]?.logoTeam1 ||
+                          (game === "Dota2"
+                            ? "/assets/team-placeholder-dota.svg"
+                            : "/assets/team-placeholder-cs2.svg")
+                        }
+                        alt=""
+                        className="h-6 w-6 rounded-full object-contain bg-white flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <p className="text-sm font-semibold text-gray-900 leading-tight break-words flex-1">
+                        {event.match}
                       </p>
-                      <div className="flex items-center justify-between">
+                      <img
+                        src={
+                          bet.expressLogos?.[index]?.logoTeam2 ||
+                          (game === "Dota2"
+                            ? "/assets/team-placeholder-dota.svg"
+                            : "/assets/team-placeholder-cs2.svg")
+                        }
+                        alt=""
+                        className="h-6 w-6 rounded-full object-contain bg-white flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                    <div className="ml-7 mt-1 flex items-center justify-between">
+                      <p className="text-xs text-slate-400 uppercase tracking-wide">
+                        {getBetTypeLabel(event.betType, bet.format)
+                          .replace(/\bMapWinner\b/g, "Переможець карти")
+                          .replace(/\bMatchWinner\b/g, "Переможець матчу")}
+                      </p>
+                      <div className="flex items-center gap-2">
                         <p
-                          className="text-base font-bold"
+                          className="text-sm font-bold"
                           style={{ color: theme.accent }}
                         >
                           <BlurReveal isPending={isPending}>
@@ -507,7 +484,7 @@ export default function BetShareCard({
                           </BlurReveal>
                         </p>
                         <span
-                          className="text-sm font-bold px-2 py-0.5 rounded-full"
+                          className="text-xs font-bold px-1.5 py-0.5 rounded-full"
                           style={{
                             backgroundColor: theme.accentLight,
                             color: theme.accent,
@@ -521,197 +498,162 @@ export default function BetShareCard({
                 ))}
               </div>
             )}
-
-            <div className="border-t border-gray-100 mt-3 -mx-6" />
           </div>
-        ) : isExpress && parsedEvents.length === 0 ? (
-          <>
-            <div className="text-center py-1.5">
-              <div className="flex items-center justify-center gap-2">
-                {isWin && (
-                  <CheckCircle2
-                    className="h-4 w-4"
-                    style={{ color: theme.accent }}
-                    strokeWidth={1.5}
-                  />
-                )}
-                <h3
-                  className={`${matchFont} font-bold text-gray-900 tracking-tight truncate min-w-0`}
-                >
-                  {matchTitle}
-                </h3>
-              </div>
-            </div>
-            <div className="border-t border-gray-100 -mx-6" />
-          </>
-        ) : selection ? (
-          <>
-            <div className="text-center py-1">
-              <div className="flex items-center justify-center gap-2 mb-0.5">
-                {isWin && (
-                  <CheckCircle2
-                    className="h-3.5 w-3.5"
-                    style={{ color: theme.accent }}
-                    strokeWidth={1.5}
-                  />
-                )}
-                {isLoss && (
-                  <XCircle
-                    className="h-3.5 w-3.5"
-                    style={{ color: theme.accent }}
-                    strokeWidth={1.5}
-                  />
-                )}
-                {isPending && (
-                  <Clock
-                    className="h-3.5 w-3.5"
-                    style={{ color: theme.accent }}
-                    strokeWidth={1.5}
-                  />
-                )}
-                <p className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-                  {betCategory}
-                </p>
-              </div>
-              <p
-                className={`${selectionFont} font-bold tracking-tight`}
-                style={{ color: theme.accent }}
-              >
-                <BlurReveal isPending={isPending}>{selection}</BlurReveal>
-              </p>
-            </div>
-            <div className="border-t border-gray-100 -mx-6" />
-          </>
         ) : (
-          <div className="border-t border-gray-100 -mx-6" />
+          /* Single match teams + date/time */
+          <div className="flex items-start justify-between px-6 pt-5">
+            {/* Team 1 */}
+            <div className="flex flex-1 flex-col items-center text-center min-w-0">
+              <TeamIcon
+                logo={bet.logoTeam1}
+                name={team1}
+                size={logoSize}
+                game={game}
+              />
+              <span className="mt-2 text-base font-bold text-slate-800 leading-snug break-words line-clamp-2">
+                {team1}
+              </span>
+            </div>
+
+            {/* Date / time */}
+            <div
+              className="flex flex-col items-center px-3 shrink-0 justify-center"
+              style={{ minHeight: logoSize }}
+            >
+              <span className="text-sm font-medium text-slate-400">
+                {dateLabel}
+              </span>
+              {timeLabel && (
+                <span className="text-2xl font-extrabold text-slate-800 leading-tight mt-0.5">
+                  {timeLabel}
+                </span>
+              )}
+              {bet.format && (
+                <span className="mt-1.5 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                  {bet.format}
+                </span>
+              )}
+            </div>
+
+            {/* Team 2 */}
+            <div className="flex flex-1 flex-col items-center text-center min-w-0">
+              <TeamIcon
+                logo={bet.logoTeam2}
+                name={team2}
+                size={logoSize}
+                game={game}
+              />
+              <span className="mt-2 text-base font-bold text-slate-800 leading-snug break-words line-clamp-2">
+                {team2}
+              </span>
+            </div>
+          </div>
         )}
 
-        {/* Amount & Odds */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <div
-            className={`text-center ${cellPadding}`}
-            style={{
-              borderRadius: cellRadius,
-              backgroundColor: "rgba(255,255,255,0.5)",
-              boxShadow:
-                "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-            }}
-          >
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">
-              Сума
-            </p>
-            <p className={`${cellValueFont} font-bold text-gray-900`}>
-              {currencySymbol}
-              {displayAmount}
-            </p>
-          </div>
-          <div
-            className={`text-center ${cellPadding}`}
-            style={{
-              borderRadius: cellRadius,
-              backgroundColor: "rgba(255,255,255,0.5)",
-              boxShadow:
-                "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-            }}
-          >
-            <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-0.5">
-              Коефіцієнт
-            </p>
-            <p className={`${cellValueFont} font-bold text-gray-900`}>
-              {Number(bet.odds).toFixed(2)}
-            </p>
-          </div>
+        {/* Ticket perforation (semicircular notches + dashed separator) */}
+        <div ref={lineRef} className="relative my-4 flex items-center">
+          <div className="w-full border-t border-dashed border-slate-200" />
         </div>
 
-        {/* Profit */}
-        {!isPending &&
-          displayProfit !== undefined &&
-          displayProfit !== null && (
-            <div
-              className={`${profitPadding} text-center`}
-              style={{
-                borderRadius: cellRadius,
-                backgroundColor: theme.accentBg,
-                border: `1.5px solid ${theme.accentMid}`,
-                boxShadow:
-                  "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-              }}
-            >
-              <p
-                className="text-sm font-semibold mb-0.5 uppercase tracking-wider"
-                style={{ color: theme.accent }}
-              >
-                Профіт
-              </p>
-              <p
-                className={`${profitValueFont} font-bold tracking-tight`}
-                style={{ color: theme.accent }}
-              >
-                {displayProfit > 0 ? "+" : ""}
-                {displayProfit.toFixed(2)} {currencySymbol}
-              </p>
-            </div>
-          )}
-
-        {/* Pending — possible win */}
-        {isPending && (
-          <div
-            className={`${profitPadding} text-center`}
-            style={{
-              borderRadius: cellRadius,
-              backgroundColor: theme.accentBg,
-              border: `1.5px solid ${theme.accentMid}`,
-              boxShadow:
-                "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-            }}
-          >
-            <p
-              className="text-sm font-semibold mb-0.5 uppercase tracking-wider"
-              style={{ color: theme.accent }}
-            >
-              Можливий виграш
-            </p>
-            <p
-              className={`${profitValueFont} font-bold tracking-tight`}
-              style={{ color: theme.accent }}
-            >
-              <BlurReveal isPending={isPending}>
-                +{((bet.odds - 1) * displayAmount).toFixed(2)} {currencySymbol}
-              </BlurReveal>
-            </p>
-          </div>
-        )}
-
-        {/* Total Amount */}
-        {!isLoss && (
-          <div
-            className={`${profitPadding} text-center`}
-            style={{
-              borderRadius: cellRadius,
-              backgroundColor: "rgba(255,255,255,0.5)",
-              boxShadow:
-                "0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-            }}
-          >
-            <p className="text-sm font-semibold mb-0.5 uppercase tracking-wider text-gray-400">
-              Загальна сума
-            </p>
-            <p
-              className={`${profitValueFont} font-bold text-gray-900 tracking-tight`}
-            >
-              {isPending ? (
-                <BlurReveal isPending={isPending}>
-                  {totalAmount.toFixed(2)} {currencySymbol}
-                </BlurReveal>
-              ) : (
-                <>
-                  {totalAmount.toFixed(2)} {currencySymbol}
-                </>
+        {/* Market, pick + odds */}
+        <div className="pb-2">
+          <div className="flex items-center justify-between text-base px-6">
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+              <span className="text-slate-400">{betCategory}:</span>
+              {selection && (
+                <span
+                  className="flex items-center gap-1 font-bold"
+                  style={{ color: theme.accent }}
+                >
+                  <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+                </span>
               )}
-            </p>
+            </div>
+            <span className="text-lg font-black text-slate-800 ml-2 shrink-0">
+              {Number(bet.odds).toFixed(2)}
+            </span>
           </div>
-        )}
+          <div className="mt-2 h-px w-full bg-slate-200" />
+        </div>
+
+        {/* Amount → payout */}
+        <div className="mt-1 flex items-center justify-between px-6 pb-5">
+          <div className="flex items-center gap-2 text-lg font-bold">
+            <span className="text-slate-700">
+              {displayAmount} {currencySymbol}
+            </span>
+            {!isLoss && (
+              <>
+                <span className="text-slate-300 font-normal">→</span>
+                <span
+                  className={
+                    isPending
+                      ? "text-slate-900 font-extrabold"
+                      : "text-emerald-600 font-extrabold"
+                  }
+                >
+                  <BlurReveal isPending={isPending}>
+                    {payoutLabel} {currencySymbol}
+                  </BlurReveal>
+                </span>
+              </>
+            )}
+          </div>
+
+          <div
+            className="rounded-xl px-4 py-2 text-lg font-extrabold text-white"
+            style={{
+              background: theme.gradient,
+              boxShadow: `0 4px 12px ${theme.accentMid}`,
+            }}
+          >
+            {statusText}
+          </div>
+        </div>
       </div>
+
+      {/* Semicircle outlines around the transparent notches (drawn outside the
+          masked element so they survive the mask cutout). */}
+      {notchY > 0 && (
+        <>
+          <svg
+            className="absolute pointer-events-none"
+            style={{
+              left: 0,
+              top: notchY,
+              transform: "translateY(-50%)",
+              width: notchR,
+              height: notchR * 2,
+            }}
+            viewBox={`0 0 ${notchR} ${notchR * 2}`}
+          >
+            <path
+              d={`M 0 0 A ${notchR} ${notchR} 0 0 1 0 ${notchR * 2}`}
+              fill="none"
+              stroke="#E5E7EB"
+              strokeWidth="1"
+            />
+          </svg>
+          <svg
+            className="absolute pointer-events-none"
+            style={{
+              right: 0,
+              top: notchY,
+              transform: "translateY(-50%)",
+              width: notchR,
+              height: notchR * 2,
+            }}
+            viewBox={`0 0 ${notchR} ${notchR * 2}`}
+          >
+            <path
+              d={`M ${notchR} 0 A ${notchR} ${notchR} 0 0 0 ${notchR} ${notchR * 2}`}
+              fill="none"
+              stroke="#E5E7EB"
+              strokeWidth="1"
+            />
+          </svg>
+        </>
+      )}
     </div>
   );
 }
