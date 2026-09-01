@@ -14,9 +14,9 @@ export default function BetShareModal({
   open,
   onClose,
 }: BetShareModalProps) {
-  const [minW, setMinW] = useState(520);
+  const [minW, setMinW] = useState(460);
   const dragging = useRef(false);
-  const start = useRef({ x: 0, w: 520 });
+  const start = useRef({ x: 0, w: 460 });
 
   const onDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ export default function BetShareModal({
   }, []);
 
   useEffect(() => {
-    if (open) setMinW(520);
+    if (open) setMinW(460);
   }, [open]);
 
   return (

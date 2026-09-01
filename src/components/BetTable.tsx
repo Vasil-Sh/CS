@@ -94,6 +94,29 @@ function getTodayStr(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * Format a bet date for the table's "Дата" column.
+ * If the date carries a time (ISO "2026-09-01T14:00:00"), render
+ * "01.09.2026, 14:00". Date-only strings render just "01.09.2026".
+ */
+function formatBetDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const hasTime = /T\d{2}:\d{2}/.test(dateStr);
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const datePart = d.toLocaleDateString("uk-UA", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  if (!hasTime) return datePart;
+  const timePart = d.toLocaleTimeString("uk-UA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${datePart}, ${timePart}`;
+}
+
 // ── Module-level pure helpers ──
 
 export function getCurrencySymbol(currency?: string): string {
@@ -955,7 +978,7 @@ const BetTableMemo = memo(function BetTable({
                         {visibleColumns.has("date") && (
                           <td className="px-4 py-4 text-center">
                             <span className="text-base text-gray-700 font-medium">
-                              {bet.date}
+                              {formatBetDate(bet.date)}
                             </span>
                           </td>
                         )}
