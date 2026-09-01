@@ -362,14 +362,19 @@ export default function BetShareCard({
       : undefined;
 
   return (
-    <div className="relative w-full">
+    <div
+      className="relative w-full"
+      style={{
+        filter:
+          "drop-shadow(0 8px 40px rgba(0,0,0,0.12)) drop-shadow(0 2px 8px rgba(0,0,0,0.06))",
+      }}
+    >
       <div
         ref={cardRef}
         className="relative w-full bg-white overflow-hidden"
         style={{
           borderRadius: "13px 13px 26px 26px",
           border: "1px solid #E5E7EB",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
           ...maskStyle,
         }}
       >
@@ -552,7 +557,23 @@ export default function BetShareCard({
 
         {/* Ticket perforation (semicircular notches + dashed separator) */}
         <div ref={lineRef} className="relative my-4 py-2 flex items-center">
-          <div className="w-full border-t border-dashed border-slate-200" />
+          <svg
+            className="w-full"
+            height="2"
+            viewBox="0 0 100 2"
+            preserveAspectRatio="none"
+          >
+            <line
+              x1="0"
+              y1="1"
+              x2="100"
+              y2="1"
+              stroke="#E5E7EB"
+              strokeWidth="2"
+              strokeDasharray="3.33 3.33"
+              strokeOpacity="0.7"
+            />
+          </svg>
         </div>
 
         {/* Market, pick + odds */}
