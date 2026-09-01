@@ -71,7 +71,7 @@ export default function BetShareModal({
 
         {/* Card preview */}
         <div
-          className="p-4 bg-gray-100"
+          className="p-4 bg-[#aaabac]"
           id="bet-share-card"
           style={{ minWidth: minW }}
         >

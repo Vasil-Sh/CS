@@ -551,7 +551,7 @@ export default function BetShareCard({
         )}
 
         {/* Ticket perforation (semicircular notches + dashed separator) */}
-        <div ref={lineRef} className="relative my-4 flex items-center">
+        <div ref={lineRef} className="relative my-4 py-2 flex items-center">
           <div className="w-full border-t border-dashed border-slate-200" />
         </div>
 
@@ -584,7 +584,7 @@ export default function BetShareCard({
               </>
             )}
           </div>
-          <div className="mt-[10.4px] h-px w-full bg-slate-200" />
+          <div className="mt-6 h-px w-full bg-slate-200" />
         </div>
 
         {/* Amount → payout */}
