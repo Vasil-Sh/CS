@@ -341,8 +341,6 @@ export default function BetShareCard({
   const team2 = bet.team2 || matchName.split(" vs ")[1]?.trim();
   const statusText = isWin ? "Виграш" : isLoss ? "Програш" : "Очікується";
 
-  const expressLabel = isExpress ? `Експрес ${bet.format}` : "";
-
   const theme = isWin ? themes.Win : isLoss ? themes.Loss : themes.Pending;
 
   const { date: dateLabel, time: timeLabel } = formatTicketDate(bet.date);
@@ -367,7 +365,7 @@ export default function BetShareCard({
     <div className="relative w-full">
       <div
         ref={cardRef}
-        className="relative w-full bg-white select-none overflow-hidden"
+        className="relative w-full bg-white overflow-hidden"
         style={{
           borderRadius: "13px 13px 26px 26px",
           border: "1px solid #E5E7EB",
@@ -380,7 +378,7 @@ export default function BetShareCard({
           className="flex items-center justify-center px-6 py-4 text-white"
           style={{ background: theme.gradient }}
         >
-          <div className="text-lg font-bold tracking-wider uppercase leading-snug text-center line-clamp-2">
+          <div className="text-lg font-light tracking-wider uppercase leading-snug text-center line-clamp-2">
             {bet.tournament || matchName}
           </div>
         </div>
@@ -421,76 +419,78 @@ export default function BetShareCard({
             </button>
 
             {isEventsOpen && (
-              <div className="space-y-2 pt-1">
+              <div className="space-y-3 pt-1">
                 {parsedEvents.map((event, index) => (
                   <div
                     key={index}
-                    className="rounded-xl p-2.5"
+                    className="rounded-2xl px-4 py-3"
                     style={{
                       backgroundColor: theme.accentBg,
                       border: `1px solid ${theme.accentLight}`,
                     }}
                   >
-                    <div className="flex items-center gap-1.5">
+                    {/* Match row */}
+                    <div className="flex items-center gap-2.5">
                       <span
-                        className="flex items-center justify-center min-w-[22px] h-[22px] rounded-full text-xs font-bold text-white"
+                        className="flex items-center justify-center min-w-[26px] h-[26px] rounded-full text-sm font-bold text-white shrink-0"
                         style={{ backgroundColor: theme.accent }}
                       >
                         {event.number}
                       </span>
-                      <img
-                        src={
-                          bet.expressLogos?.[index]?.logoTeam1 ||
-                          (game === "Dota2"
-                            ? "/assets/team-placeholder-dota.svg"
-                            : "/assets/team-placeholder-cs2.svg")
-                        }
-                        alt=""
-                        className="h-6 w-6 rounded-full object-contain bg-white flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                      <p className="text-sm font-semibold text-gray-900 leading-tight break-words flex-1">
-                        {event.match}
-                      </p>
-                      <img
-                        src={
-                          bet.expressLogos?.[index]?.logoTeam2 ||
-                          (game === "Dota2"
-                            ? "/assets/team-placeholder-dota.svg"
-                            : "/assets/team-placeholder-cs2.svg")
-                        }
-                        alt=""
-                        className="h-6 w-6 rounded-full object-contain bg-white flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <img
+                          src={
+                            bet.expressLogos?.[index]?.logoTeam1 ||
+                            (game === "Dota2"
+                              ? "/assets/team-placeholder-dota.svg"
+                              : "/assets/team-placeholder-cs2.svg")
+                          }
+                          alt=""
+                          className="h-7 w-7 rounded-full object-contain bg-white shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                        <p className="text-base font-semibold text-gray-900 leading-tight break-words min-w-0">
+                          {event.match}
+                        </p>
+                        <img
+                          src={
+                            bet.expressLogos?.[index]?.logoTeam2 ||
+                            (game === "Dota2"
+                              ? "/assets/team-placeholder-dota.svg"
+                              : "/assets/team-placeholder-cs2.svg")
+                          }
+                          alt=""
+                          className="h-7 w-7 rounded-full object-contain bg-white shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      </div>
+                      <span className="text-base font-black text-slate-900 shrink-0">
+                        {event.odds}
+                      </span>
                     </div>
-                    <div className="ml-7 mt-1 flex items-center justify-between">
-                      <p className="text-xs text-slate-400 uppercase tracking-wide">
-                        {getBetTypeLabel(event.betType, bet.format)
-                          .replace(/\bMapWinner\b/g, "Переможець карти")
-                          .replace(/\bMatchWinner\b/g, "Переможець матчу")}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p
-                          className="text-sm font-bold"
+
+                    {/* Market + selection */}
+                    <div className="mt-2 flex items-center pl-[36px]">
+                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                        <span className="text-slate-400">
+                          {getBetTypeLabel(event.betType, bet.format)
+                            .replace(/\bMapWinner\b/g, "Переможець карти")
+                            .replace(/\bMatchWinner\b/g, "Переможець матчу")}
+                          :
+                        </span>
+                        <span
+                          className="text-base font-bold leading-tight"
                           style={{ color: theme.accent }}
                         >
                           <BlurReveal isPending={isPending}>
                             {event.selection}
                           </BlurReveal>
-                        </p>
-                        <span
-                          className="text-xs font-bold px-1.5 py-0.5 rounded-full"
-                          style={{
-                            backgroundColor: theme.accentLight,
-                            color: theme.accent,
-                          }}
-                        >
-                          {event.odds}
                         </span>
                       </div>
                     </div>
@@ -558,20 +558,31 @@ export default function BetShareCard({
         {/* Market, pick + odds */}
         <div className="pb-2">
           <div className="flex items-center justify-between text-base px-6">
-            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-              <span className="text-slate-400">{betCategory}:</span>
-              {selection && (
-                <span
-                  className="flex items-center gap-1 font-bold"
-                  style={{ color: theme.accent }}
-                >
-                  <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+            {isExpress ? (
+              <>
+                <span className="text-slate-400">Загальний коефіцієнт</span>
+                <span className="text-lg font-black text-slate-800 ml-2 shrink-0">
+                  {Number(bet.odds).toFixed(2)}
                 </span>
-              )}
-            </div>
-            <span className="text-lg font-black text-slate-800 ml-2 shrink-0">
-              {Number(bet.odds).toFixed(2)}
-            </span>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                  <span className="text-slate-400">{betCategory}:</span>
+                  {selection && (
+                    <span
+                      className="flex items-center gap-1 font-bold"
+                      style={{ color: theme.accent }}
+                    >
+                      <BlurReveal isPending={isPending}>{selection}</BlurReveal>
+                    </span>
+                  )}
+                </div>
+                <span className="text-lg font-black text-slate-800 ml-2 shrink-0">
+                  {Number(bet.odds).toFixed(2)}
+                </span>
+              </>
+            )}
           </div>
           <div className="mt-2 h-px w-full bg-slate-200" />
         </div>
