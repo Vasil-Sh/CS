@@ -147,6 +147,11 @@ export default function MyBets() {
     [recentBets, dualBank.usd.initialBank],
   );
 
+  const usdBetsCount = useMemo(
+    () => recentBets.filter((b) => b.currency === "USD").length,
+    [recentBets],
+  );
+
   // ── Effects ──
   useEffect(() => {
     const handler = (e: StorageEvent) => {
@@ -534,6 +539,7 @@ export default function MyBets() {
         currencyMode={currencyMode}
         onCurrencyChange={setCurrencyMode}
         hasUsdBets={hasUsdBets}
+        usdBetsCount={usdBetsCount}
       />
 
       <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">

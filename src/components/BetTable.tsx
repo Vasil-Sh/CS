@@ -623,12 +623,27 @@ const BetTableMemo = memo(function BetTable({
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <span
-            className={`flex-shrink-0 w-20 text-right text-base font-bold tabular-nums ${isWin ? "text-green-500" : "text-red-500"}`}
+            className={`flex-shrink-0 w-24 text-right text-base font-bold tabular-nums ${isWin ? "text-green-500" : "text-red-500"}`}
           >
-            {isWin
-              ? `+${Number(b.profit || b.amount * b.odds - b.amount).toFixed(0)}`
-              : `-${Number(b.amount || 0).toFixed(0)}`}
-            ₴
+            {(() => {
+              const currency = b.currency || "UAH";
+              const sym = getCurrencySymbol(currency);
+              // b.profit is always stored in UAH; convert back for USD bets
+              let profit = Number(b.profit || b.amount * b.odds - b.amount);
+              if (currency === "USD" && b.exchangeRate) {
+                const rate = Number(b.exchangeRate);
+                if (rate > 0) profit = profit / rate;
+              }
+              if (isWin) {
+                return `+${profit.toFixed(2)} ${sym}`;
+              }
+              let amount = Number(b.amount || 0);
+              if (currency === "USD" && b.exchangeRate) {
+                const rate = Number(b.exchangeRate);
+                if (rate > 0) amount = amount / rate;
+              }
+              return `-${amount.toFixed(2)} ${sym}`;
+            })()}
           </span>
         </div>
       );

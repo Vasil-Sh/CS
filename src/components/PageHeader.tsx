@@ -27,6 +27,8 @@ export interface PageHeaderProps {
   currencyMode?: "UAH" | "USD";
   onCurrencyChange?: (c: "UAH" | "USD") => void;
   hasUsdBets?: boolean;
+  /** Number of USD bets (used to re-trigger the hint when a new one is added) */
+  usdBetsCount?: number;
   /** Game filter (Analytics page) */
   gameFilter?: "all" | "CS2" | "Dota2";
   onGameFilterChange?: (g: "all" | "CS2" | "Dota2") => void;
@@ -50,12 +52,27 @@ export function PageHeader({
   currencyMode,
   onCurrencyChange,
   hasUsdBets,
+  usdBetsCount = 0,
   gameFilter,
   onGameFilterChange,
 }: PageHeaderProps) {
   const navigate = useNavigate();
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  // USD hint: pulse the filter icon + USD button when the user has USD bets
+  // they haven't reviewed yet. We track the highest USD-bet count the user has
+  // already seen (persisted), so every NEW USD bet re-triggers the hint.
+  const usdHintKey = `matchiq_usd_hint_seen_${currentUser}`;
+  const [usdSeenCount, setUsdSeenCount] = useState(() => {
+    try {
+      return parseInt(localStorage.getItem(usdHintKey) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  });
+  const showUsdHint =
+    hasUsdBets && usdBetsCount > usdSeenCount && currencyMode !== "USD";
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -66,6 +83,15 @@ export function PageHeader({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [filterOpen]);
+
+  const dismissUsdHint = () => {
+    setUsdSeenCount(usdBetsCount);
+    try {
+      localStorage.setItem(usdHintKey, String(usdBetsCount));
+    } catch {
+      /* ignore */
+    }
+  };
 
   const hasFilters =
     (showCurrencySwitch && currencyMode && onCurrencyChange) ||
@@ -139,12 +165,20 @@ export function PageHeader({
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
+                className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
                   filterOpen ? "bg-black/10" : "hover:bg-black/5"
                 }`}
                 title="Фільтри"
               >
                 <Filter className="h-5 w-5 text-gray-500" strokeWidth={1.5} />
+                {showUsdHint && (
+                  <>
+                    <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+                    </span>
+                  </>
+                )}
               </button>
 
               {filterOpen && (
@@ -156,8 +190,12 @@ export function PageHeader({
                       </div>
                       <CurrencySwitch
                         currency={currencyMode}
-                        onChange={onCurrencyChange}
+                        onChange={(c) => {
+                          onCurrencyChange(c);
+                          if (c === "USD") dismissUsdHint();
+                        }}
                         hasUsdBets={hasUsdBets}
+                        highlightUsd={showUsdHint}
                       />
                     </div>
                   )}

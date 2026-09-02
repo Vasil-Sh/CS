@@ -22,12 +22,7 @@ import { AnalyticsSkeleton } from "@/components/PageSkeleton";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
-import type {
-  Bet,
-  OddsRange,
-  BalanceData,
-  ScatterData,
-} from "@/types/betting";
+import type { Bet, OddsRange, BalanceData, ScatterData } from "@/types/betting";
 
 interface MonthlyData {
   month: string;
@@ -58,6 +53,11 @@ export default function Analytics() {
     () =>
       bets.some((b) => b.currency === "USD") || dualBank.usd.initialBank > 0,
     [bets, dualBank.usd.initialBank],
+  );
+
+  const usdBetsCount = useMemo(
+    () => bets.filter((b) => b.currency === "USD").length,
+    [bets],
   );
   const [activeTab, setActiveTab] = useState("profit");
 
@@ -244,7 +244,6 @@ export default function Analytics() {
     const sum = completedBets.reduce((s: number, b: Bet) => s + b.odds, 0);
     return Math.round((sum / completedBets.length) * 100) / 100;
   }, [completedBets]);
-
 
   const oddsAnalysis = useMemo((): OddsRange[] => {
     const lowOdds = completedBets.filter((bet: Bet) => bet.odds < 2.0);
@@ -513,6 +512,7 @@ export default function Analytics() {
             currencyMode={currencyMode}
             onCurrencyChange={setCurrencyMode}
             hasUsdBets={hasUsdBets}
+            usdBetsCount={usdBetsCount}
             gameFilter={gameFilter}
             onGameFilterChange={setGameFilter}
           />
