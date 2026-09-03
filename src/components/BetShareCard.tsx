@@ -371,6 +371,7 @@ export default function BetShareCard({
     >
       <div
         ref={cardRef}
+        id="bet-share-card-inner"
         className="relative w-full bg-white overflow-hidden"
         style={{
           borderRadius: "13px 13px 26px 26px",
@@ -383,7 +384,7 @@ export default function BetShareCard({
           className="flex items-center justify-center px-6 py-4 text-white"
           style={{ background: theme.gradient }}
         >
-          <div className="w-full text-lg font-light tracking-wider uppercase leading-snug text-center break-words line-clamp-2">
+          <div className="w-full text-lg font-light tracking-wider uppercase leading-normal text-center break-words line-clamp-2 pb-0.5">
             {bet.tournament || matchName}
           </div>
         </div>
@@ -515,7 +516,7 @@ export default function BetShareCard({
                 size={logoSize}
                 game={game}
               />
-              <span className="mt-2 text-base font-bold text-slate-800 leading-snug break-words line-clamp-2">
+              <span className="mt-2 text-base font-bold text-slate-800 leading-normal break-words line-clamp-2 pb-0.5">
                 {team1}
               </span>
             </div>
@@ -534,7 +535,7 @@ export default function BetShareCard({
                 </span>
               )}
               {bet.format && (
-                <span className="mt-1.5 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                <span className="mt-2.5 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
                   {bet.format}
                 </span>
               )}
@@ -548,7 +549,7 @@ export default function BetShareCard({
                 size={logoSize}
                 game={game}
               />
-              <span className="mt-2 text-base font-bold text-slate-800 leading-snug break-words line-clamp-2">
+              <span className="mt-2 text-base font-bold text-slate-800 leading-normal break-words line-clamp-2 pb-0.5">
                 {team2}
               </span>
             </div>
@@ -556,7 +557,11 @@ export default function BetShareCard({
         )}
 
         {/* Ticket perforation (semicircular notches + dashed separator) */}
-        <div ref={lineRef} className="relative my-4 py-2 flex items-center">
+        <div
+          ref={lineRef}
+          data-notch-line
+          className="relative my-4 py-2 flex items-center"
+        >
           <svg
             className="w-full"
             height="2"
@@ -610,9 +615,11 @@ export default function BetShareCard({
 
         {/* Amount → payout */}
         <div className="mt-1 flex items-center justify-between px-6 pb-5">
-          <div className="flex items-center gap-2 text-lg font-bold">
+          <div className="flex items-baseline gap-2 text-lg font-bold">
             <span className="text-slate-700">
-              {displayAmount} {currencySymbol}
+              {currency === "USD"
+                ? `${currencySymbol}${displayAmount}`
+                : `${displayAmount} ${currencySymbol}`}
             </span>
             {!isLoss && (
               <>
@@ -625,7 +632,9 @@ export default function BetShareCard({
                   }
                 >
                   <BlurReveal isPending={isPending}>
-                    {payoutLabel} {currencySymbol}
+                    {currency === "USD"
+                      ? `${currencySymbol}${payoutLabel}`
+                      : `${payoutLabel} ${currencySymbol}`}
                   </BlurReveal>
                 </span>
               </>
@@ -633,6 +642,7 @@ export default function BetShareCard({
           </div>
 
           <div
+            data-share-status
             className="rounded-xl px-4 py-2 text-lg font-extrabold text-white"
             style={{
               background: theme.gradient,

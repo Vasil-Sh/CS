@@ -623,7 +623,11 @@ const BetTableMemo = memo(function BetTable({
           </span>
           <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
           <span
-            className={`flex-shrink-0 w-24 text-right text-base font-bold tabular-nums ${isWin ? "text-green-500" : "text-red-500"}`}
+            className={`flex-shrink-0 w-24 text-right text-base font-bold tabular-nums ${
+              (b.currency || "UAH") === "USD"
+                ? "text-emerald-600"
+                : "text-amber-600"
+            }`}
           >
             {(() => {
               const currency = b.currency || "UAH";
