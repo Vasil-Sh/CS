@@ -431,58 +431,22 @@ export default function BetShareCard({
                     key={index}
                     className="rounded-2xl px-4 py-3"
                     style={{
-                      backgroundColor: theme.accentBg,
-                      border: `1px solid ${theme.accentLight}`,
+                      backgroundColor: "#F8FAFC",
+                      border: `1px solid #E2E8F0`,
                     }}
                   >
                     {/* Match row */}
                     <div className="flex items-center gap-2.5">
-                      <span
-                        className="flex items-center justify-center min-w-[26px] h-[26px] rounded-full text-sm font-bold text-white shrink-0"
-                        style={{ backgroundColor: theme.accent }}
-                      >
-                        {event.number}
-                      </span>
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <img
-                          src={
-                            bet.expressLogos?.[index]?.logoTeam1 ||
-                            (game === "Dota2"
-                              ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder-cs2.svg")
-                          }
-                          alt=""
-                          className="h-7 w-7 rounded-full object-contain bg-white shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                          }}
-                        />
-                        <p className="text-base font-semibold text-gray-900 leading-tight break-words min-w-0">
-                          {event.match}
-                        </p>
-                        <img
-                          src={
-                            bet.expressLogos?.[index]?.logoTeam2 ||
-                            (game === "Dota2"
-                              ? "/assets/team-placeholder-dota.svg"
-                              : "/assets/team-placeholder-cs2.svg")
-                          }
-                          alt=""
-                          className="h-7 w-7 rounded-full object-contain bg-white shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                          }}
-                        />
-                      </div>
+                      <p className="text-base font-semibold text-gray-900 leading-tight break-words min-w-0 flex-1">
+                        {event.match}
+                      </p>
                       <span className="text-base font-black text-slate-900 shrink-0">
                         {event.odds}
                       </span>
                     </div>
 
                     {/* Market + selection */}
-                    <div className="mt-2 flex items-center pl-[36px]">
+                    <div className="mt-2 flex items-center">
                       <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                         <span className="text-slate-400">
                           {getBetTypeLabel(event.betType, bet.format)
