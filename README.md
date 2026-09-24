@@ -175,11 +175,14 @@ src/
 │   ├── ui/                    # ~40 shadcn/ui компонентів
 │   ├── CS2BettingForm.tsx     # Основна форма ставки
 │   ├── BetTable.tsx           # Таблиця записів (пошук, фільтри, пагінація)
+│   ├── BetShareCard.tsx       # Картка шерингу ставки (стиль квитка)
+│   ├── BetShareModal.tsx      # Модалка шерингу (збереження/копіювання фото)
 │   ├── GoalsManager.tsx       # CRUD цілей
 │   ├── StrategyOverview.tsx   # CRUD стратегій
 │   ├── RiskManagement.tsx     # Ризиковані команди + метрики
+│   ├── PageHeader.tsx         # Спільний хедер сторінок
+│   ├── CurrencySwitch.tsx     # Перемикач валюти UAH/USD
 │   ├── matches/               # PastDaysModal, MatchRow, MatchStates
-│   ├── MatchCard.tsx          # Картка матчу (застаріла)
 │   ├── InitialBankModal.tsx   # Початковий банк
 │   ├── SEO.tsx                # Мета-теги, OG, hreflang
 │   ├── StructuredData.tsx     # JSON-LD (WebApp, FAQ, Organization)
@@ -190,21 +193,40 @@ src/
 │   ├── Matches.tsx            # Матчі
 │   ├── Strategy.tsx           # Стратегії / Цілі / Ризики
 │   ├── Profile.tsx            # Профіль (експорт/імпорт)
-│   ├── Admin.tsx              # Адмін-панель
+│   ├── RiskyTeams.tsx         # Ризиковані команди
+│   ├── Telegram.tsx           # Telegram-інтеграція
+│   ├── PublicProfile.tsx      # Публічний профіль (шаринг)
+│   ├── NotFound.tsx           # 404
 │   ├── Landing.tsx            # Лендінг
-│   └── Login.tsx              # Вхід
+│   └── LoginPage.tsx          # Вхід
 ├── lib/
-│   ├── api/index.ts           # apiClient, auth, CS2 API, risky teams
-│   ├── services/index.ts      # BankrollService, UserDataService
-│   ├── ai/index.ts            # DeepSeek + Gemini Flash AI
-│   ├── analytics/index.ts     # EV, Kelly, bet math
-│   ├── parsing/index.ts       # URL/express parsers
-│   ├── utils/index.ts         # cn(), i18n, cardStyles, chartColors
-│   ├── monitoring/index.ts    # devLogger, errorMonitor, envValidation
+│   ├── apiClient.ts           # JWT-aware fetch wrapper
+│   ├── authService.ts         # JWT auth (login, register, user CRUD)
+│   ├── csApi.ts               # CS2 match API (SWR cache)
+│   ├── dota2Api.ts            # Dota2 match API (SWR cache)
+│   ├── userDataService.ts     # User data CRUD (API-first + localStorage cache)
+│   ├── bankrollService.ts     # Банкрол (API-first)
+│   ├── betCalculations.ts     # EV, Kelly, value bets
+│   ├── deepSeekService.ts     # DeepSeek рекомендації
+│   ├── cardStyles.ts          # CSS-in-JS card style constants
+│   ├── chartColors.ts         # Chart palette tokens
+│   ├── displayHelpers.ts      # UI badges, emojis
+│   ├── i18n.ts                # UK/EN translations
+│   ├── matchUrlParser.ts      # HLTV/Dota2 URL parser
+│   ├── googleSheetsRiskyTeams.ts  # Google Sheets імпорт
+│   ├── ai/                    # AI: shared.ts + deepSeekService
+│   ├── services/              # business logic (index.ts)
+│   ├── utils/                 # badgeStyles, betTypeOptions, gameIcons
+│   ├── parser/                # express parser
+│   ├── parsing/               # URL/express parsers
+│   ├── monitoring/            # devLogger, errorMonitor
 │   └── STRUCTURE.md           # Документація архітектури lib/
 ├── stores/appStore.ts         # Zustand event bus
 ├── hooks/
 │   ├── useTheme.ts            # Темна/світла тема
+│   ├── useGoals.ts            # Логіка цілей
+│   ├── useBettingForm.ts      # Логіка форми ставки
+│   ├── useMatches.ts          # Матчі + live-оновлення
 │   └── ...
 └── types/betting.ts           # Bet, BettingStats, команди, графіки
 ```
@@ -231,22 +253,35 @@ src/
 
 ## 🌐 Маршрути
 
-| Шлях                  | Сторінка         | Доступ     |
-| --------------------- | ---------------- | ---------- |
-| `/`                   | Landing          | Публічний  |
-| `/login`              | Login            | Публічний  |
-| `/login-digesto-demo` | LoginDigestoDemo | Публічний  |
-| `/app/analytics`      | Analytics        | Захищений  |
-| `/app/my-bets`        | MyBets           | Захищений  |
-| `/app/strategy`       | Strategy         | Захищений  |
-| `/app/matches`        | Matches          | Захищений  |
-| `/app/profile`        | Profile          | Захищений  |
-| `/app/admin`          | Admin            | Admin only |
-| `*`                   | 404 Not Found    | Публічний  |
+| Шлях                  | Сторінка         | Доступ    |
+| --------------------- | ---------------- | --------- |
+| `/`                   | Landing          | Публічний |
+| `/login`              | LoginPage        | Публічний |
+| `/login-digesto-demo` | LoginPage (demo) | Публічний |
+| `/user/:username`     | PublicProfile    | Публічний |
+| `/app/matches`        | Matches          | Захищений |
+| `/app/my-bets`        | MyBets           | Захищений |
+| `/app/analytics`      | Analytics        | Захищений |
+| `/app/strategy`       | Strategy         | Захищений |
+| `/app/risky-teams`    | RiskyTeams       | Захищений |
+| `/app/telegram`       | TelegramPage     | Захищений |
+| `/app/profile`        | Profile          | Захищений |
+| `*`                   | 404 Not Found    | Публічний |
 
 ---
 
 ## 📝 Changelog
+
+### v1.25 — Серпень–Вересень 2026
+
+- **Шеринг ставок у стилі квитка** — картка `BetShareCard` з напівкруглими вирізами (mask-image) та пунктирною лінією
+- **Збереження/копіювання зображення** — експорт картки як JPEG (html2canvas) + копіювання PNG у буфер (кнопка + правий клік)
+- **Мультивалютний профіт** — UAH/USD з коректною конвертацією у таблиці та компактному списку
+- **USD-підказка** — пульсація іконки фільтра при появі USD-ставок (з лічильником + localStorage)
+- **Фікс часу матчу** — коректний парсинг ISO-дати (без фантомних 03:00)
+- **Фікси стратегій/цілей** — збереження вибору основної стратегії/цілі після навігації
+- **Розширений CS2 BO3 auto-finish** — поріг 3 год 15 хв
+- **Спрощені події експреса** — без логотипів і нумерації, нейтральний фон
 
 ### v1.24 — Липень 2026
 
