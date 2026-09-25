@@ -1,816 +1,795 @@
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import {
-  TrendingUp,
-  BarChart3,
-  Shield,
-  ArrowRight,
+  ArrowDown,
+  ArrowUpRight,
+  Check,
   ChevronRight,
+  Flag,
   Menu,
+  ShieldCheck,
+  Target,
   X,
-  AlertTriangle,
-  Moon,
-  Sun,
-  Globe,
-  PlayCircle,
-  XCircle,
-  CheckCircle2,
-  FileCheck,
-  Search,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useTheme } from "@/hooks/useTheme";
-import { setLang, getLang, type Lang } from "@/lib/i18n";
 import { SEO } from "@/components/SEO";
 import {
+  FAQStructuredData,
   OrganizationStructuredData,
   WebAppStructuredData,
-  FAQStructuredData,
 } from "@/components/StructuredData";
+import "./Landing.css";
+
+const DEMO = "/login-digesto-demo";
+const description =
+  "Трекер ставок на CS2 та Dota 2. Веди історію, контролюй банкрол і аналізуй власні результати.";
+const faqs = [
+  {
+    question: "Чи можна зробити ставку в MatchIQ?",
+    answer:
+      "Ні. MatchIQ не приймає ставки й не проводить платежі. Це інструмент для обліку: ти записуєш власні ставки, фіксуєш результати та аналізуєш свої рішення.",
+  },
+  {
+    question: "Звідки беруться дані матчів?",
+    answer:
+      "MatchIQ отримує дані CS2 та Dota 2 із зовнішніх джерел, зокрема cstest API та tips.gg. Розклад, рахунки й коефіцієнти можуть оновлюватися із затримкою.",
+  },
+  {
+    question: "Як фіксувати результати?",
+    answer:
+      "Додай ставку вручну або почни з матчу у списку. Після завершення познач виграш чи програш. Додай нотатку, щоб зберегти контекст свого рішення; для програшу коментар обов’язковий.",
+  },
+  {
+    question: "Для чого AI-рекомендації?",
+    answer:
+      "Вони дають додатковий погляд на матч: аргументи, оцінку впевненості та ризику. AI може помилятися, а його оцінки не гарантують результату. Рішення залишаються за тобою.",
+  },
+  {
+    question: "Чи можна експортувати записи?",
+    answer:
+      "Так. У профілі можна експортувати ставки у CSV для роботи з таблицями та створити JSON-бекап даних.",
+  },
+];
+const steps = [
+  {
+    title: "Обери матч",
+    caption: "CS2 або Dota 2. Усі деталі — перед очима.",
+    label: "01 / МАТЧ",
+    heading: "NAVI — Team Spirit",
+    detail: "CS2 · Best of 3 · Демонстраційний матч",
+  },
+  {
+    title: "Запиши ставку",
+    caption: "Зафіксуй суму, коефіцієнт і свою стратегію.",
+    label: "02 / ЗАПИС",
+    heading: "Рішення має контекст",
+    detail: "500 ₴ · коефіцієнт 1.80 · перемога NAVI",
+  },
+  {
+    title: "Додай результат",
+    caption: "Збережи підсумок і те, що варто пам’ятати.",
+    label: "03 / РЕЗУЛЬТАТ",
+    heading: "Програш — теж дані",
+    detail: "−500 ₴ · Відхилився від своєї стратегії",
+  },
+  {
+    title: "Побач зміни",
+    caption: "Від одного запису — до повної картини.",
+    label: "04 / ВИСНОВОК",
+    heading: "Тепер це частина історії",
+    detail: "Банкрол: 12 000 ₴ → 11 500 ₴",
+  },
+];
+
+function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduced ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+function DemoLink({
+  dark = false,
+  children = "Спробувати демо",
+}: {
+  dark?: boolean;
+  children?: ReactNode;
+}) {
+  return (
+    <Link to={DEMO} className={`lp-button ${dark ? "lp-button-dark" : ""}`}>
+      {children}
+      <ArrowUpRight size={20} aria-hidden="true" />
+    </Link>
+  );
+}
+function Brand() {
+  return (
+    <span className="lp-brand">
+      Match<span>IQ</span>
+      <span className="lp-brand-dot">®</span>
+    </span>
+  );
+}
+function Eyebrow({ children }: { children: ReactNode }) {
+  return <p className="lp-eyebrow">{children}</p>;
+}
+function DemoLabel() {
+  return (
+    <span className="lp-demo-label">
+      <span /> Демо-дані
+    </span>
+  );
+}
+function LineChart({ loss = false }: { loss?: boolean }) {
+  const reduced = useReducedMotion();
+  const path = loss
+    ? "M0 36 L20 40 L40 28 L60 35 L80 23 L100 41 L120 36 L140 52 L160 42 L180 62 L200 57 L220 74 L240 66 L260 89 L280 77 L300 110 L320 103 L340 126 L360 135"
+    : "M0 102 L20 93 L40 107 L60 80 L80 86 L100 66 L120 78 L140 57 L160 67 L180 43 L200 56 L220 40 L240 62 L260 32 L280 42 L300 25 L320 39 L340 15 L360 24";
+  return (
+    <svg
+      className="lp-line-chart"
+      viewBox="0 0 360 160"
+      role="img"
+      aria-label={
+        loss
+          ? "Приклад зменшення банкролу після програшу"
+          : "Ілюстративна динаміка банкролу"
+      }
+    >
+      {[30, 70, 110, 150].map((y) => (
+        <line
+          key={y}
+          x1="0"
+          y1={y}
+          x2="360"
+          y2={y}
+          stroke="currentColor"
+          strokeOpacity=".12"
+        />
+      ))}
+      <motion.path
+        d={path}
+        fill="none"
+        stroke="#ff693b"
+        strokeWidth="2.5"
+        initial={reduced ? false : { pathLength: 0 }}
+        whileInView={{ pathLength: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+      />
+    </svg>
+  );
+}
+function JourneyPreview({ active }: { active: number }) {
+  const reduced = useReducedMotion();
+  return (
+    <div className="lp-journey-preview">
+      <div className="lp-preview-top">
+        <span>MatchIQ / журнал рішень</span>
+        <DemoLabel />
+      </div>
+      <motion.div
+        key={active}
+        initial={reduced ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="lp-journey-content"
+        aria-live="polite"
+      >
+        <Eyebrow>{steps[active].label}</Eyebrow>
+        <h3>{steps[active].heading}</h3>
+        <p className="lp-preview-description">{steps[active].detail}</p>
+        {active === 0 && (
+          <div className="lp-match-demo">
+            <div>
+              <b className="lp-team-mark">N</b>
+              <strong>NAVI</strong>
+            </div>
+            <span>
+              VS<small>BO3</small>
+            </span>
+            <div>
+              <b className="lp-team-mark lp-team-mark-light">TS</b>
+              <strong>Team Spirit</strong>
+            </div>
+          </div>
+        )}
+        {active === 1 && (
+          <div className="lp-record-demo">
+            <div>
+              <span>Сума ставки</span>
+              <strong>
+                500 <small>₴</small>
+              </strong>
+            </div>
+            <div>
+              <span>Коефіцієнт</span>
+              <strong>1.80</strong>
+            </div>
+            <div className="lp-record-wide">
+              <span>Стратегія</span>
+              <strong>
+                Основна <ShieldCheck size={18} />
+              </strong>
+            </div>
+          </div>
+        )}
+        {active === 2 && (
+          <div className="lp-result-demo">
+            <span className="lp-loss-tag">Програш</span>
+            <strong>
+              −500 <small>₴</small>
+            </strong>
+            <blockquote>
+              «Відхилився від своєї стратегії. Наступного разу перевірю межі
+              коефіцієнтів перед записом.»
+            </blockquote>
+          </div>
+        )}
+        {active === 3 && (
+          <div className="lp-bank-demo">
+            <span>Поточний банкрол</span>
+            <strong>
+              11 500 <small>₴</small>
+            </strong>
+            <LineChart loss />
+            <div className="lp-axis">
+              <span>До ставки</span>
+              <span>Після результату</span>
+            </div>
+          </div>
+        )}
+      </motion.div>
+      <div className="lp-preview-bottom">
+        <span>Один приклад. Чотири кроки.</span>
+        <span>0{active + 1} / 04</span>
+      </div>
+    </div>
+  );
+}
+function MonthlyChart() {
+  const bars = [
+    32, 48, -25, 68, 28, -52, 38, -24, -75, 42, 60, -32, 22, -45, 56, -66, 32,
+    -40, 23, -55,
+  ];
+  return (
+    <div className="lp-stat-visual">
+      <div className="lp-stat-top">
+        <span>Результат за місяць</span>
+        <DemoLabel />
+      </div>
+      <div className="lp-stat-value">
+        −320 <small>₴</small>
+        <span>Чистий результат</span>
+      </div>
+      <div
+        className="lp-bars"
+        role="img"
+        aria-label="Демонстраційний графік виграшних і програшних днів"
+      >
+        {bars.map((value, i) => (
+          <div key={i} className="lp-bar-slot">
+            <span
+              className={value > 0 ? "lp-bar-up" : "lp-bar-down"}
+              style={{ height: `${Math.abs(value)}%` }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="lp-axis">
+        <span>01 вер</span>
+        <span>15 вер</span>
+        <span>30 вер</span>
+      </div>
+    </div>
+  );
+}
+function Comparison({ games = false }: { games?: boolean }) {
+  const rows = games
+    ? [
+        ["CS2", "38", "−6.1%"],
+        ["Dota 2", "22", "+5.8%"],
+      ]
+    : [
+        ["Основна", "28", "+12.4%"],
+        ["Лайв", "16", "−8.7%"],
+        ["Експрес", "12", "−15.3%"],
+      ];
+  return (
+    <div className="lp-stat-visual">
+      <div className="lp-stat-top">
+        <span>{games ? "Результати за іграми" : "Порівняння стратегій"}</span>
+        <DemoLabel />
+      </div>
+      <table className="lp-data-table">
+        <caption className="lp-sr-only">
+          Ілюстративне порівняння {games ? "ігор" : "стратегій"}
+        </caption>
+        <thead>
+          <tr>
+            <th>{games ? "Гра" : "Стратегія"}</th>
+            <th>Ставок</th>
+            <th>ROI</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row[0]}>
+              <th scope="row">{row[0]}</th>
+              <td>{row[1]}</td>
+              <td
+                className={
+                  row[2].startsWith("+") ? "lp-positive" : "lp-negative"
+                }
+              >
+                {row[2]}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function Landing() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [language, setLanguage] = useState<Lang>(getLang);
-  const { theme, toggleTheme } = useTheme();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
-
-  const toggleLanguage = () => {
-    const next: Lang = language === "uk" ? "en" : "uk";
-    setLang(next);
-    setLanguage(next);
-  };
-
-  const comparisonRows = [
-    {
-      situation: "Оцінка Edge",
-      excel: '"Здається, вигідно" = Злив',
-      matchiq: "EV-детектор: тільки математична вигода",
-    },
-    {
-      situation: "Розмір позиції",
-      excel: "Помилка у формулі = Мінус банк",
-      matchiq: "Алгоритм Келлі з лімітом ризику",
-    },
-    {
-      situation: "Психологія",
-      excel: 'Паніка та "догон" = Тильт',
-      matchiq: "Drawdown control: зупинка зливів",
-    },
-    {
-      situation: "Аналіз прогресу",
-      excel: "Купа цифр без логіки",
-      matchiq: "Equity Curve: візуалізація вашого росту",
-    },
-  ];
-
-  const faqItems = [
-    {
-      q: "Чи занадто це складно для мене?",
-      a: "Ні. MatchIQ автоматизує всю математику. Вам потрібно лише вставити посилання — ми зробимо розрахунки за вас.",
-    },
-    {
-      q: "Чи гарантує MatchIQ прибуток?",
-      a: "Ні. Прибуток гарантує ваша дисципліна. Ми даємо інструменти, щоб ви її не порушували.",
-    },
-    {
-      q: "Це дешевше за Excel?",
-      a: "Це дешевше за одну емоційну помилку, яка зазвичай трапляється через відсутність контролю.",
-    },
-  ];
-
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
   return (
-    <>
-      {/* ═══ SEO ═══ */}
+    <div className="matchiq-landing">
       <SEO
-        title="Аналітика ставок на CS2"
-        description="MatchIQ — професійний інструмент для аналітики ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу, AI-рекомендації та контроль ризиків."
+        title="Трекер ставок на CS2 та Dota 2"
+        description={description}
         canonical="https://matchiq.pro/"
-        ukHref="https://matchiq.pro/"
-        enHref="https://matchiq.pro/"
       />
-      <OrganizationStructuredData
-        name="MatchIQ"
-        description="CS2 Match Analytics and Betting Intelligence Platform"
-        url="https://matchiq.pro"
+      <OrganizationStructuredData description={description} />
+      <WebAppStructuredData
+        description={description}
+        image="https://matchiq.pro/assets/og-image.svg"
       />
-      <WebAppStructuredData offers={{ price: "0", priceCurrency: "USD" }} />
-      <FAQStructuredData
-        questions={faqItems.map((item) => ({
-          question: item.q,
-          answer: item.a,
-        }))}
-      />
-
-      <main className="min-h-screen bg-[#fafaf9]">
-        {/* ═══ Header / Navigation ═══ */}
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#e8e6e5]">
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-[#3ba6f1] rounded-[10px] flex items-center justify-center">
-                  <TrendingUp
-                    className="w-5 h-5 text-white"
-                    strokeWidth={1.5}
-                  />
+      <FAQStructuredData questions={faqs} />
+      <a className="lp-skip" href="#landing-main">
+        Перейти до вмісту
+      </a>
+      <div className="lp-hero-shell">
+        <img
+          className="lp-hero-image"
+          src="/assets/landing-arena.png"
+          alt=""
+          fetchPriority="high"
+          width="1672"
+          height="941"
+        />
+        <header className="lp-header">
+          <Link to="/" aria-label="MatchIQ — головна">
+            <Brand />
+          </Link>
+          <nav className="lp-desktop-nav" aria-label="Основна навігація">
+            <a href="#features">Можливості</a>
+            <a href="#how-it-works">Як це працює</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <Link className="lp-login" to="/login">
+            Увійти <ArrowUpRight size={17} />
+          </Link>
+          <button
+            type="button"
+            className="lp-menu-button"
+            aria-label={menuOpen ? "Закрити меню" : "Відкрити меню"}
+            aria-expanded={menuOpen}
+            aria-controls="landing-mobile-nav"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <X /> : <Menu />}
+          </button>
+        </header>
+        {menuOpen && (
+          <nav
+            id="landing-mobile-nav"
+            className="lp-mobile-nav"
+            aria-label="Мобільна навігація"
+          >
+            <a href="#features" onClick={() => setMenuOpen(false)}>
+              Можливості
+            </a>
+            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
+              Як це працює
+            </a>
+            <a href="#faq" onClick={() => setMenuOpen(false)}>
+              FAQ
+            </a>
+            <Link to="/login">
+              Увійти <ArrowUpRight size={18} />
+            </Link>
+          </nav>
+        )}
+        <main id="landing-main">
+          <section className="lp-hero" aria-labelledby="hero-title">
+            <div className="lp-hero-copy">
+              <Reveal>
+                <Eyebrow>
+                  <span className="lp-signal" /> ДАНІ. ДИСЦИПЛІНА. ТВОЯ ГРА.
+                </Eyebrow>
+                <h1 id="hero-title">
+                  Гра має емоції.
+                  <br />
+                  Рішення — <span>цифри.</span>
+                </h1>
+              </Reveal>
+              <Reveal delay={0.12}>
+                <p className="lp-hero-description">
+                  Трекер ставок на CS2 та Dota 2.
+                  <br />
+                  Веди історію, контролюй банкрол
+                  <br className="lp-desktop-break" /> і аналізуй власні
+                  результати.
+                </p>
+                <div className="lp-hero-actions">
+                  <DemoLink />
+                  <a href="#how-it-works" className="lp-text-link">
+                    Як це працює <ArrowDown size={17} />
+                  </a>
                 </div>
-                <span className="text-lg font-display font-medium text-[#0c0a09] tracking-tight">
-                  MatchIQ
+                <p className="lp-hero-note">
+                  Облік та аналітика. Без приймання ставок.
+                </p>
+              </Reveal>
+            </div>
+            <aside className="lp-orange-rail" aria-hidden="true">
+              <span>
+                БІЛЬШЕ
+                <br />
+                КОНТЕКСТУ.
+                <br />
+                БІЛЬШЕ
+                <br />
+                КОНТРОЛЮ.
+              </span>
+              <div />
+              <span>
+                ДЛЯ ТИХ,
+                <br />
+                ХТО ДУМАЄ
+                <br />
+                ДАЛІ.
+              </span>
+              <ArrowDown />
+            </aside>
+            <div className="lp-hero-bottom">
+              <div className="lp-games">
+                <span>
+                  <img src="/assets/game-cs2.svg" alt="" /> CS2
+                </span>
+                <i />
+                <span>
+                  <img src="/assets/game-dota2.svg" alt="" /> Dota 2
                 </span>
               </div>
-
-              {/* Desktop Navigation — Center */}
-              <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-                <a
-                  href="#features"
-                  className="text-sm text-[#78716c] hover:text-[#0c0a09] transition-colors duration-200"
-                >
-                  Можливості
-                </a>
-                <a
-                  href="#how-it-works"
-                  className="text-sm text-[#78716c] hover:text-[#0c0a09] transition-colors duration-200"
-                >
-                  Як це працює
-                </a>
-                <a
-                  href="#philosophy"
-                  className="text-sm text-[#78716c] hover:text-[#0c0a09] transition-colors duration-200"
-                >
-                  Філософія
-                </a>
-                <a
-                  href="#risks"
-                  className="text-sm text-[#78716c] hover:text-[#0c0a09] transition-colors duration-200"
-                >
-                  Ризики
-                </a>
-                <a
-                  href="#faq"
-                  className="text-sm text-[#78716c] hover:text-[#0c0a09] transition-colors duration-200"
-                >
-                  FAQ
-                </a>
-              </nav>
-
-              {/* Actions — Right */}
-              <div className="hidden lg:flex items-center gap-2">
-                <button
-                  onClick={toggleLanguage}
-                  className="h-9 px-3 flex items-center gap-1.5 rounded-full border border-[#e8e6e5] hover:border-[#3ba6f1]/40 hover:bg-[#c1e1f7]/20 transition-all text-sm text-[#78716c]"
-                  aria-label="Toggle language"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  {language}
-                </button>
-
-                <button
-                  onClick={toggleTheme}
-                  className="h-9 w-9 flex items-center justify-center rounded-full border border-[#e8e6e5] hover:border-[#3ba6f1]/40 hover:bg-[#c1e1f7]/20 transition-all text-[#78716c]"
-                  aria-label="Toggle theme"
-                >
-                  {theme === "light" ? (
-                    <Moon className="w-4 h-4" />
-                  ) : (
-                    <Sun className="w-4 h-4" />
-                  )}
-                </button>
-
-                <Link to="/login">
-                  <Button
-                    variant="outline"
-                    className="h-9 px-4 rounded-full border-[#e8e6e5] text-[#78716c] hover:text-[#0c0a09] hover:border-[#d6d3d1] bg-transparent font-normal text-sm"
-                  >
-                    Увійти
-                  </Button>
-                </Link>
-
-                <Link to="/login">
-                  <Button className="h-9 px-5 rounded-full bg-[#3ba6f1] hover:bg-[#3398e1] text-white font-normal text-sm shadow-none">
-                    Почати аналіз
-                    <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Mobile Menu Button */}
-              <button
-                className="lg:hidden h-9 w-9 flex items-center justify-center rounded-full border border-[#e8e6e5] hover:bg-[#c1e1f7]/20 transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-4 w-4 text-[#0c0a09]" />
-                ) : (
-                  <Menu className="h-4 w-4 text-[#0c0a09]" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-[#e8e6e5] px-6 py-5 space-y-3">
-              <a
-                href="#features"
-                className="block text-[#78716c] hover:text-[#0c0a09] transition-colors text-sm py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Можливості
-              </a>
-              <a
-                href="#how-it-works"
-                className="block text-[#78716c] hover:text-[#0c0a09] transition-colors text-sm py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Як це працює
-              </a>
-              <a
-                href="#philosophy"
-                className="block text-[#78716c] hover:text-[#0c0a09] transition-colors text-sm py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Філософія
-              </a>
-              <a
-                href="#risks"
-                className="block text-[#78716c] hover:text-[#0c0a09] transition-colors text-sm py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Ризики
-              </a>
-              <a
-                href="#faq"
-                className="block text-[#78716c] hover:text-[#0c0a09] transition-colors text-sm py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                FAQ
-              </a>
-
-              <div className="flex items-center gap-2 pt-2">
-                <button
-                  onClick={toggleLanguage}
-                  className="flex-1 h-10 px-3 flex items-center justify-center gap-1.5 rounded-full border border-[#e8e6e5] text-sm text-[#78716c]"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  {language}
-                </button>
-                <button
-                  onClick={toggleTheme}
-                  className="h-10 w-10 flex items-center justify-center rounded-full border border-[#e8e6e5] text-[#78716c]"
-                >
-                  {theme === "light" ? (
-                    <Moon className="w-4 h-4" />
-                  ) : (
-                    <Sun className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-
-              <Link to="/login" className="block pt-1">
-                <Button
-                  variant="outline"
-                  className="w-full h-10 rounded-full border-[#e8e6e5] text-[#78716c] bg-transparent font-normal text-sm"
-                >
-                  Увійти
-                </Button>
-              </Link>
-              <Link to="/login" className="block">
-                <Button className="w-full h-10 rounded-full bg-[#3ba6f1] hover:bg-[#3398e1] text-white font-normal text-sm shadow-none">
-                  Почати аналіз
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-          )}
-        </header>
-
-        {/* ═══ Hero Section ═══ */}
-        <section
-          aria-label="Головний екран"
-          className="relative pt-32 pb-16 lg:pt-40 lg:pb-24 overflow-hidden"
-        >
-          {/* Subtle ambient glow — the only decorative flourish */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#3ba6f1]/[0.03] rounded-full blur-[120px] pointer-events-none" />
-
-          <div className="relative z-10 max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              {/* Heading — 52px, font-display, weight 400, tight tracking */}
-              <h1 className="text-[40px] sm:text-[48px] lg:text-[52px] font-display font-normal text-[#0c0a09] tracking-[-0.021em] leading-[1.12] mb-6">
-                Припиніть втрачати капітал через{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-[#3398e1]">
-                    емоції та помилки
-                  </span>
-                  <span className="absolute inset-0 top-[0.6em] h-[0.35em] bg-[#c1e1f7] -z-0 rounded-full opacity-60" />
-                </span>{" "}
-                в розрахунках.
-              </h1>
-
-              {/* Subtitle — 16px body, warm gray, generous line-height */}
-              <p className="text-base lg:text-lg text-[#78716c] font-light leading-[1.69] max-w-2xl mx-auto mb-10">
-                <strong className="font-medium text-[#0c0a09]">MatchIQ</strong>{" "}
-                — професійний бек-офіс для аналітиків та{" "}
-                <strong className="font-medium text-[#0c0a09]">
-                  інструмент контролю прогресу
-                </strong>{" "}
-                для кожного. Зменшуйте втрати, знаходьте перевагу над ринком та
-                перетворюйте хаотичні рішення на стабільну стратегію.
+              <p>
+                Ті самі матчі.
+                <br />
+                <strong>Інший погляд на свої рішення.</strong>
               </p>
-
-              {/* CTA — the loudest thing on the page by deliberate restraint */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-                <Link to="/login">
-                  <Button className="h-12 px-8 rounded-full bg-[#3ba6f1] hover:bg-[#3398e1] text-white font-normal text-base shadow-none">
-                    Перевірити свою ставку
-                    <ChevronRight className="ml-1.5 h-4 w-4" />
-                  </Button>
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-1.5 h-12 px-6 rounded-full border border-[#e8e6e5] text-[#78716c] hover:text-[#0c0a09] hover:border-[#d6d3d1] transition-colors text-sm"
-                >
-                  Як це працює
-                </a>
-              </div>
-
-              <p className="text-sm text-[#a8a29e] font-light">
-                Без карти • 30с на старт • Твій прогрес заслуговує на точний
-                облік
-              </p>
+              <a href="#how-it-works" aria-label="Дізнатись, як працює MatchIQ">
+                <ArrowDown size={22} />
+              </a>
             </div>
-
-            {/* ═══ Dashboard Preview — the ONE element with a shadow ═══ */}
-            <div className="mt-16 lg:mt-20 max-w-4xl mx-auto">
-              <div className="relative">
-                {/* 16px-blur floating shadow — reserved for exactly one element per page */}
-                <div className="absolute -inset-4 bg-gradient-to-b from-[#3ba6f1]/5 to-transparent rounded-[32px] blur-2xl" />
-                <div className="relative bg-white border border-[#e8e6e5] rounded-[20px] aspect-video overflow-hidden shadow-[0_8px_48px_rgba(0,0,0,0.06)]">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-14 h-14 rounded-full bg-white border border-[#e8e6e5] flex items-center justify-center">
-                        <PlayCircle
-                          className="w-7 h-7 text-[#3ba6f1]"
-                          strokeWidth={1.5}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                    <span className="px-3 py-1.5 bg-white/90 backdrop-blur rounded-full text-xs text-[#a8a29e] border border-[#e8e6e5]">
-                      Preview
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ How It Works — flat cards, 1px hairline ═══ */}
-        <section
-          id="how-it-works"
-          aria-label="Як це працює"
-          className="py-24 bg-white"
-        >
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="text-center mb-14">
-              <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                Як це працює
-              </h2>
-              <p className="text-base text-[#78716c] font-light max-w-xl mx-auto">
-                Чотири кроки до повного контролю над вашим банкролом.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              {[
-                {
-                  icon: FileCheck,
-                  title: "Протоколювання",
-                  description: "Вставте URL матчу. Миттєвий імпорт даних.",
-                },
-                {
-                  icon: Search,
-                  title: "Верифікація",
-                  description: "MatchIQ рахує вигоду та ризик.",
-                },
-                {
-                  icon: Shield,
-                  title: "Прийняття рішення",
-                  description:
-                    "Система підкаже, чи відповідає це рішення вашій стратегії.",
-                },
-                {
-                  icon: BarChart3,
-                  title: "Візуалізація",
-                  description:
-                    "Відстежуйте свій ROI та вінрейт у реальному часі.",
-                },
-              ].map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={index}
-                    className="group relative bg-white border border-[#e8e6e5] rounded-2xl p-6 hover:border-[#3ba6f1]/30 hover:-translate-y-0.5 transition-all duration-200"
-                  >
-                    <div className="w-10 h-10 rounded-[10px] bg-[#0c0a09] flex items-center justify-center mb-4">
-                      <Icon className="w-5 h-5 text-white" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-base font-medium text-[#0c0a09] mb-1.5">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-[#78716c] font-light leading-[1.64]">
-                      {item.description}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ Mini Demo — Validation Layer ═══ */}
-        <section
-          id="features"
-          aria-label="Можливості та демонстрація"
-          className="py-24 bg-[#fafaf9]"
-        >
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="text-center mb-14">
-              <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                Як виглядає{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-[#3398e1]">рішення</span>
-                  <span className="absolute inset-0 top-[0.6em] h-[0.35em] bg-[#c1e1f7] -z-0 rounded-full opacity-60" />
-                </span>{" "}
-                в MatchIQ
-              </h2>
-              <p className="text-base text-[#78716c] font-light max-w-xl mx-auto">
-                Реальний приклад аналізу матчу з розрахунком вигоди, ризику та
-                персональним попередженням.
-              </p>
-            </div>
-
-            <div className="max-w-4xl mx-auto grid lg:grid-cols-2 gap-6">
-              {/* Widget UI */}
-              <div className="bg-white border border-[#e8e6e5] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-5 pb-5 border-b border-[#e8e6e5]">
-                  <div>
-                    <p className="text-xs text-[#a8a29e] mb-1">Матч</p>
-                    <p className="text-base font-medium text-[#0c0a09]">
-                      Spirit vs FaZe
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-[#a8a29e] mb-1">Коефіцієнт</p>
-                    <p className="text-base font-medium text-[#0c0a09]">1.85</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#78716c]">
-                      Ваша впевненість
-                    </span>
-                    <span className="text-sm font-medium text-[#0c0a09]">
-                      65%
-                    </span>
-                  </div>
-                  <div className="w-full h-2 bg-[#e8e6e5] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[#3ba6f1] rounded-full"
-                      style={{ width: "65%" }}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-3">
-                    <div className="p-4 bg-[#f0fdf7] border border-green-500/20 rounded-xl">
-                      <p className="text-xs text-green-500 mb-1">💎 EV</p>
-                      <p className="text-2xl font-medium text-green-500">
-                        +4.2%
-                      </p>
-                    </div>
-                    <div className="p-4 bg-[#eff8ff] border border-[#3ba6f1]/20 rounded-xl">
-                      <p className="text-xs text-[#3ba6f1] mb-1">Kelly</p>
-                      <p className="text-2xl font-medium text-[#3ba6f1]">
-                        3.5%
-                      </p>
-                      <p className="text-[10px] text-[#a8a29e] mt-0.5">
-                        від банку
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Alert */}
-              <div className="bg-[#fffbf5] border border-amber-500/20 rounded-2xl p-6 flex flex-col">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 bg-amber-500/10 rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <AlertTriangle
-                      className="w-5 h-5 text-amber-500"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-amber-500 font-semibold mb-1 uppercase tracking-wide">
-                      Alert · Blacklist
-                    </p>
-                    <p className="text-base font-medium text-[#0c0a09]">
-                      Особисте попередження
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm text-[#78716c] leading-[1.64] italic flex-1">
-                  "Пам'ятаєте свій злив на Spirit місяць тому? Ваш Blacklist
-                  рекомендує обережність."
-                </p>
-                <div className="mt-5 pt-5 border-t border-amber-500/20">
-                  <p className="text-xs text-[#a8a29e] leading-relaxed">
-                    MatchIQ враховує вашу персональну історію помилок та
-                    автоматично сигналізує про ризиковані патерни.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ Excel vs MatchIQ Comparison ═══ */}
-        <section
-          id="risks"
-          aria-label="Порівняння Excel та MatchIQ"
-          className="py-24 bg-white"
-        >
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="text-center mb-14">
-              <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                Excel vs MatchIQ
-              </h2>
-              <p className="text-base text-[#78716c] font-light max-w-xl mx-auto">
-                Чому ручний облік гальмує ваш розвиток — і як система прибирає
-                хаос.
-              </p>
-            </div>
-
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white border border-[#e8e6e5] rounded-2xl overflow-hidden">
-                {/* Table Header */}
-                <div className="grid grid-cols-1 md:grid-cols-3 bg-[#0c0a09] text-white">
-                  <div className="p-5 font-medium text-xs uppercase tracking-wide border-b md:border-b-0 md:border-r border-white/10">
-                    Ситуація
-                  </div>
-                  <div className="p-5 font-medium text-xs uppercase tracking-wide border-b md:border-b-0 md:border-r border-white/10">
-                    Помилка в Excel / "На око"
-                  </div>
-                  <div className="p-5 font-medium text-xs uppercase tracking-wide">
-                    Рішення в MatchIQ
-                  </div>
-                </div>
-
-                {comparisonRows.map((row, index) => (
-                  <div
-                    key={index}
-                    className={`grid grid-cols-1 md:grid-cols-3 ${index !== comparisonRows.length - 1 ? "border-b border-[#e8e6e5]" : ""}`}
-                  >
-                    <div className="p-5 font-medium text-[#0c0a09] bg-[#fafaf9] border-b md:border-b-0 md:border-r border-[#e8e6e5]">
-                      {row.situation}
-                    </div>
-                    <div className="p-5 flex items-start gap-3 border-b md:border-b-0 md:border-r border-[#e8e6e5]">
-                      <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-[#78716c]">
-                        {row.excel}
-                      </span>
-                    </div>
-                    <div className="p-5 flex items-start gap-3">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-[#0c0a09] font-medium">
-                        {row.matchiq}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Cumulative Risk callout */}
-              <div className="mt-6 bg-white border border-[#e8e6e5] rounded-2xl p-6 lg:p-8 flex items-start gap-5">
-                <div className="w-10 h-10 bg-[#0c0a09] rounded-[10px] flex items-center justify-center flex-shrink-0">
-                  <TrendingUp
-                    className="w-5 h-5 text-white"
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-[#3ba6f1] uppercase tracking-wide mb-2">
-                    📈 Cumulative Risk
-                  </p>
-                  <p className="text-sm text-[#78716c] leading-[1.64]">
-                    Навіть 3–5% системної помилки з'їдають ваш банк.{" "}
-                    <strong className="font-medium text-[#0c0a09]">
-                      MatchIQ
-                    </strong>{" "}
-                    зупиняє хаос та перетворює його на зрозумілий графік
-                    прогресу.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ Philosophy Section ═══ */}
-        <section
-          id="philosophy"
-          aria-label="Філософія та підхід"
-          className="py-24 bg-[#fafaf9]"
-        >
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                  Data over Luck
+          </section>
+          <section
+            className="lp-section lp-journey"
+            id="how-it-works"
+            aria-labelledby="journey-title"
+          >
+            <Reveal className="lp-section-heading">
+              <div>
+                <Eyebrow>01 / ВІД ЗАПИСУ ДО ВИСНОВКУ</Eyebrow>
+                <h2 id="journey-title">
+                  Одна ставка.
+                  <br />
+                  Повна історія.
                 </h2>
-                <p className="text-base text-[#78716c] font-light">
-                  Від профі до відповідальних гравців — система для всіх, хто
-                  серйозно ставиться до результату.
-                </p>
               </div>
-
-              <div className="bg-white border border-[#e8e6e5] rounded-2xl p-8 lg:p-10">
-                {/* Not predictions */}
-                <div className="flex items-start gap-4 mb-8 pb-8 border-b border-[#e8e6e5]">
-                  <div className="w-10 h-10 bg-red-50 rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <XCircle className="w-5 h-5 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">
-                      Ми не даємо прогнозів
-                    </p>
-                    <p className="text-sm text-[#78716c] leading-[1.64]">
-                      MatchIQ — це дзеркало вашої дисципліни, а не магічний
-                      алгоритм.
-                    </p>
-                  </div>
-                </div>
-
-                {/* For whom */}
-                <div className="mb-8">
-                  <p className="text-xs font-semibold text-[#3ba6f1] uppercase tracking-wide mb-4">
-                    👤 Для кого це
-                  </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-5 bg-[#eff8ff] rounded-xl border border-[#3ba6f1]/15">
-                      <p className="font-medium text-[#0c0a09] mb-1.5">
-                        Професіонали
-                      </p>
-                      <p className="text-sm text-[#78716c] leading-[1.64]">
-                        Для масштабування складних моделей та систематизації
-                        процесу.
-                      </p>
-                    </div>
-                    <div className="p-5 bg-[#fafaf9] rounded-xl border border-[#e8e6e5]">
-                      <p className="font-medium text-[#0c0a09] mb-1.5">
-                        Новачки та Аматори
-                      </p>
-                      <p className="text-sm text-[#78716c] leading-[1.64]">
-                        Для тих, хто хоче бачити реальну статистику, уникати
-                        тильту та вчитися контролю банку.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Not for whom */}
-                <div className="flex items-start gap-4 p-5 bg-red-50 rounded-xl border border-red-500/15">
-                  <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">⛔</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">
-                      Не для кого
-                    </p>
-                    <p className="text-sm text-[#78716c] leading-[1.64]">
-                      Шукачі "швидких грошей" та ті, хто не готовий до
-                      відповідальності за свій результат.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ FAQ Section ═══ */}
-        <section
-          id="faq"
-          aria-label="Часті запитання"
-          className="py-24 bg-white"
-        >
-          <div className="max-w-3xl mx-auto px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                Питання та відповіді
-              </h2>
-              <p className="text-base text-[#78716c] font-light">
-                Все, що вам варто знати перед стартом.
+              <p>
+                Збережи не лише результат,
+                <br />а й причину свого рішення.
+                <br />
+                <span>Подивись, як це працює.</span>
               </p>
-            </div>
-
-            <div className="space-y-3">
-              {faqItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-[#e8e6e5] rounded-xl overflow-hidden hover:border-[#3ba6f1]/30 transition-colors"
-                >
+            </Reveal>
+            <div className="lp-journey-grid">
+              <Reveal className="lp-steps">
+                {steps.map((step, index) => (
                   <button
-                    onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
-                    className="w-full flex items-center justify-between p-5 text-left"
+                    type="button"
+                    key={step.label}
+                    className={`lp-step ${activeStep === index ? "is-active" : ""}`}
+                    aria-pressed={activeStep === index}
+                    onClick={() => setActiveStep(index)}
                   >
-                    <span className="text-sm font-medium text-[#0c0a09] pr-4">
-                      {item.q}
+                    <span className="lp-step-number">0{index + 1}</span>
+                    <span>
+                      <strong>{step.title}</strong>
+                      <small>{step.caption}</small>
                     </span>
-                    <ChevronRight
-                      className={`w-4 h-4 text-[#a8a29e] flex-shrink-0 transition-transform duration-200 ${
-                        openFAQ === index ? "rotate-90" : ""
-                      }`}
-                    />
+                    <ChevronRight size={20} aria-hidden="true" />
                   </button>
-                  {openFAQ === index && (
-                    <div className="px-5 pb-5">
-                      <p className="text-sm text-[#78716c] leading-[1.64]">
-                        {item.a}
-                      </p>
+                ))}
+              </Reveal>
+              <Reveal delay={0.1}>
+                <JourneyPreview active={activeStep} />
+              </Reveal>
+            </div>
+            <p className="lp-example-note">
+              Ілюстративний приклад інтерфейсу. Усі суми та результати —
+              демонстраційні.
+            </p>
+          </section>
+          <section
+            className="lp-section lp-analytics lp-dark"
+            id="features"
+            aria-labelledby="analytics-title"
+          >
+            <div className="lp-analytics-grid">
+              <Reveal className="lp-analytics-intro">
+                <Eyebrow>02 / АНАЛІТИКА</Eyebrow>
+                <h2 id="analytics-title">
+                  Не просто
+                  <br />
+                  цифри.
+                  <br />
+                  <span>Відповіді.</span>
+                </h2>
+                <p>
+                  Побач закономірності, які губляться між окремими ставками.
+                </p>
+                <div className="lp-intro-rule" />
+                <span className="lp-small-label">
+                  МЕНШЕ ЗДОГАДОК.
+                  <br />
+                  БІЛЬШЕ ВЛАСНИХ ДАНИХ.
+                </span>
+              </Reveal>
+              <div className="lp-analytics-rows">
+                <Reveal className="lp-analytics-row">
+                  <div>
+                    <span className="lp-row-index">/ 01</span>
+                    <h3>
+                      Який результат
+                      <br />
+                      за місяць?
+                    </h3>
+                    <p>
+                      Прибуток і збитки, динаміка банкролу та історія твоєї гри.
+                    </p>
+                  </div>
+                  <MonthlyChart />
+                </Reveal>
+                <Reveal className="lp-analytics-row">
+                  <div>
+                    <span className="lp-row-index">/ 02</span>
+                    <h3>
+                      Яка стратегія
+                      <br />
+                      працює краще?
+                    </h3>
+                    <p>
+                      Порівнюй результати стратегій на основі власних записів.
+                    </p>
+                  </div>
+                  <Comparison />
+                </Reveal>
+                <Reveal className="lp-analytics-row">
+                  <div>
+                    <span className="lp-row-index">/ 03</span>
+                    <h3>
+                      Де я втрачаю
+                      <br />
+                      найбільше?
+                    </h3>
+                    <p>
+                      Досліджуй результати за грою та типом ставки. Знаходь те,
+                      що варто переглянути.
+                    </p>
+                  </div>
+                  <Comparison games />
+                </Reveal>
+              </div>
+            </div>
+          </section>
+          <section
+            className="lp-section lp-discipline"
+            aria-labelledby="discipline-title"
+          >
+            <div className="lp-discipline-grid">
+              <Reveal>
+                <Eyebrow>03 / ДИСЦИПЛІНА</Eyebrow>
+                <h2 id="discipline-title">
+                  Твої правила.
+                  <br />
+                  Перед кожною
+                  <br />
+                  ставкою.
+                </h2>
+                <p className="lp-section-description">
+                  Менше імпульсивних рішень.
+                  <br />
+                  Більше усвідомлених.
+                </p>
+                <ul className="lp-benefits">
+                  <li>
+                    <ShieldCheck />
+                    <div>
+                      <h3>Перевірка стратегії</h3>
+                      <p>Зіставляй ставку зі своїми правилами.</p>
                     </div>
-                  )}
+                  </li>
+                  <li>
+                    <Flag />
+                    <div>
+                      <h3>Ризикові команди</h3>
+                      <p>Тримай власні застереження перед очима.</p>
+                    </div>
+                  </li>
+                  <li>
+                    <Target />
+                    <div>
+                      <h3>Прогрес цілей</h3>
+                      <p>Пов’язуй записи з особистими цілями.</p>
+                    </div>
+                  </li>
+                </ul>
+              </Reveal>
+              <Reveal className="lp-discipline-preview" delay={0.1}>
+                <div className="lp-preview-top">
+                  <span>Перед збереженням ставки</span>
+                  <DemoLabel />
                 </div>
+                <div className="lp-warning-block">
+                  <span className="lp-warning-icon">!</span>
+                  <div>
+                    <span className="lp-small-label">ПРАВИЛО СТРАТЕГІЇ</span>
+                    <h3>Коефіцієнт за межами діапазону</h3>
+                    <p>Твій діапазон: 1.40–1.70</p>
+                  </div>
+                  <b>1.80</b>
+                </div>
+                <div className="lp-risk-block">
+                  <Flag />
+                  <div>
+                    <h3>Команда у списку ризикових</h3>
+                    <p>Твоя позначка: «Обережно»</p>
+                  </div>
+                </div>
+                <div className="lp-goal-block">
+                  <div>
+                    <Target />
+                    <span>Особиста ціль</span>
+                    <strong>35%</strong>
+                  </div>
+                  <p>Прибуток за місяць · 2 000 ₴</p>
+                  <div className="lp-goal-track">
+                    <span />
+                  </div>
+                  <div className="lp-axis">
+                    <span>700 ₴ / 2 000 ₴</span>
+                    <span>У процесі</span>
+                  </div>
+                </div>
+                <div className="lp-discipline-foot">
+                  <Check size={15} /> Правила задаєш ти. MatchIQ допомагає їх
+                  помітити.
+                </div>
+              </Reveal>
+            </div>
+          </section>
+          <section
+            className="lp-demo-section lp-dark"
+            aria-labelledby="demo-title"
+          >
+            <div className="lp-demo-photo" />
+            <Reveal className="lp-demo-copy">
+              <Eyebrow>04 / СПРОБУЙ MATCHIQ</Eyebrow>
+              <h2 id="demo-title">
+                Пройди цей
+                <br />
+                шлях сам.
+              </h2>
+              <p>
+                Переглянь матчі, спробуй облік ставок
+                <br />і досліди аналітику в демо.
+              </p>
+              <DemoLink>Відкрити демо</DemoLink>
+            </Reveal>
+            <p className="lp-demo-aside">
+              ТІ САМІ МАТЧІ.
+              <br />
+              ІНШИЙ ПОГЛЯД.
+            </p>
+          </section>
+          <section
+            className="lp-section lp-faq"
+            id="faq"
+            aria-labelledby="faq-title"
+          >
+            <Reveal>
+              <Eyebrow>05 / FAQ</Eyebrow>
+              <h2 id="faq-title">
+                Перед
+                <br />
+                початком.
+              </h2>
+              <p>
+                Короткі відповіді
+                <br />
+                на важливі питання.
+              </p>
+            </Reveal>
+            <div className="lp-faq-list">
+              {faqs.map((faq, index) => (
+                <details
+                  key={faq.question}
+                  open={index === 0 ? true : undefined}
+                >
+                  <summary>
+                    {faq.question}
+                    <span aria-hidden="true">+</span>
+                  </summary>
+                  <p>{faq.answer}</p>
+                </details>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ═══ CTA Section ═══ */}
-        <section className="py-24 bg-[#fafaf9]">
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8 text-center">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-[32px] font-display font-normal text-[#0c0a09] tracking-[-0.025em] leading-[1.25] mb-4">
-                Твій банк — твоя відповідальність.
+          </section>
+          <section className="lp-final" aria-labelledby="final-title">
+            <Reveal>
+              <h2 id="final-title">
+                Більше контексту.
+                <br />
+                Зваженіші рішення.
               </h2>
-              <p className="text-base text-[#78716c] font-light mb-10">
-                Почни аналізувати ставки професійно вже сьогодні.
+            </Reveal>
+            <Reveal>
+              <p>
+                Твій кіберспорт.
+                <br />
+                Твоя історія. Твій контроль.
               </p>
-              <Link to="/login">
-                <Button className="h-12 px-8 rounded-full bg-[#3ba6f1] hover:bg-[#3398e1] text-white font-normal text-base shadow-none">
-                  Почати аналіз
-                  <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Button>
-              </Link>
-              <p className="text-sm text-[#a8a29e] font-light mt-6">
-                Безкоштовний аналіз • Без реєстрації • Без ризику
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ Footer ═══ */}
-        <footer className="py-10 border-t border-[#e8e6e5] bg-white">
-          <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp
-                  className="w-4 h-4 text-[#3ba6f1]"
-                  strokeWidth={1.5}
-                />
-                <span className="text-sm font-medium text-[#0c0a09]">
-                  MatchIQ
-                </span>
-              </div>
-              <p className="text-xs text-[#a8a29e]">
-                © {new Date().getFullYear()} MatchIQ. Data over luck.
-              </p>
-              <div className="flex items-center gap-6">
-                <a
-                  href="#"
-                  className="text-xs text-[#78716c] hover:text-[#0c0a09] transition-colors"
-                >
-                  Privacy
-                </a>
-                <a
-                  href="#"
-                  className="text-xs text-[#78716c] hover:text-[#0c0a09] transition-colors"
-                >
-                  Terms
-                </a>
-                <a
-                  href="mailto:hello@matchiq.pro"
-                  className="text-xs text-[#78716c] hover:text-[#0c0a09] transition-colors"
-                >
-                  Contact
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </>
+              <DemoLink dark />
+            </Reveal>
+          </section>
+        </main>
+      </div>
+      <footer className="lp-footer">
+        <Link to="/" aria-label="MatchIQ — головна">
+          <Brand />
+        </Link>
+        <p>Трекер та аналітика.</p>
+        <nav aria-label="Навігація у футері">
+          <a href="#features">Можливості</a>
+          <a href="#how-it-works">Як це працює</a>
+          <a href="#faq">FAQ</a>
+          <Link to="/login">Увійти</Link>
+        </nav>
+        <small>
+          © {new Date().getFullYear()} MatchIQ
+          <br />
+          CS2 / Dota 2
+        </small>
+      </footer>
+    </div>
   );
 }
