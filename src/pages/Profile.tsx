@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -10,48 +7,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  User,
-  Download,
-  Upload,
-  Shield,
-  Database,
-  FileDown,
-  FileUp,
-  CheckCircle2,
-  AlertTriangle,
-  Palette,
-  Globe,
-  Sun,
-  Moon,
-  Trash2,
-  RefreshCw,
-  DollarSign,
-  Share2,
-  Copy,
-} from "lucide-react";
-import {
-  CARD_BASE_STYLE,
-  CARD_HOVER_STYLE,
-  CHART_CARD_SHADOW,
-} from "@/lib/cardStyles";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
-import { PageHeader } from "@/components/PageHeader";
+import ProfileOverview from "@/components/profile/ProfileOverview";
+import ProfileBackup from "@/components/profile/ProfileBackup";
+import "./Profile.css";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { setLang, getLang, type Lang } from "@/lib/i18n";
 import { logRender } from "@/lib/devLogger";
-import BackupStatusCard from "@/components/profile/BackupStatusCard";
-import DataStatsCards from "@/components/profile/DataStatsCards";
 
 export default function Profile() {
   logRender("Profile");
   const { user } = useAuth();
   const username = user?.username || "User";
   const { theme, toggleTheme } = useTheme();
-  const isDarkTheme = theme === "dark";
   const isAdmin = user?.role === "admin";
   const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
@@ -187,6 +159,9 @@ export default function Profile() {
 
   // Keys to NEVER include in backup (security, ephemeral)
   const FORBIDDEN_BACKUP_KEYS = new Set([
+    "authToken",
+    "userRole",
+    "username",
     "google_sheets_api_key",
     "currentUser",
     "ui-settings",
@@ -367,10 +342,7 @@ export default function Profile() {
     }
   };
 
-  const importFullBackup = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const importFullBackup = (file: File) => {
     setIsImporting(true);
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -395,7 +367,16 @@ export default function Profile() {
         const isAdminBackup = parsed._meta.isAdminBackup === true;
 
         Object.entries(parsed).forEach(([key, value]) => {
-          if (key === "_meta") return;
+          if (key === "_meta" || FORBIDDEN_BACKUP_KEYS.has(key)) return;
+          const allowed =
+            (SHARED_KEYS as readonly string[]).includes(key) ||
+            key.startsWith(`user_${username}_`) ||
+            (isAdmin &&
+              (key.startsWith("user_") ||
+                key.startsWith("match_ratings") ||
+                key.startsWith("ai_recommendations_history") ||
+                key.startsWith("tilt_block_")));
+          if (!allowed) return;
 
           // Admin-only keys — only restore if current user is admin
           if (adminKeySet.has(key) && !isAdmin) {
@@ -452,481 +433,69 @@ export default function Profile() {
       }
     };
 
+    reader.onerror = () => {
+      setIsImporting(false);
+      toast.error("Не вдалося прочитати файл бекапу");
+    };
     reader.readAsText(file);
-    event.target.value = "";
   };
 
-  const cardBaseStyle = CARD_BASE_STYLE;
-
-  const cardHoverStyle = CARD_HOVER_STYLE;
-
-  const chartCardShadow = CHART_CARD_SHADOW;
-
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
-      <PageHeader
-        title="Профіль"
-        currentUser={username || "User"}
-        isDarkTheme={isDarkTheme}
-        onToggleTheme={toggleTheme}
-        showThemeToggle={false}
-      />
-      <div className="relative z-10 space-y-6 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
-        {/* ===== Backup status card — always visible ===== */}
-        <BackupStatusCard
-          lastBackupDate={lastBackupDate}
-          needsBackupReminder={needsBackupReminder}
-          chartCardShadow={chartCardShadow}
-        />
-
-        {/* Share Profile Card */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shrink-0">
-                <Share2 className="h-6 w-6 text-white" strokeWidth={1.5} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Публічний профіль
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Поділися своєю статистикою з друзями
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="px-3 py-1.5 bg-gray-100 rounded-xl text-sm text-gray-700 font-mono">
-                matchiq.pro/user/{username}
-              </code>
-              <Button
-                onClick={() => {
-                  const url = `${window.location.origin}/user/${username}`;
-                  navigator.clipboard
-                    .writeText(url)
-                    .then(() => toast.success("Посилання скопійовано!"));
-                }}
-                size="sm"
-                className="rounded-xl bg-primary hover:bg-blue-700 text-white gap-2"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                Копіювати
-              </Button>
-              <Button
-                onClick={() => window.open(`/user/${username}`, "_blank")}
-                size="sm"
-                variant="outline"
-                className="rounded-xl border-gray-200 text-gray-700 gap-2"
-              >
-                <Globe className="h-3.5 w-3.5" />
-                Відкрити
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Statistics + User Info — unified card */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-5">
-          {/* Data Statistics - 5 cards */}
-          <DataStatsCards
+    <div className="profile-page">
+      <header className="profile-heading">
+        <h1>{activeTab === "backup" ? "Бекап даних" : "Профіль"}</h1>
+      </header>
+      <nav className="profile-tabs" aria-label="Розділи профілю">
+        <button
+          type="button"
+          aria-current={activeTab === "interface" ? "page" : undefined}
+          onClick={() => setActiveTab("interface")}
+        >
+          Профіль
+        </button>
+        <button
+          type="button"
+          aria-current={activeTab === "backup" ? "page" : undefined}
+          onClick={() => setActiveTab("backup")}
+        >
+          Бекап
+        </button>
+      </nav>
+      <div className="profile-content">
+        {activeTab === "interface" && (
+          <ProfileOverview
+            username={username}
             stats={stats}
-            cardBaseStyle={cardBaseStyle}
-            cardHoverStyle={cardHoverStyle}
+            theme={theme}
+            language={language}
+            onThemeChange={handleThemeChange}
+            onLanguageChange={handleLanguageChange}
+            exchangeRate={exchangeRate}
+            onExchangeRateChange={(value) => {
+              setExchangeRate(value);
+              localStorage.setItem("matchiq_exchange_rate", String(value));
+              UserDataService.saveUserPrefs({
+                preferences: { exchangeRate: value },
+              }).catch(() => toast.error("Не вдалося синхронізувати курс"));
+            }}
+            onFetchRate={fetchExchangeRate}
+            isFetchingRate={isFetchingRate}
+            lastBackupDate={lastBackupDate}
+            needsBackupReminder={needsBackupReminder}
+            onOpenBackup={() => setActiveTab("backup")}
           />
-
-          {/* User Info Card */}
-          <Card
-            className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white transition-all duration-300"
-            style={{ boxShadow: chartCardShadow }}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(68,122,252,0.3)]">
-                  <User className="h-8 w-8 text-white" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    @{username}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge className="bg-green-50 text-green-600 border border-green-200 rounded-lg font-medium text-xs px-3 py-1">
-                      <CheckCircle2 className="h-3 w-3 mr-1" strokeWidth={2} />
-                      Активний
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Navigation Tabs */}
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            {[
-              { id: "interface", label: "Інтерфейс" },
-              { id: "backup", label: "Бекап" },
-            ].map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(isActive ? null : tab.id)}
-                  className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ease-in-out ${
-                    isActive
-                      ? "bg-primary text-white shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
-                      : activeTab === null
-                        ? "bg-white text-gray-900 font-medium shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-gray-300 hover:bg-[#F5F5F3]"
-                        : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Theme & Language Settings */}
-        {(activeTab === null || activeTab === "interface") && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <Card
-              id="interface"
-              className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white overflow-hidden transition-all duration-300"
-              style={{ boxShadow: chartCardShadow }}
-            >
-              <CardHeader className="bg-white border-b border-gray-200 p-6">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                  <div className="p-2.5 bg-gray-100 rounded-xl">
-                    <Palette
-                      className="h-5 w-5 text-gray-900"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  Налаштування інтерфейсу
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                {/* Theme Switcher */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    {theme === "light" ? (
-                      <Sun
-                        className="h-5 w-5 text-amber-500"
-                        strokeWidth={1.5}
-                      />
-                    ) : (
-                      <Moon
-                        className="h-5 w-5 text-[#6366F1]"
-                        strokeWidth={1.5}
-                      />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Тема оформлення
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Оберіть зовнішній вигляд додатку
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 p-1 rounded-full bg-gray-200">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleThemeChange("light")}
-                      className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                        theme === "light"
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
-                      }`}
-                    >
-                      <Sun className="h-3.5 w-3.5 mr-1.5" strokeWidth={2} />
-                      Світла
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleThemeChange("dark")}
-                      className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                        theme === "dark"
-                          ? "bg-gray-900 text-white shadow-sm"
-                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
-                      }`}
-                    >
-                      <Moon className="h-3.5 w-3.5 mr-1.5" strokeWidth={2} />
-                      Темна
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Language Switcher */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Мова інтерфейсу
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Оберіть мову відображення
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 p-1 rounded-full bg-gray-200">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLanguageChange("uk")}
-                      className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                        language === "uk"
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
-                      }`}
-                    >
-                      UA
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLanguageChange("en")}
-                      className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                        language === "en"
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-500 hover:text-gray-900 !bg-transparent hover:!bg-transparent"
-                      }`}
-                    >
-                      ENG
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Exchange Rate */}
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <DollarSign
-                      className="h-5 w-5 text-green-500"
-                      strokeWidth={1.5}
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Курс USD -{">"} UAH
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Актуальний курс для конвертації валют
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={exchangeRate}
-                      onChange={(e) => {
-                        const v = parseFloat(e.target.value);
-                        if (!isNaN(v) && v > 0) {
-                          setExchangeRate(v);
-                          localStorage.setItem(
-                            "matchiq_exchange_rate",
-                            String(v),
-                          );
-                          UserDataService.saveUserPrefs({
-                            preferences: { exchangeRate: v },
-                          }).catch(() => {});
-                        }
-                      }}
-                      className="flex-1 h-10 px-3 rounded-xl border border-gray-300 hover:border-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors text-sm bg-white text-gray-900 outline-none"
-                    />
-                    <Button
-                      onClick={fetchExchangeRate}
-                      disabled={isFetchingRate}
-                      size="sm"
-                      className="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium h-10 px-4 text-sm"
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-1.5 ${isFetchingRate ? "animate-spin" : ""}`}
-                        strokeWidth={2}
-                      />
-                      Оновити
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         )}
-
-        {/* Backup Section */}
-        {(activeTab === null || activeTab === "backup") && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <Card
-              id="backup"
-              className="border border-gray-200 hover:border-gray-300 rounded-3xl bg-white overflow-hidden transition-all duration-300"
-              style={{ boxShadow: chartCardShadow }}
-            >
-              <CardHeader className="bg-white border-b border-gray-200 p-6">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                  <div className="p-2.5 bg-gray-100 rounded-xl">
-                    <Database
-                      className="h-5 w-5 text-gray-900"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  Бекап даних
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                {/* Storage info */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <Shield
-                      className="h-5 w-5 text-gray-500"
-                      strokeWidth={1.5}
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Розмір даних у localStorage
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Усі дані додатку зберігаються локально у вашому браузері
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className="bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-semibold text-sm px-3 py-1.5">
-                    {storageSize} KB
-                  </Badge>
-                </div>
-
-                {/* Export */}
-                <div className="p-5 border border-gray-200 rounded-2xl hover:border-gray-300 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-green-50 rounded-xl flex-shrink-0">
-                      <FileDown
-                        className="h-6 w-6 text-green-600"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 mb-1">
-                        Повний бекап всіх даних
-                      </h3>
-                      <p className="text-sm text-gray-500 mb-4">
-                        Експортує всі ваші дані (ставки, команди, стратегії,
-                        цілі, Telegram-групи, налаштування) в один JSON файл.
-                        Використовуйте для збереження копії або перенесення на
-                        інший пристрій.
-                      </p>
-                      <Button
-                        onClick={exportFullBackup}
-                        disabled={isExporting}
-                        className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-sm px-6 font-semibold"
-                      >
-                        {isExporting ? (
-                          <>
-                            <Download
-                              className="mr-2 h-4 w-4 animate-pulse"
-                              strokeWidth={2}
-                            />
-                            Створення бекапу...
-                          </>
-                        ) : (
-                          <>
-                            <Download
-                              className="mr-2 h-4 w-4"
-                              strokeWidth={2}
-                            />
-                            Завантажити повний бекап
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Import */}
-                <div className="p-5 border border-gray-200 rounded-2xl hover:border-gray-300 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-50 rounded-xl flex-shrink-0">
-                      <FileUp
-                        className="h-6 w-6 text-blue-600"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 mb-1">
-                        Відновити з бекапу
-                      </h3>
-                      <p className="text-sm text-gray-500 mb-3">
-                        Завантажте раніше створений файл бекапу для відновлення
-                        всіх даних. Поточні дані будуть замінені даними з файлу.
-                      </p>
-                      <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4">
-                        <AlertTriangle
-                          className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5"
-                          strokeWidth={1.75}
-                        />
-                        <p className="text-xs text-amber-800">
-                          <span className="font-semibold">Увага:</span>{" "}
-                          відновлення з бекапу замінить усі поточні дані.
-                          Рекомендуємо спочатку створити бекап поточних даних.
-                        </p>
-                      </div>
-                      <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-blue-400 text-white rounded-xl text-sm font-semibold cursor-pointer transition-colors shadow-[0_2px_8px_rgba(68,122,252,0.3)]">
-                        <Upload className="h-4 w-4" strokeWidth={2} />
-                        {isImporting ? "Відновлення..." : "Обрати файл бекапу"}
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={importFullBackup}
-                          className="hidden"
-                          disabled={isImporting}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Clear all data — outside backup card */}
-            <div
-              className="mt-6 p-6 border border-red-200 rounded-3xl bg-white"
-              style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
-            >
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
-                  <Trash2 className="h-6 w-6 text-red-600" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">
-                    Очистити всі дані
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-3">
-                    Видаляє всі ваші дані (ставки, стратегії, цілі, команди,
-                    Telegram-групи). Обліковий запис та налаштування залишаться.
-                  </p>
-                  <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4">
-                    <AlertTriangle
-                      className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5"
-                      strokeWidth={1.75}
-                    />
-                    <p className="text-xs text-amber-800">
-                      <span className="font-semibold">Увага:</span> цю дію
-                      неможливо скасувати. Рекомендуємо спочатку створити бекап.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => setClearConfirmOpen(true)}
-                    disabled={isClearing}
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm px-6 font-semibold"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" strokeWidth={2} />
-                    {isClearing ? "Очищення..." : "Очистити всі дані"}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+        {activeTab === "backup" && (
+          <ProfileBackup
+            storageSize={storageSize}
+            lastBackupDate={lastBackupDate}
+            isExporting={isExporting}
+            isImporting={isImporting}
+            isClearing={isClearing}
+            onExport={exportFullBackup}
+            onImport={importFullBackup}
+            onClear={() => setClearConfirmOpen(true)}
+          />
         )}
 
         {/* ===== Clear data confirmation dialog ===== */}
