@@ -1,6 +1,18 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatedFAQ,
+  AnimatedNumber,
+  ArenaImage,
+  DataOwnership,
+  HeroTitle,
+  LandingMotion,
+  ProductExplorer,
+  StrategyCheck,
+  useJourneyScroll,
+  useLandingReducedMotion,
+} from "./LandingExperience";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -24,6 +36,11 @@ const DEMO = "/login-digesto-demo";
 const description =
   "Трекер ставок на CS2 та Dota 2. Веди історію, контролюй банкрол і аналізуй власні результати.";
 const faqs = [
+  {
+    question: "Як потрапити в демо?",
+    answer:
+      "Кнопка «Увійти в демо» відкриває форму входу до демо-облікового запису. Для входу потрібні його логін і пароль. Поки не маєш доступу — досліди інтерактивні приклади на цій сторінці: вони працюють без входу.",
+  },
   {
     question: "Чи можна зробити ставку в MatchIQ?",
     answer:
@@ -90,14 +107,18 @@ function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useLandingReducedMotion();
   return (
     <motion.div
       className={className}
       initial={reduced ? false : { opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: reduced ? 0 : 0.65,
+        delay: reduced ? 0 : delay,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       {children}
     </motion.div>
@@ -105,7 +126,7 @@ function Reveal({
 }
 function DemoLink({
   dark = false,
-  children = "Спробувати демо",
+  children = "Увійти в демо",
 }: {
   dark?: boolean;
   children?: ReactNode;
@@ -121,7 +142,6 @@ function Brand() {
   return (
     <span className="lp-brand">
       Match<span>IQ</span>
-      <span className="lp-brand-dot">®</span>
     </span>
   );
 }
@@ -136,7 +156,7 @@ function DemoLabel() {
   );
 }
 function LineChart({ loss = false }: { loss?: boolean }) {
-  const reduced = useReducedMotion();
+  const reduced = useLandingReducedMotion();
   const path = loss
     ? "M0 36 L20 40 L40 28 L60 35 L80 23 L100 41 L120 36 L140 52 L160 42 L180 62 L200 57 L220 74 L240 66 L260 89 L280 77 L300 110 L320 103 L340 126 L360 135"
     : "M0 102 L20 93 L40 107 L60 80 L80 86 L100 66 L120 78 L140 57 L160 67 L180 43 L200 56 L220 40 L240 62 L260 32 L280 42 L300 25 L320 39 L340 15 L360 24";
@@ -170,91 +190,94 @@ function LineChart({ loss = false }: { loss?: boolean }) {
         initial={reduced ? false : { pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
+        transition={{ duration: reduced ? 0 : 1.5, ease: "easeInOut" }}
       />
     </svg>
   );
 }
 function JourneyPreview({ active }: { active: number }) {
-  const reduced = useReducedMotion();
+  const reduced = useLandingReducedMotion();
   return (
     <div className="lp-journey-preview">
       <div className="lp-preview-top">
         <span>MatchIQ / журнал рішень</span>
         <DemoLabel />
       </div>
-      <motion.div
-        key={active}
-        initial={reduced ? false : { opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="lp-journey-content"
-        aria-live="polite"
-      >
-        <Eyebrow>{steps[active].label}</Eyebrow>
-        <h3>{steps[active].heading}</h3>
-        <p className="lp-preview-description">{steps[active].detail}</p>
-        {active === 0 && (
-          <div className="lp-match-demo">
-            <div>
-              <b className="lp-team-mark">N</b>
-              <strong>NAVI</strong>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={active}
+          initial={reduced ? false : { opacity: 0, y: 18, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: reduced ? 0 : -12 }}
+          transition={{ duration: reduced ? 0 : 0.28 }}
+          className="lp-journey-content"
+          aria-live="polite"
+        >
+          <Eyebrow>{steps[active].label}</Eyebrow>
+          <h3>{steps[active].heading}</h3>
+          <p className="lp-preview-description">{steps[active].detail}</p>
+          {active === 0 && (
+            <div className="lp-match-demo">
+              <div>
+                <b className="lp-team-mark">N</b>
+                <strong>NAVI</strong>
+              </div>
+              <span>
+                VS<small>BO3</small>
+              </span>
+              <div>
+                <b className="lp-team-mark lp-team-mark-light">TS</b>
+                <strong>Team Spirit</strong>
+              </div>
             </div>
-            <span>
-              VS<small>BO3</small>
-            </span>
-            <div>
-              <b className="lp-team-mark lp-team-mark-light">TS</b>
-              <strong>Team Spirit</strong>
+          )}
+          {active === 1 && (
+            <div className="lp-record-demo">
+              <div>
+                <span>Сума ставки</span>
+                <strong>
+                  500 <small>₴</small>
+                </strong>
+              </div>
+              <div>
+                <span>Коефіцієнт</span>
+                <strong>1.80</strong>
+              </div>
+              <div className="lp-record-wide">
+                <span>Стратегія</span>
+                <strong>
+                  Основна <ShieldCheck size={18} />
+                </strong>
+              </div>
             </div>
-          </div>
-        )}
-        {active === 1 && (
-          <div className="lp-record-demo">
-            <div>
-              <span>Сума ставки</span>
+          )}
+          {active === 2 && (
+            <div className="lp-result-demo">
+              <span className="lp-loss-tag">Програш</span>
               <strong>
-                500 <small>₴</small>
+                −500 <small>₴</small>
               </strong>
+              <blockquote>
+                «Відхилився від своєї стратегії. Наступного разу перевірю межі
+                коефіцієнтів перед записом.»
+              </blockquote>
             </div>
-            <div>
-              <span>Коефіцієнт</span>
-              <strong>1.80</strong>
-            </div>
-            <div className="lp-record-wide">
-              <span>Стратегія</span>
+          )}
+          {active === 3 && (
+            <div className="lp-bank-demo">
+              <span>Поточний банкрол</span>
               <strong>
-                Основна <ShieldCheck size={18} />
+                <AnimatedNumber value={11500} /> <small>₴</small>
               </strong>
+              <LineChart loss />
+              <div className="lp-axis">
+                <span>До ставки</span>
+                <span>Після результату</span>
+              </div>
             </div>
-          </div>
-        )}
-        {active === 2 && (
-          <div className="lp-result-demo">
-            <span className="lp-loss-tag">Програш</span>
-            <strong>
-              −500 <small>₴</small>
-            </strong>
-            <blockquote>
-              «Відхилився від своєї стратегії. Наступного разу перевірю межі
-              коефіцієнтів перед записом.»
-            </blockquote>
-          </div>
-        )}
-        {active === 3 && (
-          <div className="lp-bank-demo">
-            <span>Поточний банкрол</span>
-            <strong>
-              11 500 <small>₴</small>
-            </strong>
-            <LineChart loss />
-            <div className="lp-axis">
-              <span>До ставки</span>
-              <span>Після результату</span>
-            </div>
-          </div>
-        )}
-      </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
       <div className="lp-preview-bottom">
         <span>Один приклад. Чотири кроки.</span>
         <span>0{active + 1} / 04</span>
@@ -263,10 +286,16 @@ function JourneyPreview({ active }: { active: number }) {
   );
 }
 function MonthlyChart() {
-  const bars = [
+  const reduced = useLandingReducedMotion();
+  const [game, setGame] = useState("CS2");
+  const baseBars = [
     32, 48, -25, 68, 28, -52, 38, -24, -75, 42, 60, -32, 22, -45, 56, -66, 32,
     -40, 23, -55,
   ];
+  const bars =
+    game === "CS2"
+      ? baseBars
+      : baseBars.map((v, i) => (i % 3 === 0 ? -v : Math.abs(v)));
   return (
     <div className="lp-stat-visual">
       <div className="lp-stat-top">
@@ -274,8 +303,23 @@ function MonthlyChart() {
         <DemoLabel />
       </div>
       <div className="lp-stat-value">
-        −320 <small>₴</small>
+        <AnimatedNumber value={game === "CS2" ? -320 : 460} /> <small>₴</small>
         <span>Чистий результат</span>
+      </div>
+      <div
+        className="lp-segmented lp-chart-filter"
+        aria-label="Гра на демонстраційному графіку"
+      >
+        {["CS2", "Dota 2"].map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={game === value}
+            onClick={() => setGame(value)}
+          >
+            {value}
+          </button>
+        ))}
       </div>
       <div
         className="lp-bars"
@@ -284,9 +328,17 @@ function MonthlyChart() {
       >
         {bars.map((value, i) => (
           <div key={i} className="lp-bar-slot">
-            <span
+            <motion.span
+              key={game}
               className={value > 0 ? "lp-bar-up" : "lp-bar-down"}
               style={{ height: `${Math.abs(value)}%` }}
+              initial={reduced ? false : { scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: reduced ? 0 : 0.65,
+                delay: reduced ? 0 : i * 0.025,
+              }}
             />
           </div>
         ))}
@@ -347,9 +399,11 @@ function Comparison({ games = false }: { games?: boolean }) {
   );
 }
 
-export default function Landing() {
+function LandingContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const journeyRef = useJourneyScroll(setActiveStep);
+  const reduced = useLandingReducedMotion();
   return (
     <div className="matchiq-landing">
       <SEO
@@ -367,20 +421,13 @@ export default function Landing() {
         Перейти до вмісту
       </a>
       <div className="lp-hero-shell">
-        <img
-          className="lp-hero-image"
-          src="/assets/landing-arena.png"
-          alt=""
-          fetchPriority="high"
-          width="1672"
-          height="941"
-        />
+        <ArenaImage />
         <header className="lp-header">
           <Link to="/" aria-label="MatchIQ — головна">
             <Brand />
           </Link>
           <nav className="lp-desktop-nav" aria-label="Основна навігація">
-            <a href="#features">Можливості</a>
+            <a href="#possibilities">Можливості</a>
             <a href="#how-it-works">Як це працює</a>
             <a href="#faq">FAQ</a>
           </nav>
@@ -398,26 +445,32 @@ export default function Landing() {
             {menuOpen ? <X /> : <Menu />}
           </button>
         </header>
-        {menuOpen && (
-          <nav
-            id="landing-mobile-nav"
-            className="lp-mobile-nav"
-            aria-label="Мобільна навігація"
-          >
-            <a href="#features" onClick={() => setMenuOpen(false)}>
-              Можливості
-            </a>
-            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
-              Як це працює
-            </a>
-            <a href="#faq" onClick={() => setMenuOpen(false)}>
-              FAQ
-            </a>
-            <Link to="/login">
-              Увійти <ArrowUpRight size={18} />
-            </Link>
-          </nav>
-        )}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.nav
+              initial={{ opacity: 0, y: reduced ? 0 : -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduced ? 0 : -12 }}
+              transition={{ duration: reduced ? 0 : 0.22 }}
+              id="landing-mobile-nav"
+              className="lp-mobile-nav"
+              aria-label="Мобільна навігація"
+            >
+              <a href="#possibilities" onClick={() => setMenuOpen(false)}>
+                Можливості
+              </a>
+              <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
+                Як це працює
+              </a>
+              <a href="#faq" onClick={() => setMenuOpen(false)}>
+                FAQ
+              </a>
+              <Link to="/login">
+                Увійти <ArrowUpRight size={18} />
+              </Link>
+            </motion.nav>
+          )}
+        </AnimatePresence>
         <main id="landing-main">
           <section className="lp-hero" aria-labelledby="hero-title">
             <div className="lp-hero-copy">
@@ -425,11 +478,7 @@ export default function Landing() {
                 <Eyebrow>
                   <span className="lp-signal" /> ДАНІ. ДИСЦИПЛІНА. ТВОЯ ГРА.
                 </Eyebrow>
-                <h1 id="hero-title">
-                  Гра має емоції.
-                  <br />
-                  Рішення — <span>цифри.</span>
-                </h1>
+                <HeroTitle />
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="lp-hero-description">
@@ -440,7 +489,9 @@ export default function Landing() {
                   результати.
                 </p>
                 <div className="lp-hero-actions">
-                  <DemoLink />
+                  <a href="#possibilities" className="lp-button">
+                    Дослідити можливості <ArrowUpRight size={20} />
+                  </a>
                   <a href="#how-it-works" className="lp-text-link">
                     Як це працює <ArrowDown size={17} />
                   </a>
@@ -511,7 +562,7 @@ export default function Landing() {
                 <span>Подивись, як це працює.</span>
               </p>
             </Reveal>
-            <div className="lp-journey-grid">
+            <div className="lp-journey-grid" ref={journeyRef}>
               <Reveal className="lp-steps">
                 {steps.map((step, index) => (
                   <button
@@ -530,15 +581,16 @@ export default function Landing() {
                   </button>
                 ))}
               </Reveal>
-              <Reveal delay={0.1}>
+              <div className="lp-journey-sticky">
                 <JourneyPreview active={activeStep} />
-              </Reveal>
+              </div>
             </div>
             <p className="lp-example-note">
               Ілюстративний приклад інтерфейсу. Усі суми та результати —
               демонстраційні.
             </p>
           </section>
+          <ProductExplorer />
           <section
             className="lp-section lp-analytics lp-dark"
             id="features"
@@ -546,7 +598,7 @@ export default function Landing() {
           >
             <div className="lp-analytics-grid">
               <Reveal className="lp-analytics-intro">
-                <Eyebrow>02 / АНАЛІТИКА</Eyebrow>
+                <Eyebrow>03 / АНАЛІТИКА</Eyebrow>
                 <h2 id="analytics-title">
                   Не просто
                   <br />
@@ -617,7 +669,7 @@ export default function Landing() {
           >
             <div className="lp-discipline-grid">
               <Reveal>
-                <Eyebrow>03 / ДИСЦИПЛІНА</Eyebrow>
+                <Eyebrow>04 / ДИСЦИПЛІНА</Eyebrow>
                 <h2 id="discipline-title">
                   Твої правила.
                   <br />
@@ -659,15 +711,7 @@ export default function Landing() {
                   <span>Перед збереженням ставки</span>
                   <DemoLabel />
                 </div>
-                <div className="lp-warning-block">
-                  <span className="lp-warning-icon">!</span>
-                  <div>
-                    <span className="lp-small-label">ПРАВИЛО СТРАТЕГІЇ</span>
-                    <h3>Коефіцієнт за межами діапазону</h3>
-                    <p>Твій діапазон: 1.40–1.70</p>
-                  </div>
-                  <b>1.80</b>
-                </div>
+                <StrategyCheck />
                 <div className="lp-risk-block">
                   <Flag />
                   <div>
@@ -683,7 +727,13 @@ export default function Landing() {
                   </div>
                   <p>Прибуток за місяць · 2 000 ₴</p>
                   <div className="lp-goal-track">
-                    <span />
+                    <motion.span
+                      initial={reduced ? false : { scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: reduced ? 0 : 1 }}
+                      style={{ transformOrigin: "left" }}
+                    />
                   </div>
                   <div className="lp-axis">
                     <span>700 ₴ / 2 000 ₴</span>
@@ -697,13 +747,14 @@ export default function Landing() {
               </Reveal>
             </div>
           </section>
+          <DataOwnership />
           <section
             className="lp-demo-section lp-dark"
             aria-labelledby="demo-title"
           >
             <div className="lp-demo-photo" />
             <Reveal className="lp-demo-copy">
-              <Eyebrow>04 / СПРОБУЙ MATCHIQ</Eyebrow>
+              <Eyebrow>06 / СПРОБУЙ MATCHIQ</Eyebrow>
               <h2 id="demo-title">
                 Пройди цей
                 <br />
@@ -713,7 +764,13 @@ export default function Landing() {
                 Переглянь матчі, спробуй облік ставок
                 <br />і досліди аналітику в демо.
               </p>
-              <DemoLink>Відкрити демо</DemoLink>
+              <DemoLink />
+              <p className="lp-demo-access">
+                Потрібні логін і пароль демо-облікового запису.
+                <br />
+                Без доступу?{" "}
+                <a href="#possibilities">Досліди приклади вище ↗</a>
+              </p>
             </Reveal>
             <p className="lp-demo-aside">
               ТІ САМІ МАТЧІ.
@@ -727,7 +784,7 @@ export default function Landing() {
             aria-labelledby="faq-title"
           >
             <Reveal>
-              <Eyebrow>05 / FAQ</Eyebrow>
+              <Eyebrow>07 / FAQ</Eyebrow>
               <h2 id="faq-title">
                 Перед
                 <br />
@@ -739,20 +796,7 @@ export default function Landing() {
                 на важливі питання.
               </p>
             </Reveal>
-            <div className="lp-faq-list">
-              {faqs.map((faq, index) => (
-                <details
-                  key={faq.question}
-                  open={index === 0 ? true : undefined}
-                >
-                  <summary>
-                    {faq.question}
-                    <span aria-hidden="true">+</span>
-                  </summary>
-                  <p>{faq.answer}</p>
-                </details>
-              ))}
-            </div>
+            <AnimatedFAQ items={faqs} />
           </section>
           <section className="lp-final" aria-labelledby="final-title">
             <Reveal>
@@ -779,7 +823,7 @@ export default function Landing() {
         </Link>
         <p>Трекер та аналітика.</p>
         <nav aria-label="Навігація у футері">
-          <a href="#features">Можливості</a>
+          <a href="#possibilities">Можливості</a>
           <a href="#how-it-works">Як це працює</a>
           <a href="#faq">FAQ</a>
           <Link to="/login">Увійти</Link>
@@ -791,5 +835,13 @@ export default function Landing() {
         </small>
       </footer>
     </div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <LandingMotion>
+      <LandingContent />
+    </LandingMotion>
   );
 }
