@@ -33,9 +33,11 @@
 }
 .profile-landing .profile-nav a[aria-current],
 .profile-landing-menu .profile-nav a[aria-current] {
+  margin: 0 -18px;
+  padding: 13px 33px;
   background: #ffffff07;
-  color: #ff815b;
-  border-radius: 6px;
+  color: #fff;
+  border-radius: 0 6px 6px 0;
   box-shadow: inset 3px 0 #ff693b;
 }
 .profile-landing .profile-page {

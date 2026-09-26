@@ -138,15 +138,16 @@
 }
 .risk-metrics dt {
   margin-top: 4px;
-  color: #c7cac3;
-  font-size: 14px;
+  color: #c2c4bc;
+  font-size: 13px;
 }
 .risk-metrics dd {
   margin: 0;
   font-family: Oswald, sans-serif;
-  font-size: 36px;
+  font-size: 42px;
   font-weight: 600;
   line-height: 1;
+  letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
 }
 .risk-metrics .is-ban dd {

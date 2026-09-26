@@ -81,10 +81,17 @@
   background: #ffffff09;
   color: #fff;
 }
-.profile-nav a[aria-current] {
-  background: #ffffff07;
-  color: #ff815b;
+.profile-nav a:not([aria-current]):hover {
+  margin: 0 -18px;
+  padding: 13px 33px;
   border-radius: 6px;
+}
+.profile-nav a[aria-current] {
+  margin: 0 -18px;
+  padding: 13px 33px;
+  background: #ffffff07;
+  color: #fff;
+  border-radius: 0 6px 6px 0;
   box-shadow: inset 3px 0 #ff693b;
 }
 .profile-nav svg,
