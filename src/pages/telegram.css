@@ -226,47 +226,47 @@
 }
 .telegram-guide {
   min-width: 0;
-  padding: 18px 0 0 26px;
-  border-left: 1px solid #d8d9d2;
 }
 .telegram-guide > section {
-  padding: 0;
-  background: transparent;
+  padding: 24px;
+  border: 1px solid #d8d9d2;
+  border-radius: 5px;
+  background: #fff;
 }
 .telegram-guide h2 {
   color: #171917;
-  font-size: 28px;
+  font-size: 25px;
   line-height: 1.1;
+  text-transform: uppercase;
 }
 .telegram-guide ol {
   position: relative;
   display: grid;
-  gap: 31px;
-  padding: 27px 0 0;
-  margin: 0;
+  gap: 0;
+  padding: 0;
+  margin: 30px 0 0;
   list-style: none;
-}
-.telegram-guide ol::before {
-  position: absolute;
-  left: 15px;
-  top: 61px;
-  bottom: 63px;
-  width: 1px;
-  background: #cfd0ca;
-  content: "";
 }
 .telegram-guide li {
   position: relative;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 13px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 34px;
+}
+.telegram-guide li:last-child {
+  padding-bottom: 0;
 }
 .telegram-guide li > span {
-  position: relative;
-  z-index: 1;
-  background: var(--tg-paper);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #edeef0;
+  color: #636771;
   font-family: "Oswald", sans-serif;
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 600;
   line-height: 1;
 }
@@ -332,17 +332,12 @@
   .telegram-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  .telegram-guide {
-    border-left: 0;
-    border-top: 1px solid #d8d9d2;
-    padding: 24px 0 0;
-  }
   .telegram-guide ol {
     grid-template-columns: repeat(3, 1fr);
     gap: 22px;
   }
-  .telegram-guide ol::before {
-    display: none;
+  .telegram-guide li {
+    grid-template-columns: 40px minmax(0, 1fr);
   }
   .telegram-guide-support {
     max-width: 300px;
@@ -390,11 +385,7 @@
   }
   .telegram-guide ol {
     grid-template-columns: 1fr;
-    gap: 26px;
-  }
-  .telegram-guide ol::before {
-    display: block;
-    bottom: 59px;
+    gap: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

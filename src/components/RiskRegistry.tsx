@@ -156,11 +156,11 @@ export default function RiskRegistry() {
         <div className="risk-toolbar">
           <label className="risk-search">
             <Search size={18} />
-            <span className="sr-only">Знайти команду або правило</span>
+            <span className="sr-only">Знайти команду або коментар</span>
             <input
               value={h.searchQuery}
               onChange={(event) => h.setSearchQuery(event.target.value)}
-              placeholder="Знайти команду або правило…"
+              placeholder="Знайти команду або коментар…"
             />
           </label>
           <div className="risk-games" role="group" aria-label="Фільтр за грою">
