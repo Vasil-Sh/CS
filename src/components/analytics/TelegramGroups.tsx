@@ -28,10 +28,6 @@ import {
   MessageCircle,
   Plus,
   Trash2,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  BarChart3,
   ExternalLink,
   Users,
   CheckCircle2,
@@ -41,37 +37,49 @@ import {
   Save,
   X,
   AlertTriangle,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Eye,
   RefreshCw,
   Search,
-  MoreHorizontal,
+  CircleHelp,
 } from "lucide-react";
-import {
-  CHART_CARD_SHADOW,
-  CARD_BASE_STYLE,
-  applyCardHover,
-  resetCardHover,
-} from "@/lib/cardStyles";
+import { CHART_CARD_SHADOW } from "@/lib/cardStyles";
 
 // ── Helpers ──
-
-/** Convert any Telegram link to web preview URL (no account needed for public channels) */
-function toWebPreviewUrl(link: string): string {
-  if (!link) return "";
-  // Already a /s/ link
-  if (link.includes("/s/")) return link;
-  // https://t.me/name → https://t.me/s/name
-  return link.replace(/^(https?:\/\/)?t\.me\/(?!s\/)/, "$1t.me/s/");
-}
 
 /** Extract handle from Telegram link for display */
 function tgHandle(link: string): string {
   if (!link) return "";
   const match = link.match(/t\.me\/(?:s\/)?([^/\s?#]+)/);
   return match ? "@" + match[1] : link;
+}
+
+/** Raw username (no "@") from a Telegram link — used to build the avatar URL */
+function tgUsername(link: string): string {
+  return tgHandle(link).replace(/^@/, "");
+}
+
+/** Group avatar: real Telegram photo with a group icon fallback */
+function GroupAvatar({ link, name }: { link: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const username = tgUsername(link);
+  const showPhoto = Boolean(username) && !failed;
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0c2347] text-white">
+      {showPhoto ? (
+        <img
+          src={`https://t.me/i/userpic/320/${username}.jpg`}
+          alt={name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+          onLoad={(e) => {
+            if (e.currentTarget.naturalWidth <= 1) setFailed(true);
+          }}
+        />
+      ) : (
+        <Users size={20} strokeWidth={1.75} />
+      )}
+    </div>
+  );
 }
 
 // ── Types ──
@@ -570,9 +578,8 @@ export default function TelegramGroups() {
             </Button>
             <Button
               onClick={handleSaveGroup}
-              className="rounded-xl bg-primary hover:bg-blue-700"
+              className="rounded-xl bg-[#ff693b] text-[#171916] hover:bg-[#f65a2a]"
             >
-              <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
               {editingGroup ? "Зберегти" : "Додати"}
             </Button>
           </DialogFooter>
@@ -655,18 +662,20 @@ export default function TelegramGroups() {
   // ── Render ──
 
   const renderKPICards = () => (
-    <section className="rounded-2xl border border-[#e4e5e7] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)]">
-      <div className="grid grid-cols-2 divide-x divide-y divide-[#e9eaec] sm:grid-cols-4 sm:divide-y-0">
-        <Metric value={groups.length} label="групи" />
-        <Metric value={overallStats.totalBets} label="ставки" />
+    <section
+      className="telegram-metrics"
+      aria-label="Загальна статистика Telegram-груп"
+    >
+      <div>
+        <Metric value={groups.length} label="Групи" accent />
+        <Metric value={overallStats.totalBets} label="Ставок" />
         <Metric
           value={`${overallStats.winRate.toFixed(0)}%`}
           label="Win Rate"
         />
         <Metric
-          value={`${overallStats.totalProfit >= 0 ? "+" : ""}${Number(overallStats.totalProfit).toFixed(1)}u`}
-          label="результат"
-          positive={overallStats.totalProfit > 0}
+          value={`${overallStats.totalProfit >= 0 ? "+" : ""}${Number(overallStats.totalProfit).toFixed(0)} ₴`}
+          label="Прибуток"
         />
       </div>
     </section>
@@ -679,40 +688,47 @@ export default function TelegramGroups() {
   };
 
   const renderGuide = () => (
-    <aside className="space-y-4">
-      <section className="rounded-2xl border border-[#e4e5e7] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)]">
-        <h2 className="text-base font-semibold text-slate-900">Як це працює</h2>
-        <ol className="relative mt-5 space-y-5 before:absolute before:left-3 before:top-3 before:h-[calc(100%-24px)] before:w-px before:bg-slate-200">
+    <aside className="telegram-guide">
+      <section>
+        <h2>Як це працює</h2>
+        <ol>
           {[
-            ["1", "Додайте групу", "Збережіть назву та посилання на канал."],
-            ["2", "Вносьте ставки", "Фіксуйте рішення та результат у MatchIQ."],
             [
-              "3",
+              "01",
+              "Додайте групу",
+              "Підключіть Telegram-групу, щоб почати збирати дані про ставки.",
+            ],
+            [
+              "02",
+              "Вносьте ставки",
+              "Ми автоматично відстежуватимемо результати з групи.",
+            ],
+            [
+              "03",
               "Аналізуйте результат",
-              "Порівнюйте Win Rate і прибуток груп.",
+              "Отримуйте статистику та шукайте прибуткові закономірності.",
             ],
           ].map(([number, title, description]) => (
-            <li key={number} className="relative flex gap-3">
-              <span className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                {number}
-              </span>
+            <li key={number}>
+              <span>{number}</span>
               <div>
-                <p className="text-sm font-medium text-slate-800">{title}</p>
-                <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                  {description}
-                </p>
+                <p>{title}</p>
+                <p>{description}</p>
               </div>
             </li>
           ))}
         </ol>
-        <div className="mt-6 border-t border-[#e9eaec] pt-4 text-sm">
+        <div className="telegram-guide-support">
           <a
             href="https://t.me/cs2beet"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-blue-600 underline hover:text-blue-700"
+            className=""
           >
-            Потрібна допомога? ↗
+            <CircleHelp />
+            <span>
+              Потрібна допомога?<strong>Перейти до підтримки</strong>
+            </span>
           </a>
         </div>
       </section>
@@ -726,25 +742,23 @@ export default function TelegramGroups() {
   return (
     <>
       {renderDialogs()}
-      <div className="flex flex-col flex-1 min-h-0 space-y-6">
-        <div className="telegram-heading">
-          <div>
-            <h1>Telegram</h1>
-            <p>Групи для аналізу спільних результатів.</p>
+      <div className="telegram-screen">
+        <section className="telegram-hero">
+          <div className="telegram-heading">
+            <div>
+              <h1>Telegram</h1>
+              <p>Групи для аналізу спільних результатів.</p>
+            </div>
+            <Button onClick={openNewGroup} className="w-fit px-4">
+              <Plus className="mr-2 h-4 w-4" strokeWidth={1.75} />
+              Додати групу
+            </Button>
           </div>
-          <Button
-            onClick={openNewGroup}
-            className="w-fit rounded-xl bg-[#2878f0] px-4 text-white shadow-sm hover:bg-[#1d68d8]"
-          >
-            <Plus className="mr-2 h-4 w-4" strokeWidth={1.75} />
-            Додати групу
-          </Button>
-        </div>
+          {renderKPICards()}
+        </section>
 
         <div className="telegram-grid">
           <div className="telegram-main space-y-5">
-            {renderKPICards()}
-
             {groups.length === 0 ? (
               <div className="flex min-h-[440px] flex-1 rounded-2xl border border-[#e4e5e7] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)]">
                 <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-[#fbfbfa]">
@@ -808,15 +822,17 @@ export default function TelegramGroups() {
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[760px] text-sm">
-                        <thead className="border-b border-[#e9eaec] text-left text-xs font-medium text-slate-400">
+                        <thead className="border-b border-[#e9eaec] text-center text-xs font-medium text-slate-400">
                           <tr>
-                            <th className="px-4 py-3">Група</th>
+                            <th className="px-4 py-3 text-left">Група</th>
                             <th className="px-3 py-3">Активність</th>
-                            <th className="px-3 py-3 text-center">Ставок</th>
-                            <th className="px-3 py-3 text-center">Win Rate</th>
-                            <th className="px-3 py-3 text-right">P/L</th>
+                            <th className="px-3 py-3">Ставок</th>
+                            <th className="px-3 py-3">Win Rate</th>
+                            <th className="px-3 py-3" title="Прибуток / Збиток">
+                              Прибуток/Збиток
+                            </th>
                             <th className="px-3 py-3">Статус</th>
-                            <th className="px-4 py-3" />
+                            <th className="px-4 py-3">Дії</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -831,9 +847,6 @@ export default function TelegramGroups() {
                                   new Date(b.date).getTime() -
                                   new Date(a.date).getTime(),
                               )[0];
-                            const initials = gs.groupName
-                              .slice(0, 2)
-                              .toUpperCase();
                             return (
                               <tr
                                 key={gs.groupId}
@@ -841,9 +854,10 @@ export default function TelegramGroups() {
                               >
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0c2347] text-xs font-bold text-white">
-                                      {initials}
-                                    </div>
+                                    <GroupAvatar
+                                      link={group?.link || ""}
+                                      name={gs.groupName}
+                                    />
                                     <div className="min-w-0">
                                       <p className="truncate font-semibold text-slate-800">
                                         {gs.groupName}
@@ -853,9 +867,22 @@ export default function TelegramGroups() {
                                           "Без посилання"}
                                       </p>
                                     </div>
+                                    {group?.link && (
+                                      <a
+                                        href={group.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="ml-auto shrink-0 rounded-md p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600"
+                                        title="Відкрити групу в Telegram"
+                                        aria-label={`Відкрити групу ${gs.groupName} в Telegram`}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <ExternalLink className="h-4 w-4" />
+                                      </a>
+                                    )}
                                   </div>
                                 </td>
-                                <td className="px-3 py-3 text-xs text-slate-500">
+                                <td className="px-3 py-3 text-center text-xs text-slate-500">
                                   {lastBet
                                     ? new Date(lastBet.date).toLocaleDateString(
                                         "uk-UA",
@@ -874,19 +901,19 @@ export default function TelegramGroups() {
                                     : "—"}
                                 </td>
                                 <td
-                                  className={`px-3 py-3 text-right font-semibold ${gs.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                                  className={`px-3 py-3 text-center font-semibold ${gs.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
                                 >
                                   {gs.totalProfit >= 0 ? "+" : ""}
-                                  {gs.totalProfit.toFixed(1)}u
+                                  {gs.totalProfit.toFixed(0)} ₴
                                 </td>
-                                <td className="px-3 py-3">
+                                <td className="px-3 py-3 text-center">
                                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-600">
                                     <CheckCircle2 className="h-3 w-3" />
                                     Підключено
                                   </span>
                                 </td>
                                 <td className="px-4 py-3">
-                                  <div className="flex items-center justify-end gap-2">
+                                  <div className="flex items-center justify-center gap-2">
                                     <button
                                       onClick={() => {
                                         setEditingGroup(group || null);
@@ -896,18 +923,21 @@ export default function TelegramGroups() {
                                         });
                                         setGroupDialogOpen(true);
                                       }}
-                                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                                      className="rounded-md p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600"
+                                      title="Редагувати групу"
+                                      aria-label="Редагувати групу"
                                     >
-                                      Переглянути
+                                      <Pencil className="h-4 w-4" />
                                     </button>
                                     <button
                                       onClick={() =>
                                         setDeleteGroupConfirm(gs.groupId)
                                       }
-                                      className="rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                                      className="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-500"
                                       title="Видалити групу"
+                                      aria-label="Видалити групу"
                                     >
-                                      <MoreHorizontal className="h-4 w-4" />
+                                      <Trash2 className="h-4 w-4" />
                                     </button>
                                   </div>
                                 </td>
@@ -1122,86 +1152,21 @@ export default function TelegramGroups() {
 
 // ── Stability Badge ──
 
-function StabilityBadge({
-  stability,
-  label,
-}: {
-  stability: number;
-  label: string;
-}) {
-  const Icon =
-    stability >= 70 ? ShieldCheck : stability >= 40 ? Shield : ShieldAlert;
-  const colors =
-    stability >= 70
-      ? "bg-[#DCFCE7] text-green-600 border-green-200"
-      : stability >= 40
-        ? "bg-yellow-100 text-amber-600 border-[#FED7AA]"
-        : label === "Немає даних"
-          ? "bg-gray-100 text-gray-400 border-gray-200"
-          : "bg-red-50 text-red-600 border-red-200";
-
-  return (
-    <Badge
-      className={`text-[10px] font-medium px-2 py-0.5 border rounded-full ${colors}`}
-    >
-      <Icon className="h-3 w-3 mr-1" strokeWidth={1.5} />
-      {label}
-    </Badge>
-  );
-}
-
 // ── Mini Stat Card ──
 
 function Metric({
   value,
   label,
-  positive = false,
+  accent = false,
 }: {
   value: string | number;
   label: string;
-  positive?: boolean;
+  accent?: boolean;
 }) {
   return (
-    <div className="px-4 py-2 first:pl-0 sm:first:pl-0 sm:last:pr-0">
-      <p
-        className={`text-2xl font-semibold tracking-tight ${positive ? "text-emerald-600" : "text-slate-900"}`}
-      >
-        {value}
-      </p>
-      <p className="mt-0.5 text-sm text-slate-500">{label}</p>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-  iconColor,
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  color: string;
-  iconColor: string;
-}) {
-  return (
-    <div
-      className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5 flex flex-col justify-between transition-all duration-300"
-      style={CARD_BASE_STYLE}
-      onMouseEnter={(e) => applyCardHover(e.currentTarget)}
-      onMouseLeave={(e) => resetCardHover(e.currentTarget)}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <div
-          className={`flex items-center justify-center w-10 h-10 rounded-xl ${color}`}
-        >
-          <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={1.5} />
-        </div>
-        <span className="text-lg font-semibold text-gray-900">{label}</span>
-      </div>
-      <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+    <div className={accent ? "is-accent" : undefined}>
+      <p>{value}</p>
+      <p>{label}</p>
     </div>
   );
 }

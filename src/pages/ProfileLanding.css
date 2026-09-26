@@ -98,6 +98,17 @@
 .profile-landing .profile-identity {
   padding: 25px var(--profile-gutter) 22px;
   min-height: 118px;
+  position: relative;
+}
+.profile-landing .profile-identity::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: var(--profile-gutter);
+  right: var(--profile-gutter);
+  height: 1px;
+  background: #ffffff26;
+  pointer-events: none;
 }
 .profile-landing .profile-identity-copy h2 {
   font-family: "Manrope", sans-serif;
@@ -130,7 +141,7 @@
   background: #ffffff08;
 }
 .profile-landing .profile-overview {
-  padding: 0 var(--profile-gutter) 28px;
+  padding: 28px var(--profile-gutter) 28px;
 }
 .profile-landing .profile-overview > .profile-section-title {
   position: absolute;

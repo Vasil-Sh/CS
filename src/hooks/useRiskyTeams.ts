@@ -6,7 +6,16 @@ import { type RiskyTeam } from "@/data/riskyTeams";
 export type { RiskyTeam };
 
 // ── Constants ──
-const ALL_STATUSES = ["БАН", "Ризиковані", "Нестабільні", "Обережно", "Під питанням", "Стабільні", "Надійна", "Неоцінена"] as const;
+const ALL_STATUSES = [
+  "БАН",
+  "Ризиковані",
+  "Нестабільні",
+  "Обережно",
+  "Під питанням",
+  "Стабільні",
+  "Надійна",
+  "Неоцінена",
+] as const;
 
 // ── Pure utilities ──
 const normalizeGame = (game?: string): string => {
@@ -51,93 +60,258 @@ export function useRiskyTeams() {
   const [dotaStatusFilter, setDotaStatusFilter] = useState<string>("all");
   const initializedRef = useRef(false);
 
-  const [newTeam, setNewTeam] = useState<RiskyTeam>({ name: "", game: "CS", status: "Під питанням", notes: "" });
+  const [newTeam, setNewTeam] = useState<RiskyTeam>({
+    name: "",
+    game: "CS",
+    status: "Під питанням",
+    notes: "",
+  });
 
   // ── Effects ──
   useEffect(() => {
-    if (initializedRef.current) localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
+    if (initializedRef.current)
+      localStorage.setItem("admin_risky_teams", JSON.stringify(riskyTeams));
   }, [riskyTeams]);
 
   useEffect(() => {
     const saved = localStorage.getItem("admin_risky_teams");
     let parsed: RiskyTeam[] | null = null;
-    if (saved) { try { const p = JSON.parse(saved); if (Array.isArray(p) && p.length > 0) parsed = p; } catch { /* ignore */ } }
+    if (saved) {
+      try {
+        const p = JSON.parse(saved);
+        if (Array.isArray(p) && p.length > 0) parsed = p;
+      } catch {
+        /* ignore */
+      }
+    }
 
     if (parsed) {
       setRiskyTeams(parsed.map((t) => ({ ...t, game: normalizeGame(t.game) })));
-      setIsLoadingTeams(false); initializedRef.current = true;
+      setIsLoadingTeams(false);
+      initializedRef.current = true;
     } else if (saved === null) {
       let cancelled = false;
       (async () => {
-        try { const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams(); if (!cancelled && teams.length > 0) { setRiskyTeams(teams); localStorage.setItem("admin_risky_teams", JSON.stringify(teams)); } }
-        catch { /* ignore */ }
-        if (!cancelled) { setIsLoadingTeams(false); initializedRef.current = true; }
+        try {
+          const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams();
+          if (!cancelled && teams.length > 0) {
+            setRiskyTeams(teams);
+            localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
+          }
+        } catch {
+          /* ignore */
+        }
+        if (!cancelled) {
+          setIsLoadingTeams(false);
+          initializedRef.current = true;
+        }
       })();
       setIsLoadingTeams(true);
-      return () => { cancelled = true; };
-    } else { setIsLoadingTeams(false); initializedRef.current = true; }
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setIsLoadingTeams(false);
+      initializedRef.current = true;
+    }
   }, []);
+
+  // ── Logo enrichment ──
+  // Resolve team logos from the backend for teams that don't have one yet
+  // (data cached in localStorage / Google Sheets has no logo URL).
+  const logoCache = useRef<Map<string, string | null>>(new Map());
+  const enrichingRef = useRef(false);
+  useEffect(() => {
+    const missing = riskyTeams.filter((t) => !t.logo);
+    if (!missing.length || enrichingRef.current) return;
+    const toResolve = missing.filter((t) => {
+      const key = `${t.game}:${t.name.toLowerCase()}`;
+      return !logoCache.current.has(key);
+    });
+    if (!toResolve.length) return;
+    enrichingRef.current = true;
+    let cancelled = false;
+    (async () => {
+      const map = await googleSheetsRiskyTeamsService.resolveLogos(
+        toResolve.map((t) => ({ name: t.name, game: t.game })),
+      );
+      if (cancelled) return;
+      // Cache by game+name key and merge resolved logos
+      const keyed = new Map<string, string | null>();
+      toResolve.forEach((t) => {
+        const logo = map[t.name] ?? null;
+        logoCache.current.set(`${t.game}:${t.name.toLowerCase()}`, logo);
+        if (logo) keyed.set(`${t.game}:${t.name}`, logo);
+      });
+      if (keyed.size) {
+        setRiskyTeams((prev) =>
+          prev.map((t) => {
+            const logo = keyed.get(`${t.game}:${t.name}`);
+            return logo ? { ...t, logo } : t;
+          }),
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [riskyTeams]);
 
   // ── Handlers ──
   const updateFromGoogleSheets = async () => {
     setIsUpdating(true);
     try {
-      const id = customSheetUrl.trim() ? extractSheetId(customSheetUrl.trim()) : null;
-      const gid = customSheetUrl.trim() ? extractSheetGid(customSheetUrl.trim()) : null;
-      const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams(id || undefined, gid || undefined);
-      if (!teams.length) { toast.error("Не знайдено команд"); return; }
-      const synced = await Promise.all(teams.map(async (t) => { try { const a = await googleSheetsRiskyTeamsService.addTeamAndGet(t.name, t.game, t.status, t.notes); return { ...t, _apiId: a?.id }; } catch { return t; } }));
+      const id = customSheetUrl.trim()
+        ? extractSheetId(customSheetUrl.trim())
+        : null;
+      const gid = customSheetUrl.trim()
+        ? extractSheetGid(customSheetUrl.trim())
+        : null;
+      const teams = await googleSheetsRiskyTeamsService.fetchRiskyTeams(
+        id || undefined,
+        gid || undefined,
+      );
+      if (!teams.length) {
+        toast.error("Не знайдено команд");
+        return;
+      }
+      const synced = await Promise.all(
+        teams.map(async (t) => {
+          try {
+            const a = await googleSheetsRiskyTeamsService.addTeamAndGet(
+              t.name,
+              t.game,
+              t.status,
+              t.notes,
+            );
+            return { ...t, _apiId: a?.id };
+          } catch {
+            return t;
+          }
+        }),
+      );
       setRiskyTeams(synced);
-      toast.success(`Завантажено ${teams.length} команд!`, { description: `CS: ${teams.filter((t) => t.game === "CS").length} · Дота: ${teams.filter((t) => t.game === "Дота").length}` });
-    } catch (e) { toast.error("Помилка оновлення", { description: e instanceof Error ? e.message : "Невідома помилка" }); }
-    finally { setIsUpdating(false); }
+      toast.success(`Завантажено ${teams.length} команд!`, {
+        description: `CS: ${teams.filter((t) => t.game === "CS").length} · Дота: ${teams.filter((t) => t.game === "Дота").length}`,
+      });
+    } catch (e) {
+      toast.error("Помилка оновлення", {
+        description: e instanceof Error ? e.message : "Невідома помилка",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const addRiskyTeam = async () => {
     if (!newTeam.name.trim()) return;
     setRiskyTeams([...riskyTeams, { ...newTeam }]);
     setNewTeam({ name: "", game: "CS", status: "Під питанням", notes: "" });
-    googleSheetsRiskyTeamsService.addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes).catch(() => {});
+    googleSheetsRiskyTeamsService
+      .addTeam(newTeam.name.trim(), newTeam.game, newTeam.status, newTeam.notes)
+      .catch(() => {});
   };
 
   const deleteRiskyTeam = (index: number) => {
     if (editingIndex === index) setEditingIndex(null);
     const team = riskyTeams[index];
     setRiskyTeams(riskyTeams.filter((_, i) => i !== index));
-    if (team._apiId) googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch(() => {});
+    if (team._apiId)
+      googleSheetsRiskyTeamsService.removeTeam(team._apiId).catch(() => {});
   };
 
   const deleteAllTeams = () => {
-    riskyTeams.forEach((t) => { if (t._apiId) googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch(() => {}); });
-    setRiskyTeams([]); setEditingIndex(null);
+    riskyTeams.forEach((t) => {
+      if (t._apiId)
+        googleSheetsRiskyTeamsService.removeTeam(t._apiId).catch(() => {});
+    });
+    setRiskyTeams([]);
+    setEditingIndex(null);
     localStorage.setItem("admin_risky_teams", JSON.stringify([]));
-    toast.success("Усі команди видалено"); setIsDeleteAllOpen(false);
+    toast.success("Усі команди видалено");
+    setIsDeleteAllOpen(false);
   };
 
-  const startEditing = (idx: number, team: RiskyTeam) => { setEditingIndex(idx); setEditName(team.name); setEditNotes(team.notes); setEditStatus(team.status); setEditGame(normalizeGame(team.game)); };
-  const cancelEditing = () => { setEditingIndex(null); setEditName(""); setEditNotes(""); setEditStatus(""); setEditGame(""); };
+  const startEditing = (idx: number, team: RiskyTeam) => {
+    setEditingIndex(idx);
+    setEditName(team.name);
+    setEditNotes(team.notes);
+    setEditStatus(team.status);
+    setEditGame(normalizeGame(team.game));
+  };
+  const cancelEditing = () => {
+    setEditingIndex(null);
+    setEditName("");
+    setEditNotes("");
+    setEditStatus("");
+    setEditGame("");
+  };
 
   const saveEditing = async () => {
     if (editingIndex === null || !editName.trim()) return;
     const oldGame = riskyTeams[editingIndex].game;
     const newGame = editGame || "CS";
     const updated = [...riskyTeams];
-    updated[editingIndex] = { ...updated[editingIndex], name: editName.trim(), notes: editNotes, status: editStatus, game: newGame };
+    updated[editingIndex] = {
+      ...updated[editingIndex],
+      name: editName.trim(),
+      notes: editNotes,
+      status: editStatus,
+      game: newGame,
+    };
     const savedTeam = updated[editingIndex];
-    setRiskyTeams(updated); localStorage.setItem("admin_risky_teams", JSON.stringify(updated)); setEditingIndex(null);
+    setRiskyTeams(updated);
+    localStorage.setItem("admin_risky_teams", JSON.stringify(updated));
+    setEditingIndex(null);
     try {
-      if (savedTeam._apiId) await googleSheetsRiskyTeamsService.updateTeam(savedTeam._apiId, { name: savedTeam.name, game: savedTeam.game, status: savedTeam.status, notes: savedTeam.notes });
-      else { const added = await googleSheetsRiskyTeamsService.addTeamAndGet(savedTeam.name, savedTeam.game, savedTeam.status, savedTeam.notes); if (added?.id) { const wId = updated.map((t, i) => i === editingIndex ? { ...t, _apiId: added.id } : t); setRiskyTeams(wId); localStorage.setItem("admin_risky_teams", JSON.stringify(wId)); } }
-    } catch { /* ignore */ }
-    if (oldGame !== newGame) toast.success(`Команду "${editName.trim()}" перенесено в блок ${newGame === "CS" ? "CS" : "Dota 2"}`);
+      if (savedTeam._apiId)
+        await googleSheetsRiskyTeamsService.updateTeam(savedTeam._apiId, {
+          name: savedTeam.name,
+          game: savedTeam.game,
+          status: savedTeam.status,
+          notes: savedTeam.notes,
+        });
+      else {
+        const added = await googleSheetsRiskyTeamsService.addTeamAndGet(
+          savedTeam.name,
+          savedTeam.game,
+          savedTeam.status,
+          savedTeam.notes,
+        );
+        if (added?.id) {
+          const wId = updated.map((t, i) =>
+            i === editingIndex ? { ...t, _apiId: added.id } : t,
+          );
+          setRiskyTeams(wId);
+          localStorage.setItem("admin_risky_teams", JSON.stringify(wId));
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    if (oldGame !== newGame)
+      toast.success(
+        `Команду "${editName.trim()}" перенесено в блок ${newGame === "CS" ? "CS" : "Dota 2"}`,
+      );
     else toast.success("Команду оновлено");
-    setEditName(""); setEditNotes(""); setEditStatus(""); setEditGame("");
+    setEditName("");
+    setEditNotes("");
+    setEditStatus("");
+    setEditGame("");
   };
 
   // ── Derived ──
-  const filteredTeams = useMemo(() => riskyTeams.filter((t) =>
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.game.toLowerCase().includes(searchQuery.toLowerCase()) || t.status.toLowerCase().includes(searchQuery.toLowerCase()) || t.notes.toLowerCase().includes(searchQuery.toLowerCase())
-  ), [riskyTeams, searchQuery]);
+  const filteredTeams = useMemo(
+    () =>
+      riskyTeams.filter(
+        (t) =>
+          t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          t.game.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          t.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          t.notes.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [riskyTeams, searchQuery],
+  );
 
   const teamStats = useMemo(() => {
     const total = riskyTeams.length;
@@ -145,30 +319,113 @@ export function useRiskyTeams() {
     const dota = riskyTeams.filter((t) => t.game === "Дота").length;
     const ban = riskyTeams.filter((t) => t.status === "БАН").length;
     const unstable = riskyTeams.filter((t) => t.status === "Ризиковані").length;
-    const careful = riskyTeams.filter((t) => t.status === "Під питанням").length;
+    const careful = riskyTeams.filter(
+      (t) => t.status === "Під питанням",
+    ).length;
     const rare = riskyTeams.filter((t) => t.status === "Стабільні").length;
     const reliable = riskyTeams.filter((t) => t.status === "Надійна").length;
     const noStatus = riskyTeams.filter((t) => t.status === "Неоцінена").length;
-    return { total, csCount: cs, dotaCount: dota, banCount: ban, unstableCount: unstable, carefulCount: careful, rareCount: rare, reliableCount: reliable, noStatusCount: noStatus, attentionCount: ban + unstable, dominantGame: cs >= dota ? "CS" : "Dota 2", dominantGameCount: Math.max(cs, dota), banPercentage: total > 0 ? Math.round((ban / total) * 100) : 0 };
+    return {
+      total,
+      csCount: cs,
+      dotaCount: dota,
+      banCount: ban,
+      unstableCount: unstable,
+      carefulCount: careful,
+      rareCount: rare,
+      reliableCount: reliable,
+      noStatusCount: noStatus,
+      attentionCount: ban + unstable,
+      dominantGame: cs >= dota ? "CS" : "Dota 2",
+      dominantGameCount: Math.max(cs, dota),
+      banPercentage: total > 0 ? Math.round((ban / total) * 100) : 0,
+    };
   }, [riskyTeams]);
 
-  const csTeams = useMemo(() => filteredTeams.filter((t) => t.game === "CS" && (csStatusFilter === "all" || t.status === csStatusFilter)), [filteredTeams, csStatusFilter]);
-  const dotaTeams = useMemo(() => filteredTeams.filter((t) => t.game === "Дота" && (dotaStatusFilter === "all" || t.status === dotaStatusFilter)), [filteredTeams, dotaStatusFilter]);
-  const uncategorizedTeams = useMemo(() => filteredTeams.filter((t) => t.game !== "CS" && t.game !== "Дота"), [filteredTeams]);
+  const csTeams = useMemo(
+    () =>
+      filteredTeams.filter(
+        (t) =>
+          t.game === "CS" &&
+          (csStatusFilter === "all" || t.status === csStatusFilter),
+      ),
+    [filteredTeams, csStatusFilter],
+  );
+  const dotaTeams = useMemo(
+    () =>
+      filteredTeams.filter(
+        (t) =>
+          t.game === "Дота" &&
+          (dotaStatusFilter === "all" || t.status === dotaStatusFilter),
+      ),
+    [filteredTeams, dotaStatusFilter],
+  );
+  const uncategorizedTeams = useMemo(
+    () => filteredTeams.filter((t) => t.game !== "CS" && t.game !== "Дота"),
+    [filteredTeams],
+  );
 
-  const csStatusCounts = useMemo(() => { const all = filteredTeams.filter((t) => t.game === "CS"); const c: Record<string, number> = { all: all.length }; ALL_STATUSES.forEach((s) => { c[s] = all.filter((t) => t.status === s).length; }); return c; }, [filteredTeams]);
-  const dotaStatusCounts = useMemo(() => { const all = filteredTeams.filter((t) => t.game === "Дота"); const c: Record<string, number> = { all: all.length }; ALL_STATUSES.forEach((s) => { c[s] = all.filter((t) => t.status === s).length; }); return c; }, [filteredTeams]);
+  const csStatusCounts = useMemo(() => {
+    const all = filteredTeams.filter((t) => t.game === "CS");
+    const c: Record<string, number> = { all: all.length };
+    ALL_STATUSES.forEach((s) => {
+      c[s] = all.filter((t) => t.status === s).length;
+    });
+    return c;
+  }, [filteredTeams]);
+  const dotaStatusCounts = useMemo(() => {
+    const all = filteredTeams.filter((t) => t.game === "Дота");
+    const c: Record<string, number> = { all: all.length };
+    ALL_STATUSES.forEach((s) => {
+      c[s] = all.filter((t) => t.status === s).length;
+    });
+    return c;
+  }, [filteredTeams]);
 
   return {
-    riskyTeams, isLoadingTeams, searchQuery, setSearchQuery, isUpdating,
-    isAddTeamOpen, setIsAddTeamOpen, isSearchOpen, setIsSearchOpen,
-    isDeleteAllOpen, setIsDeleteAllOpen, isSheetsGuideOpen, setIsSheetsGuideOpen,
-    customSheetUrl, setCustomSheetUrl, editingIndex, editName, setEditName,
-    editNotes, setEditNotes, editStatus, setEditStatus, editGame, setEditGame,
-    csStatusFilter, setCsStatusFilter, dotaStatusFilter, setDotaStatusFilter,
-    updateFromGoogleSheets, addRiskyTeam, deleteRiskyTeam, deleteAllTeams,
-    startEditing, cancelEditing, saveEditing,
-    filteredTeams, teamStats, csTeams, dotaTeams, uncategorizedTeams,
-    csStatusCounts, dotaStatusCounts, newTeam, setNewTeam,
+    riskyTeams,
+    isLoadingTeams,
+    searchQuery,
+    setSearchQuery,
+    isUpdating,
+    isAddTeamOpen,
+    setIsAddTeamOpen,
+    isSearchOpen,
+    setIsSearchOpen,
+    isDeleteAllOpen,
+    setIsDeleteAllOpen,
+    isSheetsGuideOpen,
+    setIsSheetsGuideOpen,
+    customSheetUrl,
+    setCustomSheetUrl,
+    editingIndex,
+    editName,
+    setEditName,
+    editNotes,
+    setEditNotes,
+    editStatus,
+    setEditStatus,
+    editGame,
+    setEditGame,
+    csStatusFilter,
+    setCsStatusFilter,
+    dotaStatusFilter,
+    setDotaStatusFilter,
+    updateFromGoogleSheets,
+    addRiskyTeam,
+    deleteRiskyTeam,
+    deleteAllTeams,
+    startEditing,
+    cancelEditing,
+    saveEditing,
+    filteredTeams,
+    teamStats,
+    csTeams,
+    dotaTeams,
+    uncategorizedTeams,
+    csStatusCounts,
+    dotaStatusCounts,
+    newTeam,
+    setNewTeam,
   };
 }

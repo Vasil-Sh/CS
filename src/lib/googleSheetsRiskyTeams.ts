@@ -190,6 +190,38 @@ class GoogleSheetsRiskyTeamsService {
       // API unavailable — ignore
     }
   }
+
+  /** Resolve a team logo URL by name + game via the backend logo fallback */
+  async resolveLogo(name: string, game?: string): Promise<string | null> {
+    const prefix =
+      (game || "").toLowerCase().includes("dota") || game === "Дота"
+        ? "dota2"
+        : "cs2";
+    try {
+      const data = await api.get<{ url: string | null }>(
+        `/risky-teams/logo?name=${encodeURIComponent(name)}&game=${prefix}`,
+      );
+      return data?.url ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Batch-resolve team logos (one request) → map keyed by name */
+  async resolveLogos(
+    items: { name: string; game?: string }[],
+  ): Promise<Record<string, string | null>> {
+    const map: Record<string, string | null> = {};
+    try {
+      const data = await api.post<
+        { name: string; game: string; url: string | null }[]
+      >("/risky-teams/logos", items);
+      for (const it of data || []) map[it.name] = it.url ?? null;
+    } catch {
+      // API unavailable — return empty map
+    }
+    return map;
+  }
 }
 
 /** Parse a CSV row that may contain quoted strings with commas */

@@ -99,7 +99,7 @@
 .profile-topbar-user {
   position: fixed;
   top: 22px;
-  right: 24px;
+  right: 28px;
   z-index: 30;
   display: flex;
   align-items: center;

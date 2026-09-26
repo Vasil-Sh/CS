@@ -84,20 +84,6 @@ export default function ProfileShell({
   return (
     <div className={`profile-shell${isProfile ? " profile-landing" : ""}`}>
       <aside className="profile-sidebar">{navigation}</aside>
-      {!isProfile && (
-        <div className="profile-topbar-user">
-          <span className="profile-topbar-avatar">
-            {username.charAt(0).toUpperCase()}
-          </span>
-          <span className="profile-topbar-copy">
-            <strong>@{username}</strong>
-            <small>
-              <i />
-              Активний
-            </small>
-          </span>
-        </div>
-      )}
       <div className="profile-mobile-header">
         <span className="profile-mobile-brand">
           <span className="profile-brand-mark">
