@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { t } from "@/lib/i18n";
 import "@/pages/Profile.css";
+import "@/pages/ProfileLanding.css";
 
 const links = [
   ["nav.matches", "/app/matches", Trophy],
@@ -64,16 +65,6 @@ export default function ProfileShell({
         ))}
       </nav>
       <div className="profile-nav-footer">
-        <div className="profile-nav-user">
-          <User size={22} />
-          <span>
-            @{username}
-            <small>
-              <i />
-              Активний
-            </small>
-          </span>
-        </div>
         <a
           href="https://t.me/cs2beet"
           target="_blank"
@@ -89,9 +80,24 @@ export default function ProfileShell({
       </div>
     </>
   );
+  const isProfile = pathname === "/app/profile";
   return (
-    <div className="profile-shell">
+    <div className={`profile-shell${isProfile ? " profile-landing" : ""}`}>
       <aside className="profile-sidebar">{navigation}</aside>
+      {!isProfile && (
+        <div className="profile-topbar-user">
+          <span className="profile-topbar-avatar">
+            {username.charAt(0).toUpperCase()}
+          </span>
+          <span className="profile-topbar-copy">
+            <strong>@{username}</strong>
+            <small>
+              <i />
+              Активний
+            </small>
+          </span>
+        </div>
+      )}
       <div className="profile-mobile-header">
         <span className="profile-mobile-brand">
           <span className="profile-brand-mark">
@@ -110,7 +116,10 @@ export default function ProfileShell({
         </button>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="profile-mobile-menu">
+        <SheetContent
+          side="left"
+          className={`profile-mobile-menu${isProfile ? " profile-landing-menu" : ""}`}
+        >
           <SheetTitle className="sr-only">Навігація MatchIQ</SheetTitle>
           <button
             className="profile-menu-close"

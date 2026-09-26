@@ -1,0 +1,340 @@
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap");
+
+/* The landing-inspired skin is scoped to /app/profile; shared shells stay unchanged. */
+.profile-shell.profile-landing {
+  --profile-bg: #f4f3ef;
+  --profile-panel: #fff;
+  --profile-text: #20221f;
+  --profile-muted: #6a6e66;
+  --profile-border: #dedfd8;
+  --profile-accent: #ff693b;
+  --profile-gutter: clamp(24px, 3.2vw, 52px);
+  font-family: "Manrope", sans-serif;
+}
+.profile-landing .profile-sidebar {
+  background: #191b1a;
+  color: #c9ccc7;
+}
+.profile-landing .profile-brand-mark,
+.profile-landing-menu .profile-brand-mark {
+  background: #ff693b;
+  color: #171916;
+}
+.profile-landing .profile-brand-iq,
+.profile-landing-menu .profile-brand-iq {
+  color: #ff693b;
+}
+.profile-landing .profile-brand-text small,
+.profile-landing-menu .profile-brand-text small {
+  color: #a5aaa0;
+}
+.profile-landing .profile-brand-text {
+  font-size: 25px;
+}
+.profile-landing .profile-nav a[aria-current],
+.profile-landing-menu .profile-nav a[aria-current] {
+  background: #ffffff07;
+  color: #ff815b;
+  border-radius: 6px;
+  box-shadow: inset 3px 0 #ff693b;
+}
+.profile-landing .profile-page {
+  padding: 0 0 44px;
+  max-width: none;
+}
+.profile-landing .profile-heading {
+  background: #141615;
+  color: #f4f3ef;
+  padding: 30px var(--profile-gutter) 18px;
+}
+.profile-landing .profile-heading h1 {
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: clamp(40px, 4vw, 58px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.15;
+}
+.profile-landing .profile-tabs {
+  background: #141615;
+  padding: 0 var(--profile-gutter);
+  margin: 0;
+  border: 0;
+  position: relative;
+  gap: 28px;
+}
+.profile-landing .profile-tabs::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: var(--profile-gutter);
+  right: var(--profile-gutter);
+  height: 1px;
+  background: #ffffff26;
+  pointer-events: none;
+}
+.profile-landing .profile-tabs button {
+  color: #b9bdb5;
+  padding: 0 0 13px;
+  border-bottom-width: 3px;
+  z-index: 1;
+}
+.profile-landing .profile-tabs button[aria-current] {
+  color: #f4f3ef;
+  border-color: #ff693b;
+}
+.profile-landing .profile-content {
+  gap: 0;
+  animation: none;
+}
+.profile-landing .profile-identity,
+.profile-landing .profile-overview {
+  background: #141615;
+  color: #f4f3ef;
+  border: 0;
+  border-radius: 0;
+}
+.profile-landing .profile-identity {
+  padding: 25px var(--profile-gutter) 22px;
+  min-height: 118px;
+}
+.profile-landing .profile-identity-copy h2 {
+  font-family: "Manrope", sans-serif;
+  font-size: 26px;
+  letter-spacing: -0.8px;
+}
+.profile-landing .profile-identity-copy p {
+  color: #b4b9af;
+}
+.profile-landing .profile-avatar {
+  background: #e6e7e2;
+  color: #30362f;
+  width: 68px;
+  height: 68px;
+}
+.profile-landing .profile-avatar i {
+  border-color: #141615;
+}
+.profile-landing .profile-identity .profile-online {
+  color: #76d39c;
+}
+.profile-landing .profile-identity > .profile-button {
+  background: transparent;
+  color: #f4f3ef;
+  border-color: #969d91;
+  border-radius: 6px;
+}
+.profile-landing .profile-identity > .profile-button:hover {
+  border-color: #ff815b;
+  background: #ffffff08;
+}
+.profile-landing .profile-overview {
+  padding: 0 var(--profile-gutter) 28px;
+}
+.profile-landing .profile-overview > .profile-section-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.profile-landing .profile-metrics {
+  gap: 0;
+}
+.profile-landing .profile-metric {
+  border: 0;
+  border-left: 1px solid #ffffff30;
+  border-radius: 0;
+  padding: 10px 22px;
+  gap: 18px;
+  color: #f4f3ef;
+  align-items: flex-start;
+}
+.profile-landing .profile-metric:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+.profile-landing .profile-metric:hover {
+  background: #ffffff07;
+}
+.profile-landing .profile-metric svg {
+  color: #e0e4da;
+  margin-top: 7px;
+}
+.profile-landing .profile-metric strong {
+  font-family: "Oswald", sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+}
+.profile-landing .profile-metric.has-value strong {
+  color: #ff815b;
+}
+.profile-landing .profile-metric small {
+  color: #c3c8bd;
+  margin-top: 5px;
+}
+.profile-landing .profile-grid {
+  padding: 26px var(--profile-gutter) 0;
+  gap: 20px;
+}
+.profile-landing .profile-grid .profile-panel {
+  border-radius: 9px;
+  padding: 24px;
+}
+.profile-landing .profile-grid h2 {
+  font-family: "Oswald", sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.profile-landing .profile-setting {
+  min-height: 68px;
+}
+.profile-landing .profile-setting > label svg,
+.profile-landing .profile-backup-row > svg,
+.profile-landing .profile-event > svg {
+  color: #676e61;
+}
+.profile-landing .profile-setting select,
+.profile-landing .profile-setting input {
+  border-radius: 6px;
+}
+.profile-landing .profile-button,
+.profile-landing .profile-share {
+  border-radius: 6px;
+}
+.profile-landing .profile-icon-button {
+  color: var(--profile-text);
+}
+.profile-landing .profile-icon-button:hover,
+.profile-landing .profile-grid .profile-button:hover {
+  background: #8085750c;
+  border-color: #9ea595;
+}
+.profile-landing .profile-button-blue,
+.profile-landing .profile-primary {
+  background: #ff693b;
+  border-color: #ff693b;
+  color: #171916;
+  font-weight: 600;
+}
+.profile-landing .profile-button-blue:hover,
+.profile-landing .profile-primary:hover {
+  background: #f65a2a;
+  border-color: #f65a2a;
+  color: #171916;
+}
+.profile-landing .backup-page {
+  padding: 26px var(--profile-gutter) 0;
+}
+.profile-landing .backup-dropzone.is-dragging {
+  border-color: #e15d32;
+  background: #ff693b0a;
+}
+.profile-landing :is(button, a, input, select, textarea):focus-visible,
+.profile-landing-menu :is(button, a):focus-visible {
+  outline: 3px solid #ff815b;
+  outline-offset: 4px;
+}
+.profile-landing .profile-mobile-header {
+  background: #191b1a;
+}
+.profile-landing-menu {
+  background: #191b1a !important;
+  color: #c9ccc7 !important;
+  font-family: "Manrope", sans-serif;
+}
+.profile-edit-dialog .profile-primary {
+  background: #ff693b;
+  border-color: #ff693b;
+  color: #171916;
+}
+.profile-edit-dialog .profile-primary:hover {
+  background: #f65a2a;
+}
+.profile-edit-dialog :is(button, input, textarea):focus-visible {
+  outline: 3px solid #ff815b;
+  outline-offset: 3px;
+}
+.dark .profile-shell.profile-landing {
+  --profile-bg: #1c1f1c;
+  --profile-panel: #242824;
+  --profile-text: #eef0e9;
+  --profile-muted: #b3b9ad;
+  --profile-border: #41483d;
+}
+@media (min-width: 1700px) {
+  .profile-landing .profile-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 1fr);
+  }
+}
+@media (max-width: 1200px) {
+  .profile-landing .profile-metric {
+    padding-inline: 16px;
+    gap: 12px;
+  }
+}
+@media (max-width: 800px) {
+  .profile-shell.profile-landing {
+    --profile-gutter: 22px;
+  }
+  .profile-landing .profile-heading {
+    padding-top: 24px;
+  }
+  .profile-landing .profile-metrics {
+    gap: 18px 0;
+  }
+  .profile-landing .profile-metric:nth-child(odd) {
+    border: 0;
+    padding-left: 0;
+  }
+  .profile-landing .profile-grid {
+    padding-top: 20px;
+  }
+}
+@media (max-width: 560px) {
+  .profile-shell.profile-landing {
+    --profile-gutter: 16px;
+  }
+  .profile-landing .profile-heading h1 {
+    font-size: 38px;
+  }
+  .profile-landing .profile-identity {
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding-block: 22px;
+    gap: 14px;
+  }
+  .profile-landing .profile-avatar {
+    width: 52px;
+    height: 52px;
+  }
+  .profile-landing .profile-identity-copy h2 {
+    font-size: 22px;
+  }
+  .profile-landing .profile-identity > .profile-button {
+    font-size: 12px;
+  }
+  .profile-landing .profile-metric {
+    padding-block: 6px;
+    padding-inline: 14px;
+  }
+  .profile-landing .profile-metric strong {
+    font-size: 32px;
+  }
+  .profile-landing .profile-grid .profile-panel {
+    padding: 18px;
+  }
+  .profile-landing .profile-grid h2 {
+    font-size: 24px;
+  }
+  .profile-landing .profile-setting {
+    min-height: auto;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .profile-landing .profile-grid,
+  .profile-landing .backup-page {
+    animation: profile-enter 0.25s ease-out both;
+  }
+}

@@ -1,16 +1,10 @@
-/**
- * Public Profile — shareable stats page
- * Route: /user/:username — no auth required
- */
-
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import {
-  TrendingUp, DollarSign, Target, Trophy, BarChart3,
-  Zap, Loader2, Share2, Wallet, User, Calendar,
-} from "lucide-react";
-import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
+/* Scrollable chart/table regions must be keyboard focusable. */
+/* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["region"] }] */
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowUpRight, Check, Loader2, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import "./PublicProfile.css";
 
 interface PublicStats {
   username: string;
@@ -26,19 +20,151 @@ interface PublicStats {
     currentBank: number;
     activeGoals: number;
   };
-  recentBets: { match: string; result: string; profit: number; odds: number; date: string; game: string }[];
+  recentBets: {
+    match: string;
+    result: string;
+    profit: number;
+    odds: number;
+    date: string;
+    game: string;
+  }[];
   monthlyProfit: { month: string; profit: number }[];
 }
+const number = (value: number, decimals = 0) =>
+  Number(value || 0).toLocaleString("uk-UA", {
+    maximumFractionDigits: decimals,
+  });
+const signed = (value: number) => `${value > 0 ? "+" : ""}${number(value, 2)}`;
+const months = [
+  "Січ",
+  "Лют",
+  "Бер",
+  "Кві",
+  "Тра",
+  "Чер",
+  "Лип",
+  "Сер",
+  "Вер",
+  "Жов",
+  "Лис",
+  "Гру",
+];
+const monthLabel = (value: string) => {
+  const [year, month] = value.split("-");
+  return `${months[Number(month) - 1] || month} ’${year.slice(-2)}`;
+};
+const gameLabel = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]/g, "");
+const resultLabel = (result: string) =>
+  ({
+    Win: "Виграш",
+    Loss: "Програш",
+    Pending: "Очікується",
+    Refund: "Повернення",
+    Void: "Скасовано",
+    Push: "Повернення",
+  })[result] ||
+  result ||
+  "Очікується";
 
-const UA_MONTHS = ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"];
-
-function fmtMonth(m: string) {
-  const [y, mo] = m.split("-");
-  return `${UA_MONTHS[parseInt(mo, 10) - 1]}'${y?.slice(2)}`;
-}
-
-function getApiBase() {
-  return import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+function ProfitChart({ data }: { data: PublicStats["monthlyProfit"] }) {
+  if (!data.length)
+    return (
+      <div className="public-empty">
+        <strong>Ще немає результатів</strong>
+        <p>Графік з’явиться після розрахованих ставок.</p>
+      </div>
+    );
+  const sorted = [...data].sort((a, b) => a.month.localeCompare(b.month));
+  const high = Math.max(0, ...sorted.map((item) => item.profit));
+  const low = Math.min(0, ...sorted.map((item) => item.profit));
+  const span = high - low || 1;
+  const y = (value: number) => 36 + ((high - value) / span) * 180;
+  const zero = y(0);
+  const width = Math.max(620, sorted.length * 96 + 80);
+  const slot = (width - 88) / sorted.length;
+  return (
+    <div
+      className="public-chart-scroll"
+      tabIndex={0}
+      role="region"
+      aria-label="Графік прибутку за місяцями, можна прокручувати"
+    >
+      <svg
+        className="public-chart"
+        viewBox={`0 0 ${width} 270`}
+        style={{ minWidth: width }}
+        role="img"
+        aria-labelledby="public-chart-title public-chart-description"
+      >
+        <title id="public-chart-title">Прибуток за місяцями, гривні</title>
+        <desc id="public-chart-description">
+          {sorted
+            .map(
+              (item) =>
+                `${monthLabel(item.month)}: ${signed(item.profit)} гривень`,
+            )
+            .join("; ")}
+        </desc>
+        {[high, ...(high > 0 && low < 0 ? [0] : []), low]
+          .filter((value, index, list) => list.indexOf(value) === index)
+          .map((tick) => (
+            <g key={tick}>
+              <line
+                x1="72"
+                x2={width - 12}
+                y1={y(tick)}
+                y2={y(tick)}
+                className={tick === 0 ? "public-baseline" : "public-gridline"}
+              />
+              <text
+                x="60"
+                y={y(tick) + 4}
+                textAnchor="end"
+                className="public-axis"
+              >
+                {number(tick)}
+              </text>
+            </g>
+          ))}
+        {sorted.map((item, index) => {
+          const center = 80 + slot * (index + 0.5);
+          const top = Math.min(y(item.profit), zero);
+          return (
+            <g key={item.month}>
+              <rect
+                x={center - Math.min(slot * 0.3, 35)}
+                y={top}
+                width={Math.min(slot * 0.6, 70)}
+                height={Math.max(Math.abs(y(item.profit) - zero), 1)}
+                className={`public-bar${item.profit < 0 ? " is-negative" : index === sorted.length - 1 ? " is-latest" : ""}`}
+              >
+                <title>
+                  {monthLabel(item.month)}: {signed(item.profit)} ₴
+                </title>
+              </rect>
+              <text
+                x={center}
+                y={item.profit >= 0 ? top - 10 : y(item.profit) + 17}
+                textAnchor="middle"
+                className="public-bar-value"
+              >
+                {signed(item.profit)}
+              </text>
+              <text
+                x={center}
+                y="258"
+                textAnchor="middle"
+                className="public-axis"
+              >
+                {monthLabel(item.month)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
 }
 
 export default function PublicProfile() {
@@ -46,309 +172,317 @@ export default function PublicProfile() {
   const [data, setData] = useState<PublicStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [filter, setFilter] = useState("all");
+  const [copied, setCopied] = useState(false);
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!username) return;
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`${getApiBase()}/public-profile/${encodeURIComponent(username)}`)
+    setError("");
+    setData(null);
+    setFilter("all");
+    const base = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    fetch(
+      `${base.replace(/\/$/, "")}/public-profile/${encodeURIComponent(username || "")}`,
+      { signal: controller.signal },
+    )
       .then((res) => {
-        if (!res.ok) throw new Error(res.status === 404 ? "Користувача не знайдено" : "Помилка завантаження");
+        if (!res.ok)
+          throw new Error(
+            res.status === 404
+              ? "Користувача не знайдено"
+              : "Не вдалося завантажити статистику",
+          );
         return res.json();
       })
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [username]);
-
-  const copyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => toast.success("Посилання скопійовано!"));
+      .then((result) => {
+        if (!controller.signal.aborted) setData(result);
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted)
+          setError(err instanceof Error ? err.message : "Помилка завантаження");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [username, retry]);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2500);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast.success("Посилання скопійовано");
+    } catch {
+      toast.error(
+        "Не вдалося скопіювати. Скопіюйте посилання з адресного рядка.",
+      );
+    }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="min-h-screen bg-[#f3f3f3]">
-        <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-          <div className="max-w-[1064px] mx-auto px-6 py-6 flex items-center gap-4">
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shrink-0">
-              <User className="h-7 w-7 text-white" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">Профіль не знайдено</h1>
-              <p className="text-sm text-gray-500">{error || "Цей користувач ще не поділився своєю статистикою"}</p>
-            </div>
-          </div>
-        </div>
-        <div className="text-center py-20">
-          <Link to="/" className="text-primary font-medium hover:underline">← На головну</Link>
-        </div>
-      </div>
-    );
-  }
-
-  const { stats } = data;
-  const isUp = stats.totalProfit >= 0;
-
+  const bets =
+    data?.recentBets.filter(
+      (bet) => filter === "all" || gameLabel(bet.game) === filter,
+    ) || [];
   return (
-    <div className="min-h-screen bg-[#f3f3f3]">
-      {/* Header — white block matching system style */}
-      <div className="bg-white border-b border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="max-w-[1064px] mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shrink-0">
-              <User className="h-7 w-7 text-white" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">@{data.username}</h1>
-              <p className="text-sm text-gray-500">Публічний профіль беттора</p>
-            </div>
-          </div>
-          <button
-            onClick={copyLink}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-medium text-sm hover:bg-blue-700 transition-colors"
+    <div className="public-profile">
+      <a className="public-skip" href="#public-main">
+        Перейти до статистики
+      </a>
+      <header className="public-header">
+        <nav className="public-wrap public-nav" aria-label="Публічна навігація">
+          <Link
+            to="/"
+            className="public-logo"
+            aria-label="MatchIQ — на головну"
           >
-            <Share2 className="h-4 w-4" />
-            Поділитися
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Cards — wrapped in stone container like analytics */}
-      <div className="max-w-[1064px] mx-auto px-6 pt-6 pb-6 space-y-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <span className="text-sm text-gray-500">Банк</span>
-              </div>
-              <div className="text-2xl font-bold text-gray-900">
-                {Math.round(stats.currentBank).toLocaleString("uk-UA")} ₴
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-green-500" strokeWidth={1.5} />
-                </div>
-                <span className="text-sm text-gray-500">Профіт</span>
-              </div>
-              <div className={`text-2xl font-bold ${isUp ? "text-green-600" : "text-red-500"}`}>
-                {isUp ? "+" : ""}{Math.round(stats.totalProfit).toLocaleString("uk-UA")} ₴
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <Target className="h-5 w-5 text-amber-500" strokeWidth={1.5} />
-                </div>
-                <span className="text-sm text-gray-500">Вінрейт</span>
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{stats.winRate}%</div>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
-                </div>
-                <span className="text-sm text-gray-500">ROI</span>
-              </div>
-              <div className={`text-2xl font-bold ${stats.roi >= 0 ? "text-green-600" : "text-red-500"}`}>
-                {stats.roi >= 0 ? "+" : ""}{stats.roi}%
-              </div>
+            Match<span>IQ</span>
+          </Link>
+          <span className="public-nav-label">Публічний профіль</span>
+          <Link to="/login" className="public-login">
+            Увійти <ArrowUpRight size={17} />
+          </Link>
+        </nav>
+      </header>
+      <main id="public-main">
+        {loading ? (
+          <div className="public-state" role="status">
+            <Loader2 className="public-spinner" size={28} />
+            <h1>Завантажуємо профіль</h1>
+            <p>Отримуємо актуальну статистику…</p>
+          </div>
+        ) : error || !data ? (
+          <div className="public-state" role="alert">
+            <span className="public-eyebrow">MatchIQ</span>
+            <h1>
+              {error === "Користувача не знайдено"
+                ? "Профіль не знайдено"
+                : "Статистика недоступна"}
+            </h1>
+            <p>{error || "Не вдалося отримати дані профілю"}</p>
+            <div className="public-state-actions">
+              <button
+                className="public-button"
+                onClick={() => setRetry((value) => value + 1)}
+              >
+                Спробувати ще раз
+              </button>
+              <Link to="/">На головну ↗</Link>
             </div>
           </div>
-        </div>
-
-        {/* Stats row — ROI + Numbers + Monthly profit (3 columns) */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* ROI Circle */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center">
-              <span className="text-base text-gray-500 mb-4">ROI</span>
-              <AnimatedCircularProgressBar
-                max={100} min={0}
-                value={Math.abs(stats.roi) >= 100 ? 98 : Math.abs(stats.roi)}
-                gaugePrimaryColor={stats.roi >= 0 ? "#10B981" : "#EF4444"}
-                gaugeSecondaryColor="#E5E7EB"
-                className="!w-32 !h-32"
-              />
-              <span className={`text-3xl font-bold mt-4 ${stats.roi >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                {stats.roi >= 0 ? "+" : ""}{stats.roi}%
-              </span>
-              <div className="grid grid-cols-2 gap-2 mt-4 w-full">
-                <div className="bg-gray-50 rounded-xl px-3 py-2 text-center">
-                  <div className="text-[10px] text-gray-400 uppercase">Вкладено</div>
-                  <div className="text-sm font-bold">{Math.round(stats.totalStaked).toLocaleString("uk-UA")} ₴</div>
+        ) : (
+          <>
+            <section className="public-hero" aria-labelledby="public-name">
+              <div className="public-wrap public-identity">
+                <div className="public-avatar" aria-hidden="true">
+                  {data.username.slice(0, 1).toUpperCase()}
                 </div>
-                <div className={`rounded-xl px-3 py-2 text-center ${isUp ? "bg-emerald-50" : "bg-red-50"}`}>
-                  <div className={`text-[10px] uppercase ${isUp ? "text-emerald-600" : "text-red-500"}`}>Прибуток</div>
-                  <div className={`text-sm font-bold ${isUp ? "text-emerald-700" : "text-red-600"}`}>
-                    {isUp ? "+" : ""}{Math.round(stats.totalProfit).toLocaleString("uk-UA")} ₴
+                <div className="public-identity-copy">
+                  <p className="public-eyebrow">Статистика гравця</p>
+                  <h1 id="public-name">@{data.username}</h1>
+                  <p className="public-subtitle">Публічний журнал ставок</p>
+                </div>
+                <button
+                  type="button"
+                  className="public-button public-share"
+                  onClick={share}
+                >
+                  {copied ? <Check size={18} /> : <Share2 size={18} />}
+                  <span aria-live="polite">
+                    {copied ? "Скопійовано" : "Поділитися"}
+                  </span>
+                </button>
+              </div>
+              <div className="public-kpi-border">
+                <dl className="public-wrap public-kpis">
+                  <div>
+                    <dt>Ставок</dt>
+                    <dd>{number(data.stats.totalBets)}</dd>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Numbers */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Всього ставок</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.totalBets}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-green-500" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Виграші / Програші</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    <span className="text-green-600">{stats.wins}</span> / <span className="text-red-500">{stats.losses}</span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Середній коеф.</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.avgOdds}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                  <Target className="h-5 w-5 text-violet-500" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Активні цілі</p>
-                  <p className="text-xl font-bold text-gray-900">{stats.activeGoals}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Monthly profit */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Прибуток по місяцях</h3>
-              {data.monthlyProfit.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-                    <Calendar className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
+                  <div>
+                    <dt>Вінрейт</dt>
+                    <dd>
+                      {number(data.stats.winRate, 1)}
+                      <small>%</small>
+                    </dd>
                   </div>
-                  <p className="text-sm text-gray-400">Немає даних</p>
-                  <p className="text-xs text-gray-300 mt-1">З'являться після перших ставок</p>
+                  <div className="public-roi">
+                    <dt>ROI</dt>
+                    <dd>
+                      {signed(data.stats.roi)}
+                      <small>%</small>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Прибуток</dt>
+                    <dd>
+                      {signed(data.stats.totalProfit)} <small>₴</small>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+            <div className="public-wrap public-body">
+              <section
+                aria-labelledby="public-results-title"
+                className="public-results"
+              >
+                <div className="public-section-heading">
+                  <h2 id="public-results-title">Результати за місяцями</h2>
+                  <span>
+                    {data.monthlyProfit.length
+                      ? `${monthLabel([...data.monthlyProfit].sort((a, b) => a.month.localeCompare(b.month))[0].month)} — ${monthLabel([...data.monthlyProfit].sort((a, b) => a.month.localeCompare(b.month)).at(-1)!.month)}`
+                      : "Поки немає даних"}
+                  </span>
                 </div>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
-                      <th className="text-left py-2 pr-4 font-medium">Місяць</th>
-                      <th className="text-center py-2 px-4 font-medium border-l border-gray-100">Прибуток</th>
-                      <th className="text-center py-2 pl-4 font-medium border-l border-gray-100">Результат</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {data.monthlyProfit.map((m) => (
-                      <tr key={m.month} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-2.5 pr-4 font-medium text-gray-900">{fmtMonth(m.month)}</td>
-                        <td className={`py-2.5 px-4 border-l border-gray-100 text-center tabular-nums font-semibold ${m.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                          {m.profit >= 0 ? "+" : ""}{Math.round(m.profit).toLocaleString("uk-UA")} ₴
-                        </td>
-                        <td className="py-2.5 pl-4 border-l border-gray-100 text-center">
-                          <span className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${m.profit >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
-                            {m.profit >= 0 ? "Прибуток ▲" : "Збиток ▼"}
-                          </span>
-                        </td>
-                      </tr>
+                <div className="public-results-grid">
+                  <ProfitChart data={data.monthlyProfit} />
+                  <aside className="public-numbers">
+                    <h3>
+                      У цифрах <span>За весь час</span>
+                    </h3>
+                    <dl>
+                      <div>
+                        <dt>Виграші</dt>
+                        <dd>{number(data.stats.wins)}</dd>
+                      </div>
+                      <div>
+                        <dt>Програші</dt>
+                        <dd>{number(data.stats.losses)}</dd>
+                      </div>
+                      <div>
+                        <dt>Середній коефіцієнт</dt>
+                        <dd>{number(data.stats.avgOdds, 2)}</dd>
+                      </div>
+                    </dl>
+                  </aside>
+                </div>
+              </section>
+              <section
+                className="public-recent"
+                aria-labelledby="public-recent-title"
+              >
+                <div className="public-section-heading public-table-heading">
+                  <h2 id="public-recent-title">Останні ставки</h2>
+                  <div
+                    className="public-filters"
+                    role="group"
+                    aria-label="Фільтр останніх ставок за грою"
+                  >
+                    {[
+                      { value: "all", label: "Усі" },
+                      { value: "cs2", label: "CS2" },
+                      { value: "dota2", label: "Dota 2" },
+                    ].map((item) => (
+                      <button
+                        type="button"
+                        key={item.value}
+                        aria-pressed={filter === item.value}
+                        onClick={() => setFilter(item.value)}
+                      >
+                        {item.label}
+                      </button>
                     ))}
-                  </tbody>
-                </table>
-              )}
+                  </div>
+                  <span className="public-count" aria-live="polite">
+                    {bets.length} з {data.recentBets.length}
+                  </span>
+                </div>
+                {bets.length ? (
+                  <div
+                    className="public-table-scroll"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Останні ставки, таблицю можна прокручувати"
+                  >
+                    <table>
+                      <caption className="public-sr-only">
+                        Останні доступні ставки користувача {data.username}
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Дата</th>
+                          <th scope="col">Матч</th>
+                          <th scope="col">Коеф.</th>
+                          <th scope="col">Результат</th>
+                          <th scope="col">Прибуток</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bets.map((bet, index) => (
+                          <tr key={`${bet.date}-${bet.match}-${index}`}>
+                            <td className="public-date">{bet.date || "—"}</td>
+                            <td className="public-match">
+                              {bet.match}
+                              <small>{bet.game}</small>
+                            </td>
+                            <td>{number(bet.odds, 2)}</td>
+                            <td>
+                              <span
+                                className={`public-result ${bet.result === "Win" ? "is-win" : bet.result === "Loss" ? "is-loss" : "is-pending"}`}
+                              >
+                                <i />
+                                {resultLabel(bet.result)}
+                              </span>
+                            </td>
+                            <td>
+                              {[
+                                "Win",
+                                "Loss",
+                                "Refund",
+                                "Void",
+                                "Push",
+                              ].includes(bet.result)
+                                ? `${signed(bet.profit)} ₴`
+                                : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="public-empty">
+                    <strong>
+                      {filter === "all"
+                        ? "Ставок ще немає"
+                        : "У цьому списку немає ставок з цієї гри"}
+                    </strong>
+                    <p>
+                      {filter === "all"
+                        ? "Тут з’являться останні записи публічного журналу."
+                        : "Оберіть іншу гру або поверніться до всіх ставок."}
+                    </p>
+                    {filter !== "all" && (
+                      <button
+                        className="public-button"
+                        onClick={() => setFilter("all")}
+                      >
+                        Показати всі
+                      </button>
+                    )}
+                  </div>
+                )}
+                <p className="public-table-note">
+                  Показано останні доступні записи, а не всю історію ставок.
+                </p>
+              </section>
             </div>
-          </div>
+          </>
+        )}
+      </main>
+      <footer className="public-footer">
+        <div className="public-wrap">
+          <Link to="/" className="public-logo">
+            Match<span>IQ</span>
+          </Link>
+          <p>Статистика журналу · Не гарантує майбутніх результатів</p>
+          <span>Ваші дані. Зрозумілі рішення.</span>
         </div>
-
-        {/* Recent bets — full width */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Останні ставки</h3>
-            {data.recentBets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-                  <Trophy className="h-6 w-6 text-gray-300" strokeWidth={1.5} />
-                </div>
-                <p className="text-sm text-gray-400">Немає ставок</p>
-                <p className="text-xs text-gray-300 mt-1">Тут з'являться останні 5 ставок</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b-2 border-gray-100 text-gray-400 text-xs uppercase tracking-wider">
-                      <th className="text-left py-2.5 pr-3 font-medium">Дата</th>
-                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Матч</th>
-                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100 hidden sm:table-cell">Тип</th>
-                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Коеф.</th>
-                      <th className="text-center py-2.5 px-3 font-medium border-l border-gray-100">Профіт</th>
-                      <th className="text-center py-2.5 pl-3 font-medium border-l border-gray-100">Статус</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {data.recentBets.map((bet, i) => (
-                      <tr key={i} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-2.5 pr-3 text-gray-900 whitespace-nowrap">{bet.date}</td>
-                        <td className="py-2.5 px-3 border-l border-gray-100 max-w-[200px] text-center">
-                          <p className="text-sm font-medium text-gray-900 truncate">{bet.match}</p>
-                          <p className="text-xs text-gray-400 sm:hidden">{bet.game}</p>
-                        </td>
-                        <td className="py-2.5 px-3 border-l border-gray-100 text-gray-900 hidden sm:table-cell text-center">{bet.game}</td>
-                        <td className="py-2.5 px-3 border-l border-gray-100 text-center tabular-nums text-gray-900 font-medium">
-                          {bet.odds}
-                        </td>
-                        <td className={`py-2.5 px-3 border-l border-gray-100 text-center tabular-nums font-semibold whitespace-nowrap ${bet.result === "Win" ? "text-green-600" : bet.result === "Loss" ? "text-red-500" : "text-gray-400"}`}>
-                          {bet.result === "Win" ? `+${bet.profit}` : bet.result === "Loss" ? `${bet.profit}` : "—"} ₴
-                        </td>
-                        <td className="py-2.5 pl-3 border-l border-gray-100 text-center whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                            bet.result === "Win" ? "bg-green-50 text-green-600" :
-                            bet.result === "Loss" ? "bg-red-50 text-red-500" :
-                            "bg-gray-100 text-gray-500"
-                          }`}>
-                            {bet.result === "Win" ? "Виграш" : bet.result === "Loss" ? "Програш" : "Очікується"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="text-center text-base text-gray-400 pb-8 pt-4">
-        Статистика оновлюється автоматично ·{" "}
-        <Link to="/" className="text-primary hover:underline">
-          MatchIQ
-        </Link>
-      </div>
+      </footer>
     </div>
   );
 }

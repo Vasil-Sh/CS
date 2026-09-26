@@ -17,6 +17,7 @@ import {
   Check,
   RefreshCw,
   FolderOpen,
+  MessageCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -156,6 +157,12 @@ export default function ProfileOverview(p: Props) {
       Icon: Target,
       href: "/app/strategy",
     },
+    {
+      label: "Телеграм групи",
+      value: p.stats.tgGroups,
+      Icon: MessageCircle,
+      href: "/app/telegram",
+    },
   ];
   return (
     <>
@@ -192,7 +199,11 @@ export default function ProfileOverview(p: Props) {
         </div>
         <div className="profile-metrics">
           {metrics.map(({ label, value, Icon, href }) => (
-            <Link to={href} className="profile-metric" key={label}>
+            <Link
+              to={href}
+              className={`profile-metric${value > 0 ? " has-value" : ""}`}
+              key={label}
+            >
               <Icon size={27} strokeWidth={1.5} />
               <span>
                 <strong>{value}</strong>
@@ -203,119 +214,127 @@ export default function ProfileOverview(p: Props) {
         </div>
       </section>
       <div className="profile-grid">
-        <section className="profile-panel profile-settings">
-          <h2>Налаштування</h2>
-          <h3>Інтерфейс</h3>
-          <div className="profile-setting">
-            <label htmlFor="profile-theme">
-              <Sun size={21} />
-              Тема
-            </label>
-            <select
-              id="profile-theme"
-              value={p.theme}
-              onChange={(e) =>
-                p.onThemeChange(e.target.value as "light" | "dark")
-              }
-            >
-              <option value="light">Світла</option>
-              <option value="dark">Темна</option>
-            </select>
-          </div>
-          <div className="profile-setting">
-            <label htmlFor="profile-language">
-              <Globe size={21} />
-              Мова
-            </label>
-            <select
-              id="profile-language"
-              value={p.language}
-              onChange={(e) => p.onLanguageChange(e.target.value as Lang)}
-            >
-              <option value="uk">Українська</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-          <div className="profile-setting profile-rate">
-            <label htmlFor="profile-rate">
-              <DollarSign size={21} />
-              <span>
-                Курс USD → UAH<small>Для конвертації сум</small>
-              </span>
-            </label>
-            <div>
-              <div className="profile-rate-controls">
-                <input
-                  id="profile-rate"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  value={rate}
-                  aria-invalid={!!rateError}
-                  aria-describedby={
-                    rateError ? "profile-rate-error" : undefined
-                  }
-                  onChange={(e) => {
-                    setRate(e.target.value);
-                    setRateError("");
-                  }}
-                  onBlur={() => {
-                    const value = Number(rate);
-                    if (!Number.isFinite(value) || value <= 0) {
-                      setRateError("Вкажіть курс більше нуля");
-                      return;
-                    }
-                    if (value !== p.exchangeRate) p.onExchangeRateChange(value);
-                  }}
-                />
-                <button
-                  className="profile-icon-button"
-                  onClick={p.onFetchRate}
-                  disabled={p.isFetchingRate}
-                  aria-label="Оновити курс валют"
-                  title="Оновити курс"
-                >
-                  <RefreshCw
-                    size={17}
-                    className={p.isFetchingRate ? "animate-spin" : ""}
-                  />
-                </button>
-              </div>
-              {rateError && (
-                <small id="profile-rate-error" className="profile-error">
-                  {rateError}
-                </small>
-              )}
-            </div>
-          </div>
-          <h3 className="profile-data-heading">Дані</h3>
-          <div className="profile-backup-row">
-            <Database size={25} strokeWidth={1.5} />
-            <div>
-              <strong>Резервна копія даних</strong>
-              <p>
-                {p.lastBackupDate
-                  ? `Остання копія: ${dateText(p.lastBackupDate)}`
-                  : "Резервну копію ще не створено"}
-              </p>
-              <small
-                className={
-                  p.needsBackupReminder
-                    ? "profile-backup-needed"
-                    : "profile-online"
+        <div className="profile-left">
+          <section className="profile-panel profile-settings">
+            <h2>Налаштування</h2>
+            <h3>Інтерфейс</h3>
+            <div className="profile-setting">
+              <label htmlFor="profile-theme">
+                <Sun size={21} />
+                Тема
+              </label>
+              <select
+                id="profile-theme"
+                value={p.theme}
+                onChange={(e) =>
+                  p.onThemeChange(e.target.value as "light" | "dark")
                 }
               >
-                {p.needsBackupReminder
-                  ? "Рекомендуємо створити копію"
-                  : "Копію завантажено"}
-              </small>
+                <option value="light">Світла</option>
+                <option value="dark">Темна</option>
+              </select>
             </div>
-            <button className="profile-button" onClick={p.onOpenBackup}>
-              <FolderOpen size={17} />
-              Відкрити бекап
-            </button>
-          </div>
-        </section>
+            <div className="profile-setting">
+              <label htmlFor="profile-language">
+                <Globe size={21} />
+                Мова
+              </label>
+              <select
+                id="profile-language"
+                value={p.language}
+                onChange={(e) => p.onLanguageChange(e.target.value as Lang)}
+              >
+                <option value="uk">Українська</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div className="profile-setting profile-rate">
+              <label htmlFor="profile-rate">
+                <DollarSign size={21} />
+                <span>
+                  Курс USD → UAH<small>Для конвертації сум</small>
+                </span>
+              </label>
+              <div>
+                <div className="profile-rate-controls">
+                  <input
+                    id="profile-rate"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={rate}
+                    aria-invalid={!!rateError}
+                    aria-describedby={
+                      rateError ? "profile-rate-error" : undefined
+                    }
+                    onChange={(e) => {
+                      setRate(e.target.value);
+                      setRateError("");
+                    }}
+                    onBlur={() => {
+                      const value = Number(rate);
+                      if (!Number.isFinite(value) || value <= 0) {
+                        setRateError("Вкажіть курс більше нуля");
+                        return;
+                      }
+                      if (value !== p.exchangeRate)
+                        p.onExchangeRateChange(value);
+                    }}
+                  />
+                  <button
+                    className="profile-icon-button"
+                    onClick={p.onFetchRate}
+                    disabled={p.isFetchingRate}
+                    aria-label="Оновити курс валют"
+                    title="Оновити курс"
+                  >
+                    <RefreshCw
+                      size={17}
+                      className={p.isFetchingRate ? "animate-spin" : ""}
+                    />
+                  </button>
+                </div>
+                {rateError && (
+                  <small id="profile-rate-error" className="profile-error">
+                    {rateError}
+                  </small>
+                )}
+              </div>
+            </div>
+          </section>
+          <section className="profile-panel profile-settings">
+            <h2>Дані</h2>
+            <div className="profile-backup-row">
+              <Database size={25} strokeWidth={1.5} />
+              <div>
+                <strong>Резервна копія даних</strong>
+                <p>
+                  {p.lastBackupDate
+                    ? `Остання копія: ${dateText(p.lastBackupDate)}`
+                    : "Резервну копію ще не створено"}
+                </p>
+                <small
+                  className={
+                    p.needsBackupReminder
+                      ? "profile-backup-needed"
+                      : "profile-online"
+                  }
+                >
+                  {p.needsBackupReminder
+                    ? "Рекомендуємо створити копію"
+                    : "Копію завантажено"}
+                </small>
+              </div>
+              <button
+                className="profile-button profile-button-blue"
+                onClick={p.onOpenBackup}
+              >
+                <FolderOpen size={17} />
+                Відкрити бекап
+              </button>
+            </div>
+          </section>
+        </div>
         <aside className="profile-rail">
           <section className="profile-panel">
             <h2>Публічний профіль</h2>
@@ -348,16 +367,17 @@ export default function ProfileOverview(p: Props) {
               >
                 {copied ? <Check size={19} /> : <Copy size={19} />}
               </button>
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="profile-icon-button"
+                aria-label="Переглянути в новій вкладці"
+                title="Переглянути в новій вкладці"
+              >
+                <ExternalLink size={19} />
+              </a>
             </div>
-            <a
-              href={publicUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="profile-text-link"
-            >
-              <ExternalLink size={17} />
-              Переглянути<span className="sr-only"> в новій вкладці</span>
-            </a>
           </section>
           <section className="profile-panel">
             <div className="profile-section-title">

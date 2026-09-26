@@ -63,9 +63,10 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
           <div className="relative flex flex-1 flex-col justify-center py-14 sm:py-20">
             <Link
               to="/"
-              className="mb-10 inline-flex w-fit items-center gap-2 text-xs uppercase tracking-[0.13em] text-white/65 transition-colors hover:text-[#ff6937]"
+              className="group mb-10 inline-flex w-fit items-center gap-2 text-xs uppercase tracking-[0.13em] text-white/65 transition-colors hover:text-[#ff6937] active:opacity-70"
             >
-              <ArrowLeft className="h-4 w-4" /> На головну
+              <ArrowLeft className="h-4 w-4 transition-transform duration-200 ease-out group-hover:-translate-x-1 group-active:-translate-x-1.5" />
+              На головну
             </Link>
             <div className="max-w-xl">
               <p className="mb-5 text-[10px] font-medium uppercase tracking-[0.25em] text-[#ff6937]">
@@ -96,7 +97,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                   placeholder="Введіть ім'я користувача"
                   required
                   disabled={isLoading}
-                  className="h-14 rounded-none border-x-0 border-t-0 border-b border-white/30 bg-transparent px-0 text-base text-[#f4f1e9] placeholder:text-white/30 transition-colors hover:border-white/60 focus-visible:border-[#ff6937] focus-visible:ring-0 disabled:opacity-50"
+                  className="h-14 rounded-lg border border-white/30 bg-white/[0.04] px-4 text-base text-[#f4f1e9] placeholder:text-white/30 transition-colors hover:border-white/60 focus-visible:border-[#ff6937] focus-visible:ring-0 disabled:opacity-50"
                 />
               </div>
               <div className="space-y-3">
@@ -114,7 +115,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                   placeholder="Введіть пароль"
                   required
                   disabled={isLoading}
-                  className="h-14 rounded-none border-x-0 border-t-0 border-b border-white/30 bg-transparent px-0 text-base text-[#f4f1e9] placeholder:text-white/30 transition-colors hover:border-white/60 focus-visible:border-[#ff6937] focus-visible:ring-0 disabled:opacity-50"
+                  className="h-14 rounded-lg border border-white/30 bg-white/[0.04] px-4 text-base text-[#f4f1e9] placeholder:text-white/30 transition-colors hover:border-white/60 focus-visible:border-[#ff6937] focus-visible:ring-0 disabled:opacity-50"
                 />
               </div>
               {error && (
@@ -168,7 +169,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
             className="absolute inset-0 h-full w-full object-cover object-right grayscale"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(17,17,16,0.5),transparent_38%,rgba(17,17,16,0.08))]" />
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-10 text-[10px] uppercase tracking-[0.24em] text-white/60">
+          <div className="absolute inset-x-0 top-0 flex items-center justify-between py-10 pl-10 pr-[7rem] text-[10px] uppercase tracking-[0.24em] text-white/60">
             <span>Більше даних</span>
             <span>Кращі рішення</span>
           </div>
