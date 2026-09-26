@@ -28,6 +28,7 @@ import CompletedGoalResultModal from "@/components/CompletedGoalResultModal";
 import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import GoalsToolbar from "./betting-form/GoalsToolbar";
+import GoalsFocus from "@/components/goals/GoalsFocus";
 import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import DeleteGoalDialog from "@/components/goals/DeleteGoalDialog";
 import {
@@ -65,6 +66,7 @@ const cardBaseStyle = CARD_BASE_STYLE;
 const cardHoverStyle = CARD_HOVER_STYLE;
 
 interface GoalsManagerProps {
+  focusLayout?: boolean;
   topTabs?: {
     id: string;
     label: string;
@@ -75,6 +77,7 @@ interface GoalsManagerProps {
 }
 
 export default function GoalsManager({
+  focusLayout = false,
   topTabs,
   topActiveTab,
   onTopTabChange,
@@ -89,7 +92,7 @@ export default function GoalsManager({
 
   return (
     <div className="space-y-6">
-      <GoalsToolbar
+      {focusLayout ? <GoalsFocus h={h} /> : <GoalsToolbar
         activeTab={h.activeTab}
         isUpdating={h.isUpdating}
         activeGoalsCount={h.activeGoals.length}
@@ -101,10 +104,10 @@ export default function GoalsManager({
         topTabs={topTabs}
         topActiveTab={topActiveTab}
         onTopTabChange={onTopTabChange}
-      />
+      />}
 
       {/* Active Tab */}
-      {h.activeTab === "active" && (
+      {!focusLayout && h.activeTab === "active" && (
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           {h.activeGoals.length === 0 ? (
             <GoalsEmptyState
@@ -335,7 +338,7 @@ export default function GoalsManager({
       )}
 
       {/* Completed Tab */}
-      {h.activeTab === "completed" && (
+      {!focusLayout && h.activeTab === "completed" && (
         <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           {h.completedGoals.length === 0 ? (
             <GoalsEmptyState

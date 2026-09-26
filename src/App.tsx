@@ -54,7 +54,10 @@ const Analytics = safeLazy("Analytics", () => import("@/pages/Analytics"));
 const Matches = safeLazy("Matches", () => import("@/pages/Matches"));
 const Profile = safeLazy("Profile", () => import("@/pages/Profile"));
 const MyBets = safeLazy("MyBets", () => import("@/pages/MyBets"));
-const Strategy = safeLazy("Strategy", () => import("@/pages/Strategy"));
+const Strategy = safeLazy(
+  "Strategy",
+  () => import("@/pages/StrategyWorkspace"),
+);
 const RiskyTeams = safeLazy("RiskyTeams", () => import("@/pages/RiskyTeams"));
 const TelegramPage = safeLazy("TelegramPage", () => import("@/pages/Telegram"));
 const NotFound = safeLazy("NotFound", () => import("@/pages/NotFound"));
@@ -176,6 +179,16 @@ export default function App() {
                 <ErrorBoundary>
                   <Suspense fallback={<PageLoader />}>
                     <MyBets />
+                  </Suspense>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="goals"
+              element={
+                <ErrorBoundary>
+                  <Suspense fallback={<PageLoader />}>
+                    <Strategy />
                   </Suspense>
                 </ErrorBoundary>
               }

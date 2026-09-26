@@ -43,6 +43,43 @@ export default function StrategyTabNav({
 }: Props) {
   const hasTopTabs = !!(topTabs && topTabs.length && onTopTabChange);
 
+  if (!hasTopTabs)
+    return (
+      <div className="sw-toolbar">
+        <div
+          className="sw-toolbar-tabs"
+          role="group"
+          aria-label="Розділи стратегій"
+        >
+          {tabs.map((tab) => (
+            <button
+              type="button"
+              key={tab.id}
+              aria-pressed={activeTab === tab.id}
+              onClick={() => onTabChange(tab.id)}
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {activeTab === "overview" && (
+          <button
+            type="button"
+            aria-pressed={showFilters}
+            onClick={onFilterToggle}
+          >
+            <Filter size={16} />
+            Пошук і фільтри
+          </button>
+        )}
+        <button type="button" className="sw-create" onClick={onCreateClick}>
+          <Plus size={17} />
+          Створити стратегію
+        </button>
+      </div>
+    );
+
   return (
     <div className="flex justify-center">
       <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">

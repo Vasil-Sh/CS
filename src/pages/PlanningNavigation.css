@@ -1,0 +1,36 @@
+.planning-nav-toggle {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 13px 15px;
+  color: inherit;
+  text-align: left;
+  font-size: 14px;
+  border-radius: 6px;
+}
+.planning-nav-toggle span {
+  flex: 1;
+}
+.planning-nav-toggle svg {
+  flex-shrink: 0;
+  transition: transform 0.18s;
+}
+.planning-nav-toggle:hover {
+  background: #ffffff09;
+}
+.planning-nav-children {
+  margin: 2px 0 8px 25px;
+  padding-left: 15px;
+  border-left: 1px solid #ffffff24;
+  display: grid;
+  gap: 3px;
+}
+.profile-nav .planning-nav-children a {
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.planning-nav-toggle:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 2px;
+}
