@@ -228,9 +228,34 @@
 .profile-landing .backup-page {
   padding: 26px var(--profile-gutter) 0;
 }
+.profile-landing .backup-notice {
+  background: #fff;
+  border-color: #ff693b66;
+}
+.profile-landing .backup-notice svg {
+  color: #ff693b;
+}
+.profile-landing .backup-notice strong {
+  color: #ff693b;
+}
 .profile-landing .backup-dropzone.is-dragging {
   border-color: #e15d32;
   background: #ff693b0a;
+}
+.profile-landing .backup-page .backup-danger {
+  border-color: #ff5a52;
+  background: #fff;
+}
+.profile-landing .backup-danger-button {
+  background: #e5383b;
+  border-color: #e5383b;
+  color: #fff;
+  font-weight: 600;
+}
+.profile-landing .backup-danger-button:hover {
+  background: #c92f32;
+  border-color: #c92f32;
+  color: #fff;
 }
 .profile-landing :is(button, a, input, select, textarea):focus-visible,
 .profile-landing-menu :is(button, a):focus-visible {
