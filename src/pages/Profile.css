@@ -224,6 +224,19 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
+  overflow: hidden;
+}
+.profile-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-avatar-letter {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
 }
 .profile-avatar i {
   position: absolute;

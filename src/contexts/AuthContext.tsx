@@ -12,6 +12,7 @@ import { clearToken } from "@/lib/apiClient";
 interface AuthUser {
   username: string;
   role: "admin" | "user";
+  telegram?: string;
 }
 
 interface AuthContextType {
@@ -30,8 +31,9 @@ function getStoredUser(): AuthUser | null {
   const username = localStorage.getItem("username");
   const role = localStorage.getItem("userRole");
   const token = localStorage.getItem("authToken");
+  const telegram = localStorage.getItem("telegram") || "";
   if (username && role && token) {
-    return { username, role: role as "admin" | "user" };
+    return { username, role: role as "admin" | "user", telegram };
   }
   return null;
 }
@@ -57,10 +59,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (!res.ok) throw new Error("Token invalid");
         const data = await res.json();
-        setUser({ username: data.username, role: data.role });
+        setUser({
+          username: data.username,
+          role: data.role,
+          telegram: data.telegram || "",
+        });
         // Keep localStorage in sync with DB (handles role changes between sessions)
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("username", data.username);
+        localStorage.setItem("telegram", data.telegram || "");
       } catch {
         // Token expired/invalid — clear and set to null
         clearToken();
@@ -117,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
-    window.dispatchEvent(new CustomEvent('auth:logout'));
+    window.dispatchEvent(new CustomEvent("auth:logout"));
   }, []);
 
   const value: AuthContextType = {

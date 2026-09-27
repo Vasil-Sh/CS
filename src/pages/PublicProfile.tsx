@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowUpRight, Check, Loader2, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { proxyLogoUrl } from "@/lib/logoProxy";
 import "./PublicProfile.css";
 
 interface PublicStats {
   username: string;
+  telegram?: string;
   stats: {
     totalBets: number;
     wins: number;
@@ -22,6 +24,11 @@ interface PublicStats {
   };
   recentBets: {
     match: string;
+    team1?: string;
+    team2?: string;
+    logoTeam1?: string | null;
+    logoTeam2?: string | null;
+    betType?: string;
     result: string;
     profit: number;
     odds: number;
@@ -53,6 +60,46 @@ const monthLabel = (value: string) => {
   const [year, month] = value.split("-");
   return `${months[Number(month) - 1] || month} ’${year.slice(-2)}`;
 };
+type PublicBet = PublicStats["recentBets"][number];
+function PublicBetTeams({ bet }: { bet: PublicBet }) {
+  const isExpress = (bet.betType || "").toLowerCase().startsWith("експрес");
+  const team1 = isExpress ? "" : bet.team1 || "";
+  const team2 = isExpress ? "" : bet.team2 || "";
+  const logo1 = proxyLogoUrl(bet.logoTeam1 || null, bet.game);
+  const logo2 = proxyLogoUrl(bet.logoTeam2 || null, bet.game);
+  if (!team1 && !team2) return <span>{bet.match}</span>;
+  return (
+    <span className="public-match-teams">
+      {team1 && (
+        <span className="public-match-team">
+          {logo1 && (
+            <img
+              src={logo1}
+              alt=""
+              className="public-match-logo"
+              loading="lazy"
+            />
+          )}
+          <span>{team1}</span>
+        </span>
+      )}
+      {team1 && team2 && <span className="public-match-vs">vs</span>}
+      {team2 && (
+        <span className="public-match-team">
+          {logo2 && (
+            <img
+              src={logo2}
+              alt=""
+              className="public-match-logo"
+              loading="lazy"
+            />
+          )}
+          <span>{team2}</span>
+        </span>
+      )}
+    </span>
+  );
+}
 const gameLabel = (value: string) =>
   value.toLowerCase().replace(/[^a-z0-9]/g, "");
 const resultLabel = (result: string) =>
@@ -278,7 +325,28 @@ export default function PublicProfile() {
             <section className="public-hero" aria-labelledby="public-name">
               <div className="public-wrap public-identity">
                 <div className="public-avatar" aria-hidden="true">
-                  {data.username.slice(0, 1).toUpperCase()}
+                  {data.telegram &&
+                  /^[a-zA-Z0-9_]{5,32}$/.test(
+                    data.telegram.replace(/^@/, ""),
+                  ) ? (
+                    <img
+                      src={`https://t.me/i/userpic/320/${data.telegram.replace(/^@/, "")}.jpg`}
+                      alt=""
+                      className="public-avatar-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                      onLoad={(e) => {
+                        if (e.currentTarget.naturalWidth <= 1) {
+                          e.currentTarget.style.display = "none";
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <span className="public-avatar-letter">
+                    {data.username.slice(0, 1).toUpperCase()}
+                  </span>
                 </div>
                 <div className="public-identity-copy">
                   <p className="public-eyebrow">Статистика гравця</p>
@@ -416,7 +484,7 @@ export default function PublicProfile() {
                           <tr key={`${bet.date}-${bet.match}-${index}`}>
                             <td className="public-date">{bet.date || "—"}</td>
                             <td className="public-match">
-                              {bet.match}
+                              <PublicBetTeams bet={bet} />
                               <small>{bet.game}</small>
                             </td>
                             <td>{number(bet.odds, 2)}</td>

@@ -229,9 +229,22 @@ export default function Profile() {
   const getDataStats = () => {
     // Fast path: localStorage cache (instant, sync)
     const bets = UserDataService.getUserData(username, "mybets_data", []);
-    const riskyCache =
-      UserDataService.getUserData(username, "admin_risky_teams", []) ||
-      JSON.parse(localStorage.getItem("admin_risky_teams") || "[]");
+    const riskyCache = (() => {
+      const userScoped = UserDataService.getUserData<unknown>(
+        username,
+        "admin_risky_teams",
+        [],
+      );
+      if (Array.isArray(userScoped) && userScoped.length > 0) return userScoped;
+      try {
+        const global = JSON.parse(
+          localStorage.getItem("admin_risky_teams") || "[]",
+        );
+        return Array.isArray(global) ? global : [];
+      } catch {
+        return [];
+      }
+    })();
     const strategies = UserDataService.getUserData(
       username,
       "strategies_data",
@@ -465,6 +478,7 @@ export default function Profile() {
         {activeTab === "interface" && (
           <ProfileOverview
             username={username}
+            telegram={user?.telegram || ""}
             stats={stats}
             theme={theme}
             language={language}

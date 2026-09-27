@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  User,
   Pencil,
   FileText,
   AlertTriangle,
@@ -33,6 +32,7 @@ import { toast } from "sonner";
 
 interface Props {
   username: string;
+  telegram?: string;
   stats: {
     bets: number;
     riskyTeams: number;
@@ -126,6 +126,8 @@ export default function ProfileOverview(p: Props) {
       setSaving(false);
     }
   };
+  const tgAvatarName = (p.telegram || "").replace(/^@/, "").trim();
+  const tgValid = tgAvatarName && /^[a-zA-Z0-9_]{5,32}$/.test(tgAvatarName);
   const publicUrl = `${window.location.origin}/user/${encodeURIComponent(p.username)}`;
   const recent = bets
     .filter((b) => b.createdAt && Number.isFinite(Date.parse(b.createdAt)))
@@ -171,15 +173,32 @@ export default function ProfileOverview(p: Props) {
         aria-label="Ваш профіль"
       >
         <div className="profile-avatar">
-          <User size={36} strokeWidth={1.5} />
-          <i />
+          {tgValid ? (
+            <img
+              src={`https://t.me/i/userpic/320/${tgAvatarName}.jpg`}
+              alt={identity.displayName || `@${p.username}`}
+              loading="lazy"
+              className="profile-avatar-img"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+              onLoad={(e) => {
+                if (e.currentTarget.naturalWidth <= 1) {
+                  e.currentTarget.style.display = "none";
+                }
+              }}
+            />
+          ) : null}
+          <span className="profile-avatar-letter">
+            {p.username.charAt(0).toUpperCase()}
+          </span>
         </div>
         <div className="profile-identity-copy">
           <h2>{identity.displayName || `@${p.username}`}</h2>
           <span className="profile-online">
             Активний{identity.displayName ? ` · @${p.username}` : ""}
           </span>
-          <p>{identity.bio || `Записів у вашому журналі: ${total}`}</p>
+          {identity.bio && <p>{identity.bio}</p>}
         </div>
         <button
           className="profile-button"

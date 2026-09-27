@@ -125,6 +125,7 @@
   color: #30362f;
   width: 68px;
   height: 68px;
+  overflow: hidden;
 }
 .profile-landing .profile-avatar i {
   border-color: #141615;
