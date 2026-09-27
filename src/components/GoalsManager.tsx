@@ -29,6 +29,7 @@ import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import GoalsToolbar from "./betting-form/GoalsToolbar";
 import GoalsFocus from "@/components/goals/GoalsFocus";
+import PlanningPreview from "@/components/planning/PlanningPreview";
 import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import DeleteGoalDialog from "@/components/goals/DeleteGoalDialog";
 import {
@@ -92,7 +93,7 @@ export default function GoalsManager({
 
   return (
     <div className="space-y-6">
-      {focusLayout ? <GoalsFocus h={h} /> : <GoalsToolbar
+      {focusLayout ? <GoalsFocus h={h} overview={<PlanningPreview kind="strategies"/>} /> : <GoalsToolbar
         activeTab={h.activeTab}
         isUpdating={h.isUpdating}
         activeGoalsCount={h.activeGoals.length}

@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
+import PlanningHeader from "@/components/planning/PlanningHeader";
+import PlanningPreview from "@/components/planning/PlanningPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +105,7 @@ const STRATEGY_TEMPLATES: StrategyTemplate[] = [
 ];
 
 interface StrategyOverviewProps {
+  focusLayout?: boolean;
   topTabs?: {
     id: string;
     label: string;
@@ -113,6 +116,7 @@ interface StrategyOverviewProps {
 }
 
 export default function StrategyOverview({
+  focusLayout = false,
   topTabs,
   topActiveTab,
   onTopTabChange,
@@ -520,8 +524,11 @@ export default function StrategyOverview({
 
   // ── JSX ──
   return (
-    <div className="space-y-6">
+    <div className={focusLayout ? "planning-strategies" : "space-y-6"}>
+      {focusLayout && <PlanningHeader title="Стратегії" description="Зберігайте правила та оцінюйте їх за результатами ставок." action="Створити стратегію" onCreate={()=>setShowCreateDialog(true)} disabled={strategies.length>=25} metrics={[{label:"Усі стратегії",value:loading?"—":strategies.length},{label:"Основна",value:loading?"—":strategies.some(strategyMatchesPrimary)?1:0},{label:"Ставки зі стратегією",value:loading?"—":bettingData.filter(b=>b.strategy).length}]} />}
+      <div className={focusLayout ? "planning-body" : undefined}><div className={focusLayout ? "planning-main sw-content" : "space-y-6"}>
       <StrategyTabNav
+        hideCreate={focusLayout}
         activeTab={activeTab}
         showFilters={showFilters}
         onTabChange={setActiveTab}
@@ -955,6 +962,7 @@ export default function StrategyOverview({
         strategies={strategies}
         onSave={handleSaveStrategy}
       />
+      </div>{focusLayout && <PlanningPreview kind="goals"/>}</div>
     </div>
   );
 }

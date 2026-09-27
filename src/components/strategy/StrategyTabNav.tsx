@@ -14,6 +14,7 @@ interface TabDef {
 }
 
 interface Props {
+  hideCreate?: boolean;
   activeTab: string;
   showFilters: boolean;
   onTabChange: (tab: string) => void;
@@ -32,6 +33,7 @@ const tabs = [
 
 /** Pure component: tab navigation + filter + info tooltip + create button. Optionally includes top-level page tabs. */
 export default function StrategyTabNav({
+  hideCreate = false,
   activeTab,
   showFilters,
   onTabChange,
@@ -73,10 +75,10 @@ export default function StrategyTabNav({
             Пошук і фільтри
           </button>
         )}
-        <button type="button" className="sw-create" onClick={onCreateClick}>
+        {!hideCreate && <button type="button" className="sw-create" onClick={onCreateClick}>
           <Plus size={17} />
           Створити стратегію
-        </button>
+        </button>}
       </div>
     );
 

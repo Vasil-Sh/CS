@@ -19,16 +19,30 @@
 .planning-nav-toggle:hover {
   background: #ffffff09;
 }
+.planning-nav-toggle.is-open > svg:first-child {
+  color: #ff693b;
+}
 .planning-nav-children {
   margin: 2px 0 8px 25px;
   padding-left: 15px;
-  border-left: 1px solid #ffffff24;
   display: grid;
   gap: 3px;
 }
 .profile-nav .planning-nav-children a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   padding: 10px 14px;
   font-size: 13px;
+  border-radius: 0 6px 6px 0;
+}
+.profile-nav .planning-nav-children a[aria-current] {
+  margin: 0 -18px 0 -58px;
+  padding: 10px 32px 10px 72px;
+  background: #ffffff07;
+  color: #fff;
+  border-radius: 0 6px 6px 0;
+  box-shadow: inset 3px 0 #ff693b;
 }
 .planning-nav-toggle:focus-visible {
   outline: 2px solid #ff693b;

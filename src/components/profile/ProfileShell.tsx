@@ -14,6 +14,7 @@ import {
   Menu,
   ChevronDown,
   X,
+  FileText,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { t } from "@/lib/i18n";
@@ -63,7 +64,7 @@ export default function ProfileShell({
             <div key={href} className="planning-nav-group">
               <button
                 type="button"
-                className="planning-nav-toggle"
+                className={`planning-nav-toggle${planningOpen ? " is-open" : ""}`}
                 aria-expanded={planningOpen}
                 onClick={() => setPlanningOpen(!planningOpen)}
               >
@@ -79,15 +80,16 @@ export default function ProfileShell({
               {planningOpen && (
                 <div className="planning-nav-children">
                   {[
-                    ["/app/strategy", "Стратегії"],
-                    ["/app/goals", "Цілі"],
-                  ].map(([url, title]) => (
+                    ["/app/strategy", "Стратегії", FileText],
+                    ["/app/goals", "Цілі", Target],
+                  ].map(([url, title, ChildIcon]) => (
                     <Link
                       key={url}
                       to={url}
                       aria-current={pathname === url ? "page" : undefined}
                       onClick={() => setOpen(false)}
                     >
+                      <ChildIcon size={17} strokeWidth={1.6} />
                       {title}
                     </Link>
                   ))}
