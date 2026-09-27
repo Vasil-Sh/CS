@@ -6,6 +6,19 @@ afterEach(cleanup);
 const goals:Goal[]=[{id:"a",name:"Накопичити",type:"amount",status:"active",isPrimary:true,currentAmount:6400,targetAmount:10000,createdAt:"2026-09-01"},{id:"b",name:"Стабільний ROI",type:"roi",status:"active",currentROI:8,targetROI:12,createdAt:"2026-09-01"}];
 function controller(data=goals){return {goals:data,activeGoals:data,completedGoals:[],activeTab:"active",setShowCreateDialog:vi.fn(),setActiveTab:vi.fn(),handleManualUpdate:vi.fn(),isUpdating:false} as unknown as ReturnType<typeof useGoals>;}
 describe("Goals master detail",()=>{
+it("searches legacy numeric names without crashing",()=>{
+render(<GoalsFocus h={controller([{...goals[0],name:123 as unknown as string}])}/>);
+fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"123"}});
+expect(screen.getByRole("button",{name:/123/})).toBeInTheDocument();
+});
+it("links records to the selected goal and has one strategy entry",()=>{
+render(<GoalsFocus h={controller()}/>);
+expect(screen.getByRole("link",{name:/Переглянути записи/})).toHaveAttribute("href","/app/my-bets?goalId=a");
+fireEvent.click(screen.getByRole("button",{name:/Стабільний ROI/}));
+expect(screen.getByRole("link",{name:/Переглянути записи/})).toHaveAttribute("href","/app/my-bets?goalId=b");
+expect(screen.getAllByRole("link",{name:/Огляд стратегій/})).toHaveLength(1);
+expect(screen.queryByText("Переглянути огляд стратегій")).not.toBeInTheDocument();
+});
 it("selects the primary goal and switches details by selecting a row",()=>{render(<GoalsFocus h={controller()}/>);const panel=screen.getByRole("region",{name:"Деталі цілі"});expect(within(panel).getByRole("heading",{name:/Накопичити/})).toBeInTheDocument();fireEvent.click(screen.getByRole("button",{name:/Стабільний ROI/}));expect(within(panel).getByRole("heading",{name:"Стабільний ROI"})).toBeInTheDocument();expect(within(panel).queryByRole("progressbar")).not.toBeInTheDocument();});
 it("searches and clears stale details for no matches",()=>{render(<GoalsFocus h={controller()}/>);fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"немає"}});expect(screen.getByText("Нічого не знайдено")).toBeInTheDocument();expect(screen.queryByRole("button",{name:"Дії вибраної цілі"})).not.toBeInTheDocument();fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"ROI"}});expect(screen.getByRole("button",{name:/Стабільний ROI/})).toHaveAttribute("aria-pressed","true");});
 it("renders empty state and retains creation",()=>{const h=controller([]);render(<GoalsFocus h={h}/>);expect(screen.getByText("Немає активних цілей")).toBeInTheDocument();fireEvent.click(screen.getByRole("button",{name:"Створити ціль"}));expect(h.setShowCreateDialog).toHaveBeenCalledWith(true);});

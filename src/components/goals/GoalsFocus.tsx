@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import {
   Star,
   RefreshCw,
@@ -70,19 +70,13 @@ function GoalProgress({ goal }: { goal: Goal }) {
     </div>
   );
 }
-export default function GoalsFocus({
-  h,
-  overview,
-}: {
-  h: Controller;
-  overview?: ReactNode;
-}) {
+export default function GoalsFocus({ h }: { h: Controller }) {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const active = h.activeTab === "active";
   const history = h.goals.filter((g) => g.status !== "active");
   const visible = (active ? h.activeGoals : history).filter((g) =>
-    g.name
+    String(g.name ?? "")
       .toLocaleLowerCase("uk")
       .includes(query.trim().toLocaleLowerCase("uk")),
   );
@@ -210,6 +204,7 @@ export default function GoalsFocus({
               <span>
                 Виконано {h.completedGoals.length} з {h.goals.length}
               </span>
+              <a href="/app/strategy">Огляд стратегій <ArrowRight size={16} /></a>
             </div>
           </div>
           <section
@@ -329,6 +324,9 @@ export default function GoalsFocus({
                     />
                     {h.isUpdating ? "Оновлення…" : "Оновити прогрес"}
                   </button>
+                  <a href={`/app/my-bets?goalId=${encodeURIComponent(selected.id)}`}>
+                    Переглянути записи <ArrowRight size={16} />
+                  </a>
                   {selected.type === "ladder" && (
                     <button onClick={() => h.openDetailsDialog(selected)}>
                       Кроки цілі <ArrowRight size={16} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import CS2BettingForm from "@/components/CS2BettingForm";
 import type { MatchPrefillData } from "@/components/CS2BettingForm";
 import StrategyOverview from "@/components/StrategyOverview";
@@ -64,6 +64,8 @@ export default function MyBets() {
   const dataProvider = useData(); // unified bets + bankroll source
   const currentUser = user?.username || "";
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const goalId = searchParams.get("goalId");
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bumpBets = useAppStore((s) => s.bumpBets);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
@@ -94,7 +96,7 @@ export default function MyBets() {
   const [deleteDialogBet, setDeleteDialogBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
-  const [activeTab, setActiveTab] = useState("add");
+  const [activeTab, setActiveTab] = useState(goalId ? "records" : "add");
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
@@ -153,6 +155,15 @@ export default function MyBets() {
   );
 
   // ── Effects ──
+  const goalBets = goalId
+    ? recentBets.filter((bet) => String(bet.goalId) === goalId)
+    : recentBets;
+
+  useEffect(() => {
+    if (goalId) setActiveTab("records");
+    setCurrentPage(1);
+  }, [goalId]);
+
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key?.includes("bankroll_") && e.key.includes(currentUser))
@@ -578,9 +589,19 @@ export default function MyBets() {
 
           {activeTab === "records" && (
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+              {goalId && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm">
+                  <span>Записи вибраної цілі · {goalBets.length}</span>
+                  <button className="underline underline-offset-4" onClick={() => {
+                    const next = new URLSearchParams(searchParams);
+                    next.delete("goalId");
+                    setSearchParams(next);
+                  }}>Показати всі записи</button>
+                </div>
+              )}
               <BetTable
-                bets={recentBets}
-                activeBets={activeBets}
+                bets={goalBets}
+                activeBets={goalBets.filter((bet) => bet.result === "Pending")}
                 currentUser={currentUser}
                 isAdmin={isAdmin}
                 onNavigateToAdd={() => setActiveTab("add")}

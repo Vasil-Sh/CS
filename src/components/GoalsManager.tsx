@@ -29,13 +29,13 @@ import { CARD_BASE_STYLE, CARD_HOVER_STYLE } from "@/lib/cardStyles";
 import { logRender } from "@/lib/devLogger";
 import GoalsToolbar from "./betting-form/GoalsToolbar";
 import GoalsFocus from "@/components/goals/GoalsFocus";
-import PlanningPreview from "@/components/planning/PlanningPreview";
+import GoalTypeSelector from "@/components/goals/GoalTypeSelector";
+import LadderDetailsDialog from "@/components/goals/LadderDetailsDialog";
 import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import DeleteGoalDialog from "@/components/goals/DeleteGoalDialog";
 import {
   Target,
   TrendingUp,
-  Plus,
   Trash2,
   CheckCircle,
   Trophy,
@@ -47,8 +47,6 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  ArrowRight,
-  BarChart3,
   Zap,
 } from "lucide-react";
 import {
@@ -58,8 +56,6 @@ import {
   getKeyMetric,
   getNextBetHint,
   calculateLadderSteps,
-  calculateOddsScenarios,
-  type GoalType,
   type LadderMode,
 } from "@/hooks/useGoals";
 
@@ -93,7 +89,7 @@ export default function GoalsManager({
 
   return (
     <div className="space-y-6">
-      {focusLayout ? <GoalsFocus h={h} overview={<PlanningPreview kind="strategies"/>} /> : <GoalsToolbar
+      {focusLayout ? <GoalsFocus h={h} /> : <GoalsToolbar
         activeTab={h.activeTab}
         isUpdating={h.isUpdating}
         activeGoalsCount={h.activeGoals.length}
@@ -571,24 +567,13 @@ export default function GoalsManager({
           }
         }}
       >
-        <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 p-0 gap-0">
-          <DialogHeader className="pt-4 pb-3 px-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 rounded-2xl">
-                <Plus className="h-5 w-5 text-primary" strokeWidth={1.5} />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-semibold text-gray-900">
-                  Створити нову ціль
-                </DialogTitle>
-                <DialogDescription className="text-base text-gray-500 mt-0.5">
-                  Оберіть тип цілі та встановіть параметри
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent className="goal-create-dialog">
+          <DialogHeader className="goal-create-header">
+            <DialogTitle>Створити ціль</DialogTitle>
+            <DialogDescription>Оберіть показник, який хочете відстежувати.</DialogDescription>
           </DialogHeader>
-          <div className="border-t border-gray-200" />
-          <div className="space-y-4 pt-4 pb-4 px-6 bg-gray-100">
+          <div className="goal-create-body">
+            <GoalTypeSelector value={h.newGoal.type} onChange={(type) => h.setNewGoal({ ...h.newGoal, type })} />
             <div>
               <Label
                 htmlFor="goalName"
@@ -606,30 +591,6 @@ export default function GoalsManager({
                 className="rounded-2xl border border-gray-200 focus:border-primary mt-1.5 h-11 text-base"
               />
             </div>
-            <div>
-              <Label
-                htmlFor="goalType"
-                className="text-base font-medium text-gray-900"
-              >
-                Тип цілі <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={h.newGoal.type}
-                onValueChange={(v: GoalType) =>
-                  h.setNewGoal({ ...h.newGoal, type: v })
-                }
-              >
-                <SelectTrigger className="rounded-2xl border border-gray-200 mt-1.5 h-11 text-base">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="amount">💰 Досягти суми</SelectItem>
-                  <SelectItem value="ladder">📈 Лесенка (прогресія)</SelectItem>
-                  <SelectItem value="roi">📊 Досягти ROI</SelectItem>
-                  <SelectItem value="winrate">🎯 Досягти Win Rate</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             {h.newGoal.type === "amount" && (
               <div>
@@ -637,8 +598,9 @@ export default function GoalsManager({
                   htmlFor="targetAmount"
                   className="text-base font-medium text-gray-900"
                 >
-                  Цільова сума (грн) <span className="text-red-500">*</span>
+                  Цільова сума <span className="text-red-500">*</span>
                 </Label>
+                <div className="goal-create-amount">
                 <Input
                   id="targetAmount"
                   type="number"
@@ -652,6 +614,9 @@ export default function GoalsManager({
                   }}
                   className="rounded-2xl border border-gray-200 focus:border-primary mt-1.5 h-11 text-base"
                 />
+                <span aria-hidden="true">₴</span>
+                </div>
+                <p className="goal-create-help">Прогрес рахується за ставками, прив’язаними до цілі.</p>
               </div>
             )}
 
@@ -815,18 +780,17 @@ export default function GoalsManager({
               </div>
             )}
 
-            <div className="pt-3 border-t border-gray-200">
-              <h4 className="text-base font-medium text-gray-900 mb-2">
-                Правила цілі
-              </h4>
+            <details className="goal-create-rules" open>
+              <summary><ChevronDown size={16} />Додаткові правила<span>Необов’язково</span></summary>
               <div>
-                <Label className="text-base font-medium text-gray-900">
-                  Ставок на день (0 = без обмежень)
+                <Label htmlFor="goalBetsPerDay" className="text-base font-medium text-gray-900">
+                  Ліміт ставок на день
                 </Label>
                 <Input
                   type="number"
                   min="0"
                   value={h.betsPerDayStr}
+                  id="goalBetsPerDay"
                   onChange={(e) => {
                     h.setBetsPerDayStr(e.target.value);
                     const v = parseInt(e.target.value, 10);
@@ -835,11 +799,12 @@ export default function GoalsManager({
                   }}
                   className="rounded-2xl border border-gray-200 mt-1.5 h-11 text-base"
                 />
+                <p>0 — без обмежень</p>
               </div>
-            </div>
+            </details>
           </div>
-          <div className="border-t border-gray-200" />
-          <DialogFooter className="gap-2 pt-3 pb-4 px-6">
+          <div className="goal-create-note"><Info size={18} />Створення цілі не додає ставок у журнал.</div>
+          <DialogFooter className="goal-create-footer">
             <Button
               variant="outline"
               onClick={() => h.setShowCreateDialog(false)}
@@ -849,9 +814,9 @@ export default function GoalsManager({
             </Button>
             <Button
               onClick={h.createGoal}
-              className="rounded-3xl bg-primary hover:bg-blue-400 text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
+              className="goal-create-submit"
             >
-              <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} /> Створити
+              Створити ціль
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -865,410 +830,7 @@ export default function GoalsManager({
         onDelete={h.deleteGoal}
       />
 
-      {/* Details Dialog — ladder */}
-      <Dialog open={h.showDetailsDialog} onOpenChange={h.setShowDetailsDialog}>
-        <DialogContent
-          className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 p-0 gap-0"
-          style={{
-            boxShadow:
-              "0 25px 50px rgba(0,0,0,0.15), 0 12px 24px rgba(0,0,0,0.1)",
-          }}
-        >
-          <div className="px-6 py-5 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-50 rounded-2xl flex-shrink-0">
-                <TrendingUp
-                  className="h-6 w-6 text-primary"
-                  strokeWidth={1.5}
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {h.selectedGoal?.name}
-                </h1>
-                <p className="text-base text-gray-500">
-                  Детальна інформація про прогрес
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {h.selectedGoal && (
-            <div className="space-y-5 px-6 pb-6 pt-5 bg-gray-100">
-              <div className="grid grid-cols-3 gap-6">
-                <div
-                  className="p-5 bg-gray-50 rounded-3xl border border-gray-200"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
-                  }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1.5">
-                    Тип
-                  </p>
-                  <Badge className="bg-gray-100 text-gray-700 border-0 rounded-xl px-3 py-1 font-semibold text-lg">
-                    {getGoalTypeLabel(h.selectedGoal.type)}
-                  </Badge>
-                </div>
-                <div
-                  className="p-5 bg-gray-50 rounded-3xl border border-gray-200"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
-                  }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1.5">
-                    Створено
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {new Date(h.selectedGoal.createdAt).toLocaleDateString(
-                      "uk-UA",
-                    )}
-                  </p>
-                </div>
-                <div
-                  className="p-5 bg-gray-50 rounded-3xl border border-gray-200"
-                  style={cardBaseStyle}
-                  onMouseEnter={(e) =>
-                    Object.assign(e.currentTarget.style, cardHoverStyle)
-                  }
-                  onMouseLeave={(e) =>
-                    Object.assign(e.currentTarget.style, cardBaseStyle)
-                  }
-                >
-                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1.5">
-                    Прогрес
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {getGoalProgress(h.selectedGoal).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-
-              {h.selectedGoal.type === "ladder" &&
-                h.selectedGoal.steps &&
-                h.selectedGoal.steps.length > 0 && (
-                  <div className="space-y-4">
-                    <Collapsible
-                      open={h.containerStates.isLadderOverviewExpanded}
-                      onOpenChange={
-                        h.containerStates.setIsLadderOverviewExpanded
-                      }
-                    >
-                      <Card
-                        className="border border-gray-200 rounded-3xl bg-white"
-                        style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}
-                      >
-                        <CollapsibleTrigger className="w-full">
-                          <div className="px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-50 rounded-xl">
-                                <TrendingUp
-                                  className="h-5 w-5 text-primary"
-                                  strokeWidth={1.5}
-                                />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                Огляд лесенки
-                              </h3>
-                            </div>
-                            {h.containerStates.isLadderOverviewExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-gray-500" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-500" />
-                            )}
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-6 pb-5 grid grid-cols-2 gap-4">
-                            <div className="p-5 bg-gray-50 rounded-3xl border border-gray-200">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Початкова сума
-                              </p>
-                              <p className="text-2xl font-bold text-gray-900">
-                                {h.selectedGoal.startAmount?.toFixed(0)} грн
-                              </p>
-                            </div>
-                            <div className="p-5 bg-gray-50 rounded-3xl border border-gray-200">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Цільова сума
-                              </p>
-                              <p className="text-2xl font-bold text-gray-900">
-                                {h.selectedGoal.targetLadderAmount?.toFixed(0)}{" "}
-                                грн
-                              </p>
-                            </div>
-                            <div className="p-5 bg-gray-50 rounded-3xl border border-gray-200">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Коефіцієнти
-                              </p>
-                              <p className="text-xl font-bold text-gray-900">
-                                {h.selectedGoal.minOdds} –{" "}
-                                {h.selectedGoal.maxOdds}
-                              </p>
-                            </div>
-                            <div className="p-5 bg-green-50 rounded-3xl border border-green-200">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Поточний банк
-                              </p>
-                              <p className="text-2xl font-bold text-green-500">
-                                {h.selectedGoal.currentBank?.toFixed(0)} грн
-                              </p>
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Card>
-                    </Collapsible>
-
-                    <Collapsible
-                      open={h.containerStates.isStepsCalculationExpanded}
-                      onOpenChange={
-                        h.containerStates.setIsStepsCalculationExpanded
-                      }
-                    >
-                      <Card
-                        className="border border-gray-200 rounded-3xl bg-white"
-                        style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}
-                      >
-                        <CollapsibleTrigger className="w-full">
-                          <div className="px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-50 rounded-xl">
-                                <Info
-                                  className="h-5 w-5 text-primary"
-                                  strokeWidth={1.5}
-                                />
-                              </div>
-                              <div className="text-left">
-                                <p className="text-lg font-semibold text-gray-900">
-                                  Сценарії кроків
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  При різних коефіцієнтах
-                                </p>
-                              </div>
-                            </div>
-                            {h.containerStates.isStepsCalculationExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-gray-500" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-500" />
-                            )}
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-6 pb-5 space-y-3">
-                            {calculateOddsScenarios(
-                              h.selectedGoal.startAmount || 100,
-                              h.selectedGoal.targetLadderAmount || 100000,
-                              h.selectedGoal.minOdds || 1.3,
-                              h.selectedGoal.maxOdds || 5,
-                            ).map((sc, i) => (
-                              <div
-                                key={i}
-                                className="p-4 bg-gray-50 rounded-3xl border border-gray-200"
-                              >
-                                <div className="flex items-center justify-between mb-1">
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-2xl">{sc.emoji}</span>
-                                    <div>
-                                      <p className="text-base font-semibold text-gray-900">
-                                        {sc.speed}
-                                      </p>
-                                      <p className="text-sm text-gray-500">
-                                        {sc.description}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Badge className="bg-gray-100 text-gray-900 border-0 rounded-xl px-3 py-1 font-semibold text-lg">
-                                    {sc.steps} кроків
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-2 text-base text-gray-500 mt-1">
-                                  <span>Коефіцієнт:</span>
-                                  <span className="font-semibold text-gray-900">
-                                    {sc.odds}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Card>
-                    </Collapsible>
-
-                    <Collapsible
-                      open={h.containerStates.isStepsProgressionExpanded}
-                      onOpenChange={
-                        h.containerStates.setIsStepsProgressionExpanded
-                      }
-                    >
-                      <Card
-                        className="border border-gray-200 rounded-3xl bg-white"
-                        style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}
-                      >
-                        <CollapsibleTrigger className="w-full">
-                          <div className="px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-50 rounded-xl">
-                                <BarChart3
-                                  className="h-5 w-5 text-primary"
-                                  strokeWidth={1.5}
-                                />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                Кроки прогресії
-                              </h3>
-                            </div>
-                            {h.containerStates.isStepsProgressionExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-gray-500" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-500" />
-                            )}
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-6 pb-5">
-                            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-1">
-                              {h.selectedGoal.steps.map((step, index) => (
-                                <div
-                                  key={index}
-                                  className={`relative p-5 rounded-3xl border transition-all ${step.status === "completed" ? "bg-green-50 border-green-200" : step.status === "current" ? "bg-green-100 border-green-300 shadow-sm" : "bg-blue-50 border-blue-200"}`}
-                                >
-                                  <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                      <div
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base ${step.status === "completed" ? "bg-green-500 text-white" : step.status === "current" ? "bg-green-500 text-white" : "bg-blue-200 text-blue-600"}`}
-                                      >
-                                        {step.step}
-                                      </div>
-                                      <div>
-                                        <p className="font-semibold text-gray-900 text-lg">
-                                          Крок {step.step}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                          {step.status === "completed"
-                                            ? "Завершено"
-                                            : step.status === "current"
-                                              ? "Поточний"
-                                              : "Заблоковано"}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <Badge
-                                      className={`${step.status === "completed" ? "bg-green-50 text-green-600 border border-green-200" : step.status === "current" ? "bg-green-100 text-green-700 border border-green-300" : "bg-blue-100 text-blue-600 border border-blue-200"} rounded-xl px-3 py-1 font-medium text-sm`}
-                                    >
-                                      {step.status === "completed"
-                                        ? "✓ Виконано"
-                                        : step.status === "current"
-                                          ? "→ Активний"
-                                          : "🔒 Очікує"}
-                                    </Badge>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div className="p-3 bg-white rounded-2xl border border-gray-200">
-                                      <p className="text-sm text-gray-500">
-                                        Ставка
-                                      </p>
-                                      <p className="text-lg font-bold text-gray-900">
-                                        {step.startAmount.toFixed(0)} грн
-                                      </p>
-                                    </div>
-                                    <div className="p-3 bg-white rounded-2xl border border-gray-200">
-                                      <p className="text-sm text-gray-500">
-                                        Діапазон
-                                      </p>
-                                      <p className="text-base font-semibold text-gray-900">
-                                        {step.minPlannedAmount?.toFixed(0)} –{" "}
-                                        {step.maxPlannedAmount?.toFixed(0)} грн
-                                      </p>
-                                    </div>
-                                    {step.actualAmount && (
-                                      <>
-                                        <div className="p-3 bg-green-50 rounded-2xl border border-green-200">
-                                          <p className="text-sm text-gray-500">
-                                            Факт
-                                          </p>
-                                          <p className="text-lg font-bold text-green-500">
-                                            {step.actualAmount.toFixed(0)} грн
-                                          </p>
-                                        </div>
-                                        <div className="p-3 bg-green-50 rounded-2xl border border-green-200">
-                                          <p className="text-sm text-gray-500">
-                                            Коеф.
-                                          </p>
-                                          <p className="text-lg font-bold text-green-500">
-                                            {step.actualOdds?.toFixed(2)}
-                                          </p>
-                                        </div>
-                                      </>
-                                    )}
-                                  </div>
-                                  {step.deviation !== undefined &&
-                                    step.deviation > 0 && (
-                                      <div className="mt-3 p-2.5 bg-green-50 rounded-2xl border border-green-200 flex items-center gap-2">
-                                        <TrendingUp
-                                          className="h-4 w-4 text-green-500"
-                                          strokeWidth={1.5}
-                                        />
-                                        <p className="text-sm font-medium text-green-600">
-                                          +{step.deviation.toFixed(0)} грн
-                                          більше мінімуму
-                                        </p>
-                                      </div>
-                                    )}
-                                  {step.completedAt && (
-                                    <div className="mt-3 pt-3 border-t border-gray-200">
-                                      <p className="text-sm text-gray-500">
-                                        Завершено:{" "}
-                                        {new Date(
-                                          step.completedAt,
-                                        ).toLocaleDateString("uk-UA", {
-                                          day: "numeric",
-                                          month: "long",
-                                          year: "numeric",
-                                        })}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {step.status === "completed" &&
-                                    index < (h.selectedGoal?.steps?.length ?? 0) - 1 && (
-                                      <div className="absolute -bottom-3.5 left-1/2 transform -translate-x-1/2 z-10">
-                                        <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-                                          <ArrowRight
-                                            className="h-3.5 w-3.5 text-white rotate-90"
-                                            strokeWidth={2}
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Card>
-                    </Collapsible>
-                  </div>
-                )}
-            </div>
-          )}
-
-          <DialogFooter className="pt-4 px-6 pb-6 border-t border-gray-200">
-            <Button
-              onClick={() => h.setShowDetailsDialog(false)}
-              className="rounded-3xl bg-primary hover:bg-blue-400 text-white font-medium h-11 px-6 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)]"
-            >
-              Закрити
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <LadderDetailsDialog goal={h.selectedGoal} open={h.showDetailsDialog} onOpenChange={h.setShowDetailsDialog} />
 
       {/* Completed Goal Result Modal */}
       <CompletedGoalResultModal

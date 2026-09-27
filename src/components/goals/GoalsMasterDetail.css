@@ -13,7 +13,7 @@
   padding: 24px max(38px, 4.6vw) 40px;
 }
 .gmd-summary {
-  font-size: 13px;
+  font-size: 14px;
   color: #50574c;
   margin: 0 0 18px;
 }
@@ -21,10 +21,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 .gmd-left {
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 16px;
   min-width: 0;
 }
@@ -73,7 +74,7 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   outline: none;
 }
 .gmd-search:focus-within {
@@ -87,7 +88,7 @@
 }
 .gmd-tabs button {
   padding: 10px 0;
-  font-size: 13px;
+  font-size: 14px;
   border-bottom: 2px solid transparent;
 }
 .gmd-tabs button[aria-pressed="true"] {
@@ -105,7 +106,7 @@
 }
 .gmd-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   text-align: left;
   width: 100%;
@@ -123,6 +124,11 @@
 }
 .gmd-row > svg {
   flex-shrink: 0;
+  margin-top: 5px;
+}
+.gmd-row > svg:last-child {
+  align-self: center;
+  margin-top: 0;
 }
 .gmd-row-copy {
   display: block;
@@ -134,13 +140,15 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  font-weight: 700;
-  font-size: 15px;
+  font-family: Oswald, sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .gmd-row-metric {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: #535b4f;
   margin-top: 6px;
 }
@@ -153,7 +161,7 @@
   background: #ffe7db;
   color: #bf401b;
   font:
-    500 10px Manrope,
+    600 11px Manrope,
     sans-serif;
   padding: 4px 7px;
   border-radius: 4px;
@@ -164,7 +172,16 @@
   gap: 12px;
   align-items: center;
   margin-top: 12px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.gmd-row .gmd-progress {
+  max-width: 390px;
+  margin-top: 8px;
+}
+.gmd-progress span {
+  flex-shrink: 0;
 }
 .gmd-progress progress {
   appearance: none;
@@ -195,7 +212,7 @@
   padding: 16px 0;
   border-top: 1px solid #e3e4df;
   color: #757c70;
-  font-size: 12px;
+  font-size: 13px;
 }
 .gmd-achievements {
   padding: 20px;
@@ -203,13 +220,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .gmd-achievements > svg {
   color: #ff693b;
 }
 .gmd-achievements strong {
-  font-size: 17px;
+  font-size: 20px;
 }
 .gmd-achievements a {
   display: flex;
@@ -219,7 +236,8 @@
   margin-left: auto;
 }
 .gmd-detail {
-  padding: 22px;
+  padding: 24px;
+  container-type: inline-size;
   min-height: 540px;
   display: flex;
   flex-direction: column;
@@ -229,17 +247,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 14px;
   color: #596052;
 }
 .gmd-detail-top button {
   padding: 8px;
 }
 .gmd-detail h2 {
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1.3;
   overflow-wrap: anywhere;
-  margin: 10px 0 28px;
+  margin: 12px 0 24px;
 }
 .gmd-values,
 .gmd-facts {
@@ -254,23 +272,28 @@
 .gmd-detail dt,
 .gmd-detail-section p,
 .gmd-muted {
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.5;
   color: #6c7365;
 }
 .gmd-values dd {
-  font-size: 28px;
-  font-weight: 700;
+  font-family: Oswald, sans-serif;
+  font-size: clamp(24px, 6.5cqi, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
   margin-top: 5px;
 }
 .gmd-values > div:first-child dd {
-  font-size: 34px;
+  font-size: clamp(30px, 8cqi, 42px);
 }
 .gmd-facts {
-  margin: 28px 0;
+  margin: 24px 0;
 }
 .gmd-facts dd {
-  font-size: 20px;
+  font-family: Oswald, sans-serif;
+  font-size: 23px;
   font-weight: 600;
   margin-top: 4px;
 }
@@ -279,11 +302,11 @@
   padding: 18px 0;
 }
 .gmd-detail-section h3 {
-  font-size: 18px;
+  font-size: 20px;
   margin-bottom: 8px;
 }
 .gmd-detail-section strong {
-  font-size: 15px;
+  font-size: 16px;
 }
 .gmd-detail-actions {
   margin-top: auto;
@@ -293,17 +316,23 @@
   align-items: center;
   flex-wrap: wrap;
 }
-.gmd-detail-actions button {
+.gmd-detail-actions button,
+.gmd-detail-actions a {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-height: 42px;
-  font-size: 12px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.gmd-detail-actions a {
+  color: #c44320;
+  margin-left: auto;
 }
 .gmd-detail-actions .gmd-update {
-  padding: 10px 16px;
-  border: 1px solid #777e70;
+  padding: 11px 22px;
+  border: 1px solid #30352d;
   border-radius: 6px;
 }
 .gmd-detail-actions button:disabled {
@@ -337,14 +366,6 @@
   margin-top: 8px;
   max-width: 260px;
 }
-.gmd-overview {
-  font-size: 12px;
-  color: #596052;
-}
-.gmd-overview summary {
-  cursor: pointer;
-  padding: 8px 0;
-}
 .gmd-page button:focus-visible,
 .gmd-page a:focus-visible {
   outline: 2px solid #ff693b;
@@ -363,10 +384,6 @@
   .gmd-search {
     max-width: none;
     flex: 1;
-  }
-  .gmd-values dd,
-  .gmd-values > div:first-child dd {
-    font-size: 23px;
   }
 }
 @media (max-width: 760px) {
@@ -391,17 +408,6 @@
   .gmd-detail-actions {
     margin-top: 0;
   }
-  .gmd-values dd,
-  .gmd-values > div:first-child dd {
-    font-size: 28px;
-  }
-}
-.gmd-values dd,
-.gmd-values > div:first-child dd {
-  font-size: clamp(20px, 2.1vw, 32px);
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: normal;
-  white-space: nowrap;
 }
 @media (min-width: 761px) and (max-width: 1200px) {
   .gmd-values,
@@ -410,10 +416,6 @@
   }
   .gmd-values > div + div {
     padding-left: 12px;
-  }
-  .gmd-values dd,
-  .gmd-values > div:first-child dd {
-    font-size: 22px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
