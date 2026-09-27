@@ -566,25 +566,27 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #353a35;
+  color: #94a3b8;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
-.risk-row-actions button:hover {
-  background: #edeeea;
+.risk-row-actions button:not(.risk-remove):hover {
+  background: #eff6ff;
+  color: #2563eb;
 }
 .risk-row-actions button[aria-expanded="true"] > svg {
   transform: rotate(180deg);
-}
-.risk-row-actions button {
-  transition: background 150ms ease;
 }
 .risk-table-panel tbody tr:hover {
   background: #fafaf7;
 }
 .risk-row-actions .risk-remove {
-  color: #b84238;
+  color: #94a3b8;
 }
 .risk-row-actions .risk-remove:hover {
-  background: #fff0ef;
+  background: #fef2f2;
+  color: #ef4444;
 }
 .risk-edit td {
   background: #fafaf8;

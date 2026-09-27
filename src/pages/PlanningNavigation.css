@@ -17,6 +17,9 @@
   transition: transform 0.18s;
 }
 .planning-nav-toggle:hover {
+  margin: 0 -18px;
+  width: calc(100% + 36px);
+  padding: 13px 33px;
   background: #ffffff09;
 }
 .planning-nav-toggle.is-open > svg:first-child {
@@ -35,6 +38,12 @@
   padding: 10px 14px;
   font-size: 13px;
   border-radius: 0 6px 6px 0;
+}
+.profile-nav .planning-nav-children a:not([aria-current]):hover {
+  margin: 0 -18px 0 -58px;
+  padding: 10px 32px 10px 72px;
+  background: #ffffff09;
+  color: #fff;
 }
 .profile-nav .planning-nav-children a[aria-current] {
   margin: 0 -18px 0 -58px;
