@@ -3,19 +3,11 @@
   color: #171916;
   min-height: 100vh;
 }
-.gmd-page .planning-hero {
-  padding-bottom: 30px;
-}
 .gmd-page .planning-metrics:empty {
   display: none;
 }
 .gmd-content {
   padding: 24px max(38px, 4.6vw) 40px;
-}
-.gmd-summary {
-  font-size: 14px;
-  color: #50574c;
-  margin: 0 0 18px;
 }
 .gmd-layout {
   display: grid;

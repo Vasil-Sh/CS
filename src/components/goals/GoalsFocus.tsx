@@ -93,13 +93,12 @@ export default function GoalsFocus({ h }: { h: Controller }) {
         action="Створити ціль"
         onCreate={() => h.setShowCreateDialog(true)}
         disabled={h.activeGoals.length >= 25}
-        metrics={[]}
+        metrics={[
+          { label: "Активні", value: h.activeGoals.length },
+          { label: "Виконані", value: h.completedGoals.length },
+        ]}
       />
       <div className="gmd-content">
-        <p className="gmd-summary">
-          {h.activeGoals.length} активні · {h.completedGoals.length} виконані ·{" "}
-          {h.goals.length} всього
-        </p>
         <div className="gmd-layout">
           <div className="gmd-left">
             <section className="gmd-list" aria-label="Мої цілі">
