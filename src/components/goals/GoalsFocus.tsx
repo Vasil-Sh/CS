@@ -8,8 +8,11 @@ import {
   MoreVertical,
   Search,
   ChevronRight,
-  Trophy,
   Info,
+  Banknote,
+  TrendingUp,
+  Percent,
+  Layers,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +31,12 @@ import "./GoalsMasterDetail.css";
 type Controller = ReturnType<typeof useGoals>;
 const fmt = (n: number) =>
   new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(n);
+const goalTypeIcon = {
+  amount: Banknote,
+  roi: TrendingUp,
+  winrate: Percent,
+  ladder: Layers,
+} as const;
 function metric(g: Goal) {
   switch (g.type) {
     case "amount":
@@ -146,13 +155,12 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                       onClick={() => setSelectedId(goal.id)}
                     >
                       {goal.isPrimary ? (
-                        <Star
-                          className="gmd-star"
-                          size={20}
-                          fill="currentColor"
-                        />
+                        <Star className="gmd-star" size={20} fill="currentColor" />
                       ) : (
-                        <Target size={20} />
+                        (() => {
+                          const Icon = goalTypeIcon[goal.type] ?? Target;
+                          return <Icon size={20} />;
+                        })()
                       )}
                       <span className="gmd-row-copy">
                         <span className="gmd-row-title">
@@ -197,14 +205,6 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                 Оберіть ціль, щоб переглянути деталі.
               </p>
             </section>
-            <div className="gmd-achievements">
-              <Trophy size={22} />
-              <strong>Досягнення</strong>
-              <span>
-                Виконано {h.completedGoals.length} з {h.goals.length}
-              </span>
-              <a href="/app/strategy">Огляд стратегій <ArrowRight size={16} /></a>
-            </div>
           </div>
           <section
             id="goal-detail-panel"
@@ -323,16 +323,19 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                     />
                     {h.isUpdating ? "Оновлення…" : "Оновити прогрес"}
                   </button>
-                  <a href={`/app/my-bets?goalId=${encodeURIComponent(selected.id)}`}>
-                    Переглянути записи <ArrowRight size={16} />
-                  </a>
                   {selected.type === "ladder" && (
-                    <button onClick={() => h.openDetailsDialog(selected)}>
+                    <button
+                      className="gmd-outline"
+                      onClick={() => h.openDetailsDialog(selected)}
+                    >
                       Кроки цілі <ArrowRight size={16} />
                     </button>
                   )}
                   {selected.status === "completed" && (
-                    <button onClick={() => h.openCompletedGoalResult(selected)}>
+                    <button
+                      className="gmd-outline"
+                      onClick={() => h.openCompletedGoalResult(selected)}
+                    >
                       Результат <ArrowRight size={16} />
                     </button>
                   )}

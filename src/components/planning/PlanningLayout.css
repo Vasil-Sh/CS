@@ -75,6 +75,10 @@
   font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.planning-metrics .has-value dd {
+  color: #ff693b;
 }
 .planning-body {
   display: grid;
