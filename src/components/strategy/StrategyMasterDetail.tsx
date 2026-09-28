@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Search, ChevronRight, Info, MoreVertical } from "lucide-react";
+import { Star, Search, ChevronRight, Info, MoreVertical, Trash2, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { getRiskLabel, parseCriteriaForValidation } from "@/lib/strategyHelpers";
 import type { CS2Strategy } from "@/types/strategy";
@@ -28,13 +28,16 @@ export default function StrategyMasterDetail(p:Props) {
    <p className="smd-hint"><Info size={16}/>Оберіть стратегію, щоб переглянути правила.</p>
   </section>
  </div><section id="strategy-details" className="smd-detail" aria-label="Деталі стратегії">
- {selected?<><div className="smd-detail-top"><span>Деталі стратегії</span><DropdownMenu><DropdownMenuTrigger asChild><button aria-label="Дії стратегії"><MoreVertical size={20}/></button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={()=>p.onPrimary(selected)}>{p.isPrimary(selected)?"Зняти позначку основної":"Зробити основною"}</DropdownMenuItem><DropdownMenuItem onSelect={()=>p.onDetails(selected)}>Усі параметри</DropdownMenuItem><DropdownMenuItem className="text-red-600" onSelect={()=>p.onDelete(selected.id||selected.name)}>Видалити стратегію</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
+ {selected?<><div className="smd-detail-top"><span>Деталі стратегії</span><DropdownMenu><DropdownMenuTrigger asChild><button aria-label="Дії стратегії"><MoreVertical size={20}/></button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={()=>p.onPrimary(selected)}><Star size={16}/>{p.isPrimary(selected)?"Зняти позначку основної":"Зробити основною"}</DropdownMenuItem><DropdownMenuItem className="text-red-600" onSelect={()=>p.onDelete(selected.id||selected.name)}><Trash2 size={16}/>Видалити стратегію</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>
  <h2>{selected.name} {p.isPrimary(selected)&&<small className="smd-badge">Основна</small>}</h2><p className="smd-muted">{getRiskLabel(selected.riskLevel)} ризик</p>
  <dl className="smd-metrics"><div><dt>ROI</dt><dd>{settled?percent(stats!.roi):"—"}</dd></div><div><dt>Вінрейт</dt><dd>{settled?percent(stats!.winRate):"—"}</dd></div><div><dt>Ставок</dt><dd>{stats?.totalBets??0}</dd></div></dl>
  {!settled&&<p className="smd-muted">Статистика з’явиться після розрахунку пов’язаних ставок.</p>}
  <section className="smd-section"><h3>Правила</h3><dl className="smd-rules"><div><dt>Коефіцієнти</dt><dd>{min==null&&max==null?"Не задано":`${min??"—"}–${max??"—"}`}</dd></div><div><dt>Формати</dt><dd>{formats?.join(", ")||"Не задано"}</dd></div><div><dt>Типи ставок</dt><dd>{types?.join(", ")||"Не задано"}</dd></div></dl>
  {!!selected.criteria?.length&&<details className="smd-extra"><summary>Усі критерії · {selected.criteria.length}</summary><ul>{selected.criteria.map((c,i)=><li key={i}>{c}</li>)}</ul></details>}
  </section>
+ <div className="smd-actions">
+  <button className="smd-action" onClick={()=>p.onDetails(selected)}><Eye size={16}/>Деталі</button>
+ </div>
  </>:<div className="smd-empty"><h2>Деталі стратегії</h2><p>Оберіть стратегію зі списку.</p></div>}
  </section></div>;
 }

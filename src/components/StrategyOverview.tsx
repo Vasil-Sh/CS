@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import PlanningHeader from "@/components/planning/PlanningHeader";
 import StrategyMasterDetail from "@/components/strategy/StrategyMasterDetail";
+import StrategyPerformance from "@/components/strategy/StrategyPerformance";
 import EditStrategyDialog from "@/components/strategy/EditStrategyDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -612,7 +613,8 @@ export default function StrategyOverview({
         </div>
       )}
 
-      {activeTab === "performance" && (
+      {activeTab === "performance" && focusLayout && <StrategyPerformance strategies={strategies} bets={bettingData} isPrimary={strategyMatchesPrimary} />}
+      {activeTab === "performance" && !focusLayout && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StrategyOverallStats
@@ -920,56 +922,50 @@ export default function StrategyOverview({
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
-          <DialogHeader className="px-6 pt-6 pb-4">
+        <DialogContent className="smd-delete-dialog">
+          <DialogHeader className="smd-delete-header">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100">
-                <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.5} />
+              <div className="smd-delete-icon">
+                <Trash2 className="h-5 w-5" strokeWidth={1.5} />
               </div>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Видалити стратегію?
-              </DialogTitle>
+              <DialogTitle>Видалити стратегію?</DialogTitle>
             </div>
           </DialogHeader>
-          <div className="border-t border-gray-200" />
-          <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
-            <div className="text-center">
-              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                <DialogDescription className="text-lg font-bold text-gray-900 text-center">
-                  {(strategyToDelete &&
-                    strategies.find(
-                      (s) => (s.id || s.name) === strategyToDelete,
-                    )?.name) ||
-                    strategyToDelete}
-                </DialogDescription>
-              </div>
+          <div className="smd-delete-body">
+            <div className="smd-delete-name">
+              <DialogDescription className="text-lg font-bold text-center">
+                {(strategyToDelete &&
+                  strategies.find(
+                    (s) => (s.id || s.name) === strategyToDelete,
+                  )?.name) ||
+                  strategyToDelete}
+              </DialogDescription>
             </div>
-            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-red-200">
+            <div className="smd-delete-warning">
               <AlertTriangle
                 className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5"
                 strokeWidth={1.5}
               />
-              <p className="text-sm text-[#991B1B]">
+              <p>
                 Ця дія незворотна. Статистика ставок залишиться незмінною.
               </p>
             </div>
-            <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-                className="rounded-xl border-gray-200 font-medium"
-              >
-                Скасувати
-              </Button>
-              <Button
-                onClick={deleteStrategy}
-                className="rounded-xl bg-red-600 hover:bg-[#B91C1C] text-white"
-              >
-                <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                Видалити
-              </Button>
-            </DialogFooter>
           </div>
+          <DialogFooter className="smd-delete-footer">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Скасувати
+            </Button>
+            <Button
+              onClick={deleteStrategy}
+              className="smd-delete-submit"
+            >
+              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Видалити
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

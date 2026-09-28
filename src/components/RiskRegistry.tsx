@@ -183,11 +183,16 @@ export default function RiskRegistry() {
           </div>
           <button
             type="button"
-            className="risk-filter"
+            className={`risk-filter${status !== "all" ? " risk-filter-active" : ""}`}
             aria-expanded={filtersOpen}
             onClick={() => setFiltersOpen((value) => !value)}
           >
-            <SlidersHorizontal size={17} /> Фільтри <ChevronDown size={16} />
+            <SlidersHorizontal size={17} /> Фільтри{" "}
+            {status !== "all" ? (
+              <span className="risk-filter-count">1</span>
+            ) : (
+              <ChevronDown size={16} />
+            )}
           </button>
         </div>
         {filtersOpen && (

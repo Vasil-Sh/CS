@@ -69,8 +69,12 @@
   font-size: 14px;
   outline: none;
 }
+.gmd-search input:focus-visible {
+  outline: none;
+}
 .gmd-search:focus-within {
-  outline: 2px solid #d8dbd3;
+  border-color: #777a73;
+  outline: none;
 }
 .gmd-tabs {
   display: flex;
@@ -333,12 +337,12 @@
   border: 1px solid #ff693b;
   border-radius: 7px;
   background: #ff693b;
-  color: #171916;
+  color: #fff;
 }
 .gmd-detail-actions .gmd-outline:hover {
   background: #ff825d;
   border-color: #ff825d;
-  color: #171916;
+  color: #fff;
 }
 .gmd-detail-actions button:disabled {
   opacity: 0.5;
@@ -375,6 +379,104 @@
 }
 .gmd-row:focus-visible {
   outline-offset: -3px !important;
+}
+/* ── Delete goal dialog (matches "Створити ціль") ── */
+.gmd-delete-dialog {
+  width: calc(100% - 32px);
+  max-width: 480px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #454740;
+  border-radius: 7px;
+  background: #fff;
+  color: #171916;
+  font-family: Manrope, sans-serif;
+}
+.gmd-delete-dialog > button {
+  color: #fff;
+  top: 18px;
+  right: 18px;
+}
+.gmd-delete-header {
+  flex-shrink: 0;
+  padding: 22px 26px;
+  background: #171916;
+  text-align: left;
+}
+.gmd-delete-header h2 {
+  font: 600 32px/1.2 Oswald, sans-serif;
+  color: #f8f8f5;
+  text-transform: uppercase;
+  padding-right: 24px;
+  margin: 0;
+}
+.gmd-delete-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ff693b;
+  color: #171916;
+  flex-shrink: 0;
+}
+.gmd-delete-body {
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.gmd-delete-name {
+  padding: 18px;
+  background: #f3f4f4;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: #171916;
+}
+.gmd-delete-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #f3c2c2;
+  border-radius: 5px;
+}
+.gmd-delete-warning p {
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.gmd-delete-footer {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  gap: 10px;
+  border-top: 1px solid #dedfdb;
+}
+.gmd-delete-footer button {
+  border-radius: 5px;
+  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.gmd-delete-footer .gmd-delete-submit {
+  background: #dc2626;
+  color: #fff;
+}
+.gmd-delete-footer .gmd-delete-submit:hover {
+  background: #b91c1c;
 }
 @media (max-width: 1000px) {
   .gmd-layout {

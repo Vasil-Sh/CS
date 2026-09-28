@@ -34,13 +34,14 @@
   border: 1px solid #ff693b;
   border-radius: 7px;
   background: #ff693b;
-  color: #221713;
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
   margin-top: calc((clamp(42px, 4.1vw, 64px) - 44px) / 2);
 }
 .planning-create:hover {
   background: #ff825d;
+  color: #fff;
 }
 .planning-create:disabled {
   opacity: 0.5;

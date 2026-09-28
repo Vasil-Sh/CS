@@ -95,7 +95,7 @@
 .risk-primary {
   border-color: #ff693b;
   background: #ff693b;
-  color: #221713;
+  color: #fff;
 }
 .risk-primary:hover {
   border-color: #ff825d;
@@ -187,6 +187,12 @@
 .risk-search input::placeholder {
   color: #969b93;
 }
+.risk-search:focus-within {
+  border-color: #777a73;
+}
+.risk-search input:focus-visible {
+  outline: none;
+}
 .risk-games {
   display: flex;
   overflow: hidden;
@@ -231,6 +237,25 @@
   background: #fff;
   color: var(--ink);
   font-weight: 600;
+}
+.risk-filter-active {
+  border-color: #ff693b;
+  background: #fff1e9;
+  color: #b8401b;
+}
+.risk-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ff693b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 .risk-chips {
   display: flex;
