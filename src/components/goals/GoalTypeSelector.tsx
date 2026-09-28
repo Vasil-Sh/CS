@@ -16,7 +16,6 @@ export default function GoalTypeSelector({ value, onChange }: {
   const id = useId();
   return (
     <fieldset className="goal-type-selector" aria-describedby={`${id}-hint`}>
-      <legend>Тип цілі</legend>
       <div className="goal-type-options">
         {options.map((option) => (
           <label key={option.value} className="goal-type-option">

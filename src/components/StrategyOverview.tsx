@@ -404,41 +404,23 @@ export default function StrategyOverview({
     setActiveTab("overview");
   };
 
-  const handleSaveStrategy = (strat: CS2Strategy) => {
+  const handleSaveStrategy = async (strat: CS2Strategy) => {
     if (strategies.length >= 25) {
-      toast.error("Максимум 25 стратегій");
-      return;
+      throw new Error("Максимум 25 стратегій");
     }
-    const updated = [...strategies, strat];
-    setStrategies(updated);
-    UserDataService.setUserDataSync(currentUser, "strategies_data", updated);
-    setNewlyCreatedStrategy(strat);
-    UserDataService.createStrategy({
+    if (strategies.some(s => s.name.trim().toLowerCase() === strat.name.trim().toLowerCase())) {
+      throw new Error("Така стратегія вже існує");
+    }
+    const created = await UserDataService.createStrategy({
       name: strat.name,
       isPrimary: false,
       config: strat,
-    })
-      .then((bs: { id?: string }) => {
-        if (bs?.id) {
-          const all = UserDataService.getUserData<CS2Strategy[]>(
-            currentUser,
-            "strategies_data",
-            [],
-          );
-          const idx = all.findIndex(
-            (s) => (s.id || s.name) === (strat.id || strat.name),
-          );
-          if (idx >= 0) {
-            all[idx] = { ...all[idx], _backendId: bs.id };
-            UserDataService.setUserDataSync(
-              currentUser,
-              "strategies_data",
-              all,
-            );
-          }
-        }
-      })
-      .catch(() => {});
+    });
+    const saved: CS2Strategy = { ...strat, _backendId: typeof created.id === "string" ? created.id : undefined };
+    const updated = [...strategies, saved];
+    setStrategies(updated);
+    UserDataService.setUserDataSync(currentUser, "strategies_data", updated);
+    setNewlyCreatedStrategy(saved);
     bumpStrategy();
     setSuccessDialogOpen(true);
     setActiveTab("overview");
@@ -829,6 +811,8 @@ export default function StrategyOverview({
         strategy={newlyCreatedStrategy}
       />
       <StrategyDetailsDialog
+        bets={bettingData}
+        onEdit={setEditingStrategy}
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         strategy={selectedStrategy}

@@ -53,7 +53,7 @@
   line-height: 1.5;
 }
 .goal-create-header {
-  padding: 22px 26px;
+  padding: 18px 26px 16px;
   background: #171916;
   text-align: left;
 }
@@ -68,10 +68,10 @@
 .goal-create-header p {
   font-size: 14px;
   color: #caccce;
-  margin-top: 7px;
+  margin-top: 5px;
 }
 .goal-create-body {
-  padding: 20px 24px;
+  padding: 12px 24px 20px;
   overflow-y: auto;
   min-height: 0;
 }
@@ -108,7 +108,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border-bottom: 1px solid #d8dad6;
-  margin-top: 8px;
+  margin-top: 0;
 }
 .goal-type-option {
   position: relative;
@@ -123,16 +123,21 @@
   height: 1px;
 }
 .goal-type-option span {
-  display: block;
-  padding: 12px 3px;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  font-size: 15px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 3px;
+  border-bottom: 0;
+  box-shadow: inset 0 -3px 0 transparent;
+  margin-bottom: 0;
+  font-family: Oswald, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
   color: #656a72;
   transition:
     color 150ms,
-    border-color 150ms;
+    box-shadow 150ms;
 }
 .goal-type-option:hover span {
   color: #171916;
@@ -140,7 +145,7 @@
 .goal-type-option input:checked + span {
   color: #171916;
   font-weight: 700;
-  border-color: #ff693b;
+  box-shadow: inset 0 -3px 0 #ff693b;
 }
 .goal-type-option input:focus-visible + span {
   outline: 2px solid #ff693b;
@@ -148,7 +153,7 @@
   border-radius: 3px;
 }
 .goal-type-description {
-  margin-top: 10px;
+  margin-top: 6px;
   font-size: 13px;
   line-height: 1.5;
   color: #656a72;

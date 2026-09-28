@@ -719,24 +719,6 @@ export default function GoalsManager({
                     </SelectContent>
                   </Select>
                 </div>
-                {h.isLadderPreviewValid() && (
-                  <div className="p-3 bg-gray-50 rounded-2xl border border-gray-200">
-                    <p className="text-base font-medium text-gray-900">
-                      Кроків:{" "}
-                      {
-                        calculateLadderSteps(
-                          parseFloat(h.startAmountStr) || 0,
-                          parseFloat(h.targetLadderAmountStr) || 0,
-                          parseFloat(h.minOddsStr) || 0,
-                          parseFloat(h.maxOddsStr) || 0,
-                        ).length
-                      }
-                    </p>
-                    <p className="text-sm text-gray-400 mt-0.5">
-                      💡 Коефіцієнт {h.minOddsStr} – {h.maxOddsStr}
-                    </p>
-                  </div>
-                )}
               </>
             )}
 

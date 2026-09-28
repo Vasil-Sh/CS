@@ -1,399 +1,44 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plus,
-  X,
-  Zap,
-  Lightbulb,
-  Shield,
-  Sparkles,
-} from "lucide-react";
-import { toast } from "sonner";
-import type { CS2Strategy } from "@/types/strategy";
-import "./CreateStrategyDialog.css";
-
-interface StrategyTemplate {
-  name: string;
-  description: string;
-  riskLevel: "Low" | "Medium" | "High";
-  expectedROI: number;
-  criteria: string[];
-}
-
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  strategies: CS2Strategy[];
-  onSave: (strategy: CS2Strategy) => void;
-}
-
-const STRATEGY_TEMPLATES: StrategyTemplate[] = [
-  {
-    name: "Консервативна стратегія",
-    description: "Безпечний підхід з низьким ризиком. Підходить для стабільного зростання банку.",
-    riskLevel: "Low", expectedROI: 8,
-    criteria: ["Мінімальний коефіцієнт 1.3", "Максимальний коефіцієнт 1.8", "Формат тільки BO3", "Тільки ординари", "Аналіз останніх 10 матчів команд"],
-  },
-  {
-    name: "Збалансована стратегія",
-    description: "Оптимальне співвідношення ризику та прибутку. Універсальний підхід.",
-    riskLevel: "Medium", expectedROI: 15,
-    criteria: ["Мінімальний коефіцієнт 1.5", "Максимальний коефіцієнт 2.5", "Формат BO1 та BO3", "Експреси та ординари", "Розмір ставки 2-3% від банку"],
-  },
-  {
-    name: "Агресивна стратегія",
-    description: "Високий ризик, високий прибуток. Для досвідчених гравців.",
-    riskLevel: "High", expectedROI: 25,
-    criteria: ["Мінімальний коефіцієнт 2.0", "Тільки експреси", "Формат BO1 та BO3", "Розмір ставки 5% від банку", "Фокус на андердогах"],
-  },
-];
-
-const DEFAULT_FORM = {
-  name: "",
-  description: "",
-  criteria: [""],
-  riskLevel: "Medium" as "Low" | "Medium" | "High",
-  expectedROI: 10,
-  blockAfterLosses: 3,
-  blockDurationMinutes: 60,
-};
-
-function parseCriteriaForValidation(criteria: string[]): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  criteria.forEach((criterion) => {
-    const lower = criterion.toLowerCase();
-    const minOddsMatch = lower.match(/(?:мін|мінімальний|minimum|min).*?коеф.*?(\d+\.?\d*)/i);
-    if (minOddsMatch) result.minOdds = parseFloat(minOddsMatch[1]);
-    const maxOddsMatch = lower.match(/(?:макс|максимальний|maximum|max).*?коеф.*?(\d+\.?\d*)/i);
-    if (maxOddsMatch) result.maxOdds = parseFloat(maxOddsMatch[1]);
-    const formatMatch = lower.match(/формат.*?(bo[135](?:,?\s*(?:та|і|and|,)\s*bo[135])*)/i);
-    if (formatMatch) {
-      const formats = formatMatch[1].toUpperCase().match(/BO[135]/g);
-      if (formats) result.allowedFormats = formats;
-    }
-    if (lower.includes("тільки експрес") || lower.includes("только экспресс")) result.allowedBetTypes = ["Експрес"];
-    else if (lower.includes("тільки ординар") || lower.includes("только ординар")) result.allowedBetTypes = ["Ординар"];
-    else if (lower.includes("тільки система") || lower.includes("только система")) result.allowedBetTypes = ["Система"];
-  });
-  return result;
-}
-
-export default function CreateStrategyDialog({ open, onOpenChange, strategies, onSave }: Props) {
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [form, setForm] = useState({ ...DEFAULT_FORM });
-
-  const resetForm = () => setForm({ ...DEFAULT_FORM });
-
-  const handleOpenChange = (open: boolean) => {
-    onOpenChange(open);
-    if (!open) {
-      resetForm();
-      setShowTemplates(false);
-    }
-  };
-
-  const isTemplateAlreadyCreated = (name: string) =>
-    strategies.some((s) => s.name.toLowerCase() === name.toLowerCase());
-
-  const applyTemplate = (template: StrategyTemplate) => {
-    if (isTemplateAlreadyCreated(template.name)) return;
-    setForm({
-      name: template.name,
-      description: template.description,
-      criteria: [...template.criteria],
-      riskLevel: template.riskLevel,
-      expectedROI: template.expectedROI,
-      blockAfterLosses: 3,
-      blockDurationMinutes: 60,
-    });
-    setShowTemplates(false);
-    toast.success(`Шаблон "${template.name}" застосовано!`);
-  };
-
-  const addCriterion = () => setForm((prev) => ({ ...prev, criteria: [...prev.criteria, ""] }));
-  const updateCriterion = (index: number, value: string) =>
-    setForm((prev) => ({ ...prev, criteria: prev.criteria.map((c, i) => (i === index ? value : c)) }));
-  const removeCriterion = (index: number) =>
-    setForm((prev) => ({ ...prev, criteria: prev.criteria.filter((_, i) => i !== index) }));
-
-  const handleSave = () => {
-    if (!form.name.trim() || !form.description.trim()) {
-      toast.error("Заповніть назву та опис стратегії");
-      return;
-    }
-    const validCriteria = form.criteria.filter((c) => c.trim() !== "");
-    if (validCriteria.length === 0) {
-      toast.error("Додайте хоча б один критерій");
-      return;
-    }
-    const existingNames = strategies.map((s) => s.name.toLowerCase());
-    if (existingNames.includes(form.name.toLowerCase().trim())) {
-      toast.error("Стратегія з такою назвою вже існує. Оберіть іншу назву.");
-      return;
-    }
-    if (strategies.length >= 25) {
-      toast.error("Досягнуто ліміту стратегій", {
-        description: "Максимум 25 стратегій. Видаліть непотрібні перед створенням нової.",
-      });
-      return;
-    }
-    const validationRules = parseCriteriaForValidation(validCriteria);
-    const strategy: CS2Strategy = {
-      id: crypto.randomUUID(),
-      name: form.name.trim(),
-      description: form.description.trim(),
-      criteria: validCriteria,
-      riskLevel: form.riskLevel,
-      expectedROI: form.expectedROI,
-      activityLimits: {
-        enabled: true,
-        blockAfterLosses: form.blockAfterLosses,
-        blockDurationMinutes: form.blockDurationMinutes,
-        actionMode: "block",
-      },
-      ...validationRules,
-    };
-    onSave(strategy);
-    handleOpenChange(false);
-  };
-
-  const isValid = form.name.trim() !== '' && form.description.trim() !== '' && form.criteria.some((c) => c.trim() !== '');
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="strategy-create-dialog">
-        {/* === HEADER === */}
-        <DialogHeader className="strategy-create-header">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#ff693b] flex-shrink-0">
-              <Sparkles className="h-5 w-5 text-[#171916]" strokeWidth={1.5} />
-            </div>
-            <div>
-              <DialogTitle>Створити нову стратегію</DialogTitle>
-              <DialogDescription>
-                Додайте критерії та обмеження для вашої стратегії ставок
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        {/* === BODY === */}
-        <div className="strategy-create-body space-y-4">
-          {/* Template button */}
-          {!showTemplates && (
-            <Button
-              type="button"
-              onClick={() => setShowTemplates(true)}
-              className="w-full rounded-2xl bg-primary hover:bg-blue-400 text-white font-medium h-10 text-sm"
-            >
-              <Zap className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Використати шаблон
-            </Button>
-          )}
-
-          {/* Template picker */}
-          {showTemplates && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-amber-500" strokeWidth={1.5} /> Шаблони стратегій
-                </h4>
-                <Button variant="ghost" size="sm" onClick={() => setShowTemplates(false)} className="rounded-xl text-xs">
-                  <X className="h-3 w-3 mr-1" /> Закрити
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {STRATEGY_TEMPLATES.map((template, idx) => {
-                  const exists = isTemplateAlreadyCreated(template.name);
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => !exists && applyTemplate(template)}
-                      className={`border rounded-2xl p-4 transition-all ${
-                        exists
-                          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
-                          : "bg-white border-gray-200 hover:border-primary cursor-pointer hover:shadow-md"
-                      }`}
-                    >
-                      <div className="text-sm font-semibold text-gray-900 mb-1">{template.name}</div>
-                      <div className="text-xs text-gray-500 mb-2 line-clamp-2">{template.description}</div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-                          ROI {template.expectedROI}%
-                        </span>
-                        {exists && <span className="text-gray-400">Вже створено</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Hint box */}
-          <div className="hint-box">
-            <h4 className="mb-2 flex items-center gap-2 text-sm">
-              <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
-              Як додати обмеження до стратегії:
-            </h4>
-            <div className="space-y-2 text-sm">
-              <p>• <strong>Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5"</p>
-              <p>• <strong>Для обмеження форматів:</strong> напишіть "Формат тільки BO3"</p>
-              <p>• <strong>Для обмеження типів ставок:</strong> напишіть "Тільки експреси"</p>
-            </div>
-          </div>
-
-          {/* Tilt protection */}
-          <div className="tilt-box space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FEE2E2]">
-                <Shield className="h-4 w-4 text-red-600" strokeWidth={2} />
-              </div>
-              <h4>🔒 Тілт-захист (anti-tilt)</h4>
-            </div>
-            <p className="text-xs text-red-600/70">
-              Автоматично блокує форму ставки після N програшів поспіль.
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-gray-500 font-medium text-sm">Блокувати після програшів</Label>
-                <Input
-                  type="number" min={1} max={10}
-                  value={form.blockAfterLosses}
-                  onChange={(e) => setForm({ ...form, blockAfterLosses: parseInt(e.target.value) || 3 })}
-                  className="rounded-xl border-gray-200 bg-white mt-1.5"
-                />
-                <p className="text-xs text-gray-400 mt-1">К-сть програшів поспіль</p>
-              </div>
-              <div>
-                <Label className="text-gray-500 font-medium text-sm">Тривалість блокування</Label>
-                <div className="relative mt-1.5">
-                  <Input
-                    type="number" min={15} max={480} step={15}
-                    value={form.blockDurationMinutes}
-                    onChange={(e) => setForm({ ...form, blockDurationMinutes: parseInt(e.target.value) || 60 })}
-                    className="rounded-xl border-gray-200 bg-white pr-12"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">хв</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Від 15 до 480 хв</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Name / Risk / ROI row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label className="text-base font-medium">Назва стратегії <span className="text-red-600">*</span></Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Наприклад: Консервативна"
-                className="rounded-2xl border-gray-200 mt-1.5 h-11 text-base"
-              />
-            </div>
-            <div>
-              <Label className="text-base font-medium">Рівень ризику <span className="text-red-600">*</span></Label>
-              <Select value={form.riskLevel} onValueChange={(v: "Low" | "Medium" | "High") => setForm({ ...form, riskLevel: v })}>
-                <SelectTrigger className="rounded-2xl border-gray-200 mt-1.5 h-11"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Low">Низький</SelectItem>
-                  <SelectItem value="Medium">Середній</SelectItem>
-                  <SelectItem value="High">Високий</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-base font-medium">Очікуваний ROI (%)</Label>
-              <Input
-                type="number" min={0} max={100}
-                value={form.expectedROI}
-                onChange={(e) => setForm({ ...form, expectedROI: parseInt(e.target.value) || 0 })}
-                className="rounded-2xl border-gray-200 mt-1.5 h-11 text-base"
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <Label className="text-base font-medium">Опис стратегії <span className="text-red-600">*</span></Label>
-            <Textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Детальний опис стратегії, коли її використовувати..."
-              rows={3}
-              className="rounded-2xl border-gray-200 mt-1.5"
-            />
-          </div>
-
-          {/* Criteria */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-base font-medium">Критерії стратегії <span className="text-red-600">*</span></Label>
-              <Button
-                type="button" variant="outline" size="sm"
-                onClick={addCriterion}
-                className="rounded-xl bg-blue-50 border-blue-100 font-medium text-blue-500 hover:bg-blue-100"
-              >
-                <Plus className="h-4 w-4 mr-2" strokeWidth={1.5} /> Додати критерій
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {form.criteria.map((criterion, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={criterion}
-                    onChange={(e) => updateCriterion(index, e.target.value)}
-                    placeholder={index === 0 ? "Наприклад: Мінімальний коефіцієнт 1.5" : `Критерій ${index + 1}`}
-                    className="rounded-2xl border-gray-200"
-                  />
-                  {form.criteria.length > 1 && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => removeCriterion(index)} className="rounded-xl border-gray-200">
-                      <X className="h-4 w-4" strokeWidth={1.5} />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* === FOOTER === */}
-        <DialogFooter className="strategy-create-footer">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            className="border border-gray-200 hover:bg-gray-50"
-          >
-            Скасувати
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!isValid}
-            className="strategy-create-submit"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Створити стратегію
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+import {useRef,useState} from 'react';
+import {ArrowRight,FileText,Plus,Shield,X} from 'lucide-react';
+import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import {AlertDialog,AlertDialogContent,AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogAction,AlertDialogCancel} from '@/components/ui/alert-dialog';
+import {getRiskLabel} from '@/lib/strategyHelpers';
+import type {CS2Strategy} from '@/types/strategy';
+import {newDraft,wizardTemplates,validateDraft,draftToStrategy,type StrategyDraft} from './strategyWizard';
+import './CreateStrategyDialog.css';
+interface Props{open:boolean;onOpenChange:(open:boolean)=>void;strategies:CS2Strategy[];onSave:(strategy:CS2Strategy)=>void|Promise<void>}
+export default function CreateStrategyDialog({open,onOpenChange,strategies,onSave}:Props){
+ const [draft,setDraft]=useState(newDraft),[step,setStep]=useState(0),[errors,setErrors]=useState<Record<string,string>>({});
+ const [templates,setTemplates]=useState(false),[saving,setSaving]=useState(false),[failure,setFailure]=useState('');
+ const [confirm,setConfirm]=useState(false),[replacement,setReplacement]=useState<StrategyDraft|null>(null);
+ const busy=useRef(false),body=useRef<HTMLDivElement>(null);
+ const dirty=JSON.stringify(draft)!==JSON.stringify(newDraft());
+ const reset=()=>{setDraft(newDraft());setStep(0);setErrors({});setTemplates(false);setFailure('');setConfirm(false);setReplacement(null);};
+ const close=()=>{if(busy.current)return;if(dirty){setReplacement(null);setConfirm(true);}else{reset();onOpenChange(false);}};
+ const change=<K extends keyof StrategyDraft>(key:K,value:StrategyDraft[K])=>{setDraft(d=>({...d,[key]:value}));setErrors(e=>({...e,[key]:''}));setFailure('');};
+ const go=(next:number)=>{if(busy.current)return;if(next>step){for(let i=0;i<next;i++){const e=validateDraft(draft,i,strategies);if(Object.keys(e).length){setStep(i);setErrors(e);requestAnimationFrame(()=>body.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());return;}}}setStep(next);setErrors({});setFailure('');if(body.current)body.current.scrollTop=0;};
+ const save=async()=>{if(busy.current)return;for(let i=0;i<2;i++){const e=validateDraft(draft,i,strategies);if(Object.keys(e).length){setStep(i);setErrors(e);return;}}busy.current=true;setSaving(true);setFailure('');try{await onSave(draftToStrategy(draft));reset();onOpenChange(false);}catch{setFailure('Не вдалося зберегти стратегію. Ваші поля збережено — спробуйте ще раз.');}finally{busy.current=false;setSaving(false);}};
+ const apply=(t:StrategyDraft)=>{setDraft({...t,formats:[...t.formats],types:[...t.types],criteria:[...t.criteria]});setTemplates(false);setErrors({});setFailure('');};
+ const error=(key:string)=>errors[key]?<span className="sc-error" id={`sc-${key}-error`} role="alert">{errors[key]}</span>:null;
+ const field=(key:'name'|'roi'|'min'|'max'|'losses'|'minutes',label:string)=> <label className="sc-field" htmlFor={`sc-${key}`}><span>{label}</span><input id={`sc-${key}`} value={draft[key]} inputMode={key==='name'?'text':'decimal'} maxLength={key==='name'?120:16} aria-invalid={!!errors[key]} aria-describedby={errors[key]?`sc-${key}-error`:undefined} onChange={e=>change(key,e.target.value)}/>{error(key)}</label>;
+ const options=(key:'formats'|'types',label:string,values:string[]) => <fieldset className="sc-options"><legend>{label}</legend>{values.map(value=><label key={value}><input type="checkbox" checked={draft[key].includes(value)} onChange={e=>change(key,e.target.checked?[...draft[key],value]:draft[key].filter(v=>v!==value))}/>{value}</label>)}</fieldset>;
+ const protection=<div className="sc-notice"><Shield size={20}/><span>{draft.tilt?`${draft.losses} програші поспіль → пауза ${draft.minutes} хв. Додавання ставок блокується на час паузи.`:'Тільт-захист вимкнено.'}</span></div>;
+ return <><Dialog open={open} onOpenChange={v=>{if(!v)close();}}><DialogContent className="sc-dialog" hideCloseButton onEscapeKeyDown={e=>{if(saving||confirm)e.preventDefault();}} onPointerDownOutside={e=>{if(saving||confirm)e.preventDefault();}}>
+ <header className="sc-header"><DialogTitle>Створити стратегію</DialogTitle><DialogDescription>Задайте правила для своїх рішень.</DialogDescription><button disabled={saving} className="sc-close" aria-label="Закрити форму" onClick={close}><X size={22}/></button></header>
+ <nav className="sc-steps" aria-label="Кроки створення стратегії">{['Основне','Правила','Перевірка'].map((label,i)=><button key={label} disabled={saving} aria-current={step===i?'step':undefined} onClick={()=>go(i)}>{label}</button>)}</nav>
+ <div className="sc-body" ref={body}><fieldset className="sc-fields" disabled={saving}>
+ {step===0&&<><button type="button" className="sc-template-button" aria-expanded={templates} onClick={()=>setTemplates(!templates)}><FileText size={16}/>Використати шаблон</button>
+ {templates&&<div className="sc-templates">{wizardTemplates.map(t=><button type="button" key={t.name} onClick={()=>{if(dirty){setReplacement(t);setConfirm(true);}else apply(t);}}><strong>{t.name}</strong><span>{getRiskLabel(t.riskLevel)} ризик · коефіцієнти {t.min}–{t.max||'без максимуму'}</span></button>)}</div>}
+ {field('name','Назва стратегії *')}<label className="sc-field" htmlFor="sc-description"><span>Опис *</span><textarea id="sc-description" rows={3} maxLength={2000} value={draft.description} aria-invalid={!!errors.description} aria-describedby={errors.description?'sc-description-error':undefined} onChange={e=>change('description',e.target.value)}/>{error('description')}</label>
+ <fieldset className="sc-risk"><legend>Рівень ризику</legend><div>{(['Low','Medium','High'] as const).map(value=><label key={value}><input type="radio" name="sc-risk" value={value} checked={draft.riskLevel===value} onChange={()=>change('riskLevel',value)}/><span>{getRiskLabel(value)}</span></label>)}</div></fieldset><p className="sc-help">Ваша оцінка ризику, не прогноз.</p>
+ {field('roi','Очікуваний ROI, %')}<p className="sc-help">Орієнтир, а не гарантований прибуток.</p><p className="sc-help">* Обов’язкові поля</p>{error('limit')}</>}
+ {step===1&&<><h3>Контроль ставок</h3><div className="sc-pair">{field('min','Коефіцієнт від')}{field('max','Коефіцієнт до')}</div><p className="sc-help">Порожнє поле — без обмеження.</p>{options('formats','Формати матчів',['BO1','BO3','BO5'])}{options('types','Типи ставок',['Ординар','Експрес','Система'])}<p className="sc-help">Якщо нічого не обрано — дозволені всі варіанти.</p>
+ <section className="sc-section"><h3>Додаткові критерії *</h3>{draft.criteria.map((criterion,i)=><div className="sc-criterion" key={i}><input aria-label={`Критерій ${i+1}`} value={criterion} maxLength={500} aria-invalid={!!errors.criteria&&i===0} aria-describedby={errors.criteria?'sc-criteria-error':undefined} onChange={e=>change('criteria',draft.criteria.map((c,n)=>n===i?e.target.value:c))}/><button type="button" aria-label={`Видалити критерій ${i+1}`} onClick={()=>change('criteria',draft.criteria.length===1?['']:draft.criteria.filter((_,n)=>n!==i))}><X size={16}/></button></div>)}{error('criteria')}<button type="button" className="sc-text-action" onClick={()=>change('criteria',[...draft.criteria,''])}><Plus size={16}/>Додати критерій</button></section>
+ <section className="sc-section"><label className="sc-switch"><span>Тільт-захист</span><input type="checkbox" role="switch" checked={draft.tilt} onChange={e=>change('tilt',e.target.checked)}/></label>{draft.tilt&&<><div className="sc-pair">{field('losses','Після програшів поспіль')}{field('minutes','Пауза, хв')}</div>{protection}</>}</section></>}
+ {step===2&&<><h3 className="sc-name">{draft.name}</h3><p className="sc-help">{getRiskLabel(draft.riskLevel)} ризик</p><div className="sc-summary-title"><h3>Основне</h3><button type="button" onClick={()=>go(0)}>Змінити</button></div><dl className="sc-summary"><div><dt>Опис</dt><dd>{draft.description}</dd></div><div><dt>Очікуваний ROI</dt><dd>{draft.roi}%</dd></div></dl><section className="sc-section"><div className="sc-summary-title"><h3>Правила</h3><button type="button" onClick={()=>go(1)}>Змінити</button></div><dl className="sc-summary"><div><dt>Коефіцієнти</dt><dd>{draft.min||'Без мінімуму'} — {draft.max||'без максимуму'}</dd></div><div><dt>Формати матчів</dt><dd>{draft.formats.join(', ')||'Усі'}</dd></div><div><dt>Типи ставок</dt><dd>{draft.types.join(', ')||'Усі'}</dd></div><div><dt>Додаткові критерії</dt><dd><ul>{draft.criteria.filter(c=>c.trim()).map((c,i)=><li key={i}>{c}</li>)}</ul></dd></div></dl>{protection}</section><p className="sc-info">Стратегія не створює ставки автоматично.</p></>}
+ </fieldset>{failure&&<p className="sc-error" role="alert">{failure}</p>}</div>
+ <footer className="sc-footer"><button disabled={saving} onClick={()=>step?go(step-1):close()}>{step?'Назад':'Скасувати'}</button><button disabled={saving} className="sc-primary" onClick={()=>step===2?void save():go(step+1)}>{saving?'Збереження…':step===2?'Створити стратегію':step===1?'Перевірити':'Далі'}{step<2&&<ArrowRight size={16}/>}</button></footer>
+ </DialogContent></Dialog>
+ <AlertDialog open={confirm} onOpenChange={setConfirm}><AlertDialogContent><AlertDialogTitle>{replacement?'Застосувати шаблон?':'Скасувати створення?'}</AlertDialogTitle><AlertDialogDescription>{replacement?'Шаблон замінить заповнені поля.':'Введені дані буде втрачено.'}</AlertDialogDescription><AlertDialogFooter><AlertDialogCancel>Продовжити редагування</AlertDialogCancel><AlertDialogAction className="bg-[#ff693b] text-black hover:bg-[#ee5a2e]" onClick={()=>{if(replacement){apply(replacement);setReplacement(null);setConfirm(false);}else{reset();onOpenChange(false);}}}>{replacement?'Застосувати':'Скасувати створення'}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+ </>;
 }

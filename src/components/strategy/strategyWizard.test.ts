@@ -1,0 +1,5 @@
+import {it,expect} from 'vitest';
+import {newDraft,validateDraft,draftToStrategy,wizardTemplates} from './strategyWizard';
+it('requires basic fields, checks duplicates and invalid ranges',()=>{expect(validateDraft(newDraft(),0,[])).toHaveProperty('name');const d={...wizardTemplates[0],min:'2',max:'1.5'};expect(validateDraft(d,1,[])).toHaveProperty('max');expect(validateDraft(d,0,[draftToStrategy(d)])).toHaveProperty('name');});
+it('validates enabled protection and decimal comma',()=>{const d={...wizardTemplates[0],min:'1,3',losses:'0'};expect(validateDraft(d,1,[])).toHaveProperty('losses');expect(validateDraft({...d,tilt:false},1,[])).toEqual({});expect(draftToStrategy({...d,tilt:false}).minOdds).toBe(1.3);});
+it('preserves combinations as structured rules, not text parsing',()=>{const s=draftToStrategy({...wizardTemplates[1],tilt:false});expect(s.allowedBetTypes).toEqual(['Експрес','Ординар']);expect(s.betTypeRules?.enabled).toBe(true);expect(s.activityLimits?.enabled).toBe(false);expect(s.criteria).toEqual(['Розмір ставки 2–3% від банку']);});
