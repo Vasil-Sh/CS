@@ -698,6 +698,32 @@
   border-radius: 5px;
   background: #fff;
 }
+.risk-guide-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #ff693b;
+  border-radius: 6px;
+  background: #ff693b;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.risk-guide-toggle:hover {
+  background: #ff825d;
+  border-color: #ff825d;
+  color: #fff;
+}
+.risk-guide-toggle svg {
+  transition: transform 0.18s;
+}
+.risk-guide-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
 .risk-guide h2 {
   font-size: 25px;
   text-transform: uppercase;

@@ -1,183 +1,34 @@
-/**
- * MonthlyProfitChartCard — bar chart (monthly profit) + cumulative line,
- * restyled in 21st Sales Overview style.
- */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import {
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  Area,
-  Cell,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-interface MonthlyData {
-  month: string;
-  profit: number;
-  cumulative: number;
-  totalBets: number;
-}
+interface MonthlyData { month: string; profit: number; cumulative: number; totalBets: number; }
+interface Props { data: MonthlyData[]; }
 
-interface Props {
-  data: MonthlyData[];
+function ProfitValueLabel({ x = 0, y = 0, width = 0, height = 0, value }: { x?: number; y?: number; width?: number; height?: number; value?: number | string }) {
+  const profit = Number(value || 0);
+  if (!profit) return null;
+  return <text x={x + width / 2} y={profit >= 0 ? y - 8 : y + height + 16} textAnchor="middle" fill={profit >= 0 ? "#287540" : "#cc463c"} fontFamily="Oswald, sans-serif" fontSize="14" fontWeight="600">{profit >= 0 ? "+" : ""}{Math.round(profit).toLocaleString("uk-UA")} ₴</text>;
 }
 
 export default function MonthlyProfitChartCard({ data }: Props) {
   return (
-    <Card className="w-full border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-2xl bg-white overflow-hidden">
-      {/* ── Header: title (left) + legend (right) ── */}
-      <CardHeader className="flex flex-row items-center justify-between p-0 pt-5 pb-3 px-5 space-y-0 border-0">
-        <CardTitle className="flex items-center gap-2.5 text-base font-semibold text-gray-900">
-          <div className="p-2 bg-blue-50 rounded-xl">
-            <Calendar className="h-4 w-4 text-primary" strokeWidth={1.5} />
-          </div>
-          Прибуток по місяцях
-        </CardTitle>
-
-        <div className="flex items-center gap-4 text-sm font-medium">
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-emerald-500 inline-block" />
-            <span className="text-muted-foreground text-xs">За місяць</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-blue-500 inline-block" />
-            <span className="text-muted-foreground text-xs">Загальний</span>
-          </div>
-        </div>
+    <Card className="analytics-chart-card analytics-monthly-card w-full overflow-hidden">
+      <CardHeader className="analytics-monthly-header flex flex-row items-center justify-between p-0 px-5 space-y-0 border-0">
+        <CardTitle className="analytics-monthly-title text-gray-900">Прибуток по місяцях</CardTitle>
       </CardHeader>
-
-      {/* ── Chart: bars + cumulative line ── */}
-      <CardContent className="p-0 h-80 w-full">
+      <CardContent className="analytics-monthly-content p-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 5, bottom: 5 }}
-          >
-            <defs>
-              <linearGradient id="profitBarGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#10B981" stopOpacity={0.3} />
-              </linearGradient>
-              <linearGradient id="lossBarGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
-                <stop offset="100%" stopColor="#EF4444" stopOpacity={0.3} />
-              </linearGradient>
-              <linearGradient
-                id="cumulativeAreaGrad"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="0%" stopColor="#447afc" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#447afc" stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.7}
-              vertical={false}
-            />
-
-            <XAxis
-              dataKey="month"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: "#6B7280" }}
-              tickMargin={8}
-            />
-
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: "#6B7280" }}
-              tickFormatter={(v: number) =>
-                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
-              }
-              width={50}
-              tickMargin={8}
-            />
-
-            <ReferenceLine y={0} stroke="#D1D5DB" strokeWidth={1} />
-
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const d = payload[0].payload as MonthlyData;
-                  return (
-                    <div className="bg-background/95 backdrop-blur-sm border border-border shadow-md rounded-lg p-2.5 text-xs space-y-1">
-                      <p className="font-semibold text-foreground">{d.month}</p>
-                      <p
-                        className={`font-medium ${d.profit >= 0 ? "text-emerald-600" : "text-red-500"}`}
-                      >
-                        За місяць: {d.profit.toLocaleString("uk-UA")} ₴
-                      </p>
-                      <p className="text-blue-600 font-medium">
-                        Загалом: {d.cumulative.toLocaleString("uk-UA")} ₴
-                      </p>
-                      {d.totalBets > 0 && (
-                        <p className="text-gray-500 font-medium">
-                          Ставок: {d.totalBets}
-                        </p>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              }}
-              cursor={{
-                stroke: "#D1D5DB",
-                strokeWidth: 1,
-                strokeDasharray: "4 4",
-              }}
-            />
-
-            {/* Area fill under cumulative line */}
-            <Area
-              type="monotone"
-              dataKey="cumulative"
-              fill="url(#cumulativeAreaGrad)"
-              stroke="none"
-            />
-
-            {/* Monthly profit bars — green for profit, red for loss */}
-            <Bar dataKey="profit" radius={[4, 4, 0, 0]} maxBarSize={48}>
-              {data.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={
-                    entry.profit >= 0
-                      ? "url(#profitBarGrad)"
-                      : "url(#lossBarGrad)"
-                  }
-                />
-              ))}
+          <BarChart data={data} margin={{ top: 24, right: 20, left: 4, bottom: 3 }} barCategoryGap="12%">
+            <CartesianGrid stroke="#e4e6e0" vertical />
+            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#747a71" }} tickMargin={11} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#747a71" }} tickFormatter={(v: number) => Math.round(v).toLocaleString("uk-UA")} tickMargin={8} width={54} tickCount={5} />
+            <ReferenceLine y={0} stroke="#cfd3cc" strokeWidth={1} />
+            <Tooltip cursor={{ fill: "rgba(32,36,31,.035)" }} content={({ active, payload }) => active && payload?.length ? <div className="analytics-chart-tooltip"><strong>{payload[0].payload.month}</strong><span>{Number(payload[0].value).toLocaleString("uk-UA")} ₴</span></div> : null} />
+            <Bar dataKey="profit" maxBarSize={56} radius={[0, 0, 0, 0]}>
+              <LabelList dataKey="profit" content={<ProfitValueLabel />} />
+              {data.map((entry, index) => <Cell key={index} fill={entry.profit >= 0 ? "#62af69" : "#eb5750"} />)}
             </Bar>
-
-            {/* Cumulative line (blue, dots) */}
-            <Line
-              type="monotone"
-              dataKey="cumulative"
-              stroke="#447afc"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: "#fff", stroke: "#447afc", strokeWidth: 2 }}
-              activeDot={{
-                r: 6,
-                fill: "#447afc",
-                stroke: "#fff",
-                strokeWidth: 2,
-              }}
-            />
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

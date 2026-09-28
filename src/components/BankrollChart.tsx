@@ -17,7 +17,7 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import { Wallet, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import type { BalanceData } from "@/types/betting";
 
 interface BankrollChartProps {
@@ -40,22 +40,19 @@ const BankrollChart = memo(function BankrollChart({
     return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit" });
   };
   const fmtCurrency = (v: number) =>
-    v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(Math.round(v));
+    Math.round(v).toLocaleString("uk-UA");
 
   return (
-    <Card className="w-full border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-2xl bg-white overflow-hidden">
+    <Card className="analytics-chart-card w-full overflow-hidden">
       {/* ── Header: title (left) + legend (right) ── */}
-      <CardHeader className="flex flex-row items-center justify-between p-0 pt-5 pb-3 px-5 space-y-0 border-0">
-        <CardTitle className="flex items-center gap-2.5 text-base font-semibold text-gray-900">
-          <div className="p-2 bg-blue-50 rounded-xl">
-            <Wallet className="h-4 w-4 text-primary" strokeWidth={1.5} />
-          </div>
-          Історія банкролу
+      <CardHeader className="analytics-bankroll-header flex flex-row items-center justify-between p-0 px-5 space-y-0 border-0">
+        <CardTitle className="analytics-bankroll-title text-gray-900">
+          Динаміка банку
         </CardTitle>
 
         <div className="flex items-center gap-4 text-sm font-medium">
           <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full bg-blue-500 inline-block" />
+            <span className="size-2.5 rounded-full bg-[#ff693b] inline-block" />
             <span className="text-muted-foreground text-xs">Баланс</span>
           </div>
           <button className="text-muted-foreground hover:text-foreground transition-colors -mr-1">
@@ -65,31 +62,29 @@ const BankrollChart = memo(function BankrollChart({
       </CardHeader>
 
       {/* ── Chart ── */}
-      <CardContent className="p-0 h-80 w-full">
+      <CardContent className="analytics-bankroll-content p-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 10, right: 10, left: 5, bottom: 5 }}
+            margin={{ top: 8, right: 10, left: 4, bottom: 2 }}
           >
             <defs>
               <linearGradient id="bankrollGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#447afc" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#447afc" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#ff693b" stopOpacity={0.16} />
+                <stop offset="100%" stopColor="#ff693b" stopOpacity={0.01} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke="#E5E7EB"
-              opacity={0.7}
+              stroke="#e4e6e0"
+              opacity={1}
             />
 
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tick={{ fontSize: 10, fill: "#747a71" }}
               tickFormatter={fmtDate}
               tickMargin={8}
             />
@@ -97,7 +92,7 @@ const BankrollChart = memo(function BankrollChart({
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tick={{ fontSize: 10, fill: "#747a71" }}
               tickFormatter={fmtCurrency}
               domain={["auto", "auto"]}
               width={50}
@@ -123,7 +118,7 @@ const BankrollChart = memo(function BankrollChart({
                         </p>
                       ) : (
                         <>
-                          <p className="text-blue-600 font-medium">
+                          <p className="text-orange-600 font-medium">
                             Баланс:{" "}
                             {Math.round(d.balance).toLocaleString("uk-UA")} ₴
                           </p>
@@ -147,8 +142,8 @@ const BankrollChart = memo(function BankrollChart({
             {/* Reference line — initial bankroll */}
             <ReferenceLine
               y={initialBalance}
-              stroke="#D1D5DB"
-              strokeDasharray="6 4"
+              stroke="#cfd3cc"
+              strokeDasharray="0"
               strokeWidth={1}
             />
 
@@ -156,13 +151,12 @@ const BankrollChart = memo(function BankrollChart({
             <Area
               type="monotone"
               dataKey="balance"
-              stroke="#447afc"
-              strokeWidth={2}
+              stroke="none"
               fill="url(#bankrollGradient)"
               dot={false}
               activeDot={{
                 r: 6,
-                fill: "#447afc",
+                fill: "#ff693b",
                 stroke: "#fff",
                 strokeWidth: 2,
               }}
@@ -171,21 +165,17 @@ const BankrollChart = memo(function BankrollChart({
             <Line
               type="monotone"
               dataKey="balance"
-              stroke="#447afc"
-              strokeWidth={2}
-              dot={{
-                r: 4,
-                fill: "#fff",
-                stroke: "#447afc",
-                strokeWidth: 2,
-              }}
+              stroke="#ff693b"
+              strokeWidth={2.25}
+              dot={false}
               activeDot={{
-                r: 6,
-                fill: "#447afc",
-                stroke: "#fff",
+                r: 5,
+                fill: "#fff",
+                stroke: "#ff693b",
                 strokeWidth: 2,
               }}
             />
+
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>

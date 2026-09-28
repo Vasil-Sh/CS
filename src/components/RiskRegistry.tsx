@@ -65,6 +65,7 @@ export default function RiskRegistry() {
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("risk");
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const counts = useMemo(() => {
     const output: Record<string, number> = { all: h.riskyTeams.length };
@@ -371,6 +372,8 @@ export default function RiskRegistry() {
                   <p>Зверніть увагу на форму команди.</p>
                 </div>
               </li>
+              {guideOpen && (
+                <>
               <li>
                 <span>5</span>
                 <div>
@@ -399,7 +402,18 @@ export default function RiskRegistry() {
                   <p>Недостатньо даних для оцінки.</p>
                 </div>
               </li>
+                </>
+              )}
             </ol>
+            <button
+              type="button"
+              className="risk-guide-toggle"
+              aria-expanded={guideOpen}
+              onClick={() => setGuideOpen((v) => !v)}
+            >
+              <ChevronDown size={16} />
+              {guideOpen ? "Згорнути" : "Показати всі статуси"}
+            </button>
           </aside>
         </div>
       </div>

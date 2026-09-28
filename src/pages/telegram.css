@@ -113,11 +113,16 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 285px;
   gap: 28px;
-  align-items: start;
+  align-items: stretch;
   padding: 27px max(38px, 4.6vw) 48px;
 }
 .telegram-main {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.telegram-main .tg-empty {
+  flex: 1;
 }
 .telegram-main > section.space-y-4 {
   display: flex;

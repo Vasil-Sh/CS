@@ -6,26 +6,23 @@ import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCar
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
 import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
 import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
-import MetricCard from "@/components/analytics/MetricCard";
 import RiskManagement from "@/components/RiskManagement";
 import PeriodComparison from "@/components/PeriodComparison";
-import { PageHeader } from "@/components/PageHeader";
 import GoalsManager from "@/components/GoalsManager";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService, type DualBankrollStats } from "@/lib/bankrollService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/stores/appStore";
-import { useTheme } from "@/hooks/useTheme";
 
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
-import { BlurFade } from "@/components/ui/blur-fade";
-
-import { AlertTriangle, BarChart3, Calendar, Wallet, Zap } from "lucide-react";
+import { AlertTriangle, BarChart3, Calendar, Wallet } from "lucide-react";
 import type { Bet, OddsRange, BalanceData, ScatterData } from "@/types/betting";
+import "./Analytics.css";
 
 interface MonthlyData {
   month: string;
+  monthKey: string;
   profit: number;
   cumulative: number;
   wins: number;
@@ -49,16 +46,6 @@ export default function Analytics() {
   });
   const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
 
-  const hasUsdBets = useMemo(
-    () =>
-      bets.some((b) => b.currency === "USD") || dualBank.usd.initialBank > 0,
-    [bets, dualBank.usd.initialBank],
-  );
-
-  const usdBetsCount = useMemo(
-    () => bets.filter((b) => b.currency === "USD").length,
-    [bets],
-  );
   const [activeTab, setActiveTab] = useState("profit");
 
   // Convert all bets to display currency — used by ALL charts
@@ -76,8 +63,6 @@ export default function Analytics() {
     });
   }, [bets, currencyMode]);
 
-  const { theme, toggleTheme } = useTheme();
-  const isDarkTheme = theme === "dark";
   const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("all");
 
   useEffect(() => {
@@ -340,6 +325,7 @@ export default function Analytics() {
         cumulative += data.profit;
         return {
           month,
+          monthKey: data.sortKey,
           profit: Math.round(data.profit * 100) / 100,
           cumulative: Math.round(cumulative * 100) / 100,
           wins: data.wins,
@@ -353,21 +339,32 @@ export default function Analytics() {
       });
   }, [completedBets]);
 
-  const dateRange = useMemo(() => {
-    if (completedBets.length === 0) return "—";
-    const dates = completedBets
-      .map((b: Bet) => new Date(b.date))
-      .sort((a, b) => a.getTime() - b.getTime());
-    const first = dates[0];
-    const last = dates[dates.length - 1];
-    const fmt = (d: Date) =>
-      d.toLocaleDateString("uk-UA", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    return `${fmt(first)} – ${fmt(last)}`;
-  }, [completedBets]);
+  const monthlyChartData = useMemo((): MonthlyData[] => {
+    if (monthlyProfitData.length === 0) return [];
+    const latest = monthlyProfitData[monthlyProfitData.length - 1];
+    const [year, month] = latest.monthKey.split("-").map(Number);
+    const lastMonth = new Date(year, month - 1, 1);
+    return Array.from({ length: 4 }, (_, offset) => {
+      const date = new Date(lastMonth.getFullYear(), lastMonth.getMonth() - 3 + offset, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const source = monthlyProfitData.find((item) => item.monthKey === monthKey);
+      const monthName = date.toLocaleDateString("uk-UA", { month: "long" });
+      const displayMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      return source ? {
+        ...source,
+        month: displayMonth,
+      } : {
+        month: displayMonth,
+        monthKey,
+        profit: 0,
+        cumulative: 0,
+        wins: 0,
+        losses: 0,
+        totalBets: 0,
+        winRate: 0,
+      };
+    });
+  }, [monthlyProfitData]);
 
   const balanceOverTime = useMemo((): BalanceData[] => {
     // Support both UAH and USD — pick correct initial bank
@@ -496,167 +493,101 @@ export default function Analytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative flex flex-col">
+    <div className="analytics-profit min-h-screen relative flex flex-col">
       {loading ? (
         <AnalyticsSkeleton />
       ) : (
         <>
-          {/* ===== HEADER ===== */}
-          <PageHeader
-            title="Аналітика"
-            currentUser={currentUser || "User"}
-            isDarkTheme={isDarkTheme}
-            onToggleTheme={toggleTheme}
-            showThemeToggle={false}
-            showCurrencySwitch={true}
-            currencyMode={currencyMode}
-            onCurrencyChange={setCurrencyMode}
-            hasUsdBets={hasUsdBets}
-            usdBetsCount={usdBetsCount}
-            gameFilter={gameFilter}
-            onGameFilterChange={setGameFilter}
-          />
-
-          <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4 flex flex-col flex-1 min-h-0">
-            {gameFilteredBets.length === 0 && (
-              <Card className="rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
-                <CardContent className="py-5 px-6 flex items-center gap-4">
-                  <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
-                    <AlertTriangle
-                      className="h-6 w-6 text-red-500"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-gray-900">
-                      Немає даних для аналізу
-                    </p>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      Додайте записи на сторінці «Додати запис»
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* ===== QUICK STATS ===== */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                {/* 1. Прибуток */}
-                <BlurFade delay={0} inView>
-                  <MetricCard
-                    value={`${filteredStats.totalProfit >= 0 ? "+" : ""}${Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴`}
-                    label="прибуток / вкладено"
-                    change={
-                      totalStaked > 0
-                        ? `${roi >= 0 ? "+" : ""}${roi}%`
-                        : undefined
-                    }
-                    isPositive={filteredStats.totalProfit >= 0}
-                    dateRange={dateRange}
-                    icon={Wallet}
-                    badgeClass={
-                      filteredStats.totalProfit >= 0
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
-                    }
-                  />
-                </BlurFade>
-
-                {/* 2. Ставки */}
-                <BlurFade delay={0.1} inView>
-                  <MetricCard
-                    value={completedBets.length.toString()}
-                    label="ставок"
-                    change={
-                      completedBets.length > 0
-                        ? `${winningBets.length}W / ${losingBets.length}L`
-                        : undefined
-                    }
-                    isPositive={winningBets.length >= losingBets.length}
-                    dateRange={dateRange}
-                    icon={BarChart3}
-                    badgeClass={
-                      winningBets.length >= losingBets.length
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-orange-100 text-orange-700"
-                    }
-                  />
-                </BlurFade>
-
-                {/* 3. Коефіцієнти */}
-                <BlurFade delay={0.2} inView>
-                  <MetricCard
-                    value={avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
-                    label="середній коеф."
-                    change={
-                      filteredStats.winRate > 0
-                        ? `${filteredStats.winRate}% виграшів`
-                        : undefined
-                    }
-                    isPositive={filteredStats.winRate >= 50}
-                    dateRange={dateRange}
-                    icon={Zap}
-                    badgeClass={
-                      filteredStats.winRate >= 50
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-orange-100 text-orange-700"
-                    }
-                  />
-                </BlurFade>
+          <header className="analytics-header">
+            <div className="analytics-header-top">
+              <div>
+                <h1>Аналітика</h1>
+                <p>Картина ваших рішень — без шуму.</p>
+              </div>
+              <div className="analytics-header-controls" aria-label="Фільтри аналітики">
+                <div className="analytics-segment" role="group" aria-label="Фільтр гри">
+                  {(["all", "CS2", "Dota2"] as const).map((game) => (
+                    <button key={game} type="button" aria-pressed={gameFilter === game} onClick={() => setGameFilter(game)}>
+                      {game === "all" ? "Усі ігри" : game === "Dota2" ? "Dota 2" : "CS2"}
+                    </button>
+                  ))}
+                </div>
+                <div className="analytics-segment" role="group" aria-label="Валюта">
+                  {(["UAH", "USD"] as const).map((currency) => (
+                    <button key={currency} type="button" aria-pressed={currencyMode === currency} onClick={() => setCurrencyMode(currency)}>
+                      {currency === "UAH" ? "₴ UAH" : "$ USD"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
+            <dl className="analytics-head-stats">
+              <div>
+                <dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴</dd>
+                <dt>Прибуток <span>ROI {roi >= 0 ? "+" : ""}{roi}%</span></dt>
+              </div>
+              <div><dd>{completedBets.length}</dd><dt>Розраховано <span>{winningBets.length}W / {losingBets.length}L</span></dt></div>
+              <div><dd>{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</dd><dt>Середній коеф. <span>{filteredStats.winRate}% вінрейт</span></dt></div>
+            </dl>
+          </header>
+
+          <div className="analytics-workspace relative z-10 flex flex-col flex-1 min-h-0">
+            {gameFilteredBets.length === 0 && (
+              <div className="analytics-empty-state">
+                <div className="analytics-empty-icon">
+                  <Wallet strokeWidth={1.5} />
+                </div>
+                <h3>Немає даних для аналізу</h3>
+                <p>Додайте записи на сторінці «Додати запис»</p>
+              </div>
+            )}
 
             {/* Custom Tabs Navigation */}
-            <div className="flex flex-col flex-1 min-h-0 space-y-6">
-              <div className="flex justify-center">
-                <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            {gameFilteredBets.length > 0 && (
+            <div className="analytics-tabs-shell flex flex-col flex-1 min-h-0">
+              <div className="analytics-tabs" role="tablist" aria-label="Розділи аналітики">
                   {tabs.map((tab) => {
-                    const Icon = tab.icon;
                     return (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`
-                      relative rounded-[24px] px-6 py-4 font-light text-base
-                      transition-all duration-300 ease-in-out
-                      ${
-                        activeTab === tab.id
-                          ? "bg-blue-500 text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent"
-                          : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent"
-                      }
-                    `}
+                        className="analytics-tab"
+                        aria-selected={activeTab === tab.id}
                       >
                         <span className="flex items-center justify-center gap-2">
-                          {Icon && (
-                            <Icon className="h-4 w-4" strokeWidth={1.5} />
-                          )}
                           {tab.label}
                         </span>
                       </button>
                     );
                   })}
-                </div>
               </div>
 
               {/* Tab Content */}
-              <div className="flex flex-col flex-1 min-h-0">
+              <div className="analytics-tab-content flex flex-col flex-1 min-h-0">
                 {activeTab === "profit" && (
                   <div className="flex flex-col flex-1">
                     {gameFilteredBets.length > 0 ? (
-                      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                        <div className="mb-6">
+                      <div className="analytics-profit-grid">
+                        <div className="analytics-bankroll-wrap">
                           <BankrollChart data={balanceOverTime} />
                         </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <MonthlyProfitChartCard data={monthlyProfitData} />
+                        <aside className="analytics-period-summary" aria-label="Підсумок періоду">
+                          <h2>Підсумок періоду</h2>
+                          <dl>
+                            <div><dt>Чистий результат</dt><dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴</dd></div>
+                            <div><dt>Розраховано</dt><dd>{completedBets.length}</dd></div>
+                            <div><dt>Активні</dt><dd>{gameFilteredBets.filter((bet) => bet.result === "Pending").length}</dd></div>
+                          </dl>
+                        </aside>
+                        <div className="analytics-profit-charts">
+                          <MonthlyProfitChartCard data={monthlyChartData} />
                           <OddsVsProfitScatterCard
                             data={scatterData}
                             winCount={winningBets.length}
                             lossCount={losingBets.length}
                           />
                         </div>
+                        <p className="analytics-method-note">Усі показники оновлюються після розрахунку запису.</p>
                       </div>
                     ) : (
                       <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
@@ -726,6 +657,7 @@ export default function Analytics() {
                 {activeTab === "risks" && <RiskManagement />}
               </div>
             </div>
+            )}
           </div>
         </>
       )}

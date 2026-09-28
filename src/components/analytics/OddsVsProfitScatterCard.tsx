@@ -3,8 +3,6 @@
  * restyled in 21st Sales Overview style (clean header, no axis lines).
  */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Target } from "lucide-react";
 import {
   ScatterChart,
   Scatter,
@@ -25,69 +23,53 @@ interface Props {
 
 export default function OddsVsProfitScatterCard({
   data,
-  winCount,
-  lossCount,
 }: Props) {
   return (
-    <Card className="w-full border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)] rounded-2xl bg-white overflow-hidden">
+    <Card className="analytics-chart-card w-full overflow-hidden">
       {/* ── Header: title (left) + legend + badges (right) ── */}
-      <CardHeader className="flex flex-row items-center justify-between p-0 pt-5 pb-3 px-5 space-y-0 border-0">
-        <CardTitle className="flex items-center gap-2.5 text-base font-semibold text-gray-900">
-          <div className="p-2 bg-blue-50 rounded-xl">
-            <Target className="h-4 w-4 text-primary" strokeWidth={1.5} />
-          </div>
-          Коефіцієнти vs Прибуток
+      <CardHeader className="analytics-scatter-header p-0 px-5 space-y-0 border-0">
+        <CardTitle className="analytics-scatter-title text-gray-900">
+          Коефіцієнт і результат
         </CardTitle>
 
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-emerald-500 inline-block" />
-            <span className="text-muted-foreground text-xs">Виграш</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-red-500 inline-block" />
-            <span className="text-muted-foreground text-xs">Програш</span>
-          </div>
-          <div className="w-px h-5 bg-gray-200" />
-          <Badge className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-            ✅ {winCount}
-          </Badge>
-          <Badge className="bg-red-50 text-red-500 text-[10px] font-semibold px-2 py-0.5 rounded-lg border-0">
-            ✕ {lossCount}
-          </Badge>
-        </div>
       </CardHeader>
 
       {/* ── Chart ── */}
-      <CardContent className="p-0 h-80 w-full">
+      <CardContent className="analytics-scatter-content p-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 10, right: 10, left: 5, bottom: 5 }}>
+          <ScatterChart margin={{ top: 6, right: 20, left: 14, bottom: 10 }}>
             <CartesianGrid
-              strokeDasharray="3 3"
               stroke="#E5E7EB"
-              opacity={0.7}
+              opacity={1}
             />
 
             <XAxis
               dataKey="odds"
+              type="number"
+              domain={[(min: number) => Math.min(1, min), (max: number) => Math.max(3.5, Math.ceil(max * 2) / 2)]}
+              tickCount={6}
+              height={42}
+              label={{ value: "Коефіцієнт", position: "insideBottom", offset: -2, fill: "#747a71", fontSize: 12 }}
               name="Коефіцієнт"
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: "#6B7280" }}
-              tickFormatter={(v) => Number(v).toFixed(2)}
+              tickFormatter={(v) => Number(v).toFixed(1)}
               tickMargin={8}
             />
 
             <YAxis
               dataKey="profit"
+              type="number"
+              label={{ value: "Прибуток, ₴", angle: -90, position: "insideLeft", offset: -5, style: { textAnchor: "middle", fill: "#747a71", fontSize: 12 } }}
               name="Прибуток"
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: "#6B7280" }}
               tickFormatter={(v: number) =>
-                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
+                Math.round(v).toLocaleString("uk-UA")
               }
-              width={50}
+              width={64}
               tickMargin={8}
             />
 
@@ -125,6 +107,7 @@ export default function OddsVsProfitScatterCard({
 
             <Scatter
               data={data}
+              isAnimationActive={false}
               shape={(props: unknown) => {
                 const { cx, cy, payload } = props as {
                   cx?: number;
@@ -136,11 +119,9 @@ export default function OddsVsProfitScatterCard({
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={5}
-                    fill={isWin ? "#10B981" : "#EF4444"}
-                    opacity={0.85}
-                    stroke="#fff"
-                    strokeWidth={2}
+                    r={3}
+                    fill={isWin ? "#ff693b" : "#9ca09a"}
+                    opacity={0.9}
                   />
                 );
               }}
