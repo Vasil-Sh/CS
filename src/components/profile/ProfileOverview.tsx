@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Pencil,
   FileText,
   AlertTriangle,
   BarChart3,
@@ -18,13 +17,6 @@ import {
   FolderOpen,
   MessageCircle,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { UserDataService } from "@/lib/userDataService";
 import { useData } from "@/contexts/DataContext";
 import type { Lang } from "@/lib/i18n";
@@ -69,9 +61,6 @@ export default function ProfileOverview(p: Props) {
       bio: "",
     }),
   );
-  const [draft, setDraft] = useState(identity);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rate, setRate] = useState(String(p.exchangeRate));
   const [rateError, setRateError] = useState("");
@@ -105,27 +94,6 @@ export default function ProfileOverview(p: Props) {
     const timeout = setTimeout(() => setCopied(false), 2500);
     return () => clearTimeout(timeout);
   }, [copied]);
-  const saveIdentity = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setSaving(true);
-    const next = {
-      displayName: draft.displayName.trim(),
-      bio: draft.bio.trim(),
-    };
-    try {
-      await UserDataService.saveUserPrefs({
-        preferences: { profileIdentity: next },
-      });
-      UserDataService.setUserDataSync(p.username, "profile_identity", next);
-      setIdentity(next);
-      setEditing(false);
-      toast.success("Профіль збережено");
-    } catch {
-      toast.error("Не вдалося зберегти профіль. Спробуйте ще раз.");
-    } finally {
-      setSaving(false);
-    }
-  };
   const tgAvatarName = (p.telegram || "").replace(/^@/, "").trim();
   const tgValid = tgAvatarName && /^[a-zA-Z0-9_]{5,32}$/.test(tgAvatarName);
   const publicUrl = `${window.location.origin}/user/${encodeURIComponent(p.username)}`;
@@ -200,16 +168,6 @@ export default function ProfileOverview(p: Props) {
           </span>
           {identity.bio && <p>{identity.bio}</p>}
         </div>
-        <button
-          className="profile-button"
-          onClick={() => {
-            setDraft(identity);
-            setEditing(true);
-          }}
-        >
-          <Pencil size={17} />
-          Редагувати профіль
-        </button>
       </section>
       <section className="profile-panel profile-overview">
         <div className="profile-section-title">
@@ -434,60 +392,6 @@ export default function ProfileOverview(p: Props) {
           </section>
         </aside>
       </div>
-      <Dialog
-        open={editing}
-        onOpenChange={(value) => {
-          if (!saving) setEditing(value);
-        }}
-      >
-        <DialogContent className="profile-edit-dialog">
-          <DialogHeader>
-            <DialogTitle>Редагувати профіль</DialogTitle>
-            <DialogDescription>
-              Налаштуйте ім’я та опис у вашому робочому просторі. Логін
-              залишається @{p.username}.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={saveIdentity}>
-            <label htmlFor="profile-display-name">Відображуване ім’я</label>
-            <input
-              id="profile-display-name"
-              maxLength={60}
-              value={draft.displayName}
-              onChange={(e) =>
-                setDraft({ ...draft, displayName: e.target.value })
-              }
-              placeholder={p.username}
-            />
-            <label htmlFor="profile-bio">Про себе</label>
-            <textarea
-              id="profile-bio"
-              maxLength={160}
-              rows={3}
-              value={draft.bio}
-              onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
-            />
-            <small>{draft.bio.length}/160</small>
-            <footer>
-              <button
-                type="button"
-                className="profile-button"
-                disabled={saving}
-                onClick={() => setEditing(false)}
-              >
-                Скасувати
-              </button>
-              <button
-                type="submit"
-                className="profile-button profile-primary"
-                disabled={saving}
-              >
-                {saving ? "Збереження…" : "Зберегти"}
-              </button>
-            </footer>
-          </form>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

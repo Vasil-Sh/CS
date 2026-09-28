@@ -531,55 +531,47 @@ export default function TelegramGroups() {
     <>
       {/* ===== Group Dialog ===== */}
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-        <DialogContent className="rounded-2xl max-w-md">
-          <DialogHeader>
+        <DialogContent className="tg-group-dialog">
+          <DialogHeader className="tg-group-header">
             <DialogTitle>
-              {editingGroup ? "Редагувати групу" : "Нова Telegram-група"}
+              {editingGroup ? "Редагувати групу" : "Додати групу"}
             </DialogTitle>
             <DialogDescription>
               Додайте групу з якої будете аналізувати ставки
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="tg-group-body">
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">
-                Назва групи *
-              </Label>
+              <Label htmlFor="tg-group-name">Назва групи *</Label>
               <Input
+                id="tg-group-name"
                 value={groupForm.name}
                 onChange={(e) =>
                   setGroupForm((p) => ({ ...p, name: e.target.value }))
                 }
                 placeholder="Pro Betting 🇺🇦"
-                className="rounded-xl border-gray-200"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium mb-1.5 block">
-                Посилання
-              </Label>
+              <Label htmlFor="tg-group-link">Посилання</Label>
               <Input
+                id="tg-group-link"
                 value={groupForm.link}
                 onChange={(e) =>
                   setGroupForm((p) => ({ ...p, link: e.target.value }))
                 }
                 placeholder="https://t.me/groupname"
-                className="rounded-xl border-gray-200"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="tg-group-footer">
             <Button
               variant="outline"
               onClick={() => setGroupDialogOpen(false)}
-              className="rounded-xl"
             >
               Скасувати
             </Button>
-            <Button
-              onClick={handleSaveGroup}
-              className="rounded-xl bg-[#ff693b] text-[#171916] hover:bg-[#f65a2a]"
-            >
+            <Button onClick={handleSaveGroup} className="tg-group-submit">
               {editingGroup ? "Зберегти" : "Додати"}
             </Button>
           </DialogFooter>
@@ -591,69 +583,62 @@ export default function TelegramGroups() {
         open={!!deleteGroupConfirm}
         onOpenChange={() => setDeleteGroupConfirm(null)}
       >
-        <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
-          <DialogHeader className="px-6 pt-6 pb-4">
+        <DialogContent className="tg-group-dialog">
+          <DialogHeader className="tg-delete-header">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-                <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.5} />
+              <div className="tg-delete-icon">
+                <Trash2 className="h-5 w-5" strokeWidth={1.5} />
               </div>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Видалити групу?
-              </DialogTitle>
+              <DialogTitle>Видалити групу?</DialogTitle>
             </div>
           </DialogHeader>
 
-          <div className="border-t border-gray-200" />
-
-          <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
-            <div className="text-center">
-              <div className="flex flex-col items-center px-5 py-5 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                <DialogDescription className="text-lg font-bold text-gray-900 text-center">
-                  {(deleteGroupConfirm &&
-                    groups.find((g) => g.id === deleteGroupConfirm)?.name) ||
-                    "—"}
-                </DialogDescription>
-                {deleteGroupConfirm &&
-                  (() => {
-                    const g = groups.find((x) => x.id === deleteGroupConfirm);
-                    return g?.link ? (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {tgHandle(g.link)}
-                      </p>
-                    ) : null;
-                  })()}
-              </div>
+          <div className="tg-delete-body">
+            <div className="tg-delete-name">
+              <DialogDescription className="text-lg font-bold text-center">
+                {(deleteGroupConfirm &&
+                  groups.find((g) => g.id === deleteGroupConfirm)?.name) ||
+                  "—"}
+              </DialogDescription>
+              {deleteGroupConfirm &&
+                (() => {
+                  const g = groups.find((x) => x.id === deleteGroupConfirm);
+                  return g?.link ? (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {tgHandle(g.link)}
+                    </p>
+                  ) : null;
+                })()}
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-red-200">
+            <div className="tg-delete-warning">
               <AlertTriangle
                 className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5"
                 strokeWidth={1.5}
               />
-              <p className="text-sm text-[#991B1B]">
+              <p>
                 Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
               </p>
             </div>
-
-            <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteGroupConfirm(null)}
-                className="rounded-xl border-gray-200 font-medium"
-              >
-                Скасувати
-              </Button>
-              <Button
-                onClick={() =>
-                  deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)
-                }
-                className="rounded-xl bg-red-600 hover:bg-[#B91C1C] text-white"
-              >
-                <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                Видалити
-              </Button>
-            </DialogFooter>
           </div>
+
+          <DialogFooter className="tg-group-footer">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteGroupConfirm(null)}
+            >
+              Скасувати
+            </Button>
+            <Button
+              onClick={() =>
+                deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)
+              }
+              className="tg-delete-submit"
+            >
+              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
+              Видалити
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

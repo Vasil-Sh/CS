@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { CS2Strategy } from "@/types/strategy";
+import "./CreateStrategyDialog.css";
 
 interface StrategyTemplate {
   name: string;
@@ -178,28 +179,24 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 p-0 gap-0">
+      <DialogContent className="strategy-create-dialog">
         {/* === HEADER === */}
-        <DialogHeader className="pt-4 pb-3 px-6">
+        <DialogHeader className="strategy-create-header">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-2xl">
-              <Sparkles className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#ff693b] flex-shrink-0">
+              <Sparkles className="h-5 w-5 text-[#171916]" strokeWidth={1.5} />
             </div>
             <div>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Створити нову стратегію
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 mt-0.5">
+              <DialogTitle>Створити нову стратегію</DialogTitle>
+              <DialogDescription>
                 Додайте критерії та обмеження для вашої стратегії ставок
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="border-t border-gray-200" />
-
         {/* === BODY === */}
-        <div className="space-y-4 pt-4 pb-4 px-6 bg-gray-100">
+        <div className="strategy-create-body space-y-4">
           {/* Template button */}
           {!showTemplates && (
             <Button
@@ -252,12 +249,12 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           )}
 
           {/* Hint box */}
-          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
-            <h4 className="font-semibold text-blue-500 mb-2 flex items-center gap-2 text-sm">
+          <div className="hint-box">
+            <h4 className="mb-2 flex items-center gap-2 text-sm">
               <Lightbulb className="h-4 w-4" strokeWidth={1.5} />
               Як додати обмеження до стратегії:
             </h4>
-            <div className="space-y-2 text-sm text-blue-500">
+            <div className="space-y-2 text-sm">
               <p>• <strong>Для обмеження коефіцієнтів:</strong> напишіть "Мінімальний коефіцієнт 1.5"</p>
               <p>• <strong>Для обмеження форматів:</strong> напишіть "Формат тільки BO3"</p>
               <p>• <strong>Для обмеження типів ставок:</strong> напишіть "Тільки експреси"</p>
@@ -265,12 +262,12 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </div>
 
           {/* Tilt protection */}
-          <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-red-200 space-y-4">
+          <div className="tilt-box space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FEE2E2]">
                 <Shield className="h-4 w-4 text-red-600" strokeWidth={2} />
               </div>
-              <h4 className="font-semibold text-red-600 text-sm">🔒 Тілт-захист (anti-tilt)</h4>
+              <h4>🔒 Тілт-захист (anti-tilt)</h4>
             </div>
             <p className="text-xs text-red-600/70">
               Автоматично блокує форму ставки після N програшів поспіль.
@@ -379,21 +376,19 @@ export default function CreateStrategyDialog({ open, onOpenChange, strategies, o
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
-
         {/* === FOOTER === */}
-        <DialogFooter className="gap-2 pt-3 pb-4 px-6">
+        <DialogFooter className="strategy-create-footer">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
-            className="rounded-3xl border border-gray-200 hover:bg-gray-50 font-medium h-11 px-5 text-base"
+            className="border border-gray-200 hover:bg-gray-50"
           >
             Скасувати
           </Button>
           <Button
             onClick={handleSave}
             disabled={!isValid}
-            className="rounded-3xl bg-primary hover:bg-blue-400 text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+            className="strategy-create-submit"
           >
             <Plus className="h-4 w-4 mr-2" /> Створити стратегію
           </Button>

@@ -1,0 +1,118 @@
+.strategy-create-dialog {
+  width: calc(100% - 32px);
+  max-width: 680px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #454740;
+  border-radius: 7px;
+  background: #fff;
+  color: #171916;
+  font-family: Manrope, sans-serif;
+}
+.strategy-create-dialog > button {
+  color: #fff;
+  top: 18px;
+  right: 18px;
+}
+.strategy-create-header {
+  flex-shrink: 0;
+  padding: 22px 26px;
+  background: #171916;
+  text-align: left;
+}
+.strategy-create-header h2 {
+  font: 600 32px/1.2 Oswald, sans-serif;
+  color: #f8f8f5;
+  text-transform: uppercase;
+  padding-right: 24px;
+  margin: 0;
+}
+.strategy-create-header p {
+  font-size: 14px;
+  color: #caccce;
+  margin-top: 7px;
+}
+.strategy-create-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  min-height: 0;
+  background: #fff;
+}
+.strategy-create-body label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #171916;
+}
+.strategy-create-body input:not([type="radio"]),
+.strategy-create-body textarea,
+.strategy-create-body button[role="combobox"] {
+  border-radius: 5px;
+  background: #fff;
+  border-color: #cfd1ce;
+  font-size: 14px;
+  box-shadow: none;
+}
+.strategy-create-body input:focus-visible,
+.strategy-create-body textarea:focus-visible,
+.strategy-create-body button:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+  border-color: #cfd1ce;
+}
+.strategy-create-body .hint-box {
+  padding: 14px 16px;
+  background: #eef1fd;
+  border: 1px solid #d6ddfa;
+  border-radius: 5px;
+}
+.strategy-create-body .hint-box h4 {
+  color: #4a56a8;
+  font-size: 14px;
+  font-weight: 700;
+}
+.strategy-create-body .hint-box p {
+  color: #4a56a8;
+  font-size: 13px;
+}
+.strategy-create-body .tilt-box {
+  padding: 16px;
+  background: #fff5f5;
+  border: 1px solid #f3c2c2;
+  border-radius: 5px;
+}
+.strategy-create-body .tilt-box h4 {
+  color: #b84238;
+  font-size: 14px;
+  font-weight: 700;
+}
+.strategy-create-footer {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  gap: 10px;
+  border-top: 1px solid #dedfdb;
+  background: #fff;
+}
+.strategy-create-footer button {
+  border-radius: 5px;
+  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.strategy-create-footer .strategy-create-submit {
+  background: #ff693b;
+  color: #171916;
+}
+.strategy-create-footer .strategy-create-submit:hover {
+  background: #f25b2e;
+}
+.strategy-create-footer .strategy-create-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

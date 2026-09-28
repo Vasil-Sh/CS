@@ -781,25 +781,129 @@
   font-size: 10px;
 }
 .risk-dialog {
-  border: 1px solid #d7dad2;
-  border-radius: 10px;
+  width: calc(100% - 32px);
+  max-width: 520px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #454740;
+  border-radius: 7px;
+  background: #fff;
+  color: #171916;
   font-family: Manrope, sans-serif;
 }
-.risk-dialog [data-slot="dialog-title"] {
-  font-family: Oswald, sans-serif;
-  font-size: 25px;
+.risk-dialog > button {
+  color: #fff;
+  top: 18px;
+  right: 18px;
+}
+.risk-dialog-header {
+  flex-shrink: 0;
+  padding: 22px 26px;
+  background: #171916;
+  text-align: left;
+}
+.risk-dialog-header h2 {
+  font:
+    600 32px/1.2 Oswald,
+    sans-serif;
+  color: #f8f8f5;
   text-transform: uppercase;
+  padding-right: 24px;
+  margin: 0;
+}
+.risk-dialog-header p {
+  font-size: 14px;
+  color: #caccce;
+  margin-top: 7px;
+}
+.risk-dialog-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.risk-dialog-icon-danger {
+  background: #ff693b;
+  color: #171916;
 }
 .risk-dialog-fields {
   display: grid;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 12px;
+  padding: 20px 24px;
+  margin-top: 0;
+  overflow-y: auto;
+  min-height: 0;
 }
 .risk-dialog-fields p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.55;
+}
+.risk-dialog-fields input,
+.risk-dialog-fields select,
+.risk-dialog-fields textarea {
+  height: 40px;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+  color: #171916;
+}
+.risk-dialog-fields textarea {
+  height: auto;
+  min-height: 80px;
+}
+.risk-dialog-body {
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.risk-dialog-name {
+  padding: 18px;
+  background: #f3f4f4;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: #171916;
+}
+.risk-dialog-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #f3c2c2;
+  border-radius: 5px;
+}
+.risk-dialog-warning p {
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.risk-dialog-footer {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  gap: 10px;
+  border-top: 1px solid #dedfdb;
+}
+.risk-dialog-footer .risk-button {
+  min-height: 42px;
+  border-radius: 5px;
+  padding: 0 20px;
+  font-size: 14px;
 }
 @media (max-width: 1100px) {
   .risk-grid {

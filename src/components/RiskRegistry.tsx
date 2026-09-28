@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
   RefreshCw,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Dialog,
@@ -259,64 +260,7 @@ export default function RiskRegistry() {
                   <tbody>
                     {rows.map((team) => {
                       const index = h.riskyTeams.indexOf(team);
-                      const editing = h.editingIndex === index;
-                      return editing ? (
-                        <tr className="risk-edit" key={`${team.name}-${index}`}>
-                          <td colSpan={5}>
-                            <div className="risk-editor">
-                              <Input
-                                value={h.editName}
-                                onChange={(event) =>
-                                  h.setEditName(event.target.value)
-                                }
-                                aria-label="Назва команди"
-                              />
-                              <select
-                                value={h.editGame}
-                                onChange={(event) =>
-                                  h.setEditGame(event.target.value)
-                                }
-                                aria-label="Гра"
-                              >
-                                <option value="CS">CS</option>
-                                <option value="Дота">Dota 2</option>
-                              </select>
-                              <select
-                                value={h.editStatus}
-                                onChange={(event) =>
-                                  h.setEditStatus(event.target.value)
-                                }
-                                aria-label="Статус"
-                              >
-                                {ALL_STATUSES.map((item) => (
-                                  <option key={item}>{item}</option>
-                                ))}
-                              </select>
-                              <Textarea
-                                value={h.editNotes}
-                                onChange={(event) =>
-                                  h.setEditNotes(event.target.value)
-                                }
-                                aria-label="Коментар"
-                                rows={2}
-                              />
-                              <div>
-                                <button type="button" onClick={h.cancelEditing}>
-                                  Скасувати
-                                </button>
-                                <button
-                                  type="button"
-                                  className="risk-primary"
-                                  disabled={!h.editName.trim()}
-                                  onClick={h.saveEditing}
-                                >
-                                  Зберегти
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
+                      return (
                         <tr key={`${team.name}-${index}`}>
                           <td className="risk-team">
                             <div className="risk-team-identity">
@@ -457,7 +401,7 @@ export default function RiskRegistry() {
       </div>
       <Dialog open={h.isAddTeamOpen} onOpenChange={h.setIsAddTeamOpen}>
         <DialogContent className="risk-dialog">
-          <DialogHeader>
+          <DialogHeader className="risk-dialog-header">
             <DialogTitle>Додати команду</DialogTitle>
             <DialogDescription>
               Додайте команду, яку треба відстежувати перед ставкою.
@@ -507,7 +451,7 @@ export default function RiskRegistry() {
               rows={4}
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="risk-dialog-footer">
             <button
               className="risk-button risk-secondary"
               onClick={() => h.setIsAddTeamOpen(false)}
@@ -532,17 +476,24 @@ export default function RiskRegistry() {
         onOpenChange={(open) => !open && setDeleteTarget(null)}
       >
         <DialogContent className="risk-dialog">
-          <DialogHeader>
-            <DialogTitle>Видалити команду?</DialogTitle>
-            <DialogDescription>
-              Команду{" "}
-              <strong>
-                {deleteTarget !== null ? h.riskyTeams[deleteTarget]?.name : ""}
-              </strong>{" "}
-              буде видалено з реєстру. Цю дію неможливо скасувати.
-            </DialogDescription>
+          <DialogHeader className="risk-dialog-header">
+            <div className="flex items-center gap-3">
+              <div className="risk-dialog-icon risk-dialog-icon-danger">
+                <Trash2 size={20} />
+              </div>
+              <DialogTitle>Видалити команду?</DialogTitle>
+            </div>
           </DialogHeader>
-          <DialogFooter>
+          <div className="risk-dialog-body">
+            <div className="risk-dialog-name">
+              {deleteTarget !== null ? h.riskyTeams[deleteTarget]?.name : ""}
+            </div>
+            <div className="risk-dialog-warning">
+              <AlertTriangle size={18} className="shrink-0 text-red-600" />
+              <p>Команду буде видалено з реєстру. Цю дію неможливо скасувати.</p>
+            </div>
+          </div>
+          <DialogFooter className="risk-dialog-footer">
             <button
               className="risk-button risk-secondary"
               onClick={() => setDeleteTarget(null)}
@@ -561,9 +512,75 @@ export default function RiskRegistry() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit team dialog */}
+      <Dialog
+        open={h.editingIndex !== null}
+        onOpenChange={(open) => !open && h.cancelEditing()}
+      >
+        <DialogContent className="risk-dialog">
+          <DialogHeader className="risk-dialog-header">
+            <DialogTitle>Редагувати команду</DialogTitle>
+            <DialogDescription>
+              Оновіть дані команди, яку відстежуєте перед ставкою.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="risk-dialog-fields">
+            <Input
+              value={h.editName}
+              onChange={(event) => h.setEditName(event.target.value)}
+              placeholder="Назва команди"
+            />
+            <select
+              value={h.editGame}
+              onChange={(event) => h.setEditGame(event.target.value)}
+            >
+              <option value="CS">CS</option>
+              <option value="Дота">Dota 2</option>
+            </select>
+            <div className="risk-status-field">
+              <span
+                className={`risk-status-dot ${tone(h.editStatus)}`}
+                aria-hidden="true"
+              />
+              <select
+                value={h.editStatus}
+                onChange={(event) => h.setEditStatus(event.target.value)}
+              >
+                {ALL_STATUSES.map((item, index) => (
+                  <option key={item} value={item}>
+                    {index + 1}. {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Textarea
+              value={h.editNotes}
+              onChange={(event) => h.setEditNotes(event.target.value)}
+              placeholder="Коментар або коротка нотатка"
+              rows={3}
+            />
+          </div>
+          <DialogFooter className="risk-dialog-footer">
+            <button
+              className="risk-button risk-secondary"
+              onClick={h.cancelEditing}
+            >
+              Скасувати
+            </button>
+            <button
+              className="risk-button risk-primary"
+              disabled={!h.editName.trim()}
+              onClick={h.saveEditing}
+            >
+              Зберегти
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={h.isSheetsGuideOpen} onOpenChange={h.setIsSheetsGuideOpen}>
         <DialogContent className="risk-dialog">
-          <DialogHeader>
+          <DialogHeader className="risk-dialog-header">
             <DialogTitle>Імпорт із Google Sheets</DialogTitle>
             <DialogDescription>
               Під час імпорту список команд замінюється даними з таблиці.
@@ -580,7 +597,7 @@ export default function RiskRegistry() {
               доступна для читання за посиланням.
             </p>
           </div>
-          <DialogFooter>
+          <DialogFooter className="risk-dialog-footer">
             <button
               className="risk-button risk-secondary"
               onClick={() => h.setIsSheetsGuideOpen(false)}

@@ -318,6 +318,167 @@
   border-radius: 8px;
   box-shadow: none;
 }
+
+/* ── Add/Edit group dialog (matches "Створити ціль") ── */
+.tg-group-dialog {
+  width: calc(100% - 32px);
+  max-width: 480px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #454740;
+  border-radius: 7px;
+  background: #fff;
+  color: #171916;
+  font-family: "Manrope", sans-serif;
+}
+.tg-group-dialog > button {
+  color: #fff;
+  top: 18px;
+  right: 18px;
+}
+.tg-group-header {
+  flex-shrink: 0;
+  padding: 22px 26px;
+  background: #171916;
+  text-align: left;
+}
+.tg-group-header h2 {
+  font: 600 32px/1.2 "Oswald", sans-serif;
+  color: #f8f8f5;
+  text-transform: uppercase;
+  padding-right: 24px;
+  margin: 0;
+}
+.tg-group-header p {
+  font-size: 14px;
+  color: #caccce;
+  margin-top: 7px;
+}
+.tg-group-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.tg-group-body > * + * {
+  margin-top: 18px;
+}
+.tg-group-body label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #171916;
+}
+.tg-group-body input {
+  height: 40px;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+  box-shadow: none;
+}
+.tg-group-body input:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+  border-color: #cfd1ce;
+}
+.tg-group-footer {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  gap: 10px;
+  border-top: 1px solid #dedfdb;
+}
+.tg-group-footer button {
+  border-radius: 5px;
+  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.tg-group-footer button[data-slot="dialog-footer"] {
+  border-radius: 5px;
+}
+.tg-group-footer .tg-group-submit {
+  background: #ff693b;
+  color: #171916;
+}
+.tg-group-footer .tg-group-submit:hover {
+  background: #f25b2e;
+}
+
+/* ── Delete group confirm (matches "Створити ціль") ── */
+.tg-delete-header {
+  flex-shrink: 0;
+  padding: 22px 26px;
+  background: #171916;
+  text-align: left;
+}
+.tg-delete-header h2 {
+  font: 600 32px/1.2 "Oswald", sans-serif;
+  color: #f8f8f5;
+  text-transform: uppercase;
+  padding-right: 24px;
+  margin: 0;
+}
+.tg-delete-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ff693b;
+  color: #171916;
+  flex-shrink: 0;
+}
+.tg-delete-body {
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.tg-delete-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px;
+  background: #f3f4f4;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+}
+.tg-delete-name p {
+  color: #171916;
+  margin: 0;
+}
+.tg-delete-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #f3c2c2;
+  border-radius: 5px;
+}
+.tg-delete-warning p {
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.tg-group-footer .tg-delete-submit {
+  background: #dc2626;
+  color: #fff;
+}
+.tg-group-footer .tg-delete-submit:hover {
+  background: #b91c1c;
+}
 .telegram-main > .flex.min-h-\[440px\] > div {
   border-radius: 7px;
 }
