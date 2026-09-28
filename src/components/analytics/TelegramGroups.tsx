@@ -806,7 +806,7 @@ export default function TelegramGroups() {
                       </h2>
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full min-w-[760px] text-sm">
+                      <table className="w-full text-sm">
                         <thead className="border-b border-[#e9eaec] text-center text-xs font-medium text-slate-400">
                           <tr>
                             <th className="px-4 py-3 text-left">Група</th>
