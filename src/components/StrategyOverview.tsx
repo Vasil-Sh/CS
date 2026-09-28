@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import PlanningHeader from "@/components/planning/PlanningHeader";
-import PlanningPreview from "@/components/planning/PlanningPreview";
+import StrategyMasterDetail from "@/components/strategy/StrategyMasterDetail";
+import EditStrategyDialog from "@/components/strategy/EditStrategyDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +160,18 @@ export default function StrategyOverview({
     null,
   );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingStrategy, setEditingStrategy] = useState<CS2Strategy | null>(null);
+  const saveEditedStrategy = async (updatedStrategy: CS2Strategy) => {
+    // Persist remotely before replacing the local view; keep the form open on failure.
+    const backendId = updatedStrategy._backendId;
+    if (backendId) await UserDataService.updateStrategy(backendId, { name: updatedStrategy.name, config: updatedStrategy });
+    else throw new Error("Strategy must be synced before editing");
+    const updated = strategies.map(s => (s.id || s.name) === (updatedStrategy.id || updatedStrategy.name) ? updatedStrategy : s);
+    setStrategies(updated);
+    UserDataService.setUserDataSync(currentUser, "strategies_data", updated);
+    bumpStrategy();
+    toast.success("Зміни збережено");
+  };
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [newlyCreatedStrategy, setNewlyCreatedStrategy] =
@@ -524,9 +537,9 @@ export default function StrategyOverview({
 
   // ── JSX ──
   return (
-    <div className={focusLayout ? "planning-strategies" : "space-y-6"}>
+    <div className={focusLayout ? "smd-page" : "space-y-6"}>
       {focusLayout && <PlanningHeader title="Стратегії" description="Зберігайте правила та оцінюйте їх за результатами ставок." action="Створити стратегію" onCreate={()=>setShowCreateDialog(true)} disabled={strategies.length>=25} metrics={[{label:"Усі стратегії",value:loading?"—":strategies.length},{label:"Основна",value:loading?"—":strategies.some(strategyMatchesPrimary)?1:0},{label:"Ставки зі стратегією",value:loading?"—":bettingData.filter(b=>b.strategy).length}]} />}
-      <div className={focusLayout ? "planning-body" : undefined}><div className={focusLayout ? "planning-main sw-content" : "space-y-6"}>
+      <div className={focusLayout ? "smd-body" : undefined}><div className={focusLayout ? "smd-content" : "space-y-6"}>
       <StrategyTabNav
         hideCreate={focusLayout}
         activeTab={activeTab}
@@ -539,7 +552,11 @@ export default function StrategyOverview({
         onTopTabChange={onTopTabChange}
       />
 
-      {activeTab === "overview" && (
+      {focusLayout && activeTab === "overview" && <>
+        {showFilters && <StrategyFilters searchQuery={searchQuery} riskFilter={riskFilter} sortBy={sortBy} sortOrder={sortOrder} onSearchChange={setSearchQuery} onRiskFilterChange={setRiskFilter} onSortByChange={setSortBy} onSortOrderToggle={()=>setSortOrder(sortOrder === "asc" ? "desc" : "asc")} />}
+        <StrategyMasterDetail strategies={filteredStrategies} total={strategies.length} stats={strategyStats} query={searchQuery} onSearch={setSearchQuery} isPrimary={strategyMatchesPrimary} onPrimary={togglePrimaryStrategy} onDelete={id=>{setStrategyToDelete(id);setDeleteDialogOpen(true);}} onEdit={setEditingStrategy} onDetails={s=>{setSelectedStrategy(s);setDetailsDialogOpen(true);}} onCreate={()=>setShowCreateDialog(true)} />
+      </>}
+      {!focusLayout && activeTab === "overview" && (
         <div className="space-y-6">
           {strategies.length === 0 ? (
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
@@ -962,7 +979,8 @@ export default function StrategyOverview({
         strategies={strategies}
         onSave={handleSaveStrategy}
       />
-      </div>{focusLayout && <PlanningPreview kind="goals"/>}</div>
+      {editingStrategy && <EditStrategyDialog key={editingStrategy.id || editingStrategy.name} strategy={editingStrategy} onClose={()=>setEditingStrategy(null)} onSave={saveEditedStrategy} />}
+      </div></div>
     </div>
   );
 }

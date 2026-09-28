@@ -1,0 +1,9 @@
+import {render,screen,fireEvent,cleanup,within} from "@testing-library/react";
+import {afterEach,it,expect,vi} from "vitest";
+import StrategyMasterDetail from "./StrategyMasterDetail";
+afterEach(cleanup);
+const strategies=[{id:"a",name:"Основна",description:"",riskLevel:"Low" as const,expectedROI:0,criteria:["Мінімальний коефіцієнт 1.3","Формат тільки BO3"]},{id:"b",name:"Друга",description:"",riskLevel:"High" as const,expectedROI:0}];
+const props={strategies,total:2,stats:{Основна:{totalBets:1,wins:0,losses:0,roi:0,winRate:0},Друга:{totalBets:2,wins:1,losses:1,roi:10,winRate:50}},query:"",onSearch:vi.fn(),isPrimary:(s:{id?:string})=>s.id==="a",onPrimary:vi.fn(),onDelete:vi.fn(),onEdit:vi.fn(),onDetails:vi.fn(),onCreate:vi.fn()};
+it("defaults to primary, shows real rules and hides metrics for pending bets",()=>{render(<StrategyMasterDetail {...props}/>);const panel=screen.getByRole("region",{name:"Деталі стратегії"});expect(within(panel).getAllByText("—")).toHaveLength(2);expect(within(panel).getByText("BO3")).toBeInTheDocument();expect(within(panel).getByText("1.3–—")).toBeInTheDocument();});
+it("switches details by selecting a strategy row",()=>{render(<StrategyMasterDetail {...props}/>);fireEvent.click(screen.getByRole("button",{name:/Друга/}));expect(screen.getByText("50%")).toBeInTheDocument();expect(within(screen.getByRole("region",{name:"Деталі стратегії"})).getByRole("heading",{name:"Друга"})).toBeInTheDocument();});
+it("clears details after filtering and retains create empty state",()=>{const {rerender}=render(<StrategyMasterDetail {...props}/>);rerender(<StrategyMasterDetail {...props} strategies={[]}/>);expect(screen.getByText("Нічого не знайдено")).toBeInTheDocument();rerender(<StrategyMasterDetail {...props} strategies={[]} total={0}/>);fireEvent.click(screen.getByRole("button",{name:"Створити стратегію"}));expect(props.onCreate).toHaveBeenCalledOnce();});

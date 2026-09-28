@@ -65,16 +65,6 @@ export default function StrategyTabNav({
             </button>
           ))}
         </div>
-        {activeTab === "overview" && (
-          <button
-            type="button"
-            aria-pressed={showFilters}
-            onClick={onFilterToggle}
-          >
-            <Filter size={16} />
-            Пошук і фільтри
-          </button>
-        )}
         {!hideCreate && <button type="button" className="sw-create" onClick={onCreateClick}>
           <Plus size={17} />
           Створити стратегію

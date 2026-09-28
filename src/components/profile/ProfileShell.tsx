@@ -45,8 +45,8 @@ export default function ProfileShell({
   const inPlanning = pathname === "/app/strategy" || pathname === "/app/goals";
   const [planningOpen, setPlanningOpen] = useState(inPlanning);
   useEffect(() => {
-    if (inPlanning) setPlanningOpen(true);
-  }, [inPlanning]);
+    setPlanningOpen(pathname === "/app/strategy" || pathname === "/app/goals");
+  }, [pathname]);
   const navigation = (
     <>
       <Link to="/app/matches" className="profile-brand">

@@ -66,6 +66,7 @@ export default function MyBets() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const goalId = searchParams.get("goalId");
+  const strategyFilter = searchParams.get("strategy");
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bumpBets = useAppStore((s) => s.bumpBets);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
@@ -96,7 +97,7 @@ export default function MyBets() {
   const [deleteDialogBet, setDeleteDialogBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
-  const [activeTab, setActiveTab] = useState(goalId ? "records" : "add");
+  const [activeTab, setActiveTab] = useState(goalId || strategyFilter ? "records" : "add");
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
@@ -155,14 +156,12 @@ export default function MyBets() {
   );
 
   // ── Effects ──
-  const goalBets = goalId
-    ? recentBets.filter((bet) => String(bet.goalId) === goalId)
-    : recentBets;
+  const goalBets = recentBets.filter(bet => (!goalId || String(bet.goalId) === goalId) && (!strategyFilter || bet.strategy === strategyFilter));
 
   useEffect(() => {
-    if (goalId) setActiveTab("records");
+    if (goalId || strategyFilter) setActiveTab("records");
     setCurrentPage(1);
-  }, [goalId]);
+  }, [goalId, strategyFilter]);
 
   useEffect(() => {
     const handler = (e: StorageEvent) => {
@@ -589,12 +588,13 @@ export default function MyBets() {
 
           {activeTab === "records" && (
             <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              {goalId && (
+              {(goalId || strategyFilter) && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm">
-                  <span>Записи вибраної цілі · {goalBets.length}</span>
+                  <span>{strategyFilter ? `Стратегія: ${strategyFilter}` : "Записи вибраної цілі"} · {goalBets.length}</span>
                   <button className="underline underline-offset-4" onClick={() => {
                     const next = new URLSearchParams(searchParams);
                     next.delete("goalId");
+                    next.delete("strategy");
                     setSearchParams(next);
                   }}>Показати всі записи</button>
                 </div>

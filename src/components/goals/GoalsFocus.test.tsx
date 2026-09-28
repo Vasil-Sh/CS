@@ -11,13 +11,12 @@ render(<GoalsFocus h={controller([{...goals[0],name:123 as unknown as string}])}
 fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"123"}});
 expect(screen.getByRole("button",{name:/123/})).toBeInTheDocument();
 });
-it("links records to the selected goal and has one strategy entry",()=>{
+it("shows progress source in details and switches on selection",()=>{
 render(<GoalsFocus h={controller()}/>);
-expect(screen.getByRole("link",{name:/Переглянути записи/})).toHaveAttribute("href","/app/my-bets?goalId=a");
+const panel=screen.getByRole("region",{name:"Деталі цілі"});
+expect(within(panel).getByRole("heading",{name:"Джерело прогресу"})).toBeInTheDocument();
 fireEvent.click(screen.getByRole("button",{name:/Стабільний ROI/}));
-expect(screen.getByRole("link",{name:/Переглянути записи/})).toHaveAttribute("href","/app/my-bets?goalId=b");
-expect(screen.getAllByRole("link",{name:/Огляд стратегій/})).toHaveLength(1);
-expect(screen.queryByText("Переглянути огляд стратегій")).not.toBeInTheDocument();
+expect(within(panel).getByRole("heading",{name:"Стабільний ROI"})).toBeInTheDocument();
 });
 it("selects the primary goal and switches details by selecting a row",()=>{render(<GoalsFocus h={controller()}/>);const panel=screen.getByRole("region",{name:"Деталі цілі"});expect(within(panel).getByRole("heading",{name:/Накопичити/})).toBeInTheDocument();fireEvent.click(screen.getByRole("button",{name:/Стабільний ROI/}));expect(within(panel).getByRole("heading",{name:"Стабільний ROI"})).toBeInTheDocument();expect(within(panel).queryByRole("progressbar")).not.toBeInTheDocument();});
 it("searches and clears stale details for no matches",()=>{render(<GoalsFocus h={controller()}/>);fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"немає"}});expect(screen.getByText("Нічого не знайдено")).toBeInTheDocument();expect(screen.queryByRole("button",{name:"Дії вибраної цілі"})).not.toBeInTheDocument();fireEvent.change(screen.getByRole("textbox",{name:"Пошук цілі"}),{target:{value:"ROI"}});expect(screen.getByRole("button",{name:/Стабільний ROI/})).toHaveAttribute("aria-pressed","true");});
