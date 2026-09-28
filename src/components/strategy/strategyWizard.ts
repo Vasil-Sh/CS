@@ -15,7 +15,6 @@ export function validateDraft(d:StrategyDraft,step:number,strategies:CS2Strategy
  if(step===0){
   if(!d.name.trim())e.name='Вкажіть назву стратегії.';
   else if(strategies.some(s=>s.name.trim().toLocaleLowerCase()===d.name.trim().toLocaleLowerCase()))e.name='Стратегія з такою назвою вже існує.';
-  if(!d.description.trim())e.description='Додайте короткий опис.';
   if(!d.roi.trim()||!Number.isFinite(numeric(d.roi)))e.roi='Вкажіть коректне число.';
   if(strategies.length>=25)e.limit='Максимум 25 стратегій. Спочатку видаліть непотрібну.';
  }else{

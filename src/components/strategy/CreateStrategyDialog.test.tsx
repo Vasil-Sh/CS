@@ -4,7 +4,6 @@ import CreateStrategyDialog from './CreateStrategyDialog';
 afterEach(cleanup);
 function start(onSave=vi.fn(),onOpenChange=vi.fn()){
  render(<CreateStrategyDialog open onOpenChange={onOpenChange} strategies={[]} onSave={onSave}/>);
- fireEvent.click(screen.getByRole('button',{name:'Використати шаблон'}));
  fireEvent.click(screen.getByRole('button',{name:/Консервативна стратегія/}));
  return {onSave,onOpenChange};
 }
