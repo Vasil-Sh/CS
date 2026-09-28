@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Percent,
   Layers,
+  Plus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -182,7 +183,6 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                 })}
                 {!visible.length && (
                   <div className="gmd-empty">
-                    <Target size={28} />
                     <h3>
                       {query
                         ? "Нічого не знайдено"
@@ -194,9 +194,18 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                       {query
                         ? "Спробуйте іншу назву або очистіть пошук."
                         : active
-                          ? "Створіть першу ціль кнопкою вгорі."
+                          ? "Створіть першу ціль, щоб почати відстеження."
                           : "Тут з’являться завершені цілі та їх результати."}
                     </p>
+                    {!query && active && (
+                      <button
+                        className="gmd-empty-create"
+                        onClick={() => h.setShowCreateDialog(true)}
+                      >
+                        <Plus size={17} />
+                        Створити ціль
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -343,7 +352,6 @@ export default function GoalsFocus({ h }: { h: Controller }) {
               </>
             ) : (
               <div className="gmd-empty">
-                <Target size={32} />
                 <h2>Деталі цілі</h2>
                 <p>
                   {query

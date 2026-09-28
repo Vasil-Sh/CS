@@ -514,15 +514,51 @@
 .tg-group-footer .tg-delete-submit:hover {
   background: #b91c1c;
 }
-.telegram-main > .flex.min-h-\[440px\] > div {
+.tg-empty {
+  display: flex;
+  min-height: 310px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 36px 20px;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  background: #fff;
+  color: #73776f;
+  text-align: center;
+}
+.tg-empty strong {
+  color: #171917;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.tg-empty p {
+  margin: 0;
+  font-size: 13px;
+  max-width: 320px;
+}
+.tg-empty .tg-empty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  min-height: 42px;
+  padding: 8px 18px;
+  border: 1px solid #ff693b;
   border-radius: 7px;
+  background: #ff693b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
 }
-.telegram-main .bg-slate-900 {
-  background: var(--tg-orange);
-  color: #171715;
-}
-.telegram-main .bg-slate-900:hover {
-  background: #ff8059;
+.tg-empty .tg-empty-button:hover {
+  background: #ff825d;
+  border-color: #ff825d;
+  color: #fff;
 }
 @media (max-width: 1400px) {
   .telegram-grid {

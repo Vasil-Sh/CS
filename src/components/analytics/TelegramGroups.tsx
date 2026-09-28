@@ -25,7 +25,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
 import {
-  MessageCircle,
   Plus,
   Trash2,
   ExternalLink,
@@ -745,31 +744,17 @@ export default function TelegramGroups() {
         <div className="telegram-grid">
           <div className="telegram-main space-y-5">
             {groups.length === 0 ? (
-              <div className="flex min-h-[440px] flex-1 rounded-2xl border border-[#e4e5e7] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)]">
-                <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-[#fbfbfa]">
-                  <div className="max-w-sm px-6 py-16 text-center">
-                    <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                      <MessageCircle
-                        className="h-7 w-7 text-slate-500"
-                        strokeWidth={1.5}
-                      />
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold text-slate-900">
-                      Немає доданих Telegram-груп
-                    </h3>
-                    <p className="mb-6 text-sm leading-6 text-slate-500">
-                      Додайте Telegram-групи зі ставками для аналізу їх
-                      результатів
-                    </p>
-                    <Button
-                      onClick={openNewGroup}
-                      className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-base font-semibold text-white transition-colors hover:bg-slate-700"
-                    >
-                      <Plus className="h-4 w-4" strokeWidth={2} />
-                      Додати групу
-                    </Button>
-                  </div>
-                </div>
+              <div className="tg-empty">
+                <strong>Немає доданих Telegram-груп</strong>
+                <p>Додайте Telegram-групи зі ставками для аналізу їх результатів</p>
+                <button
+                  type="button"
+                  className="tg-empty-button"
+                  onClick={openNewGroup}
+                >
+                  <Plus size={17} />
+                  Додати групу
+                </button>
               </div>
             ) : (
               <>

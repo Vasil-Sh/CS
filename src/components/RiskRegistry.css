@@ -366,7 +366,10 @@
   border-bottom: 1px solid var(--line);
 }
 .risk-list-head h2 {
+  font-family: Oswald, "Arial Narrow", sans-serif;
   font-size: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 .risk-list-head p {
   margin: 3px 0 0;
@@ -665,6 +668,10 @@
 }
 .risk-empty strong {
   color: var(--ink);
+  font-family: Oswald, "Arial Narrow", sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 .risk-empty p {
   margin: 0;
@@ -677,6 +684,13 @@
   border-radius: 6px;
   background: #fff;
   color: var(--ink);
+}
+.risk-empty button.risk-primary {
+  min-height: 42px;
+  padding: 8px 18px;
+  border-color: #ff693b;
+  background: #ff693b;
+  color: #fff;
 }
 .risk-guide {
   padding: 24px;

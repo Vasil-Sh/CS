@@ -49,6 +49,7 @@
 }
 .gmd-list h2 {
   font-size: 25px;
+  text-transform: uppercase;
 }
 .gmd-search {
   display: flex;
@@ -79,7 +80,8 @@
 .gmd-tabs {
   display: flex;
   gap: 24px;
-  margin: 0 22px;
+  margin: 0;
+  padding: 0 22px;
   border-bottom: 1px solid #e3e4df;
 }
 .gmd-tabs button {
@@ -360,17 +362,34 @@
   min-height: 200px;
   width: 100%;
 }
-.gmd-empty svg {
-  margin-bottom: 16px;
-  flex-shrink: 0;
-}
 .gmd-empty h3 {
   font-weight: 600;
+  font-family: Oswald, sans-serif;
+  font-size: 25px;
+  text-transform: uppercase;
 }
 .gmd-empty p {
   font-size: 13px;
   margin-top: 8px;
   max-width: 260px;
+}
+.gmd-empty .gmd-empty-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 11px 22px;
+  border: 1px solid #ff693b;
+  border-radius: 7px;
+  background: #ff693b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.gmd-empty .gmd-empty-create:hover {
+  background: #ff825d;
+  border-color: #ff825d;
 }
 .gmd-page button:focus-visible,
 .gmd-page a:focus-visible {

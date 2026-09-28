@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Search, ChevronRight, Info, MoreVertical, Trash2, Eye } from "lucide-react";
+import { Star, Search, ChevronRight, Info, MoreVertical, Trash2, Eye, Plus } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { getRiskLabel, parseCriteriaForValidation } from "@/lib/strategyHelpers";
 import type { CS2Strategy } from "@/types/strategy";
@@ -24,7 +24,7 @@ export default function StrategyMasterDetail(p:Props) {
    <div className="smd-rows">{p.strategies.map(s=><button className="smd-row" key={s.id||s.name} aria-pressed={selected===s} aria-controls="strategy-details" onClick={()=>setSelectedId(s.id||s.name)}>
     <Star size={20} className={p.isPrimary(s)?"smd-star":""} fill={p.isPrimary(s)?"currentColor":"none"}/><span><strong>{s.name} {p.isPrimary(s)&&<small className="smd-badge">Основна</small>}</strong><span className="smd-subline">{getRiskLabel(s.riskLevel)} ризик · {p.stats[s.name]?.totalBets??0} ставок</span></span><ChevronRight size={18}/>
    </button>)}</div>
-   {!p.strategies.length&&<div className="smd-empty"><h3>{p.total?"Нічого не знайдено":"Ще немає стратегій"}</h3><p>{p.total?"Змініть пошук або фільтри.":"Збережіть правила для відстеження результатів."}</p>{!p.total&&<button onClick={p.onCreate}>Створити стратегію</button>}</div>}
+   {!p.strategies.length&&<div className="smd-empty"><h3>{p.total?"Нічого не знайдено":"Ще немає стратегій"}</h3><p>{p.total?"Змініть пошук або фільтри.":"Збережіть правила для відстеження результатів."}</p>{!p.total&&<button onClick={p.onCreate}><Plus size={17}/>Створити стратегію</button>}</div>}
    <p className="smd-hint"><Info size={16}/>Оберіть стратегію, щоб переглянути правила.</p>
   </section>
  </div><section id="strategy-details" className="smd-detail" aria-label="Деталі стратегії">
@@ -38,6 +38,6 @@ export default function StrategyMasterDetail(p:Props) {
  <div className="smd-actions">
   <button className="smd-action" onClick={()=>p.onDetails(selected)}><Eye size={16}/>Деталі</button>
  </div>
- </>:<div className="smd-empty"><h2>Деталі стратегії</h2><p>Оберіть стратегію зі списку.</p></div>}
+ </>:<div className="smd-empty"><h2>Деталі стратегії</h2><p>Оберіть стратегію зі списку або створіть нову.</p></div>}
  </section></div>;
 }

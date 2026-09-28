@@ -105,11 +105,6 @@ export default function RiskRegistry() {
     "Надійна",
     "Неоцінена",
   ];
-  const reset = () => {
-    setGame("all");
-    setStatus("all");
-    h.setSearchQuery("");
-  };
 
   return (
     <div className="risk-registry">
@@ -335,8 +330,12 @@ export default function RiskRegistry() {
               <div className="risk-empty">
                 <strong>Нічого не знайдено</strong>
                 <p>Змініть фільтри або спробуйте інший запит.</p>
-                <button type="button" onClick={reset}>
-                  Скинути фільтри
+                <button
+                  type="button"
+                  className="risk-button risk-primary"
+                  onClick={() => h.setIsAddTeamOpen(true)}
+                >
+                  <Plus size={17} /> Додати команду
                 </button>
               </div>
             )}
