@@ -583,23 +583,110 @@ export default function RiskRegistry() {
         </DialogContent>
       </Dialog>
       <Dialog open={h.isSheetsGuideOpen} onOpenChange={h.setIsSheetsGuideOpen}>
-        <DialogContent className="risk-dialog">
+        <DialogContent className="risk-dialog risk-sheets-dialog">
           <DialogHeader className="risk-dialog-header">
             <DialogTitle>Імпорт із Google Sheets</DialogTitle>
             <DialogDescription>
-              Під час імпорту список команд замінюється даними з таблиці.
+              Як оформити документ, щоб дані правильно підтягнулись.
             </DialogDescription>
           </DialogHeader>
-          <div className="risk-dialog-fields">
-            <Input
-              value={h.customSheetUrl}
-              onChange={(event) => h.setCustomSheetUrl(event.target.value)}
-              placeholder="https://docs.google.com/spreadsheets/d/…"
-            />
-            <p>
-              Колонки: назва команди, статус і нотатка. Таблиця має бути
-              доступна для читання за посиланням.
-            </p>
+          <div className="risk-sheets-body">
+            {/* Крок 1 */}
+            <div className="risk-sheet-step">
+              <span className="risk-sheet-step-num">1</span>
+              <div>
+                <h4>Створіть Google Sheets документ</h4>
+                <p>
+                  Відкрийте новий документ на{" "}
+                  <strong>Google Sheets</strong> і дайте йому будь-яку назву.
+                </p>
+              </div>
+            </div>
+
+            {/* Крок 2 */}
+            <div className="risk-sheet-step">
+              <span className="risk-sheet-step-num">2</span>
+              <div>
+                <h4>Оформіть колонки</h4>
+                <div className="risk-sheet-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>A — Назва команди</th>
+                        <th>B — Статус</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Vitality</td>
+                        <td>🟩 CS: У фіналах часто вимикаються…</td>
+                      </tr>
+                      <tr>
+                        <td>Team Spirit</td>
+                        <td>🟨 Dota2: Тільки на +1.5</td>
+                      </tr>
+                      <tr>
+                        <td>Virtus Pro</td>
+                        <td>🟥 CS: Раки — рідко на них ставити</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="risk-sheet-note">
+                  💡 Перший рядок може бути заголовком — він буде автоматично
+                  проігнорований.
+                </p>
+              </div>
+            </div>
+
+            {/* Крок 3 */}
+            <div className="risk-sheet-step">
+              <span className="risk-sheet-step-num">3</span>
+              <div>
+                <h4>Відкрийте доступ до документу</h4>
+                <p>
+                  Натисніть{" "}
+                  <strong>«Поділитися» → «Усі, хто має посилання» → «Читач»</strong>
+                  , щоб документ був доступний для читання.
+                </p>
+              </div>
+            </div>
+
+            {/* Крок 4 */}
+            <div className="risk-sheet-step">
+              <span className="risk-sheet-step-num">4</span>
+              <div>
+                <h4>Вставте посилання на ваш документ</h4>
+                <Input
+                  value={h.customSheetUrl}
+                  onChange={(event) => h.setCustomSheetUrl(event.target.value)}
+                  placeholder="https://docs.google.com/spreadsheets/d/ВАШ_ID/edit"
+                />
+                {h.customSheetUrl.trim() &&
+                  !h.customSheetUrl.trim().includes("spreadsheets/d/") && (
+                    <p className="risk-sheet-error">
+                      ❌ Неправильний формат посилання. Перевірте, чи скопійовано
+                      повне посилання з Google Sheets.
+                    </p>
+                  )}
+                {h.customSheetUrl.trim() &&
+                  h.customSheetUrl.trim().includes("spreadsheets/d/") && (
+                    <p className="risk-sheet-ok">
+                      ✓ Посилання правильне. Будуть завантажені команди з вашого
+                      документу.
+                    </p>
+                  )}
+              </div>
+            </div>
+
+            {/* Попередження */}
+            <div className="risk-sheet-warning">
+              <AlertTriangle size={16} className="shrink-0 text-red-600" />
+              <p>
+                <strong>Важливо:</strong> при оновленні всі команди замінюються
+                даними з Google Sheets. Локальні зміни будуть перезаписані.
+              </p>
+            </div>
           </div>
           <DialogFooter className="risk-dialog-footer">
             <button
@@ -617,7 +704,10 @@ export default function RiskRegistry() {
               }}
             >
               {h.isUpdating ? (
-                "Завантаження…"
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  Завантаження…
+                </>
               ) : (
                 <>
                   <Download size={16} /> Оновити список
