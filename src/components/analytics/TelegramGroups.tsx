@@ -225,9 +225,9 @@ export default function TelegramGroups() {
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("all");
   const [resultFilter, setResultFilter] = useState<string>("all");
   const [groupSearch, setGroupSearch] = useState("");
-  const [groupListFilter, setGroupListFilter] = useState<"all" | "profitable">(
-    "all",
-  );
+  const [groupListFilter, setGroupListFilter] = useState<
+    "all" | "profitable" | "losing" | "stable" | "unstable"
+  >("all");
   const [sortBy] = useState<"date" | "odds" | "profit">("date");
   const [sortOrder] = useState<"asc" | "desc">("desc");
 
@@ -470,7 +470,11 @@ export default function TelegramGroups() {
             .toLowerCase()
             .includes(query);
         const matchesFilter =
-          groupListFilter === "all" || group.totalProfit > 0;
+          groupListFilter === "all" ||
+          (groupListFilter === "profitable" && group.totalProfit > 0) ||
+          (groupListFilter === "losing" && group.totalProfit < 0) ||
+          (groupListFilter === "stable" && group.stabilityLabel === "Стабільна") ||
+          (groupListFilter === "unstable" && group.stabilityLabel === "Нестабільна");
         return matchesSearch && matchesFilter;
       }),
     [rankedGroups, groups, groupSearch, groupListFilter],
@@ -771,7 +775,7 @@ export default function TelegramGroups() {
                     </div>
                     <Select
                       value={groupListFilter}
-                      onValueChange={(value: "all" | "profitable") =>
+                      onValueChange={(value: "all" | "profitable" | "losing" | "stable" | "unstable") =>
                         setGroupListFilter(value)
                       }
                     >
@@ -781,6 +785,9 @@ export default function TelegramGroups() {
                       <SelectContent>
                         <SelectItem value="all">Усі групи</SelectItem>
                         <SelectItem value="profitable">Прибуткові</SelectItem>
+                        <SelectItem value="losing">Збиткові</SelectItem>
+                        <SelectItem value="stable">Стабільні</SelectItem>
+                        <SelectItem value="unstable">Нестабільні</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
