@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   ChevronDown,
+  ChevronUp,
   Download,
   FileSpreadsheet,
   Pencil,
@@ -184,10 +185,13 @@ export default function RiskRegistry() {
             onClick={() => setFiltersOpen((value) => !value)}
           >
             <SlidersHorizontal size={17} /> Фільтри{" "}
-            {status !== "all" ? (
+            {status !== "all" && (
               <span className="risk-filter-count">1</span>
-            ) : (
+            )}
+            {filtersOpen ? (
               <ChevronDown size={16} />
+            ) : (
+              <ChevronUp size={16} />
             )}
           </button>
         </div>
@@ -365,6 +369,8 @@ export default function RiskRegistry() {
                   <p>Лише за конкретним сценарієм.</p>
                 </div>
               </li>
+              {guideOpen && (
+                <>
               <li>
                 <span>4</span>
                 <div>
@@ -372,8 +378,6 @@ export default function RiskRegistry() {
                   <p>Зверніть увагу на форму команди.</p>
                 </div>
               </li>
-              {guideOpen && (
-                <>
               <li>
                 <span>5</span>
                 <div>

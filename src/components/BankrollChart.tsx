@@ -17,7 +17,6 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import { MoreHorizontal } from "lucide-react";
 import type { BalanceData } from "@/types/betting";
 
 interface BankrollChartProps {
@@ -44,21 +43,11 @@ const BankrollChart = memo(function BankrollChart({
 
   return (
     <Card className="analytics-chart-card w-full overflow-hidden">
-      {/* ── Header: title (left) + legend (right) ── */}
+      {/* ── Header: title only ── */}
       <CardHeader className="analytics-bankroll-header flex flex-row items-center justify-between p-0 px-5 space-y-0 border-0">
         <CardTitle className="analytics-bankroll-title text-gray-900">
           Динаміка банку
         </CardTitle>
-
-        <div className="flex items-center gap-4 text-sm font-medium">
-          <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full bg-[#ff693b] inline-block" />
-            <span className="text-muted-foreground text-xs">Баланс</span>
-          </div>
-          <button className="text-muted-foreground hover:text-foreground transition-colors -mr-1">
-            <MoreHorizontal className="size-4" />
-          </button>
-        </div>
       </CardHeader>
 
       {/* ── Chart ── */}

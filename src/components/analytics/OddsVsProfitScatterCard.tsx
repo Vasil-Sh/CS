@@ -61,7 +61,6 @@ export default function OddsVsProfitScatterCard({
             <YAxis
               dataKey="profit"
               type="number"
-              label={{ value: "Прибуток, ₴", angle: -90, position: "insideLeft", offset: -5, style: { textAnchor: "middle", fill: "#747a71", fontSize: 12 } }}
               name="Прибуток"
               axisLine={false}
               tickLine={false}

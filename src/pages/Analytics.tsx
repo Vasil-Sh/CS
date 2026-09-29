@@ -1,11 +1,9 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import BankrollChart from "@/components/BankrollChart";
 import MonthlyProfitChartCard from "@/components/analytics/MonthlyProfitChartCard";
 import OddsVsProfitScatterCard from "@/components/analytics/OddsVsProfitScatterCard";
-import OddsWinRateChartCard from "@/components/analytics/OddsWinRateChartCard";
-import OddsCategoryCards from "@/components/analytics/OddsCategoryCards";
+import OddsOverview from "@/components/analytics/OddsOverview";
 import RiskManagement from "@/components/RiskManagement";
 import PeriodComparison from "@/components/PeriodComparison";
 import GoalsManager from "@/components/GoalsManager";
@@ -16,8 +14,8 @@ import { useAppStore } from "@/stores/appStore";
 
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
-import { AlertTriangle, BarChart3, Calendar, Wallet } from "lucide-react";
-import type { Bet, OddsRange, BalanceData, ScatterData } from "@/types/betting";
+import { BarChart3, Calendar, Wallet } from "lucide-react";
+import type { Bet, BalanceData, ScatterData } from "@/types/betting";
 import "./Analytics.css";
 
 interface MonthlyData {
@@ -230,61 +228,6 @@ export default function Analytics() {
     return Math.round((sum / completedBets.length) * 100) / 100;
   }, [completedBets]);
 
-  const oddsAnalysis = useMemo((): OddsRange[] => {
-    const lowOdds = completedBets.filter((bet: Bet) => bet.odds < 2.0);
-    const midOdds = completedBets.filter(
-      (bet: Bet) => bet.odds >= 2.0 && bet.odds < 3.0,
-    );
-    const highOdds = completedBets.filter((bet: Bet) => bet.odds >= 3.0);
-
-    return [
-      {
-        range: "Низькі (< 2.0)",
-        count: lowOdds.length,
-        winRate: lowOdds.length
-          ? (
-              (lowOdds.filter((b: Bet) => b.result === "Win").length /
-                lowOdds.length) *
-              100
-            ).toFixed(1)
-          : "0",
-        profit: lowOdds.reduce(
-          (sum: number, bet: Bet) => sum + (bet.profit || 0),
-          0,
-        ),
-      },
-      {
-        range: "Середні (2.0-3.0)",
-        count: midOdds.length,
-        winRate: midOdds.length
-          ? (
-              (midOdds.filter((b: Bet) => b.result === "Win").length /
-                midOdds.length) *
-              100
-            ).toFixed(1)
-          : "0",
-        profit: midOdds.reduce(
-          (sum: number, bet: Bet) => sum + (bet.profit || 0),
-          0,
-        ),
-      },
-      {
-        range: "Високі (> 3.0)",
-        count: highOdds.length,
-        winRate: highOdds.length
-          ? (
-              (highOdds.filter((b: Bet) => b.result === "Win").length /
-                highOdds.length) *
-              100
-            ).toFixed(1)
-          : "0",
-        profit: highOdds.reduce(
-          (sum: number, bet: Bet) => sum + (bet.profit || 0),
-          0,
-        ),
-      },
-    ];
-  }, [completedBets]);
 
   const monthlyProfitData = useMemo((): MonthlyData[] => {
     const monthlyData: {
@@ -463,21 +406,6 @@ export default function Analytics() {
       }));
   }, [gameFilteredBets]);
 
-  const oddsData = oddsAnalysis;
-
-  const oddsChartData = useMemo(
-    () =>
-      oddsData.map((range) => ({
-        range: range.range.replace(/\s*\(.*?\)\s*/g, ""),
-        winRate: parseFloat(range.winRate),
-        roi:
-          range.count > 0
-            ? Math.round((range.profit / (range.count * 100)) * 100)
-            : 0,
-        bets: range.count,
-      })),
-    [oddsData],
-  );
 
   const tabs = [
     { id: "profit", label: "Прибуток", icon: Wallet },
@@ -485,12 +413,6 @@ export default function Analytics() {
     { id: "comparison", label: "Періоди", icon: Calendar },
   ];
 
-  // Odds category labels
-  const oddsCategoryLabels = [
-    { label: "Низькі", sublabel: "< 2.0" },
-    { label: "Середні", sublabel: "2.0 – 3.0" },
-    { label: "Високі", sublabel: "> 3.0" },
-  ];
 
   return (
     <div className="analytics-profit min-h-screen relative flex flex-col">
@@ -614,45 +536,11 @@ export default function Analytics() {
 
                 {/* ===== КОЕФІЦІЄНТИ TAB ===== */}
                 {activeTab === "odds" && (
-                  <div className="flex flex-col flex-1">
-                    {gameFilteredBets.length > 0 ? (
-                      <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] space-y-6">
-                        <OddsWinRateChartCard data={oddsChartData} />
-                        <OddsCategoryCards
-                          data={oddsData}
-                          labels={oddsCategoryLabels}
-                        />
-                      </div>
-                    ) : (
-                      <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
-                        <CardContent className="py-16 text-center">
-                          <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
-                            <BarChart3
-                              className="h-16 w-16 text-gray-400"
-                              strokeWidth={1.5}
-                            />
-                          </div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            Немає даних для аналізу коефіцієнтів
-                          </h3>
-                          <p className="text-gray-500 text-sm">
-                            Додайте ставки для перегляду аналізу по категоріях
-                            коефіцієнтів
-                          </p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
+                  <OddsOverview bets={gameFilteredBets} currency={currencyMode} />
                 )}
 
                 {activeTab === "comparison" && (
-                  <TooltipProvider>
-                    <div className="flex flex-col flex-1">
-                      <div className="bg-white rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
-                        <PeriodComparison bets={bets} />
-                      </div>
-                    </div>
-                  </TooltipProvider>
+                  <PeriodComparison bets={gameFilteredBets} currency={currencyMode} />
                 )}
                 {activeTab === "risks" && <RiskManagement />}
               </div>
