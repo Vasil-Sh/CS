@@ -1,9 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Dark rounded square background — same as sidebar logo -->
-  <rect width="512" height="512" rx="112" ry="112" fill="#1a1a2e"/>
-  <!-- White TrendingUp icon -->
-  <polyline points="120,340 260,200 340,280 420,120" 
-            fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
-  <polyline points="310,120 420,120 420,230" 
-            fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#ff693b"/>
+  <g transform="translate(4,4)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 16v5"/>
+    <path d="M16 14v7"/>
+    <path d="M20 10v11"/>
+    <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/>
+    <path d="M4 18v3"/>
+    <path d="M8 14v7"/>
+  </g>
 </svg>
+

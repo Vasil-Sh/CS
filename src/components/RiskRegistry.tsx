@@ -89,12 +89,30 @@ export default function RiskRegistry() {
               ))
           );
         })
-        .sort((a, b) =>
-          sort === "name"
-            ? a.name.localeCompare(b.name, "uk")
-            : (order[a.status] ?? 99) - (order[b.status] ?? 99) ||
-              a.name.localeCompare(b.name, "uk"),
-        ),
+        .sort((a, b) => {
+          switch (sort) {
+            case "name":
+              return a.name.localeCompare(b.name, "uk");
+            case "name-desc":
+              return b.name.localeCompare(a.name, "uk");
+            case "game":
+              return (
+                (a.game === "CS" ? 0 : 1) - (b.game === "CS" ? 0 : 1) ||
+                a.name.localeCompare(b.name, "uk")
+              );
+            case "game-dota":
+              return (
+                (a.game === "Дота" ? 0 : 1) - (b.game === "Дота" ? 0 : 1) ||
+                a.name.localeCompare(b.name, "uk")
+              );
+            case "risk":
+            default:
+              return (
+                (order[a.status] ?? 99) - (order[b.status] ?? 99) ||
+                a.name.localeCompare(b.name, "uk")
+              );
+          }
+        }),
     [game, h.riskyTeams, h.searchQuery, sort, status],
   );
   const chips = [
@@ -241,7 +259,10 @@ export default function RiskRegistry() {
                   onChange={(event) => setSort(event.target.value)}
                 >
                   <option value="risk">найвищий ризик</option>
-                  <option value="name">за назвою</option>
+                  <option value="name">за назвою (А–Я)</option>
+                  <option value="name-desc">за назвою (Я–А)</option>
+                  <option value="game">за грою (CS спочатку)</option>
+                  <option value="game-dota">за грою (Dota 2 спочатку)</option>
                 </select>
               </label>
             </header>
