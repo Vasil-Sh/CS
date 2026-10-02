@@ -42,7 +42,7 @@ export default function OddsOverview({ bets, currency }: { bets: Bet[]; currency
       <p className="odds-subtitle">Розраховані записи за діапазонами.</p>
       {data.categories.map(item => <div className="odds-rate-row" key={item.name}>
         <div className="odds-range"><h3>{item.label}</h3><span>{betCount(item.count)}</span></div>
-        <progress className="odds-progress" max={100} value={item.winRate ?? 0} aria-label={`Вінрейт ${item.name.toLowerCase()}: ${item.winRate === null ? "немає даних" : `${item.winRate}%`}`} />
+        <progress className={`odds-progress${item.count > 0 ? (item.losses === 0 ? " is-perfect" : " has-losses") : ""}`} max={100} value={item.winRate ?? 0} aria-label={`Вінрейт ${item.name.toLowerCase()}: ${item.winRate === null ? "немає даних" : `${item.winRate}%`}`} />
         <strong className="odds-rate-value">{item.winRate === null ? "—" : `${item.winRate}%`}</strong>
         <div className="odds-outcomes" aria-label={`${item.wins} перемог, ${item.losses} поразок`}><span className="odds-positive">{item.wins}W</span><span> / </span><span className="odds-negative">{item.losses}L</span></div>
       </div>)}

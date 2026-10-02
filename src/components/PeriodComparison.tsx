@@ -71,7 +71,7 @@ export default function PeriodComparison({ bets, currency = "UAH" }: { bets: Bet
           <ReferenceLine y={0} stroke="#c9cdc6" />
           <Tooltip labelFormatter={day => `День ${day} від початку`} formatter={(value: number, name: string) => [money(value), name === "first" ? labels[0] : labels[1]]} contentStyle={{ fontSize: 12, borderRadius: 4, borderColor: "#d9dcd4" }} />
           <Line type="linear" dataKey="first" stroke="#ff693b" strokeWidth={2.2} dot={trend.length === 1} isAnimationActive={false} connectNulls={false} />
-          <Line type="linear" dataKey="second" stroke="#949a9c" strokeWidth={2.2} dot={trend.length === 1} isAnimationActive={false} connectNulls={false} />
+          <Line type="linear" dataKey="second" stroke="#4278f5" strokeWidth={2.2} dot={trend.length === 1} isAnimationActive={false} connectNulls={false} />
         </LineChart></ResponsiveContainer> : <div className="period-empty">Немає розрахованих записів за вибрані дати.</div>}
       </section>
       <section className="period-panel period-results"><h3>Розподіл результатів</h3>{stats.map((stat, index) => <div className="period-result" key={index}>
