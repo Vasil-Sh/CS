@@ -399,6 +399,9 @@
   outline: 0;
   cursor: pointer;
 }
+.risk-list-head select:focus-visible {
+  outline: none;
+}
 .risk-scroll {
   overflow-x: auto;
 }
