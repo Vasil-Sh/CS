@@ -6,9 +6,8 @@
 .odds-rate-row+.odds-rate-row{margin-top:10px}
 .odds-range{padding-right:16px;border-right:1px solid #e6e8e2}.odds-rate-value{padding-left:16px;border-left:1px solid #e6e8e2}
 .odds-range h3{font-size:22px}.odds-range>span{font-size:12px;color:#6e746c}
-.odds-progress{appearance:none;width:100%;height:13px;border:0;border-radius:20px;overflow:hidden;background:#e9ebec}
-.odds-progress::-webkit-progress-bar{background:#e9ebec;border-radius:20px}.odds-progress::-webkit-progress-value{background:#ff693b;border-radius:20px}.odds-progress::-moz-progress-bar{background:#ff693b;border-radius:20px}
-.odds-progress.is-perfect::-webkit-progress-value{background:#16873d}.odds-progress.is-perfect::-moz-progress-bar{background:#16873d}.odds-progress.has-losses::-webkit-progress-value{background:#d63d32}.odds-progress.has-losses::-moz-progress-bar{background:#d63d32}
+.odds-progress{display:flex;align-items:stretch;width:100%;height:13px;border:0;border-radius:20px;overflow:hidden;background:#e9ebec}
+.odds-progress-win{background:#16873d}.odds-progress-loss{background:#d63d32}
 .odds-rate-value{font:600 24px/1 Oswald,sans-serif;font-variant-numeric:tabular-nums}
 .odds-outcomes{text-align:center;white-space:nowrap;font:600 24px/1 Oswald,sans-serif;color:#777d75}
 .odds-positive{color:#16873d}.odds-negative{color:#e7453b}
