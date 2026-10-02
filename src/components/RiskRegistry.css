@@ -296,10 +296,10 @@
 .risk-chips .warning {
   border-color: #c98a1a;
   background: #f0b23b;
-  color: #221713;
+  color: #ffffff;
 }
 .risk-chips .warning span {
-  color: #4a3a12;
+  color: #ffffff;
 }
 .risk-chips .unstable {
   border-color: #c05621;
@@ -515,44 +515,44 @@
   white-space: nowrap;
 }
 .risk-status.ban {
-  border-color: #f4beb9;
-  background: #fff0ef;
-  color: #b84238;
+  border-color: #c0392b;
+  background: #d64545;
+  color: #fff;
 }
 .risk-status.warning {
-  border-color: #f0c76f;
-  background: #fff7e8;
-  color: #9a6515;
+  border-color: #c98a1a;
+  background: #f0b23b;
+  color: #fff;
 }
 .risk-status.unstable {
-  border-color: #e9b48f;
-  background: #fff1e8;
-  color: #b3561f;
+  border-color: #c05621;
+  background: #e8732e;
+  color: #fff;
 }
 .risk-status.caution {
-  border-color: #c3c8ec;
-  background: #eef0fb;
-  color: #4a56a8;
+  border-color: #4f5bb0;
+  background: #6c78d0;
+  color: #fff;
 }
 .risk-status.question {
-  border-color: #d4d7cf;
-  background: #f3f4f1;
-  color: #5d645c;
+  border-color: #8f968b;
+  background: #9aa0a6;
+  color: #fff;
 }
 .risk-status.safe {
-  border-color: #b7dfc0;
-  background: #edf8ef;
-  color: #277247;
+  border-color: #1f8a4c;
+  background: #2e9e63;
+  color: #fff;
 }
 .risk-status.reliable {
-  border-color: #a9d6d6;
-  background: #e8f6f6;
-  color: #0f6b6b;
+  border-color: #0e6b6b;
+  background: #1a8a8a;
+  color: #fff;
 }
 .risk-status.neutral {
-  border-color: #d9dcd4;
-  background: #f4f4f2;
-  color: #656a64;
+  border-color: #c4c8c0;
+  background: #e6e8e3;
+  color: #343832;
 }
 /* Status field with a colored dot next to the select */
 .risk-status-field {
