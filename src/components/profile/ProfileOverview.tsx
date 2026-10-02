@@ -10,7 +10,6 @@ import {
   DollarSign,
   Copy,
   ExternalLink,
-  Clock,
   Check,
   RefreshCw,
   FolderOpen,
@@ -359,7 +358,6 @@ export default function ProfileOverview(p: Props) {
           <section className="profile-panel">
             <div className="profile-section-title">
               <h2>Остання активність</h2>
-              <Clock size={17} />
             </div>
             <div className="profile-activity">
               {isLoading ? (

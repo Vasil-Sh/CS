@@ -226,6 +226,20 @@
   background: #8085750c;
   border-color: #9ea595;
 }
+.profile-landing .profile-share .profile-icon-button {
+  background: #ff693b;
+  border-color: #ff693b;
+  color: #ffffff;
+}
+.profile-landing .profile-share .profile-icon-button:hover {
+  background: #ff825d;
+  border-color: #ff825d;
+  color: #ffffff;
+}
+.profile-landing .profile-share .profile-icon-button:focus-visible,
+.profile-landing .profile-share input:focus-visible {
+  outline: none;
+}
 .profile-landing .profile-button-blue,
 .profile-landing .profile-primary {
   background: #ff693b;
