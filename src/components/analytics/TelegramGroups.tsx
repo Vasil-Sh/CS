@@ -738,7 +738,7 @@ export default function TelegramGroups() {
               <p>Групи для аналізу спільних результатів.</p>
             </div>
             <Button onClick={openNewGroup} className="w-fit px-4">
-              <Plus className="mr-2 h-4 w-4" strokeWidth={1.75} />
+              <Plus size={18} />
               Додати групу
             </Button>
           </div>

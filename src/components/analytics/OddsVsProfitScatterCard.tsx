@@ -118,8 +118,8 @@ export default function OddsVsProfitScatterCard({
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={3}
-                    fill={isWin ? "#ff693b" : "#9ca09a"}
+                    r={3.5}
+                    fill={isWin ? "#16873d" : "#d63d32"}
                     opacity={0.9}
                   />
                 );

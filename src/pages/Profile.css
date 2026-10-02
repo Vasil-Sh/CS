@@ -431,6 +431,28 @@
 .profile-data-heading {
   margin-top: 25px !important;
 }
+.profile-data-title {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--profile-border);
+}
+.profile-data-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.profile-section-title .profile-data-status-ok {
+  background: #e7f6ec;
+  color: #1a7f4f;
+}
+.profile-section-title .profile-data-status-warn {
+  background: #fbecc9;
+  color: #9c670c;
+}
 .profile-backup-row {
   display: flex;
   align-items: center;

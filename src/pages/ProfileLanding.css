@@ -230,14 +230,14 @@
 .profile-landing .profile-primary {
   background: #ff693b;
   border-color: #ff693b;
-  color: #171916;
+  color: #ffffff;
   font-weight: 600;
 }
 .profile-landing .profile-button-blue:hover,
 .profile-landing .profile-primary:hover {
   background: #f65a2a;
   border-color: #f65a2a;
-  color: #171916;
+  color: #ffffff;
 }
 .profile-landing .backup-page {
   padding: 26px var(--profile-gutter) 0;
@@ -275,6 +275,9 @@
 .profile-landing-menu :is(button, a):focus-visible {
   outline: 3px solid #ff815b;
   outline-offset: 4px;
+}
+.profile-landing .profile-setting select:focus-visible {
+  outline: none;
 }
 .profile-landing .profile-mobile-header {
   background: #191b1a;

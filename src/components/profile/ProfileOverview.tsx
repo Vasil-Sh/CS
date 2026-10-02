@@ -8,7 +8,6 @@ import {
   Sun,
   Globe,
   DollarSign,
-  Database,
   Copy,
   ExternalLink,
   Clock,
@@ -280,9 +279,21 @@ export default function ProfileOverview(p: Props) {
             </div>
           </section>
           <section className="profile-panel profile-settings">
-            <h2>Дані</h2>
+            <div className="profile-section-title profile-data-title">
+              <h2>Дані</h2>
+              <span
+                className={`profile-data-status ${
+                  p.needsBackupReminder
+                    ? "profile-data-status-warn"
+                    : "profile-data-status-ok"
+                }`}
+              >
+                {p.needsBackupReminder
+                  ? "Рекомендуємо створити копію"
+                  : "Копію завантажено"}
+              </span>
+            </div>
             <div className="profile-backup-row">
-              <Database size={25} strokeWidth={1.5} />
               <div>
                 <strong>Резервна копія даних</strong>
                 <p>
@@ -290,17 +301,6 @@ export default function ProfileOverview(p: Props) {
                     ? `Остання копія: ${dateText(p.lastBackupDate)}`
                     : "Резервну копію ще не створено"}
                 </p>
-                <small
-                  className={
-                    p.needsBackupReminder
-                      ? "profile-backup-needed"
-                      : "profile-online"
-                  }
-                >
-                  {p.needsBackupReminder
-                    ? "Рекомендуємо створити копію"
-                    : "Копію завантажено"}
-                </small>
               </div>
               <button
                 className="profile-button profile-button-blue"
