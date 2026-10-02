@@ -63,14 +63,27 @@
 }
 .public-nav-label {
   color: #b6b6b1;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 .public-login {
   display: inline-flex;
   align-items: center;
   gap: 9px;
+  min-height: 42px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  background: var(--public-orange);
+  color: #ffffff !important;
+  font-weight: 700;
+  transition: background 0.18s;
 }
 .public-login:hover {
-  color: var(--public-orange);
+  color: #ffffff !important;
+  background: #ff825d;
 }
 .public-identity {
   display: flex;
@@ -98,6 +111,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.public-avatar-letter {
+  color: #f2f0ea;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1;
+  z-index: 1;
 }
 .public-identity-copy {
   min-width: 0;
@@ -190,7 +211,19 @@
 }
 .public-kpis .public-roi dt,
 .public-kpis .public-roi dd {
+  color: #4278f5;
+}
+.public-kpis .public-bets-count dt,
+.public-kpis .public-bets-count dd {
   color: var(--public-orange);
+}
+.public-kpis .public-positive dt,
+.public-kpis .public-positive dd {
+  color: #67d08e;
+}
+.public-kpis .public-negative dt,
+.public-kpis .public-negative dd {
+  color: #ff8c7d;
 }
 .public-body {
   padding-block: 38px 48px;
@@ -215,6 +248,13 @@
   grid-template-columns: minmax(0, 2.2fr) minmax(230px, 1fr);
   gap: 36px;
 }
+.public-chart-card {
+  background: #fff;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  padding: 18px 16px 14px;
+  min-width: 0;
+}
 .public-chart-scroll {
   overflow-x: auto;
   min-width: 0;
@@ -238,31 +278,37 @@
     sans-serif;
 }
 .public-bar-value {
-  fill: #242724;
+  fill: #287540;
   font:
     600 12px "Manrope",
     sans-serif;
 }
+.public-bar-value.is-negative {
+  fill: #cc463c;
+}
 .public-bar {
-  fill: #282c28;
+  fill: #62af69;
   transition: opacity 0.2s;
 }
 .public-bar:hover {
   opacity: 0.75;
 }
-.public-bar.is-latest {
-  fill: var(--public-orange);
-}
 .public-bar.is-negative {
-  fill: #999c94;
+  fill: #eb5750;
 }
 .public-numbers {
-  border-left: 1px solid #c8cac1;
-  padding-left: 28px;
+  background: #fff;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  padding: 18px 20px;
 }
 .public-numbers h3 {
   margin: 0 0 8px;
-  font-size: 17px;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  text-transform: uppercase;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -279,7 +325,10 @@
   align-items: center;
   gap: 16px;
   padding-block: 12px;
-  border-top: 1px solid #c8cac1;
+  border-top: 1px solid #e5e6e1;
+}
+.public-numbers dl > div:first-of-type {
+  border-top: 0;
 }
 .public-numbers dt {
   font-size: 13px;
@@ -289,6 +338,20 @@
   font-weight: 600;
   font-size: 36px;
   line-height: 1.2;
+}
+.public-numbers dd.public-numbers-green {
+  color: #1a7f4f;
+}
+.public-numbers dd.public-numbers-red {
+  color: #e1251b;
+}
+.public-profit-pos {
+  color: #1a7f4f;
+  font-weight: 600;
+}
+.public-profit-neg {
+  color: #e1251b;
+  font-weight: 600;
 }
 .public-recent {
   margin-top: 42px;
@@ -327,6 +390,17 @@
 .public-table-scroll {
   overflow-x: auto;
 }
+.public-bets-table {
+  background: #fff;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+.public-profile .public-bets-table {
+  border-collapse: separate;
+}
 .public-profile table {
   width: 100%;
   border-collapse: collapse;
@@ -342,6 +416,14 @@
   padding: 14px 18px;
   border-bottom: 1px solid #d0d2c9;
 }
+.public-profile .public-bets-table th,
+.public-profile .public-bets-table td {
+  border-right: 1px solid #e5e6e1;
+}
+.public-profile .public-bets-table th:last-child,
+.public-profile .public-bets-table td:last-child {
+  border-right: 0;
+}
 .public-profile th:first-child,
 .public-profile td:first-child {
   padding-left: 0;
@@ -351,6 +433,20 @@
   padding-right: 0;
   text-align: right;
   white-space: nowrap;
+}
+.public-profile .public-bets-table th:first-child,
+.public-profile .public-bets-table td:first-child {
+  padding-left: 18px;
+}
+.public-profile .public-bets-table th:last-child,
+.public-profile .public-bets-table td:last-child {
+  padding-right: 18px;
+}
+.public-profile .public-bets-table .public-col-center {
+  text-align: center;
+}
+.public-profile .public-bets-table tbody tr:last-child td {
+  border-bottom: 0;
 }
 .public-profile td {
   font-variant-numeric: tabular-nums;
@@ -433,6 +529,17 @@
   border: 1px dashed #c8cac1;
   border-radius: 6px;
 }
+.public-empty.public-bets-empty {
+  background: transparent;
+  border: 1px dashed #c8cac1;
+  border-radius: 6px;
+}
+.public-bets-card {
+  background: #fff;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  padding: 18px 16px;
+}
 .public-empty p {
   color: #646760;
   font-size: 13px;
@@ -461,8 +568,9 @@
   animation: public-spin 1s linear infinite;
 }
 .public-footer {
-  border-top: 1px solid #c8cac1;
-  padding-block: 20px;
+  background: var(--public-ink);
+  border-top: 1px solid #ffffff24;
+  padding-block: 24px;
 }
 .public-footer > div {
   display: flex;
@@ -472,10 +580,11 @@
 }
 .public-footer .public-logo {
   font-size: 22px;
+  color: #f2f0ea;
 }
 .public-footer p,
 .public-footer > div > span {
-  color: #646760;
+  color: #f2f0ea;
   font-size: 10px;
 }
 .public-sr-only,

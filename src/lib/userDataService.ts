@@ -248,6 +248,10 @@ export class UserDataService {
         for (const apiBet of mapped) {
           const local = localMap.get(apiBet.id);
           if (local) {
+            // Backfill server timestamp so "recent activity" can sort correctly
+            if (!local.createdAt && apiBet.createdAt) {
+              local.createdAt = apiBet.createdAt;
+            }
             // Keep local non-Pending result if newer; otherwise use API data
             if (local.result && local.result !== 'Pending') {
               apiBet.result = local.result;

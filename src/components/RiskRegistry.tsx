@@ -150,7 +150,7 @@ export default function RiskRegistry() {
           </div>
         </div>
         <dl className="risk-metrics">
-          <div>
+          <div className="is-total">
             <dt>Усі команди</dt>
             <dd>{h.teamStats.total}</dd>
           </div>

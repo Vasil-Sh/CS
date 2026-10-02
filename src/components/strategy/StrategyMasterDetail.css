@@ -37,8 +37,12 @@
 .smd-hint svg { flex-shrink:0; }
 .smd-detail { padding:24px; display:flex; flex-direction:column; min-height:540px; }
 .smd-detail-top { display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#6a7078; }
-.smd-detail-top button { padding:8px; border:0; background:transparent; color:#6a7078; }
+.smd-detail-top button { padding:8px; border:0; background:transparent; color:#6a7078; border-radius:6px; }
 .smd-detail-top button:hover { color:#171916; }
+.smd-detail-top [data-state] { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; background:#ff693b; color:#fff; border-radius:6px; }
+.smd-detail-top [data-state]:hover { background:#ff825d; color:#fff; }
+.smd-detail-top [data-state] button { padding:0; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; color:#fff; background:transparent; }
+.smd-detail-top [data-state] button:hover { color:#fff; background:transparent; }
 .smd-detail h2 { font-size:38px; line-height:1.2; margin:14px 0 8px; overflow-wrap:anywhere; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .smd-muted { font-size:14px; color:#697078; line-height:1.55; }
 .smd-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:26px 0 16px; }

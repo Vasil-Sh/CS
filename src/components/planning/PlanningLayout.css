@@ -81,6 +81,9 @@
 .planning-metrics .has-value dd {
   color: #ff693b;
 }
+.planning-metrics .tone-green dd {
+  color: #67d08e;
+}
 .planning-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;

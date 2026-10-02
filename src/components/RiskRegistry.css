@@ -156,6 +156,9 @@
 .risk-metrics .is-warning dd {
   color: #f0b23b;
 }
+.risk-metrics .is-total dd {
+  color: #ff693b;
+}
 .risk-workspace {
   padding: 27px max(38px, 4.6vw) 48px;
 }

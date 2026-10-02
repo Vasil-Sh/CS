@@ -521,7 +521,7 @@ export default function StrategyOverview({
   // ── JSX ──
   return (
     <div className={focusLayout ? "smd-page" : "space-y-6"}>
-      {focusLayout && <PlanningHeader title="Стратегії" description="Зберігайте правила та оцінюйте їх за результатами ставок." action="Створити стратегію" onCreate={()=>setShowCreateDialog(true)} disabled={strategies.length>=25} metrics={[{label:"Усі стратегії",value:loading?"—":strategies.length},{label:"Основна",value:loading?"—":strategies.some(strategyMatchesPrimary)?1:0}]} />}
+      {focusLayout && <PlanningHeader title="Стратегії" description="Зберігайте правила та оцінюйте їх за результатами ставок." action="Створити стратегію" onCreate={()=>setShowCreateDialog(true)} disabled={strategies.length>=25} metrics={[{label:"Усі стратегії",value:loading?"—":strategies.length},{label:"Основна",value:loading?"—":strategies.some(strategyMatchesPrimary)?1:0,tone:"green"}]} />}
       <div className={focusLayout ? "smd-body" : undefined}><div className={focusLayout ? "smd-content" : "space-y-6"}>
       <StrategyTabNav
         hideCreate={focusLayout}

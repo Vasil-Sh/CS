@@ -448,8 +448,8 @@ export default function Analytics() {
                 <dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴</dd>
                 <dt>Прибуток <span>ROI {roi >= 0 ? "+" : ""}{roi}%</span></dt>
               </div>
-              <div><dd>{completedBets.length}</dd><dt>Розраховано <span>{winningBets.length}W / {losingBets.length}L</span></dt></div>
-              <div><dd>{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</dd><dt>Середній коеф. <span>{filteredStats.winRate}% вінрейт</span></dt></div>
+              <div><dd className="analytics-orange">{completedBets.length}</dd><dt>Розраховано <span>{winningBets.length}W / {losingBets.length}L</span></dt></div>
+              <div><dd className="analytics-blue">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</dd><dt>Середній коеф. <span>{filteredStats.winRate}% вінрейт</span></dt></div>
             </dl>
           </header>
 

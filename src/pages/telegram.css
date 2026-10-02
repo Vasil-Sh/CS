@@ -109,6 +109,12 @@
 .telegram-metrics .is-accent p:first-child {
   color: var(--tg-orange);
 }
+.telegram-metrics .is-orange p:first-child {
+  color: var(--tg-orange);
+}
+.telegram-metrics .is-green p:first-child {
+  color: #67d08e;
+}
 .telegram-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 285px;

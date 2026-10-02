@@ -105,7 +105,7 @@ export default function GoalsFocus({ h }: { h: Controller }) {
         disabled={h.activeGoals.length >= 25}
         metrics={[
           { label: "Активні", value: h.activeGoals.length },
-          { label: "Виконані", value: h.completedGoals.length },
+          { label: "Виконані", value: h.completedGoals.length, tone: "green" },
         ]}
       />
       <div className="gmd-content">

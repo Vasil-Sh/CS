@@ -2,8 +2,7 @@
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["region"] }] */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowUpRight, Check, Loader2, Share2 } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowUpRight, Loader2 } from "lucide-react";
 import { proxyLogoUrl } from "@/lib/logoProxy";
 import "./PublicProfile.css";
 
@@ -184,7 +183,7 @@ function ProfitChart({ data }: { data: PublicStats["monthlyProfit"] }) {
                 y={top}
                 width={Math.min(slot * 0.6, 70)}
                 height={Math.max(Math.abs(y(item.profit) - zero), 1)}
-                className={`public-bar${item.profit < 0 ? " is-negative" : index === sorted.length - 1 ? " is-latest" : ""}`}
+                className={`public-bar${item.profit < 0 ? " is-negative" : ""}`}
               >
                 <title>
                   {monthLabel(item.month)}: {signed(item.profit)} ₴
@@ -194,7 +193,7 @@ function ProfitChart({ data }: { data: PublicStats["monthlyProfit"] }) {
                 x={center}
                 y={item.profit >= 0 ? top - 10 : y(item.profit) + 17}
                 textAnchor="middle"
-                className="public-bar-value"
+                className={`public-bar-value${item.profit < 0 ? " is-negative" : ""}`}
               >
                 {signed(item.profit)}
               </text>
@@ -220,8 +219,8 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
-  const [copied, setCopied] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
@@ -254,22 +253,6 @@ export default function PublicProfile() {
       });
     return () => controller.abort();
   }, [username, retry]);
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(false), 2500);
-    return () => clearTimeout(timer);
-  }, [copied]);
-  const share = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      toast.success("Посилання скопійовано");
-    } catch {
-      toast.error(
-        "Не вдалося скопіювати. Скопіюйте посилання з адресного рядка.",
-      );
-    }
-  };
   const bets =
     data?.recentBets.filter(
       (bet) => filter === "all" || gameLabel(bet.game) === filter,
@@ -334,43 +317,36 @@ export default function PublicProfile() {
                       alt=""
                       className="public-avatar-img"
                       loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                      onLoad={(e) => {
-                        if (e.currentTarget.naturalWidth <= 1) {
-                          e.currentTarget.style.display = "none";
+                      ref={(node) => {
+                        if (node && node.complete && node.naturalWidth > 1) {
+                          setAvatarLoaded(true);
                         }
+                      }}
+                      onError={() => setAvatarLoaded(false)}
+                      onLoad={(e) => {
+                        setAvatarLoaded(e.currentTarget.naturalWidth > 1);
                       }}
                     />
                   ) : null}
-                  <span className="public-avatar-letter">
-                    {data.username.slice(0, 1).toUpperCase()}
-                  </span>
+                  {!avatarLoaded && (
+                    <span className="public-avatar-letter">
+                      {data.username.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
                 </div>
                 <div className="public-identity-copy">
                   <p className="public-eyebrow">Статистика гравця</p>
                   <h1 id="public-name">@{data.username}</h1>
                   <p className="public-subtitle">Публічний журнал ставок</p>
                 </div>
-                <button
-                  type="button"
-                  className="public-button public-share"
-                  onClick={share}
-                >
-                  {copied ? <Check size={18} /> : <Share2 size={18} />}
-                  <span aria-live="polite">
-                    {copied ? "Скопійовано" : "Поділитися"}
-                  </span>
-                </button>
               </div>
               <div className="public-kpi-border">
                 <dl className="public-wrap public-kpis">
-                  <div>
+                  <div className="public-bets-count">
                     <dt>Ставок</dt>
                     <dd>{number(data.stats.totalBets)}</dd>
                   </div>
-                  <div>
+                  <div className={data.stats.winRate >= 50 ? "public-positive" : "public-negative"}>
                     <dt>Вінрейт</dt>
                     <dd>
                       {number(data.stats.winRate, 1)}
@@ -384,7 +360,7 @@ export default function PublicProfile() {
                       <small>%</small>
                     </dd>
                   </div>
-                  <div>
+                  <div className={data.stats.totalProfit >= 0 ? "public-positive" : "public-negative"}>
                     <dt>Прибуток</dt>
                     <dd>
                       {signed(data.stats.totalProfit)} <small>₴</small>
@@ -407,7 +383,9 @@ export default function PublicProfile() {
                   </span>
                 </div>
                 <div className="public-results-grid">
-                  <ProfitChart data={data.monthlyProfit} />
+                  <div className="public-chart-card">
+                    <ProfitChart data={data.monthlyProfit} />
+                  </div>
                   <aside className="public-numbers">
                     <h3>
                       У цифрах <span>За весь час</span>
@@ -415,11 +393,11 @@ export default function PublicProfile() {
                     <dl>
                       <div>
                         <dt>Виграші</dt>
-                        <dd>{number(data.stats.wins)}</dd>
+                        <dd className="public-numbers-green">{number(data.stats.wins)}</dd>
                       </div>
                       <div>
                         <dt>Програші</dt>
-                        <dd>{number(data.stats.losses)}</dd>
+                        <dd className="public-numbers-red">{number(data.stats.losses)}</dd>
                       </div>
                       <div>
                         <dt>Середній коефіцієнт</dt>
@@ -466,7 +444,7 @@ export default function PublicProfile() {
                     role="region"
                     aria-label="Останні ставки, таблицю можна прокручувати"
                   >
-                    <table>
+                    <table className="public-bets-table">
                       <caption className="public-sr-only">
                         Останні доступні ставки користувача {data.username}
                       </caption>
@@ -474,9 +452,9 @@ export default function PublicProfile() {
                         <tr>
                           <th scope="col">Дата</th>
                           <th scope="col">Матч</th>
-                          <th scope="col">Коеф.</th>
-                          <th scope="col">Результат</th>
-                          <th scope="col">Прибуток</th>
+                          <th scope="col" className="public-col-center">Коеф.</th>
+                          <th scope="col" className="public-col-center">Результат</th>
+                          <th scope="col" className="public-col-center">Прибуток</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -487,8 +465,8 @@ export default function PublicProfile() {
                               <PublicBetTeams bet={bet} />
                               <small>{bet.game}</small>
                             </td>
-                            <td>{number(bet.odds, 2)}</td>
-                            <td>
+                            <td className="public-col-center">{number(bet.odds, 2)}</td>
+                            <td className="public-col-center">
                               <span
                                 className={`public-result ${bet.result === "Win" ? "is-win" : bet.result === "Loss" ? "is-loss" : "is-pending"}`}
                               >
@@ -496,7 +474,7 @@ export default function PublicProfile() {
                                 {resultLabel(bet.result)}
                               </span>
                             </td>
-                            <td>
+                            <td className="public-col-center">
                               {[
                                 "Win",
                                 "Loss",
@@ -504,7 +482,11 @@ export default function PublicProfile() {
                                 "Void",
                                 "Push",
                               ].includes(bet.result)
-                                ? `${signed(bet.profit)} ₴`
+                                ? (
+                                  <span className={bet.profit >= 0 ? "public-profit-pos" : "public-profit-neg"}>
+                                    {signed(bet.profit)} ₴
+                                  </span>
+                                )
                                 : "—"}
                             </td>
                           </tr>
@@ -513,25 +495,27 @@ export default function PublicProfile() {
                     </table>
                   </div>
                 ) : (
-                  <div className="public-empty">
-                    <strong>
-                      {filter === "all"
-                        ? "Ставок ще немає"
-                        : "У цьому списку немає ставок з цієї гри"}
-                    </strong>
-                    <p>
-                      {filter === "all"
-                        ? "Тут з’являться останні записи публічного журналу."
-                        : "Оберіть іншу гру або поверніться до всіх ставок."}
-                    </p>
-                    {filter !== "all" && (
-                      <button
-                        className="public-button"
-                        onClick={() => setFilter("all")}
-                      >
-                        Показати всі
-                      </button>
-                    )}
+                  <div className="public-bets-card">
+                    <div className="public-empty public-bets-empty">
+                      <strong>
+                        {filter === "all"
+                          ? "Ставок ще немає"
+                          : "У цьому списку немає ставок з цієї гри"}
+                      </strong>
+                      <p>
+                        {filter === "all"
+                          ? "Тут з’являться останні записи публічного журналу."
+                          : "Оберіть іншу гру або поверніться до всіх ставок."}
+                      </p>
+                      {filter !== "all" && (
+                        <button
+                          className="public-button"
+                          onClick={() => setFilter("all")}
+                        >
+                          Показати всі
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
                 <p className="public-table-note">

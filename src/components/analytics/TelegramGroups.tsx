@@ -656,14 +656,16 @@ export default function TelegramGroups() {
     >
       <div>
         <Metric value={groups.length} label="Групи" accent />
-        <Metric value={overallStats.totalBets} label="Ставок" />
+        <Metric value={overallStats.totalBets} label="Ставок" tone="orange" />
         <Metric
           value={`${overallStats.winRate.toFixed(0)}%`}
           label="Win Rate"
+          tone="green"
         />
         <Metric
           value={`${overallStats.totalProfit >= 0 ? "+" : ""}${Number(overallStats.totalProfit).toFixed(0)} ₴`}
           label="Прибуток"
+          tone="green"
         />
       </div>
     </section>
@@ -1135,13 +1137,15 @@ function Metric({
   value,
   label,
   accent = false,
+  tone,
 }: {
   value: string | number;
   label: string;
   accent?: boolean;
+  tone?: "orange" | "green";
 }) {
   return (
-    <div className={accent ? "is-accent" : undefined}>
+    <div className={[accent ? "is-accent" : undefined, tone ? `is-${tone}` : undefined].filter(Boolean).join(" ")}>
       <p>{value}</p>
       <p>{label}</p>
     </div>

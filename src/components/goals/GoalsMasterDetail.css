@@ -252,6 +252,33 @@
 .gmd-detail-top button {
   padding: 8px;
 }
+.gmd-detail-top [data-state] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: #ff693b;
+  color: #fff;
+  border-radius: 6px;
+}
+.gmd-detail-top [data-state]:hover {
+  background: #ff825d;
+}
+.gmd-detail-top [data-state] button {
+  padding: 0;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: transparent;
+}
+.gmd-detail-top [data-state] button:hover {
+  color: #fff;
+  background: transparent;
+}
 .gmd-detail h2 {
   font-size: 38px;
   line-height: 1.2;

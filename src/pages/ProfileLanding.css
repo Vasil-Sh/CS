@@ -233,6 +233,7 @@
   color: #ffffff;
   font-weight: 600;
 }
+.profile-landing .profile-grid .profile-button-blue:hover,
 .profile-landing .profile-button-blue:hover,
 .profile-landing .profile-primary:hover {
   background: #f65a2a;

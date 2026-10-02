@@ -83,13 +83,15 @@ export function useTiltBlock(
             [],
           );
 
+    const ts = (b: BetRecord): number => {
+      const c = b.createdAt;
+      if (typeof c === "string") return new Date(c).getTime();
+      if (typeof c === "number") return c;
+      return new Date(b.date).getTime();
+    };
     const sorted = [...allBets]
       .filter((b: BetRecord) => b.result === "Win" || b.result === "Loss")
-      .sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return (b.createdAt || dateB) - (a.createdAt || dateA);
-      });
+      .sort((a, b) => ts(b) - ts(a));
 
     let consecutiveLosses = 0;
     for (const b of sorted) {

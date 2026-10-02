@@ -94,7 +94,7 @@ export interface BetRecord {
   notes: string;
   goalId?: string;
   winProbability?: number;
-  createdAt?: number;
+  createdAt?: string | number;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
   expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
@@ -818,6 +818,7 @@ export function useBettingForm({
           ? formData.goalId
           : undefined;
       const record: BetRecord = {
+        createdAt: new Date().toISOString(),
         date: prefillTimeRef.current
           ? `${formData.date}T${prefillTimeRef.current}:00`
           : formData.date,
