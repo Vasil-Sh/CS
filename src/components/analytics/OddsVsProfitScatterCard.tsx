@@ -19,10 +19,12 @@ interface Props {
   data: ScatterData[];
   winCount: number;
   lossCount: number;
+  currency?: "UAH" | "USD";
 }
 
 export default function OddsVsProfitScatterCard({
   data,
+  currency = "UAH",
 }: Props) {
   return (
     <Card className="analytics-chart-card w-full overflow-hidden">
@@ -90,7 +92,7 @@ export default function OddsVsProfitScatterCard({
                         className={`font-medium ${Number(p.profit) >= 0 ? "text-emerald-600" : "text-red-500"}`}
                       >
                         {Number(p.profit) >= 0 ? "+" : ""}
-                        {Number(p.profit).toFixed(0)} ₴
+                        {Number(p.profit).toFixed(0)} {currency === "USD" ? "$" : "₴"}
                       </p>
                     </div>
                   );

@@ -46,19 +46,29 @@ export default function Analytics() {
 
   const [activeTab, setActiveTab] = useState("profit");
 
-  // Convert all bets to display currency — used by ALL charts
+  // Filter bets by their REAL currency (no cross-currency conversion).
+  // UAH mode shows UAH bets; USD mode shows USD bets.
+  // Profit is always stored in UAH, so USD bets divide by their exchange rate.
   const displayBets = useMemo(() => {
-    if (currencyMode === "UAH") return bets;
-    return bets.map((bet: Bet) => {
-      const profit = bet.profit || 0;
-      let displayProfit = 0;
-      if (bet.currency === "USD" && bet.exchangeRate) {
-        const rate = Number(bet.exchangeRate);
-        displayProfit = rate > 0 ? profit / rate : profit;
-      }
-      // UAH bets show 0 profit in USD mode (they belong to UAH portfolio)
-      return { ...bet, profit: displayProfit };
-    });
+    if (currencyMode === "UAH") {
+      return bets.filter(
+        (bet: Bet) => (bet.currency || "UAH") === "UAH",
+      );
+    }
+    const globalRate = Number(
+      localStorage.getItem("matchiq_exchange_rate") || 41.5,
+    );
+    return bets
+      .filter((bet: Bet) => bet.currency === "USD")
+      .map((bet: Bet) => {
+        const profit = bet.profit || 0;
+        const rate =
+          bet.exchangeRate && Number(bet.exchangeRate) > 0
+            ? Number(bet.exchangeRate)
+            : globalRate;
+        const displayProfit = rate > 0 ? profit / rate : profit;
+        return { ...bet, profit: displayProfit };
+      });
   }, [bets, currencyMode]);
 
   const [gameFilter, setGameFilter] = useState<"all" | "CS2" | "Dota2">("all");
@@ -445,7 +455,7 @@ export default function Analytics() {
             </div>
             <dl className="analytics-head-stats">
               <div>
-                <dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴</dd>
+                <dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} {currencyMode === "USD" ? "$" : "₴"}</dd>
                 <dt>Прибуток <span>ROI {roi >= 0 ? "+" : ""}{roi}%</span></dt>
               </div>
               <div><dd className="analytics-orange">{completedBets.length}</dd><dt>Розраховано <span>{winningBets.length}W / {losingBets.length}L</span></dt></div>
@@ -491,22 +501,23 @@ export default function Analytics() {
                     {gameFilteredBets.length > 0 ? (
                       <div className="analytics-profit-grid">
                         <div className="analytics-bankroll-wrap">
-                          <BankrollChart data={balanceOverTime} />
+                          <BankrollChart data={balanceOverTime} currency={currencyMode} />
                         </div>
                         <aside className="analytics-period-summary" aria-label="Підсумок періоду">
                           <h2>Підсумок періоду</h2>
                           <dl>
-                            <div><dt>Чистий результат</dt><dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} ₴</dd></div>
+                            <div><dt>Чистий результат</dt><dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} {currencyMode === "USD" ? "$" : "₴"}</dd></div>
                             <div><dt>Розраховано</dt><dd>{completedBets.length}</dd></div>
                             <div><dt>Активні</dt><dd>{gameFilteredBets.filter((bet) => bet.result === "Pending").length}</dd></div>
                           </dl>
                         </aside>
                         <div className="analytics-profit-charts">
-                          <MonthlyProfitChartCard data={monthlyChartData} />
+                          <MonthlyProfitChartCard data={monthlyChartData} currency={currencyMode} />
                           <OddsVsProfitScatterCard
                             data={scatterData}
                             winCount={winningBets.length}
                             lossCount={losingBets.length}
+                            currency={currencyMode}
                           />
                         </div>
                         <p className="analytics-method-note">Усі показники оновлюються після розрахунку запису.</p>

@@ -21,10 +21,12 @@ import type { BalanceData } from "@/types/betting";
 
 interface BankrollChartProps {
   data: BalanceData[];
+  currency?: "UAH" | "USD";
 }
 
 const BankrollChart = memo(function BankrollChart({
   data,
+  currency = "UAH",
 }: BankrollChartProps) {
   const initialBalance = useMemo(() => {
     if (!data || data.length === 0) return 0;
@@ -109,14 +111,14 @@ const BankrollChart = memo(function BankrollChart({
                         <>
                           <p className="text-orange-600 font-medium">
                             Баланс:{" "}
-                            {Math.round(d.balance).toLocaleString("uk-UA")} ₴
+                            {Math.round(d.balance).toLocaleString("uk-UA")} {currency === "USD" ? "$" : "₴"}
                           </p>
                           {d.profit !== 0 && (
                             <p
                               className={`font-medium ${d.profit >= 0 ? "text-emerald-600" : "text-red-500"}`}
                             >
                               {d.profit >= 0 ? "+" : ""}
-                              {Math.round(d.profit).toLocaleString("uk-UA")} ₴
+                              {Math.round(d.profit).toLocaleString("uk-UA")} {currency === "USD" ? "$" : "₴"}
                             </p>
                           )}
                         </>

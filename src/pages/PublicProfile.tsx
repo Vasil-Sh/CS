@@ -15,6 +15,8 @@ interface PublicStats {
     losses: number;
     winRate: number;
     totalProfit: number;
+    profitUAH: number;
+    profitUSD: number;
     totalStaked: number;
     roi: number;
     avgOdds: number;
@@ -30,6 +32,7 @@ interface PublicStats {
     betType?: string;
     result: string;
     profit: number;
+    currency?: string;
     odds: number;
     date: string;
     game: string;
@@ -360,10 +363,16 @@ export default function PublicProfile() {
                       <small>%</small>
                     </dd>
                   </div>
-                  <div className={data.stats.totalProfit >= 0 ? "public-positive" : "public-negative"}>
-                    <dt>Прибуток</dt>
+                  <div className={data.stats.profitUAH >= 0 ? "public-positive" : "public-negative"}>
+                    <dt>Прибуток ₴</dt>
                     <dd>
-                      {signed(data.stats.totalProfit)} <small>₴</small>
+                      {signed(data.stats.profitUAH)} <small>₴</small>
+                    </dd>
+                  </div>
+                  <div className={data.stats.profitUSD >= 0 ? "public-positive" : "public-negative"}>
+                    <dt>Прибуток $</dt>
+                    <dd>
+                      {signed(data.stats.profitUSD)} <small>$</small>
                     </dd>
                   </div>
                 </dl>
@@ -463,7 +472,6 @@ export default function PublicProfile() {
                             <td className="public-date">{bet.date || "—"}</td>
                             <td className="public-match">
                               <PublicBetTeams bet={bet} />
-                              <small>{bet.game}</small>
                             </td>
                             <td className="public-col-center">{number(bet.odds, 2)}</td>
                             <td className="public-col-center">
@@ -484,7 +492,7 @@ export default function PublicProfile() {
                               ].includes(bet.result)
                                 ? (
                                   <span className={bet.profit >= 0 ? "public-profit-pos" : "public-profit-neg"}>
-                                    {signed(bet.profit)} ₴
+                                    {signed(bet.profit)} {bet.currency === "USD" ? "$" : "₴"}
                                   </span>
                                 )
                                 : "—"}

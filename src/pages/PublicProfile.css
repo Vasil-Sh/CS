@@ -177,13 +177,14 @@
 .public-kpis {
   margin-inline: auto !important;
   display: grid;
-  grid-template-columns: 0.8fr 1fr 1fr 1.25fr;
+  grid-template-columns: 0.7fr 0.9fr 0.9fr 1.1fr 1.1fr;
   padding-block: 28px 34px;
 }
 .public-kpis > div {
   padding-inline: 30px;
   border-left: 1px solid #ffffff35;
   min-width: 0;
+  text-align: center;
 }
 .public-kpis > div:first-child {
   border: 0;
