@@ -489,27 +489,6 @@ export function useBettingForm({
   }, []);
 
   // ── Helpers ──
-  const checkRiskyTeams = (
-    team1: string,
-    team2: string,
-    currentGame: "CS2" | "Dota2",
-  ) => {
-    if (!team1 && !team2) {
-      setFormData((prev) => ({ ...prev, riskyTeams: [] }));
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      riskyTeams: findRiskyTeams(
-        team1,
-        team2,
-        getGameFilterValue(currentGame),
-        loadRiskyTeamsFromStorage(),
-        prefillLogosRef.current,
-      ),
-    }));
-  };
-
   const detectRisky = (
     team1: string,
     team2: string,
@@ -517,36 +496,47 @@ export function useBettingForm({
   ): RiskyTeam[] =>
     findRiskyTeams(team1, team2, gameFilter, loadRiskyTeamsFromStorage());
 
+  // Include the draft match and every express event; clear stale notes when teams change.
   useEffect(() => {
-    if (formData.team1 || formData.team2)
-      checkRiskyTeams(formData.team1, formData.team2, formData.game);
-  }, [formData.team1, formData.team2, formData.game]);
-
-  useEffect(() => {
-    if (expressEvents.length === 0 || formData.team1 || formData.team2) return;
     const saved = loadRiskyTeamsFromStorage();
-    if (saved.length === 0) return;
-    const found: RiskyTeam[] = [];
-    for (const event of expressEvents) {
-      const parts = event.match.split(" vs ");
-      // Use each event's own game, defaulting to formData.game for old events without game field
-      const eventGame =
-        event.game === "Dota2" || event.game === "CS2"
-          ? event.game
-          : formData.game;
-      for (const f of findRiskyTeams(
-        parts[0] || "",
-        parts[1] || "",
-        getGameFilterValue(eventGame),
-        saved,
-        { logoTeam1: event.logoTeam1, logoTeam2: event.logoTeam2 },
-      )) {
-        if (!found.some((r) => r.name === f.name)) found.push(f);
+    const found = findRiskyTeams(
+      formData.team1,
+      formData.team2,
+      getGameFilterValue(formData.game),
+      saved,
+      prefillLogosRef.current,
+    );
+    if (formData.betCategory === "Експрес") {
+      for (const event of expressEvents) {
+        const [team1 = "", team2 = ""] = event.match.split(" vs ");
+        const game =
+          event.game === "Dota2" || event.game === "CS2"
+            ? event.game
+            : formData.game;
+        for (const team of findRiskyTeams(
+          team1,
+          team2,
+          getGameFilterValue(game),
+          saved,
+          { logoTeam1: event.logoTeam1, logoTeam2: event.logoTeam2 },
+        )) {
+          if (
+            !found.some(
+              (item) => item.name === team.name && item.game === team.game,
+            )
+          )
+            found.push(team);
+        }
       }
     }
-    if (found.length > 0)
-      setFormData((prev) => ({ ...prev, riskyTeams: found }));
-  }, [expressEvents, formData.game]);
+    setFormData((prev) => ({ ...prev, riskyTeams: found }));
+  }, [
+    formData.team1,
+    formData.team2,
+    formData.game,
+    formData.betCategory,
+    expressEvents,
+  ]);
 
   // ── Strategy validation ──
   const validateAgainstStrategy = useCallback(() => {

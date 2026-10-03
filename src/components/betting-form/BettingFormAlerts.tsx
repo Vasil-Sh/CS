@@ -10,12 +10,14 @@ interface TiltBlock {
 
 interface BettingFormAlertsProps {
   tiltBlock: TiltBlock;
+  showStrategyBanner?: boolean;
   primaryStrategy: CS2Strategy | null;
   strategyViolations: StrategyViolation[];
 }
 
 export default function BettingFormAlerts({
   tiltBlock,
+  showStrategyBanner = true,
   primaryStrategy,
   strategyViolations,
 }: BettingFormAlertsProps) {
@@ -53,7 +55,7 @@ export default function BettingFormAlerts({
       )}
 
       {/* Strategy Banner */}
-      {primaryStrategy && (
+      {showStrategyBanner && primaryStrategy && (
         <div
           className="rounded-3xl overflow-hidden border border-blue-200"
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}

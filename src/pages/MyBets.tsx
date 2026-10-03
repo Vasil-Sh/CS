@@ -20,9 +20,9 @@ import {
   parseExpressEvents,
   type ParsedEvent,
 } from "@/lib/parser/expressParser";
-import { useTheme } from "@/hooks/useTheme";
 import { logRender } from "@/lib/devLogger";
-import { PageHeader } from "@/components/PageHeader";
+import RecordPageHeader from "@/components/mybets/RecordPageHeader";
+import "@/components/mybets/RecordEntry.css";
 import { Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
@@ -97,10 +97,10 @@ export default function MyBets() {
   const [deleteDialogBet, setDeleteDialogBet] = useState<Bet | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
-  const [activeTab, setActiveTab] = useState(goalId || strategyFilter ? "records" : "add");
+  const [activeTab, setActiveTab] = useState(
+    goalId || strategyFilter ? "records" : "add",
+  );
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
-  const { theme, toggleTheme } = useTheme();
-  const isDarkTheme = theme === "dark";
   const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
   const [expressMatchesData, setExpressMatchesData] = useState<
     MatchPrefillData[] | null
@@ -142,21 +142,12 @@ export default function MyBets() {
     [currentUser, bankrollRefreshKey],
   );
 
-  // ── Currency breakdown ──
-  const hasUsdBets = useMemo(
-    () =>
-      recentBets.some((b) => b.currency === "USD") ||
-      dualBank.usd.initialBank > 0,
-    [recentBets, dualBank.usd.initialBank],
-  );
-
-  const usdBetsCount = useMemo(
-    () => recentBets.filter((b) => b.currency === "USD").length,
-    [recentBets],
-  );
-
   // ── Effects ──
-  const goalBets = recentBets.filter(bet => (!goalId || String(bet.goalId) === goalId) && (!strategyFilter || bet.strategy === strategyFilter));
+  const goalBets = recentBets.filter(
+    (bet) =>
+      (!goalId || String(bet.goalId) === goalId) &&
+      (!strategyFilter || bet.strategy === strategyFilter),
+  );
 
   useEffect(() => {
     if (goalId || strategyFilter) setActiveTab("records");
@@ -533,51 +524,53 @@ export default function MyBets() {
 
   // ── UI ──
   const tabs = [
-    { id: "add", label: "Додати запис", icon: Plus },
-    { id: "records", label: "Останні записи", icon: ClipboardList },
+    { id: "add", label: "Новий запис" },
+    { id: "records", label: "Журнал" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] relative">
-      <PageHeader
-        title="Додати запис"
-        currentUser={currentUser || "User"}
-        isDarkTheme={isDarkTheme}
-        onToggleTheme={toggleTheme}
-        showThemeToggle={false}
-        showCurrencySwitch={true}
-        currencyMode={currencyMode}
+    <div className="record-page min-h-screen relative">
+      <RecordPageHeader
+        bets={recentBets}
+        bank={
+          (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
+        }
+        currency={currencyMode}
         onCurrencyChange={setCurrencyMode}
-        hasUsdBets={hasUsdBets}
-        usdBetsCount={usdBetsCount}
+        onEditBank={() => setBankModalOpen(true)}
       />
 
-      <div className="relative z-10 space-y-8 px-6 lg:px-8 pb-8 pt-4">
-        <MyBetsStatsCards
-          recentBets={recentBets}
-          stats={stats}
-          dualBank={dualBank}
-          currencyMode={currencyMode}
-          activeBets={activeBets}
-          winningBets={winningBets}
-          losingBets={losingBets}
-          onEditBank={() => setBankModalOpen(true)}
-        />
+      <div className="record-workspace">
+        {activeTab === "records" && (
+          <MyBetsStatsCards
+            recentBets={recentBets}
+            stats={stats}
+            dualBank={dualBank}
+            currencyMode={currencyMode}
+            activeBets={activeBets}
+            winningBets={winningBets}
+            losingBets={losingBets}
+            onEditBank={() => setBankModalOpen(true)}
+          />
+        )}
 
         {/* Tabs */}
         <div className="space-y-6">
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border-2 border-stone-200 p-3 rounded-[32px] flex-wrap justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="record-tabs-wrap">
+            <div className="record-tabs">
               {tabs.map((tab) => {
-                const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative rounded-[24px] px-6 py-4 font-light text-base transition-all duration-300 ${activeTab === tab.id ? "bg-primary text-white font-medium shadow-[0_4px_16px_rgba(68,122,252,0.3)] border border-transparent" : "bg-transparent text-gray-400 hover:bg-[#F5F5F3] hover:text-gray-500 border border-transparent"}`}
+                    className={
+                      activeTab === tab.id
+                        ? "record-tab is-active"
+                        : "record-tab"
+                    }
+                    aria-pressed={activeTab === tab.id}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      <Icon className="h-4 w-4" strokeWidth={1.5} />
                       {tab.label}
                     </span>
                   </button>
@@ -587,16 +580,26 @@ export default function MyBets() {
           </div>
 
           {activeTab === "records" && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="entry-journal">
               {(goalId || strategyFilter) && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-stone-200 bg-stone-50 p-4 text-sm">
-                  <span>{strategyFilter ? `Стратегія: ${strategyFilter}` : "Записи вибраної цілі"} · {goalBets.length}</span>
-                  <button className="underline underline-offset-4" onClick={() => {
-                    const next = new URLSearchParams(searchParams);
-                    next.delete("goalId");
-                    next.delete("strategy");
-                    setSearchParams(next);
-                  }}>Показати всі записи</button>
+                  <span>
+                    {strategyFilter
+                      ? `Стратегія: ${strategyFilter}`
+                      : "Записи вибраної цілі"}{" "}
+                    · {goalBets.length}
+                  </span>
+                  <button
+                    className="underline underline-offset-4"
+                    onClick={() => {
+                      const next = new URLSearchParams(searchParams);
+                      next.delete("goalId");
+                      next.delete("strategy");
+                      setSearchParams(next);
+                    }}
+                  >
+                    Показати всі записи
+                  </button>
                 </div>
               )}
               <BetTable
@@ -631,7 +634,7 @@ export default function MyBets() {
             </div>
           )}
           {activeTab === "add" && (
-            <div className="bg-white/60 backdrop-blur-sm rounded-[32px] p-5 border-2 border-stone-200 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+            <div className="entry-add-content">
               <CS2BettingForm
                 key={
                   prefillData

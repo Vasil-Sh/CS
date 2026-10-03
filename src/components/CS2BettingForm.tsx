@@ -2,7 +2,9 @@ import { logRender } from "@/lib/devLogger";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import StrategyViolationDialog from "./StrategyViolationDialog";
-import { BettingSidebar } from "./BettingSidebar";
+import SidebarCalculations from "./betting-form/SidebarCalculations";
+import RecordTeamNotes from "./betting-form/RecordTeamNotes";
+import { getBetTypeLabel } from "@/lib/displayHelpers";
 import { ExpressEventBuilder } from "./ExpressEventBuilder";
 import BettingFormAlerts from "./betting-form/BettingFormAlerts";
 import BettingFormSettings from "./betting-form/BettingFormSettings";
@@ -26,19 +28,37 @@ export default function CS2BettingForm(props: Props) {
   logRender("CS2BettingForm");
   const h = useBettingForm(props);
 
+  const isExpress = h.formData.betCategory === "Експрес";
+  const odds = isExpress ? h.totalExpressOdds : Number(h.formData.odds);
+  const stake = Number(h.formData.stake);
+  const validAmounts =
+    Number.isFinite(odds) &&
+    odds > 1 &&
+    Number.isFinite(stake) &&
+    stake > 0 &&
+    (!isExpress || h.allExpressEventsComplete);
+  const money = (amount: number) =>
+    new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 2 }).format(
+      amount,
+    ) + (h.formData.currency === "USD" ? " $" : " ₴");
+  const teamNotes = (
+    <RecordTeamNotes
+      teams={h.formData.riskyTeams}
+      selection={h.formData.selection}
+    />
+  );
   // ── CSS classes ──
   const css = {
     input:
-      "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors",
+      "rounded-md border-gray-200 bg-white h-11 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-0 transition-colors",
     select:
       "rounded-2xl border-gray-200 bg-white h-11 text-gray-900 focus:border-gray-900 focus:ring-0 transition-colors",
     label: "text-sm font-medium text-gray-700",
-    section:
-      "text-base font-semibold text-gray-900 flex items-center gap-2.5 bg-gray-100 px-4 py-2.5 -mx-6",
+    section: "entry-section-title",
   };
 
   return (
-    <div className="space-y-6">
+    <div className="record-entry space-y-6">
       <StrategyViolationDialog
         open={h.showViolationDialog}
         onOpenChange={h.setShowViolationDialog}
@@ -49,18 +69,24 @@ export default function CS2BettingForm(props: Props) {
       />
 
       <BettingFormAlerts
+        showStrategyBanner={false}
         tiltBlock={h.tiltBlock}
         primaryStrategy={h.primaryStrategy}
         strategyViolations={h.strategyViolations}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="entry-layout">
         <div
-          className={`lg:col-span-2 space-y-6 ${h.tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
+          className={`entry-form-column space-y-6 ${h.tiltBlock.blocked ? "opacity-50 pointer-events-none select-none" : ""}`}
         >
-          <form onSubmit={h.handleSubmit} noValidate className="space-y-6">
+          <form
+            id="record-entry-form"
+            onSubmit={h.handleSubmit}
+            noValidate
+            className="space-y-6"
+          >
             <div
-              className="bg-white border border-gray-300 rounded-3xl overflow-hidden"
+              className="entry-form-panel"
               style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
             >
               <BettingFormSettings
@@ -120,6 +146,7 @@ export default function CS2BettingForm(props: Props) {
                   <div className="border-t border-gray-100" />
                   <div className="px-6 pb-6">
                     <BettingFormMatchSection
+                      teamNotes={teamNotes}
                       data={{
                         game: h.formData.game,
                         format: h.formData.format,
@@ -156,11 +183,42 @@ export default function CS2BettingForm(props: Props) {
                 </>
               )}
 
+              {h.isExpressFromMatches && h.expressEvents.length > 0 && (
+                <div className="px-6 pb-6">{teamNotes}</div>
+              )}
+              {h.primaryStrategy && (
+                <div className="entry-strategy-context">
+                  <span>Основна стратегія</span>
+                  <strong>{h.primaryStrategy.name}</strong>
+                  <small>Правила перевіряються під час збереження.</small>
+                </div>
+              )}
+
               {(h.formData.betCategory === "Ординар" ||
                 (h.formData.betCategory === "Експрес" &&
                   h.expressEvents.length > 0)) && (
                 <div className="px-6 pb-6">
                   <BettingFormFinances
+                    calculations={
+                      <SidebarCalculations
+                        stake={h.formData.stake}
+                        betCategory={h.formData.betCategory}
+                        currency={h.formData.currency}
+                        totalExpressOdds={h.totalExpressOdds}
+                        expressEventsCount={h.expressEvents.length}
+                        potentialProfitInCurrency={h.potentialProfit}
+                        expectedValue={h.expectedValue}
+                        evVerdict={h.evVerdict}
+                        isValuePositive={h.isValuePositive}
+                        valueBetAnalysis={h.valueBetAnalysis}
+                        kellyData={h.kellyData}
+                        overconfidenceWarning={h.overconfidenceWarning}
+                        hasConfidence={h.hasConfidence}
+                        maxStakePercent={h.maxStakePercent}
+                        onMaxStakePercentChange={h.setMaxStakePercent}
+                        onApplyKellyAmount={h.applyKellyAmount}
+                      />
+                    }
                     data={{
                       stake: h.formData.stake,
                       currency: h.formData.currency,
@@ -199,61 +257,86 @@ export default function CS2BettingForm(props: Props) {
                   onClearAll={h.clearExpressEvents}
                 />
               )}
-
-            {(h.formData.betCategory === "Ординар" ||
-              (h.formData.betCategory === "Експрес" &&
-                h.expressEvents.length > 0)) && (
-              <Button
-                type="submit"
-                id="submit-btn"
-                disabled={
-                  h.isSubmitting ||
-                  h.tiltBlock.blocked ||
-                  (h.formData.betCategory === "Експрес" &&
-                    !h.allExpressEventsComplete)
-                }
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-medium py-7 text-base transition-all disabled:opacity-50"
-              >
-                {h.isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                    Додавання...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-5 w-5 mr-2" strokeWidth={1.5} />
-                    Додати запис
-                  </>
-                )}
-              </Button>
-            )}
           </form>
         </div>
 
-        <BettingSidebar
-          stake={h.formData.stake}
-          odds={h.formData.odds}
-          confidence={h.formData.confidence}
-          betCategory={h.formData.betCategory}
-          currency={h.formData.currency}
-          totalExpressOdds={h.totalExpressOdds}
-          expressEventsCount={h.expressEvents.length}
-          potentialProfit={h.potentialProfit}
-          potentialProfitInCurrency={h.potentialProfit}
-          expectedValue={h.expectedValue}
-          evVerdict={h.evVerdict}
-          isValuePositive={h.isValuePositive}
-          valueBetAnalysis={h.valueBetAnalysis}
-          kellyData={h.kellyData}
-          overconfidenceWarning={h.overconfidenceWarning}
-          hasConfidence={h.hasConfidence}
-          isHighConfidence={h.isHighConfidence}
-          riskyTeams={h.formData.riskyTeams}
-          maxStakePercent={h.maxStakePercent}
-          onMaxStakePercentChange={h.setMaxStakePercent}
-          onApplyKellyAmount={h.applyKellyAmount}
-          onRemoveRiskyTeam={h.removeRiskyTeam}
-        />
+        <aside className="entry-summary">
+          <div className="entry-summary-heading">
+            <h2>Підсумок запису</h2>
+            <span>{isExpress ? "Експрес" : "Ординар"}</span>
+          </div>
+          <p className="entry-summary-match">
+            {isExpress
+              ? `Подій в експресі: ${h.expressEvents.length}`
+              : h.formData.team1 && h.formData.team2
+                ? `${h.formData.team1} — ${h.formData.team2}`
+                : "Оберіть команди матчу"}
+          </p>
+          <p className="entry-muted">
+            {h.formData.game === "Dota2" ? "Dota 2" : "CS2"} ·{" "}
+            {h.formData.format} · {h.formData.date}
+          </p>
+          <dl className="entry-summary-details">
+            {!isExpress && (
+              <>
+                <dt>Ваш вибір</dt>
+                <dd>{h.formData.selection || "—"}</dd>
+                <dt>Тип прогнозу</dt>
+                <dd>
+                  {h.formData.betType
+                    ? getBetTypeLabel(h.formData.betType)
+                    : "—"}
+                </dd>
+              </>
+            )}
+            <dt>Коефіцієнт</dt>
+            <dd>{odds > 1 && Number.isFinite(odds) ? odds.toFixed(2) : "—"}</dd>
+            <dt>Сума запису</dt>
+            <dd>{stake > 0 ? money(stake) : "—"}</dd>
+            <dt>Ціль</dt>
+            <dd>
+              {h.activeGoals.find((goal) => goal.id === h.formData.goalId)
+                ?.name || "Без цілі"}
+            </dd>
+          </dl>
+          <div className="entry-payout">
+            <span>У разі виграшу</span>
+            <div>
+              <span>Виплата зі ставкою</span>
+              <strong>{validAmounts ? money(stake * odds) : "—"}</strong>
+            </div>
+            <div>
+              <span>Чистий прибуток</span>
+              <strong>
+                {validAmounts ? "+" + money(stake * (odds - 1)) : "—"}
+              </strong>
+            </div>
+          </div>
+          {h.formData.riskyTeams.length > 0 && (
+            <a className="entry-notes-reminder" href="#record-team-notes">
+              Перевірте примітки до команд · {h.formData.riskyTeams.length} →
+            </a>
+          )}
+          <Button
+            type="submit"
+            form="record-entry-form"
+            id="submit-btn"
+            disabled={
+              h.isSubmitting ||
+              h.tiltBlock.blocked ||
+              (isExpress &&
+                (!h.allExpressEventsComplete || h.expressEvents.length === 0))
+            }
+            className="entry-save"
+          >
+            <Plus size={18} />
+            {h.isSubmitting ? "Збереження…" : "Зберегти запис"}
+          </Button>
+          <p className="entry-summary-footnote">
+            Запис збережеться в журналі зі статусом «Очікує результату». Це не
+            розміщення ставки.
+          </p>
+        </aside>
       </div>
     </div>
   );

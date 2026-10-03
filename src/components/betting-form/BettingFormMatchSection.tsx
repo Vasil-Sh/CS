@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, Plus, Users, X, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ interface FormMatchData {
 
 interface BettingFormMatchSectionProps {
   data: FormMatchData;
+  teamNotes?: ReactNode;
   isParsing: boolean;
   isExpressFromMatches: boolean;
   expressEventsCount: number;
@@ -59,6 +60,7 @@ interface BettingFormMatchSectionProps {
 
 export default function BettingFormMatchSection({
   data,
+  teamNotes,
   isParsing,
   isExpressFromMatches,
   expressEventsCount,
@@ -300,7 +302,7 @@ export default function BettingFormMatchSection({
       <div className="space-y-4">
         <h3 className={classes.sectionTitle}>
           <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-          Інформація про матч і деталі запису
+          Матч і прогноз
         </h3>
 
         {/* Match URL */}
@@ -367,7 +369,10 @@ export default function BettingFormMatchSection({
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
+                  } else if (
+                    data.game === "CS2" &&
+                    !t.src.includes("team-placeholder-cs2")
+                  ) {
                     t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
@@ -409,7 +414,10 @@ export default function BettingFormMatchSection({
                     !t.src.includes("team-placeholder-dota")
                   ) {
                     t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (data.game === "CS2" && !t.src.includes("team-placeholder-cs2")) {
+                  } else if (
+                    data.game === "CS2" &&
+                    !t.src.includes("team-placeholder-cs2")
+                  ) {
                     t.src = "/assets/team-placeholder-cs2.svg";
                   } else if (!t.src.includes("team-placeholder")) {
                     t.src = "/assets/team-placeholder-cs2.svg";
@@ -432,11 +440,13 @@ export default function BettingFormMatchSection({
 
         <div className="border-t border-gray-100 -mx-6" />
 
+        {teamNotes}
+
         {/* Bet type + Selection — swapped: Selection left, Bet type center */}
-        <div className="flex items-end gap-3">
+        <div className="entry-prediction-row">
           <div className="flex-[2] space-y-1.5">
             <Label className={classes.label}>
-              Вибір переможця{" "}
+              Вибір команди{" "}
               {showRequired && <span className="text-red-500">*</span>}
             </Label>
             <Select
@@ -483,7 +493,7 @@ export default function BettingFormMatchSection({
               }`}
             >
               {!data.selection
-                ? "Спочатку виберіть переможця"
+                ? "Спочатку оберіть команду"
                 : data.betType
                   ? getBetTypeLabel(data.betType, data.format)
                   : "Оберіть тип прогнозу"}

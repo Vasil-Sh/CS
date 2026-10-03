@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet } from "lucide-react";
 import { BankrollService } from "@/lib/bankrollService";
 import { toast } from "sonner";
 
@@ -67,45 +66,34 @@ export default function InitialBankModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
+      <DialogContent className="initial-bank-dialog">
         {/* Header */}
-        <DialogHeader className="pt-4 pb-3 px-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-2xl">
-              <Wallet className="h-5 w-5 text-primary" strokeWidth={1.5} />
-            </div>
-            <div>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Редагувати стартовий банк
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 mt-0.5">
-                Змініть ваш стартовий банк для точного відстеження прогресу
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="initial-bank-header">
+          <DialogTitle>Редагувати стартовий банк</DialogTitle>
+          <DialogDescription>
+            Змініть ваш стартовий банк для точного відстеження прогресу
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="border-t border-gray-200" />
-
         {/* Body */}
-        <div className="space-y-4 pt-4 pb-4 px-6 bg-gray-100">
+        <div className="initial-bank-body">
           <div>
-            <Label className="text-base font-medium">
+            <Label className="initial-bank-label">
               Стартовий банк ({currency === "USD" ? "$" : "₴"})
             </Label>
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="flex bg-white rounded-xl p-0.5 border border-gray-200 flex-shrink-0">
+            <div className="initial-bank-row">
+              <div className="initial-bank-currency">
                 <button
                   type="button"
                   onClick={() => setCurrency("UAH")}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "UAH" ? "bg-primary text-white shadow-sm" : "text-gray-400 hover:text-gray-500"}`}
+                  className={currency === "UAH" ? "is-active" : ""}
                 >
                   ₴
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrency("USD")}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${currency === "USD" ? "bg-primary text-white shadow-sm" : "text-gray-400 hover:text-gray-500"}`}
+                  className={currency === "USD" ? "is-active" : ""}
                 >
                   $
                 </button>
@@ -115,12 +103,12 @@ export default function InitialBankModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                className="flex-1 rounded-2xl border-gray-200 h-11 text-base font-semibold"
+                className="initial-bank-input"
                 autoFocus
               />
             </div>
             {currency === "USD" && amount && parseFloat(amount) > 0 && (
-              <p className="text-xs text-gray-500 mt-1.5">
+              <p className="initial-bank-hint">
                 ≈ {(parseFloat(amount) * savedRate).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴ за курсом {savedRate} ₴/$
               </p>
             )}
@@ -130,27 +118,25 @@ export default function InitialBankModal({
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="w-full rounded-xl border-gray-200 font-medium text-sm"
+            className="initial-bank-reset"
           >
             Скинути до 0
           </Button>
         </div>
 
-        <div className="border-t border-gray-200" />
-
         {/* Footer */}
-        <DialogFooter className="gap-2 pt-3 pb-4 px-6">
+        <DialogFooter className="initial-bank-footer">
           <Button
             variant="outline"
             onClick={handleClose}
-            className="rounded-3xl border border-gray-200 hover:bg-gray-50 font-medium h-11 px-5 text-base"
+            className="initial-bank-cancel"
           >
             Скасувати
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="rounded-3xl bg-primary hover:bg-blue-400 text-white font-medium h-11 px-5 text-base shadow-[0_4px_16px_rgba(68,122,252,0.3)] disabled:opacity-50"
+            className="initial-bank-submit"
           >
             {isSubmitting ? "Збереження..." : "Оновити"}
           </Button>
