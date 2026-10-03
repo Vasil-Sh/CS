@@ -167,13 +167,17 @@
   display: inline-block;
   vertical-align: middle;
   background: #ff693b;
-  color: #171916;
+  color: #fff;
   font:
     700 14px Manrope,
     sans-serif;
   padding: 5px 10px;
   border-radius: 4px;
   white-space: nowrap;
+}
+.gmd-badge-complete {
+  background: #2e9e63;
+  color: #fff;
 }
 .gmd-progress {
   display: flex;
@@ -372,8 +376,15 @@
 }
 .gmd-detail-actions .gmd-update {
   padding: 11px 22px;
-  border: 1px solid #30352d;
+  border: 1px solid #ff693b;
   border-radius: 7px;
+  background: #ff693b;
+  color: #fff;
+}
+.gmd-detail-actions .gmd-update:hover {
+  border-color: #ff825d;
+  background: #ff825d;
+  color: #fff;
 }
 .gmd-detail-actions .gmd-outline {
   margin-left: auto;

@@ -260,6 +260,9 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                   {selected.isPrimary && selected.status === "active" && (
                     <span className="gmd-badge">Основна</span>
                   )}
+                  {selected.status === "completed" && (
+                    <span className="gmd-badge gmd-badge-complete">Завершена</span>
+                  )}
                 </h2>
                 <dl className="gmd-values">
                   <div>

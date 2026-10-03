@@ -32,7 +32,7 @@
 .smd-row > svg:last-child { align-self:center; }
 .smd-row strong { font:600 24px/1.3 Oswald,sans-serif; overflow-wrap:anywhere; }
 .smd-star { color:#ff693b; }
-.smd-badge { display:inline-block; vertical-align:middle; font:700 14px Manrope,sans-serif; padding:5px 10px; border-radius:4px; background:#ff693b; color:#171916; margin-left:8px; }
+.smd-badge { display:inline-block; vertical-align:middle; font:700 14px Manrope,sans-serif; padding:5px 10px; border-radius:4px; background:#ff693b; color:#fff; margin-left:8px; }
 .smd-subline { display:block; margin-top:5px; font-size:16px; color:#626a70; }
 .smd-hint { display:flex; gap:10px; align-items:center; font-size:13px; color:#757c70; margin:auto 22px 0; padding:16px 0; border-top:1px solid #e3e4df; }
 .smd-hint svg { flex-shrink:0; }

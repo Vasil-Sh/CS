@@ -84,13 +84,13 @@
   line-height: 1;
 }
 .risk-secondary {
-  border-color: #b9bdb5;
-  background: transparent;
+  border-color: #ff693b;
+  background: #ff693b14;
   color: inherit;
 }
 .risk-secondary:hover {
-  border-color: #ff693b;
-  background: #ff693b14;
+  border-color: #ff825d;
+  background: #ff693b2e;
 }
 .risk-primary {
   border-color: #ff693b;

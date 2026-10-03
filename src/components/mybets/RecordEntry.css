@@ -91,9 +91,9 @@
 }
 .record-header-stats strong {
   font-family: Oswald, sans-serif;
-  font-size: 36px;
+  font-size: clamp(32px, 3.15vw, 45px);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .record-header-stats small {
@@ -106,13 +106,13 @@
   padding-top: 16px;
 }
 .record-header-stats-minor span {
-  font-size: 10px;
+  font-size: 13px;
 }
 .record-header-stats-minor strong {
-  font-size: 27px;
+  font-size: 36px;
 }
 .record-header-stats-minor small {
-  font-size: 9px;
+  font-size: 12px;
 }
 .record-header .entry-positive {
   color: #65cf8a;
