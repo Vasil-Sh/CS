@@ -135,12 +135,8 @@ export default function RecordPageHeader({
         </div>
         <div>
           <span>В активних записах</span>
-          <strong className="entry-pending">
-            {new Intl.NumberFormat("uk-UA", {
-              maximumFractionDigits: 2,
-            }).format(stats.activeAmount)}
-          </strong>
-          <small>Очікують результату: {stats.activeCount}</small>
+          <strong className="entry-pending">{money(stats.activeAmount)}</strong>
+          <small>Сума ставок · очікують: {stats.activeCount}</small>
         </div>
       </div>
       {stats.missingRates && (

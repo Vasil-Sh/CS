@@ -84,6 +84,13 @@
 .planning-metrics .tone-green dd {
   color: #67d08e;
 }
+.planning-metrics .is-clickable {
+  cursor: pointer;
+  transition: opacity 0.16s;
+}
+.planning-metrics .is-clickable:hover {
+  opacity: 0.85;
+}
 .planning-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;

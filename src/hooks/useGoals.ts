@@ -858,6 +858,7 @@ function computeGoalProgress(goal: Goal, betsData: Bet[]): Goal {
         ...goal,
         currentAmount: totalProfit,
         status: done ? "completed" : "active",
+        isPrimary: done ? false : goal.isPrimary,
         completedAt: done ? new Date().toISOString() : undefined,
       };
     }
@@ -881,6 +882,7 @@ function computeGoalProgress(goal: Goal, betsData: Bet[]): Goal {
         ...goal,
         currentROI: roi,
         status: done ? "completed" : "active",
+        isPrimary: done ? false : goal.isPrimary,
         completedAt: done ? new Date().toISOString() : undefined,
       };
     }
@@ -896,6 +898,7 @@ function computeGoalProgress(goal: Goal, betsData: Bet[]): Goal {
         ...goal,
         currentWinRate: wr,
         status: done ? "completed" : "active",
+        isPrimary: done ? false : goal.isPrimary,
         completedAt: done ? new Date().toISOString() : undefined,
       };
     }
@@ -1013,6 +1016,7 @@ function computeLadderProgress(goal: Goal, betsData: Bet[]): Goal {
     currentBank,
     steps,
     status: done ? "completed" : "active",
+    isPrimary: done ? false : goal.isPrimary,
     completedAt: done ? new Date().toISOString() : undefined,
   };
 }

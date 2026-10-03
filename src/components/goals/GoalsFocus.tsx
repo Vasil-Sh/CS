@@ -14,6 +14,7 @@ import {
   Percent,
   Layers,
   Plus,
+  CheckCircle2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -73,8 +74,9 @@ function metric(g: Goal) {
 function GoalProgress({ goal }: { goal: Goal }) {
   const raw = getGoalProgress(goal);
   const value = Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
+  const complete = goal.status === "completed";
   return (
-    <div className="gmd-progress">
+    <div className={`gmd-progress${complete ? " is-complete" : ""}`}>
       <progress max={100} value={value} aria-label={`Прогрес: ${goal.name}`} />
       <span>{fmt(value)}%</span>
     </div>
@@ -104,8 +106,8 @@ export default function GoalsFocus({ h }: { h: Controller }) {
         onCreate={() => h.setShowCreateDialog(true)}
         disabled={h.activeGoals.length >= 25}
         metrics={[
-          { label: "Активні", value: h.activeGoals.length },
-          { label: "Виконані", value: h.completedGoals.length, tone: "green" },
+          { label: "Активні", value: h.activeGoals.length, onClick: () => h.setActiveTab("active") },
+          { label: "Виконані", value: h.completedGoals.length, tone: "green", onClick: () => h.setActiveTab("completed") },
         ]}
       />
       <div className="gmd-content">
@@ -150,13 +152,15 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                   return (
                     <button
                       key={goal.id}
-                      className="gmd-row"
+                      className={`gmd-row${goal.status === "completed" ? " is-complete" : ""}`}
                       aria-pressed={selected?.id === goal.id}
                       aria-controls="goal-detail-panel"
                       onClick={() => setSelectedId(goal.id)}
                     >
-                      {goal.isPrimary ? (
+                      {goal.isPrimary && goal.status === "active" ? (
                         <Star className="gmd-star" size={20} fill="currentColor" />
+                      ) : goal.status === "completed" ? (
+                        <CheckCircle2 className="gmd-check" size={20} />
                       ) : (
                         (() => {
                           const Icon = goalTypeIcon[goal.type] ?? Target;
@@ -166,7 +170,7 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                       <span className="gmd-row-copy">
                         <span className="gmd-row-title">
                           {goal.name}
-                          {goal.isPrimary && (
+                          {goal.isPrimary && goal.status === "active" && (
                             <span className="gmd-badge">Основна</span>
                           )}
                         </span>
@@ -253,7 +257,7 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                 </div>
                 <h2>
                   {selected.name}{" "}
-                  {selected.isPrimary && (
+                  {selected.isPrimary && selected.status === "active" && (
                     <span className="gmd-badge">Основна</span>
                   )}
                 </h2>

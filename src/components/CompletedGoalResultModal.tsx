@@ -20,6 +20,7 @@ import {
 import { UserDataService } from '@/lib/userDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
+import './CompletedGoalResultModal.css';
 
 interface Bet {
   result: string;
@@ -134,21 +135,21 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-3xl max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 p-0">
+      <DialogContent className="goal-result-dialog">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-200">
+        <div className="goal-result-header">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-50 rounded-2xl border border-green-200 flex-shrink-0">
-              <Trophy className="h-7 w-7 text-green-500" strokeWidth={1.5} />
+            <div className="goal-result-header-icon">
+              <Trophy className="h-6 w-6" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">🎉 Ціль досягнута!</h1>
-              <p className="text-base text-gray-500 mt-0.5">{goal.name}</p>
+              <h1>Ціль досягнута!</h1>
+              <p>{goal.name}</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-5 px-6 pb-6 pt-5">
+        <div className="goal-result-body">
           {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-4">
             <div className="p-5 bg-gray-50 rounded-3xl border border-gray-200">
@@ -389,7 +390,7 @@ export default function CompletedGoalResultModal({ goal, isOpen, onClose }: Comp
 
           {/* Close Button */}
           <div className="pt-4 border-t border-gray-200">
-            <Button onClick={onClose} className="w-full rounded-3xl bg-gray-900 hover:bg-gray-800 text-white font-medium h-12 px-6 text-base">
+            <Button onClick={onClose} className="goal-result-close">
               Закрити
             </Button>
           </div>

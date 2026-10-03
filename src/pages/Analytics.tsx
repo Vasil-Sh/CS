@@ -466,9 +466,6 @@ export default function Analytics() {
           <div className="analytics-workspace relative z-10 flex flex-col flex-1 min-h-0">
             {gameFilteredBets.length === 0 && (
               <div className="analytics-empty-state">
-                <div className="analytics-empty-icon">
-                  <Wallet strokeWidth={1.5} />
-                </div>
                 <h3>Немає даних для аналізу</h3>
                 <p>Додайте записи на сторінці «Додати запис»</p>
               </div>
