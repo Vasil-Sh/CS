@@ -26,7 +26,6 @@ import "@/components/mybets/RecordEntry.css";
 import { Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
-import MyBetsStatsCards from "@/components/mybets/MyBetsStatsCards";
 import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
 import DeleteBetDialog from "@/components/mybets/DeleteBetDialog";
 
@@ -541,19 +540,6 @@ export default function MyBets() {
       />
 
       <div className="record-workspace">
-        {activeTab === "records" && (
-          <MyBetsStatsCards
-            recentBets={recentBets}
-            stats={stats}
-            dualBank={dualBank}
-            currencyMode={currencyMode}
-            activeBets={activeBets}
-            winningBets={winningBets}
-            losingBets={losingBets}
-            onEditBank={() => setBankModalOpen(true)}
-          />
-        )}
-
         {/* Tabs */}
         <div className="space-y-6">
           <div className="record-tabs-wrap">
