@@ -20,6 +20,7 @@ interface FormFinancialData {
 interface BettingFormFinancesProps {
   data: FormFinancialData;
   calculations?: ReactNode;
+  analysisOnly?: boolean;
   isSubmitting: boolean;
   isBlocked: boolean;
   isHighConfidence: boolean;
@@ -40,6 +41,7 @@ interface BettingFormFinancesProps {
 export default function BettingFormFinances({
   data,
   calculations,
+  analysisOnly = false,
   isHighConfidence,
   showSection,
   classes,
@@ -59,63 +61,66 @@ export default function BettingFormFinances({
 
   return (
     <>
-      <div className="border-t border-gray-100" />
+      {!analysisOnly && <div className="border-t border-gray-100" />}
 
       <div className="space-y-4">
-        <h3 className={classes.sectionTitle}>
-          <DollarSign className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-          Фінансові деталі
-        </h3>
+        {!analysisOnly && (
+          <h3 className={classes.sectionTitle}>
+            <DollarSign className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
+            Фінансові деталі
+          </h3>
+        )}
 
         <div className="space-y-5">
-          <div className="space-y-1.5">
-            <Label htmlFor="stake" className={classes.label}>
-              Сума прогнозу ({data.currency === "USD" ? "$" : "₴"}){" "}
-              <span className="text-red-500">*</span>
-            </Label>
-            <div className="flex gap-2">
-              <div className="inline-flex items-center rounded-2xl border border-gray-200 bg-gray-50 p-1 h-11 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => onFieldChange("currency", "UAH")}
-                  className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
-                    data.currency === "UAH"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-400 hover:text-gray-500"
-                  }`}
-                  aria-label="Гривня"
-                  title="Гривня (UAH)"
-                >
-                  ₴
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onFieldChange("currency", "USD")}
-                  className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
-                    data.currency === "USD"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-400 hover:text-gray-500"
-                  }`}
-                  aria-label="Долар"
-                  title="Долар США (USD)"
-                >
-                  $
-                </button>
+          {!analysisOnly && (
+            <div className="space-y-1.5">
+              <Label htmlFor="stake" className={classes.label}>
+                Сума прогнозу ({data.currency === "USD" ? "$" : "₴"}){" "}
+                <span className="text-red-500">*</span>
+              </Label>
+              <div className="flex gap-2">
+                <div className="inline-flex items-center rounded-2xl border border-gray-200 bg-gray-50 p-1 h-11 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onFieldChange("currency", "UAH")}
+                    className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
+                      data.currency === "UAH"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-400 hover:text-gray-500"
+                    }`}
+                    aria-label="Гривня"
+                    title="Гривня (UAH)"
+                  >
+                    ₴
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onFieldChange("currency", "USD")}
+                    className={`flex items-center justify-center w-9 h-full rounded-xl text-sm font-semibold transition-all ${
+                      data.currency === "USD"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-400 hover:text-gray-500"
+                    }`}
+                    aria-label="Долар"
+                    title="Долар США (USD)"
+                  >
+                    $
+                  </button>
+                </div>
+                <Input
+                  id="stake"
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={data.stake}
+                  onChange={(e) => onFieldChange("stake", e.target.value)}
+                  placeholder="100"
+                  required
+                  className={`flex-1 ${classes.input} ${err("stake")}`}
+                />
               </div>
-              <Input
-                id="stake"
-                type="number"
-                min="1"
-                step="0.01"
-                value={data.stake}
-                onChange={(e) => onFieldChange("stake", e.target.value)}
-                placeholder="100"
-                required
-                className={`flex-1 ${classes.input} ${err("stake")}`}
-              />
             </div>
-          </div>
-
+          )}
           <details className="entry-analysis">
             <summary>
               Додаткові розрахунки <span>EV · Value · Келлі</span>

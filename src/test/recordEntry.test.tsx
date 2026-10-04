@@ -29,6 +29,9 @@ describe("Record header statistics", () => {
     );
     expect(stats).toEqual({
       activeAmount: 100,
+      total: 3,
+      wins: 1,
+      losses: 1,
       activeCount: 1,
       profit: 30,
       missingRates: false,
@@ -52,6 +55,9 @@ describe("Record header statistics", () => {
     );
     expect(stats).toEqual({
       activeAmount: 30,
+      total: 4,
+      wins: 1,
+      losses: 1,
       activeCount: 2,
       profit: -5,
       missingRates: false,
@@ -65,6 +71,9 @@ describe("Record header statistics", () => {
   it("handles an empty journal", () => {
     expect(recordHeaderStats([], "UAH")).toEqual({
       activeAmount: 0,
+      total: 0,
+      wins: 0,
+      losses: 0,
       activeCount: 0,
       profit: 0,
       missingRates: false,

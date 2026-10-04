@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Link, Plus, Users, X, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,8 @@ interface FormMatchData {
 
 interface BettingFormMatchSectionProps {
   data: FormMatchData;
+  mode?: "all" | "match" | "prediction";
+  hideOdds?: boolean;
   teamNotes?: ReactNode;
   isParsing: boolean;
   isExpressFromMatches: boolean;
@@ -60,6 +62,8 @@ interface BettingFormMatchSectionProps {
 
 export default function BettingFormMatchSection({
   data,
+  mode = "all",
+  hideOdds = false,
   teamNotes,
   isParsing,
   isExpressFromMatches,
@@ -300,226 +304,243 @@ export default function BettingFormMatchSection({
   return (
     <>
       <div className="space-y-4">
-        <h3 className={classes.sectionTitle}>
-          <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-          Матч і прогноз
-        </h3>
+        {mode !== "prediction" && (
+          <>
+            <h3 className={classes.sectionTitle}>
+              <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
+              Матч і прогноз
+            </h3>
 
-        {/* Match URL */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="matchUrl"
-            className={`${classes.label} flex items-center gap-2`}
-          >
-            <Link className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-            {data.game === "CS2" ? "HLTV URL матчу" : "Dota 2 URL матчу"}{" "}
-            (необов&apos;язково)
-          </Label>
-          <div className="flex gap-2">
-            <Input
-              id="matchUrl"
-              value={data.matchUrl}
-              onChange={(e) => onUrlChange(e.target.value)}
-              placeholder={
-                data.game === "CS2"
-                  ? "https://www.hltv.org/matches/..."
-                  : "https://...dota2/.../team1-vs-team2/..."
-              }
-              className={`flex-1 ${classes.input}`}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onParseUrl}
-              disabled={isParsing || !data.matchUrl}
-              className="rounded-2xl px-5 border-gray-200 hover:bg-gray-100 hover:border-gray-300 h-11 text-sm font-medium"
-            >
-              {isParsing ? "Оновлення..." : "Оновити"}
-            </Button>
-          </div>
-          <p className="text-xs text-gray-400">
-            {data.game === "CS2"
-              ? "Вставте посилання з HLTV для автозаповнення"
-              : "Вставте посилання на Dota 2 матч для автозаповнення"}
-          </p>
-        </div>
-
-        <div className="border-t border-gray-100 -mx-6" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5" id="team1-wrapper">
-            <Label htmlFor="team1" className={classes.label}>
-              Команда 1{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <div className="flex items-center gap-2">
-              <img
-                src={
-                  data.logoTeam1 ||
-                  (data.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder-cs2.svg")
-                }
-                alt={data.team1 || "Team 1"}
-                className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
-                onError={(e) => {
-                  const t = e.target as HTMLImageElement;
-                  if (
-                    data.game === "Dota2" &&
-                    !t.src.includes("team-placeholder-dota")
-                  ) {
-                    t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (
-                    data.game === "CS2" &&
-                    !t.src.includes("team-placeholder-cs2")
-                  ) {
-                    t.src = "/assets/team-placeholder-cs2.svg";
-                  } else if (!t.src.includes("team-placeholder")) {
-                    t.src = "/assets/team-placeholder-cs2.svg";
-                  } else {
-                    t.style.display = "none";
+            {/* Match URL */}
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="matchUrl"
+                className={`${classes.label} flex items-center gap-2`}
+              >
+                <Link className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
+                {data.game === "CS2"
+                  ? "HLTV URL матчу"
+                  : "Dota 2 URL матчу"}{" "}
+                (необов&apos;язково)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="matchUrl"
+                  value={data.matchUrl}
+                  onChange={(e) => onUrlChange(e.target.value)}
+                  placeholder={
+                    data.game === "CS2"
+                      ? "https://www.hltv.org/matches/..."
+                      : "https://...dota2/.../team1-vs-team2/..."
                   }
-                }}
-              />
-              <Input
-                id="team1"
-                value={data.team1}
-                onChange={(e) => onFieldChange("team1", e.target.value)}
-                placeholder={data.game === "CS2" ? "NAVI" : "Team Spirit"}
-                required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={`${classes.input} ${err("team1")}`}
-              />
+                  className={`flex-1 ${classes.input}`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onParseUrl}
+                  disabled={isParsing || !data.matchUrl}
+                  className="rounded-2xl px-5 border-gray-200 hover:bg-gray-100 hover:border-gray-300 h-11 text-sm font-medium"
+                >
+                  {isParsing ? "Оновлення..." : "Оновити"}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-400">
+                {data.game === "CS2"
+                  ? "Вставте посилання з HLTV для автозаповнення"
+                  : "Вставте посилання на Dota 2 матч для автозаповнення"}
+              </p>
             </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="team2" className={classes.label}>
-              Команда 2{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <div className="flex items-center gap-2">
-              <img
-                src={
-                  data.logoTeam2 ||
-                  (data.game === "Dota2"
-                    ? "/assets/team-placeholder-dota.svg"
-                    : "/assets/team-placeholder-cs2.svg")
-                }
-                alt={data.team2 || "Team 2"}
-                className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
-                onError={(e) => {
-                  const t = e.target as HTMLImageElement;
-                  if (
-                    data.game === "Dota2" &&
-                    !t.src.includes("team-placeholder-dota")
-                  ) {
-                    t.src = "/assets/team-placeholder-dota.svg";
-                  } else if (
-                    data.game === "CS2" &&
-                    !t.src.includes("team-placeholder-cs2")
-                  ) {
-                    t.src = "/assets/team-placeholder-cs2.svg";
-                  } else if (!t.src.includes("team-placeholder")) {
-                    t.src = "/assets/team-placeholder-cs2.svg";
-                  } else {
-                    t.style.display = "none";
-                  }
-                }}
-              />
-              <Input
-                id="team2"
-                value={data.team2}
-                onChange={(e) => onFieldChange("team2", e.target.value)}
-                placeholder={data.game === "CS2" ? "G2" : "OG"}
-                required={!isExpress || (isExpress && expressEventsCount === 0)}
-                className={`${classes.input} ${err("team2")}`}
-              />
+            <div className="border-t border-gray-100 -mx-6" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5" id="team1-wrapper">
+                <Label htmlFor="team1" className={classes.label}>
+                  Команда 1{" "}
+                  {showRequired && <span className="text-red-500">*</span>}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={
+                      data.logoTeam1 ||
+                      (data.game === "Dota2"
+                        ? "/assets/team-placeholder-dota.svg"
+                        : "/assets/team-placeholder-cs2.svg")
+                    }
+                    alt={data.team1 || "Team 1"}
+                    className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement;
+                      if (
+                        data.game === "Dota2" &&
+                        !t.src.includes("team-placeholder-dota")
+                      ) {
+                        t.src = "/assets/team-placeholder-dota.svg";
+                      } else if (
+                        data.game === "CS2" &&
+                        !t.src.includes("team-placeholder-cs2")
+                      ) {
+                        t.src = "/assets/team-placeholder-cs2.svg";
+                      } else if (!t.src.includes("team-placeholder")) {
+                        t.src = "/assets/team-placeholder-cs2.svg";
+                      } else {
+                        t.style.display = "none";
+                      }
+                    }}
+                  />
+                  <Input
+                    id="team1"
+                    value={data.team1}
+                    onChange={(e) => onFieldChange("team1", e.target.value)}
+                    placeholder={data.game === "CS2" ? "NAVI" : "Team Spirit"}
+                    required={
+                      !isExpress || (isExpress && expressEventsCount === 0)
+                    }
+                    className={`${classes.input} ${err("team1")}`}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="team2" className={classes.label}>
+                  Команда 2{" "}
+                  {showRequired && <span className="text-red-500">*</span>}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={
+                      data.logoTeam2 ||
+                      (data.game === "Dota2"
+                        ? "/assets/team-placeholder-dota.svg"
+                        : "/assets/team-placeholder-cs2.svg")
+                    }
+                    alt={data.team2 || "Team 2"}
+                    className="h-9 w-9 rounded-xl object-contain flex-shrink-0"
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement;
+                      if (
+                        data.game === "Dota2" &&
+                        !t.src.includes("team-placeholder-dota")
+                      ) {
+                        t.src = "/assets/team-placeholder-dota.svg";
+                      } else if (
+                        data.game === "CS2" &&
+                        !t.src.includes("team-placeholder-cs2")
+                      ) {
+                        t.src = "/assets/team-placeholder-cs2.svg";
+                      } else if (!t.src.includes("team-placeholder")) {
+                        t.src = "/assets/team-placeholder-cs2.svg";
+                      } else {
+                        t.style.display = "none";
+                      }
+                    }}
+                  />
+                  <Input
+                    id="team2"
+                    value={data.team2}
+                    onChange={(e) => onFieldChange("team2", e.target.value)}
+                    placeholder={data.game === "CS2" ? "G2" : "OG"}
+                    required={
+                      !isExpress || (isExpress && expressEventsCount === 0)
+                    }
+                    className={`${classes.input} ${err("team2")}`}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="border-t border-gray-100 -mx-6" />
-
+            <div className="border-t border-gray-100 -mx-6" />
+          </>
+        )}
         {teamNotes}
 
         {/* Bet type + Selection — swapped: Selection left, Bet type center */}
-        <div className="entry-prediction-row">
-          <div className="flex-[2] space-y-1.5">
-            <Label className={classes.label}>
-              Вибір команди{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <Select
-              value={data.selection}
-              onValueChange={(value) => onFieldChange("selection", value)}
-              disabled={!data.team1 || !data.team2}
-            >
-              <SelectTrigger
-                className={`${classes.selectTrigger} ${err("selection")}`}
+        {mode !== "match" && (
+          <div
+            className={`entry-prediction-row ${hideOdds ? "wizard-prediction-fields" : ""}`}
+          >
+            <div className="flex-[2] space-y-1.5">
+              <Label className={classes.label}>
+                Вибір команди{" "}
+                {showRequired && <span className="text-red-500">*</span>}
+              </Label>
+              <Select
+                value={data.selection}
+                onValueChange={(value) => onFieldChange("selection", value)}
+                disabled={!data.team1 || !data.team2}
               >
-                <SelectValue
-                  placeholder={
-                    data.team1 && data.team2
-                      ? "Хто переможе?"
-                      : "Спочатку оберіть команду"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {data.team1 && (
-                  <SelectItem value={data.team1}>{data.team1}</SelectItem>
-                )}
-                {data.team2 && (
-                  <SelectItem value={data.team2}>{data.team2}</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-[2] space-y-1.5">
-            <Label className={classes.label}>
-              Тип прогнозу{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <button
-              type="button"
-              disabled={!data.selection}
-              onClick={openBetModal}
-              className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
-                !data.selection
-                  ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                <SelectTrigger
+                  className={`${classes.selectTrigger} ${err("selection")}`}
+                >
+                  <SelectValue
+                    placeholder={
+                      data.team1 && data.team2
+                        ? "Хто переможе?"
+                        : "Спочатку оберіть команду"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {data.team1 && (
+                    <SelectItem value={data.team1}>{data.team1}</SelectItem>
+                  )}
+                  {data.team2 && (
+                    <SelectItem value={data.team2}>{data.team2}</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-[2] space-y-1.5">
+              <Label className={classes.label}>
+                Тип прогнозу{" "}
+                {showRequired && <span className="text-red-500">*</span>}
+              </Label>
+              <button
+                type="button"
+                disabled={!data.selection}
+                onClick={openBetModal}
+                className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
+                  !data.selection
+                    ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                    : data.betType
+                      ? `border-primary bg-blue-50 text-primary hover:bg-blue-100 ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
+                      : `border-primary bg-primary text-white hover:bg-blue-700 ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
+                }`}
+              >
+                {!data.selection
+                  ? "Спочатку оберіть команду"
                   : data.betType
-                    ? `border-primary bg-blue-50 text-primary hover:bg-blue-100 ${submitErrors.betType ? "border-red-500 bg-red-50 text-red-600" : ""}`
-                    : `border-primary bg-primary text-white hover:bg-blue-700 ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
-              }`}
-            >
-              {!data.selection
-                ? "Спочатку оберіть команду"
-                : data.betType
-                  ? getBetTypeLabel(data.betType, data.format)
-                  : "Оберіть тип прогнозу"}
-            </button>
+                    ? getBetTypeLabel(data.betType, data.format)
+                    : "Оберіть тип прогнозу"}
+              </button>
+            </div>
+            {!hideOdds && (
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="odds" className={classes.label}>
+                  Коефіцієнт{" "}
+                  {showRequired && <span className="text-red-500">*</span>}
+                </Label>
+                <Input
+                  id="odds"
+                  type="number"
+                  step="0.01"
+                  min="1.01"
+                  value={data.odds}
+                  onChange={(e) => onFieldChange("odds", e.target.value)}
+                  placeholder="1.65"
+                  required={
+                    !isExpress || (isExpress && expressEventsCount === 0)
+                  }
+                  className={`${classes.input} ${err("odds")}`}
+                />
+              </div>
+            )}
           </div>
-          <div className="flex-1 space-y-1.5">
-            <Label htmlFor="odds" className={classes.label}>
-              Коефіцієнт{" "}
-              {showRequired && <span className="text-red-500">*</span>}
-            </Label>
-            <Input
-              id="odds"
-              type="number"
-              step="0.01"
-              min="1.01"
-              value={data.odds}
-              onChange={(e) => onFieldChange("odds", e.target.value)}
-              placeholder="1.65"
-              required={!isExpress || (isExpress && expressEventsCount === 0)}
-              className={`${classes.input} ${err("odds")}`}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Show "Add event to express" button ONLY when NOT pre-filled from matches */}
-        {isExpress && !isExpressFromMatches && (
+        {mode !== "match" && isExpress && !isExpressFromMatches && (
           <Button
             type="button"
             onClick={onAddToExpress}
@@ -586,13 +607,18 @@ export default function BettingFormMatchSection({
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-100">
             {/* Tab: Основне */}
-            {betTab === 1 && grouped.main.map((group) => renderGroup(group))}
+            {betTab === 1 &&
+              grouped.main.map((group) => (
+                <Fragment key={group.category}>{renderGroup(group)}</Fragment>
+              ))}
             {/* Tab: Карта N */}
             {betTab >= 2 &&
               (
                 grouped.maps.find((m) => m.mapNumber === betTab - 1)?.groups ??
                 []
-              ).map((group) => renderGroup(group))}
+              ).map((group) => (
+                <Fragment key={group.category}>{renderGroup(group)}</Fragment>
+              ))}
           </div>
           {/* Footer with Clear / Cancel / Save buttons */}
           <DialogFooter className="px-6 py-4 border-t border-gray-100 flex gap-3 sm:gap-3">

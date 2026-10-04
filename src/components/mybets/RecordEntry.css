@@ -819,3 +819,432 @@
     margin-top: 6px;
   }
 }
+
+/* Three-step entry workflow. Scoped to avoid altering the journal or legacy forms. */
+.record-wizard {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0 0 24px;
+}
+.wizard-steps button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-bottom: 2px solid #dedfd8;
+  padding: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8b9085;
+}
+.wizard-steps button > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #cdd1c5;
+  border-radius: 50%;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.wizard-steps .is-current {
+  color: #20251f;
+  border-color: #ff693b;
+}
+.wizard-steps .is-current > span {
+  color: white;
+  background: #ff693b;
+  border-color: #ff693b;
+}
+.wizard-steps .is-done {
+  color: #374335;
+}
+.wizard-context {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 20px;
+  background: white;
+  border: 1px solid #e0e2d9;
+  border-radius: 5px;
+  margin-bottom: 16px;
+}
+.wizard-context strong {
+  font-family: Oswald, sans-serif;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.wizard-context span {
+  color: #747d6e;
+  font-size: 13px;
+}
+.wizard-context button {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: #db552a;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.wizard-risks {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.wizard-risks > div {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 18px;
+  border: 1px solid #f0d797;
+  background: #fff6e2;
+  border-radius: 5px;
+  color: #845316;
+}
+.wizard-risks .wizard-note {
+  border-color: #dce1d3;
+  background: #f2f4ec;
+  color: #58614e;
+}
+.wizard-risks svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.wizard-risks strong {
+  font-family: Oswald, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+.wizard-risks p {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wizard-panel {
+  background: white;
+  border: 1px solid #dcded5;
+  border-radius: 5px;
+  padding: 24px;
+  min-width: 0;
+  margin: 0;
+}
+.wizard-panel:disabled {
+  opacity: 0.65;
+}
+.wizard-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.wizard-panel-heading h2 {
+  font-family: Oswald, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+.wizard-panel-heading h2:focus {
+  outline: none;
+}
+.record-wizard .entry-category button {
+  padding: 8px 18px;
+  font-size: 12px;
+}
+.record-wizard .entry-category button[aria-pressed="true"] {
+  background: #ff693b;
+  color: #fff;
+}
+.record-wizard .wizard-prediction-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.wizard-money-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin: 18px 0 22px;
+}
+.wizard-money-fields label {
+  display: block;
+  font-size: 13px;
+  color: #646d5e;
+}
+.wizard-money-fields input {
+  display: block;
+  margin-top: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d9dcd3;
+  border-radius: 4px;
+  background: white;
+  color: #20251f;
+  font-size: 16px;
+}
+.wizard-money-fields input[readonly] {
+  background: #f5f6f0;
+}
+.wizard-stake-input {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  border: 1px solid #d9dcd3;
+  border-radius: 4px;
+}
+.wizard-stake-input input {
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.wizard-stake-input select {
+  width: 62px;
+  height: 42px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #e2e5db;
+  padding: 0 9px;
+  color: #525d4a;
+}
+.wizard-returns {
+  background: #f6f6f2;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 20px 0;
+}
+.wizard-returns h3 {
+  font-family: Oswald, sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+.wizard-returns > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: white;
+  border-radius: 3px;
+  padding: 15px 20px;
+}
+.wizard-returns > div > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.wizard-returns > div > div + div {
+  border-left: 1px solid #e0e2d9;
+  padding-left: 26px;
+}
+.wizard-returns span {
+  font-size: 13px;
+  color: #6e7865;
+}
+.wizard-returns strong {
+  font-family: Oswald, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.wizard-returns > div > div:last-child strong {
+  color: #f36636;
+}
+.wizard-options {
+  border: 1px solid #d9dcd3;
+  border-radius: 5px;
+  margin-top: 12px;
+}
+.wizard-options > summary,
+.record-wizard .entry-analysis > summary {
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+.wizard-options > summary span {
+  float: right;
+  font-size: 12px;
+  color: #848b7b;
+  font-weight: 400;
+}
+.record-wizard .entry-analysis {
+  margin-top: 10px;
+}
+.record-wizard .entry-settings {
+  padding: 0;
+}
+.record-wizard .wizard-options .entry-settings {
+  padding: 0 20px 18px;
+}
+.record-wizard .entry-prediction-row button {
+  text-align: left;
+  color: #20251f;
+  background: white;
+  border-color: #d9dcd3;
+  font-weight: 500;
+}
+.record-wizard .entry-prediction-row button:disabled {
+  color: #8a9181;
+  background: #f5f6f1;
+}
+.record-wizard .entry-prediction-row button.border-red-500 {
+  border-color: #ef4444;
+}
+.wizard-match-stage .entry-settings {
+  padding-bottom: 20px;
+}
+.wizard-match-stage .entry-section-title {
+  font-size: 22px;
+}
+.wizard-match-stage .entry-clear {
+  margin-top: 18px;
+}
+.wizard-match-stage .-mx-6 {
+  margin-left: 0;
+  margin-right: 0;
+}
+.wizard-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+}
+.wizard-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid #929b85;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+.record-wizard .wizard-next {
+  background: #ff693b;
+  color: white;
+  border-radius: 4px;
+  min-height: 42px;
+  padding: 0 22px;
+  display: flex;
+  gap: 14px;
+  font-size: 14px;
+}
+.record-wizard .wizard-next:hover {
+  background: #eb592f;
+}
+.wizard-error {
+  padding: 12px 14px;
+  margin-top: 16px;
+  background: #fff0e9;
+  color: #a63720;
+  border-left: 3px solid #df5936;
+  font-size: 14px;
+}
+.wizard-footnote {
+  color: #868d7d;
+  font-size: 12px;
+  margin-top: 14px;
+}
+.wizard-review dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+  font-size: 14px;
+}
+.wizard-review dt {
+  color: #77816d;
+}
+.wizard-review dd {
+  text-align: right;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.wizard-review-events {
+  margin: 20px 0;
+  border-bottom: 1px solid #e1e4da;
+}
+.wizard-review-events li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 0;
+  border-top: 1px solid #e1e4da;
+  font-size: 14px;
+}
+.wizard-review-events span {
+  color: #77816d;
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .wizard-panel {
+    padding: 18px 14px;
+  }
+  .wizard-steps {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .wizard-steps button {
+    gap: 6px;
+    font-size: 12px;
+  }
+  .wizard-steps button > span {
+    width: 23px;
+    height: 23px;
+  }
+  .wizard-panel-heading {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .wizard-panel-heading h2 {
+    font-size: 27px;
+  }
+  .wizard-context {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 14px;
+  }
+  .record-wizard .wizard-prediction-fields,
+  .wizard-money-fields {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .wizard-returns {
+    padding: 12px;
+  }
+  .wizard-returns > div {
+    padding: 12px;
+  }
+  .wizard-returns strong {
+    font-size: 26px;
+  }
+  .wizard-returns > div > div + div {
+    padding-left: 14px;
+  }
+  .wizard-options > summary span {
+    display: none;
+  }
+  .wizard-actions {
+    gap: 10px;
+  }
+  .record-wizard .wizard-next {
+    padding: 0 14px;
+    font-size: 13px;
+    gap: 8px;
+  }
+  .wizard-back {
+    padding: 0 12px;
+  }
+}
