@@ -532,16 +532,28 @@ export default function MyBets() {
       className={`record-page min-h-screen relative ${activeTab === "records" ? "journal-page" : ""}`}
     >
       {activeTab === "records" ? (
-        <header className="journal-hero">
-          <div>
-            <h1>ЖУРНАЛ</h1>
-            <p>Ваші рішення, результати та висновки</p>
-          </div>
-          <button onClick={() => setActiveTab("add")}>
-            <Plus size={18} />
-            Додати запис
-          </button>
-        </header>
+        <RecordPageHeader
+          bets={recentBets}
+          bank={
+            (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
+          }
+          currency={currencyMode}
+          onCurrencyChange={setCurrencyMode}
+          onEditBank={() => setBankModalOpen(true)}
+          title="ЖУРНАЛ"
+          subtitle="Ваші рішення, результати та висновки"
+          hideCurrency
+          hideEditBank
+          extraAction={
+            <button
+              className="record-header-add"
+              onClick={() => setActiveTab("add")}
+            >
+              <Plus size={18} />
+              Додати запис
+            </button>
+          }
+        />
       ) : (
         <RecordPageHeader
           bets={recentBets}
@@ -604,33 +616,6 @@ export default function MyBets() {
                 </div>
               )}
               <JournalTable
-                onNotesSaved={(bet, notes) => {
-                  setRecentBets((prev) =>
-                    prev.map((item) =>
-                      String(item.id) === String(bet.id)
-                        ? { ...item, notes }
-                        : item,
-                    ),
-                  );
-                  try {
-                    const cached = UserDataService.getUserData<Bet[]>(
-                      currentUser,
-                      "mybets_data",
-                      [],
-                    );
-                    UserDataService.setUserDataSync(
-                      currentUser,
-                      "mybets_data",
-                      cached.map((item) =>
-                        String(item.id) === String(bet.id)
-                          ? { ...item, notes }
-                          : item,
-                      ),
-                    );
-                  } catch {
-                    /* The API has already saved the note; cache is best effort. */
-                  }
-                }}
                 bets={goalBets}
                 activeBets={goalBets.filter((bet) => bet.result === "Pending")}
                 currentUser={currentUser}

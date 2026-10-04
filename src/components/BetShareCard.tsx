@@ -73,7 +73,7 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    const update = () => setUnit(node.clientWidth / 35);
+    const update = () => setUnit(Math.min(node.clientWidth / 35, 14));
     update();
     const observer = new ResizeObserver(update);
     observer.observe(node);

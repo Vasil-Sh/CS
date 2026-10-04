@@ -13,9 +13,7 @@ import {
   MoreHorizontal,
   X,
   Flag,
-  Pencil,
   Share2,
-  Download,
   ChevronLeft,
   ChevronRight,
   ListChecks,
@@ -50,9 +48,7 @@ import {
 } from "./journalModel";
 import "./Journal.css";
 
-type Props = ComponentProps<typeof BetTable> & {
-  onNotesSaved: (bet: Bet, notes: string) => void;
-};
+type Props = ComponentProps<typeof BetTable>;
 const columns = [
   ["date", "Дата"],
   ["match", "Матч"],
@@ -62,7 +58,6 @@ const columns = [
   ["profit", "Профіт"],
   ["goal", "Ціль"],
   ["status", "Статус"],
-  ["notes", "Нотатки"],
 ] as const;
 type Column = (typeof columns)[number][0];
 const statuses = [
@@ -90,7 +85,6 @@ function TeamLogo({ src, name }: { src?: string | null; name: string }) {
 }
 export default function JournalTable(p: Props) {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [dense, setDense] = useState(false);
   const [game, setGame] = useState("all");
   const [currency, setCurrency] = useState("all");
   const [category, setCategory] = useState("all");
@@ -101,18 +95,11 @@ export default function JournalTable(p: Props) {
   );
   const [goals, setGoals] = useState<Goal[]>([]);
   const [goalsLoaded, setGoalsLoaded] = useState(false);
-  const [draft, setDraft] = useState("");
-  const [savedNotes, setSavedNotes] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
-  const [noteError, setNoteError] = useState("");
   const [compact, setCompact] = useState(false);
   const [compactPeriod, setCompactPeriod] = useState("all");
   const [compactMonth, setCompactMonth] = useState("");
   const detailRef = useRef<HTMLHeadingElement>(null);
   const selected = p.bets.find((bet) => journalKey(bet) === selectedKey);
-  const effectiveNote = (bet: Bet) =>
-    savedNotes[journalKey(bet)] ?? bet.notes ?? "";
-  const dirty = !!selected && draft !== effectiveNote(selected);
   useEffect(() => {
     let cancelled = false;
     setGoalsLoaded(false);
@@ -140,52 +127,14 @@ export default function JournalTable(p: Props) {
   useEffect(() => {
     if (selectedKey && !selected) {
       setSelectedKey(null);
-      setDraft("");
     }
   }, [selectedKey, selected]);
-  useEffect(() => {
-    if (!dirty) return;
-    const handler = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty]);
   const choose = (bet: Bet | null) => {
-    if (
-      saving ||
-      (dirty && !window.confirm("Відкинути незбережені зміни нотатки?"))
-    )
-      return;
     setSelectedKey(bet ? journalKey(bet) : null);
-    setDraft(bet ? effectiveNote(bet) : "");
-    setNoteError("");
     if (bet)
       requestAnimationFrame(() =>
         detailRef.current?.focus({ preventScroll: true }),
       );
-  };
-  const saveNote = async () => {
-    if (!selected?.id || saving || !dirty) return;
-    const target = selected;
-    const note = draft;
-    setSaving(true);
-    setNoteError("");
-    try {
-      await api.patch(`/bets/${encodeURIComponent(target.id!)}`, {
-        notes: note,
-      });
-      setSavedNotes((prev) => ({ ...prev, [journalKey(target)]: note }));
-      p.onNotesSaved(target, note);
-      toast.success("Нотатку збережено");
-    } catch {
-      setNoteError(
-        "Не вдалося зберегти. Текст залишився у полі — спробуйте ще раз.",
-      );
-    } finally {
-      setSaving(false);
-    }
   };
   const goalName = (bet: Bet) =>
     goals.find((goal) => String(goal.id) === String(bet.goalId))?.name ||
@@ -227,7 +176,6 @@ export default function JournalTable(p: Props) {
           bet.selection,
           bet.team1,
           bet.team2,
-          bet.notes,
           bet.strategy,
           journalMarket(bet),
         ]
@@ -298,7 +246,6 @@ export default function JournalTable(p: Props) {
         "Профіт",
         "Ціль",
         "Статус",
-        "Нотатки",
       ],
       ...filtered.map((b) => [
         b.date,
@@ -311,7 +258,6 @@ export default function JournalTable(p: Props) {
         journalProfit(b),
         b.goalId ? goalName(b) : "",
         journalStatus(b),
-        effectiveNote(b),
       ]),
     ];
     const blob = new Blob(
@@ -337,12 +283,6 @@ export default function JournalTable(p: Props) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => choose(bet)}>
-          Деталі запису
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => p.onShareBet(bet)}>
-          Поділитися
-        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => p.onBetDetails(bet)}>
           Текст для Telegram
         </DropdownMenuItem>
@@ -444,17 +384,6 @@ export default function JournalTable(p: Props) {
         return goal(bet);
       case "status":
         return badge(bet);
-      case "notes":
-        return (
-          <button
-            className="journal-note-link"
-            onClick={() => choose(bet)}
-            title={effectiveNote(bet) || "Додати нотатку"}
-          >
-            <Pencil size={13} />
-            <span>{effectiveNote(bet) || "Додати"}</span>
-          </button>
-        );
     }
   };
   const compactBets = filtered.filter((b) => {
@@ -478,7 +407,7 @@ export default function JournalTable(p: Props) {
     .join("\n");
   return (
     <section
-      className={`journal-workspace ${dense ? "is-dense" : ""}`}
+      className="journal-workspace is-dense"
       aria-label="Журнал записів"
     >
       <div className="journal-tools">
@@ -486,45 +415,18 @@ export default function JournalTable(p: Props) {
           <Search size={17} />
           <input
             aria-label="Пошук записів"
-            placeholder="Пошук матчу, команди або нотатки"
+            placeholder="Пошук матчу або команди"
             value={p.searchText}
             onChange={(e) => p.onSearchTextChange(e.target.value)}
           />
         </label>
-        <select
-          aria-label="Період журналу"
-          value={p.tableFilter === "today" ? "today" : p.periodFilter}
-          onChange={(e) => {
-            p.onTableFilterChange(e.target.value === "today" ? "today" : "all");
-            p.onPeriodFilterChange(
-              e.target.value === "today"
-                ? "all"
-                : (e.target.value as Props["periodFilter"]),
-            );
-          }}
-        >
-          <option value="all">Увесь період</option>
-          <option value="today">Сьогодні</option>
-          <option value="week">Останні 7 днів</option>
-          <option value="month">Останні 30 днів</option>
-          <option value="quarter">Останні 90 днів</option>
-        </select>
-        <select
-          aria-label="Гра журналу"
-          value={game}
-          onChange={(e) => setGame(e.target.value)}
-        >
-          <option value="all">Усі ігри</option>
-          <option value="CS2">CS2</option>
-          <option value="Dota2">Dota 2</option>
-        </select>
         <button
           className="journal-outline"
           aria-expanded={p.showAdvancedFilters}
           onClick={p.onToggleAdvancedFilters}
         >
           <SlidersHorizontal size={15} />
-          Фільтри{currency !== "all" || category !== "all" ? " •" : ""}
+          Фільтри{currency !== "all" || category !== "all" || game !== "all" || (p.tableFilter !== "today" && p.periodFilter !== "all") ? " •" : ""}
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -555,24 +457,45 @@ export default function JournalTable(p: Props) {
           </DropdownMenuContent>
         </DropdownMenu>
         <button
-          className="journal-icon"
-          aria-label="Експорт відфільтрованих записів CSV"
-          onClick={exportCSV}
-          disabled={!filtered.length}
+          className="journal-compact"
+          onClick={() => setCompact(true)}
         >
-          <Download size={18} />
+          <FileText size={15} />
+          Стислий список
         </button>
-        <div className="journal-density">
-          <button aria-pressed={!dense} onClick={() => setDense(false)}>
-            Комфортний
-          </button>
-          <button aria-pressed={dense} onClick={() => setDense(true)}>
-            Стислий
-          </button>
-        </div>
       </div>
       {p.showAdvancedFilters && (
         <div className="journal-extra">
+          <label>
+            Період
+            <select
+              value={p.tableFilter === "today" ? "today" : p.periodFilter}
+              onChange={(e) => {
+                p.onTableFilterChange(
+                  e.target.value === "today" ? "today" : "all",
+                );
+                p.onPeriodFilterChange(
+                  e.target.value === "today"
+                    ? "all"
+                    : (e.target.value as Props["periodFilter"]),
+                );
+              }}
+            >
+              <option value="all">Увесь період</option>
+              <option value="today">Сьогодні</option>
+              <option value="week">Останні 7 днів</option>
+              <option value="month">Останні 30 днів</option>
+              <option value="quarter">Останні 90 днів</option>
+            </select>
+          </label>
+          <label>
+            Гра
+            <select value={game} onChange={(e) => setGame(e.target.value)}>
+              <option value="all">Усі ігри</option>
+              <option value="CS2">CS2</option>
+              <option value="Dota2">Dota 2</option>
+            </select>
+          </label>
           <label>
             Валюта
             <select
@@ -595,14 +518,10 @@ export default function JournalTable(p: Props) {
               <option value="express">Експрес</option>
             </select>
           </label>
-          <button onClick={reset}>Скинути фільтри</button>
-          <button onClick={() => setCompact(true)}>
-            <FileText size={15} />
-            Список для копіювання
-          </button>
+          <button className="journal-reset" onClick={reset}>Скинути фільтри</button>
         </div>
       )}
-      <div className={`journal-layout ${selected ? "has-detail" : ""}`}>
+      <div className="journal-layout">
         <div className="journal-list">
           <nav className="journal-statuses" aria-label="Статус записів">
             {statuses.map(([value, label]) => (
@@ -642,23 +561,24 @@ export default function JournalTable(p: Props) {
                         {id === "date" || id === "odds" || id === "profit" ? (
                           <button
                             onClick={() => sort(id)}
+                            className="journal-sort"
                             title={
                               id === "profit"
                                 ? "Сортування за профітом у базовій валюті UAH"
                                 : undefined
                             }
                           >
-                            {label}{" "}
-                            {p.sortBy === id ? (ascending ? "↑" : "↓") : "↕"}
+                            <span>{label}</span>
+                            <span className="journal-sort-arrow">
+                              {p.sortBy === id ? (ascending ? "↑" : "↓") : "↕"}
+                            </span>
                           </button>
                         ) : (
                           label
                         )}
                       </th>
                     ))}
-                  <th>
-                    <span className="sr-only">Дії</span>
-                  </th>
+                  <th className="col-actions-head">Дії</th>
                 </tr>
               </thead>
               <tbody>
@@ -687,7 +607,6 @@ export default function JournalTable(p: Props) {
             </table>
             {!rows.length && (
               <div className="journal-empty">
-                <ListChecks size={32} />
                 <h3>
                   {p.bets.length
                     ? "Нічого не знайдено"
@@ -739,33 +658,38 @@ export default function JournalTable(p: Props) {
                 <ChevronRight size={17} />
               </button>
             </footer>
+            <p className="journal-footnote">
+              Суми у валюті запису. Валюти не підсумовуються. Сортування профіту —
+              за UAH.
+            </p>
           </div>
-          <p className="journal-footnote">
-            Суми у валюті запису. Валюти не підсумовуються. Сортування профіту —
-            за UAH.
-          </p>
         </div>
-        {selected && (
-          <aside
-            className="journal-detail"
-            aria-labelledby="journal-detail-title"
-          >
-            <header>
-              <h2 id="journal-detail-title" ref={detailRef} tabIndex={-1}>
-                Деталі запису
-              </h2>
+        <aside
+          className={`journal-detail ${selected ? "" : "journal-detail-empty"}`}
+          aria-labelledby="journal-detail-title"
+        >
+          <header>
+            <h2 id="journal-detail-title" ref={detailRef} tabIndex={-1}>
+              Деталі запису
+            </h2>
+            {selected && (
               <button
                 className="journal-icon"
                 aria-label="Закрити деталі"
                 onClick={() => choose(null)}
-                disabled={saving}
               >
                 <X size={20} />
               </button>
-            </header>
+            )}
+          </header>
+          {!selected ? (
+            <div className="journal-detail-placeholder">
+              <ListChecks size={32} />
+              <p>Оберіть матч, щоб переглянути деталі.</p>
+            </div>
+          ) : (
             <div className="journal-detail-body">
               <div className="journal-detail-match">
-                {badge(selected)}
                 <div className="journal-versus">
                   <TeamLogo
                     src={selected.logoTeam1}
@@ -784,10 +708,11 @@ export default function JournalTable(p: Props) {
                   {journalDate(selected.date).time} · {selected.game || "CS2"} ·{" "}
                   {selected.format || "—"}
                 </p>
+                {badge(selected)}
               </div>
               <div className="journal-detail-grid">
                 <div>
-                  <span>Ринок</span>
+                  <span>Тип прогнозу</span>
                   <strong>
                     {journalExpress(selected)
                       ? "Експрес"
@@ -858,40 +783,9 @@ export default function JournalTable(p: Props) {
                   <strong>{selected.strategy}</strong>
                 </div>
               )}
-              <label className="journal-note-editor">
-                <span>
-                  <Pencil size={15} />
-                  Нотатки
-                </span>
-                <textarea
-                  value={draft}
-                  disabled={saving}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Що варто врахувати наступного разу?"
-                />
-              </label>
-              {!selected.id && (
-                <p className="journal-muted">
-                  Збереження нотатки доступне після синхронізації запису.
-                </p>
-              )}
-              {noteError && (
-                <p className="journal-error" role="alert">
-                  {noteError}
-                </p>
-              )}
-              <div className="journal-note-save">
-                <button
-                  className="journal-outline"
-                  disabled={!dirty || saving || !selected.id}
-                  onClick={saveNote}
-                >
-                  {saving ? "Збереження…" : "Зберегти нотатку"}
-                </button>
-              </div>
               <footer>
                 <button
-                  className="journal-outline"
+                  className="journal-share"
                   onClick={() => p.onShareBet(selected)}
                 >
                   <Share2 size={16} />
@@ -900,8 +794,8 @@ export default function JournalTable(p: Props) {
                 {menu(selected)}
               </footer>
             </div>
-          </aside>
-        )}
+          )}
+        </aside>
       </div>
       <CompactBetModal
         open={compact}

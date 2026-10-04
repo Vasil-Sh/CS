@@ -4,6 +4,7 @@
   background: #f5f4f0;
   color: #10120f;
   font-family: Oswald, "Arial Narrow", sans-serif;
+  font-size: 0.7em;
   overflow: hidden;
 }
 .mi-share * {
@@ -98,11 +99,11 @@
 }
 .mi-share-team strong {
   font-size: 5.15em;
-  max-width: 4.1em;
   line-height: 1.04;
   letter-spacing: -0.055em;
   font-weight: 700;
   overflow-wrap: anywhere;
+  min-width: 0;
   padding-bottom: 0.1em;
 }
 .mi-share-vs {
@@ -225,16 +226,19 @@
   font-size: 1.1em;
   overflow-wrap: anywhere;
 }
-.mi-share-dialog {
+.mi-share-dialog.mi-share-dialog {
   padding: 0 !important;
   gap: 0 !important;
   border-radius: 8px !important;
-  overflow: hidden;
-  width: min(560px, 94vw, calc((100dvh - 100px) * 0.65)) !important;
-  max-width: 560px !important;
-  max-height: 94dvh;
   display: flex !important;
   flex-direction: column;
+  width: 392px;
+  min-width: 320px;
+  max-width: 90vw;
+  min-height: 400px;
+  max-height: 96dvh;
+  overflow: hidden;
+  resize: both;
 }
 .mi-share-toolbar {
   display: flex;
@@ -263,7 +267,14 @@
 .mi-share-preview {
   overflow: auto;
   min-height: 0;
+  flex: 1;
   background: #f5f4f0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.mi-share-preview .mi-share {
+  width: 100%;
 }
 .mi-share-error {
   padding: 8px 18px;

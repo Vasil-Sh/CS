@@ -1,3 +1,4 @@
+import { type ReactNode } from "react";
 import { Pencil } from "lucide-react";
 import type { Bet } from "@/types/betting";
 
@@ -53,6 +54,11 @@ interface Props {
   currency: "UAH" | "USD";
   onCurrencyChange: (currency: "UAH" | "USD") => void;
   onEditBank: () => void;
+  title?: string;
+  subtitle?: string;
+  extraAction?: ReactNode;
+  hideCurrency?: boolean;
+  hideEditBank?: boolean;
 }
 export default function RecordPageHeader({
   bets,
@@ -60,6 +66,11 @@ export default function RecordPageHeader({
   currency,
   onCurrencyChange,
   onEditBank,
+  title = "ДОДАТИ ЗАПИС",
+  subtitle = "Зафіксуйте рішення. Перевірте ризики. Відстежуйте результат.",
+  extraAction,
+  hideCurrency = false,
+  hideEditBank = false,
 }: Props) {
   const stats = recordHeaderStats(bets, currency);
   const money = (value: number) =>
@@ -69,33 +80,40 @@ export default function RecordPageHeader({
     <header className="record-header">
       <div className="record-header-top">
         <div>
-          <h1>ДОДАТИ ЗАПИС</h1>
-          <p>Зафіксуйте рішення. Перевірте ризики. Відстежуйте результат.</p>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
         </div>
-        <div className="record-currency" aria-label="Валюта статистики">
-          {(["UAH", "USD"] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={currency === value}
-              onClick={() => onCurrencyChange(value)}
-            >
-              {value === "UAH" ? "₴ UAH" : "$ USD"}
-            </button>
-          ))}
+        <div className="record-header-actions">
+          {extraAction}
+          {!hideCurrency && (
+            <div className="record-currency" aria-label="Валюта статистики">
+              {(["UAH", "USD"] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={currency === value}
+                  onClick={() => onCurrencyChange(value)}
+                >
+                  {value === "UAH" ? "₴ UAH" : "$ USD"}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="record-header-stats">
         <div>
           <span>
             Поточний банк{" "}
-            <button
-              type="button"
-              onClick={onEditBank}
-              aria-label="Редагувати банк"
-            >
-              <Pencil size={14} />
-            </button>
+            {!hideEditBank && (
+              <button
+                type="button"
+                onClick={onEditBank}
+                aria-label="Редагувати банк"
+              >
+                <Pencil size={14} />
+              </button>
+            )}
           </span>
           <strong className="entry-bank">{money(bank)}</strong>
           <small>Баланс у вибраній валюті</small>

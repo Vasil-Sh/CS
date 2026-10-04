@@ -27,6 +27,28 @@
   color: #cdcec7;
   margin: 0;
 }
+.record-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.record-header-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ff693b;
+  color: #fff;
+  border-radius: 7px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.record-header-add:hover {
+  background: #ff825d;
+}
 .record-currency {
   display: flex;
   border: 1px solid #55594d;
@@ -67,7 +89,7 @@
   padding: 0 20px;
 }
 .record-header-stats > div + div {
-  border-left: 1px solid #3c4039;
+  border-left: 1px solid #555b51;
 }
 .record-header-stats span {
   font-size: 13px;
