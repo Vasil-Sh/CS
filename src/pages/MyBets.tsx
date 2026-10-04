@@ -8,7 +8,7 @@ import BetShareModal from "@/components/BetShareModal";
 import ExpressDetailsModal from "@/components/ExpressDetailsModal";
 import BetDetailsModal from "@/components/BetDetailsModal";
 import InitialBankModal from "@/components/InitialBankModal";
-import BetTable from "@/components/BetTable";
+import JournalTable from "@/components/mybets/JournalTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import { api } from "@/lib/apiClient";
@@ -23,7 +23,7 @@ import {
 import { logRender } from "@/lib/devLogger";
 import RecordPageHeader from "@/components/mybets/RecordPageHeader";
 import "@/components/mybets/RecordEntry.css";
-import { Plus, ClipboardList } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
 import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
@@ -528,16 +528,31 @@ export default function MyBets() {
   ];
 
   return (
-    <div className="record-page min-h-screen relative">
-      <RecordPageHeader
-        bets={recentBets}
-        bank={
-          (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
-        }
-        currency={currencyMode}
-        onCurrencyChange={setCurrencyMode}
-        onEditBank={() => setBankModalOpen(true)}
-      />
+    <div
+      className={`record-page min-h-screen relative ${activeTab === "records" ? "journal-page" : ""}`}
+    >
+      {activeTab === "records" ? (
+        <header className="journal-hero">
+          <div>
+            <h1>ЖУРНАЛ</h1>
+            <p>Ваші рішення, результати та висновки</p>
+          </div>
+          <button onClick={() => setActiveTab("add")}>
+            <Plus size={18} />
+            Додати запис
+          </button>
+        </header>
+      ) : (
+        <RecordPageHeader
+          bets={recentBets}
+          bank={
+            (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
+          }
+          currency={currencyMode}
+          onCurrencyChange={setCurrencyMode}
+          onEditBank={() => setBankModalOpen(true)}
+        />
+      )}
 
       <div className="record-workspace">
         {/* Tabs */}
@@ -588,7 +603,34 @@ export default function MyBets() {
                   </button>
                 </div>
               )}
-              <BetTable
+              <JournalTable
+                onNotesSaved={(bet, notes) => {
+                  setRecentBets((prev) =>
+                    prev.map((item) =>
+                      String(item.id) === String(bet.id)
+                        ? { ...item, notes }
+                        : item,
+                    ),
+                  );
+                  try {
+                    const cached = UserDataService.getUserData<Bet[]>(
+                      currentUser,
+                      "mybets_data",
+                      [],
+                    );
+                    UserDataService.setUserDataSync(
+                      currentUser,
+                      "mybets_data",
+                      cached.map((item) =>
+                        String(item.id) === String(bet.id)
+                          ? { ...item, notes }
+                          : item,
+                      ),
+                    );
+                  } catch {
+                    /* The API has already saved the note; cache is best effort. */
+                  }
+                }}
                 bets={goalBets}
                 activeBets={goalBets.filter((bet) => bet.result === "Pending")}
                 currentUser={currentUser}

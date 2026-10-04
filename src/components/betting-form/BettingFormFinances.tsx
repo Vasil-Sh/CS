@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, DollarSign, Info } from "lucide-react";
+import { AlertTriangle, Calculator, ChevronDown, DollarSign, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -123,53 +123,58 @@ export default function BettingFormFinances({
           )}
           <details className="entry-analysis">
             <summary>
+              <Calculator className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
               Додаткові розрахунки <span>EV · Value · Келлі</span>
+              <ChevronDown size={14} />
             </summary>
-            <div className="entry-confidence space-y-1.5">
-              <Label
-                htmlFor="confidence"
-                className={`${classes.label} flex items-center gap-1.5`}
-              >
-                Впевненість (%, макс. {MAX_CONFIDENCE})
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 cursor-help">
-                        <Info
-                          className="h-3 w-3 text-gray-500"
-                          strokeWidth={2}
-                        />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="max-w-[280px] text-sm"
-                    >
-                      <p className="font-medium mb-1">
-                        Ваша оцінка ймовірності виграшу
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Вкажіть від 1 до {MAX_CONFIDENCE}%. У спорті 100%
-                        впевненість нереалістична через непередбачувані фактори
-                        (травми, помилки суддів, форс-мажори). Максимум обмежено
-                        до {MAX_CONFIDENCE}% для реалістичних розрахунків.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-              <Input
-                id="confidence"
-                type="number"
-                min="1"
-                max={MAX_CONFIDENCE}
-                value={data.confidence}
-                onChange={(e) => onConfidenceChange(e.target.value)}
-                placeholder="70"
-                className={`${classes.input} ${isHighConfidence ? "border-amber-500 focus:border-amber-500" : ""}`}
-              />
+            <div className="entry-confidence">
+              <div className="entry-confidence-row">
+                <Label
+                  htmlFor="confidence"
+                  className={`${classes.label} flex items-center gap-1.5`}
+                >
+                  Впевненість (%, макс. {MAX_CONFIDENCE})
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 cursor-help">
+                          <Info
+                            className="h-3 w-3 text-gray-500"
+                            strokeWidth={2}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="max-w-[280px] text-sm"
+                      >
+                        <p className="font-medium mb-1">
+                          Ваша оцінка ймовірності виграшу
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Вкажіть від 1 до {MAX_CONFIDENCE}%. У спорті 100%
+                          впевненість нереалістична через непередбачувані
+                          фактори (травми, помилки суддів, форс-мажори).
+                          Максимум обмежено до {MAX_CONFIDENCE}% для
+                          реалістичних розрахунків.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </Label>
+                <Input
+                  id="confidence"
+                  type="number"
+                  min="1"
+                  max={MAX_CONFIDENCE}
+                  value={data.confidence}
+                  onChange={(e) => onConfidenceChange(e.target.value)}
+                  placeholder="70"
+                  className={`${classes.input} ${isHighConfidence ? "border-amber-500 focus:border-amber-500" : ""}`}
+                />
+              </div>
               {isHighConfidence && (
-                <p className="text-xs text-amber-600 flex items-center gap-1.5 mt-1">
+                <p className="text-xs text-amber-600 flex items-center gap-1.5 mt-2">
                   <AlertTriangle
                     className="h-3 w-3 flex-shrink-0"
                     strokeWidth={2}

@@ -1,5 +1,5 @@
 import { Fragment, useState, type ReactNode } from "react";
-import { Link, Plus, Users, X, Target } from "lucide-react";
+import { Plus, Users, X, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -317,11 +317,10 @@ export default function BettingFormMatchSection({
                 htmlFor="matchUrl"
                 className={`${classes.label} flex items-center gap-2`}
               >
-                <Link className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-                {data.game === "CS2"
-                  ? "HLTV URL матчу"
-                  : "Dota 2 URL матчу"}{" "}
-                (необов&apos;язково)
+                Посилання на матч{" "}
+                <span className="font-normal text-gray-400">
+                  (необов&apos;язково)
+                </span>
               </Label>
               <div className="flex gap-2">
                 <Input
@@ -345,11 +344,6 @@ export default function BettingFormMatchSection({
                   {isParsing ? "Оновлення..." : "Оновити"}
                 </Button>
               </div>
-              <p className="text-xs text-gray-400">
-                {data.game === "CS2"
-                  ? "Вставте посилання з HLTV для автозаповнення"
-                  : "Вставте посилання на Dota 2 матч для автозаповнення"}
-              </p>
             </div>
 
             <div className="border-t border-gray-100 -mx-6" />

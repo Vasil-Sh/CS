@@ -1,0 +1,273 @@
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap");
+.mi-share {
+  width: 100%;
+  background: #f5f4f0;
+  color: #10120f;
+  font-family: Oswald, "Arial Narrow", sans-serif;
+  overflow: hidden;
+}
+.mi-share * {
+  box-sizing: border-box;
+}
+.mi-share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.8em;
+  padding: 1.05em 1.55em 0.8em;
+  min-height: 4.9em;
+  background: #171a16;
+  color: #fff;
+  border-bottom: 0.34em solid #ff6229;
+}
+.mi-share-brand {
+  font-size: 3.1em;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  font-weight: 700;
+  white-space: nowrap;
+  flex: 1.3;
+}
+.mi-share-brand span {
+  color: #ff6229;
+}
+.mi-share-tournament {
+  border-left: 1px solid #7b7d76;
+  padding-left: 1.55em;
+  text-align: right;
+  min-width: 0;
+  flex: 1;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.mi-share-tournament strong {
+  display: block;
+  font-size: 1.25em;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.mi-share-tournament span {
+  display: block;
+  font-size: 1.15em;
+  margin-top: 0.12em;
+  color: #a8aaa3;
+  font-weight: 600;
+}
+.mi-share-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7em;
+  padding: 0.8em 1.55em 0;
+  font-weight: 600;
+}
+.mi-share-meta > div {
+  display: flex;
+  align-items: center;
+  gap: 0.65em;
+}
+.mi-share-meta img {
+  width: 2.2em;
+  height: 2.2em;
+  object-fit: contain;
+  filter: grayscale(1);
+}
+.mi-share-meta strong,
+.mi-share-meta time,
+.mi-share-meta span {
+  font-size: 1.1em;
+}
+.mi-share-meta span {
+  border-left: 1px solid #8f918a;
+  padding-left: 0.7em;
+}
+.mi-share-teams {
+  padding: 1.7em 1.55em 0.3em;
+}
+.mi-share-team {
+  display: grid;
+  grid-template-columns: 6em minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8em;
+  min-height: 5.6em;
+}
+.mi-share-team img {
+  width: 6em;
+  height: 7.8em;
+  object-fit: contain;
+}
+.mi-share-team strong {
+  font-size: 5.15em;
+  max-width: 4.1em;
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  padding-bottom: 0.1em;
+}
+.mi-share-vs {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin: 0.9em 0 0.65em;
+  font-size: 1.1em;
+  color: #80837b;
+  font-weight: 600;
+}
+.mi-share-vs span {
+  height: 1px;
+  background: #92958d;
+  flex: 1;
+}
+.mi-share-prediction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10.4em;
+  align-items: center;
+  gap: 1em;
+  padding: 0.9em 1.55em 1.05em;
+}
+.mi-share-pick {
+  border-left: 0.5em solid #ff6229;
+  padding-left: 1em;
+}
+.mi-share-pick > span,
+.mi-share-odds > span {
+  display: block;
+  color: #595d55;
+  font:
+    400 1em/1.3 Arial,
+    sans-serif;
+}
+.mi-share-pick strong {
+  display: block;
+  font-size: 1.75em;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  margin-top: 0.2em;
+  overflow-wrap: anywhere;
+}
+.mi-share-odds {
+  border-left: 1px solid #8c9087;
+  padding-left: 1.7em;
+}
+.mi-share-odds strong {
+  display: block;
+  font-size: 4.2em;
+  line-height: 1.06;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+}
+.mi-share-footer {
+  background: #171a16;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  padding: 0.85em 1.55em 1.05em;
+  gap: 1em;
+}
+.mi-share-footer > div {
+  min-width: 0;
+}
+.mi-share-footer > div + div {
+  border-left: 1px solid #7b7e75;
+  padding-left: 1em;
+}
+.mi-share-footer span {
+  display: block;
+  font-size: 0.85em;
+  color: #abada6;
+  margin-bottom: 0.2em;
+  white-space: nowrap;
+}
+.mi-share-footer strong {
+  display: block;
+  font-size: 2.25em;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.mi-share-footer .mi-share-status {
+  font-size: 1.9em;
+  text-transform: uppercase;
+}
+.mi-share[data-result="Loss"] .mi-share-result,
+.mi-share[data-result="Loss"] .mi-share-status {
+  color: #ff4843;
+}
+.mi-share[data-result="Win"] .mi-share-result,
+.mi-share[data-result="Win"] .mi-share-status {
+  color: #53ce88;
+}
+.mi-share[data-result="Pending"] .mi-share-status {
+  color: #ffad63;
+  font-size: 1.6em;
+}
+.mi-share-events {
+  padding: 1.5em;
+}
+.mi-share-events h3 {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 0 0 0.5em;
+}
+.mi-share-event {
+  display: flex;
+  gap: 1em;
+  padding: 0.85em 0;
+  border-top: 1px solid #d3d4ce;
+}
+.mi-share-event > span {
+  color: #ff6229;
+  font-weight: 600;
+}
+.mi-share-event p {
+  margin: 0;
+  font-size: 1.1em;
+  overflow-wrap: anywhere;
+}
+.mi-share-dialog {
+  padding: 0 !important;
+  gap: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  width: min(560px, 94vw, calc((100dvh - 100px) * 0.65)) !important;
+  max-width: 560px !important;
+  max-height: 94dvh;
+  display: flex !important;
+  flex-direction: column;
+}
+.mi-share-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 48px 14px 18px;
+  background: #fff;
+  border-bottom: 1px solid #dedfd8;
+  flex-shrink: 0;
+}
+.mi-share-toolbar h2 {
+  margin: 0 auto 0 0;
+  font:
+    600 22px Oswald,
+    sans-serif;
+}
+.mi-share-toolbar button {
+  border: 1px solid #dadcd4;
+  border-radius: 5px;
+  padding: 8px;
+  background: #fff;
+}
+.mi-share-toolbar button:disabled {
+  opacity: 0.45;
+}
+.mi-share-preview {
+  overflow: auto;
+  min-height: 0;
+  background: #f5f4f0;
+}
+.mi-share-error {
+  padding: 8px 18px;
+  color: #bb312d;
+  font-size: 12px;
+  background: #fff0ed;
+}

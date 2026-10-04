@@ -18,7 +18,12 @@ const { state } = vi.hoisted(() => ({
       stake: "500",
       currency: "UAH",
       confidence: "",
-      riskyTeams: [],
+      riskyTeams: [] as {
+        name: string;
+        game: string;
+        status: string;
+        notes: string;
+      }[],
     },
     tiltBlock: { blocked: false },
     activeGoals: [],
@@ -66,100 +71,105 @@ afterEach(() => {
   state.formData.selection = "NAVI";
   state.formData.stake = "500";
   state.formData.date = "2026-10-03";
+  state.formData.riskyTeams = [];
   state.expressEvents = [];
   state.allExpressEventsComplete = false;
+  state.isSubmitting = false;
   state.tiltBlock.blocked = false;
   state.handleSubmit.mockClear();
 });
-const click = (name: string) =>
-  fireEvent.click(screen.getByRole("button", { name, exact: true }));
-const predict = () => click("До прогнозу");
-describe("Record wizard", () => {
-  it("starts at match and never saves while advancing", () => {
+const save = () =>
+  fireEvent.click(screen.getByRole("button", { name: "Зберегти запис" }));
+describe("Single-page record entry", () => {
+  it("shows match, prediction and save together without wizard navigation", () => {
     render(<CS2BettingForm />);
-    expect(screen.getByRole("heading", { name: "ОБЕРІТЬ МАТЧ" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Матч" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Прогноз" })).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Зберегти запис" }),
+      screen.queryByRole("button", { name: "Перевірити запис" }),
     ).not.toBeInTheDocument();
-    predict();
-    expect(screen.getByRole("heading", { name: "ЩО ФІКСУЄМО?" })).toBeVisible();
-    click("Перевірити запис");
-    expect(
-      screen.getByRole("heading", { name: "ПЕРЕВІРТЕ ЗАПИС" }),
-    ).toBeVisible();
-    expect(state.handleSubmit).not.toHaveBeenCalled();
-    click("Зберегти запис");
+    save();
     expect(state.handleSubmit).toHaveBeenCalledOnce();
   });
   it("blocks incomplete match", () => {
     state.formData.team1 = "";
     render(<CS2BettingForm />);
-    predict();
+    save();
     expect(screen.getByRole("alert")).toHaveTextContent("дві різні команди");
     expect(state.handleSubmit).not.toHaveBeenCalled();
   });
-  it("blocks invalid odds from review", () => {
+  it("blocks invalid odds", () => {
     state.formData.odds = "1";
     render(<CS2BettingForm />);
-    predict();
-    click("Перевірити запис");
+    save();
     expect(screen.getByRole("alert")).toHaveTextContent("коефіцієнт");
-    expect(
-      screen.queryByRole("button", { name: "Зберегти запис" }),
-    ).not.toBeInTheDocument();
-  });
-  it("blocks stale selection after a team change", () => {
-    state.formData.selection = "OTHER";
-    render(<CS2BettingForm />);
-    predict();
-    click("Перевірити запис");
-    expect(screen.getByRole("alert")).toBeVisible();
-  });
-  it("allows back navigation without calling submit", () => {
-    render(<CS2BettingForm />);
-    predict();
-    click("Перевірити запис");
-    click("Назад");
-    expect(screen.getByRole("heading", { name: "ЩО ФІКСУЄМО?" })).toBeVisible();
-    expect(screen.getByDisplayValue("500")).toBeVisible();
     expect(state.handleSubmit).not.toHaveBeenCalled();
   });
-  it("shows separate payout and profit", () => {
+  it("blocks stale selection", () => {
+    state.formData.selection = "OTHER";
     render(<CS2BettingForm />);
-    predict();
+    save();
+    expect(screen.getByRole("alert")).toHaveTextContent("Оберіть ринок");
+  });
+  it("shows payout and profit", () => {
+    render(<CS2BettingForm />);
     expect(screen.getByText("1 000 ₴", { exact: false })).toBeVisible();
     expect(screen.getByText("+500 ₴")).toBeVisible();
   });
-  it("uses form currency for hypothetical returns", () => {
+  it("uses USD for returns", () => {
     state.formData.currency = "USD";
     render(<CS2BettingForm />);
-    predict();
     expect(screen.getByText("+500 $")).toBeVisible();
   });
-  it("disables progression during tilt protection", () => {
+  it("disables save for tilt protection", () => {
     state.tiltBlock.blocked = true;
     render(<CS2BettingForm />);
-    expect(screen.getByRole("button", { name: "До прогнозу" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Зберегти запис" }),
+    ).toBeDisabled();
+  });
+  it("disables save while submitting", () => {
+    state.isSubmitting = true;
+    render(<CS2BettingForm />);
+    expect(screen.getByRole("button", { name: "Збереження…" })).toBeDisabled();
   });
   it("blocks empty express", () => {
     state.formData.betCategory = "Експрес";
     render(<CS2BettingForm />);
-    predict();
+    save();
     expect(screen.getByRole("alert")).toHaveTextContent("хоча б одну");
   });
-  it("blocks incomplete express at prediction", () => {
+  it("blocks incomplete express", () => {
     state.formData.betCategory = "Експрес";
     state.expressEvents = [{ match: "A vs B" }];
     render(<CS2BettingForm />);
-    predict();
-    click("Перевірити запис");
+    save();
     expect(screen.getByRole("alert")).toBeVisible();
     expect(state.handleSubmit).not.toHaveBeenCalled();
   });
-  it("does not skip directly from match to review", () => {
+  it("shows both teams with neutral missing notes", () => {
     render(<CS2BettingForm />);
-    expect(
-      screen.getByRole("button", { name: /3\s*Перевірка/ }),
-    ).toBeDisabled();
+    expect(screen.getAllByText("Немає збережених приміток")).toHaveLength(2);
+  });
+  it("preserves real risk status and note", () => {
+    state.formData.riskyTeams = [
+      {
+        name: "NAVI",
+        game: "CS",
+        status: "БАН",
+        notes: "Коментар користувача",
+      },
+    ];
+    render(<CS2BettingForm />);
+    expect(screen.getByText("БАН")).toBeVisible();
+    expect(screen.getByText("Коментар користувача")).toBeVisible();
+    expect(screen.getByText("Ваш вибір")).toBeVisible();
+  });
+  it("does not match notes from another game", () => {
+    state.formData.riskyTeams = [
+      { name: "NAVI", game: "Дота", status: "БАН", notes: "Dota only" },
+    ];
+    render(<CS2BettingForm />);
+    expect(screen.queryByText("Dota only")).not.toBeInTheDocument();
   });
 });
