@@ -1,10 +1,12 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import { AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Bet } from "@/types/betting";
+import "./DeleteBetDialog.css";
 
 interface DeleteBetDialogProps {
   bet: Bet | null;
@@ -12,31 +14,63 @@ interface DeleteBetDialogProps {
   onClose: () => void;
 }
 
-export default function DeleteBetDialog({ bet, onConfirm, onClose }: DeleteBetDialogProps) {
+export default function DeleteBetDialog({
+  bet,
+  onConfirm,
+  onClose,
+}: DeleteBetDialogProps) {
   if (!bet) return null;
 
+  const matchName =
+    bet.match || `${bet.team1 || ""}${bet.team2 ? ` vs ${bet.team2}` : ""}`;
+
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="rounded-3xl max-w-md border border-gray-200 p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100 flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-red-600" strokeWidth={1.5} />
-            </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900">Видалити запис?</DialogTitle>
-          </div>
-        </DialogHeader>
-        <div className="border-t border-gray-200" />
-        <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
-          <DialogDescription className="text-sm text-gray-500">
-            Ви впевнені, що хочете видалити запис <strong className="text-gray-900">{bet.team1} vs {bet.team2}</strong>?
-            <br />Цю дію неможливо скасувати.
+    <Dialog
+      open={true}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onClose();
+      }}
+    >
+      <DialogContent className="delete-bet">
+        <header className="delete-bet__header">
+          <DialogTitle className="delete-bet__title">
+            Видалити запис?
+          </DialogTitle>
+
+          <DialogDescription className="delete-bet__subtitle">
+            Дію неможливо скасувати.
           </DialogDescription>
-          <DialogFooter className="flex gap-3 sm:gap-3">
-            <Button variant="outline" onClick={onClose} className="flex-1 rounded-2xl">Скасувати</Button>
-            <Button onClick={onConfirm} variant="destructive" className="flex-1 rounded-2xl">Видалити</Button>
-          </DialogFooter>
+        </header>
+
+        <div className="delete-bet__body">
+          <p className="delete-bet__match">{matchName}</p>
+
+          <div className="delete-bet__warning">
+            <AlertTriangle size={20} aria-hidden="true" />
+            <p>
+              Ви впевнені, що хочете видалити цей запис? Всі дані про ставку
+              буде втрачено назавжди.
+            </p>
+          </div>
         </div>
+
+        <footer className="delete-bet__footer">
+          <button
+            type="button"
+            className="delete-bet__button"
+            onClick={onClose}
+          >
+            Скасувати
+          </button>
+
+          <button
+            type="button"
+            className="delete-bet__button delete-bet__button--danger"
+            onClick={onConfirm}
+          >
+            Видалити
+          </button>
+        </footer>
       </DialogContent>
     </Dialog>
   );

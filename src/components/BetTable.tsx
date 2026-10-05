@@ -497,168 +497,57 @@ const BetTableMemo = memo(function BetTable({
       .slice(0, 100);
   }, [sortedAndFilteredBets, compactPeriodFilter, compactMonth]);
 
-  // Build compact results text (for clipboard copy)
-  const compactResultsText = useMemo(() => {
-    return filteredCompletedBets
-      .map((b) => {
-        const icon = b.result === "Win" ? "✅" : "✕";
-        const odds = Number(b.odds).toFixed(2);
-        const isExpress = isExpressBet(b);
-        if (isExpress) {
-          const count =
-            getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
-          return `${icon}~${odds}. Експрес ${count}x`;
-        }
-        const selectedTeam =
-          b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
-        const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
-        const betDesc = humanizeBetType(rawDesc);
-        return `${icon}~${odds}. ${selectedTeam}, ${betDesc}`;
-      })
-      .join("\n");
-  }, [filteredCompletedBets]);
-
-  // Build rendered rows with team icons
-  const compactRows = useMemo(() => {
-    return filteredCompletedBets.map((b, idx) => {
+  // Build structured records for the compact results modal.
+  const compactRecords = useMemo(() => {
+    return filteredCompletedBets.map((b) => {
       const isWin = b.result === "Win";
-      const odds = Number(b.odds).toFixed(2);
       const isExpress = isExpressBet(b);
+      const currency = (b.currency || "UAH") === "USD" ? "USD" : "UAH";
+      const rate = b.exchangeRate ? Number(b.exchangeRate) : 0;
 
-      // For express bets: show first event's team/selection in the team column, "Експрес Nx" as description
-      let selectedTeam: string;
-      let betDesc: string;
+      // Profit in the record's own currency.
+      let profit: number;
+      if (isWin) {
+        profit = Number(b.profit || b.amount * b.odds - b.amount);
+        if (currency === "USD" && rate > 0) profit = profit / rate;
+      } else {
+        let amount = Number(b.amount || 0);
+        if (currency === "USD" && rate > 0) amount = amount / rate;
+        profit = -amount;
+      }
+
+      let selection: string;
+      let market: string;
       let logoUrl: string | null;
 
       if (isExpress) {
         const count =
           getExpressEventCount(b) || (b.format ? parseInt(b.format) : 0) || 0;
-        const events = (b.betType || "").split(" • ").filter(Boolean);
-        const firstEvent = events[0]?.replace(/^\d+\.\s*/, "") || b.match || "";
-        // Parse first event: "FNATIC vs BRUTE | Map 3 Winner: BRUTE @1.5"
-        const parts = firstEvent.split(" | ");
-        const matchPart = parts[0] || "";
-        const selectionPart = parts[1] || "";
-        // Extract team from matchPart: "FNATIC vs BRUTE"
-        const teams = matchPart.split(/\s+vs\s+/i);
-        if (teams.length === 2) {
-          // Try to get the winning team's logo from expressLogos
-          const selection = selectionPart.split(":")[0]?.trim() || "";
-          const selectedFromMatch =
-            selectionPart.split(":").slice(1).join(":").split("@")[0]?.trim() ||
-            "";
-          selectedTeam = selectedFromMatch || teams[0] || selection;
-          betDesc = `Експрес x${count || events.length}`;
-          // Get logo from expressLogos first event
-          if (b.expressLogos && b.expressLogos.length > 0) {
-            // Determine which team logo to use based on selection
-            const sel = selectedTeam.toLowerCase().trim();
-            const t1 = teams[0].toLowerCase().trim();
-            const t2 = teams[1].toLowerCase().trim();
-            if (t1 && sel === t1)
-              logoUrl = b.expressLogos[0]?.logoTeam1 || null;
-            else if (t2 && sel === t2)
-              logoUrl = b.expressLogos[0]?.logoTeam2 || null;
-            else logoUrl = b.expressLogos[0]?.logoTeam1 || null;
-          } else {
-            logoUrl = getSelectedTeamLogo(b, selectedTeam);
-          }
-        } else {
-          selectedTeam = "Експрес";
-          betDesc = `Експрес x${count}`;
-          logoUrl = null;
-        }
+        selection = `Експрес ${count}x`;
+        market = "Кілька подій";
+        logoUrl = null;
       } else {
-        selectedTeam =
+        selection =
           b.selection || b.betType.match(/[-–—]\s*(.+)$/)?.[1] || b.team1 || "";
         const rawDesc = b.betType.replace(/\s*[-–—]\s*[^\-–—]+$/, "").trim();
-        betDesc = humanizeBetType(rawDesc);
-        logoUrl = getSelectedTeamLogo(b, selectedTeam);
+        market = humanizeBetType(rawDesc)
+          .replace(/\bMapWinner\b/g, "Переможець карти")
+          .replace(/\bMatchWinner\b/g, "Переможець матчу");
+        logoUrl = getSelectedTeamLogo(b, selection);
       }
 
-      const teamPlaceholder = (b.game || "").toLowerCase().startsWith("cs")
-        ? "/assets/team-placeholder-cs2.svg"
-        : "/assets/team-placeholder-dota.svg";
-      return (
-        <div
-          key={idx}
-          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors gap-0"
-        >
-          <span
-            className={`flex-shrink-0 w-10 flex items-center justify-center text-lg font-bold ${isWin ? "" : "text-red-500"}`}
-          >
-            {isWin ? "✅" : "✕"}
-          </span>
-          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span className="flex-shrink-0 w-16 text-center text-base font-bold text-gray-800 tabular-nums">
-            x{odds}
-          </span>
-          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <div className="flex-shrink-0 flex items-center justify-center gap-1.5 w-48">
-            <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
-              <img
-                src={logoUrl || teamPlaceholder}
-                alt={selectedTeam}
-                className="w-5 h-5 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = teamPlaceholder;
-                }}
-              />
-            </div>
-            <span
-              className="text-base font-semibold text-gray-900 truncate"
-              title={selectedTeam}
-            >
-              {selectedTeam}
-            </span>
-          </div>
-          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span
-            className="flex-1 text-center text-base text-gray-800 truncate"
-            title={betDesc}
-          >
-            {betDesc
-              .replace(/\bMapWinner\b/g, "Переможець карти")
-              .replace(/\bMatchWinner\b/g, "Переможець матчу")}
-          </span>
-          <span className="flex-shrink-0 w-px h-6 bg-gray-200" />
-          <span
-            className={`flex-shrink-0 w-24 text-right text-base font-bold tabular-nums ${
-              (b.currency || "UAH") === "USD"
-                ? "text-emerald-600"
-                : "text-amber-600"
-            }`}
-          >
-            {(() => {
-              const currency = b.currency || "UAH";
-              const sym = getCurrencySymbol(currency);
-              // b.profit is always stored in UAH; convert back for USD bets
-              let profit = Number(b.profit || b.amount * b.odds - b.amount);
-              if (currency === "USD" && b.exchangeRate) {
-                const rate = Number(b.exchangeRate);
-                if (rate > 0) profit = profit / rate;
-              }
-              if (isWin) {
-                return `+${profit.toFixed(2)} ${sym}`;
-              }
-              let amount = Number(b.amount || 0);
-              if (currency === "USD" && b.exchangeRate) {
-                const rate = Number(b.exchangeRate);
-                if (rate > 0) amount = amount / rate;
-              }
-              return `-${amount.toFixed(2)} ${sym}`;
-            })()}
-          </span>
-        </div>
-      );
+      return {
+        id: String(b.id || `${b.date}-${b.match}-${b.amount}`),
+        selection,
+        market,
+        logoUrl,
+        odds: Number(b.odds),
+        result: (isWin ? "Win" : "Loss") as "Win" | "Loss",
+        profit,
+        currency: currency as "UAH" | "USD",
+      };
     });
   }, [filteredCompletedBets]);
-
-  const handleCopyCompact = () => {
-    navigator.clipboard.writeText(compactResultsText).then(() => {
-      // toast handled by parent or just silent
-    });
-  };
 
   return (
     <div
@@ -1446,18 +1335,15 @@ const BetTableMemo = memo(function BetTable({
       <CompactBetModal
         open={showCompactResults}
         onClose={() => setShowCompactResults(false)}
-        periodFilter={compactPeriodFilter}
+        period={compactPeriodFilter as "all" | "day" | "week" | "month"}
         month={compactMonth}
         monthOptions={monthOptions}
-        betsCount={filteredCompletedBets.length}
-        rows={compactRows}
-        copyText={compactResultsText}
+        records={compactRecords}
         onPeriodChange={(val) => {
           setCompactPeriodFilter(val as typeof compactPeriodFilter);
           if (val !== "month") setCompactMonth("");
         }}
         onMonthChange={setCompactMonth}
-        onCopy={handleCopyCompact}
       />
     </div>
   );

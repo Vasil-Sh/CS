@@ -1,0 +1,179 @@
+.delete-bet {
+  --delete-dark: #171a16;
+  --delete-orange: #ff642f;
+  --delete-background: #f5f4f0;
+  --delete-border: #dcded7;
+  --delete-muted: #757970;
+  --delete-danger: #b3261e;
+
+  display: flex !important;
+  flex-direction: column;
+  gap: 0 !important;
+
+  width: min(520px, calc(100vw - 32px)) !important;
+  max-width: 520px !important;
+  max-height: calc(100dvh - 32px);
+
+  padding: 0 !important;
+  overflow: hidden;
+
+  border: 1px solid #41463d;
+  border-radius: 8px !important;
+  background: var(--delete-background);
+  color: #20251f;
+  font-family: Manrope, sans-serif;
+  box-shadow: 0 24px 80px #0005;
+}
+
+.delete-bet *,
+.delete-bet *::before,
+.delete-bet *::after {
+  box-sizing: border-box;
+}
+
+.delete-bet > button {
+  top: 22px;
+  right: 22px;
+  color: #fff;
+  opacity: 0.85;
+}
+
+.delete-bet > button:hover {
+  opacity: 1;
+}
+
+.delete-bet__header {
+  flex-shrink: 0;
+  padding: 24px 64px 22px 28px;
+  border-bottom: 4px solid var(--delete-orange);
+  background: var(--delete-dark);
+}
+
+.delete-bet__title {
+  margin: 0;
+  color: #fff;
+  font:
+    700 30px/1.15 Oswald,
+    sans-serif;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+
+.delete-bet__subtitle {
+  margin: 8px 0 0;
+  color: #b8bdb7;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.delete-bet__body {
+  padding: 24px 28px 20px;
+}
+
+.delete-bet__match {
+  display: block;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #f0d3cc;
+  border-radius: 6px;
+  background: #fff3f0;
+  color: #a53325;
+  font:
+    600 18px/1.35 Oswald,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.delete-bet__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 0;
+  color: var(--delete-muted);
+}
+
+.delete-bet__warning svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.delete-bet__warning p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.delete-bet__footer {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 28px;
+  border-top: 1px solid var(--delete-border);
+  background: #fafaf7;
+}
+
+.delete-bet__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 140px;
+  min-height: 44px;
+  padding: 10px 20px;
+
+  border: 1px solid #747b73;
+  border-radius: 5px;
+  background: transparent;
+  color: #252b25;
+
+  font:
+    700 14px/1.3 Manrope,
+    sans-serif;
+  cursor: pointer;
+}
+
+.delete-bet__button:hover:not(:disabled) {
+  background: #eeefe9;
+}
+
+.delete-bet__button--danger {
+  min-width: 160px;
+  border-color: var(--delete-danger);
+  background: var(--delete-danger);
+  color: #fff;
+}
+
+.delete-bet__button--danger:hover:not(:disabled) {
+  border-color: #9c1f18;
+  background: #9c1f18;
+}
+
+.delete-bet button:focus-visible {
+  outline: 3px solid var(--delete-orange);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .delete-bet__header {
+    padding: 20px 52px 18px 18px;
+  }
+
+  .delete-bet__title {
+    font-size: 25px;
+  }
+
+  .delete-bet__body {
+    padding: 20px 18px;
+  }
+
+  .delete-bet__footer {
+    padding: 14px 18px;
+  }
+
+  .delete-bet__button {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 14px;
+  }
+}

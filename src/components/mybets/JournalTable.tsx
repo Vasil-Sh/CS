@@ -19,6 +19,8 @@ import {
   ListChecks,
   FileText,
   Trash2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,7 +35,6 @@ import { api } from "@/lib/apiClient";
 import { UserDataService } from "@/lib/userDataService";
 import { parseExpressEvents } from "@/lib/parser/expressParser";
 import CompactBetModal from "./CompactBetModal";
-import { toast } from "sonner";
 import {
   journalKey,
   journalExpress,
@@ -310,6 +311,50 @@ export default function JournalTable(p: Props) {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+  const actions = (bet: Bet) => (
+    <div className="journal-actions">
+      {bet.result === "Pending" && (
+        <>
+          <button
+            type="button"
+            className="journal-action journal-action-win"
+            onClick={() => p.onUpdateResult(bet, "Win")}
+            aria-label={`Позначити виграш: ${bet.match}`}
+            title="Виграш"
+          >
+            <CheckCircle size={18} />
+          </button>
+          <button
+            type="button"
+            className="journal-action journal-action-loss"
+            onClick={() => p.onUpdateResult(bet, "Loss")}
+            aria-label={`Позначити програш: ${bet.match}`}
+            title="Програш"
+          >
+            <XCircle size={18} />
+          </button>
+        </>
+      )}
+      <button
+        type="button"
+        className="journal-action journal-action-tg"
+        onClick={() => p.onBetDetails(bet)}
+        aria-label={`Текст для Telegram: ${bet.match}`}
+        title="Текст для Telegram"
+      >
+        <FileText size={18} />
+      </button>
+      <button
+        type="button"
+        className="journal-action journal-action-del"
+        onClick={() => p.onDeleteBet(bet)}
+        aria-label={`Видалити: ${bet.match}`}
+        title="Видалити"
+      >
+        <Trash2 size={18} />
+      </button>
+    </div>
+  );
   const badge = (bet: Bet) => (
     <span className={`journal-badge status-${bet.result}`}>
       {journalStatus(bet)}
@@ -343,7 +388,11 @@ export default function JournalTable(p: Props) {
             <small>{date.time}</small>
           </>
         );
-      case "match":
+      case "match": {
+        const parts = (bet.match || "").split(/\s+vs\s+/i);
+        const t1 = bet.team1 || parts[0] || "";
+        const t2 = bet.team2 || parts[1] || "";
+        const matchName = bet.match.replace(/\s+vs\s+/i, " — ");
         return (
           <button
             className="journal-match-button"
@@ -351,27 +400,47 @@ export default function JournalTable(p: Props) {
             aria-label={`Деталі: ${bet.match}`}
             aria-expanded={selectedKey === journalKey(bet)}
           >
-            <span className="journal-match-title">
-              {journalExpress(bet) ? (
+            {journalExpress(bet) ? (
+              <span className="journal-match-title">
                 <ListChecks size={24} />
-              ) : (
-                <TeamLogo src={bet.logoTeam1} name={bet.team1 || bet.match} />
-              )}
-              <strong>
-                {journalExpress(bet)
-                  ? `Експрес · ${parseExpressEvents(bet.betType).length || bet.format?.replace("x", "") || "—"} подій`
-                  : bet.match.replace(/\s+vs\s+/i, " — ")}
-              </strong>
-              {!journalExpress(bet) && bet.logoTeam2 && (
-                <TeamLogo src={bet.logoTeam2} name={bet.team2 || ""} />
-              )}
-            </span>
+                <strong>
+                  Експрес ·{" "}
+                  {parseExpressEvents(bet.betType).length ||
+                    bet.format?.replace("x", "") ||
+                    "—"}{" "}
+                  подій
+                </strong>
+              </span>
+            ) : (
+              <span className="journal-match-title">
+                {/* Wide: logos flanking the full name */}
+                <span className="journal-match-inline">
+                  <TeamLogo src={bet.logoTeam1} name={t1} />
+                  <strong>{matchName}</strong>
+                  {t2 && <TeamLogo src={bet.logoTeam2} name={t2} />}
+                </span>
+                {/* Narrow: one logo per team, name beside it */}
+                <span className="journal-match-stacked">
+                  <span className="journal-match-team">
+                    <TeamLogo src={bet.logoTeam1} name={t1} />
+                    <strong>{t1}</strong>
+                  </span>
+                  {t2 && (
+                    <span className="journal-match-team">
+                      <TeamLogo src={bet.logoTeam2} name={t2} />
+                      <strong>{t2}</strong>
+                    </span>
+                  )}
+                </span>
+              </span>
+            )}
             <small>
               {journalExpress(bet) ? "Переглянути події →" : journalMarket(bet)}{" "}
               · {bet.game || "CS2"} · {bet.format || "—"}
             </small>
           </button>
         );
+      }
       case "selection":
         return journalExpress(bet) ? "Експрес" : journalSelection(bet);
       case "amount":
@@ -399,17 +468,20 @@ export default function JournalTable(p: Props) {
     );
     return date >= start && date <= now;
   });
-  const compactText = compactBets
-    .map(
-      (b) =>
-        `${b.match} · ${journalSelection(b)} · ${Number(b.odds).toFixed(2)} · ${journalMoney(journalProfit(b), b.currency, true)} · ${journalStatus(b)}`,
-    )
-    .join("\n");
+  const compactRecords = compactBets.map((b) => ({
+    id: journalKey(b),
+    selection: journalExpress(b)
+      ? `Експрес · ${parseExpressEvents(b.betType).length || b.format?.replace("x", "") || "—"} подій`
+      : journalSelection(b),
+    market: journalExpress(b) ? "Кілька подій" : journalMarket(b),
+    logoUrl: journalExpress(b) ? null : b.logoTeam1,
+    odds: Number(b.odds),
+    result: (b.result === "Win" ? "Win" : "Loss") as "Win" | "Loss",
+    profit: journalProfit(b) ?? 0,
+    currency: (b.currency === "USD" ? "USD" : "UAH") as "UAH" | "USD",
+  }));
   return (
-    <section
-      className="journal-workspace is-dense"
-      aria-label="Журнал записів"
-    >
+    <section className="journal-workspace is-dense" aria-label="Журнал записів">
       <div className="journal-tools">
         <label className="journal-search">
           <Search size={17} />
@@ -426,7 +498,13 @@ export default function JournalTable(p: Props) {
           onClick={p.onToggleAdvancedFilters}
         >
           <SlidersHorizontal size={15} />
-          Фільтри{currency !== "all" || category !== "all" || game !== "all" || (p.tableFilter !== "today" && p.periodFilter !== "all") ? " •" : ""}
+          Фільтри
+          {currency !== "all" ||
+          category !== "all" ||
+          game !== "all" ||
+          (p.tableFilter !== "today" && p.periodFilter !== "all")
+            ? " •"
+            : ""}
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -456,10 +534,7 @@ export default function JournalTable(p: Props) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <button
-          className="journal-compact"
-          onClick={() => setCompact(true)}
-        >
+        <button className="journal-compact" onClick={() => setCompact(true)}>
           <FileText size={15} />
           Стислий список
         </button>
@@ -518,7 +593,9 @@ export default function JournalTable(p: Props) {
               <option value="express">Експрес</option>
             </select>
           </label>
-          <button className="journal-reset" onClick={reset}>Скинути фільтри</button>
+          <button className="journal-reset" onClick={reset}>
+            Скинути фільтри
+          </button>
         </div>
       )}
       <div className="journal-layout">
@@ -600,7 +677,7 @@ export default function JournalTable(p: Props) {
                           {cell(id, bet)}
                         </td>
                       ))}
-                    <td className="col-actions">{menu(bet)}</td>
+                    <td className="col-actions">{actions(bet)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -659,8 +736,8 @@ export default function JournalTable(p: Props) {
               </button>
             </footer>
             <p className="journal-footnote">
-              Суми у валюті запису. Валюти не підсумовуються. Сортування профіту —
-              за UAH.
+              Суми у валюті запису. Валюти не підсумовуються. Сортування профіту
+              — за UAH.
             </p>
           </div>
         </div>
@@ -746,13 +823,23 @@ export default function JournalTable(p: Props) {
               </div>
               {selected.result === "Pending" && (
                 <div className="journal-resolve">
-                  <p>Запис очікує результату</p>
-                  <button onClick={() => p.onUpdateResult(selected, "Win")}>
-                    Позначити виграш
-                  </button>
-                  <button onClick={() => p.onUpdateResult(selected, "Loss")}>
-                    Позначити програш
-                  </button>
+                  <span className="journal-resolve-label">
+                    Запис очікує результату
+                  </span>
+                  <div className="journal-resolve-actions">
+                    <button
+                      className="journal-resolve-win"
+                      onClick={() => p.onUpdateResult(selected, "Win")}
+                    >
+                      Виграш
+                    </button>
+                    <button
+                      className="journal-resolve-loss"
+                      onClick={() => p.onUpdateResult(selected, "Loss")}
+                    >
+                      Програш
+                    </button>
+                  </div>
                 </div>
               )}
               {journalExpress(selected) && (
@@ -800,28 +887,15 @@ export default function JournalTable(p: Props) {
       <CompactBetModal
         open={compact}
         onClose={() => setCompact(false)}
-        periodFilter={compactPeriod}
-        onPeriodChange={setCompactPeriod}
+        period={compactPeriod as "all" | "day" | "week" | "month"}
+        onPeriodChange={(val) => setCompactPeriod(val)}
         month={compactMonth}
         onMonthChange={setCompactMonth}
         monthOptions={[...new Set(p.bets.map((b) => b.date.slice(0, 7)))]
           .sort()
           .reverse()
           .map((value) => ({ value, label: value }))}
-        betsCount={compactBets.length}
-        rows={compactBets.map((b) => (
-          <div key={journalKey(b)} className="flex justify-between gap-4 py-2">
-            <span>{b.match}</span>
-            {profit(b)}
-          </div>
-        ))}
-        copyText={compactText}
-        onCopy={() => {
-          navigator.clipboard
-            .writeText(compactText)
-            .then(() => toast.success("Скопійовано"))
-            .catch(() => toast.error("Не вдалося скопіювати"));
-        }}
+        records={compactRecords}
       />
     </section>
   );

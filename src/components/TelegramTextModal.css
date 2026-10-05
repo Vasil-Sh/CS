@@ -1,0 +1,330 @@
+/* Не дублюйте import, якщо шрифти вже підключені глобально. */
+
+.telegram-text {
+  --telegram-dark: #171a16;
+  --telegram-orange: #ff642f;
+  --telegram-background: #f5f4f0;
+  --telegram-border: #d8dbd3;
+  --telegram-muted: #737a80;
+
+  display: flex !important;
+  flex-direction: column;
+  gap: 0 !important;
+
+  width: min(720px, calc(100vw - 32px)) !important;
+  max-width: 720px !important;
+  max-height: calc(100dvh - 32px);
+
+  padding: 0 !important;
+  overflow: hidden;
+
+  border: 1px solid #41463d;
+  border-radius: 8px !important;
+  background: var(--telegram-background);
+  color: #20251f;
+  font-family: Manrope, sans-serif;
+  box-shadow: 0 24px 80px #0005;
+}
+
+.telegram-text *,
+.telegram-text *::before,
+.telegram-text *::after {
+  box-sizing: border-box;
+}
+
+/* Хрестик, який уже додає ваш DialogContent. */
+.telegram-text > button {
+  top: 22px;
+  right: 22px;
+  color: #fff;
+  opacity: 0.85;
+}
+
+.telegram-text > button:hover {
+  opacity: 1;
+}
+
+.telegram-text__header {
+  flex-shrink: 0;
+  padding: 24px 64px 22px 28px;
+  border-bottom: 4px solid var(--telegram-orange);
+  background: var(--telegram-dark);
+}
+
+.telegram-text__title {
+  margin: 0;
+  color: #fff;
+  font:
+    700 32px/1.15 Oswald,
+    sans-serif;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+
+.telegram-text__subtitle {
+  margin: 8px 0 0;
+  color: #b8bdb7;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.telegram-text__body {
+  flex: 1;
+  min-height: 0;
+  padding: 26px 28px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.telegram-text__context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.telegram-text__context h3 {
+  min-width: 0;
+  margin: 0;
+  font:
+    600 25px/1.25 Oswald,
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.telegram-text__context > span {
+  flex-shrink: 0;
+  color: var(--telegram-muted);
+  font-size: 13px;
+}
+
+.telegram-text__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.telegram-text__label-row label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.telegram-text__restore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--telegram-muted);
+  font:
+    500 13px/1.4 Manrope,
+    sans-serif;
+  cursor: pointer;
+}
+
+.telegram-text__restore:hover:not(:disabled) {
+  color: #242b23;
+}
+
+.telegram-text__restore:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.telegram-text__editor {
+  display: block;
+  width: 100%;
+  height: clamp(260px, 42dvh, 380px);
+  min-height: 220px;
+  padding: 16px;
+
+  border: 1px solid #c6ccd0;
+  border-radius: 5px;
+  background: #fff;
+  color: #202631;
+
+  font:
+    400 15px/1.55 Manrope,
+    sans-serif;
+  caret-color: var(--telegram-orange);
+
+  resize: vertical;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.telegram-text__editor:focus {
+  border-color: var(--telegram-orange);
+  outline: 2px solid #ff642f26;
+  outline-offset: 1px;
+}
+
+.telegram-text__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  color: var(--telegram-muted);
+}
+
+.telegram-text__notice svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.telegram-text__notice p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.telegram-text__error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #efc4bd;
+  border-radius: 5px;
+  background: #fff0ec;
+  color: #a53325;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.telegram-text__footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 18px 28px;
+  border-top: 1px solid var(--telegram-border);
+  background: #fafaf7;
+}
+
+.telegram-text__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 140px;
+  min-height: 44px;
+  padding: 10px 20px;
+
+  border: 1px solid #747b73;
+  border-radius: 5px;
+  background: transparent;
+  color: #252b25;
+
+  font:
+    700 14px/1.3 Manrope,
+    sans-serif;
+  cursor: pointer;
+}
+
+.telegram-text__button:hover:not(:disabled) {
+  background: #eeefe9;
+}
+
+.telegram-text__button--primary {
+  min-width: 225px;
+  border-color: var(--telegram-orange);
+  background: var(--telegram-orange);
+  color: #fff;
+}
+
+.telegram-text__button--primary:hover:not(:disabled) {
+  border-color: #e95322;
+  background: #e95322;
+}
+
+.telegram-text__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.telegram-text__copy-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.telegram-text__copy-group p {
+  max-width: 300px;
+  margin: 0;
+  color: var(--telegram-muted);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.telegram-text button:focus-visible {
+  outline: 3px solid var(--telegram-orange);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .telegram-text__header {
+    padding: 20px 52px 18px 18px;
+  }
+
+  .telegram-text__title {
+    font-size: 27px;
+  }
+
+  .telegram-text__body {
+    padding: 20px 18px;
+  }
+
+  .telegram-text__context {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+
+  .telegram-text__context h3 {
+    font-size: 23px;
+  }
+
+  .telegram-text__label-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .telegram-text__editor {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .telegram-text__footer {
+    padding: 16px 18px;
+    gap: 10px;
+  }
+
+  .telegram-text__button {
+    min-width: 0;
+    padding-inline: 14px;
+  }
+
+  .telegram-text__copy-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .telegram-text__button--primary {
+    width: 100%;
+  }
+
+  .telegram-text__copy-group p {
+    font-size: 10px;
+  }
+}

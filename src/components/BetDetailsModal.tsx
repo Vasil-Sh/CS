@@ -1,19 +1,15 @@
+import { useId, useRef, useState } from "react";
+import { Check, Copy, Info, RotateCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Copy, Check, FileText } from "lucide-react";
-import { toast } from "sonner";
-import { useState, useEffect, useRef } from "react";
-import { getBetTypeLabel } from '@/lib/displayHelpers';
+import { getBetTypeLabel } from "@/lib/displayHelpers";
 import type { Bet } from "@/types/betting";
-import {
-  parseExpressEvents,
-} from "@/lib/parser/expressParser";
+import { parseExpressEvents } from "@/lib/parser/expressParser";
+import "./TelegramTextModal.css";
 
 interface BetDetailsModalProps {
   bet: Bet | null;
@@ -21,200 +17,289 @@ interface BetDetailsModalProps {
   onClose: () => void;
 }
 
+/** Build the Telegram message text for a single bet (regular or express). */
+function generateTelegramText(bet: Bet): string {
+  const currencySymbol = bet.currency === "USD" ? "$" : "₴";
+  const displayAmount = bet.originalAmount || bet.amount;
+  const isExpressBet =
+    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
+  const translate = (label: string) =>
+    label
+      .replace(/\bMapWinner\b/g, "Переможець карти")
+      .replace(/\bMatchWinner\b/g, "Переможець матчу");
+
+  if (isExpressBet) {
+    const parsedEvents = parseExpressEvents(bet.betType);
+    const eventCount = parsedEvents.length;
+
+    let text = `🚨 Експрес-прогноз (${eventCount} події)\n\n`;
+
+    parsedEvents.forEach((event, index) => {
+      text += `📌 Подія ${index + 1}:\n`;
+      text += `⚽ Матч: ${event.match}\n`;
+      text += `📊 Тип: ${translate(getBetTypeLabel(event.betType, bet.format))}\n`;
+      text += `🎯 Вибір: ${event.selection}\n`;
+      text += `💰 Коефіцієнт: ${event.odds}\n\n`;
+    });
+
+    text += `💵 Загальний коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
+    text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
+
+    const potentialWin = displayAmount * bet.odds;
+    text += `💎 Можливий виграш: ${potentialWin.toFixed(2)}${currencySymbol}\n\n`;
+
+    text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
+
+    return text;
+  }
+
+  const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
+  const winProbability =
+    bet.winProbability != null && !isNaN(bet.winProbability)
+      ? bet.winProbability
+      : null;
+
+  let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
+  text += `📊 Тип прогнозу: ${translate(getBetTypeLabel(bet.betType.split(" - ")[0], bet.format))}\n`;
+
+  if (bet.selection) {
+    text += `🎯 Вибір: ${bet.selection}\n`;
+  }
+
+  text += `💰 Коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
+  text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
+
+  if (winProbability !== null) {
+    text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
+  } else {
+    text += `\n`;
+  }
+
+  const matchUrl = bet.matchUrl || "";
+  if (matchUrl) {
+    text += `🎯 Посилання на гру: ${matchUrl}\n\n`;
+  } else {
+    text += `🎯 Посилання на гру: [Вставте посилання на HLTV]\n\n`;
+  }
+
+  text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
+
+  return text;
+}
+
+interface EditorProps {
+  matchName: string;
+  game?: string;
+  format?: string;
+  initialText: string;
+  onClose: () => void;
+}
+
+function TelegramTextEditor({
+  matchName,
+  game,
+  format,
+  initialText,
+  onClose,
+}: EditorProps) {
+  // Початковий шаблон фіксується на час відкриття.
+  // Оновлення батьківського компонента не стирають правки.
+  const [template] = useState(initialText);
+  const [text, setText] = useState(initialText);
+  const [copying, setCopying] = useState(false);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const busyRef = useRef(false);
+  const fieldId = useId();
+  const hintId = useId();
+  const errorId = useId();
+
+  const copied = copiedText === text;
+  const changed = text !== template;
+  const metadata = [game, format].filter(Boolean).join(" · ");
+
+  function restoreTemplate() {
+    if (!changed || copying) return;
+
+    const confirmed = window.confirm(
+      "Відновити початковий шаблон? Ваші зміни тексту буде втрачено.",
+    );
+
+    if (!confirmed) return;
+
+    setText(template);
+    setCopiedText(null);
+    setError("");
+    textareaRef.current?.focus();
+  }
+
+  async function copyText() {
+    if (busyRef.current || !text.trim()) return;
+
+    busyRef.current = true;
+    setCopying(true);
+    setCopiedText(null);
+    setError("");
+
+    // Копіюємо саме текст, який користувач бачить у полі.
+    const snapshot = text;
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard unavailable");
+      }
+
+      await navigator.clipboard.writeText(snapshot);
+      setCopiedText(snapshot);
+    } catch {
+      setError(
+        "Не вдалося скопіювати автоматично. Текст виділено — скопіюйте його вручну.",
+      );
+
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
+    } finally {
+      busyRef.current = false;
+      setCopying(false);
+    }
+  }
+
+  return (
+    <>
+      <header className="telegram-text__header">
+        <DialogTitle className="telegram-text__title">
+          Текст для Telegram
+        </DialogTitle>
+
+        <DialogDescription className="telegram-text__subtitle">
+          Відредагуйте повідомлення перед копіюванням.
+        </DialogDescription>
+      </header>
+
+      <div className="telegram-text__body">
+        <div className="telegram-text__context">
+          <h3>{matchName}</h3>
+          {metadata && <span>{metadata}</span>}
+        </div>
+
+        <div className="telegram-text__label-row">
+          <label htmlFor={fieldId}>Повідомлення</label>
+
+          <button
+            type="button"
+            className="telegram-text__restore"
+            onClick={restoreTemplate}
+            disabled={!changed || copying}
+          >
+            <RotateCcw size={17} aria-hidden="true" />
+            Відновити шаблон
+          </button>
+        </div>
+
+        <textarea
+          ref={textareaRef}
+          id={fieldId}
+          className="telegram-text__editor"
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value);
+            setCopiedText(null);
+            setError("");
+          }}
+          aria-describedby={error ? `${hintId} ${errorId}` : hintId}
+          spellCheck={false}
+          wrap="soft"
+        />
+
+        <div className="telegram-text__notice" id={hintId}>
+          <Info size={20} aria-hidden="true" />
+          <p>Редагування змінює лише текст повідомлення, не запис у журналі.</p>
+        </div>
+
+        {error && (
+          <p className="telegram-text__error" id={errorId} role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+
+      <footer className="telegram-text__footer">
+        <button
+          type="button"
+          className="telegram-text__button"
+          onClick={onClose}
+        >
+          Закрити
+        </button>
+
+        <div className="telegram-text__copy-group">
+          <button
+            type="button"
+            className="
+              telegram-text__button
+              telegram-text__button--primary
+            "
+            onClick={copyText}
+            disabled={copying || !text.trim()}
+            aria-busy={copying}
+          >
+            {copied ? (
+              <Check size={20} aria-hidden="true" />
+            ) : (
+              <Copy size={20} aria-hidden="true" />
+            )}
+
+            {copying
+              ? "Копіювання…"
+              : copied
+                ? "Скопійовано"
+                : "Копіювати текст"}
+          </button>
+
+          <p>Після копіювання вставте повідомлення в Telegram.</p>
+        </div>
+
+        <span className="sr-only" role="status">
+          {copied ? "Текст скопійовано в буфер обміну." : ""}
+        </span>
+      </footer>
+    </>
+  );
+}
+
 export default function BetDetailsModal({
   bet,
   open,
   onClose,
 }: BetDetailsModalProps) {
-  const [copied, setCopied] = useState(false);
-  const [editableText, setEditableText] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (bet && open) {
-      setEditableText(generateTelegramText());
-    }
-  }, [bet, open]);
-
   if (!bet) return null;
 
-  const currencySymbol = bet.currency === "USD" ? "$" : "₴";
-  const displayAmount = bet.originalAmount || bet.amount;
-
-  const isExpressBet =
-    bet.betType.includes("Експрес") || (bet.format ?? "").includes("x");
-
-  const generateTelegramText = () => {
-    if (isExpressBet) {
-      const parsedEvents = parseExpressEvents(bet.betType);
-      const eventCount = parsedEvents.length;
-
-      let text = `🚨 Експрес-прогноз (${eventCount} події)\n\n`;
-
-      parsedEvents.forEach((event, index) => {
-        text += `📌 Подія ${index + 1}:\n`;
-        text += `⚽ Матч: ${event.match}\n`;
-        text += `📊 Тип: ${getBetTypeLabel(event.betType, bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}\n`;
-        text += `🎯 Вибір: ${event.selection}\n`;
-        text += `💰 Коефіцієнт: ${event.odds}\n\n`;
-      });
-
-      text += `💵 Загальний коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
-      text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
-
-      const potentialWin = displayAmount * bet.odds;
-      text += `💎 Можливий виграш: ${potentialWin.toFixed(2)}${currencySymbol}\n\n`;
-
-      text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
-
-      return text;
-    } else {
-      const matchName = bet.match || `${bet.team1} vs ${bet.team2}`;
-      const winProbability =
-        bet.winProbability != null && !isNaN(bet.winProbability)
-          ? bet.winProbability
-          : null;
-
-      let text = `🚨 Прогноз на матч: ${matchName}\n\n`;
-      text += `📊 Тип прогнозу: ${getBetTypeLabel(bet.betType.split(" - ")[0], bet.format).replace(/\bMapWinner\b/g, 'Переможець карти').replace(/\bMatchWinner\b/g, 'Переможець матчу')}\n`;
-
-      if (bet.selection) {
-        text += `🎯 Вибір: ${bet.selection}\n`;
-      }
-
-      text += `💰 Коефіцієнт: ${Number(bet.odds).toFixed(2)}\n`;
-      text += `💵 Сума: ${displayAmount}${currencySymbol}\n`;
-
-      if (winProbability !== null) {
-        text += `📊 Імовірність виграшу: ${winProbability}%\n\n`;
-      } else {
-        text += `\n`;
-      }
-
-      const matchUrl = bet.matchUrl || "";
-      if (matchUrl) {
-        text += `🎯 Посилання на гру: ${matchUrl}\n\n`;
-      } else {
-        text += `🎯 Посилання на гру: [Вставте посилання на HLTV]\n\n`;
-      }
-
-      text += `🔔 Підписуйся на перевірену аналітику - @cs2beet`;
-
-      return text;
-    }
-  };
-
-  const handleCopyToClipboard = () => {
-    if (textareaRef.current) {
-      textareaRef.current.select();
-      textareaRef.current.setSelectionRange(0, 99999);
-
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard
-            .writeText(editableText)
-            .then(() => {
-              setCopied(true);
-              toast.success("Текст скопійовано в буфер обміну!");
-              copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-            })
-            .catch(() => {
-              fallbackCopy();
-            });
-        } else {
-          fallbackCopy();
-        }
-      } catch {
-        fallbackCopy();
-      }
-    }
-  };
-
-  const fallbackCopy = () => {
-    try {
-      const successful = document.execCommand("copy");
-      if (successful) {
-        setCopied(true);
-        toast.success("Текст скопійовано в буфер обміну!");
-        copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-      } else {
-        toast.error("Помилка при копіюванні");
-      }
-    } catch (error) {
-      toast.error("Помилка при копіюванні");
-      if (import.meta.env.DEV) console.error("Copy error:", error);
-    }
-  };
+  const matchName =
+    bet.match ||
+    `${bet.team1 || ""}${bet.team2 ? ` vs ${bet.team2}` : ""}`.trim();
+  const recordId = String(bet.id ?? `${bet.date}-${bet.match}-${bet.amount}`);
+  const initialText = generateTelegramText(bet);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200 rounded-3xl p-0 gap-0"
-        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}
-      >
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
-              <FileText className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
-            </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900">
-              Текст для Telegram
-            </DialogTitle>
-          </div>
-        </DialogHeader>
-
-        <div className="border-t border-gray-200" />
-
-        <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-sm font-medium text-gray-900 uppercase tracking-wide">
-              Формат тексту
-            </span>
-            <Button
-              onClick={handleCopyToClipboard}
-              size="sm"
-              className={`rounded-xl text-sm font-medium h-9 px-4 transition-all duration-200 ${
-                copied
-                  ? "bg-[#DCFCE7] hover:bg-[#DCFCE7] text-green-600 border border-[#86EFAC]"
-                  : "bg-primary hover:bg-blue-700 text-white"
-              }`}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" strokeWidth={2} />
-                  Скопійовано
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" strokeWidth={1.5} />
-                  Копіювати
-                </>
-              )}
-            </Button>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <Textarea
-              ref={textareaRef}
-              value={editableText}
-              onChange={(e) => setEditableText(e.target.value)}
-              className="min-h-[320px] font-mono text-sm bg-white border-0 rounded-2xl p-4 resize-none focus:ring-0 focus:outline-none text-gray-700 w-full"
-            />
-          </div>
-          <p className="text-xs text-gray-400 font-normal">
-            💡 Ви можете відредагувати текст перед копіюванням.{" "}
-            {!isExpressBet &&
-              !bet.matchUrl &&
-              'Не забудьте замінити "[Вставте посилання на HLTV]" на реальне посилання на матч'}
-          </p>
-        </div>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onClose();
+      }}
+    >
+      <DialogContent className="telegram-text">
+        {open && (
+          <TelegramTextEditor
+            key={recordId}
+            matchName={matchName}
+            game={bet.game}
+            format={bet.format}
+            initialText={initialText}
+            onClose={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

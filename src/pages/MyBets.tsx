@@ -35,27 +35,10 @@ interface UserRecord {
   username: string;
   isAdmin?: boolean;
 }
-interface BetStats {
-  totalBets: number;
-  winRate: number;
-  totalProfit: number;
-  averageROI: number;
-  profitByMonth: { month: string; profit: number }[];
-  profitByStrategy: { strategy: string; profit: number }[];
-}
 type TableFilterMode = "today" | "all";
 type ResultFilter = "all" | "Win" | "Loss" | "Pending";
 type PeriodFilter = "all" | "week" | "month" | "quarter";
 type SortBy = "date" | "profit" | "odds";
-
-const DEFAULT_STATS: BetStats = {
-  totalBets: 0,
-  winRate: 0,
-  totalProfit: 0,
-  averageROI: 0,
-  profitByMonth: [],
-  profitByStrategy: [],
-};
 
 export default function MyBets() {
   logRender("MyBets");
@@ -71,7 +54,6 @@ export default function MyBets() {
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
 
   // ── State ──
-  const [stats, setStats] = useState<BetStats>(DEFAULT_STATS);
   const [recentBets, setRecentBets] = useState<Bet[]>([]);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedBet, setSelectedBet] = useState<Bet | null>(null);
@@ -124,18 +106,6 @@ export default function MyBets() {
   const rollbackRef = useRef<Bet[] | null>(null);
 
   // ── Derived ──
-  const { activeBets, winningBets, losingBets } = useMemo(() => {
-    const active: Bet[] = [];
-    const winning: Bet[] = [];
-    const losing: Bet[] = [];
-    for (const b of recentBets) {
-      if (b.result === "Pending") active.push(b);
-      else if (b.result === "Win") winning.push(b);
-      else if (b.result === "Loss") losing.push(b);
-    }
-    return { activeBets: active, winningBets: winning, losingBets: losing };
-  }, [recentBets]);
-
   const isBankrollInitialized = useMemo(
     () => BankrollService.isInitialized(currentUser),
     [currentUser, bankrollRefreshKey],
@@ -249,40 +219,6 @@ export default function MyBets() {
     }
   };
 
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await UserDataService.fetchBetStats();
-      setStats(data.totalBets > 0 ? data : { ...DEFAULT_STATS, ...data });
-    } catch {
-      setStats(DEFAULT_STATS);
-    }
-  }, []);
-
-  const syncStats = useCallback(() => {
-    const allBets = recentBetsRef.current;
-    const completed = allBets.filter(
-      (b) => b.result === "Win" || b.result === "Loss",
-    );
-    const wins = completed.filter((b) => b.result === "Win").length;
-    const totalProfit = completed.reduce((sum, b) => sum + (b.profit || 0), 0);
-    setStats({
-      totalBets: allBets.length,
-      winRate:
-        completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
-      totalProfit: Math.round(totalProfit * 100) / 100,
-      averageROI:
-        completed.length > 0
-          ? Math.round(
-              (completed.reduce((sum, b) => sum + (b.roi || 0), 0) /
-                completed.length) *
-                100,
-            ) / 100
-          : 0,
-      profitByMonth: [],
-      profitByStrategy: [],
-    });
-  }, [recentBets]);
-
   const loadRecentBets = useCallback(async () => {
     try {
       const bets = await loadRecentBetsData();
@@ -291,11 +227,6 @@ export default function MyBets() {
       /* noop */
     }
   }, [currentUser, bankrollVersion]);
-
-  // Recompute stats whenever bets change
-  useEffect(() => {
-    syncStats();
-  }, [recentBets, syncStats]);
 
   // ── Handlers ──
   const handleRecordAdded = useCallback(() => {
@@ -392,8 +323,6 @@ export default function MyBets() {
         );
         if (note.trim())
           toast("Нотатку додано до запису", { description: note.trim() });
-        loadStats();
-        syncStats();
         // DataProvider handles bankroll recalculation — trigger refresh
         dataProvider.refresh().catch(() => {});
       } catch {
@@ -405,7 +334,7 @@ export default function MyBets() {
         toast.error("Помилка при оновленні результату");
       }
     },
-    [currentUser, bumpBankroll, syncStats],
+    [currentUser, bumpBankroll],
   );
 
   const updateBetResult = useCallback(
@@ -693,6 +622,13 @@ export default function MyBets() {
               setExpressModalOpen(false);
               setSelectedExpressBet(null);
               setSelectedExpressEvents([]);
+            }}
+            onShare={() => {
+              setExpressModalOpen(false);
+              setSelectedExpressBet(null);
+              setSelectedExpressEvents([]);
+              setSelectedBet(selectedExpressBet);
+              setShareModalOpen(true);
             }}
             parsedEvents={selectedExpressEvents}
           />
