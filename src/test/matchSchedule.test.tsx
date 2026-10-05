@@ -457,8 +457,8 @@ describe("dense schedule", () => {
     );
     expect(p.onEditNote).toHaveBeenCalledWith(p.model.matches[1], "STATE");
   });
-  it("keeps real live and finished scores in the match context", () => {
-    render(
+  it("shows live and finished scores in the source cell without status pills", () => {
+    const { container } = render(
       <MatchSchedule
         {...props([
           makeMatch({ matchStatus: "live", score1: 1, score2: 0 }),
@@ -471,7 +471,12 @@ describe("dense schedule", () => {
         ])}
       />,
     );
-    expect(screen.getByText("Зараз грають · 1:0")).toBeVisible();
+    const scores = Array.from(
+      container.querySelectorAll(".ms-source-score"),
+    ).map((el) => el.textContent?.trim());
+    expect(scores).toContain("1:0");
+    expect(scores).toContain("2:1");
+    expect(screen.queryByText("Зараз грають · 1:0")).not.toBeInTheDocument();
     expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
   });
   it("preserves source, express, results and refresh actions without saving a record", () => {

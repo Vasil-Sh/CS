@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
-  Clock3,
   ExternalLink,
   FileText,
   Info,
@@ -33,7 +32,6 @@ import {
   filterSchedule,
   formLabel,
   groupSchedule,
-  matchState,
   matchSource,
   nextScheduleDate,
   riskTone,
@@ -527,7 +525,10 @@ export default function MatchSchedule({
     const selectedForExpress = m.selectedMatchIds.has(match.id);
     const liked = m.matchRatings[match.id] === "like";
     const disliked = m.matchRatings[match.id] === "dislike";
-    const state = matchState(match, today);
+    const showSourceScore =
+      match.matchStatus === "finished" || match.matchStatus === "live";
+    const s1 = match.score1 ?? 0;
+    const s2 = match.score2 ?? 0;
     return (
       <Fragment key={match.id}>
         <div
@@ -587,18 +588,6 @@ export default function MatchSchedule({
                   {match.context || "Турнір не вказаний"}
                 </span>
               </span>
-              {match.matchStatus !== "finished" && (
-                <span
-                  className={`ms-match-status ms-match-status--${state.tone}`}
-                >
-                  {state.tone === "live" ? (
-                    <span className="ms-live-dot" />
-                  ) : (
-                    <Clock3 size={11} aria-hidden="true" />
-                  )}
-                  {state.text}
-                </span>
-              )}
             </span>
             <span className="ms-teams">
               <span className="ms-team">
@@ -650,36 +639,24 @@ export default function MatchSchedule({
             </span>
           </button>
           <div className="ms-source-cell">
-            {match.matchStatus === "finished" ? (
-              match.score1 != null && match.score2 != null ? (
-                <span className="ms-source-score">
-                  <span
-                    className={
-                      match.score1 === match.score2
-                        ? ""
-                        : match.score1 > match.score2
-                          ? "ms-score-win"
-                          : "ms-score-loss"
-                    }
-                  >
-                    {match.score1}
-                  </span>
-                  <span className="ms-score-sep">:</span>
-                  <span
-                    className={
-                      match.score1 === match.score2
-                        ? ""
-                        : match.score2 > match.score1
-                          ? "ms-score-win"
-                          : "ms-score-loss"
-                    }
-                  >
-                    {match.score2}
-                  </span>
+            {showSourceScore ? (
+              <span className="ms-source-score">
+                <span
+                  className={
+                    s1 === s2 ? "" : s1 > s2 ? "ms-score-win" : "ms-score-loss"
+                  }
+                >
+                  {s1}
                 </span>
-              ) : (
-                <span className="ms-source-score">Завершено</span>
-              )
+                <span className="ms-score-sep">:</span>
+                <span
+                  className={
+                    s1 === s2 ? "" : s2 > s1 ? "ms-score-win" : "ms-score-loss"
+                  }
+                >
+                  {s2}
+                </span>
+              </span>
             ) : (
               <a
                 className="ms-cell-icon"
