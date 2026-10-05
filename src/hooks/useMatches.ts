@@ -23,6 +23,10 @@ import {
 } from "@/lib/dota2Api";
 import { deepSeekService, type AIRecommendation } from "@/lib/deepSeekService";
 import { findRiskyTeams, getGameFilterValue } from "@/lib/riskyTeamsMatcher";
+import {
+  scheduleDate,
+  scheduleTime,
+} from "@/components/matches/matchScheduleModel";
 
 // ── Types ──
 export type FormStability =
@@ -1212,9 +1216,9 @@ export function useMatches() {
   const navigate = useNavigate();
   const handleAddToBets = useCallback(
     (match: Match) => {
-      const dateOnly = match.date ? match.date.split("T")[0] : match.date;
-      const timeMatch = match.date ? match.date.match(/T(\d{2}:\d{2})/) : null;
-      const time = timeMatch ? timeMatch[1] : undefined;
+      const dateOnly = scheduleDate(match.date);
+      const displayTime = scheduleTime(match.date);
+      const time = displayTime === "—" ? undefined : displayTime;
       navigate("/app/my-bets", {
         state: {
           prefillMatch: {

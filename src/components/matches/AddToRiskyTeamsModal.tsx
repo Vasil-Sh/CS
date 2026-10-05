@@ -36,6 +36,7 @@ interface AddToRiskyTeamsModalProps {
   team1: TeamInfo;
   team2: TeamInfo;
   game: string; // "CS2" or "Dota2" — current match game
+  initialTeam?: string;
   team1Risky: boolean; // already computed by parent via getTeamRiskInfo
   team2Risky: boolean;
   team1Existing: ExistingTeamInfo | null; // existing data for team1 if already in list
@@ -64,8 +65,10 @@ const GAME_OPTIONS = [
 ] as const;
 
 /** Proxy a CDN logo URL through the backend */
-const proxyLogo = (url: string | null | undefined, game: string): string | null =>
-  proxyLogoUrl(url, game);
+const proxyLogo = (
+  url: string | null | undefined,
+  game: string,
+): string | null => proxyLogoUrl(url, game);
 
 export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   const {
@@ -108,7 +111,9 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
   useEffect(() => {
     if (!open) return;
     let autoTeam = team1.name;
-    if (team1Risky && !team2Risky) {
+    if (props.initialTeam === team1.name || props.initialTeam === team2.name) {
+      autoTeam = props.initialTeam;
+    } else if (team1Risky && !team2Risky) {
       autoTeam = team2.name;
     } else if (!team1Risky) {
       autoTeam = team1.name;
@@ -119,14 +124,28 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
     const existing = getExistingData(autoTeam);
     if (existing) {
       setStatus(existing.status || "Під питанням");
-      setSelectedGame(existing.game || gameStorageKey);
+      setSelectedGame(
+        existing.game === "Dota2" || existing.game === "Дота"
+          ? "Дота"
+          : existing.game === "CS2" || existing.game === "CS"
+            ? "CS"
+            : gameStorageKey,
+      );
       setNotes(existing.notes || "");
     } else {
       setStatus("Під питанням");
       setSelectedGame(gameStorageKey);
       setNotes("");
     }
-  }, [open, team1.name, team2.name, gameStorageKey, team1Risky, team2Risky]);
+  }, [
+    open,
+    team1.name,
+    team2.name,
+    gameStorageKey,
+    team1Risky,
+    team2Risky,
+    props.initialTeam,
+  ]);
 
   const handleSave = async () => {
     setSaving(true);
