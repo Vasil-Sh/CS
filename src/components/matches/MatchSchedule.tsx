@@ -893,7 +893,7 @@ export default function MatchSchedule({
                       ) : (
                         <CalendarDays size={22} />
                       )}
-                      <strong>{group.title}</strong>
+                      <strong>{group.title}</strong>{" "}
                       <span>
                         {group.game && `${group.game} · `}
                         {group.matches.length} матчів

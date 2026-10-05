@@ -215,14 +215,14 @@ describe("match schedule data", () => {
 describe("match schedule interactions", () => {
   it("opens one inline detail region and preserves risk next to the correct team", () => {
     render(<MatchSchedule {...props()} />);
-    expect(screen.getAllByRole("region")).toHaveLength(1);
+    expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
     const first = screen.getAllByTestId("schedule-row")[0];
     expect(within(first).getByText("БАН")).toBeVisible();
     expect(screen.getByText("Краще ставити проти них")).toBeVisible();
     fireEvent.click(
       screen.getByRole("button", { name: "Деталі: STATE — ECSTATIC" }),
     );
-    expect(screen.getAllByRole("region")).toHaveLength(1);
+    expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
     expect(
       screen.queryByText("Краще ставити проти них"),
     ).not.toBeInTheDocument();
