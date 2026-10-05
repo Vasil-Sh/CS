@@ -6,7 +6,10 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  Clock3,
   ExternalLink,
+  FileText,
+  Info,
   Layers,
   Lightbulb,
   Pencil,
@@ -14,8 +17,10 @@ import {
   RefreshCw,
   Search,
   ShieldAlert,
+  ShieldCheck,
   SlidersHorizontal,
   ThumbsDown,
+  ThumbsUp,
   Trophy,
   X,
 } from "lucide-react";
@@ -24,18 +29,21 @@ import { proxyLogoUrl } from "@/lib/logoProxy";
 import {
   coefficient,
   dateLabel,
+  matchCount,
   filterSchedule,
   formLabel,
   groupSchedule,
-  matchSource,
   matchState,
+  matchSource,
   nextScheduleDate,
   riskTone,
   scheduleDate,
   scheduleTime,
+  sourceForecast,
   type ScheduleFilters,
 } from "./matchScheduleModel";
 import "./MatchSchedule.css";
+import "./MatchScheduleDense.css";
 
 type Controller = ReturnType<typeof useMatches>;
 export interface MatchScheduleProps {
@@ -96,6 +104,120 @@ function RiskBadge({ status }: { status: string }) {
   );
 }
 
+function CompactOdds({ match }: { match: Match }) {
+  const teams = [
+    {
+      name: match.team1,
+      logo: match.logoTeam1,
+      value: coefficient(match.bettingCoefficientTeam1),
+    },
+    {
+      name: match.team2,
+      logo: match.logoTeam2,
+      value: coefficient(match.bettingCoefficientTeam2),
+    },
+  ];
+
+  const bothAvailable = teams.every((team) => team.value !== "—");
+  const lowest = bothAvailable
+    ? Math.min(...teams.map((team) => Number(team.value)))
+    : null;
+
+  // Однакові показані значення не виділяємо.
+  const canHighlight = bothAvailable && teams[0].value !== teams[1].value;
+
+  if (teams.every((team) => team.value === "—")) {
+    return (
+      <div
+        className="ms-odds ms-odds--compact ms-odds--empty"
+        role="group"
+        aria-label="Коефіцієнти недоступні"
+        title="Джерело ще не надало коефіцієнти"
+      >
+        <Info size={15} aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="ms-odds ms-odds--compact"
+      role="group"
+      aria-label="Коефіцієнти"
+    >
+      {teams.map((team, index) => {
+        const isLower = canHighlight && Number(team.value) === lowest;
+
+        const description = `${team.name}: ${
+          team.value === "—" ? "немає даних" : team.value
+        }${isLower ? " · менший коефіцієнт у парі" : ""}`;
+
+        return (
+          <span key={index} className="ms-odd-line" title={description}>
+            <TeamLogo name={team.name} src={team.logo} game={match.game} />
+
+            <span className="ms-odds-sr">{description}</span>
+
+            <strong
+              aria-hidden="true"
+              className={[
+                "ms-odd-value",
+                isLower ? "ms-odd-value--lower" : "",
+                team.value === "—" ? "ms-odd-value--missing" : "",
+              ].join(" ")}
+            >
+              {team.value}
+            </strong>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+const percentLabel = (value: number) =>
+  `${new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value)}%`;
+
+function SourceForecast({ match }: { match: Match }) {
+  const forecast = sourceForecast(match);
+  return (
+    <div
+      className="ms-forecast"
+      role="group"
+      aria-label={`Прогноз джерела: ${match.team1} — ${match.team2}`}
+    >
+      <span className="ms-cell-caption" aria-hidden="true">
+        Прогноз джерела
+      </span>
+      {forecast ? (
+        <>
+          <span className="ms-odds-sr">
+            {match.team1}: {percentLabel(forecast.first)}; {match.team2}:{" "}
+            {percentLabel(forecast.second)}.
+          </span>
+          <div className="ms-forecast-values" aria-hidden="true">
+            <span
+              className={forecast.first > forecast.second ? "is-higher" : ""}
+            >
+              {percentLabel(forecast.first)}
+            </span>
+            <span
+              className={forecast.second > forecast.first ? "is-higher" : ""}
+            >
+              {percentLabel(forecast.second)}
+            </span>
+          </div>
+          <div className="ms-forecast-track" aria-hidden="true">
+            <span style={{ width: `${forecast.firstWidth}%` }} />
+          </div>
+        </>
+      ) : (
+        <span className="ms-forecast-empty">Немає даних</span>
+      )}
+    </div>
+  );
+}
+
 export default function MatchSchedule({
   model: m,
   onAnalysis,
@@ -116,26 +238,27 @@ export default function MatchSchedule({
     sort: "time",
   });
   const [filters, setFilters] = useState<ScheduleFilters>(initialFilters);
-  const [mode, setMode] = useState<"time" | "tournament">("tournament");
+  const [mode, setMode] = useState<"time" | "tournament">("time");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null | undefined>();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [fullGroups, setFullGroups] = useState<Set<string>>(new Set());
   const [expressMode, setExpressMode] = useState(false);
   const regionId = useId();
 
+  const { matches, getTeamRiskInfo } = m;
   const risks = useMemo(
     () =>
       new Map(
-        m.matches.map((match) => [
+        matches.map((match) => [
           match.id,
           [
-            m.getTeamRiskInfo(match.team1, match.game),
-            m.getTeamRiskInfo(match.team2, match.game),
+            getTeamRiskInfo(match.team1, match.game),
+            getTeamRiskInfo(match.team2, match.game),
           ] as const,
         ]),
       ),
-    [m.matches, m.getTeamRiskInfo],
+    [matches, getTeamRiskInfo],
   );
   const hasNotes = (match: Match) => !!risks.get(match.id)?.some(Boolean);
   const baseFilters = { ...filters, personal: "all" as const };
@@ -146,8 +269,13 @@ export default function MatchSchedule({
     hasNotes,
   );
   const visible = filterSchedule(m.matches, filters, m.matchRatings, hasNotes);
-  const groups = groupSchedule(visible, mode);
-  const activeId = expandedId === undefined ? visible[0]?.id : expandedId;
+  const sortedVisible = [...visible].sort((a, b) => {
+    const aLiked = m.matchRatings[a.id] === "like" ? 1 : 0;
+    const bLiked = m.matchRatings[b.id] === "like" ? 1 : 0;
+    return bLiked - aLiked;
+  });
+  const groups = groupSchedule(sortedVisible, mode);
+  const activeId = expandedId;
   const dayMatches = m.matches.filter(
     (match) =>
       scheduleDate(match.date) === filters.date &&
@@ -171,7 +299,7 @@ export default function MatchSchedule({
 
   function changeFilters(patch: Partial<ScheduleFilters>) {
     setFilters((current) => ({ ...current, ...patch }));
-    setExpandedId(undefined);
+    setExpandedId(null);
     setFullGroups(new Set());
     setCollapsed(new Set());
   }
@@ -350,6 +478,26 @@ export default function MatchSchedule({
             </button>
             <button
               type="button"
+              aria-pressed={m.matchRatings[match.id] === "like"}
+              onClick={() =>
+                m.handleRateMatch(
+                  match.id,
+                  m.matchRatings[match.id] === "like" ? null : "like",
+                )
+              }
+            >
+              <Bookmark
+                size={15}
+                fill={
+                  m.matchRatings[match.id] === "like" ? "currentColor" : "none"
+                }
+              />
+              {m.matchRatings[match.id] === "like"
+                ? "Прибрати з цікавих"
+                : "Позначити цікавим"}
+            </button>
+            <button
+              type="button"
               aria-pressed={m.matchRatings[match.id] === "dislike"}
               onClick={() =>
                 m.handleRateMatch(
@@ -375,16 +523,41 @@ export default function MatchSchedule({
       teamRisks?.[0] && { name: match.team1, ...teamRisks[0] },
       teamRisks?.[1] && { name: match.team2, ...teamRisks[1] },
     ].filter(Boolean) as { name: string; notes: string; status: string }[];
-    const state = matchState(match, today);
     const open = activeId === match.id;
     const selectedForExpress = m.selectedMatchIds.has(match.id);
     const liked = m.matchRatings[match.id] === "like";
+    const disliked = m.matchRatings[match.id] === "dislike";
+    const state = matchState(match, today);
     return (
       <Fragment key={match.id}>
         <div
           className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""}`}
           data-testid="schedule-row"
         >
+          <div className="ms-interest">
+            <button
+              type="button"
+              className={`ms-rate ${liked ? "is-active" : ""}`}
+              aria-label={`${liked ? "Прибрати з цікавих" : "Позначити цікавим"}: ${match.team1} — ${match.team2}`}
+              aria-pressed={liked}
+              title={liked ? "Прибрати з цікавих" : "Позначити цікавим"}
+              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
+            >
+              <ThumbsUp size={16} fill={liked ? "currentColor" : "none"} />
+            </button>
+            <button
+              type="button"
+              className={`ms-rate ${disliked ? "is-active is-disliked" : ""}`}
+              aria-label={`${disliked ? "Повернути матч" : "Не цікавить"}: ${match.team1} — ${match.team2}`}
+              aria-pressed={disliked}
+              title={disliked ? "Повернути матч" : "Не цікавить"}
+              onClick={() =>
+                m.handleRateMatch(match.id, disliked ? null : "dislike")
+              }
+            >
+              <ThumbsDown size={16} fill={disliked ? "currentColor" : "none"} />
+            </button>
+          </div>
           <div className="ms-time">
             {expressMode && (
               <input
@@ -395,9 +568,6 @@ export default function MatchSchedule({
               />
             )}
             <time dateTime={match.date}>{scheduleTime(match.date)}</time>
-            <small className={`ms-status ms-status--${state.tone}`}>
-              {state.text}
-            </small>
           </div>
           <button
             type="button"
@@ -407,6 +577,29 @@ export default function MatchSchedule({
             aria-controls={`${regionId}-detail-${match.id}`}
             aria-label={`Деталі: ${match.team1} — ${match.team2}`}
           >
+            <span className="ms-match-context">
+              <span
+                className="ms-tournament"
+                title={match.context || "Турнір не вказаний"}
+              >
+                <Trophy size={12} aria-hidden="true" />
+                <span className="ms-tournament-name">
+                  {match.context || "Турнір не вказаний"}
+                </span>
+              </span>
+              {match.matchStatus !== "finished" && (
+                <span
+                  className={`ms-match-status ms-match-status--${state.tone}`}
+                >
+                  {state.tone === "live" ? (
+                    <span className="ms-live-dot" />
+                  ) : (
+                    <Clock3 size={11} aria-hidden="true" />
+                  )}
+                  {state.text}
+                </span>
+              )}
+            </span>
             <span className="ms-teams">
               <span className="ms-team">
                 <TeamLogo
@@ -416,7 +609,6 @@ export default function MatchSchedule({
                 />
                 <span>
                   <strong>{match.team1 || "Команда ще невідома"}</strong>
-                  {teamRisks?.[0] && <RiskBadge status={teamRisks[0].status} />}
                 </span>
               </span>
               <span className="ms-versus">vs</span>
@@ -428,68 +620,108 @@ export default function MatchSchedule({
                 />
                 <span>
                   <strong>{match.team2 || "Команда ще невідома"}</strong>
-                  {teamRisks?.[1] && <RiskBadge status={teamRisks[1].status} />}
                 </span>
               </span>
             </span>
             <span className="ms-match-meta">
-              {match.game === "Dota2" ? "Dota 2" : "CS2"} ·{" "}
-              {match.matchType.toUpperCase()}
-              {mode === "time" && match.context ? ` · ${match.context}` : ""}
+              <span className={`ms-game-chip ms-game-chip--${match.game}`}>
+                {match.game === "Dota2" ? "Dota 2" : "CS2"}
+              </span>
+              <span className="ms-format-chip">
+                {match.matchType.toUpperCase()}
+              </span>
+              {rowRisks.map((risk, index) => (
+                <span
+                  key={index}
+                  className={`ms-team-risk ms-team-risk--${riskTone(risk.status)}`}
+                  title={risk.notes || "Примітка не додана"}
+                >
+                  {["stable", "reliable"].includes(riskTone(risk.status)) ? (
+                    <ShieldCheck size={12} aria-hidden="true" />
+                  ) : (
+                    <ShieldAlert size={12} aria-hidden="true" />
+                  )}
+                  {risk.name} ·{" "}
+                  {risk.status === "Стабільні"
+                    ? "Стабільна"
+                    : risk.status || "Неоцінена"}
+                </span>
+              ))}
             </span>
           </button>
-          <div className="ms-format">
-            <span>{match.matchType.toUpperCase()}</span>
-          </div>
-          <div className="ms-odds" aria-label="Коефіцієнти">
-            {[
-              { name: match.team1, value: match.bettingCoefficientTeam1 },
-              { name: match.team2, value: match.bettingCoefficientTeam2 },
-            ].map((team, index) => (
-              <div
-                key={index}
-                title={`${team.name}: ${coefficient(team.value)}`}
+          <div className="ms-source-cell">
+            {match.matchStatus === "finished" ? (
+              match.score1 != null && match.score2 != null ? (
+                <span className="ms-source-score">
+                  <span
+                    className={
+                      match.score1 === match.score2
+                        ? ""
+                        : match.score1 > match.score2
+                          ? "ms-score-win"
+                          : "ms-score-loss"
+                    }
+                  >
+                    {match.score1}
+                  </span>
+                  <span className="ms-score-sep">:</span>
+                  <span
+                    className={
+                      match.score1 === match.score2
+                        ? ""
+                        : match.score2 > match.score1
+                          ? "ms-score-win"
+                          : "ms-score-loss"
+                    }
+                  >
+                    {match.score2}
+                  </span>
+                </span>
+              ) : (
+                <span className="ms-source-score">Завершено</span>
+              )
+            ) : (
+              <a
+                className="ms-cell-icon"
+                href={matchSource(match)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Джерело матчу: ${match.team1} — ${match.team2}`}
+                title="Відкрити джерело матчу"
               >
-                <small>{team.name}</small>
-                <strong>{coefficient(team.value)}</strong>
-              </div>
-            ))}
+                <ExternalLink size={15} />
+              </a>
+            )}
           </div>
-          <div className="ms-marks">
+          <SourceForecast match={match} />
+          <CompactOdds match={match} />
+          <div className="ms-notes-cell">
             <button
               type="button"
-              className={`ms-icon ${liked ? "is-liked" : ""}`}
-              aria-label={`${liked ? "Прибрати з цікавих" : "Позначити цікавим"}: ${match.team1} — ${match.team2}`}
-              aria-pressed={liked}
-              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
+              className={`ms-note-button ${rowRisks.length ? "" : "ms-note-button--add"}`}
+              onClick={() => {
+                if (rowRisks.length) setExpandedId(match.id);
+                else onEditNote(match, match.team1);
+              }}
+              aria-label={`${rowRisks.length ? "Переглянути примітки" : "Додати примітку"}: ${match.team1} — ${match.team2}`}
+              title={
+                rowRisks.map((r) => `${r.name}: ${r.status}`).join("; ") ||
+                "Немає нотаток"
+              }
             >
-              <Bookmark size={21} fill={liked ? "currentColor" : "none"} />
+              {rowRisks.length ? (
+                <>
+                  <FileText size={15} />
+                  <span>Переглянути · {rowRisks.length}</span>
+                </>
+              ) : (
+                <>
+                  <Plus size={16} />
+                  <span>Додати</span>
+                </>
+              )}
             </button>
           </div>
-          <button
-            type="button"
-            className="ms-risk-cell"
-            onClick={() => {
-              setExpandedId(match.id);
-            }}
-            aria-label={`Примітки: ${match.team1} — ${match.team2}`}
-            title={
-              rowRisks.map((r) => `${r.name}: ${r.status}`).join("; ") ||
-              "Немає нотаток"
-            }
-          >
-            {rowRisks.length ? (
-              <>
-                <ShieldAlert size={15} />
-                <span>
-                  {rowRisks.length}{" "}
-                  {rowRisks.length === 1 ? "примітка" : "примітки"}
-                </span>
-              </>
-            ) : (
-              <span className="ms-muted">—</span>
-            )}
-          </button>
           <div className="ms-record">
             <button
               type="button"
@@ -499,17 +731,31 @@ export default function MatchSchedule({
             >
               <Plus size={19} /> Запис
             </button>
+            <button
+              type="button"
+              className="ms-cell-icon ms-express-toggle"
+              aria-pressed={selectedForExpress}
+              aria-label={`${selectedForExpress ? "Прибрати матч з експресу" : "Додати матч до експресу"}: ${match.team1} — ${match.team2}`}
+              title={
+                selectedForExpress
+                  ? "Прибрати з експресу"
+                  : "Додати до експресу"
+              }
+              onClick={() => m.toggleMatchSelection(match.id)}
+            >
+              {selectedForExpress ? <Check size={17} /> : <Layers size={17} />}
+            </button>
+            <button
+              type="button"
+              className="ms-icon ms-disclosure"
+              onClick={() => toggleDetails(match.id)}
+              aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}
+              aria-expanded={open}
+              aria-controls={`${regionId}-detail-${match.id}`}
+            >
+              <ChevronDown size={19} className={open ? "ms-rotate" : ""} />
+            </button>
           </div>
-          <button
-            type="button"
-            className="ms-icon ms-disclosure"
-            onClick={() => toggleDetails(match.id)}
-            aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}
-            aria-expanded={open}
-            aria-controls={`${regionId}-detail-${match.id}`}
-          >
-            <ChevronDown size={19} className={open ? "ms-rotate" : ""} />
-          </button>
         </div>
         {open && renderDetails(match)}
       </Fragment>
@@ -519,117 +765,178 @@ export default function MatchSchedule({
   return (
     <div className="ms-page">
       <header className="ms-hero">
-        <div>
-          <h1>МАТЧІ</h1>
-          <p>Розклад, ваші позначки та аналіз.</p>
-        </div>
-        <div className="ms-hero-right">
-          <dl>
-            <div>
-              <dd>{dayMatches.length}</dd>
-              <dt>Матчів на дату</dt>
-            </div>
-            <div>
-              <dd>{tournaments.length}</dd>
-              <dt>Турніри</dt>
-            </div>
-            <div>
-              <dd>
-                {
-                  dayMatches.filter(
-                    (match) =>
-                      match.matchStatus === "live" &&
-                      scheduleDate(match.date) >= today,
-                  ).length
-                }
-              </dd>
-              <dt>Зараз грають</dt>
-            </div>
-          </dl>
-          <button
-            type="button"
-            className="ms-button"
-            disabled={m.isLoading}
-            onClick={() => void m.refreshMatches()}
-          >
-            <RefreshCw size={17} className={m.isLoading ? "ms-spinning" : ""} />
-            {m.isLoading ? "Оновлення…" : "Оновити"}
-          </button>
-        </div>
-      </header>
-      <div className="ms-body">
-        <div className="ms-date-tools">
-          <div className="ms-segment" aria-label="Швидкий вибір дати">
+        <div className="ms-hero-top">
+          <div>
+            <h1>МАТЧІ</h1>
+            <p>Розклад, ваші позначки та аналіз.</p>
+          </div>
+          <div className="ms-hero-actions">
             <button
               type="button"
-              aria-pressed={filters.date === today}
-              onClick={() => changeFilters({ date: today, tournament: "all" })}
+              className="ms-hero-results"
+              onClick={onResults}
             >
-              Сьогодні
+              Результати <ExternalLink size={16} />
             </button>
             <button
               type="button"
-              aria-pressed={filters.date === tomorrow}
-              onClick={() =>
-                changeFilters({ date: tomorrow, tournament: "all" })
-              }
+              className="ms-hero-refresh"
+              disabled={m.isLoading}
+              onClick={() => void m.refreshMatches()}
             >
-              Завтра
+              <RefreshCw
+                size={17}
+                className={m.isLoading ? "ms-spinning" : ""}
+              />
+              {m.isLoading ? "Оновлення…" : "Оновити"}
             </button>
           </div>
-          <label className="ms-date-input">
-            <CalendarDays size={18} />
-            <span>{dateLabel(filters.date)}</span>
-            <input
-              type="date"
-              aria-label="Дата матчів"
-              value={filters.date}
-              onChange={(event) => {
-                if (event.target.value)
-                  changeFilters({
-                    date: event.target.value,
-                    tournament: "all",
-                  });
-              }}
-            />
-          </label>
-          <div className="ms-segment" aria-label="Гра">
-            {(["all", "CS2", "Dota2"] as const).map((game) => (
+        </div>
+        <dl className="ms-hero-stats">
+          <div>
+            <dd className="ms-hero-matches">{dayMatches.length}</dd>
+            <dt>Матчів на дату</dt>
+          </div>
+          <div>
+            <dd className="ms-hero-tournaments">{tournaments.length}</dd>
+            <dt>Турніри</dt>
+          </div>
+          <div>
+            <dd className="ms-hero-live">
+              {
+                dayMatches.filter(
+                  (match) =>
+                    match.matchStatus === "live" &&
+                    scheduleDate(match.date) >= today,
+                ).length
+              }
+            </dd>
+            <dt>Зараз грають</dt>
+          </div>
+        </dl>
+      </header>
+      <div className="ms-body ms-body--dense">
+        <div className="ms-dense-heading">
+          <h2>Розклад матчів</h2>
+          <div className="ms-segment ms-personal" aria-label="Мої матчі">
+            <button
+              type="button"
+              aria-pressed={filters.personal === "all"}
+              onClick={() => changeFilters({ personal: "all" })}
+            >
+              Усі · {baseMatches.length}
+            </button>
+            <button
+              type="button"
+              aria-pressed={filters.personal === "liked"}
+              onClick={() => changeFilters({ personal: "liked" })}
+            >
+              Мої цікаві
+            </button>
+            <button
+              type="button"
+              aria-pressed={filters.personal === "notes"}
+              onClick={() => changeFilters({ personal: "notes" })}
+            >
+              З нотатками
+            </button>
+          </div>
+          <div className="ms-segment ms-grouping" aria-label="Групування">
+            <button
+              type="button"
+              aria-pressed={mode === "time"}
+              onClick={() => setMode("time")}
+            >
+              За часом
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === "tournament"}
+              onClick={() => setMode("tournament")}
+            >
+              За турніром
+            </button>
+          </div>
+        </div>
+        <div className="ms-dense-tools">
+          <div className="ms-date-tools">
+            <div className="ms-segment" aria-label="Швидкий вибір дати">
               <button
                 type="button"
-                key={game}
-                aria-pressed={filters.game === game}
-                onClick={() => changeFilters({ game, tournament: "all" })}
+                aria-pressed={filters.date === today}
+                onClick={() =>
+                  changeFilters({ date: today, tournament: "all" })
+                }
               >
-                {game === "all" ? "Усі" : game === "Dota2" ? "Dota 2" : game}
+                Сьогодні
               </button>
-            ))}
+              <button
+                type="button"
+                aria-pressed={filters.date === tomorrow}
+                onClick={() =>
+                  changeFilters({ date: tomorrow, tournament: "all" })
+                }
+              >
+                Завтра
+              </button>
+            </div>
+            <label className="ms-date-input">
+              <CalendarDays size={18} />
+              <span>{dateLabel(filters.date)}</span>
+              <input
+                type="date"
+                aria-label="Дата матчів"
+                value={filters.date}
+                onChange={(event) => {
+                  if (event.target.value)
+                    changeFilters({
+                      date: event.target.value,
+                      tournament: "all",
+                    });
+                }}
+              />
+            </label>
+            <div className="ms-segment ms-game-filter" aria-label="Гра">
+              {(["all", "CS2", "Dota2"] as const).map((game) => (
+                <button
+                  type="button"
+                  key={game}
+                  aria-pressed={filters.game === game}
+                  onClick={() => changeFilters({ game, tournament: "all" })}
+                >
+                  {game === "all"
+                    ? "Усі ігри"
+                    : game === "Dota2"
+                      ? "Dota 2"
+                      : game}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="ms-search-tools">
-          <label className="ms-search">
-            <Search size={19} />
-            <input
-              type="search"
-              aria-label="Пошук команди або турніру"
-              placeholder="Пошук команди або турніру"
-              value={filters.query}
-              onChange={(event) => changeFilters({ query: event.target.value })}
-            />
-          </label>
-          <button
-            type="button"
-            className="ms-button"
-            aria-expanded={filtersOpen}
-            aria-controls={`${regionId}-filters`}
-            onClick={() => setFiltersOpen(!filtersOpen)}
-          >
-            <SlidersHorizontal size={18} /> Фільтри{" "}
-            {extraCount > 0 && <span className="ms-count">{extraCount}</span>}
-          </button>
-          <button type="button" className="ms-button" onClick={onResults}>
-            Результати <ExternalLink size={16} />
-          </button>
+          <div className="ms-search-tools">
+            <label className="ms-search">
+              <Search size={19} />
+              <input
+                type="search"
+                aria-label="Пошук команди або турніру"
+                placeholder="Команда або турнір"
+                value={filters.query}
+                onChange={(event) =>
+                  changeFilters({ query: event.target.value })
+                }
+              />
+            </label>
+            <button
+              type="button"
+              className="ms-button"
+              aria-expanded={filtersOpen}
+              aria-controls={`${regionId}-filters`}
+              onClick={() => setFiltersOpen(!filtersOpen)}
+            >
+              <SlidersHorizontal size={18} /> Фільтри{" "}
+              {extraCount > 0 && <span className="ms-count">{extraCount}</span>}
+            </button>
+          </div>
         </div>
         {filtersOpen && (
           <div className="ms-filter-panel" id={`${regionId}-filters`}>
@@ -733,59 +1040,6 @@ export default function MatchSchedule({
             </button>
           </div>
         )}
-        <div className="ms-schedule-toolbar">
-          <h2>Розклад</h2>
-          <div className="ms-segment ms-personal" aria-label="Мої матчі">
-            <button
-              type="button"
-              aria-pressed={filters.personal === "all"}
-              onClick={() => changeFilters({ personal: "all" })}
-            >
-              Усі · {baseMatches.length}
-            </button>
-            <button
-              type="button"
-              aria-pressed={filters.personal === "liked"}
-              onClick={() => changeFilters({ personal: "liked" })}
-            >
-              Мої цікаві
-            </button>
-            <button
-              type="button"
-              aria-pressed={filters.personal === "notes"}
-              onClick={() => changeFilters({ personal: "notes" })}
-            >
-              З нотатками
-            </button>
-          </div>
-          <div className="ms-toolbar-end">
-            <button
-              type="button"
-              className="ms-button"
-              aria-pressed={expressMode}
-              onClick={() => setExpressMode(!expressMode)}
-            >
-              <Layers size={17} />
-              {expressMode ? "Завершити вибір" : "Вибрати для експресу"}
-            </button>
-            <div className="ms-segment" aria-label="Групування">
-              <button
-                type="button"
-                aria-pressed={mode === "time"}
-                onClick={() => setMode("time")}
-              >
-                За часом
-              </button>
-              <button
-                type="button"
-                aria-pressed={mode === "tournament"}
-                onClick={() => setMode("tournament")}
-              >
-                За турніром
-              </button>
-            </div>
-          </div>
-        </div>
         {m.apiError && (
           <div className="ms-error" role="alert">
             <ShieldAlert size={18} />
@@ -858,16 +1112,6 @@ export default function MatchSchedule({
           </div>
         ) : (
           <>
-            <div className="ms-columns" aria-hidden="true">
-              <span>Час за Києвом</span>
-              <span>Матч</span>
-              <span>Формат</span>
-              <span>Коефіцієнти</span>
-              <span>Обране</span>
-              <span>Примітки</span>
-              <span>Запис</span>
-              <span />
-            </div>
             {groups.map((group, index) => {
               const isCollapsed = collapsed.has(group.key);
               const limit = mode === "time" ? 12 : 4;
@@ -876,36 +1120,69 @@ export default function MatchSchedule({
                 : group.matches.slice(0, limit);
               return (
                 <section
-                  className="ms-group"
+                  className={`ms-group ${mode === "time" ? "ms-group--time" : ""}`}
                   key={group.key}
-                  aria-labelledby={`${regionId}-group-${index}`}
+                  aria-label={mode === "time" ? "Матчі за часом" : undefined}
+                  aria-labelledby={
+                    mode === "tournament"
+                      ? `${regionId}-group-${index}`
+                      : undefined
+                  }
                 >
-                  <h3 id={`${regionId}-group-${index}`}>
-                    <button
-                      type="button"
-                      className="ms-group-title"
-                      onClick={() => toggleGroup(group.key)}
-                      aria-expanded={!isCollapsed}
-                      aria-controls={`${regionId}-group-body-${index}`}
-                    >
-                      {mode === "tournament" ? (
+                  {mode === "tournament" && (
+                    <h3 id={`${regionId}-group-${index}`}>
+                      <button
+                        type="button"
+                        className="ms-group-title"
+                        onClick={() => toggleGroup(group.key)}
+                        aria-expanded={!isCollapsed}
+                        aria-controls={`${regionId}-group-body-${index}`}
+                      >
                         <Trophy size={22} />
-                      ) : (
-                        <CalendarDays size={22} />
-                      )}
-                      <strong>{group.title}</strong>{" "}
-                      <span>
-                        {group.game && `${group.game} · `}
-                        {group.matches.length} матчів
-                      </span>
-                      <ChevronDown
-                        size={20}
-                        className={!isCollapsed ? "ms-rotate" : ""}
-                      />
-                    </button>
-                  </h3>
-                  {!isCollapsed && (
+                        <strong>{group.title}</strong>{" "}
+                        <span className="ms-group-count">
+                          {group.game && `${group.game} · `}
+                          {matchCount(group.matches.length)}
+                        </span>
+                        <ChevronDown
+                          size={20}
+                          className={!isCollapsed ? "ms-rotate" : ""}
+                        />
+                      </button>
+                    </h3>
+                  )}
+                  {(!isCollapsed || mode === "time") && (
                     <div id={`${regionId}-group-body-${index}`}>
+                      <div className="ms-columns">
+                        <span
+                          className="ms-interest-heading"
+                          aria-label="Інтерес"
+                        >
+                          <span className="ms-interest-heading-text">
+                            Інтерес
+                          </span>
+                        </span>
+                        <span>Час</span>
+                        <span>Матч і турнір</span>
+                        <span>Джерело</span>
+                        <span className="ms-forecast-heading">
+                          Прогноз джерела
+                          <details className="ms-forecast-help">
+                            <summary aria-label="Про прогноз джерела">
+                              <Info size={14} />
+                            </summary>
+                            <span role="note">
+                              Відсотки від джерела матчу, не розрахунок із
+                              коефіцієнтів. Синій — перша команда, зелений —
+                              друга. Це не гарантія результату. Якщо повної пари
+                              даних немає, прогноз не показується.
+                            </span>
+                          </details>
+                        </span>
+                        <span>Коеф.</span>
+                        <span>Примітки</span>
+                        <span>Дії</span>
+                      </div>
                       {shown.map(renderMatch)}
                       {group.matches.length > shown.length && (
                         <button
@@ -917,8 +1194,8 @@ export default function MatchSchedule({
                             )
                           }
                         >
-                          Ще {group.matches.length - shown.length}{" "}
-                          {mode === "tournament" ? "матчів турніру" : "матчів"}{" "}
+                          Ще {matchCount(group.matches.length - shown.length)}
+                          {mode === "tournament" ? " турніру" : ""}{" "}
                           <ArrowDown size={16} />
                         </button>
                       )}
@@ -948,9 +1225,19 @@ export default function MatchSchedule({
         )}
         <footer className="ms-footer">
           <span>
-            {dateLabel(filters.date)} · {visible.length} матчів
+            {dateLabel(filters.date)} · {matchCount(visible.length)}
           </span>
-          <span>Створення запису не розміщує ставку.</span>
+          <span>Синій — команда 1 · Зелений — команда 2</span>
+          <span>Час за Києвом</span>
+          <button
+            type="button"
+            className="ms-bulk-express"
+            aria-pressed={expressMode}
+            onClick={() => setExpressMode(!expressMode)}
+          >
+            <Layers size={15} />
+            {expressMode ? "Завершити вибір" : "Вибрати для експресу"}
+          </button>
         </footer>
         {m.selectedMatchIds.size > 0 && (
           <aside className="ms-express" aria-label="Вибрані матчі для експресу">

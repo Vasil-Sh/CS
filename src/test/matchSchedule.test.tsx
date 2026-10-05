@@ -18,6 +18,7 @@ import {
   nextScheduleDate,
   scheduleDate,
   scheduleTime,
+  sourceForecast,
   type ScheduleFilters,
 } from "@/components/matches/matchScheduleModel";
 import type { Match } from "@/hooks/useMatches";
@@ -213,11 +214,20 @@ describe("match schedule data", () => {
 });
 
 describe("match schedule interactions", () => {
-  it("opens one inline detail region and preserves risk next to the correct team", () => {
+  it("starts compact, names the risky team, and opens one detail region on demand", () => {
     render(<MatchSchedule {...props()} />);
-    expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
+    expect(screen.queryAllByRole("region", { name: /Деталі:/ })).toHaveLength(
+      0,
+    );
     const first = screen.getAllByTestId("schedule-row")[0];
-    expect(within(first).getByText("БАН")).toBeVisible();
+    expect(within(first).getByText("Переглянути · 1")).toBeVisible();
+    expect(within(first).getByText("MASONIC · БАН")).toBeVisible();
+    fireEvent.click(
+      within(first).getByRole("button", {
+        name: "Переглянути примітки: MASONIC — Linx Legacy Esport",
+      }),
+    );
+    expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
     expect(screen.getByText("Краще ставити проти них")).toBeVisible();
     fireEvent.click(
       screen.getByRole("button", { name: "Деталі: STATE — ECSTATIC" }),
@@ -230,6 +240,11 @@ describe("match schedule interactions", () => {
   it("routes the chosen team to the note editor and retains detailed analysis", () => {
     const p = props();
     render(<MatchSchedule {...p} />);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    );
     fireEvent.click(
       screen.getByRole("button", { name: "Редагувати нотатку: MASONIC" }),
     );
@@ -256,7 +271,7 @@ describe("match schedule interactions", () => {
     );
     expect(p.model.handleAddToBets).toHaveBeenCalledWith(p.model.matches[0]);
     expect(
-      screen.queryByRole("button", { name: "Створити запис", exact: true }),
+      screen.queryByRole("button", { name: "Створити запис" }),
     ).not.toBeInTheDocument();
   });
   it("collapses groups, shows the remaining rows and switches grouping", () => {
@@ -264,10 +279,13 @@ describe("match schedule interactions", () => {
       makeMatch({ id: String(index), team1: `Team ${index}` }),
     );
     render(<MatchSchedule {...props(matches)} />);
-    expect(screen.getAllByTestId("schedule-row")).toHaveLength(4);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ще 2 матчів турніру" }),
+    expect(screen.getByRole("button", { name: "За часом" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
     );
+    fireEvent.click(screen.getByRole("button", { name: "За турніром" }));
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(4);
+    fireEvent.click(screen.getByRole("button", { name: "Ще 2 матчі турніру" }));
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(6);
     fireEvent.click(
       screen.getByRole("button", {
@@ -275,9 +293,7 @@ describe("match schedule interactions", () => {
       }),
     );
     expect(screen.queryAllByTestId("schedule-row")).toHaveLength(0);
-    fireEvent.click(
-      screen.getByRole("button", { name: "За часом", exact: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "За часом" }));
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(6);
   });
   it("filters by tournament search and recovers from an empty search", () => {
@@ -296,18 +312,14 @@ describe("match schedule interactions", () => {
     const p = props();
     p.model.matchRatings = { m2: "like" };
     render(<MatchSchedule {...p} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Мої цікаві", exact: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Мої цікаві" }));
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
     expect(
       screen.queryByRole("button", {
         name: "Деталі: MASONIC — Linx Legacy Esport",
       }),
     ).not.toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: "З нотатками", exact: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "З нотатками" }));
     expect(
       screen.getByRole("button", {
         name: "Деталі: MASONIC — Linx Legacy Esport",
@@ -333,7 +345,7 @@ describe("match schedule interactions", () => {
       screen.getByRole("button", { name: "Створити експрес" }),
     ).toBeDisabled();
     fireEvent.click(
-      screen.getByRole("button", { name: "Вибрати для експресу", exact: true }),
+      screen.getByRole("button", { name: "Вибрати для експресу" }),
     );
     fireEvent.click(
       screen.getByRole("checkbox", {
@@ -347,9 +359,7 @@ describe("match schedule interactions", () => {
     const p = props();
     p.model.selectedMatchIds = new Set(["m1", "m2"]);
     render(<MatchSchedule {...p} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Завтра", exact: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Завтра" }));
     expect(screen.getByText("На цю дату немає матчів")).toBeVisible();
     expect(
       screen.getByRole("button", { name: "Створити експрес" }),
@@ -374,5 +384,148 @@ describe("match schedule interactions", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Не вдалося повністю оновити розклад",
     );
+  });
+});
+
+describe("dense schedule", () => {
+  it("accepts source percentage pairs, including 0/100, but never manufactures missing predictions", () => {
+    expect(
+      sourceForecast(
+        makeMatch({ predictionPercentTeam1: 45, predictionPercentTeam2: 55 }),
+      ),
+    ).toEqual({ first: 45, second: 55, firstWidth: 45 });
+    expect(
+      sourceForecast(
+        makeMatch({ predictionPercentTeam1: 0, predictionPercentTeam2: 100 }),
+      ),
+    ).toEqual({ first: 0, second: 100, firstWidth: 0 });
+    for (const pair of [
+      [undefined, 55],
+      [45, null],
+      [NaN, 50],
+      [Infinity, 50],
+      [-1, 101],
+      [0, 0],
+      [30, 30],
+      [140, 60],
+    ]) {
+      expect(
+        sourceForecast(
+          makeMatch({
+            predictionPercentTeam1: pair[0],
+            predictionPercentTeam2: pair[1],
+            aiConfidence: 80,
+            odds: { team1: 1.1, team2: 5 },
+          }),
+        ),
+      ).toBeNull();
+    }
+  });
+  it("keeps forecast position stable, with the correct team names and an honest empty state", () => {
+    render(
+      <MatchSchedule
+        {...props([
+          makeMatch({ predictionPercentTeam1: 28, predictionPercentTeam2: 72 }),
+          makeMatch({ id: "m2", team1: "STATE", team2: "ECSTATIC" }),
+        ])}
+      />,
+    );
+    const forecast = screen.getByRole("group", {
+      name: "Прогноз джерела: MASONIC — Linx Legacy Esport",
+    });
+    expect(within(forecast).getByText("28%")).toBeVisible();
+    expect(within(forecast).getByText("72%")).toBeVisible();
+    expect(forecast).toHaveTextContent(
+      "MASONIC: 28%; Linx Legacy Esport: 72%.",
+    );
+    expect(forecast.querySelector(".ms-forecast-track > span")).toHaveStyle({
+      width: "28%",
+    });
+    expect(
+      screen.getByRole("group", { name: "Прогноз джерела: STATE — ECSTATIC" }),
+    ).toHaveTextContent("Немає даних");
+  });
+  it("does not label an unmarked team as safe, and Add opens the existing note editor", () => {
+    const p = props();
+    render(<MatchSchedule {...p} />);
+    const row = screen.getAllByTestId("schedule-row")[1];
+    expect(row.querySelectorAll(".ms-team-risk")).toHaveLength(0);
+    fireEvent.click(
+      within(row).getByRole("button", {
+        name: "Додати примітку: STATE — ECSTATIC",
+      }),
+    );
+    expect(p.onEditNote).toHaveBeenCalledWith(p.model.matches[1], "STATE");
+  });
+  it("keeps real live and finished scores in the match context", () => {
+    render(
+      <MatchSchedule
+        {...props([
+          makeMatch({ matchStatus: "live", score1: 1, score2: 0 }),
+          makeMatch({
+            id: "m2",
+            matchStatus: "finished",
+            score1: 2,
+            score2: 1,
+          }),
+        ])}
+      />,
+    );
+    expect(screen.getByText("Зараз грають · 1:0")).toBeVisible();
+    expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
+  });
+  it("preserves source, express, results and refresh actions without saving a record", () => {
+    const p = props([makeMatch({ url: "https://tips.gg/match/example/" })]);
+    render(<MatchSchedule {...p} />);
+    const source = screen.getByRole("link", {
+      name: "Джерело матчу: MASONIC — Linx Legacy Esport",
+    });
+    expect(source).toHaveAttribute("href", "https://tips.gg/match/example/");
+    expect(source).toHaveAttribute("rel", "noopener noreferrer");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Додати матч до експресу: MASONIC — Linx Legacy Esport",
+      }),
+    );
+    expect(p.model.toggleMatchSelection).toHaveBeenCalledWith("m1");
+    fireEvent.click(screen.getByRole("button", { name: "Результати" }));
+    expect(p.onResults).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "Оновити" }));
+    expect(p.model.refreshMatches).toHaveBeenCalledOnce();
+    expect(p.model.handleAddToBets).not.toHaveBeenCalled();
+  });
+  it("renders odds in team order and only highlights a genuinely lower available value", () => {
+    const p = props([
+      makeMatch({
+        bettingCoefficientTeam1: 3.01,
+        bettingCoefficientTeam2: 1.35,
+      }),
+    ]);
+    const view = render(<MatchSchedule {...p} />);
+    let odds = screen.getByRole("group", { name: "Коефіцієнти" });
+    expect(odds.querySelectorAll(".ms-odd-line")[0]).toHaveTextContent(
+      "MASONIC: 3.01",
+    );
+    expect(odds.querySelector(".ms-odd-value--lower")).toHaveTextContent(
+      "1.35",
+    );
+    for (const values of [
+      [1.5, 1.5],
+      [1.5, null],
+      [1.501, 1.502],
+    ]) {
+      view.rerender(
+        <MatchSchedule
+          {...props([
+            makeMatch({
+              bettingCoefficientTeam1: values[0],
+              bettingCoefficientTeam2: values[1],
+            }),
+          ])}
+        />,
+      );
+      odds = screen.getByRole("group", { name: "Коефіцієнти" });
+      expect(odds.querySelector(".ms-odd-value--lower")).toBeNull();
+    }
   });
 });

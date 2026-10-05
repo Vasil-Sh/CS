@@ -54,10 +54,31 @@ export function dateLabel(value: string): string {
   });
 }
 
+export function matchCount(count: number): string {
+  const lastTwo = count % 100;
+  const last = count % 10;
+  return `${count} ${lastTwo >= 11 && lastTwo <= 14 ? "матчів" : last === 1 ? "матч" : last >= 2 && last <= 4 ? "матчі" : "матчів"}`;
+}
+
 export function coefficient(value?: number | null): string {
   return value != null && Number.isFinite(value) && value > 1
     ? value.toFixed(2)
     : "—";
+}
+
+/** Only use the source's complete percentage pair, never odds or AI fallbacks. */
+export function sourceForecast(match: Match) {
+  const first = match.predictionPercentTeam1;
+  const second = match.predictionPercentTeam2;
+  const valid = (value: unknown): value is number =>
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 0 &&
+    value <= 100;
+  if (!valid(first) || !valid(second) || Math.abs(first + second - 100) > 1) {
+    return null;
+  }
+  return { first, second, firstWidth: (100 * first) / (first + second) };
 }
 
 export function riskTone(status: string): string {
@@ -123,12 +144,34 @@ export function matchState(
     return { text: "Перенесено", tone: "postponed" };
   if (scheduleDate(match.date) && scheduleDate(match.date) < today)
     return { text: "Статус потребує оновлення", tone: "stale" };
-  if (match.matchStatus === "live")
-    return { text: "Зараз грають", tone: "live" };
+  if (match.matchStatus === "live") {
+    const score =
+      match.score1 != null && match.score2 != null
+        ? ` · ${match.score1}:${match.score2}`
+        : "";
+    return { text: `Зараз грають${score}`, tone: "live" };
+  }
   return {
     text: match.matchStatus === "upcoming" ? "Очікується" : "Статус не вказано",
     tone: "upcoming",
   };
+}
+
+/** Compact score label for the schedule row's score column. */
+export function matchScore(match: Match): { text: string; tone: string } {
+  if (match.matchStatus === "live") return { text: "Лайв", tone: "live" };
+  if (match.matchStatus === "finished") {
+    const score =
+      match.score1 != null && match.score2 != null
+        ? `${match.score1}:${match.score2}`
+        : "";
+    return { text: score || "Завершено", tone: "finished" };
+  }
+  if (match.matchStatus === "cancelled")
+    return { text: "Скасовано", tone: "cancelled" };
+  if (match.matchStatus === "postponed")
+    return { text: "Перенесено", tone: "postponed" };
+  return { text: "Очікує", tone: "upcoming" };
 }
 
 export type PersonalFilter = "all" | "liked" | "notes" | "skipped";
@@ -192,7 +235,7 @@ export function filterSchedule(
 export function groupSchedule(matches: Match[], mode: "time" | "tournament") {
   if (mode === "time")
     return matches.length
-      ? [{ key: "time", title: "Усі матчі за часом", game: "", matches }]
+      ? [{ key: "time", title: "Усі матчі", game: "", matches }]
       : [];
   const groups = new Map<
     string,

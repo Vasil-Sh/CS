@@ -287,7 +287,15 @@ export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
                       // Load existing data into form
                       if (existingData) {
                         setStatus(existingData.status || "Під питанням");
-                        setSelectedGame(existingData.game || gameStorageKey);
+                        setSelectedGame(
+                          existingData.game === "Dota2" ||
+                            existingData.game === "Дота"
+                            ? "Дота"
+                            : existingData.game === "CS2" ||
+                                existingData.game === "CS"
+                              ? "CS"
+                              : gameStorageKey,
+                        );
                         setNotes(existingData.notes || "");
                       }
                     }}
