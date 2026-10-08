@@ -2,6 +2,7 @@
 .ms-body--dense {
   font-family: Inter, Arial, sans-serif;
   color: #192332;
+  background: #f8f9fa;
   padding-top: 20px;
 }
 .ms-page .ms-hero-results {
@@ -42,7 +43,7 @@
 }
 .ms-body--dense .ms-segment button {
   min-height: 38px;
-  font-size: clamp(12px, 1.15cqi, 15px);
+  font-size: 14px;
   padding: 8px 14px;
   border: 1px solid #e1e3e6;
   border-radius: 5px;
@@ -59,6 +60,11 @@
   box-shadow: inset 0 0 0 1px #5b6569;
   border-radius: 4px;
   font-weight: 700;
+}
+.ms-body--dense .ms-game-filter .ms-game-count {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
 }
 .ms-dense-tools {
   display: flex;
@@ -86,7 +92,7 @@
   min-height: 38px;
   padding: 7px 10px;
   gap: 9px;
-  font-size: clamp(12px, 1.1cqi, 14px);
+  font-size: 14px;
 }
 .ms-body--dense .ms-search {
   padding: 0 10px;
@@ -94,11 +100,11 @@
 }
 .ms-body--dense .ms-search input {
   height: 38px;
-  font-size: clamp(12px, 1.15cqi, 15px);
+  font-size: 14px;
 }
 .ms-body--dense .ms-search-tools .ms-button {
   min-height: 38px;
-  font-size: clamp(12px, 1.15cqi, 15px);
+  font-size: 14px;
   padding: 7px 10px;
 }
 .ms-body--dense .ms-count {
@@ -132,9 +138,9 @@
   /* Keep the approved column proportions at every desktop width, rather
      than giving all spare space to the match and shrinking the other cells. */
   grid-template-columns:
-    minmax(54px, 60fr) minmax(58px, 62fr) minmax(0, 362fr)
-    minmax(60px, 62fr) minmax(128px, 134fr) minmax(74px, 78fr)
-    minmax(126px, 134fr) minmax(154px, 164fr);
+    minmax(52px, 64fr) minmax(60px, 70fr) minmax(0, 390fr)
+    minmax(44px, 50fr) minmax(136px, 146fr) minmax(80px, 86fr)
+    minmax(160px, 174fr) minmax(108px, 116fr);
   column-gap: 0;
   padding: 0;
   align-items: center;
@@ -143,7 +149,7 @@
   background: transparent;
   color: #667185;
   font:
-    500 clamp(10px, 1cqi, 12px)/1.4 Inter,
+    500 12px/1.4 Inter,
     Arial,
     sans-serif;
   text-transform: uppercase;
@@ -171,6 +177,10 @@
   justify-content: center;
   gap: 4px;
 }
+.ms-body--dense .ms-columns .ms-source-heading {
+  padding-inline: 0;
+  color: #7d78a5;
+}
 .ms-interest-heading-text {
   font-size: 11px;
   text-transform: uppercase;
@@ -182,7 +192,7 @@
   justify-content: center;
   gap: 4px;
   padding-inline: 6px;
-  white-space: nowrap;
+  white-space: normal;
 }
 .ms-forecast-help {
   position: relative;
@@ -215,7 +225,7 @@
 }
 .ms-body--dense .ms-row {
   background: #fff;
-  min-height: clamp(88px, 8.4cqi, 108px);
+  min-height: 92px;
   border-top: 1px solid #e7e8eb;
   align-items: stretch;
 }
@@ -223,7 +233,7 @@
   border-left: 0;
   box-shadow: none;
   align-self: stretch;
-  padding: 7px 10px;
+  padding: 6px 10px;
 }
 .ms-body--dense .ms-row > * + * {
   box-shadow: inset 1px 0 #ececf0;
@@ -233,15 +243,15 @@
   padding-inline: 4px;
 }
 .ms-body--dense .ms-row.is-open {
-  background: #f1f3ef;
-  box-shadow: inset 3px 0 #526158;
+  background: #f3f7fc;
+  box-shadow: inset 3px 0 #7092c2;
 }
 .ms-body--dense .ms-row.is-selected:not(.is-open) {
   background: #f0f5f2;
   box-shadow: inset 3px 0 #389c70;
 }
 .ms-body--dense .ms-row:hover:not(.is-open) {
-  background: #fafbf8;
+  background: #fafcfe;
 }
 .ms-body--dense .ms-interest {
   gap: 0;
@@ -266,8 +276,22 @@
   background: #fcece9;
 }
 .ms-body--dense .ms-time time {
-  font-size: clamp(21px, 2cqi, 27px);
+  font:
+    650 17px/1.3 Inter,
+    Arial,
+    sans-serif;
   font-variant-numeric: tabular-nums;
+}
+.ms-body--dense .ms-time {
+  gap: 7px;
+}
+.ms-body--dense .ms-time .ms-format-chip {
+  font:
+    600 12px/1.4 Inter,
+    Arial,
+    sans-serif;
+  padding: 2px 5px;
+  background: #f1f3f5;
 }
 .ms-body--dense .ms-time input {
   accent-color: #37594a;
@@ -275,8 +299,8 @@
 .ms-body--dense .ms-match {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 7px 12px;
+  gap: 3px;
+  padding: 6px 12px;
   border-radius: 0;
   justify-content: center;
 }
@@ -292,7 +316,7 @@
   gap: 5px;
   align-items: center;
   min-width: 0;
-  font-size: clamp(11px, 1.02cqi, 13px);
+  font-size: 13px;
   line-height: 1.45;
   color: #68748a;
 }
@@ -315,7 +339,7 @@
   color: #5b6367;
   border-radius: 12px;
   padding: 1px 6px;
-  font-size: clamp(10px, 1cqi, 12px);
+  font-size: 12px;
   font-weight: 500;
   flex-shrink: 0;
   line-height: 1.4;
@@ -325,6 +349,11 @@
   color: #227347;
   border-color: #a1d9b4;
   background: #ecf9ef;
+}
+.ms-match-status--upcoming {
+  color: #426fad;
+  border-color: #cbdcf4;
+  background: #eff5fd;
 }
 .ms-live-dot {
   width: 6px;
@@ -356,7 +385,7 @@
 }
 .ms-body--dense .ms-team strong {
   font:
-    700 clamp(15px, 1.47cqi, 19px)/1.3 Inter,
+    700 clamp(17px, 1.45cqi, 20px)/1.3 Inter,
     Arial,
     sans-serif;
   color: #151e30;
@@ -368,8 +397,8 @@
   color: #7d858c;
 }
 .ms-body--dense .ms-team .ms-logo {
-  width: clamp(25px, 2.5cqi, 32px);
-  height: clamp(25px, 2.5cqi, 32px);
+  width: 27px;
+  height: 27px;
 }
 .ms-body--dense .ms-match-meta {
   display: flex;
@@ -378,7 +407,7 @@
   gap: 4px 6px;
   padding: 0;
   margin: 0;
-  font-size: clamp(11px, 1.06cqi, 13px);
+  font-size: 13px;
   font-weight: 500;
 }
 .ms-game-chip,
@@ -415,9 +444,9 @@
 }
 .ms-team-risk--stable,
 .ms-team-risk--reliable {
-  border-color: #9fd4ad;
-  color: #22723e;
-  background: #f2fcf2;
+  border-color: #219568;
+  color: #fff;
+  background: #219568;
 }
 .ms-team-risk--ban {
   border-color: #efb5ad;
@@ -460,27 +489,42 @@
   color: #8a9195;
   font-weight: 600;
 }
-.ms-source-score--finished {
-  color: #192332;
+.ms-match-score {
+  font:
+    600 13px/1.4 Inter,
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #3b495c;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0f3f6;
+  border-radius: 4px;
+  padding: 2px 6px;
 }
-.ms-source-score--live {
-  color: #227347;
-}
-.ms-source-score--cancelled,
-.ms-source-score--postponed {
-  color: #b33e32;
+.ms-match-score-label {
+  font-weight: 400;
+  color: #647184;
 }
 .ms-body--dense .ms-cell-icon {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 32px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
-  border: 1px solid #dce0da;
+  border: 1px solid #dce2e9;
   border-radius: 4px;
   color: #535d63;
   background: transparent;
+}
+.ms-body--dense .ms-source-cell .ms-cell-icon {
+  width: 28px;
+  height: 28px;
+  color: #8b78c1;
+  background: #faf8ff;
+  border-color: #e5def4;
 }
 .ms-body--dense .ms-cell-icon:hover {
   background: #e9ede8;
@@ -505,7 +549,7 @@
   justify-content: space-between;
   gap: 5px;
   color: #34404d;
-  font-size: clamp(13px, 1.3cqi, 16px);
+  font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   margin-bottom: 6px;
@@ -519,15 +563,15 @@
   height: 7px;
   border-radius: 5px;
   overflow: hidden;
-  background: #389c70;
+  background: #26b574;
 }
 .ms-forecast-track > span {
   height: 100%;
-  background: #5f7ca0;
+  background: #497cbd;
   flex-shrink: 0;
 }
 .ms-forecast-empty {
-  font-size: clamp(12px, 1.2cqi, 15px);
+  font-size: 13px;
   color: #717c84;
   display: block;
   text-align: center;
@@ -546,53 +590,61 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  border: 1px solid #d5dad4;
-  border-radius: 4px;
-  background: transparent;
-  color: #46505b;
-  min-height: 34px;
-  padding: 6px 8px;
-  font-size: clamp(11px, 1.08cqi, 14px);
+  border: 1px solid #c5d8f3;
+  border-radius: 5px;
+  background: #f0f6ff;
+  color: #346bc0;
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 13px;
   font-weight: 500;
-  min-width: 100%;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
 }
 .ms-body--dense .ms-note-button svg {
   flex-shrink: 0;
 }
 .ms-body--dense .ms-note-button--add {
-  border-color: #d5dad4;
+  border-color: #477fe8;
+  background: #477fe8;
+  color: #fff;
 }
-.ms-body--dense .ms-note-button:hover {
-  border-color: #8f9b92;
-  background: #f1f4ee;
+.ms-body--dense .ms-note-button--add:hover {
+  border-color: #3364bd;
+  background: #3364bd;
+}
+.ms-body--dense .ms-note-button:not(.ms-note-button--add):hover {
+  border-color: #2c5fb8;
+  background: #e3edfb;
 }
 .ms-body--dense .ms-record {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 7px;
 }
 .ms-body--dense .ms-record-button {
-  width: auto;
-  min-height: 34px;
-  padding: 6px 8px;
-  font-size: clamp(12px, 1.15cqi, 15px);
-  gap: 5px;
-  color: #28322f;
-  border-color: #a9b0a9;
-  background: #fff;
-  flex: 1;
-  box-shadow: 0 1px 2px #18202b0a;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  gap: 0;
+  color: #28946a;
+  border-color: #bce4d3;
+  background: #f0fbf6;
+  flex: 0 0 32px;
+  box-shadow: none;
 }
 .ms-body--dense .ms-record-button:hover {
-  color: #fff;
-  background: #293c34;
-  border-color: #293c34;
+  color: #19774f;
+  background: #def4e9;
+  border-color: #78bd9c;
 }
 .ms-body--dense .ms-disclosure {
   display: inline-flex !important;
-  width: 24px;
-  height: 34px;
+  width: 22px;
+  height: 30px;
 }
 .ms-body--dense .ms-row > .ms-odds--compact {
   padding: 10px 7px;
@@ -602,7 +654,7 @@
 }
 .ms-body--dense .ms-odd-value {
   font-family: Inter, Arial, sans-serif;
-  font-size: clamp(13px, 1.3cqi, 17px);
+  font-size: 15px;
 }
 .ms-body--dense .ms-details {
   background: #fff;
@@ -646,7 +698,7 @@
     gap: 4px;
   }
   .ms-body--dense .ms-record-button {
-    padding: 6px;
+    padding: 0;
   }
   .ms-body--dense .ms-interest {
     gap: 0;
@@ -658,7 +710,10 @@
     padding-inline: 8px;
   }
   .ms-body--dense .ms-row > .ms-forecast {
-    padding-inline: 10px;
+    padding-inline: 8px;
+  }
+  .ms-body--dense .ms-search-tools {
+    flex-basis: 34%;
   }
 }
 @container schedule (max-width: 930px) {
@@ -737,7 +792,9 @@
   }
   .ms-body--dense .ms-record-button {
     margin-right: auto;
-    font-size: 12px;
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
   }
   .ms-body--dense .ms-cell-icon,
   .ms-body--dense .ms-disclosure {
@@ -745,7 +802,7 @@
     height: 36px;
   }
   .ms-body--dense .ms-note-button {
-    font-size: 11px;
+    font-size: 13px;
   }
   .ms-body--dense .ms-date-tools {
     flex-basis: 100%;
@@ -801,7 +858,7 @@
     flex: none;
   }
   .ms-body--dense .ms-row {
-    grid-template-columns: 44px minmax(0, 1fr) 72px;
+    grid-template-columns: 52px minmax(0, 1fr) 72px;
     grid-template-areas: "time match match" "interest forecast odds" "source notes notes" "record record record";
     padding: 14px 10px;
     gap: 12px 9px;
@@ -816,7 +873,7 @@
     gap: 5px;
   }
   .ms-body--dense .ms-team strong {
-    font-size: 14px;
+    font-size: 16px;
   }
   .ms-body--dense .ms-team .ms-logo {
     width: 22px;

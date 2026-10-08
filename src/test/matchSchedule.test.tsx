@@ -308,21 +308,16 @@ describe("match schedule interactions", () => {
     fireEvent.change(search, { target: { value: "" } });
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(2);
   });
-  it("keeps liked, skipped and note filters distinct", () => {
+  it("keeps the skipped filter available through the filter panel", () => {
     const p = props();
-    p.model.matchRatings = { m2: "like" };
+    p.model.matchRatings = { m2: "dislike" };
     render(<MatchSchedule {...p} />);
-    fireEvent.click(screen.getByRole("button", { name: "Мої цікаві" }));
+    fireEvent.click(screen.getByRole("button", { name: "Фільтри" }));
+    fireEvent.click(screen.getByRole("button", { name: "Нецікаві матчі" }));
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
     expect(
-      screen.queryByRole("button", {
-        name: "Деталі: MASONIC — Linx Legacy Esport",
-      }),
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "З нотатками" }));
-    expect(
       screen.getByRole("button", {
-        name: "Деталі: MASONIC — Linx Legacy Esport",
+        name: "Деталі: STATE — ECSTATIC",
       }),
     ).toBeVisible();
   });
@@ -457,7 +452,7 @@ describe("dense schedule", () => {
     );
     expect(p.onEditNote).toHaveBeenCalledWith(p.model.matches[1], "STATE");
   });
-  it("shows live and finished scores in the source cell without status pills", () => {
+  it("shows scores in the Гра block and a Гра link otherwise", () => {
     const { container } = render(
       <MatchSchedule
         {...props([
@@ -472,18 +467,86 @@ describe("dense schedule", () => {
       />,
     );
     const scores = Array.from(
-      container.querySelectorAll(".ms-source-score"),
-    ).map((el) => el.textContent?.trim());
-    expect(scores).toContain("1:0");
-    expect(scores).toContain("2:1");
+      container.querySelectorAll(".ms-source-cell .ms-source-score"),
+    ).map((el) => el.getAttribute("aria-label"));
+    expect(scores).toContain("Рахунок матчу: 1:0");
+    expect(scores).toContain("Рахунок матчу: 2:1");
+    expect(
+      container.querySelectorAll(".ms-source-cell .ms-source-score"),
+    ).toHaveLength(2);
+    expect(container.querySelector(".ms-match-status--live")).toHaveTextContent(
+      "Зараз грають",
+    );
     expect(screen.queryByText("Зараз грають · 1:0")).not.toBeInTheDocument();
     expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
+  });
+  it("pins liked matches to the top and pushes disliked above finished", () => {
+    const p = props([
+      makeMatch({
+        id: "finished",
+        team1: "FINISHED",
+        matchStatus: "finished",
+        score1: 2,
+        score2: 1,
+      }),
+      makeMatch({ id: "disliked", team1: "DISLIKED" }),
+      makeMatch({ id: "neutral", team1: "NEUTRAL" }),
+      makeMatch({ id: "liked", team1: "LIKED" }),
+    ]);
+    p.model.matchRatings = { disliked: "dislike", liked: "like" };
+    render(<MatchSchedule {...p} />);
+    const order = screen
+      .getAllByTestId("schedule-row")
+      .map((row) => row.querySelector(".ms-team strong")?.textContent);
+    expect(order).toEqual(["LIKED", "NEUTRAL", "DISLIKED", "FINISHED"]);
+  });
+  it("places the format under time and keeps the row record action icon-only and labelled", () => {
+    render(<MatchSchedule {...props([makeMatch()])} />);
+    const row = screen.getByTestId("schedule-row");
+    expect(row.querySelector(".ms-time .ms-format-chip")).toHaveTextContent(
+      "BO1",
+    );
+    expect(row.querySelector(".ms-match-meta .ms-format-chip")).toBeNull();
+    const record = within(row).getByRole("button", {
+      name: "Створити запис: MASONIC — Linx Legacy Esport",
+    });
+    expect(record).toHaveAttribute("title", "Створити запис");
+    expect(record.textContent).toBe("");
+  });
+  it("does not turn a missing score into a fictional 0:0", () => {
+    const view = render(
+      <MatchSchedule {...props([makeMatch({ matchStatus: "live" })])} />,
+    );
+    expect(view.container.querySelector(".ms-source-score")).toBeNull();
+    view.rerender(
+      <MatchSchedule
+        {...props([makeMatch({ matchStatus: "live", score1: 0, score2: 0 })])}
+      />,
+    );
+    expect(screen.getByLabelText("Рахунок матчу: 0:0")).toBeInTheDocument();
+  });
+  it("opens and closes notes from the compact view action without saving", () => {
+    const p = props([makeMatch()]);
+    render(<MatchSchedule {...p} />);
+    const notes = screen.getByRole("button", {
+      name: "Переглянути примітки: MASONIC — Linx Legacy Esport",
+    });
+    expect(notes).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(notes);
+    expect(notes).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Краще ставити проти них")).toBeVisible();
+    fireEvent.click(notes);
+    expect(notes).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByText("Краще ставити проти них"),
+    ).not.toBeInTheDocument();
+    expect(p.model.handleAddToBets).not.toHaveBeenCalled();
   });
   it("preserves source, express, results and refresh actions without saving a record", () => {
     const p = props([makeMatch({ url: "https://tips.gg/match/example/" })]);
     render(<MatchSchedule {...p} />);
     const source = screen.getByRole("link", {
-      name: "Джерело матчу: MASONIC — Linx Legacy Esport",
+      name: "Гра: MASONIC — Linx Legacy Esport",
     });
     expect(source).toHaveAttribute("href", "https://tips.gg/match/example/");
     expect(source).toHaveAttribute("rel", "noopener noreferrer");

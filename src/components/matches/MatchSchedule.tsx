@@ -6,8 +6,9 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  CirclePlus,
   ExternalLink,
-  FileText,
+  Eye,
   Info,
   Layers,
   Lightbulb,
@@ -259,18 +260,16 @@ export default function MatchSchedule({
     [matches, getTeamRiskInfo],
   );
   const hasNotes = (match: Match) => !!risks.get(match.id)?.some(Boolean);
-  const baseFilters = { ...filters, personal: "all" as const };
-  const baseMatches = filterSchedule(
-    m.matches,
-    baseFilters,
-    m.matchRatings,
-    hasNotes,
-  );
   const visible = filterSchedule(m.matches, filters, m.matchRatings, hasNotes);
   const sortedVisible = [...visible].sort((a, b) => {
-    const aLiked = m.matchRatings[a.id] === "like" ? 1 : 0;
-    const bLiked = m.matchRatings[b.id] === "like" ? 1 : 0;
-    return bLiked - aLiked;
+    const rank = (match: Match) => {
+      const rating = m.matchRatings[match.id];
+      if (rating === "like") return 0;
+      if (match.matchStatus === "finished") return 3;
+      if (rating === "dislike") return 2;
+      return 1;
+    };
+    return rank(a) - rank(b);
   });
   const groups = groupSchedule(sortedVisible, mode);
   const activeId = expandedId;
@@ -278,6 +277,9 @@ export default function MatchSchedule({
     (match) =>
       scheduleDate(match.date) === filters.date &&
       (filters.game === "all" || match.game === filters.game),
+  );
+  const dateMatches = m.matches.filter(
+    (match) => scheduleDate(match.date) === filters.date,
   );
   const tournaments = [
     ...new Set(dayMatches.map((match) => match.context).filter(Boolean)),
@@ -526,7 +528,13 @@ export default function MatchSchedule({
     const liked = m.matchRatings[match.id] === "like";
     const disliked = m.matchRatings[match.id] === "dislike";
     const showSourceScore =
-      match.matchStatus === "finished" || match.matchStatus === "live";
+      (match.matchStatus === "finished" || match.matchStatus === "live") &&
+      typeof match.score1 === "number" &&
+      Number.isFinite(match.score1) &&
+      match.score1 >= 0 &&
+      typeof match.score2 === "number" &&
+      Number.isFinite(match.score2) &&
+      match.score2 >= 0;
     const s1 = match.score1 ?? 0;
     const s2 = match.score2 ?? 0;
     return (
@@ -569,6 +577,9 @@ export default function MatchSchedule({
               />
             )}
             <time dateTime={match.date}>{scheduleTime(match.date)}</time>
+            <span className="ms-format-chip">
+              {match.matchType.toUpperCase()}
+            </span>
           </div>
           <button
             type="button"
@@ -588,6 +599,17 @@ export default function MatchSchedule({
                   {match.context || "Турнір не вказаний"}
                 </span>
               </span>
+              {match.matchStatus === "live" && (
+                <span className="ms-match-status ms-match-status--live">
+                  <span className="ms-live-dot" aria-hidden="true" />
+                  Зараз грають
+                </span>
+              )}
+              {match.matchStatus === "upcoming" && (
+                <span className="ms-match-status ms-match-status--upcoming">
+                  Очікується
+                </span>
+              )}
             </span>
             <span className="ms-teams">
               <span className="ms-team">
@@ -616,9 +638,6 @@ export default function MatchSchedule({
               <span className={`ms-game-chip ms-game-chip--${match.game}`}>
                 {match.game === "Dota2" ? "Dota 2" : "CS2"}
               </span>
-              <span className="ms-format-chip">
-                {match.matchType.toUpperCase()}
-              </span>
               {rowRisks.map((risk, index) => (
                 <span
                   key={index}
@@ -640,7 +659,10 @@ export default function MatchSchedule({
           </button>
           <div className="ms-source-cell">
             {showSourceScore ? (
-              <span className="ms-source-score">
+              <span
+                className="ms-source-score"
+                aria-label={`Рахунок матчу: ${match.score1}:${match.score2}`}
+              >
                 <span
                   className={
                     s1 === s2 ? "" : s1 > s2 ? "ms-score-win" : "ms-score-loss"
@@ -663,7 +685,7 @@ export default function MatchSchedule({
                 href={matchSource(match)}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Джерело матчу: ${match.team1} — ${match.team2}`}
+                aria-label={`Гра: ${match.team1} — ${match.team2}`}
                 title="Відкрити джерело матчу"
               >
                 <ExternalLink size={15} />
@@ -677,10 +699,14 @@ export default function MatchSchedule({
               type="button"
               className={`ms-note-button ${rowRisks.length ? "" : "ms-note-button--add"}`}
               onClick={() => {
-                if (rowRisks.length) setExpandedId(match.id);
+                if (rowRisks.length) toggleDetails(match.id);
                 else onEditNote(match, match.team1);
               }}
               aria-label={`${rowRisks.length ? "Переглянути примітки" : "Додати примітку"}: ${match.team1} — ${match.team2}`}
+              aria-expanded={rowRisks.length ? open : undefined}
+              aria-controls={
+                rowRisks.length ? `${regionId}-detail-${match.id}` : undefined
+              }
               title={
                 rowRisks.map((r) => `${r.name}: ${r.status}`).join("; ") ||
                 "Немає нотаток"
@@ -688,13 +714,13 @@ export default function MatchSchedule({
             >
               {rowRisks.length ? (
                 <>
-                  <FileText size={15} />
+                  <Eye size={15} />
                   <span>Переглянути · {rowRisks.length}</span>
                 </>
               ) : (
                 <>
-                  <Plus size={16} />
-                  <span>Додати</span>
+                  <CirclePlus size={15} />
+                  <span>Додати нотатку</span>
                 </>
               )}
             </button>
@@ -705,8 +731,9 @@ export default function MatchSchedule({
               className="ms-button ms-record-button"
               onClick={() => m.handleAddToBets(match)}
               aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
+              title="Створити запис"
             >
-              <Plus size={19} /> Запис
+              <CirclePlus size={18} />
             </button>
             <button
               type="button"
@@ -795,29 +822,6 @@ export default function MatchSchedule({
       <div className="ms-body ms-body--dense">
         <div className="ms-dense-heading">
           <h2>Розклад матчів</h2>
-          <div className="ms-segment ms-personal" aria-label="Мої матчі">
-            <button
-              type="button"
-              aria-pressed={filters.personal === "all"}
-              onClick={() => changeFilters({ personal: "all" })}
-            >
-              Усі · {baseMatches.length}
-            </button>
-            <button
-              type="button"
-              aria-pressed={filters.personal === "liked"}
-              onClick={() => changeFilters({ personal: "liked" })}
-            >
-              Мої цікаві
-            </button>
-            <button
-              type="button"
-              aria-pressed={filters.personal === "notes"}
-              onClick={() => changeFilters({ personal: "notes" })}
-            >
-              З нотатками
-            </button>
-          </div>
           <div className="ms-segment ms-grouping" aria-label="Групування">
             <button
               type="button"
@@ -874,20 +878,28 @@ export default function MatchSchedule({
               />
             </label>
             <div className="ms-segment ms-game-filter" aria-label="Гра">
-              {(["all", "CS2", "Dota2"] as const).map((game) => (
-                <button
-                  type="button"
-                  key={game}
-                  aria-pressed={filters.game === game}
-                  onClick={() => changeFilters({ game, tournament: "all" })}
-                >
-                  {game === "all"
+              {(["all", "CS2", "Dota2"] as const).map((game) => {
+                const count =
+                  game === "all"
+                    ? dateMatches.length
+                    : dateMatches.filter((match) => match.game === game).length;
+                const label =
+                  game === "all"
                     ? "Усі ігри"
                     : game === "Dota2"
                       ? "Dota 2"
-                      : game}
-                </button>
-              ))}
+                      : game;
+                return (
+                  <button
+                    type="button"
+                    key={game}
+                    aria-pressed={filters.game === game}
+                    onClick={() => changeFilters({ game, tournament: "all" })}
+                  >
+                    {label} <span className="ms-game-count">({count})</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="ms-search-tools">
@@ -1141,7 +1153,7 @@ export default function MatchSchedule({
                         </span>
                         <span>Час</span>
                         <span>Матч і турнір</span>
-                        <span>Джерело</span>
+                        <span className="ms-source-heading">Гра</span>
                         <span className="ms-forecast-heading">
                           Прогноз джерела
                           <details className="ms-forecast-help">
@@ -1156,9 +1168,9 @@ export default function MatchSchedule({
                             </span>
                           </details>
                         </span>
-                        <span>Коеф.</span>
+                        <span>Коефіцієнти</span>
                         <span>Примітки</span>
-                        <span>Дії</span>
+                        <span>Додати запис</span>
                       </div>
                       {shown.map(renderMatch)}
                       {group.matches.length > shown.length && (
