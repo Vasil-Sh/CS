@@ -274,7 +274,7 @@ describe("match schedule interactions", () => {
       screen.queryByRole("button", { name: "Створити запис" }),
     ).not.toBeInTheDocument();
   });
-  it("collapses groups, shows the remaining rows and switches grouping", () => {
+  it("shows all matches at once and switches grouping", () => {
     const matches = Array.from({ length: 6 }, (_, index) =>
       makeMatch({ id: String(index), team1: `Team ${index}` }),
     );
@@ -284,8 +284,6 @@ describe("match schedule interactions", () => {
       "true",
     );
     fireEvent.click(screen.getByRole("button", { name: "За турніром" }));
-    expect(screen.getAllByTestId("schedule-row")).toHaveLength(4);
-    fireEvent.click(screen.getByRole("button", { name: "Ще 2 матчі турніру" }));
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(6);
     fireEvent.click(
       screen.getByRole("button", {
@@ -308,18 +306,15 @@ describe("match schedule interactions", () => {
     fireEvent.change(search, { target: { value: "" } });
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(2);
   });
-  it("keeps the skipped filter available through the filter panel", () => {
+  it("offers reset filters without a skipped toggle", () => {
     const p = props();
-    p.model.matchRatings = { m2: "dislike" };
     render(<MatchSchedule {...p} />);
     fireEvent.click(screen.getByRole("button", { name: "Фільтри" }));
-    fireEvent.click(screen.getByRole("button", { name: "Нецікаві матчі" }));
-    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
     expect(
-      screen.getByRole("button", {
-        name: "Деталі: STATE — ECSTATIC",
-      }),
-    ).toBeVisible();
+      screen.queryByRole("button", { name: "Нецікаві матчі" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Скинути фільтри" }));
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(2);
   });
   it("clears a bookmark with a null rating, not a second like", () => {
     const p = props();
@@ -475,7 +470,7 @@ describe("dense schedule", () => {
       container.querySelectorAll(".ms-source-cell .ms-source-score"),
     ).toHaveLength(2);
     expect(container.querySelector(".ms-match-status--live")).toHaveTextContent(
-      "Зараз грають",
+      "Лайв",
     );
     expect(screen.queryByText("Зараз грають · 1:0")).not.toBeInTheDocument();
     expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
@@ -500,13 +495,19 @@ describe("dense schedule", () => {
       .map((row) => row.querySelector(".ms-team strong")?.textContent);
     expect(order).toEqual(["LIKED", "NEUTRAL", "DISLIKED", "FINISHED"]);
   });
-  it("places the format under time and keeps the row record action icon-only and labelled", () => {
+  it("aligns time with team names and the format chip with the game chip", () => {
     render(<MatchSchedule {...props([makeMatch()])} />);
     const row = screen.getByTestId("schedule-row");
-    expect(row.querySelector(".ms-time .ms-format-chip")).toHaveTextContent(
-      "BO1",
+    expect(row.querySelector(".ms-time-col .ms-time-inline")).toHaveTextContent(
+      "19:00",
     );
-    expect(row.querySelector(".ms-match-meta .ms-format-chip")).toBeNull();
+    expect(
+      row.querySelector(".ms-match-meta .ms-format-chip"),
+    ).toHaveTextContent("BO1");
+    expect(row.querySelector(".ms-match-meta .ms-game-chip")).toHaveTextContent(
+      "CS2",
+    );
+    expect(row.querySelector(".ms-time-col .ms-format-chip")).toBeNull();
     const record = within(row).getByRole("button", {
       name: "Створити запис: MASONIC — Linx Legacy Esport",
     });

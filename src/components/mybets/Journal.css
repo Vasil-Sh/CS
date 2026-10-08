@@ -139,19 +139,18 @@
   background: #f1f2ed;
 }
 .journal-actions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  flex-wrap: wrap;
-  row-gap: 2px;
+  gap: 3px;
+  flex-wrap: nowrap;
 }
 .journal-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   border: 1px solid #e4e7df;
   background: #fff;
@@ -164,8 +163,8 @@
     border-color 0.15s;
 }
 .journal-action svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 .journal-action:hover {
   background: #f1f2ed;
@@ -363,15 +362,14 @@
   text-align: center;
 }
 .journal-workspace th.col-actions-head {
-  width: 14%;
+  width: 17%;
+  min-width: 124px;
   text-align: center;
 }
 .journal-workspace .col-actions {
   text-align: center;
-  overflow: hidden;
-}
-.journal-workspace th:last-child {
-  width: 4%;
+  overflow: visible;
+  white-space: nowrap;
 }
 .journal-workspace td small {
   display: block;
@@ -426,7 +424,7 @@
   border-radius: 4px;
 }
 .journal-profit {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   white-space: nowrap;
 }

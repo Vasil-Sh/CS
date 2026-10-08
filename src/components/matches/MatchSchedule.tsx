@@ -1,6 +1,5 @@
 import { Fragment, useId, useMemo, useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   Bookmark,
   CalendarDays,
@@ -241,7 +240,6 @@ export default function MatchSchedule({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const [fullGroups, setFullGroups] = useState<Set<string>>(new Set());
   const [expressMode, setExpressMode] = useState(false);
   const regionId = useId();
 
@@ -300,7 +298,6 @@ export default function MatchSchedule({
   function changeFilters(patch: Partial<ScheduleFilters>) {
     setFilters((current) => ({ ...current, ...patch }));
     setExpandedId(null);
-    setFullGroups(new Set());
     setCollapsed(new Set());
   }
   function resetFilters() {
@@ -540,34 +537,10 @@ export default function MatchSchedule({
     return (
       <Fragment key={match.id}>
         <div
-          className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""}`}
+          className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""} ${liked ? "is-liked" : ""} ${disliked ? "is-disliked" : ""}`}
           data-testid="schedule-row"
         >
           <div className="ms-interest">
-            <button
-              type="button"
-              className={`ms-rate ${liked ? "is-active" : ""}`}
-              aria-label={`${liked ? "Прибрати з цікавих" : "Позначити цікавим"}: ${match.team1} — ${match.team2}`}
-              aria-pressed={liked}
-              title={liked ? "Прибрати з цікавих" : "Позначити цікавим"}
-              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
-            >
-              <ThumbsUp size={16} fill={liked ? "currentColor" : "none"} />
-            </button>
-            <button
-              type="button"
-              className={`ms-rate ${disliked ? "is-active is-disliked" : ""}`}
-              aria-label={`${disliked ? "Повернути матч" : "Не цікавить"}: ${match.team1} — ${match.team2}`}
-              aria-pressed={disliked}
-              title={disliked ? "Повернути матч" : "Не цікавить"}
-              onClick={() =>
-                m.handleRateMatch(match.id, disliked ? null : "dislike")
-              }
-            >
-              <ThumbsDown size={16} fill={disliked ? "currentColor" : "none"} />
-            </button>
-          </div>
-          <div className="ms-time">
             {expressMode && (
               <input
                 type="checkbox"
@@ -576,10 +549,30 @@ export default function MatchSchedule({
                 onChange={() => m.toggleMatchSelection(match.id)}
               />
             )}
-            <time dateTime={match.date}>{scheduleTime(match.date)}</time>
-            <span className="ms-format-chip">
-              {match.matchType.toUpperCase()}
-            </span>
+            <button
+              type="button"
+              className={`ms-rate ${liked ? "is-active" : ""}`}
+              aria-label={`${liked ? "Прибрати з цікавих" : "Позначити цікавим"}: ${match.team1} — ${match.team2}`}
+              aria-pressed={liked}
+              title={liked ? "Прибрати з цікавих" : "Позначити цікавим"}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
+            >
+              <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} />
+            </button>
+            <button
+              type="button"
+              className={`ms-rate ${disliked ? "is-active is-disliked" : ""}`}
+              aria-label={`${disliked ? "Повернути матч" : "Не цікавить"}: ${match.team1} — ${match.team2}`}
+              aria-pressed={disliked}
+              title={disliked ? "Повернути матч" : "Не цікавить"}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() =>
+                m.handleRateMatch(match.id, disliked ? null : "dislike")
+              }
+            >
+              <ThumbsDown size={14} fill={disliked ? "currentColor" : "none"} />
+            </button>
           </div>
           <button
             type="button"
@@ -599,63 +592,73 @@ export default function MatchSchedule({
                   {match.context || "Турнір не вказаний"}
                 </span>
               </span>
-              {match.matchStatus === "live" && (
-                <span className="ms-match-status ms-match-status--live">
-                  <span className="ms-live-dot" aria-hidden="true" />
-                  Зараз грають
-                </span>
-              )}
-              {match.matchStatus === "upcoming" && (
-                <span className="ms-match-status ms-match-status--upcoming">
-                  Очікується
+              {match.matchStatus === "finished" && (
+                <span className="ms-match-status ms-match-status--finished">
+                  Завершено
                 </span>
               )}
             </span>
-            <span className="ms-teams">
-              <span className="ms-team">
-                <TeamLogo
-                  name={match.team1}
-                  src={match.logoTeam1}
-                  game={match.game}
-                />
-                <span>
-                  <strong>{match.team1 || "Команда ще невідома"}</strong>
+            <div className="ms-match-main">
+              <div className="ms-time-col">
+                <time dateTime={match.date} className="ms-time-inline">
+                  {scheduleTime(match.date)}
+                </time>
+                {match.matchStatus === "live" && (
+                  <span className="ms-match-status ms-match-status--live">
+                    <span className="ms-live-dot" aria-hidden="true" />
+                    Лайв
+                  </span>
+                )}
+              </div>
+              <span className="ms-teams">
+                <span className="ms-team">
+                  <TeamLogo
+                    name={match.team1}
+                    src={match.logoTeam1}
+                    game={match.game}
+                  />
+                  <span>
+                    <strong>{match.team1 || "Команда ще невідома"}</strong>
+                  </span>
+                </span>
+                <span className="ms-versus">vs</span>
+                <span className="ms-team">
+                  <TeamLogo
+                    name={match.team2}
+                    src={match.logoTeam2}
+                    game={match.game}
+                  />
+                  <span>
+                    <strong>{match.team2 || "Команда ще невідома"}</strong>
+                  </span>
                 </span>
               </span>
-              <span className="ms-versus">vs</span>
-              <span className="ms-team">
-                <TeamLogo
-                  name={match.team2}
-                  src={match.logoTeam2}
-                  game={match.game}
-                />
-                <span>
-                  <strong>{match.team2 || "Команда ще невідома"}</strong>
+              <span className="ms-match-meta">
+                <span className={`ms-game-chip ms-game-chip--${match.game}`}>
+                  {match.game === "Dota2" ? "Dota 2" : "CS2"}
                 </span>
-              </span>
-            </span>
-            <span className="ms-match-meta">
-              <span className={`ms-game-chip ms-game-chip--${match.game}`}>
-                {match.game === "Dota2" ? "Dota 2" : "CS2"}
-              </span>
-              {rowRisks.map((risk, index) => (
-                <span
-                  key={index}
-                  className={`ms-team-risk ms-team-risk--${riskTone(risk.status)}`}
-                  title={risk.notes || "Примітка не додана"}
-                >
-                  {["stable", "reliable"].includes(riskTone(risk.status)) ? (
-                    <ShieldCheck size={12} aria-hidden="true" />
-                  ) : (
-                    <ShieldAlert size={12} aria-hidden="true" />
-                  )}
-                  {risk.name} ·{" "}
-                  {risk.status === "Стабільні"
-                    ? "Стабільна"
-                    : risk.status || "Неоцінена"}
+                <span className="ms-format-chip">
+                  {match.matchType.toUpperCase()}
                 </span>
-              ))}
-            </span>
+                {rowRisks.map((risk, index) => (
+                  <span
+                    key={index}
+                    className={`ms-team-risk ms-team-risk--${riskTone(risk.status)}`}
+                    title={risk.notes || "Примітка не додана"}
+                  >
+                    {["stable", "reliable"].includes(riskTone(risk.status)) ? (
+                      <ShieldCheck size={12} aria-hidden="true" />
+                    ) : (
+                      <ShieldAlert size={12} aria-hidden="true" />
+                    )}
+                    {risk.name} ·{" "}
+                    {risk.status === "Стабільні"
+                      ? "Стабільна"
+                      : risk.status || "Неоцінена"}
+                  </span>
+                ))}
+              </span>
+            </div>
           </button>
           <div className="ms-source-cell">
             {showSourceScore ? (
@@ -733,7 +736,7 @@ export default function MatchSchedule({
               aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
               title="Створити запис"
             >
-              <CirclePlus size={18} />
+              <CirclePlus size={16} />
             </button>
             <button
               type="button"
@@ -747,7 +750,7 @@ export default function MatchSchedule({
               }
               onClick={() => m.toggleMatchSelection(match.id)}
             >
-              {selectedForExpress ? <Check size={17} /> : <Layers size={17} />}
+              {selectedForExpress ? <Check size={15} /> : <Layers size={15} />}
             </button>
             <button
               type="button"
@@ -757,7 +760,7 @@ export default function MatchSchedule({
               aria-expanded={open}
               aria-controls={`${regionId}-detail-${match.id}`}
             >
-              <ChevronDown size={19} className={open ? "ms-rotate" : ""} />
+              <ChevronDown size={16} className={open ? "ms-rotate" : ""} />
             </button>
           </div>
         </div>
@@ -893,6 +896,7 @@ export default function MatchSchedule({
                   <button
                     type="button"
                     key={game}
+                    className={`ms-game-option ms-game-option--${game}`}
                     aria-pressed={filters.game === game}
                     onClick={() => changeFilters({ game, tournament: "all" })}
                   >
@@ -917,7 +921,7 @@ export default function MatchSchedule({
             </label>
             <button
               type="button"
-              className="ms-button"
+              className={`ms-button ms-filter-toggle ${filtersOpen ? "is-active" : ""}`}
               aria-expanded={filtersOpen}
               aria-controls={`${regionId}-filters`}
               onClick={() => setFiltersOpen(!filtersOpen)}
@@ -1001,19 +1005,7 @@ export default function MatchSchedule({
             </label>
             <button
               type="button"
-              className="ms-text-action"
-              aria-pressed={filters.personal === "skipped"}
-              onClick={() =>
-                changeFilters({
-                  personal: filters.personal === "skipped" ? "all" : "skipped",
-                })
-              }
-            >
-              <ThumbsDown size={15} /> Нецікаві матчі
-            </button>
-            <button
-              type="button"
-              className="ms-text-action"
+              className="ms-button ms-primary"
               onClick={resetFilters}
             >
               Скинути фільтри
@@ -1103,10 +1095,7 @@ export default function MatchSchedule({
           <>
             {groups.map((group, index) => {
               const isCollapsed = collapsed.has(group.key);
-              const limit = mode === "time" ? 12 : 4;
-              const shown = fullGroups.has(group.key)
-                ? group.matches
-                : group.matches.slice(0, limit);
+              const shown = group.matches;
               return (
                 <section
                   className={`ms-group ${mode === "time" ? "ms-group--time" : ""}`}
@@ -1151,7 +1140,6 @@ export default function MatchSchedule({
                             Інтерес
                           </span>
                         </span>
-                        <span>Час</span>
                         <span>Матч і турнір</span>
                         <span className="ms-source-heading">Гра</span>
                         <span className="ms-forecast-heading">
@@ -1173,38 +1161,6 @@ export default function MatchSchedule({
                         <span>Додати запис</span>
                       </div>
                       {shown.map(renderMatch)}
-                      {group.matches.length > shown.length && (
-                        <button
-                          type="button"
-                          className="ms-more"
-                          onClick={() =>
-                            setFullGroups((current) =>
-                              new Set(current).add(group.key),
-                            )
-                          }
-                        >
-                          Ще {matchCount(group.matches.length - shown.length)}
-                          {mode === "tournament" ? " турніру" : ""}{" "}
-                          <ArrowDown size={16} />
-                        </button>
-                      )}
-                      {fullGroups.has(group.key) &&
-                        group.matches.length > limit && (
-                          <button
-                            type="button"
-                            className="ms-more"
-                            onClick={() =>
-                              setFullGroups((current) => {
-                                const next = new Set(current);
-                                next.delete(group.key);
-                                return next;
-                              })
-                            }
-                          >
-                            Показати менше{" "}
-                            <ChevronDown size={16} className="ms-rotate" />
-                          </button>
-                        )}
                     </div>
                   )}
                 </section>

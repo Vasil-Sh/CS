@@ -53,18 +53,46 @@
   background: #202c2e;
   color: white;
 }
-.ms-body--dense .ms-grouping button[aria-pressed="true"],
-.ms-body--dense .ms-game-filter button[aria-pressed="true"] {
-  background: #fafaf8;
-  color: #202629;
-  box-shadow: inset 0 0 0 1px #5b6569;
+.ms-body--dense .ms-grouping button[aria-pressed="true"] {
+  background: #293c34;
+  color: #fff;
+  border-color: #293c34;
   border-radius: 4px;
   font-weight: 700;
+}
+.ms-body--dense .ms-game-filter button[aria-pressed="true"] {
+  border-radius: 4px;
+  font-weight: 700;
+  box-shadow: none;
+}
+.ms-body--dense .ms-game-option--all[aria-pressed="true"] {
+  background: #293c34;
+  color: #fff;
+  border-color: #293c34;
+}
+.ms-body--dense .ms-game-option--CS2[aria-pressed="true"] {
+  background: #fff2d0;
+  color: #815b19;
+  border-color: #e7c67a;
+}
+.ms-body--dense .ms-game-option--Dota2[aria-pressed="true"] {
+  background: #f0e8fc;
+  color: #6945a2;
+  border-color: #d3bdf0;
 }
 .ms-body--dense .ms-game-filter .ms-game-count {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   opacity: 0.72;
+}
+.ms-body--dense .ms-filter-toggle.is-active {
+  background: #293c34;
+  color: #fff;
+  border-color: #293c34;
+}
+.ms-body--dense .ms-filter-toggle.is-active .ms-count {
+  background: #fff;
+  color: #293c34;
 }
 .ms-dense-tools {
   display: flex;
@@ -138,8 +166,8 @@
   /* Keep the approved column proportions at every desktop width, rather
      than giving all spare space to the match and shrinking the other cells. */
   grid-template-columns:
-    minmax(52px, 64fr) minmax(60px, 70fr) minmax(0, 390fr)
-    minmax(44px, 50fr) minmax(136px, 146fr) minmax(80px, 86fr)
+    minmax(52px, 64fr) minmax(0, 430fr) minmax(44px, 50fr)
+    minmax(136px, 146fr) minmax(80px, 86fr)
     minmax(160px, 174fr) minmax(108px, 116fr);
   column-gap: 0;
   padding: 0;
@@ -165,7 +193,7 @@
   border-left: 0;
   align-self: stretch;
 }
-.ms-body--dense .ms-columns > span:nth-child(3) {
+.ms-body--dense .ms-columns > span:nth-child(2) {
   justify-content: flex-start;
   text-align: left;
 }
@@ -225,7 +253,7 @@
 }
 .ms-body--dense .ms-row {
   background: #fff;
-  min-height: 92px;
+  min-height: 73px;
   border-top: 1px solid #e7e8eb;
   align-items: stretch;
 }
@@ -233,13 +261,12 @@
   border-left: 0;
   box-shadow: none;
   align-self: stretch;
-  padding: 6px 10px;
+  padding: 3px 10px;
 }
 .ms-body--dense .ms-row > * + * {
   box-shadow: inset 1px 0 #ececf0;
 }
-.ms-body--dense .ms-row > .ms-interest,
-.ms-body--dense .ms-row > .ms-time {
+.ms-body--dense .ms-row > .ms-interest {
   padding-inline: 4px;
 }
 .ms-body--dense .ms-row.is-open {
@@ -250,6 +277,12 @@
   background: #f0f5f2;
   box-shadow: inset 3px 0 #389c70;
 }
+.ms-body--dense .ms-row.is-liked {
+  box-shadow: inset 3px 0 #2f9e64;
+}
+.ms-body--dense .ms-row.is-disliked {
+  box-shadow: inset 3px 0 #d84038;
+}
 .ms-body--dense .ms-row:hover:not(.is-open) {
   background: #fafcfe;
 }
@@ -258,8 +291,8 @@
   justify-content: space-around;
 }
 .ms-body--dense .ms-rate {
-  width: 24px;
-  height: 32px;
+  width: 22px;
+  height: 28px;
   border: 0;
   background: transparent;
   color: #737b80;
@@ -275,32 +308,45 @@
   color: #b33e32;
   background: #fcece9;
 }
-.ms-body--dense .ms-time time {
+.ms-body--dense .ms-match-main {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 3px;
+}
+.ms-body--dense .ms-time-col {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-right: 1px solid #e7e8eb;
+  padding-right: 10px;
+}
+.ms-body--dense .ms-time-inline {
   font:
-    650 17px/1.3 Inter,
+    650 15px/1.3 Inter,
     Arial,
     sans-serif;
   font-variant-numeric: tabular-nums;
+  color: #38465b;
 }
-.ms-body--dense .ms-time {
-  gap: 7px;
+.ms-body--dense .ms-time-col .ms-match-status {
+  font-size: 10px;
+  padding: 0 5px;
+  line-height: 1.4;
 }
-.ms-body--dense .ms-time .ms-format-chip {
-  font:
-    600 12px/1.4 Inter,
-    Arial,
-    sans-serif;
-  padding: 2px 5px;
-  background: #f1f3f5;
-}
-.ms-body--dense .ms-time input {
+.ms-body--dense .ms-interest input {
   accent-color: #37594a;
 }
 .ms-body--dense .ms-match {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 6px 12px;
+  gap: 1px;
+  padding: 3px 12px;
   border-radius: 0;
   justify-content: center;
 }
@@ -316,8 +362,8 @@
   gap: 5px;
   align-items: center;
   min-width: 0;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.3;
   color: #68748a;
 }
 .ms-tournament-name {
@@ -337,29 +383,60 @@
   border: 1px solid #e0e2df;
   background: #f0f1ef;
   color: #5b6367;
-  border-radius: 12px;
-  padding: 1px 6px;
-  font-size: 12px;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 10px;
   font-weight: 500;
   flex-shrink: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   white-space: nowrap;
 }
 .ms-match-status--live {
-  color: #227347;
-  border-color: #a1d9b4;
-  background: #ecf9ef;
+  color: #fff;
+  border-color: #dc2626;
+  background: #dc2626;
+}
+.ms-match-status--live .ms-live-dot {
+  animation: ms-live-pulse 1.2s ease-in-out infinite;
 }
 .ms-match-status--upcoming {
-  color: #426fad;
-  border-color: #cbdcf4;
-  background: #eff5fd;
+  color: #fff;
+  border-color: #2563eb;
+  background: #2563eb;
+}
+.ms-match-status--finished {
+  color: #64748b;
+  border-color: #e2e8f0;
+  background: #f1f5f9;
+}
+@keyframes ms-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+@keyframes ms-status-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+  }
+}
+.ms-match-status--live {
+  animation: ms-status-glow 2s ease-out infinite;
 }
 .ms-live-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2f9857;
+  background: #fff;
 }
 .ms-match-status--cancelled {
   color: #b83a30;
@@ -376,20 +453,20 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 6px 10px;
+  gap: 4px 8px;
   align-items: center;
 }
 .ms-body--dense .ms-team {
   flex: 0 1 auto;
-  gap: 7px;
+  gap: 6px;
 }
 .ms-body--dense .ms-team strong {
   font:
-    700 clamp(17px, 1.45cqi, 20px)/1.3 Inter,
+    500 clamp(16px, 1.35cqi, 19px)/1.3 Inter,
     Arial,
     sans-serif;
-  color: #151e30;
-  letter-spacing: -0.025em;
+  color: #202a38;
+  letter-spacing: 0;
 }
 .ms-body--dense .ms-versus {
   display: inline;
@@ -397,8 +474,8 @@
   color: #7d858c;
 }
 .ms-body--dense .ms-team .ms-logo {
-  width: 27px;
-  height: 27px;
+  width: 26px;
+  height: 26px;
 }
 .ms-body--dense .ms-match-meta {
   display: flex;
@@ -407,61 +484,65 @@
   gap: 4px 6px;
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 .ms-game-chip,
 .ms-format-chip {
-  padding: 2px 7px;
-  border-radius: 4px;
-  line-height: 1.4;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.3;
+  font-size: 10px;
   color: #495059;
   background: #f0f1f0;
 }
 .ms-game-chip--CS2 {
-  background: #fff2d0;
-  color: #815b19;
+  background: #fbf3e4;
+  color: #9a6b1c;
 }
 .ms-game-chip--Dota2 {
-  background: #f0e8fc;
-  color: #6945a2;
+  background: #f3ecfb;
+  color: #6d4aa8;
 }
 .ms-team-risk {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 1px 6px;
-  line-height: 1.5;
+  gap: 3px;
+  padding: 0 5px;
+  line-height: 1.4;
+  font-size: 10px;
   color: #68716b;
   border: 1px solid #d7dbd7;
-  border-radius: 4px;
+  border-radius: 3px;
   background: #fafbf8;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
 .ms-team-risk svg {
+  width: 11px;
+  height: 11px;
   flex-shrink: 0;
 }
 .ms-team-risk--stable,
 .ms-team-risk--reliable {
-  border-color: #219568;
-  color: #fff;
-  background: #219568;
+  border-color: #d4ecdc;
+  color: #1c7a4a;
+  background: #eef9f2;
 }
 .ms-team-risk--ban {
-  border-color: #efb5ad;
-  color: #b32c25;
-  background: #fff1ee;
+  border-color: #f2d3d0;
+  color: #b23b32;
+  background: #fdf0ee;
 }
 .ms-team-risk--risk {
-  border-color: #ebc39a;
-  color: #a25312;
-  background: #fff6e9;
+  border-color: #f2dcc8;
+  color: #b35c1a;
+  background: #fdf4ea;
 }
 .ms-team-risk--caution {
-  border-color: #e5ce91;
-  color: #846319;
-  background: #fff9e5;
+  border-color: #f0e2c2;
+  color: #9a7415;
+  background: #fdf8ea;
 }
 .ms-source-cell {
   display: flex;
@@ -470,7 +551,7 @@
 }
 .ms-source-score {
   font:
-    700 clamp(15px, 1.5cqi, 20px)/1.3 Inter,
+    700 clamp(13px, 1.25cqi, 16px)/1.2 Inter,
     Arial,
     sans-serif;
   font-variant-numeric: tabular-nums;
@@ -549,19 +630,19 @@
   justify-content: space-between;
   gap: 5px;
   color: #34404d;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .ms-forecast-values .is-higher {
-  font-weight: 800;
+  font-weight: 700;
   color: #18202b;
 }
 .ms-forecast-track {
   display: flex;
-  height: 7px;
-  border-radius: 5px;
+  height: 5px;
+  border-radius: 4px;
   overflow: hidden;
   background: #26b574;
 }
@@ -571,7 +652,7 @@
   flex-shrink: 0;
 }
 .ms-forecast-empty {
-  font-size: 13px;
+  font-size: 12px;
   color: #717c84;
   display: block;
   text-align: center;
@@ -586,23 +667,25 @@
 }
 .ms-body--dense .ms-note-button {
   display: inline-flex;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   border: 1px solid #c5d8f3;
-  border-radius: 5px;
+  border-radius: 4px;
   background: #f0f6ff;
   color: #346bc0;
-  min-height: 32px;
-  padding: 5px 10px;
-  font-size: 13px;
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 11px;
   font-weight: 500;
   width: fit-content;
   min-width: 0;
   max-width: 100%;
 }
 .ms-body--dense .ms-note-button svg {
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
 }
 .ms-body--dense .ms-note-button--add {
@@ -625,15 +708,15 @@
   gap: 7px;
 }
 .ms-body--dense .ms-record-button {
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
   padding: 0;
   gap: 0;
   color: #28946a;
   border-color: #bce4d3;
   background: #f0fbf6;
-  flex: 0 0 32px;
+  flex: 0 0 28px;
   box-shadow: none;
 }
 .ms-body--dense .ms-record-button:hover {
@@ -644,17 +727,17 @@
 .ms-body--dense .ms-disclosure {
   display: inline-flex !important;
   width: 22px;
-  height: 30px;
+  height: 28px;
 }
 .ms-body--dense .ms-row > .ms-odds--compact {
-  padding: 10px 7px;
+  padding: 8px 6px;
 }
 .ms-body--dense .ms-odd-line {
-  column-gap: 7px;
+  column-gap: 6px;
 }
 .ms-body--dense .ms-odd-value {
   font-family: Inter, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 13px;
 }
 .ms-body--dense .ms-details {
   background: #fff;
@@ -722,7 +805,7 @@
   }
   .ms-body--dense .ms-row {
     grid-template-columns: 52px minmax(0, 1fr) 88px 136px;
-    grid-template-areas: "time match match source" "interest forecast odds notes" "record record record record";
+    grid-template-areas: "interest match match source" "forecast forecast odds notes" "record record record record";
     row-gap: 14px;
     column-gap: 12px;
     padding: 16px;
@@ -734,8 +817,7 @@
   }
   .ms-body--dense .ms-row > .ms-forecast,
   .ms-body--dense .ms-row > .ms-odds--compact,
-  .ms-body--dense .ms-row > .ms-interest,
-  .ms-body--dense .ms-row > .ms-time {
+  .ms-body--dense .ms-row > .ms-interest {
     padding: 0;
   }
   .ms-body--dense .ms-match-context {
@@ -747,12 +829,9 @@
   .ms-body--dense .ms-note-button {
     min-width: 0;
   }
-  .ms-body--dense .ms-time {
-    grid-area: time;
-    align-self: start;
-  }
   .ms-body--dense .ms-interest {
     grid-area: interest;
+    align-self: start;
   }
   .ms-body--dense .ms-match {
     grid-area: match;
@@ -859,7 +938,7 @@
   }
   .ms-body--dense .ms-row {
     grid-template-columns: 52px minmax(0, 1fr) 72px;
-    grid-template-areas: "time match match" "interest forecast odds" "source notes notes" "record record record";
+    grid-template-areas: "interest match match" "source forecast odds" "notes notes notes" "record record record";
     padding: 14px 10px;
     gap: 12px 9px;
   }

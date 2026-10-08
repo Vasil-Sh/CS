@@ -1437,7 +1437,7 @@
   justify-content: center;
   align-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   min-height: 44px;
   min-width: 0;
   padding: 0;
@@ -1445,27 +1445,27 @@
 
 .ms-odds--compact .ms-odd-line {
   display: grid;
-  grid-template-columns: 18px minmax(4ch, auto);
+  grid-template-columns: 16px minmax(4ch, auto);
   align-items: center;
-  column-gap: 8px;
+  column-gap: 6px;
   white-space: nowrap;
 }
 
 .ms-odds--compact .ms-logo {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 
 .ms-odds--compact .ms-monogram {
-  font-size: 10px;
+  font-size: 9px;
   border-radius: 2px;
 }
 
 .ms-odds--compact .ms-odd-value {
   color: #262b28;
   font:
-    700 15px/20px Manrope,
+    600 13px/18px Manrope,
     Arial,
     sans-serif;
   font-variant-numeric: tabular-nums lining-nums;
