@@ -79,6 +79,10 @@ function TeamLogo({
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const url = proxyLogoUrl(src ?? null, game);
+  const placeholder =
+    game === "Dota2"
+      ? "/assets/team-placeholder-dota.svg"
+      : "/assets/team-placeholder-cs2.svg";
   return url && url !== failedUrl ? (
     <img
       className="ms-logo"
@@ -88,9 +92,7 @@ function TeamLogo({
       onError={() => setFailedUrl(url)}
     />
   ) : (
-    <span className="ms-logo ms-monogram" aria-hidden="true">
-      {name.slice(0, 2).toUpperCase() || "?"}
-    </span>
+    <img className="ms-logo" src={placeholder} alt="" aria-hidden="true" />
   );
 }
 

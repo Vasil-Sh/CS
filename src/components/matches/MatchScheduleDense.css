@@ -288,7 +288,7 @@
 }
 .ms-body--dense .ms-interest {
   gap: 0;
-  justify-content: space-around;
+  justify-content: center;
 }
 .ms-body--dense .ms-rate {
   width: 22px;
@@ -296,17 +296,18 @@
   border: 0;
   background: transparent;
   color: #737b80;
+  margin-inline: -2px;
 }
 .ms-body--dense .ms-rate:hover {
   background: #e9ede8;
 }
 .ms-body--dense .ms-rate.is-active {
   color: #21814e;
-  background: #e8f4ec;
+  background: transparent;
 }
 .ms-body--dense .ms-rate.is-disliked {
   color: #b33e32;
-  background: #fcece9;
+  background: transparent;
 }
 .ms-body--dense .ms-match-main {
   display: grid;
