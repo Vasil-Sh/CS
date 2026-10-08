@@ -587,7 +587,6 @@ export default function MatchSchedule({
                 className="ms-tournament"
                 title={match.context || "Турнір не вказаний"}
               >
-                <Trophy size={12} aria-hidden="true" />
                 <span className="ms-tournament-name">
                   {match.context || "Турнір не вказаний"}
                 </span>
