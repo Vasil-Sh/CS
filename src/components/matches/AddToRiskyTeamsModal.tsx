@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -15,9 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShieldAlert, Save, CheckCircle2, X } from "lucide-react";
+import { Check, Info, LoaderCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import { proxyLogoUrl } from "@/lib/logoProxy";
+import "./AddToRiskyTeamsModal.css";
 
 interface TeamInfo {
   name: string;
@@ -35,24 +34,52 @@ interface AddToRiskyTeamsModalProps {
   onClose: () => void;
   team1: TeamInfo;
   team2: TeamInfo;
-  game: string; // "CS2" or "Dota2" — current match game
+  game: string;
   initialTeam?: string;
-  team1Risky: boolean; // already computed by parent via getTeamRiskInfo
+  team1Risky: boolean;
   team2Risky: boolean;
-  team1Existing: ExistingTeamInfo | null; // existing data for team1 if already in list
-  team2Existing: ExistingTeamInfo | null; // existing data for team2 if already in list
-  onSaved: () => void; // callback to refresh risky teams in parent
+  team1Existing: ExistingTeamInfo | null;
+  team2Existing: ExistingTeamInfo | null;
+  onSaved: () => void;
 }
 
 const STATUS_OPTIONS = [
-  { value: "БАН", label: "🔴 БАН", color: "text-red-600" },
-  { value: "Ризиковані", label: "🟠 Ризиковані", color: "text-orange-500" },
-  { value: "Нестабільні", label: "� Нестабільні", color: "text-red-600" },
-  { value: "Обережно", label: "🟡 Обережно", color: "text-amber-500" },
-  { value: "Під питанням", label: "🟡 Під питанням", color: "text-yellow-600" },
-  { value: "Стабільні", label: "🔵 Стабільні", color: "text-blue-600" },
-  { value: "Надійна", label: "🟢 Надійна", color: "text-green-600" },
-  { value: "Неоцінена", label: "⚪ Неоцінена", color: "text-gray-500" },
+  {
+    value: "БАН",
+    tone: "red",
+    hint: "Команда позначена як виключена з розгляду.",
+  },
+  {
+    value: "Ризиковані",
+    tone: "orange",
+    hint: "Звертайте увагу на збережені застереження.",
+  },
+  {
+    value: "Нестабільні",
+    tone: "red",
+    hint: "Результати команди потребують додаткової перевірки.",
+  },
+  {
+    value: "Обережно",
+    tone: "amber",
+    hint: "Перегляньте нотатку перед наступним рішенням.",
+  },
+  {
+    value: "Під питанням",
+    tone: "amber",
+    hint: "Потрібне додаткове спостереження.",
+  },
+  {
+    value: "Стабільні",
+    tone: "blue",
+    hint: "Позначка за спостереженнями, а не гарантія результату.",
+  },
+  {
+    value: "Надійна",
+    tone: "green",
+    hint: "Позначка за спостереженнями, а не гарантія результату.",
+  },
+  { value: "Неоцінена", tone: "gray", hint: "Оцінку команди ще не визначено." },
 ] as const;
 
 const GAME_OPTIONS = [
@@ -64,418 +91,380 @@ const GAME_OPTIONS = [
   },
 ] as const;
 
-/** Proxy a CDN logo URL through the backend */
-const proxyLogo = (
-  url: string | null | undefined,
-  game: string,
-): string | null => proxyLogoUrl(url, game);
+interface TeamDraft {
+  status: string;
+  game: string;
+  notes: string;
+}
 
-export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
-  const {
-    open,
-    onClose,
-    team1,
-    team2,
-    onSaved,
-    team1Risky,
-    team2Risky,
-    team1Existing,
-    team2Existing,
-  } = props;
-  const gameStorageKey: string = props.game === "Dota2" ? "Дота" : "CS";
+function storageGame(game: string) {
+  return ["dota2", "dota 2", "дота"].includes(game.toLowerCase())
+    ? "Дота"
+    : "CS";
+}
 
-  const [selectedTeam, setSelectedTeam] = useState<string>(team1.name);
-  const [status, setStatus] = useState<string>("Під питанням");
-  const [selectedGame, setSelectedGame] = useState<string>(gameStorageKey);
-  const [notes, setNotes] = useState("");
+function makeDraft(existing: ExistingTeamInfo | null, game: string): TeamDraft {
+  return {
+    status: existing?.status || "Під питанням",
+    game: storageGame(existing?.game || game),
+    notes: existing?.notes || "",
+  };
+}
+
+function TeamLogo({ team, game }: { team: TeamInfo; game: string }) {
+  const [failed, setFailed] = useState(false);
+  const logo = proxyLogoUrl(team.logo, game);
+
+  return logo && !failed ? (
+    <img
+      className="team-note__logo"
+      src={logo}
+      alt=""
+      onError={() => setFailed(true)}
+    />
+  ) : (
+    <span
+      className="team-note__logo team-note__logo--fallback"
+      aria-hidden="true"
+    >
+      {team.name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function TeamNoteContent(props: AddToRiskyTeamsModalProps) {
+  const { team1, team2, onClose, onSaved } = props;
+  const id = useId();
+  const [selectedTeam, setSelectedTeam] = useState(() => {
+    if (props.initialTeam === team1.name || props.initialTeam === team2.name) {
+      return props.initialTeam;
+    }
+    return props.team1Risky && !props.team2Risky ? team2.name : team1.name;
+  });
+  // Keep each team's unsaved changes separate while switching between the cards.
+  const [drafts, setDrafts] = useState<Record<string, TeamDraft>>(() => ({
+    [team1.name]: makeDraft(props.team1Existing, props.game),
+    [team2.name]: makeDraft(props.team2Existing, props.game),
+  }));
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
+  const draft = drafts[selectedTeam];
+  const selectedStatus = STATUS_OPTIONS.find(
+    (option) => option.value === draft.status,
+  );
+  const isEditingExisting =
+    selectedTeam === team1.name ? props.team1Risky : props.team2Risky;
 
-  // Use parent's pre-computed risky status — single source of truth.
-  const existingTeams = new Set<string>();
-  if (team1Risky) existingTeams.add(team1.name.toLowerCase());
-  if (team2Risky) existingTeams.add(team2.name.toLowerCase());
-
-  // Get existing data for a team by name
-  const getExistingData = (teamName: string): ExistingTeamInfo | null => {
-    if (teamName.toLowerCase() === team1.name.toLowerCase())
-      return team1Existing;
-    if (teamName.toLowerCase() === team2.name.toLowerCase())
-      return team2Existing;
-    return null;
+  const updateDraft = (patch: Partial<TeamDraft>) => {
+    setDrafts((current) => ({
+      ...current,
+      [selectedTeam]: { ...current[selectedTeam], ...patch },
+    }));
   };
 
-  // Check if selected team is being edited (already exists)
-  const isEditingExisting = existingTeams.has(selectedTeam.toLowerCase());
-
-  // Auto-select team & reset form when modal opens
-  useEffect(() => {
-    if (!open) return;
-    let autoTeam = team1.name;
-    if (props.initialTeam === team1.name || props.initialTeam === team2.name) {
-      autoTeam = props.initialTeam;
-    } else if (team1Risky && !team2Risky) {
-      autoTeam = team2.name;
-    } else if (!team1Risky) {
-      autoTeam = team1.name;
-    }
-    setSelectedTeam(autoTeam);
-
-    // Pre-fill with existing data if the auto-selected team already exists
-    const existing = getExistingData(autoTeam);
-    if (existing) {
-      setStatus(existing.status || "Під питанням");
-      setSelectedGame(
-        existing.game === "Dota2" || existing.game === "Дота"
-          ? "Дота"
-          : existing.game === "CS2" || existing.game === "CS"
-            ? "CS"
-            : gameStorageKey,
-      );
-      setNotes(existing.notes || "");
-    } else {
-      setStatus("Під питанням");
-      setSelectedGame(gameStorageKey);
-      setNotes("");
-    }
-  }, [
-    open,
-    team1.name,
-    team2.name,
-    gameStorageKey,
-    team1Risky,
-    team2Risky,
-    props.initialTeam,
-  ]);
-
-  const handleSave = async () => {
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (saveInFlight.current) return;
+    saveInFlight.current = true;
     setSaving(true);
     try {
-      // Fallback to defaults if state wasn't initialized properly
-      const teamName = selectedTeam || team1.name;
-      const teamStatus = status || "Під питанням";
-
-      // Load existing risky teams
+      const entry = {
+        name: selectedTeam,
+        game: draft.game,
+        status: draft.status || "Під питанням",
+        notes: draft.notes.trim(),
+      };
       let teams: Array<{
         name: string;
         game: string;
         status: string;
         notes: string;
       }> = [];
-      try {
-        const saved = localStorage.getItem("admin_risky_teams");
-        if (saved) teams = JSON.parse(saved);
-      } catch {
-        /* ignore */
+      const saved = localStorage.getItem("admin_risky_teams");
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        if (!Array.isArray(parsed)) throw new Error("Invalid team list");
+        teams = parsed;
       }
-
-      // Check if team already exists
       const existingIndex = teams.findIndex(
-        (t) => t.name.toLowerCase() === teamName.toLowerCase(),
+        (team) => team.name.toLowerCase() === selectedTeam.toLowerCase(),
       );
-
       if (existingIndex >= 0) {
-        // Update existing entry
-        teams[existingIndex] = {
-          ...teams[existingIndex],
-          game: selectedGame,
-          status: teamStatus,
-          notes: notes.trim(),
-        };
-
-        // Save to localStorage
-        localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
-
-        // Sync update to backend API
-        try {
-          const { api } = await import("@/lib/apiClient");
-          await api.put(`/risky-teams/${encodeURIComponent(teamName)}`, {
-            name: teamName,
-            game: selectedGame,
-            status: teamStatus,
-            notes: notes.trim(),
-          });
-        } catch {
-          // Backend sync failed — data is saved locally
-        }
-
-        toast.success(`"${teamName}" оновлено!`);
+        teams[existingIndex] = { ...teams[existingIndex], ...entry };
       } else {
-        // Add new entry
-        teams.push({
-          name: teamName,
-          game: selectedGame,
-          status: teamStatus,
-          notes: notes.trim(),
-        });
+        teams.push(entry);
+      }
+      localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
 
-        // Save to localStorage
-        localStorage.setItem("admin_risky_teams", JSON.stringify(teams));
-
-        // Sync to backend API
-        try {
-          const { api } = await import("@/lib/apiClient");
-          await api.post("/risky-teams", {
-            name: teamName,
-            game: selectedGame,
-            status: teamStatus,
-            notes: notes.trim(),
-          });
-        } catch {
-          // Backend sync failed — data is saved locally
+      // Preserve the existing local-first persistence and API contract.
+      try {
+        const { api } = await import("@/lib/apiClient");
+        if (existingIndex >= 0) {
+          await api.put(
+            `/risky-teams/${encodeURIComponent(selectedTeam)}`,
+            entry,
+          );
+        } else {
+          await api.post("/risky-teams", entry);
         }
-
-        toast.success(`"${teamName}" додано до ризикованих команд!`);
+      } catch {
+        // The saved local entry remains available when backend sync fails.
       }
 
+      toast.success(
+        `Примітку до «${selectedTeam}» ${isEditingExisting ? "оновлено" : "збережено"}.`,
+      );
       onSaved();
       onClose();
-      setNotes("");
-      setStatus("Під питанням");
-      setSelectedGame("CS");
     } catch {
-      toast.error("Помилка при збереженні");
+      toast.error("Не вдалося зберегти примітку. Спробуйте ще раз.");
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px] rounded-3xl border border-gray-100 bg-white p-0 gap-0 [&>button]:hidden">
-        {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 flex-shrink-0">
-              <ShieldAlert
-                className="h-5 w-5 text-blue-500"
-                strokeWidth={1.5}
-              />
-            </div>
-            <div className="flex-1">
-              <DialogTitle className="text-lg font-bold text-gray-900">
-                Додати до ризикованих команд
-              </DialogTitle>
-              <p className="text-sm text-gray-500 mt-0.5 font-normal">
-                Додайте команду до списку ризикованих
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-            >
-              <X className="h-4 w-4" strokeWidth={2} />
-            </button>
-          </div>
-        </DialogHeader>
+    <DialogContent
+      className="team-note"
+      hideCloseButton
+      onEscapeKeyDown={(event) => {
+        if (saving) event.preventDefault();
+      }}
+      onPointerDownOutside={(event) => {
+        if (saving) event.preventDefault();
+      }}
+    >
+      <header className="team-note__header">
+        <DialogTitle className="team-note__title">
+          Примітка до команди
+        </DialogTitle>
+        <DialogDescription className="team-note__description">
+          Статус і нотатка з’являться біля матчів команди.
+        </DialogDescription>
+        <button
+          type="button"
+          className="team-note__close"
+          onClick={onClose}
+          disabled={saving}
+          aria-label="Закрити"
+        >
+          <X size={22} aria-hidden="true" />
+        </button>
+      </header>
 
-        {/* Content */}
-        <div className="px-6 pb-6 pt-4 space-y-5">
-          {/* Team cards */}
-          <div className="grid grid-cols-2 gap-3">
-            {[team1, team2].map((team) => {
-              const isAlreadyAdded = existingTeams.has(team.name.toLowerCase());
-              const isSelected = selectedTeam === team.name;
-              const existingData = getExistingData(team.name);
-
-              // Team already in risky list — show with notes and allow selecting for edit
-              if (isAlreadyAdded) {
+      <form
+        className="team-note__form"
+        onSubmit={handleSave}
+        aria-busy={saving}
+      >
+        <div className="team-note__body">
+          <fieldset className="team-note__teams" disabled={saving}>
+            <legend className="team-note__label">Команда</legend>
+            <div className="team-note__team-grid">
+              {[team1, team2].map((team, index) => {
+                const selected = selectedTeam === team.name;
+                const existing =
+                  index === 0 ? props.team1Risky : props.team2Risky;
                 return (
-                  <button
-                    key={team.name}
-                    onClick={() => {
-                      setSelectedTeam(team.name);
-                      // Load existing data into form
-                      if (existingData) {
-                        setStatus(existingData.status || "Під питанням");
-                        setSelectedGame(
-                          existingData.game === "Dota2" ||
-                            existingData.game === "Дота"
-                            ? "Дота"
-                            : existingData.game === "CS2" ||
-                                existingData.game === "CS"
-                              ? "CS"
-                              : gameStorageKey,
-                        );
-                        setNotes(existingData.notes || "");
-                      }
-                    }}
-                    className={`flex flex-col gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
-                      isSelected
-                        ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                        : "border-green-200 bg-green-50/60 hover:border-green-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      {team.logo ? (
-                        <img
-                          src={proxyLogo(team.logo, props.game) || undefined}
-                          alt={team.name}
-                          className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                            (
-                              e.target as HTMLImageElement
-                            ).nextElementSibling?.classList.remove("hidden");
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
-                      >
-                        {team.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-semibold text-gray-700 block truncate">
-                          {team.name}
-                        </span>
-                        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
-                          {isSelected ? "Редагувати" : "Вже додано"}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={team.name}
-                  onClick={() => setSelectedTeam(team.name)}
-                  className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
-                    isSelected
-                      ? "border-primary bg-blue-50 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                      : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
-                  }`}
-                >
-                  {team.logo ? (
-                    <img
-                      src={proxyLogo(team.logo, props.game) || undefined}
-                      alt={team.name}
-                      className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                        (
-                          e.target as HTMLImageElement
-                        ).nextElementSibling?.classList.remove("hidden");
-                      }}
+                  <label key={team.name} className="team-note__choice">
+                    <input
+                      className="sr-only"
+                      type="radio"
+                      name={`${id}-team`}
+                      value={team.name}
+                      checked={selected}
+                      onChange={() => setSelectedTeam(team.name)}
+                      aria-label={team.name}
                     />
-                  ) : null}
-                  <div
-                    className={`w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0 ${team.logo ? "hidden" : ""}`}
-                  >
-                    {team.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span
-                    className={`text-sm font-semibold truncate ${
-                      isSelected ? "text-gray-900" : "text-gray-500"
-                    }`}
-                  >
-                    {team.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                    <span className="team-note__team-card">
+                      <TeamLogo team={team} game={props.game} />
+                      <span className="team-note__team-copy">
+                        <strong>{team.name}</strong>
+                        <span>
+                          {selected
+                            ? "Обрана команда"
+                            : existing
+                              ? "Є примітка"
+                              : "Обрати"}
+                        </span>
+                      </span>
+                      {selected && (
+                        <span className="team-note__selected">
+                          <Check
+                            size={14}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
 
-          {/* Warning when both teams already added */}
-          {existingTeams.has(team1.name.toLowerCase()) &&
-            existingTeams.has(team2.name.toLowerCase()) && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-2xl text-center">
-                <p className="text-sm text-green-700 font-medium">
-                  Обидві команди вже є у списку ризикованих
-                </p>
-              </div>
-            )}
-
-          {/* Form */}
-          <div className="space-y-4">
-            {/* Status */}
-            <div className="space-y-2">
-              <Label className="text-sm text-gray-700 font-medium">
+          <div className="team-note__settings">
+            <div className="team-note__field">
+              <label className="team-note__label" htmlFor={`${id}-status`}>
                 Статус
-              </Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="rounded-xl border-gray-200">
+              </label>
+              <Select
+                value={draft.status}
+                onValueChange={(status) => updateDraft({ status })}
+                disabled={saving}
+              >
+                <SelectTrigger
+                  id={`${id}-status`}
+                  className="team-note__select"
+                  aria-describedby={`${id}-status-hint`}
+                >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {STATUS_OPTIONS.map((opt) => (
+                <SelectContent className="team-note__menu">
+                  {STATUS_OPTIONS.map((option) => (
                     <SelectItem
-                      key={opt.value}
-                      value={opt.value}
-                      className="rounded-lg"
+                      key={option.value}
+                      value={option.value}
+                      className="team-note__option"
                     >
-                      {opt.label}
+                      <span className="team-note__select-value">
+                        <span
+                          className={`team-note__dot team-note__dot--${option.tone}`}
+                          aria-hidden="true"
+                        />
+                        {option.value}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Game — toggle buttons with SVG icons */}
-            <div className="space-y-2">
-              <Label className="text-sm text-gray-700 font-medium">Гра</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {GAME_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedGame(opt.value)}
-                    className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 transition-all text-sm font-semibold ${
-                      selectedGame === opt.value
-                        ? "border-primary bg-blue-50 text-gray-900 shadow-[0_0_0_2px_rgba(68,122,252,0.2)]"
-                        : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-white"
-                    }`}
-                  >
-                    <img
-                      src={opt.iconSrc}
-                      alt={opt.label}
-                      className={`w-6 h-6 object-contain ${selectedGame !== opt.value ? "opacity-50" : ""}`}
-                    />
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+            <div className="team-note__field">
+              <label className="team-note__label" htmlFor={`${id}-game`}>
+                Гра
+              </label>
+              <Select
+                value={draft.game}
+                onValueChange={(game) => updateDraft({ game })}
+                disabled={saving}
+              >
+                <SelectTrigger id={`${id}-game`} className="team-note__select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="team-note__menu">
+                  {GAME_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="team-note__option"
+                    >
+                      <span className="team-note__select-value">
+                        <img
+                          src={option.iconSrc}
+                          alt=""
+                          width={24}
+                          height={24}
+                        />
+                        {option.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label className="text-sm text-gray-700 font-medium">
-                Нотатки
-              </Label>
-              <Input
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Наприклад: Не ставити на них, коли грають фінал..."
-                className="rounded-xl border-gray-200"
-              />
-            </div>
+            <p
+              className="team-note__hint"
+              id={`${id}-status-hint`}
+              aria-live="polite"
+            >
+              {selectedStatus?.hint || "Оберіть статус команди."}
+            </p>
           </div>
 
-          {/* Save / Update button — always visible (can add or edit) */}
-          <Button
-            onClick={handleSave}
+          <div className="team-note__field">
+            <div className="team-note__label-row">
+              <label className="team-note__label" htmlFor={`${id}-notes`}>
+                Нотатка
+              </label>
+              <span id={`${id}-optional`}>Необов’язково</span>
+            </div>
+            <Textarea
+              id={`${id}-notes`}
+              className="team-note__textarea"
+              rows={4}
+              value={draft.notes}
+              onChange={(event) => updateDraft({ notes: event.target.value })}
+              placeholder="На що звернути увагу перед наступним матчем?"
+              aria-describedby={`${id}-optional ${id}-scope`}
+              disabled={saving}
+            />
+            <p
+              className="team-note__scope"
+              id={`${id}-scope`}
+              aria-live="polite"
+            >
+              <Info size={17} aria-hidden="true" />
+              <span>Збережеться лише для {selectedTeam}.</span>
+            </p>
+          </div>
+        </div>
+
+        <footer className="team-note__footer">
+          <button
+            type="button"
+            className="team-note__button"
+            onClick={onClose}
             disabled={saving}
-            className="w-full h-12 rounded-2xl bg-primary hover:bg-[#3568e0] text-white font-semibold text-base transition-all"
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            className="team-note__button team-note__button--primary"
+            disabled={saving}
           >
             {saving ? (
-              "Збереження..."
-            ) : isEditingExisting ? (
-              <>
-                <Save className="h-4 w-4 mr-2" strokeWidth={2} />
-                Оновити
-              </>
+              <LoaderCircle
+                size={19}
+                className="team-note__spinner"
+                aria-hidden="true"
+              />
             ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" strokeWidth={2} />
-                Зберегти
-              </>
+              <Check size={19} aria-hidden="true" />
             )}
-          </Button>
-        </div>
-      </DialogContent>
+            {saving
+              ? "Збереження…"
+              : isEditingExisting
+                ? "Оновити примітку"
+                : "Зберегти примітку"}
+          </button>
+        </footer>
+      </form>
+    </DialogContent>
+  );
+}
+
+export default function AddToRiskyTeamsModal(props: AddToRiskyTeamsModalProps) {
+  return (
+    <Dialog
+      open={props.open}
+      onOpenChange={(open) => {
+        if (!open) props.onClose();
+      }}
+    >
+      {props.open && (
+        <TeamNoteContent
+          key={JSON.stringify([
+            props.team1.name,
+            props.team2.name,
+            props.game,
+            props.initialTeam,
+          ])}
+          {...props}
+        />
+      )}
     </Dialog>
   );
 }
