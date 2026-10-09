@@ -7,6 +7,7 @@ import BetShareCard, {
   shareDate,
 } from "@/components/BetShareCard";
 import type { Bet } from "@/types/betting";
+import { posterLines } from "@/components/PosterShareArtwork";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -27,13 +28,63 @@ const bet: Bet = {
   tournament: "UNITED21 SEASON 56 — GROUP C",
 };
 describe("Share card", () => {
+  it.each(["Win", "Loss", "Pending"] as const)(
+    "keeps odds and %s status free of grain filters",
+    (result) => {
+      const { container } = render(<BetShareCard bet={{ ...bet, result }} />);
+      for (const selector of ["[data-poster-odds]", "[data-poster-status]"]) {
+        const group = container.querySelector(selector)!;
+        expect(group).toBeTruthy();
+        expect(group.closest("[filter]")).toBeNull();
+        expect(group.querySelector("[filter]")).toBeNull();
+      }
+    },
+  );
+  it("moves the VS badge with the inter-team gap", () => {
+    const { container, rerender } = render(
+      <BetShareCard bet={{ ...bet, match: "Team Spirit vs ShindeN" }} />,
+    );
+    const shortTransform = container
+      .querySelector("[data-poster-vs]")!
+      .getAttribute("transform");
+    rerender(<BetShareCard bet={bet} />);
+    const longTransform = container
+      .querySelector("[data-poster-vs]")!
+      .getAttribute("transform");
+    expect(shortTransform).not.toBe(longTransform);
+    expect(shortTransform).toContain("rotate(-8 48 27)");
+  });
+  it("wraps long names without discarding words", () => {
+    expect(posterLines("ex-Eternal Fire Academy", 19).join(" ")).toBe(
+      "ex-Eternal Fire Academy",
+    );
+    expect(
+      posterLines("A".repeat(80), 19).every((line) => line.length <= 19),
+    ).toBe(true);
+  });
+  it("renders pending without a fabricated financial result", () => {
+    render(<BetShareCard bet={{ ...bet, result: "Pending" }} />);
+    expect(screen.getByText("—")).toBeTruthy();
+    expect(screen.getByRole("img", { name: /Очікується/ })).toBeTruthy();
+  });
+  it("renders winning values from the record", () => {
+    render(
+      <BetShareCard bet={{ ...bet, result: "Win", originalProfit: 200 }} />,
+    );
+    expect(screen.getByText("+200 ₴")).toBeTruthy();
+    expect(screen.getByText("ВИГРАШ")).toBeTruthy();
+  });
   it("renders actual tournament, selection and loss", () => {
     render(<BetShareCard bet={bet} />);
-    expect(screen.getByText("UNITED21 SEASON 56")).toBeTruthy();
+    expect(screen.getByText("UNITED21")).toBeTruthy();
+    expect(screen.getByText("SEASON 56")).toBeTruthy();
     expect(screen.getByText("GROUP C")).toBeTruthy();
     expect(screen.getByText("−200 ₴")).toBeTruthy();
     expect(screen.getByText("Програш")).toBeTruthy();
-    expect(screen.getAllByText("ex-Eternal Fire Academy")).toHaveLength(2);
+    expect(
+      screen.getByRole("img", { name: /ex-Eternal Fire Academy — OldMix/ }),
+    ).toBeTruthy();
+    expect(screen.getByText("ex-Eternal Fire Academy")).toBeTruthy();
   });
   it("does not invent a time for date-only records", () => {
     expect(shareDate("2026-10-02")).toEqual({ date: "02.10.2026", time: "" });

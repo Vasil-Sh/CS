@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import PosterShareArtwork from "./PosterShareArtwork";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
 import type { Bet } from "@/types/betting";
 import "./BetShareCard.css";
@@ -45,40 +45,7 @@ export function shareDate(value: string) {
   };
 }
 
-function TeamLogo({
-  src,
-  name,
-  game,
-}: {
-  src?: string | null;
-  name: string;
-  game: string;
-}) {
-  const fallback = `/assets/team-placeholder-${game === "dota2" ? "dota" : "cs2"}.svg`;
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [src]);
-  return (
-    <img
-      src={!failed && src ? src : fallback}
-      alt={name}
-      crossOrigin={src?.startsWith("http") ? "anonymous" : undefined}
-      onError={() => setFailed(true)}
-    />
-  );
-}
-
 export default function BetShareCard({ bet }: BetShareCardProps) {
-  const ref = useRef<HTMLElement>(null);
-  const [unit, setUnit] = useState(16);
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const update = () => setUnit(Math.min(node.clientWidth / 35, 14));
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
   const game = bet.game?.toLowerCase() === "dota2" ? "dota2" : "cs2";
   const teams = bet.match.split(/\s+vs\.?\s+/i);
   const team1 = bet.team1 || teams[0] || "Команда 1";
@@ -116,94 +83,29 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
         : "Очікується";
   return (
     <article
-      ref={ref}
       id="bet-share-card-inner"
-      className="mi-share"
+      className="mi-share mi-share-poster"
       data-result={bet.result}
-      style={{ fontSize: unit }}
       aria-label="Картка запису для поширення"
     >
-      <header className="mi-share-header">
-        <div className="mi-share-brand">
-          Match<span>IQ</span>
-        </div>
-        <div className="mi-share-tournament">
-          <strong>{tournament[0]}</strong>
-          {tournament.length > 1 && (
-            <span>{tournament.slice(1).join(" — ")}</span>
-          )}
-        </div>
-      </header>
-      <div className="mi-share-meta">
-        <div>
-          <img src={`/assets/game-${game}.svg`} alt="" />
-          <strong>{game === "dota2" ? "Dota 2" : "CS2"}</strong>
-          {bet.format && <span>{bet.format}</span>}
-        </div>
-        <div>
-          <time>{date.date}</time>
-          {date.time && <span>{date.time}</span>}
-        </div>
-      </div>
-      {express ? (
-        <div className="mi-share-events">
-          <h3>Експрес · {events.length || bet.format}</h3>
-          {events.length ? (
-            events.map((event, i) => (
-              <div className="mi-share-event" key={i}>
-                <span>{String(i + 1).padStart(2, "0")}</span>
-                <p>{event.replace(/^\d+\.\s*/, "").replace(/\|/g, " · ")}</p>
-              </div>
-            ))
-          ) : (
-            <p>{bet.match}</p>
-          )}
-        </div>
-      ) : (
-        <div className="mi-share-teams">
-          <div className="mi-share-team">
-            <TeamLogo src={bet.logoTeam1} name={team1} game={game} />
-            <strong>{team1}</strong>
-          </div>
-          <div className="mi-share-vs">
-            <span />
-            VS
-            <span />
-          </div>
-          <div className="mi-share-team">
-            <TeamLogo src={bet.logoTeam2} name={team2} game={game} />
-            <strong>{team2}</strong>
-          </div>
-        </div>
-      )}
-      <div className="mi-share-prediction">
-        <div className="mi-share-pick">
-          <span>{express ? "Тип запису" : market}</span>
-          <strong>{express ? "Експрес" : selection || "Не вказано"}</strong>
-        </div>
-        <div className="mi-share-odds">
-          <span>{express ? "Загальний коеф." : "Коефіцієнт"}</span>
-          <strong>{Number(bet.odds).toFixed(2)}</strong>
-        </div>
-      </div>
-      <footer className="mi-share-footer">
-        <div>
-          <span>Сума</span>
-          <strong>
-            {shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
-          </strong>
-        </div>
-        <div>
-          <span>Чистий результат</span>
-          <strong className="mi-share-result">
-            {result == null ? "—" : shareMoney(result, bet.currency, true)}
-          </strong>
-        </div>
-        <div>
-          <span>Статус</span>
-          <strong className="mi-share-status">{status}</strong>
-        </div>
-      </footer>
+      <PosterShareArtwork
+        team1={team1}
+        team2={team2}
+        tournament={tournament}
+        game={game === "dota2" ? "Dota 2" : "CS2"}
+        format={bet.format}
+        date={date}
+        market={express ? "Експрес" : market}
+        selection={express ? bet.match : selection || "Не вказано"}
+        odds={bet.odds}
+        amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
+        result={result == null ? "—" : shareMoney(result, bet.currency, true)}
+        status={status}
+        state={bet.result}
+        express={express}
+        events={events}
+      />
+      <span className="sr-only">{status}</span>
     </article>
   );
 }

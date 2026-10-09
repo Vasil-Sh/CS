@@ -276,6 +276,13 @@
 .mi-share-preview .mi-share {
   width: 100%;
 }
+.mi-share-poster {
+  background: #101110;
+  flex-shrink: 0;
+}
+.mi-share-dialog.mi-share-dialog {
+  width: 480px;
+}
 .mi-share-error {
   padding: 8px 18px;
   color: #bb312d;
