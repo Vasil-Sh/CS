@@ -290,7 +290,10 @@
   box-shadow: inset 3px 0 #d84038;
 }
 .ms-body--dense .ms-row:hover:not(.is-open) {
-  background: #fafcfe;
+  background: #f0f6ff;
+}
+.ms-body--dense .ms-row:hover:not(.is-open) .match-identity {
+  background: transparent;
 }
 .ms-body--dense .ms-interest {
   gap: 0;
@@ -647,10 +650,10 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  border: 1px solid #c5d8f3;
+  border: 1px solid #ff6635;
   border-radius: 4px;
-  background: #f0f6ff;
-  color: #346bc0;
+  background: #ff6635;
+  color: #fff;
   min-height: 28px;
   padding: 4px 8px;
   font-size: 11px;
@@ -665,18 +668,24 @@
   flex-shrink: 0;
 }
 .ms-body--dense .ms-note-button--add {
-  border-color: #dce2e9;
-  background: transparent;
-  color: #535d63;
+  border-color: #ff6635;
+  background: #ff6635;
+  color: #fff;
 }
 .ms-body--dense .ms-note-button--add:hover {
-  border-color: #88958c;
-  background: #e9ede8;
-  color: #535d63;
+  border-color: #e9572b;
+  background: #e9572b;
+  color: #fff;
+}
+.ms-body--dense .ms-note-button:not(.ms-note-button--add) {
+  border-color: #346bc0;
+  background: #346bc0;
+  color: #fff;
 }
 .ms-body--dense .ms-note-button:not(.ms-note-button--add):hover {
   border-color: #2c5fb8;
-  background: #e3edfb;
+  background: #2c5fb8;
+  color: #fff;
 }
 .ms-body--dense .ms-record {
   display: flex;

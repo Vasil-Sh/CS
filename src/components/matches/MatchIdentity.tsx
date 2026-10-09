@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./MatchIdentity.css";
 
 type Team = {
@@ -15,6 +16,33 @@ type MatchIdentityProps = {
   team1: Team;
   team2: Team;
 };
+
+function TeamLogo({ team, game }: { team: Team; game: string }) {
+  const [failed, setFailed] = useState(false);
+  const placeholder =
+    game === "Dota 2"
+      ? "/assets/team-placeholder-dota.svg"
+      : "/assets/team-placeholder-cs2.svg";
+
+  if (!team.logo || failed) {
+    return (
+      <span className="match-identity__logo">
+        <img src={placeholder} alt="" aria-hidden="true" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="match-identity__logo">
+      <img
+        src={team.logo}
+        alt=""
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
+    </span>
+  );
+}
 
 export function MatchIdentity({
   tournament,
@@ -61,14 +89,7 @@ export function MatchIdentity({
         <div className="match-identity__teams">
           {[team1, team2].map((team, index) => (
             <div className="match-identity__team" key={index}>
-              <span className="match-identity__logo">
-                {team.logo ? (
-                  <img src={team.logo} alt="" decoding="async" />
-                ) : (
-                  <span aria-hidden="true">{team.name.slice(0, 1)}</span>
-                )}
-              </span>
-
+              <TeamLogo team={team} game={game} />
               <span className="match-identity__name" title={team.name}>
                 {team.name}
               </span>

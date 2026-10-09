@@ -104,9 +104,12 @@
   min-height: 36px;
 }
 
-.ms-body--sectioned .ms-columns > span:first-child,
+.ms-body--sectioned .ms-columns > span:first-child {
+  border-left: 0;
+}
+
 .ms-body--sectioned .ms-columns > span:last-child {
-  border-inline: 0;
+  border-right: 0;
 }
 
 .ms-body--sectioned .ms-row > .ms-interest {

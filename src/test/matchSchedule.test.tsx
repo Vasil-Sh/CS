@@ -531,11 +531,11 @@ describe("match schedule interactions", () => {
       0,
     );
     const first = screen.getAllByTestId("schedule-row")[0];
-    expect(within(first).getByText("Примітки")).toBeVisible();
+    expect(within(first).getByText("Показати запис")).toBeVisible();
     expect(within(first).queryByText("MASONIC · БАН")).not.toBeInTheDocument();
     fireEvent.click(
       within(first).getByRole("button", {
-        name: "Переглянути примітки: MASONIC — Linx Legacy Esport",
+        name: "Показати запис: MASONIC — Linx Legacy Esport",
       }),
     );
     expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
@@ -838,7 +838,7 @@ describe("dense schedule", () => {
     const p = props([makeMatch()]);
     render(<MatchSchedule {...p} />);
     const notes = screen.getByRole("button", {
-      name: "Переглянути примітки: MASONIC — Linx Legacy Esport",
+      name: "Показати запис: MASONIC — Linx Legacy Esport",
     });
     expect(notes).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(notes);

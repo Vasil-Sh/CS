@@ -657,7 +657,7 @@ export default function MatchSchedule({
                 if (rowRisks.length) toggleDetails(match.id);
                 else onEditNote(match, match.team1);
               }}
-              aria-label={`${rowRisks.length ? "Переглянути примітки" : "Додати примітку"}: ${match.team1} — ${match.team2}`}
+              aria-label={`${rowRisks.length ? "Показати запис" : "Додати примітку"}: ${match.team1} — ${match.team2}`}
               aria-expanded={rowRisks.length ? open : undefined}
               aria-controls={
                 rowRisks.length ? `${regionId}-detail-${match.id}` : undefined
@@ -670,7 +670,7 @@ export default function MatchSchedule({
               {rowRisks.length ? (
                 <>
                   <Eye size={15} />
-                  <span>Примітки</span>
+                  <span>Показати запис</span>
                 </>
               ) : (
                 <>
@@ -760,8 +760,7 @@ export default function MatchSchedule({
           <div id={id}>
             <div className="ms-columns">
               <span className="ms-interest-heading" aria-label="Інтерес">
-                <ThumbsUp size={14} aria-hidden="true" />
-                <ThumbsDown size={14} aria-hidden="true" />
+                <span className="ms-interest-heading-text">Інтерес</span>
               </span>
               <span>Матч</span>
               <span className="ms-source-heading">Гра</span>
