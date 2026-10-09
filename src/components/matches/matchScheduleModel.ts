@@ -255,3 +255,33 @@ export function groupSchedule(matches: Match[], mode: "time" | "tournament") {
   }
   return [...groups.values()];
 }
+
+const scheduleSections = [
+  { key: "live", title: "Зараз грають" },
+  { key: "upcoming", title: "Найближчі матчі" },
+  { key: "finished", title: "Завершені матчі" },
+  { key: "postponed", title: "Перенесені матчі" },
+  { key: "cancelled", title: "Скасовані матчі" },
+  { key: "unconfirmed", title: "Статус потребує уточнення" },
+] as const;
+
+export type ScheduleSectionKey = (typeof scheduleSections)[number]["key"];
+
+/** Partition already filtered/sorted matches without guessing results from the clock. */
+export function sectionSchedule(matches: Match[], today: string) {
+  const buckets = new Map<ScheduleSectionKey, Match[]>();
+  for (const match of matches) {
+    let key: ScheduleSectionKey = match.matchStatus || "unconfirmed";
+    const date = scheduleDate(match.date);
+    if ((key === "live" || key === "upcoming") && (!date || date < today)) {
+      key = "unconfirmed";
+    }
+    const bucket = buckets.get(key) || [];
+    bucket.push(match);
+    buckets.set(key, bucket);
+  }
+  return scheduleSections.flatMap((section) => {
+    const entries = buckets.get(section.key);
+    return entries?.length ? [{ ...section, matches: entries }] : [];
+  });
+}

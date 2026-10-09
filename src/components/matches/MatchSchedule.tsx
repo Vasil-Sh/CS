@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   CirclePlus,
+  Clock3,
   ExternalLink,
   Eye,
   Info,
@@ -25,6 +26,10 @@ import type { Match, useMatches } from "@/hooks/useMatches";
 import { proxyLogoUrl } from "@/lib/logoProxy";
 import { MatchIdentity } from "./MatchIdentity";
 import {
+  ScheduleAdvertisement,
+  type ScheduleAdvertisementProps,
+} from "./ScheduleAdvertisement";
+import {
   coefficient,
   dateLabel,
   matchCount,
@@ -36,12 +41,14 @@ import {
   riskTone,
   scheduleDate,
   scheduleTime,
+  sectionSchedule,
   sourceForecast,
   type ScheduleFilters,
 } from "./matchScheduleModel";
 import "./MatchSchedule.css";
 import "./MatchScheduleDense.css";
 import "./MatchDetails.css";
+import "./MatchScheduleSections.css";
 
 type Controller = ReturnType<typeof useMatches>;
 export interface MatchScheduleProps {
@@ -66,6 +73,7 @@ export interface MatchScheduleProps {
   onEditNote: (match: Match, team: string) => void;
   onResults: () => void;
   now?: Date;
+  advertising?: ScheduleAdvertisementProps;
 }
 
 function TeamLogo({
@@ -223,6 +231,7 @@ export default function MatchSchedule({
   onEditNote,
   onResults,
   now = new Date(),
+  advertising,
 }: MatchScheduleProps) {
   const today = scheduleDate(now);
   const tomorrow = nextScheduleDate(today);
@@ -270,7 +279,12 @@ export default function MatchSchedule({
     };
     return rank(a) - rank(b);
   });
-  const groups = groupSchedule(sortedVisible, mode);
+  const sections = sectionSchedule(sortedVisible, today);
+  // One slot at an existing section boundary, never interrupt a match or invent an empty group.
+  const adAfterSection =
+    sections.length > 1 && ["live", "upcoming"].includes(sections[0].key)
+      ? sections[0].key
+      : null;
   const activeId = expandedId;
   const dayMatches = m.matches.filter(
     (match) =>
@@ -584,7 +598,10 @@ export default function MatchSchedule({
               game={match.game === "Dota2" ? "Dota 2" : "CS2"}
               format={match.matchType.toUpperCase()}
               time={scheduleTime(match.date)}
-              isLive={match.matchStatus === "live"}
+              isLive={
+                match.matchStatus === "live" &&
+                scheduleDate(match.date) >= today
+              }
               team1={{
                 name: match.team1 || "Команда ще невідома",
                 logo: proxyLogoUrl(match.logoTeam1, match.game) ?? undefined,
@@ -704,6 +721,75 @@ export default function MatchSchedule({
     );
   }
 
+  function renderGroup(
+    group: ReturnType<typeof groupSchedule>[number],
+    sectionKey: string,
+    index: number,
+  ) {
+    const key = `${sectionKey}:${group.key}`;
+    const id = `${regionId}-${sectionKey}-group-${index}`;
+    const isCollapsed = collapsed.has(key);
+    return (
+      <div
+        className={`ms-group ${mode === "time" ? "ms-group--time" : ""}`}
+        key={key}
+      >
+        {mode === "tournament" && (
+          <h4>
+            <button
+              type="button"
+              className="ms-group-title"
+              onClick={() => toggleGroup(key)}
+              aria-expanded={!isCollapsed}
+              aria-controls={id}
+            >
+              <Trophy size={20} aria-hidden="true" />
+              <strong>{group.title}</strong>{" "}
+              <span className="ms-group-count">
+                {group.game && `${group.game} · `}
+                {matchCount(group.matches.length)}
+              </span>
+              <ChevronDown
+                size={20}
+                className={!isCollapsed ? "ms-rotate" : ""}
+              />
+            </button>
+          </h4>
+        )}
+        {(!isCollapsed || mode === "time") && (
+          <div id={id}>
+            <div className="ms-columns">
+              <span className="ms-interest-heading" aria-label="Інтерес">
+                <ThumbsUp size={14} aria-hidden="true" />
+                <ThumbsDown size={14} aria-hidden="true" />
+              </span>
+              <span>Матч</span>
+              <span className="ms-source-heading">Гра</span>
+              <span className="ms-forecast-heading">
+                Прогноз
+                <details className="ms-forecast-help">
+                  <summary aria-label="Про прогноз джерела">
+                    <Info size={14} />
+                  </summary>
+                  <span role="note">
+                    Відсотки від джерела матчу, не розрахунок із коефіцієнтів.
+                    Синій — перша команда, зелений — друга. Це не гарантія
+                    результату. Якщо повної пари даних немає, прогноз не
+                    показується.
+                  </span>
+                </details>
+              </span>
+              <span>Коеф.</span>
+              <span>Примітки</span>
+              <span>Дії</span>
+            </div>
+            {group.matches.map(renderMatch)}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="ms-page">
       <header className="ms-hero">
@@ -757,7 +843,7 @@ export default function MatchSchedule({
           </div>
         </dl>
       </header>
-      <div className="ms-body ms-body--dense">
+      <div className="ms-body ms-body--dense ms-body--sectioned">
         <div className="ms-dense-tools">
           <h2 className="ms-dense-title">Розклад матчів</h2>
           <div className="ms-date-tools">
@@ -1026,79 +1112,39 @@ export default function MatchSchedule({
           </div>
         ) : (
           <>
-            {groups.map((group, index) => {
-              const isCollapsed = collapsed.has(group.key);
-              const shown = group.matches;
-              return (
+            {sections.map((section) => (
+              <Fragment key={section.key}>
                 <section
-                  className={`ms-group ${mode === "time" ? "ms-group--time" : ""}`}
-                  key={group.key}
-                  aria-label={mode === "time" ? "Матчі за часом" : undefined}
-                  aria-labelledby={
-                    mode === "tournament"
-                      ? `${regionId}-group-${index}`
-                      : undefined
-                  }
+                  className={`ms-status-section ms-status-section--${section.key}`}
+                  aria-labelledby={`${regionId}-section-${section.key}`}
                 >
-                  {mode === "tournament" && (
-                    <h3 id={`${regionId}-group-${index}`}>
-                      <button
-                        type="button"
-                        className="ms-group-title"
-                        onClick={() => toggleGroup(group.key)}
-                        aria-expanded={!isCollapsed}
-                        aria-controls={`${regionId}-group-body-${index}`}
-                      >
-                        <Trophy size={22} />
-                        <strong>{group.title}</strong>{" "}
-                        <span className="ms-group-count">
-                          {group.game && `${group.game} · `}
-                          {matchCount(group.matches.length)}
-                        </span>
-                        <ChevronDown
-                          size={20}
-                          className={!isCollapsed ? "ms-rotate" : ""}
-                        />
-                      </button>
-                    </h3>
-                  )}
-                  {(!isCollapsed || mode === "time") && (
-                    <div id={`${regionId}-group-body-${index}`}>
-                      <div className="ms-columns">
-                        <span
-                          className="ms-interest-heading"
-                          aria-label="Інтерес"
-                        >
-                          <span className="ms-interest-heading-text">
-                            Інтерес
-                          </span>
-                        </span>
-                        <span>Матч і турнір</span>
-                        <span className="ms-source-heading">Гра</span>
-                        <span className="ms-forecast-heading">
-                          Прогноз джерела
-                          <details className="ms-forecast-help">
-                            <summary aria-label="Про прогноз джерела">
-                              <Info size={14} />
-                            </summary>
-                            <span role="note">
-                              Відсотки від джерела матчу, не розрахунок із
-                              коефіцієнтів. Синій — перша команда, зелений —
-                              друга. Це не гарантія результату. Якщо повної пари
-                              даних немає, прогноз не показується.
-                            </span>
-                          </details>
-                        </span>
-                        <span>Коефіцієнти</span>
-                        <span>Примітки</span>
-                        <span>Додати запис</span>
-                      </div>
-                      {shown.map(renderMatch)}
-                    </div>
+                  <h3
+                    className="ms-status-title"
+                    id={`${regionId}-section-${section.key}`}
+                  >
+                    {section.key === "live" ? (
+                      <span className="ms-status-dot" aria-hidden="true" />
+                    ) : section.key === "upcoming" ? (
+                      <Clock3 size={17} aria-hidden="true" />
+                    ) : section.key === "finished" ? (
+                      <Check size={17} aria-hidden="true" />
+                    ) : (
+                      <Info size={17} aria-hidden="true" />
+                    )}
+                    {section.title}
+                    <span className="ms-status-count" aria-hidden="true">
+                      {section.matches.length}
+                    </span>
+                  </h3>
+                  {groupSchedule(section.matches, mode).map((group, index) =>
+                    renderGroup(group, section.key, index),
                   )}
                 </section>
-              );
-            })}
+                {section.key === adAfterSection && (
+                  <ScheduleAdvertisement {...advertising} />
+                )}
+              </Fragment>
+            ))}
           </>
         )}
         <footer className="ms-footer">

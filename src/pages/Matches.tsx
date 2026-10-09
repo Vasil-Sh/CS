@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AIRecommendationModal from "@/components/AIRecommendationModal";
@@ -6,6 +6,8 @@ import PredictionsModal from "@/components/PredictionsModal";
 import AddToRiskyTeamsModal from "@/components/matches/AddToRiskyTeamsModal";
 import PastDaysModal from "@/components/matches/PastDaysModal";
 import MatchSchedule from "@/components/matches/MatchSchedule";
+import type { ScheduleAdCampaign } from "@/components/matches/ScheduleAdvertisement";
+import { fetchActiveBanner } from "@/lib/bannerApi";
 import { useMatches, type Match } from "@/hooks/useMatches";
 
 export type { Match } from "@/hooks/useMatches";
@@ -13,10 +15,21 @@ export type { Match } from "@/hooks/useMatches";
 export default function Matches() {
   const m = useMatches();
   const [noteTeam, setNoteTeam] = useState<string>();
+  const [banner, setBanner] = useState<ScheduleAdCampaign | null>(null);
   const riskyMatch = m.selectedRiskyMatch;
   const game = riskyMatch?.game || "CS2";
   const team1RiskInfo = m.getTeamRiskInfo(riskyMatch?.team1 || "", game);
   const team2RiskInfo = m.getTeamRiskInfo(riskyMatch?.team2 || "", game);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchActiveBanner().then((campaign) => {
+      if (!cancelled) setBanner(campaign);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function openAnalysis(match: Match) {
     m.setSelectedMatch(match);
@@ -28,6 +41,7 @@ export default function Matches() {
       <ErrorBoundary>
         <MatchSchedule
           model={m}
+          advertising={{ campaign: banner, preview: import.meta.env.DEV }}
           onAnalysis={openAnalysis}
           onResults={() => m.setPastDaysModalOpen(true)}
           onEditNote={(match, team) => {

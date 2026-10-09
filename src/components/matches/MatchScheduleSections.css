@@ -1,0 +1,150 @@
+/* Both status sections share the existing row/header grid, including responsive cards. */
+.ms-body--sectioned {
+  background: #fcfcfd;
+}
+
+.ms-body--sectioned .ms-dense-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px 20px;
+  margin-bottom: 20px;
+}
+
+.ms-body--sectioned .ms-dense-title {
+  grid-area: 1 / 1;
+  font:
+    750 28px/1.2 Inter,
+    Arial,
+    sans-serif;
+  padding: 0;
+}
+
+.ms-body--sectioned .ms-grouping {
+  grid-area: 1 / 2;
+  justify-self: end;
+}
+
+.ms-body--sectioned .ms-date-tools {
+  grid-area: 2 / 1;
+}
+
+.ms-body--sectioned .ms-game-filter {
+  margin-left: 12px;
+}
+
+.ms-body--sectioned .ms-search-tools {
+  grid-area: 2 / 2;
+}
+
+.ms-body--sectioned .ms-search {
+  max-width: 280px;
+}
+
+.ms-status-section {
+  min-width: 0;
+  margin-bottom: 20px;
+}
+
+.ms-body--sectioned .ms-status-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: #263244;
+  font:
+    650 16px/1.4 Inter,
+    Arial,
+    sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.ms-status-title > svg {
+  flex-shrink: 0;
+  color: #697586;
+}
+
+.ms-status-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  background: #f02648;
+}
+
+.ms-status-count {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #edf0f4;
+  color: #687487;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-body--sectioned .ms-group {
+  margin: 0 0 10px;
+  border-color: #e3e7ee;
+}
+
+.ms-body--sectioned .ms-group--time {
+  border: 1px solid #e3e7ee;
+  border-radius: 4px;
+  background: white;
+}
+
+.ms-body--sectioned .ms-group > h4 {
+  margin: 0;
+}
+
+.ms-body--sectioned .ms-columns {
+  background: #f3f5f8;
+  border-top: 0;
+  border-bottom: 0;
+  font-size: 13px;
+  min-height: 36px;
+}
+
+.ms-body--sectioned .ms-columns > span:first-child,
+.ms-body--sectioned .ms-columns > span:last-child {
+  border-inline: 0;
+}
+
+.ms-body--sectioned .ms-row > .ms-interest {
+  box-shadow: none;
+}
+
+.ms-body--sectioned .ms-row > .ms-record {
+  box-shadow: inset 1px 0 #ececf0;
+}
+
+.ms-body--sectioned .ms-ad + .ms-status-section {
+  margin-top: 0;
+}
+
+@container schedule (max-width: 930px) {
+  .ms-body--sectioned .ms-date-tools {
+    grid-area: 2 / 1 / auto / -1;
+  }
+  .ms-body--sectioned .ms-search-tools {
+    grid-area: 3 / 1 / auto / -1;
+  }
+  .ms-body--sectioned .ms-search {
+    max-width: none;
+  }
+  .ms-body--sectioned .ms-row > .ms-record {
+    box-shadow: none;
+  }
+}
+
+@container schedule (max-width: 600px) {
+  .ms-body--sectioned .ms-dense-tools {
+    display: flex;
+  }
+  .ms-body--sectioned .ms-dense-title {
+    font-size: 25px;
+    white-space: normal;
+  }
+  .ms-body--sectioned .ms-status-title {
+    font-size: 15px;
+  }
+}

@@ -19,6 +19,7 @@ import {
   scheduleDate,
   scheduleTime,
   sourceForecast,
+  sectionSchedule,
   type ScheduleFilters,
 } from "@/components/matches/matchScheduleModel";
 import type { Match } from "@/hooks/useMatches";
@@ -105,6 +106,159 @@ const props = (
   onResults: vi.fn(),
 });
 afterEach(cleanup);
+
+describe("status sections and advertising placement", () => {
+  const mixed = () => [
+    makeMatch({ id: "next", team1: "NEXT" }),
+    makeMatch({ id: "done", team1: "DONE", matchStatus: "finished" }),
+    makeMatch({ id: "live", team1: "LIVE TEAM", matchStatus: "live" }),
+  ];
+
+  it("partitions each status exactly once while retaining order within sections", () => {
+    const matches = [
+      ...mixed(),
+      makeMatch({ id: "later", team1: "LATER" }),
+      makeMatch({ id: "postponed", matchStatus: "postponed" }),
+      makeMatch({ id: "cancelled", matchStatus: "cancelled" }),
+      makeMatch({ id: "unknown", matchStatus: undefined }),
+    ];
+    const sections = sectionSchedule(matches, "2026-10-05");
+    expect(sections.map((s) => s.key)).toEqual([
+      "live",
+      "upcoming",
+      "finished",
+      "postponed",
+      "cancelled",
+      "unconfirmed",
+    ]);
+    expect(sections[1].matches.map((m) => m.id)).toEqual(["next", "later"]);
+    expect(sections.flatMap((s) => s.matches)).toHaveLength(matches.length);
+    expect(matches[0].id).toBe("next");
+    expect(sectionSchedule([], "2026-10-05")).toEqual([]);
+  });
+
+  it("does not describe yesterday's stale live or upcoming entries as playing now", () => {
+    const sections = sectionSchedule(
+      [
+        makeMatch({ matchStatus: "live", date: "2026-10-04T10:00:00Z" }),
+        makeMatch({ id: "old", date: "2026-10-04T12:00:00Z" }),
+        makeMatch({
+          id: "done",
+          matchStatus: "finished",
+          date: "2026-10-04T12:00:00Z",
+        }),
+      ],
+      "2026-10-05",
+    );
+    expect(sections.map((s) => s.key)).toEqual(["finished", "unconfirmed"]);
+    expect(sections[1].matches).toHaveLength(2);
+  });
+
+  it("renders live, ad, upcoming and finished in that order with shared headers", () => {
+    const { container } = render(
+      <MatchSchedule {...props(mixed())} advertising={{ preview: true }} />,
+    );
+    const live = screen.getByRole("region", { name: "Зараз грають" });
+    const upcoming = screen.getByRole("region", { name: "Найближчі матчі" });
+    const finished = screen.getByRole("region", { name: "Завершені матчі" });
+    const ad = screen.getByRole("complementary", { name: "Реклама" });
+    expect(within(live).getByText("LIVE TEAM")).toBeVisible();
+    expect(within(upcoming).getByText("NEXT")).toBeVisible();
+    expect(within(finished).getByText("DONE")).toBeVisible();
+    expect(live.nextElementSibling).toBe(ad);
+    expect(ad.nextElementSibling).toBe(upcoming);
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(3);
+    const headers = Array.from(container.querySelectorAll(".ms-columns"));
+    expect(headers).toHaveLength(3);
+    expect(new Set(headers.map((h) => h.textContent)).size).toBe(1);
+    expect(ad.querySelector(".ms-row")).toBeNull();
+  });
+
+  it("renders no empty ad slot without an active campaign", () => {
+    const { container } = render(<MatchSchedule {...props(mixed())} />);
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+    expect(
+      container.querySelector(".ms-status-section--live")?.nextElementSibling,
+    ).toHaveClass("ms-status-section--upcoming");
+  });
+
+  it("removes empty sections and the ad when filtering to one group or no results", () => {
+    render(
+      <MatchSchedule {...props(mixed())} advertising={{ preview: true }} />,
+    );
+    const search = screen.getByRole("searchbox", {
+      name: "Пошук команди або турніру",
+    });
+    fireEvent.change(search, { target: { value: "NEXT" } });
+    expect(screen.queryByRole("region", { name: "Зараз грають" })).toBeNull();
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
+    fireEvent.change(search, { target: { value: "unmatched query" } });
+    expect(screen.queryAllByTestId("schedule-row")).toHaveLength(0);
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+    fireEvent.change(search, { target: { value: "" } });
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(3);
+    expect(
+      screen.getAllByRole("complementary", { name: "Реклама" }),
+    ).toHaveLength(1);
+  });
+
+  it("keeps tournament collapse state independent across statuses and preserves actions", () => {
+    const p = props(mixed());
+    render(<MatchSchedule {...p} advertising={{ preview: true }} />);
+    fireEvent.click(screen.getByRole("button", { name: "За турніром" }));
+    const live = screen.getByRole("region", { name: "Зараз грають" });
+    const upcoming = screen.getByRole("region", { name: "Найближчі матчі" });
+    fireEvent.click(
+      within(live).getByRole("button", { name: /Dust2.dk Ligaen/ }),
+    );
+    expect(within(live).queryAllByTestId("schedule-row")).toHaveLength(0);
+    expect(within(upcoming).getAllByTestId("schedule-row")).toHaveLength(1);
+    expect(
+      screen.getAllByRole("complementary", { name: "Реклама" }),
+    ).toHaveLength(1);
+    fireEvent.click(
+      within(upcoming).getByRole("button", {
+        name: "Створити запис: NEXT — Linx Legacy Esport",
+      }),
+    );
+    expect(p.model.handleAddToBets).toHaveBeenCalledWith(p.model.matches[0]);
+    fireEvent.click(screen.getByRole("button", { name: "За часом" }));
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "Фільтри" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Статус" }), {
+      target: { value: "finished" },
+    });
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+  });
+
+  it("does not show a demo ad on empty/loading days or between historical-only groups", () => {
+    const p = props([]);
+    const view = render(
+      <MatchSchedule {...p} advertising={{ preview: true }} />,
+    );
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+    view.rerender(
+      <MatchSchedule
+        {...p}
+        model={{ ...p.model, initialLoading: true }}
+        advertising={{ preview: true }}
+      />,
+    );
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+    view.rerender(
+      <MatchSchedule
+        {...props([
+          makeMatch({ id: "done", matchStatus: "finished" }),
+          makeMatch({ id: "cancelled", matchStatus: "cancelled" }),
+        ])}
+        advertising={{ preview: true }}
+      />,
+    );
+    expect(screen.queryByRole("complementary", { name: "Реклама" })).toBeNull();
+  });
+});
 
 describe("redesigned expanded match panel", () => {
   const openDetails = () => {
