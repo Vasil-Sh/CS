@@ -106,6 +106,163 @@ const props = (
 });
 afterEach(cleanup);
 
+describe("redesigned expanded match panel", () => {
+  const openDetails = () => {
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    );
+    return screen.getByRole("region", {
+      name: "Деталі: MASONIC — Linx Legacy Esport",
+    });
+  };
+
+  it("renders two distinct note cards, the note count and the empty-state action", () => {
+    render(<MatchSchedule {...props()} />);
+    const panel = openDetails();
+    expect(within(panel).getAllByRole("article")).toHaveLength(2);
+    expect(
+      within(panel).getByLabelText("Команд із примітками: 1"),
+    ).toHaveTextContent("1");
+    const note = within(panel).getByRole("article", {
+      name: "Примітка: MASONIC",
+    });
+    expect(note).toHaveTextContent("БАН");
+    expect(note).toHaveClass("ms-detail-card--ban");
+    expect(note).toHaveTextContent("Краще ставити проти них");
+    const empty = within(panel).getByRole("article", {
+      name: "Примітка: Linx Legacy Esport",
+    });
+    expect(empty).toHaveTextContent("Ще немає примітки");
+    expect(empty).not.toHaveTextContent("Стабільні");
+    expect(
+      within(empty).getByRole("button", {
+        name: "Додати нотатку: Linx Legacy Esport",
+      }),
+    ).toHaveTextContent("Додати примітку");
+    expect(within(panel).queryByText("Дії з матчем")).not.toBeInTheDocument();
+  });
+
+  it("preserves multiline notes and does not call a stable team risky", () => {
+    const p = props();
+    p.model.getTeamRiskInfo = vi.fn((name) => ({
+      name,
+      game: "CS",
+      status: "Стабільні",
+      notes: "Перший рядок\nДругий рядок",
+    }));
+    render(<MatchSchedule {...p} />);
+    const panel = openDetails();
+    expect(
+      within(panel).getByLabelText("Команд із примітками: 2"),
+    ).toHaveTextContent("2");
+    const note = within(panel).getByRole("article", {
+      name: "Примітка: MASONIC",
+    });
+    expect(note).toHaveClass("ms-detail-card--stable");
+    expect(note.querySelector(".ms-detail-note-text")?.textContent).toBe(
+      "Перший рядок\nДругий рядок",
+    );
+    expect(within(note).queryByText("Ризиковані")).not.toBeInTheDocument();
+  });
+
+  it("allows editing a status-only entry without inventing note text", () => {
+    const p = props();
+    p.model.getTeamRiskInfo = vi.fn(() => ({
+      status: "Під питанням",
+      notes: "   ",
+      game: "CS",
+    }));
+    render(<MatchSchedule {...p} />);
+    const panel = openDetails();
+    const note = within(panel).getByRole("article", {
+      name: "Примітка: MASONIC",
+    });
+    expect(note).toHaveTextContent("Текст примітки ще не додано");
+    fireEvent.click(
+      within(note).getByRole("button", { name: "Редагувати нотатку: MASONIC" }),
+    );
+    expect(p.onEditNote).toHaveBeenCalledWith(p.model.matches[0], "MASONIC");
+  });
+
+  it("shows a single form-empty message and never manufactures a missing rank", () => {
+    render(
+      <MatchSchedule
+        {...props([
+          makeMatch({
+            formStabilityTeam1: "",
+            formStabilityTeam2: "",
+            positionTeam1: null,
+            positionTeam2: NaN,
+          }),
+        ])}
+      />,
+    );
+    const panel = openDetails();
+    expect(
+      within(panel).getAllByText("Даних про форму поки немає"),
+    ).toHaveLength(1);
+    const table = within(panel).getByRole("table", { name: "Рейтинг команд" });
+    expect(within(table).getAllByLabelText("Рейтинг відсутній")).toHaveLength(
+      2,
+    );
+    expect(table).not.toHaveTextContent("#0");
+    expect(table).not.toHaveTextContent("Немає даних");
+  });
+
+  it("retains actual form and rank data in the compact ranking table", () => {
+    render(<MatchSchedule {...props()} />);
+    const panel = openDetails();
+    const table = within(panel).getByRole("table", { name: "Рейтинг команд" });
+    expect(table).toHaveTextContent("#106");
+    expect(table).toHaveTextContent("#11");
+    expect(table).toHaveTextContent("Стабільна");
+    expect(table).toHaveTextContent("Форма не надана");
+    expect(
+      within(panel).queryByText("Даних про форму поки немає"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps recent results collapsed until requested", () => {
+    render(
+      <MatchSchedule
+        {...props([
+          makeMatch({
+            formWins1: 4,
+            formLosses1: 1,
+            formStreak1: 2,
+            formLast1: "WWLWW",
+            interestStars: 3,
+          }),
+        ])}
+      />,
+    );
+    const panel = openDetails();
+    const summary = within(panel).getByText("Останні результати");
+    const disclosure = summary.closest("details")!;
+    expect(disclosure.open).toBe(false);
+    fireEvent.click(summary);
+    expect(disclosure.open).toBe(true);
+    expect(disclosure).toHaveTextContent("4W / 1L · Серія W2 · WWLWW");
+    expect(disclosure).toHaveTextContent("Інтерес за рейтингом: 3/5");
+  });
+
+  it("connects AI and detailed analysis actions to existing callbacks without creating records", () => {
+    const p = props([makeMatch()]);
+    render(<MatchSchedule {...p} />);
+    const panel = openDetails();
+    fireEvent.click(within(panel).getByRole("button", { name: "AI-аналіз" }));
+    expect(p.model.handleAiRecommend).toHaveBeenCalledWith(p.model.matches[0]);
+    fireEvent.click(
+      within(panel).getByRole("button", { name: "Детальний аналіз" }),
+    );
+    expect(p.onAnalysis).toHaveBeenCalledWith(p.model.matches[0]);
+    expect(p.model.handleAddToBets).not.toHaveBeenCalled();
+    expect(p.model.handleCreateExpress).not.toHaveBeenCalled();
+  });
+});
+
 describe("match schedule data", () => {
   it("uses the same Kyiv date and clock across the UTC midnight boundary", () => {
     expect(scheduleDate("2026-10-04T22:30:00Z")).toBe("2026-10-05");
@@ -221,7 +378,7 @@ describe("match schedule interactions", () => {
     );
     const first = screen.getAllByTestId("schedule-row")[0];
     expect(within(first).getByText("Переглянути · 1")).toBeVisible();
-    expect(within(first).getByText("MASONIC · БАН")).toBeVisible();
+    expect(within(first).queryByText("MASONIC · БАН")).not.toBeInTheDocument();
     fireEvent.click(
       within(first).getByRole("button", {
         name: "Переглянути примітки: MASONIC — Linx Legacy Esport",
@@ -469,8 +626,8 @@ describe("dense schedule", () => {
     expect(
       container.querySelectorAll(".ms-source-cell .ms-source-score"),
     ).toHaveLength(2);
-    expect(container.querySelector(".ms-match-status--live")).toHaveTextContent(
-      "Лайв",
+    expect(container.querySelector(".match-identity__live")).toHaveTextContent(
+      "LIVE",
     );
     expect(screen.queryByText("Зараз грають · 1:0")).not.toBeInTheDocument();
     expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
@@ -492,22 +649,19 @@ describe("dense schedule", () => {
     render(<MatchSchedule {...p} />);
     const order = screen
       .getAllByTestId("schedule-row")
-      .map((row) => row.querySelector(".ms-team strong")?.textContent);
+      .map((row) => row.querySelector(".match-identity__name")?.textContent);
     expect(order).toEqual(["LIKED", "NEUTRAL", "DISLIKED", "FINISHED"]);
   });
-  it("aligns time with team names and the format chip with the game chip", () => {
+  it("shows time, game and format together in the identity block", () => {
     render(<MatchSchedule {...props([makeMatch()])} />);
     const row = screen.getByTestId("schedule-row");
-    expect(row.querySelector(".ms-time-col .ms-time-inline")).toHaveTextContent(
+    expect(row.querySelector(".match-identity__time")).toHaveTextContent(
       "19:00",
     );
-    expect(
-      row.querySelector(".ms-match-meta .ms-format-chip"),
-    ).toHaveTextContent("BO1");
-    expect(row.querySelector(".ms-match-meta .ms-game-chip")).toHaveTextContent(
-      "CS2",
+    expect(row.querySelector(".match-identity__format")).toHaveTextContent(
+      "BO1",
     );
-    expect(row.querySelector(".ms-time-col .ms-format-chip")).toBeNull();
+    expect(row.querySelector(".match-identity__game")).toHaveTextContent("CS2");
     const record = within(row).getByRole("button", {
       name: "Створити запис: MASONIC — Linx Legacy Esport",
     });

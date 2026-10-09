@@ -346,8 +346,9 @@
 .ms-body--dense .ms-match {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  padding: 3px 12px;
+  gap: 0;
+  padding: 0;
+  border-left: 1px solid #ececf0;
   border-radius: 0;
   justify-content: center;
 }
@@ -397,9 +398,6 @@
   border-color: #dc2626;
   background: #dc2626;
 }
-.ms-match-status--live .ms-live-dot {
-  animation: ms-live-pulse 1.2s ease-in-out infinite;
-}
 .ms-match-status--upcoming {
   color: #fff;
   border-color: #2563eb;
@@ -409,35 +407,6 @@
   color: #64748b;
   border-color: #e2e8f0;
   background: #f1f5f9;
-}
-@keyframes ms-live-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
-}
-@keyframes ms-status-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
-  }
-}
-.ms-match-status--live {
-  animation: ms-status-glow 2s ease-out infinite;
-}
-.ms-live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #fff;
 }
 .ms-match-status--cancelled {
   color: #b83a30;
@@ -483,9 +452,9 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 6px;
-  padding: 0;
+  padding: 8px 18px;
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 .ms-game-chip,

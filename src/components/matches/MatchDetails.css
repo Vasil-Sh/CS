@@ -1,0 +1,569 @@
+/* Expanded match panel. Kept separate from schedule-row and legacy detail styles. */
+.ms-detail-panel {
+  color: #111927;
+  background: #fff;
+  border: 1px solid #b9c4d2;
+  border-top: 0;
+  border-radius: 0;
+  box-shadow: 0 6px 16px #14202e1a;
+  font:
+    14px/1.5 Inter,
+    Arial,
+    sans-serif;
+}
+
+.ms-detail-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 20px;
+  padding: 24px 20px;
+}
+
+.ms-detail-notes,
+.ms-detail-form {
+  min-width: 0;
+  border: 1px solid #cbd4df;
+  border-radius: 6px;
+  background: #fbfcfe;
+  padding: 18px;
+}
+.ms-detail-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: #111923;
+  font:
+    600 26px/1.2 Oswald,
+    "Arial Narrow",
+    sans-serif;
+  letter-spacing: -0.02em;
+}
+.ms-detail-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid #d8dfe8;
+  border-radius: 4px;
+  background: #f2f5f9;
+  color: #536175;
+  font:
+    400 14px/1 Inter,
+    Arial,
+    sans-serif;
+  letter-spacing: normal;
+}
+.ms-detail-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ms-detail-card {
+  --detail-card-border: #d8dfe8;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 244px;
+  padding: 18px;
+  border: 1px solid var(--detail-card-border);
+  border-radius: 5px;
+  background: #fff;
+}
+.ms-detail-card--risk,
+.ms-detail-card--caution {
+  --detail-card-border: #f2bd69;
+  background: #fffaf3;
+}
+.ms-detail-card--ban {
+  --detail-card-border: #e8b8b5;
+  background: #fff9f8;
+}
+.ms-detail-card-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 8px;
+  min-height: 58px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e5eb;
+}
+.ms-detail-card-head .ms-logo {
+  width: 40px;
+  height: 40px;
+}
+.ms-detail-card-head > strong {
+  min-width: 0;
+  flex: 1;
+  color: #111923;
+  font:
+    600 20px/1.3 Oswald,
+    "Arial Narrow",
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.ms-detail-panel .ms-risk {
+  flex-shrink: 0;
+  max-width: 100%;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 5px 9px;
+  font:
+    500 13px/1.4 Oswald,
+    "Arial Narrow",
+    sans-serif;
+}
+.ms-detail-panel .ms-risk--risk,
+.ms-detail-panel .ms-risk--caution {
+  border-color: #f2bd69;
+  background: #fff4e2;
+  color: #9a530c;
+}
+.ms-detail-panel .ms-risk--ban {
+  border-color: #e8b8b5;
+  background: #ffefed;
+  color: #aa342e;
+}
+.ms-detail-panel .ms-detail-note-text {
+  margin: 12px 0 22px;
+  color: #35455a;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    400 16px/1.65 Inter,
+    Arial,
+    sans-serif;
+}
+.ms-detail-note-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 14px 0 16px;
+  text-align: center;
+  color: #111927;
+}
+.ms-detail-note-empty p {
+  font-size: 16px;
+}
+.ms-detail-note-empty > span {
+  color: #5b6470;
+  font-size: 14px;
+}
+.ms-detail-edit,
+.ms-detail-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  color: #365c5a;
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  font:
+    400 14px/1.5 Inter,
+    Arial,
+    sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ms-detail-edit {
+  margin-top: auto;
+  text-align: left;
+}
+.ms-detail-edit:hover,
+.ms-detail-ai:hover {
+  color: #173e3d;
+}
+.ms-detail-panel svg {
+  flex-shrink: 0;
+}
+.ms-detail-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid #ccd5e1;
+  border-radius: 5px;
+  background: #fff;
+  color: #263648;
+  font:
+    500 14px/1.4 Inter,
+    Arial,
+    sans-serif;
+  text-align: center;
+}
+.ms-detail-button:hover {
+  background: #f4f7fa;
+  border-color: #91a0b3;
+}
+.ms-detail-note-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  margin-top: auto;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid #ff6635;
+  border-radius: 5px;
+  background: #ff6635;
+  color: #fff;
+  font:
+    500 14px/1.4 Inter,
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+}
+.ms-detail-note-action:hover {
+  background: #e9572b;
+  border-color: #e9572b;
+}
+.ms-detail-table-wrap {
+  overflow: hidden;
+  border: 1px solid #d8dfe8;
+  border-radius: 5px;
+}
+.ms-detail-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.ms-detail-table thead th {
+  padding: 9px 13px;
+  background: #f4f5f7;
+  color: #657389;
+  text-align: left;
+  text-transform: uppercase;
+  font:
+    400 12px/1.5 Inter,
+    Arial,
+    sans-serif;
+}
+.ms-detail-table thead th:last-child {
+  width: 94px;
+  text-align: right;
+}
+.ms-detail-table tbody th,
+.ms-detail-table td {
+  padding: 9px 13px;
+  height: 52px;
+  border-top: 1px solid #e3e7ed;
+}
+.ms-detail-table tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+.ms-detail-ranked-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.ms-detail-ranked-team .ms-logo {
+  width: 30px;
+  height: 30px;
+}
+.ms-detail-ranked-team > span {
+  min-width: 0;
+}
+.ms-detail-table strong {
+  color: #15202f;
+  font:
+    600 18px/1.35 Oswald,
+    "Arial Narrow",
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+.ms-detail-ranked-team small {
+  display: block;
+  margin-top: 2px;
+  color: #6c7b90;
+  font:
+    400 12px/1.4 Inter,
+    Arial,
+    sans-serif;
+}
+.ms-detail-table td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ms-detail-panel .ms-detail-form-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 20px 0 0;
+  color: #75839a;
+  font-size: 14px;
+}
+.ms-detail-form-empty svg {
+  margin-top: 1px;
+}
+.ms-detail-form-tools {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e3e7ed;
+}
+.ms-detail-results {
+  min-width: 0;
+  color: #61718a;
+  font-size: 14px;
+}
+.ms-detail-results summary {
+  padding: 6px 0;
+  cursor: pointer;
+}
+.ms-detail-results summary:hover {
+  color: #253549;
+}
+.ms-detail-results p {
+  margin-top: 9px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.ms-detail-results strong {
+  font:
+    600 13px/1.5 Inter,
+    Arial,
+    sans-serif;
+}
+.ms-detail-ai {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.ms-detail-tool-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #d8dfe8;
+  border-radius: 6px;
+  background: #f6f8fb;
+}
+.ms-detail-tool-actions .ms-detail-ai,
+.ms-detail-analyze {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid #ccd5e1;
+  border-radius: 5px;
+  background: #fff;
+  color: #263648;
+  font:
+    500 14px/1.4 Inter,
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.ms-detail-tool-actions .ms-detail-ai:hover,
+.ms-detail-analyze:hover {
+  background: #f4f7fa;
+  border-color: #91a0b3;
+}
+.ms-detail-analyze {
+  color: #fff;
+  background: #263340;
+  border-color: #263340;
+}
+.ms-detail-analyze:hover {
+  color: #fff;
+  background: #17232f;
+  border-color: #17232f;
+}
+.ms-detail-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  padding: 17px 20px;
+  border-top: 1px solid #e6eaf0;
+}
+.ms-detail-source {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 225px;
+}
+.ms-detail-source > svg {
+  color: #34445b;
+}
+.ms-detail-source > div {
+  min-width: 0;
+}
+.ms-detail-source a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #293a4c;
+  font:
+    600 18px/1.3 Oswald,
+    "Arial Narrow",
+    sans-serif;
+}
+.ms-detail-source a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ms-detail-source p {
+  margin-top: 3px;
+  color: #8190a3;
+  font-size: 12px;
+}
+.ms-detail-personal {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.ms-detail-personal .ms-detail-button[aria-pressed="true"] {
+  color: #315e59;
+  border-color: #8bb0a6;
+  background: #edf6f2;
+}
+.ms-detail-personal .ms-detail-dislike[aria-pressed="true"] {
+  color: #a04742;
+  background: #fff1ef;
+  border-color: #d7a19d;
+}
+.ms-detail-dislike {
+  width: 44px;
+  padding: 10px;
+}
+.ms-detail-main-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 18px;
+  border-left: 1px solid #e3e7ed;
+}
+.ms-detail-main-actions .ms-detail-button {
+  white-space: nowrap;
+}
+.ms-detail-main-actions .ms-detail-button[aria-pressed="true"] {
+  background: #edf3f6;
+  border-color: #96a9b9;
+}
+.ms-detail-primary {
+  border-color: #263340;
+  background: #263340;
+  color: #fff;
+}
+.ms-detail-primary:hover {
+  border-color: #17232f;
+  background: #17232f;
+}
+.ms-detail-panel :focus-visible {
+  outline: 2px solid #47749c;
+  outline-offset: 3px;
+}
+
+@container schedule (max-width: 1050px) {
+  .ms-detail-content {
+    grid-template-columns: minmax(0, 1.55fr) minmax(270px, 1fr);
+    gap: 18px;
+    padding: 22px 18px;
+  }
+  .ms-detail-form {
+    padding-left: 18px;
+  }
+  .ms-detail-card {
+    padding: 14px;
+  }
+  .ms-detail-card-head {
+    column-gap: 9px;
+  }
+  .ms-detail-card-head .ms-logo {
+    width: 34px;
+    height: 34px;
+  }
+  .ms-detail-footer {
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .ms-detail-source {
+    min-width: 200px;
+    gap: 12px;
+  }
+  .ms-detail-button {
+    padding-inline: 12px;
+  }
+  .ms-detail-main-actions {
+    padding-left: 14px;
+  }
+}
+
+@container schedule (max-width: 850px) {
+  .ms-detail-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ms-detail-form {
+    padding: 20px 0 0;
+    border-left: 0;
+    border-top: 1px solid #e3e7ed;
+  }
+  .ms-detail-card {
+    min-height: 220px;
+  }
+  .ms-detail-source {
+    flex-basis: 100%;
+  }
+  .ms-detail-main-actions {
+    margin-left: auto;
+  }
+}
+
+@container schedule (max-width: 520px) {
+  .ms-detail-content {
+    gap: 20px;
+    padding: 18px 14px;
+  }
+  .ms-detail-panel h3 {
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  .ms-detail-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ms-detail-card {
+    min-height: 210px;
+  }
+  .ms-detail-note-empty {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .ms-detail-footer {
+    padding: 16px 14px;
+  }
+  .ms-detail-personal {
+    flex-basis: 100%;
+  }
+  .ms-detail-personal > .ms-detail-button:first-child {
+    flex: 1;
+  }
+  .ms-detail-main-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .ms-detail-main-actions .ms-detail-button {
+    flex: 1 1 145px;
+    white-space: normal;
+  }
+}
