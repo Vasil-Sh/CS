@@ -16,7 +16,6 @@ import {
   Search,
   ShieldAlert,
   SlidersHorizontal,
-  Sparkles,
   ThumbsDown,
   ThumbsUp,
   Trophy,
@@ -62,14 +61,12 @@ export interface MatchScheduleProps {
     | "getTeamRiskInfo"
     | "handleRateMatch"
     | "handleAddToBets"
-    | "handleAiRecommend"
     | "selectedMatchIds"
     | "toggleMatchSelection"
     | "clearSelectedMatches"
     | "handleCreateExpress"
     | "refreshMatches"
   >;
-  onAnalysis: (match: Match) => void;
   onEditNote: (match: Match, team: string) => void;
   onResults: () => void;
   now?: Date;
@@ -227,7 +224,6 @@ function SourceForecast({ match }: { match: Match }) {
 
 export default function MatchSchedule({
   model: m,
-  onAnalysis,
   onEditNote,
   onResults,
   now = new Date(),
@@ -502,22 +498,6 @@ export default function MatchSchedule({
                   </p>
                 ))}
               </details>
-              <div className="ms-detail-tool-actions">
-                <button
-                  type="button"
-                  className="ms-detail-ai"
-                  onClick={() => m.handleAiRecommend(match)}
-                >
-                  <Sparkles size={18} aria-hidden="true" /> AI-аналіз
-                </button>
-                <button
-                  type="button"
-                  className="ms-detail-analyze"
-                  onClick={() => onAnalysis(match)}
-                >
-                  Детальний аналіз <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              </div>
             </div>
           </section>
         </div>

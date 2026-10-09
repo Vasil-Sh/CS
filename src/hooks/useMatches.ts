@@ -892,31 +892,14 @@ export function useMatches() {
     };
   }, [matches, loadMatchesFromApi]);
 
-  // ── Filtering & sorting (memoized) ──
-  const {
-    sortedDateKeys,
-    groupedByDate,
-    displayedMatches,
-    bo1Count,
-    bo3Count,
-    bo5Count,
-    cs2DisplayedCount,
-    dota2DisplayedCount,
-    ongoingCount,
-    avgCoefficient,
-    avgConfidence,
-    tournamentOptions,
-    tournamentCount,
-  } = useMemo(() => {
+  // ── Auto-finish stale live matches based on format max duration ──
+  // Overrides the backend "live" status for matches past their expected
+  // duration so the schedule correctly transitions them to "finished".
+  // Backend will backfill the correct score later.
+  // CS2: Bo1=1h, Bo3=2.5h, Bo5=4.5h | Dota2: Bo1=1h, Bo3=3.5h, Bo5=5.5h
+  const autoFinishedMatches = useMemo(() => {
     const now = Date.now();
-    const todayKey = getTodayDateKey();
-
-    // ── Pre-process: auto-finish stale live matches based on format max duration ──
-    // This runs on every render/recalculation, so it overrides the backend "live"
-    // status for matches past their expected duration. Backend will backfill
-    // the correct score later.
-    // CS2: Bo1=1h, Bo3=2.5h, Bo5=4.5h | Dota2: Bo1=1h, Bo3=3.5h, Bo5=5.5h
-    const statusFixed = matches.map((m) => {
+    return matches.map((m) => {
       if (m.matchStatus !== "live") return m;
       const ageMs = now - new Date(m.date).getTime();
       const isDota = m.game === "Dota2";
@@ -935,6 +918,25 @@ export function useMatches() {
       }
       return m;
     });
+  }, [matches]);
+
+  // ── Filtering & sorting (memoized) ──
+  const {
+    sortedDateKeys,
+    groupedByDate,
+    displayedMatches,
+    bo1Count,
+    bo3Count,
+    bo5Count,
+    cs2DisplayedCount,
+    dota2DisplayedCount,
+    ongoingCount,
+    avgCoefficient,
+    avgConfidence,
+    tournamentOptions,
+    tournamentCount,
+  } = useMemo(() => {
+    const todayKey = getTodayDateKey();
 
     // Yesterday's date key for keeping recently completed matches visible
     const yesterdayDate = new Date();
@@ -944,7 +946,7 @@ export function useMatches() {
     const ydd = String(yesterdayDate.getDate()).padStart(2, "0");
     const yesterdayKey = `${yyyy}-${ymm}-${ydd}`;
 
-    const filtered = statusFixed.filter((match) => {
+    const filtered = autoFinishedMatches.filter((match) => {
       const matchDateKey = getDateKey(match.date);
       // Exclude matches from past days — but keep:
       // - live & upcoming (still playing or about to start)
@@ -1128,7 +1130,7 @@ export function useMatches() {
         .size,
     };
   }, [
-    matches,
+    autoFinishedMatches,
     filterGame,
     filterDayOfWeek,
     filterRisk,
@@ -1411,7 +1413,7 @@ export function useMatches() {
 
   return {
     // Data
-    matches,
+    matches: autoFinishedMatches,
     sortedDateKeys,
     groupedByDate,
     displayedMatches,

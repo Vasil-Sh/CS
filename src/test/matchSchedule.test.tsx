@@ -94,14 +94,12 @@ const props = (
     ),
     handleRateMatch: vi.fn(),
     handleAddToBets: vi.fn(),
-    handleAiRecommend: vi.fn(),
     selectedMatchIds: new Set(),
     toggleMatchSelection: vi.fn(),
     clearSelectedMatches: vi.fn(),
     handleCreateExpress: vi.fn(),
     refreshMatches: vi.fn().mockResolvedValue(undefined),
   },
-  onAnalysis: vi.fn(),
   onEditNote: vi.fn(),
   onResults: vi.fn(),
 });
@@ -401,20 +399,6 @@ describe("redesigned expanded match panel", () => {
     expect(disclosure).toHaveTextContent("4W / 1L · Серія W2 · WWLWW");
     expect(disclosure).toHaveTextContent("Інтерес за рейтингом: 3/5");
   });
-
-  it("connects AI and detailed analysis actions to existing callbacks without creating records", () => {
-    const p = props([makeMatch()]);
-    render(<MatchSchedule {...p} />);
-    const panel = openDetails();
-    fireEvent.click(within(panel).getByRole("button", { name: "AI-аналіз" }));
-    expect(p.model.handleAiRecommend).toHaveBeenCalledWith(p.model.matches[0]);
-    fireEvent.click(
-      within(panel).getByRole("button", { name: "Детальний аналіз" }),
-    );
-    expect(p.onAnalysis).toHaveBeenCalledWith(p.model.matches[0]);
-    expect(p.model.handleAddToBets).not.toHaveBeenCalled();
-    expect(p.model.handleCreateExpress).not.toHaveBeenCalled();
-  });
 });
 
 describe("match schedule data", () => {
@@ -569,8 +553,6 @@ describe("match schedule interactions", () => {
       p.model.matches[0],
       "Linx Legacy Esport",
     );
-    fireEvent.click(screen.getByRole("button", { name: "Детальний аналіз" }));
-    expect(p.onAnalysis).toHaveBeenCalledWith(p.model.matches[0]);
   });
   it("opens the record form from its single row action", () => {
     const p = props();

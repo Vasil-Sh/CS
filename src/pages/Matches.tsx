@@ -31,18 +31,12 @@ export default function Matches() {
     };
   }, []);
 
-  function openAnalysis(match: Match) {
-    m.setSelectedMatch(match);
-    m.setPredictionsModalOpen(true);
-  }
-
   return (
     <TooltipProvider>
       <ErrorBoundary>
         <MatchSchedule
           model={m}
           advertising={{ campaign: banner, preview: import.meta.env.DEV }}
-          onAnalysis={openAnalysis}
           onResults={() => m.setPastDaysModalOpen(true)}
           onEditNote={(match, team) => {
             setNoteTeam(team);

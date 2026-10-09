@@ -65,6 +65,10 @@ export function ScheduleAdvertisement({
       </>
     );
 
+  const creativeClass = `ms-ad__creative${
+    image && image !== failedImage ? " ms-ad__creative--image" : ""
+  }`;
+
   return (
     <aside className="ms-ad" aria-label="Реклама">
       <div className="ms-ad__label">
@@ -75,7 +79,7 @@ export function ScheduleAdvertisement({
       </div>
       {href ? (
         <a
-          className="ms-ad__creative"
+          className={creativeClass}
           href={href}
           target="_blank"
           rel="sponsored noopener noreferrer"
@@ -84,7 +88,7 @@ export function ScheduleAdvertisement({
           {content}
         </a>
       ) : (
-        <div className="ms-ad__creative">{content}</div>
+        <div className={creativeClass}>{content}</div>
       )}
     </aside>
   );

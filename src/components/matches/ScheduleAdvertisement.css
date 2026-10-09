@@ -34,6 +34,10 @@
   text-decoration: none;
 }
 
+.ms-ad__creative--image {
+  min-height: 0;
+}
+
 .ms-ad__creative:focus-visible {
   outline: 3px solid #3b75cf;
   outline-offset: 3px;
@@ -140,7 +144,7 @@ a.ms-ad__creative:hover {
 .ms-ad__image {
   display: block;
   width: 100%;
-  height: 112px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -168,7 +172,7 @@ a.ms-ad__creative:hover {
   .ms-ad__accent {
     left: 28px;
   }
-  .ms-ad__image {
-    height: 100px;
+  .ms-ad__creative--image {
+    min-height: 0;
   }
 }
