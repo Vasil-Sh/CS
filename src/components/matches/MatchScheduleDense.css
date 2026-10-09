@@ -20,31 +20,32 @@
 .ms-hero-results:hover {
   background: #ffffff12;
 }
-.ms-dense-heading {
+.ms-dense-tools {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 14px;
 }
-.ms-dense-heading h2 {
-  font-size: clamp(32px, 3.2cqi, 42px);
-  line-height: 1.15;
+.ms-dense-title {
+  margin: 0;
+  font:
+    600 clamp(32px, 3.2cqi, 42px)/1 Oswald,
+    sans-serif;
   letter-spacing: -0.025em;
-}
-.ms-dense-heading .ms-grouping {
-  margin-left: auto;
+  white-space: nowrap;
+  padding-bottom: 4px;
 }
 .ms-body--dense .ms-segment {
   background: transparent;
   border: 0;
   border-radius: 0;
-  gap: 4px;
+  gap: 3px;
 }
 .ms-body--dense .ms-segment button {
-  min-height: 38px;
-  font-size: 14px;
-  padding: 8px 14px;
+  min-height: 30px;
+  font-size: 12px;
+  padding: 5px 10px;
   border: 1px solid #e1e3e6;
   border-radius: 5px;
   font-weight: 500;
@@ -94,16 +95,9 @@
   background: #fff;
   color: #293c34;
 }
-.ms-dense-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
 .ms-body--dense .ms-date-tools {
   margin: 0;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
@@ -111,29 +105,31 @@
   margin-left: auto;
 }
 .ms-body--dense .ms-search-tools {
-  flex: 0 1 37%;
+  flex: 0 1 auto;
   flex-wrap: nowrap;
-  min-width: 300px;
-  gap: 10px;
+  min-width: 150px;
+  gap: 6px;
 }
 .ms-body--dense .ms-date-input {
-  min-height: 38px;
-  padding: 7px 10px;
-  gap: 9px;
-  font-size: 14px;
+  min-height: 30px;
+  padding: 5px 10px;
+  gap: 7px;
+  font-size: 12px;
 }
 .ms-body--dense .ms-search {
-  padding: 0 10px;
-  flex: 1;
+  padding: 0 8px;
+  flex: 1 1 120px;
+  max-width: 200px;
 }
 .ms-body--dense .ms-search input {
-  height: 38px;
-  font-size: 14px;
+  height: 30px;
+  font-size: 12px;
+  min-width: 0;
 }
 .ms-body--dense .ms-search-tools .ms-button {
-  min-height: 38px;
-  font-size: 14px;
-  padding: 7px 10px;
+  min-height: 30px;
+  font-size: 12px;
+  padding: 5px 10px;
 }
 .ms-body--dense .ms-count {
   background: #e5e9e6;
@@ -174,14 +170,15 @@
   align-items: center;
 }
 .ms-body--dense .ms-columns {
-  background: transparent;
-  color: #667185;
+  background: #eef1f4;
+  color: #111827;
   font:
-    500 12px/1.4 Inter,
+    500 14px/1.4 Inter,
     Arial,
     sans-serif;
-  text-transform: uppercase;
-  min-height: 32px;
+  min-height: 38px;
+  border-top: 1px solid #e7e8eb;
+  border-bottom: 1px solid #e7e8eb;
 }
 .ms-body--dense .ms-columns > span {
   display: flex;
@@ -192,6 +189,12 @@
   padding: 8px 10px;
   border-left: 0;
   align-self: stretch;
+}
+.ms-body--dense .ms-columns > span:first-child {
+  border-left: 1px solid #e7e8eb;
+}
+.ms-body--dense .ms-columns > span:last-child {
+  border-right: 1px solid #e7e8eb;
 }
 .ms-body--dense .ms-columns > span:nth-child(2) {
   justify-content: flex-start;
@@ -207,12 +210,11 @@
 }
 .ms-body--dense .ms-columns .ms-source-heading {
   padding-inline: 0;
-  color: #7d78a5;
+  color: #111827;
 }
 .ms-interest-heading-text {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-size: 14px;
+  letter-spacing: 0;
 }
 .ms-body--dense .ms-columns .ms-forecast-heading {
   display: flex;
@@ -268,10 +270,14 @@
 }
 .ms-body--dense .ms-row > .ms-interest {
   padding-inline: 4px;
+  box-shadow: inset 1px 0 #ececf0;
 }
 .ms-body--dense .ms-row.is-open {
   background: #f3f7fc;
   box-shadow: inset 3px 0 #7092c2;
+}
+.ms-body--dense .ms-row.is-open .match-identity {
+  background: transparent;
 }
 .ms-body--dense .ms-row.is-selected:not(.is-open) {
   background: #f0f5f2;
@@ -659,13 +665,14 @@
   flex-shrink: 0;
 }
 .ms-body--dense .ms-note-button--add {
-  border-color: #477fe8;
-  background: #477fe8;
-  color: #fff;
+  border-color: #dce2e9;
+  background: transparent;
+  color: #535d63;
 }
 .ms-body--dense .ms-note-button--add:hover {
-  border-color: #3364bd;
-  background: #3364bd;
+  border-color: #88958c;
+  background: #e9ede8;
+  color: #535d63;
 }
 .ms-body--dense .ms-note-button:not(.ms-note-button--add):hover {
   border-color: #2c5fb8;
@@ -676,6 +683,9 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
+  box-shadow:
+    inset 1px 0 #ececf0,
+    inset -1px 0 #ececf0;
 }
 .ms-body--dense .ms-record-button {
   width: 28px;
@@ -690,9 +700,9 @@
   box-shadow: none;
 }
 .ms-body--dense .ms-record-button:hover {
-  color: #19774f;
-  background: #def4e9;
-  border-color: #78bd9c;
+  color: #fff;
+  background: #28946a;
+  border-color: #28946a;
 }
 .ms-body--dense .ms-disclosure {
   display: inline-flex !important;
@@ -861,11 +871,8 @@
   }
 }
 @container schedule (max-width: 600px) {
-  .ms-dense-heading {
-    gap: 12px;
-  }
-  .ms-dense-heading h2 {
-    font-size: 28px;
+  .ms-dense-title {
+    font-size: 26px;
     width: 100%;
   }
   .ms-body--dense .ms-personal {
@@ -877,7 +884,7 @@
     padding: 8px 7px !important;
     font-size: 11px;
   }
-  .ms-dense-heading .ms-grouping {
+  .ms-body--dense .ms-grouping {
     width: 100%;
     margin: 0;
   }

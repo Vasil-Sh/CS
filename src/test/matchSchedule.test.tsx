@@ -377,7 +377,7 @@ describe("match schedule interactions", () => {
       0,
     );
     const first = screen.getAllByTestId("schedule-row")[0];
-    expect(within(first).getByText("Переглянути · 1")).toBeVisible();
+    expect(within(first).getByText("Примітки")).toBeVisible();
     expect(within(first).queryByText("MASONIC · БАН")).not.toBeInTheDocument();
     fireEvent.click(
       within(first).getByRole("button", {

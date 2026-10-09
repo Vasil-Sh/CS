@@ -653,7 +653,7 @@ export default function MatchSchedule({
               {rowRisks.length ? (
                 <>
                   <Eye size={15} />
-                  <span>Переглянути · {rowRisks.length}</span>
+                  <span>Примітки</span>
                 </>
               ) : (
                 <>
@@ -758,26 +758,8 @@ export default function MatchSchedule({
         </dl>
       </header>
       <div className="ms-body ms-body--dense">
-        <div className="ms-dense-heading">
-          <h2>Розклад матчів</h2>
-          <div className="ms-segment ms-grouping" aria-label="Групування">
-            <button
-              type="button"
-              aria-pressed={mode === "time"}
-              onClick={() => setMode("time")}
-            >
-              За часом
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === "tournament"}
-              onClick={() => setMode("tournament")}
-            >
-              За турніром
-            </button>
-          </div>
-        </div>
         <div className="ms-dense-tools">
+          <h2 className="ms-dense-title">Розклад матчів</h2>
           <div className="ms-date-tools">
             <div className="ms-segment" aria-label="Швидкий вибір дати">
               <button
@@ -863,6 +845,22 @@ export default function MatchSchedule({
             >
               <SlidersHorizontal size={18} /> Фільтри{" "}
               {extraCount > 0 && <span className="ms-count">{extraCount}</span>}
+            </button>
+          </div>
+          <div className="ms-segment ms-grouping" aria-label="Групування">
+            <button
+              type="button"
+              aria-pressed={mode === "time"}
+              onClick={() => setMode("time")}
+            >
+              За часом
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === "tournament"}
+              onClick={() => setMode("tournament")}
+            >
+              За турніром
             </button>
           </div>
         </div>
