@@ -1,5 +1,7 @@
 import {
+  Fragment,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -11,7 +13,6 @@ import {
   SlidersHorizontal,
   Columns3,
   MoreHorizontal,
-  X,
   Flag,
   Share2,
   ChevronLeft,
@@ -21,6 +22,10 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  Clock3,
+  ChevronDown,
+  Download,
+  Info,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +33,7 @@ import {
   DropdownMenuItem,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import type BetTable from "@/components/BetTable";
 import type { Bet } from "@/types/betting";
@@ -35,6 +41,7 @@ import { api } from "@/lib/apiClient";
 import { UserDataService } from "@/lib/userDataService";
 import { parseExpressEvents } from "@/lib/parser/expressParser";
 import CompactBetModal from "./CompactBetModal";
+import JournalRecordDetails from "./JournalRecordDetails";
 import {
   journalKey,
   journalExpress,
@@ -52,8 +59,7 @@ import "./Journal.css";
 type Props = ComponentProps<typeof BetTable>;
 const columns = [
   ["date", "Дата"],
-  ["match", "Матч"],
-  ["selection", "Ваш вибір"],
+  ["match", "Матч і вибір"],
   ["amount", "Сума"],
   ["odds", "Коеф."],
   ["profit", "Профіт"],
@@ -90,7 +96,7 @@ export default function JournalTable(p: Props) {
   const [currency, setCurrency] = useState("all");
   const [category, setCategory] = useState("all");
   const [size, setSize] = useState(20);
-  const [ascending, setAscending] = useState(false);
+  const [ascending, setAscending] = useState(p.sortOrder === "asc");
   const [visible, setVisible] = useState<Set<Column>>(
     () => new Set(columns.map(([id]) => id)),
   );
@@ -99,8 +105,10 @@ export default function JournalTable(p: Props) {
   const [compact, setCompact] = useState(false);
   const [compactPeriod, setCompactPeriod] = useState("all");
   const [compactMonth, setCompactMonth] = useState("");
-  const detailRef = useRef<HTMLHeadingElement>(null);
-  const selected = p.bets.find((bet) => journalKey(bet) === selectedKey);
+  const disclosureRefs = useRef(new Map<string, HTMLButtonElement>());
+  const detailId = useId();
+  const panelId = (bet: Bet) =>
+    `${detailId}-${encodeURIComponent(journalKey(bet))}`;
   useEffect(() => {
     let cancelled = false;
     setGoalsLoaded(false);
@@ -125,17 +133,13 @@ export default function JournalTable(p: Props) {
   useEffect(() => {
     p.onPageChange(1);
   }, [game, currency, category, size]);
-  useEffect(() => {
-    if (selectedKey && !selected) {
-      setSelectedKey(null);
-    }
-  }, [selectedKey, selected]);
-  const choose = (bet: Bet | null) => {
-    setSelectedKey(bet ? journalKey(bet) : null);
-    if (bet)
-      requestAnimationFrame(() =>
-        detailRef.current?.focus({ preventScroll: true }),
-      );
+  const choose = (bet: Bet) => {
+    const key = journalKey(bet);
+    setSelectedKey((current) => (current === key ? null : key));
+  };
+  const closeDetails = (bet: Bet) => {
+    setSelectedKey(null);
+    disclosureRefs.current.get(journalKey(bet))?.focus({ preventScroll: true });
   };
   const goalName = (bet: Bet) =>
     goals.find((goal) => String(goal.id) === String(bet.goalId))?.name ||
@@ -218,8 +222,13 @@ export default function JournalTable(p: Props) {
     [scope, p.resultFilter, p.sortBy, ascending],
   );
   const pages = Math.max(1, Math.ceil(filtered.length / size));
-  const page = Math.min(p.currentPage, pages);
+  const page = Math.max(1, Math.min(p.currentPage, pages));
   const rows = filtered.slice((page - 1) * size, page * size);
+  useEffect(() => {
+    if (selectedKey && !rows.some((bet) => journalKey(bet) === selectedKey)) {
+      setSelectedKey(null);
+    }
+  }, [selectedKey, rows]);
   const reset = () => {
     p.onSearchTextChange("");
     p.onTableFilterChange("all");
@@ -285,13 +294,15 @@ export default function JournalTable(p: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => p.onBetDetails(bet)}>
+          <FileText size={16} />
           Текст для Telegram
         </DropdownMenuItem>
         {journalExpress(bet) && (
           <DropdownMenuItem onSelect={() => p.onExpressDetails(bet)}>
-            Події експресу
+            Повні деталі експресу
           </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
         {bet.result === "Pending" && (
           <>
             <DropdownMenuItem onSelect={() => p.onUpdateResult(bet, "Win")}>
@@ -312,51 +323,32 @@ export default function JournalTable(p: Props) {
     </DropdownMenu>
   );
   const actions = (bet: Bet) => (
-    <div className="journal-actions">
-      {bet.result === "Pending" && (
-        <>
-          <button
-            type="button"
-            className="journal-action journal-action-win"
-            onClick={() => p.onUpdateResult(bet, "Win")}
-            aria-label={`Позначити виграш: ${bet.match}`}
-            title="Виграш"
-          >
-            <CheckCircle size={18} />
-          </button>
-          <button
-            type="button"
-            className="journal-action journal-action-loss"
-            onClick={() => p.onUpdateResult(bet, "Loss")}
-            aria-label={`Позначити програш: ${bet.match}`}
-            title="Програш"
-          >
-            <XCircle size={18} />
-          </button>
-        </>
-      )}
+    <div
+      className="journal-actions"
+      onClick={(event) => event.stopPropagation()}
+    >
       <button
         type="button"
-        className="journal-action journal-action-tg"
-        onClick={() => p.onBetDetails(bet)}
-        aria-label={`Текст для Telegram: ${bet.match}`}
-        title="Текст для Telegram"
+        className="journal-row-share"
+        onClick={() => p.onShareBet(bet)}
+        aria-label={`Поділитися: ${bet.match}`}
+        title="Поділитися записом"
       >
-        <FileText size={18} />
+        <Share2 size={16} />
+        <span>Поділитися</span>
       </button>
-      <button
-        type="button"
-        className="journal-action journal-action-del"
-        onClick={() => p.onDeleteBet(bet)}
-        aria-label={`Видалити: ${bet.match}`}
-        title="Видалити"
-      >
-        <Trash2 size={18} />
-      </button>
+      {menu(bet)}
     </div>
   );
   const badge = (bet: Bet) => (
     <span className={`journal-badge status-${bet.result}`}>
+      {bet.result === "Win" ? (
+        <CheckCircle size={15} />
+      ) : bet.result === "Loss" ? (
+        <XCircle size={15} />
+      ) : (
+        <Clock3 size={15} />
+      )}
       {journalStatus(bet)}
     </span>
   );
@@ -395,13 +387,19 @@ export default function JournalTable(p: Props) {
         const matchName = bet.match.replace(/\s+vs\s+/i, " — ");
         return (
           <button
+            type="button"
             className="journal-match-button"
+            ref={(node) => {
+              if (node) disclosureRefs.current.set(journalKey(bet), node);
+              else disclosureRefs.current.delete(journalKey(bet));
+            }}
             onClick={() => choose(bet)}
             aria-label={`Деталі: ${bet.match}`}
             aria-expanded={selectedKey === journalKey(bet)}
+            aria-controls={panelId(bet)}
           >
             {journalExpress(bet) ? (
-              <span className="journal-match-title">
+              <span className="journal-match-title journal-match-inline">
                 <ListChecks size={24} />
                 <strong>
                   Експрес ·{" "}
@@ -410,39 +408,37 @@ export default function JournalTable(p: Props) {
                     "—"}{" "}
                   подій
                 </strong>
+                <ChevronDown size={15} className="journal-disclosure-icon" />
               </span>
             ) : (
               <span className="journal-match-title">
-                {/* Wide: logos flanking the full name */}
                 <span className="journal-match-inline">
                   <TeamLogo src={bet.logoTeam1} name={t1} />
                   <strong>{matchName}</strong>
                   {t2 && <TeamLogo src={bet.logoTeam2} name={t2} />}
-                </span>
-                {/* Narrow: one logo per team, name beside it */}
-                <span className="journal-match-stacked">
-                  <span className="journal-match-team">
-                    <TeamLogo src={bet.logoTeam1} name={t1} />
-                    <strong>{t1}</strong>
-                  </span>
-                  {t2 && (
-                    <span className="journal-match-team">
-                      <TeamLogo src={bet.logoTeam2} name={t2} />
-                      <strong>{t2}</strong>
-                    </span>
-                  )}
+                  <ChevronDown size={15} className="journal-disclosure-icon" />
                 </span>
               </span>
             )}
+            {!journalExpress(bet) && (
+              <span className="journal-selection">
+                Вибір: <span>{journalSelection(bet)}</span>
+              </span>
+            )}
             <small>
-              {journalExpress(bet) ? "Переглянути події →" : journalMarket(bet)}{" "}
-              · {bet.game || "CS2"} · {bet.format || "—"}
+              {!journalExpress(bet) && <>{journalMarket(bet)} · </>}
+              {bet.game || "CS2"} · {bet.format || "—"}
             </small>
+            {journalExpress(bet) && (
+              <span className="journal-expand-label">
+                {selectedKey === journalKey(bet)
+                  ? "Згорнути події"
+                  : "Показати події"}
+              </span>
+            )}
           </button>
         );
       }
-      case "selection":
-        return journalExpress(bet) ? "Експрес" : journalSelection(bet);
       case "amount":
         return journalMoney(journalAmount(bet), bet.currency);
       case "odds":
@@ -481,7 +477,7 @@ export default function JournalTable(p: Props) {
     currency: (b.currency === "USD" ? "USD" : "UAH") as "UAH" | "USD",
   }));
   return (
-    <section className="journal-workspace is-dense" aria-label="Журнал записів">
+    <section className="journal-workspace" aria-label="Журнал записів">
       <div className="journal-tools">
         <label className="journal-search">
           <Search size={17} />
@@ -532,6 +528,10 @@ export default function JournalTable(p: Props) {
                 {label}
               </DropdownMenuCheckboxItem>
             ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={exportCSV}>
+              <Download size={16} /> Експорт CSV
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <button className="journal-compact" onClick={() => setCompact(true)}>
@@ -598,73 +598,80 @@ export default function JournalTable(p: Props) {
           </button>
         </div>
       )}
-      <div className="journal-layout">
-        <div className="journal-list">
+      <div className="journal-list">
+        <div className="journal-status-bar">
           <nav className="journal-statuses" aria-label="Статус записів">
             {statuses.map(([value, label]) => (
               <button
                 key={value}
                 aria-pressed={p.resultFilter === value}
-                onClick={() => p.onResultFilterChange(value)}
+                onClick={() => {
+                  p.onResultFilterChange(value);
+                  p.onPageChange(1);
+                }}
               >
-                {label} ·{" "}
-                {value === "all"
-                  ? scope.length
-                  : scope.filter((b) => b.result === value).length}
+                {label}{" "}
+                <span>
+                  {value === "all"
+                    ? scope.length
+                    : scope.filter((b) => b.result === value).length}
+                </span>
               </button>
             ))}
           </nav>
-          <div className="journal-table-wrap">
-            <table>
-              <caption className="sr-only">
-                Записи журналу. Натисніть назву матчу, щоб відкрити деталі.
-              </caption>
-              <thead>
-                <tr>
-                  {columns
-                    .filter(([id]) => visible.has(id))
-                    .map(([id, label]) => (
-                      <th
-                        key={id}
-                        className={`col-${id}`}
-                        aria-sort={
-                          p.sortBy === id
-                            ? ascending
-                              ? "ascending"
-                              : "descending"
-                            : undefined
-                        }
-                      >
-                        {id === "date" || id === "odds" || id === "profit" ? (
-                          <button
-                            onClick={() => sort(id)}
-                            className="journal-sort"
-                            title={
-                              id === "profit"
-                                ? "Сортування за профітом у базовій валюті UAH"
-                                : undefined
-                            }
-                          >
-                            <span>{label}</span>
-                            <span className="journal-sort-arrow">
-                              {p.sortBy === id ? (ascending ? "↑" : "↓") : "↕"}
-                            </span>
-                          </button>
-                        ) : (
-                          label
-                        )}
-                      </th>
-                    ))}
-                  <th className="col-actions-head">Дії</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((bet) => (
+          <span className="journal-record-count">
+            Записів: {filtered.length}
+          </span>
+        </div>
+        <div className="journal-table-wrap">
+          <table className="journal-records-table">
+            <caption className="sr-only">
+              Записи журналу. Натисніть назву матчу, щоб відкрити деталі.
+            </caption>
+            <thead>
+              <tr>
+                {columns
+                  .filter(([id]) => visible.has(id))
+                  .map(([id, label]) => (
+                    <th
+                      key={id}
+                      className={`col-${id}`}
+                      aria-sort={
+                        p.sortBy === id
+                          ? ascending
+                            ? "ascending"
+                            : "descending"
+                          : undefined
+                      }
+                    >
+                      {id === "date" || id === "odds" || id === "profit" ? (
+                        <button
+                          onClick={() => sort(id)}
+                          className="journal-sort"
+                          title={
+                            id === "profit"
+                              ? "Сортування за профітом у базовій валюті UAH"
+                              : undefined
+                          }
+                        >
+                          <span>{label}</span>
+                          <span className="journal-sort-arrow">
+                            {p.sortBy === id ? (ascending ? "↑" : "↓") : "↕"}
+                          </span>
+                        </button>
+                      ) : (
+                        label
+                      )}
+                    </th>
+                  ))}
+                <th className="col-actions-head">Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((bet) => (
+                <Fragment key={journalKey(bet)}>
                   <tr
-                    key={journalKey(bet)}
-                    className={
-                      selectedKey === journalKey(bet) ? "is-selected" : ""
-                    }
+                    className={`journal-record-row ${selectedKey === journalKey(bet) ? "is-selected" : ""}`}
                     onClick={(e) => {
                       if (!(e.target as HTMLElement).closest("button,a,input"))
                         choose(bet);
@@ -679,210 +686,87 @@ export default function JournalTable(p: Props) {
                       ))}
                     <td className="col-actions">{actions(bet)}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {!rows.length && (
-              <div className="journal-empty">
-                <h3>
-                  {p.bets.length
-                    ? "Нічого не знайдено"
-                    : "Журнал поки порожній"}
-                </h3>
-                <p>
-                  {p.bets.length
-                    ? "Спробуйте інший пошук або змініть фільтри."
-                    : "Додайте перший запис, щоб відстежувати свої рішення."}
-                </p>
-                <button onClick={p.bets.length ? reset : p.onNavigateToAdd}>
-                  {p.bets.length ? "Скинути фільтри" : "Додати запис"}
-                </button>
-              </div>
-            )}
-            <footer className="journal-pagination">
-              <span>
-                {filtered.length
-                  ? `${(page - 1) * size + 1}–${Math.min(page * size, filtered.length)} із ${filtered.length} записів`
-                  : "0 записів"}
-              </span>
-              <label>
-                На сторінці
-                <select
-                  aria-label="Записів на сторінці"
-                  value={size}
-                  onChange={(e) => setSize(Number(e.target.value))}
-                >
-                  {[10, 20, 50].map((n) => (
-                    <option key={n}>{n}</option>
-                  ))}
-                </select>
-              </label>
-              <button
-                aria-label="Попередня сторінка"
-                disabled={page <= 1}
-                onClick={() => p.onPageChange(page - 1)}
-              >
-                <ChevronLeft size={17} />
-              </button>
-              <span>
-                {page} / {pages}
-              </span>
-              <button
-                aria-label="Наступна сторінка"
-                disabled={page >= pages}
-                onClick={() => p.onPageChange(page + 1)}
-              >
-                <ChevronRight size={17} />
-              </button>
-            </footer>
-            <p className="journal-footnote">
-              Суми у валюті запису. Валюти не підсумовуються. Сортування профіту
-              — за UAH.
-            </p>
-          </div>
-        </div>
-        <aside
-          className={`journal-detail ${selected ? "" : "journal-detail-empty"}`}
-          aria-labelledby="journal-detail-title"
-        >
-          <header>
-            <h2 id="journal-detail-title" ref={detailRef} tabIndex={-1}>
-              Деталі запису
-            </h2>
-            {selected && (
-              <button
-                className="journal-icon"
-                aria-label="Закрити деталі"
-                onClick={() => choose(null)}
-              >
-                <X size={20} />
-              </button>
-            )}
-          </header>
-          {!selected ? (
-            <div className="journal-detail-placeholder">
-              <ListChecks size={32} />
-              <p>Оберіть матч, щоб переглянути деталі.</p>
-            </div>
-          ) : (
-            <div className="journal-detail-body">
-              <div className="journal-detail-match">
-                <div className="journal-versus">
-                  <TeamLogo
-                    src={selected.logoTeam1}
-                    name={selected.team1 || selected.match}
-                  />
-                  <strong>{selected.match.replace(/\s+vs\s+/i, " — ")}</strong>
-                  {!journalExpress(selected) && (
-                    <TeamLogo
-                      src={selected.logoTeam2}
-                      name={selected.team2 || "?"}
-                    />
+                  {selectedKey === journalKey(bet) && (
+                    <tr className="journal-expanded-row">
+                      <td colSpan={visible.size + 1}>
+                        <JournalRecordDetails
+                          bet={bet}
+                          id={panelId(bet)}
+                          onClose={() => closeDetails(bet)}
+                          onExpressDetails={() => p.onExpressDetails(bet)}
+                          onUpdateResult={(result) =>
+                            p.onUpdateResult(bet, result)
+                          }
+                          hiddenGoal={
+                            !visible.has("goal") ? goal(bet) : undefined
+                          }
+                        />
+                      </td>
+                    </tr>
                   )}
-                </div>
-                <p>
-                  {journalDate(selected.date).day}{" "}
-                  {journalDate(selected.date).time} · {selected.game || "CS2"} ·{" "}
-                  {selected.format || "—"}
-                </p>
-                {badge(selected)}
-              </div>
-              <div className="journal-detail-grid">
-                <div>
-                  <span>Тип прогнозу</span>
-                  <strong>
-                    {journalExpress(selected)
-                      ? "Експрес"
-                      : journalMarket(selected)}
-                  </strong>
-                </div>
-                <div>
-                  <span>Ваш вибір</span>
-                  <strong>
-                    {journalExpress(selected)
-                      ? "Кілька подій"
-                      : journalSelection(selected)}
-                  </strong>
-                </div>
-              </div>
-              <div className="journal-detail-money">
-                <div>
-                  <span>Сума</span>
-                  <strong>
-                    {journalMoney(journalAmount(selected), selected.currency)}
-                  </strong>
-                </div>
-                <div>
-                  <span>Коеф.</span>
-                  <strong>{Number(selected.odds).toFixed(2)}</strong>
-                </div>
-                <div>
-                  <span>Чистий результат</span>
-                  {profit(selected)}
-                </div>
-              </div>
-              {selected.result === "Pending" && (
-                <div className="journal-resolve">
-                  <span className="journal-resolve-label">
-                    Запис очікує результату
-                  </span>
-                  <div className="journal-resolve-actions">
-                    <button
-                      className="journal-resolve-win"
-                      onClick={() => p.onUpdateResult(selected, "Win")}
-                    >
-                      Виграш
-                    </button>
-                    <button
-                      className="journal-resolve-loss"
-                      onClick={() => p.onUpdateResult(selected, "Loss")}
-                    >
-                      Програш
-                    </button>
-                  </div>
-                </div>
-              )}
-              {journalExpress(selected) && (
-                <div className="journal-express-events">
-                  <h3>Події експресу</h3>
-                  {parseExpressEvents(selected.betType).map((event, index) => (
-                    <div key={index}>
-                      <strong>
-                        {index + 1}. {event.match}
-                      </strong>
-                      <small>
-                        {event.selection} · {event.odds}
-                      </small>
-                    </div>
-                  ))}
-                  <button onClick={() => p.onExpressDetails(selected)}>
-                    Повні деталі експресу →
-                  </button>
-                </div>
-              )}
-              <div className="journal-detail-goal">
-                <span>Ціль</span>
-                {goal(selected)}
-              </div>
-              {selected.strategy && (
-                <div className="journal-detail-goal">
-                  <span>Стратегія</span>
-                  <strong>{selected.strategy}</strong>
-                </div>
-              )}
-              <footer>
-                <button
-                  className="journal-share"
-                  onClick={() => p.onShareBet(selected)}
-                >
-                  <Share2 size={16} />
-                  Поділитися
-                </button>
-                {menu(selected)}
-              </footer>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+          {!rows.length && (
+            <div className="journal-empty">
+              <h3>
+                {p.bets.length ? "Нічого не знайдено" : "Журнал поки порожній"}
+              </h3>
+              <p>
+                {p.bets.length
+                  ? "Спробуйте інший пошук або змініть фільтри."
+                  : "Додайте перший запис, щоб відстежувати свої рішення."}
+              </p>
+              <button onClick={p.bets.length ? reset : p.onNavigateToAdd}>
+                {p.bets.length ? "Скинути фільтри" : "Додати запис"}
+              </button>
             </div>
           )}
-        </aside>
+          <footer className="journal-pagination">
+            <span>
+              {filtered.length
+                ? `${(page - 1) * size + 1}–${Math.min(page * size, filtered.length)} із ${filtered.length} записів`
+                : "0 записів"}
+            </span>
+            <label>
+              На сторінці
+              <select
+                aria-label="Записів на сторінці"
+                value={size}
+                onChange={(e) => setSize(Number(e.target.value))}
+              >
+                {[10, 20, 50].map((n) => (
+                  <option key={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              aria-label="Попередня сторінка"
+              disabled={page <= 1}
+              onClick={() => p.onPageChange(page - 1)}
+            >
+              <ChevronLeft size={17} />
+            </button>
+            <span>
+              {page} / {pages}
+            </span>
+            <button
+              aria-label="Наступна сторінка"
+              disabled={page >= pages}
+              onClick={() => p.onPageChange(page + 1)}
+            >
+              <ChevronRight size={17} />
+            </button>
+          </footer>
+        </div>
+        <p className="journal-footnote">
+          <Info size={15} />{" "}
+          <span>
+            Суми показано у валюті запису — ₴ і $ не підсумовуються. Сортування
+            профіту — за UAH.
+          </span>
+        </p>
       </div>
       <CompactBetModal
         open={compact}

@@ -1,4 +1,5 @@
 import PosterShareArtwork from "./PosterShareArtwork";
+import ExpressShareArtwork from "./ExpressShareArtwork";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
 import type { Bet } from "@/types/betting";
 import "./BetShareCard.css";
@@ -88,23 +89,37 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
       data-result={bet.result}
       aria-label="Картка запису для поширення"
     >
-      <PosterShareArtwork
-        team1={team1}
-        team2={team2}
-        tournament={tournament}
-        game={game === "dota2" ? "Dota 2" : "CS2"}
-        format={bet.format}
-        date={date}
-        market={express ? "Експрес" : market}
-        selection={express ? bet.match : selection || "Не вказано"}
-        odds={bet.odds}
-        amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
-        result={result == null ? "—" : shareMoney(result, bet.currency, true)}
-        status={status}
-        state={bet.result}
-        express={express}
-        events={events}
-      />
+      {express ? (
+        <ExpressShareArtwork
+          events={events}
+          format={bet.format}
+          game={game === "dota2" ? "Dota 2" : "CS2"}
+          date={date.date}
+          odds={bet.odds}
+          amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
+          result={result == null ? "—" : shareMoney(result, bet.currency, true)}
+          status={status}
+          state={bet.result}
+        />
+      ) : (
+        <PosterShareArtwork
+          team1={team1}
+          team2={team2}
+          tournament={tournament}
+          game={game === "dota2" ? "Dota 2" : "CS2"}
+          format={bet.format}
+          date={date}
+          market={express ? "Експрес" : market}
+          selection={express ? bet.match : selection || "Не вказано"}
+          odds={bet.odds}
+          amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
+          result={result == null ? "—" : shareMoney(result, bet.currency, true)}
+          status={status}
+          state={bet.result}
+          express={express}
+          events={events}
+        />
+      )}
       <span className="sr-only">{status}</span>
     </article>
   );

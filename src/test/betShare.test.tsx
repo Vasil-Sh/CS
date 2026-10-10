@@ -8,6 +8,10 @@ import BetShareCard, {
 } from "@/components/BetShareCard";
 import type { Bet } from "@/types/betting";
 import { posterLines } from "@/components/PosterShareArtwork";
+import {
+  expressShareRows,
+  expressEventCount,
+} from "@/components/ExpressShareArtwork";
 
 vi.stubGlobal(
   "ResizeObserver",
@@ -28,6 +32,82 @@ const bet: Bet = {
   tournament: "UNITED21 SEASON 56 — GROUP C",
 };
 describe("Share card", () => {
+  it("parses and translates real express legs without recomputing totals", () => {
+    const rows = expressShareRows(
+      [
+        "1. GamerLegion vs MOUZ | Handicap +1.5: GamerLegion @1.14",
+        "2. B8 vs Team Spirit | Map2_MapWinner: Team Spirit @1.1",
+      ],
+      "BO3",
+    );
+    expect(rows[0]).toMatchObject({
+      match: "GamerLegion — MOUZ",
+      market: "Фора +1.5",
+      selection: "GamerLegion",
+      odds: "1.14",
+    });
+    expect(rows[1].market).toBe("Карта 2: Переможець карти");
+    expect(rows[1].odds).toBe("1.10");
+  });
+  it("keeps malformed events and does not invent missing odds", () => {
+    const rows = expressShareRows([
+      "1. A vs B | unknown legacy prediction",
+      "unstructured legacy event",
+    ]);
+    expect(rows).toHaveLength(2);
+    expect(rows[0].detail).toBe("unknown legacy prediction");
+    expect(rows[0].odds).toBe("—");
+    expect(rows[1].match).toBe("unstructured legacy event");
+  });
+  it.each([
+    [1, "1 подія"],
+    [2, "2 події"],
+    [5, "5 подій"],
+    [11, "11 подій"],
+    [21, "21 подія"],
+  ])("localizes %s events", (count, label) => {
+    expect(expressEventCount(Number(count))).toBe(label);
+  });
+  it("uses the separate express artwork and preserves stored summary values", () => {
+    const { container } = render(
+      <BetShareCard
+        bet={{
+          ...bet,
+          match: "Експрес 2x",
+          format: "2x",
+          odds: 1.72,
+          originalAmount: 250,
+          originalProfit: 178.65,
+          result: "Win",
+          betType:
+            "Експрес 2x | 1. A vs B | Handicap +1.5: A @1.14 • 2. C vs D | Handicap +1.5: D @1.13",
+        }}
+      />,
+    );
+    expect(
+      container.querySelector('svg[data-share-artwork="express"]'),
+    ).toBeTruthy();
+    expect(container.querySelectorAll("[data-express-row]")).toHaveLength(2);
+    expect(screen.getByText("1.72")).toBeTruthy();
+    expect(screen.getByText("+178,65 ₴")).toBeTruthy();
+    expect(screen.getByText("250 ₴")).toBeTruthy();
+    expect(
+      container.querySelector("[data-poster-odds]")?.closest("[filter]"),
+    ).toBeNull();
+    expect(
+      container.querySelector("[data-poster-status]")?.closest("[filter]"),
+    ).toBeNull();
+  });
+  it("shows an honest empty state for legacy express records", () => {
+    render(
+      <BetShareCard
+        bet={{ ...bet, format: "5x", betType: "Експрес 5x", result: "Pending" }}
+      />,
+    );
+    expect(screen.getByText("Деталі подій не збережені")).toBeTruthy();
+    expect(screen.getByRole("img", { name: /5 подій/ })).toBeTruthy();
+    expect(screen.getByText("ОЧІКУЄТЬСЯ")).toBeTruthy();
+  });
   it.each(["Win", "Loss", "Pending"] as const)(
     "keeps odds and %s status free of grain filters",
     (result) => {
@@ -116,7 +196,7 @@ describe("Share card", () => {
         }}
       />,
     );
-    expect(screen.getByText(/A vs B/)).toBeTruthy();
-    expect(screen.getByText(/C vs D/)).toBeTruthy();
+    expect(screen.getByText(/A — B/)).toBeTruthy();
+    expect(screen.getByText(/C — D/)).toBeTruthy();
   });
 });
