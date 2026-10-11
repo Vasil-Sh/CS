@@ -107,12 +107,9 @@ function TeamMark({
   );
 }
 
-function ThemePreview({ mode }: { mode: ThemePreference }) {
+function ThemeCanvas({ dark = false }: { dark?: boolean }) {
   return (
-    <span
-      className={`profile-theme-preview preview-${mode}`}
-      aria-hidden="true"
-    >
+    <span className={`preview-canvas${dark ? " preview-dark" : ""}`}>
       <span className="preview-side">
         <i />
         <i />
@@ -120,8 +117,13 @@ function ThemePreview({ mode }: { mode: ThemePreference }) {
         <i />
       </span>
       <span className="preview-workspace">
-        <span className="preview-heading" />
-        <span className="preview-hero" />
+        <span className="preview-hero">
+          <i />
+          <span>
+            <b />
+            <b />
+          </span>
+        </span>
         <span className="preview-tiles">
           <i />
           <i />
@@ -132,6 +134,22 @@ function ThemePreview({ mode }: { mode: ThemePreference }) {
           <i />
         </span>
       </span>
+    </span>
+  );
+}
+
+function ThemePreview({ mode }: { mode: ThemePreference }) {
+  return (
+    <span
+      className={`profile-theme-preview preview-${mode}`}
+      aria-hidden="true"
+    >
+      <ThemeCanvas dark={mode === "dark"} />
+      {mode === "system" && (
+        <span className="preview-system-dark">
+          <ThemeCanvas dark />
+        </span>
+      )}
     </span>
   );
 }

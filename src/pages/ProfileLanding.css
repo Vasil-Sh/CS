@@ -6,78 +6,17 @@
   --profile-bg: #f4f4f3;
   --profile-panel: #fff;
   --profile-text: #191c1b;
-  --profile-muted: #727774;
+  --profile-muted: #646b66;
   --profile-border: #e8eae7;
   --profile-accent: #fc5a2b;
   --profile-gutter: clamp(24px, 2.4vw, 40px);
+}
+/* Scope the profile skin to the content area only — the sidebar/navbar keeps
+   the same font as every other screen so it doesn't jump when switching routes. */
+.profile-landing .profile-main,
+.profile-studio-dialog {
   font-family: "Manrope", sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-.profile-landing .profile-sidebar {
-  width: 224px;
-  padding: 28px 12px 24px;
-  background: #1b1e1d;
-  border-right: 1px solid #ffffff07;
-  color: #e3e5e3;
-}
-.profile-landing .profile-main {
-  margin-left: 224px;
-}
-.profile-landing .profile-brand,
-.profile-landing-menu .profile-brand {
-  padding: 0 14px;
-  border: 0;
-  margin-bottom: 34px;
-}
-.profile-landing .profile-brand-mark,
-.profile-landing-menu .profile-brand-mark,
-.profile-landing .profile-brand-text small,
-.profile-landing-menu .profile-brand-text small {
-  display: none;
-}
-.profile-landing .profile-brand-text,
-.profile-landing-menu .profile-brand-text {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-}
-.profile-landing .profile-brand-iq,
-.profile-landing-menu .profile-brand-iq {
-  color: #ff6638;
-}
-.profile-landing .profile-nav {
-  gap: 8px;
-}
-.profile-landing .profile-nav a,
-.profile-landing .planning-nav-toggle,
-.profile-landing-menu .profile-nav a,
-.profile-landing-menu .planning-nav-toggle {
-  min-height: 48px;
-  padding: 12px 14px;
-  gap: 14px;
-  font-size: 13px;
-  border-radius: 8px;
-}
-.profile-landing .profile-nav a:not([aria-current]):hover,
-.profile-landing-menu .profile-nav a:not([aria-current]):hover {
-  margin: 0;
-  padding: 12px 14px;
-}
-.profile-landing .profile-nav a[aria-current],
-.profile-landing-menu .profile-nav a[aria-current] {
-  margin: 0;
-  padding: 12px 14px;
-  background: #ff693b14;
-  color: #ff835e;
-  box-shadow: inset 3px 0 #ff693b;
-  border-radius: 7px;
-}
-.profile-landing .profile-nav-footer {
-  border: 0;
-}
-.profile-landing .profile-nav-footer > :is(a, button) {
-  font-size: 13px;
-  padding: 13px 14px;
 }
 .profile-landing .profile-page {
   max-width: none;
@@ -186,7 +125,7 @@
 .profile-landing .profile-identity-copy p {
   color: #b9bebb;
   max-width: 560px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .profile-landing .profile-online {
@@ -211,7 +150,7 @@
   background: #ffffff03;
   color: #fff;
   border-color: #ffffff38;
-  font-size: 12px;
+  font-size: 13px;
 }
 .profile-landing .profile-edit-trigger:hover {
   background: #ffffff0a;
@@ -225,7 +164,7 @@
 }
 .profile-landing .profile-metric {
   position: relative;
-  min-height: 98px;
+  min-height: 110px;
   align-items: flex-start;
   gap: 14px;
   padding: 19px 16px 16px;
@@ -262,7 +201,7 @@
 }
 .profile-landing .profile-metric small {
   margin-top: 9px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.35;
 }
 .profile-landing .profile-metric .profile-metric-arrow {
@@ -276,7 +215,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 4px;
   white-space: nowrap;
 }
@@ -286,7 +225,7 @@
 .profile-landing .profile-grid {
   padding: 22px var(--profile-gutter) 0;
   gap: 18px;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
   align-items: start;
 }
 .profile-landing .profile-left,
@@ -317,7 +256,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   white-space: nowrap;
   color: var(--profile-muted);
   transition: color 160ms;
@@ -338,7 +277,7 @@
 }
 .profile-record {
   display: grid;
-  grid-template-columns: 42px 90px minmax(0, 1fr) auto 12px;
+  grid-template-columns: 44px 90px minmax(0, 1fr) 82px 12px;
   width: 100%;
   gap: 12px;
   align-items: center;
@@ -354,7 +293,7 @@
   background: var(--profile-bg);
   border-radius: 6px;
   padding: 6px 4px;
-  font-size: 10px;
+  font-size: 12px;
   text-align: center;
   color: var(--profile-muted);
   white-space: nowrap;
@@ -390,7 +329,7 @@
 }
 .profile-record-copy strong {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   font-weight: 650;
   overflow: hidden;
@@ -401,7 +340,7 @@
   display: block;
   margin-top: 3px;
   color: var(--profile-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
   overflow: hidden;
   white-space: nowrap;
@@ -409,7 +348,7 @@
 }
 .profile-record time {
   max-width: 75px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--profile-muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -448,8 +387,9 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: 350px;
-  aspect-ratio: 1.19;
+  width: 100%;
+  height: clamp(340px, 27vw, 410px);
+  min-height: 340px;
   border-radius: 9px;
   background: #101312;
   color: #fff;
@@ -493,14 +433,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .profile-player-initial {
   position: absolute;
   top: 45px;
   left: 9px;
   font:
-    800 clamp(150px, 17vw, 270px)/1 "Manrope",
+    800 clamp(150px, calc(27vw - 180px), 210px)/1 "Manrope",
     sans-serif;
   letter-spacing: -10px;
   color: #fa5b2b;
@@ -510,7 +450,7 @@
 .profile-player-bottom {
   margin-top: auto;
   z-index: 1;
-  padding-top: 125px;
+  padding-top: 100px;
 }
 .profile-player-bottom > strong {
   display: block;
@@ -572,7 +512,7 @@
   min-width: 0;
 }
 .profile-theme-picker legend {
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 9px;
 }
 .profile-theme-options {
@@ -639,7 +579,7 @@
 }
 .profile-theme-label {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   text-align: center;
   margin-top: 6px;
   color: var(--profile-muted);
@@ -648,15 +588,24 @@
   color: var(--profile-text);
   font-weight: 700;
 }
-.profile-theme-preview {
+.preview-canvas {
   --mini-bg: #f0f1ee;
   --mini-panel: #fff;
   --mini-line: #dde0db;
   display: flex;
-  aspect-ratio: 1.9;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   border-radius: 4px;
   background: var(--mini-bg);
+}
+.profile-theme-preview {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 90px;
+  overflow: hidden;
+  border-radius: 4px;
 }
 .preview-dark {
   --mini-bg: #272b29;
@@ -665,6 +614,7 @@
 }
 .preview-side {
   width: 19%;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -687,8 +637,10 @@
 }
 .preview-workspace {
   flex: 1;
+  min-width: 0;
   padding: 8px 7px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 5px;
 }
 .preview-heading {
@@ -698,9 +650,39 @@
   border-radius: 2px;
 }
 .preview-hero {
-  background: var(--mini-line);
+  background: #252b27;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 3px;
+}
+.preview-hero > i {
+  width: 12px;
   height: 12px;
+  border-radius: 50%;
+  background: #d9dfd8;
+}
+.preview-hero > span {
+  display: grid;
+  gap: 3px;
+  width: 42%;
+}
+.preview-hero b {
+  display: block;
+  height: 3px;
+  background: #7a827a;
   border-radius: 2px;
+}
+.preview-hero b:last-child {
+  width: 60%;
+  opacity: 0.5;
+}
+.preview-system-dark {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 0 50%);
 }
 .preview-tiles {
   display: grid;
@@ -729,14 +711,6 @@
 .preview-system {
   position: relative;
 }
-.preview-system::after {
-  content: "";
-  position: absolute;
-  inset: 0 0 0 50%;
-  background: #e0e4e0;
-  mix-blend-mode: difference;
-  pointer-events: none;
-}
 .profile-settings-fields {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -757,40 +731,40 @@
 }
 .profile-landing .profile-setting > label {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 8px;
 }
 .profile-landing .profile-setting :is(input, select) {
-  height: 39px;
-  font-size: 12px;
+  height: 42px;
+  font-size: 14px;
   padding: 8px 10px;
   border-radius: 6px;
 }
 .profile-landing .profile-setting small {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .profile-landing .profile-icon-button {
   color: var(--profile-text);
-  min-height: 39px;
-  width: 36px;
+  min-height: 42px;
+  width: 42px;
 }
 .profile-landing .profile-icon-button:hover {
   background: var(--profile-bg);
 }
 .profile-landing .profile-backup-card p {
   color: var(--profile-muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.65;
   margin: 8px 0 0;
 }
 .profile-landing .profile-backup-card .profile-backup-date {
-  font-size: 11px;
+  font-size: 13px;
 }
 .profile-backup-reminder {
   display: block;
   margin-top: 7px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--profile-muted);
 }
 .profile-landing .profile-backup-card .profile-button {
@@ -800,8 +774,8 @@
 .profile-landing .profile-button,
 .profile-studio-dialog .profile-button {
   border-radius: 7px;
-  font-size: 12px;
-  min-height: 40px;
+  font-size: 13px;
+  min-height: 42px;
   transition:
     background 160ms,
     border-color 160ms,
@@ -814,8 +788,8 @@
 }
 .profile-landing .profile-primary,
 .profile-studio-dialog .profile-primary {
-  background: #fa5b2b;
-  border-color: #fa5b2b;
+  background: #d6441c;
+  border-color: #d6441c;
   color: #fff;
   font-weight: 700;
 }
@@ -916,13 +890,6 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.profile-landing .profile-mobile-header {
-  background: #1b1e1d;
-}
-.profile-landing-menu {
-  background: #1b1e1d !important;
-  font-family: "Manrope", sans-serif;
-}
 .dark .profile-shell.profile-landing,
 .dark .profile-studio-dialog {
   --profile-bg: #171a18;
@@ -949,10 +916,10 @@
 @media (prefers-reduced-motion: no-preference) {
   .profile-landing .profile-grid,
   .profile-landing .backup-page {
-    animation: profile-enter 250ms ease-out both;
+    animation: profile-enter 250ms ease-out backwards;
   }
   .profile-landing .profile-metric {
-    animation: profile-enter 250ms ease-out both;
+    animation: profile-enter 250ms ease-out backwards;
   }
   .profile-landing .profile-metric:nth-child(2) {
     animation-delay: 25ms;
@@ -993,18 +960,12 @@
     font-size: 12px;
   }
   .profile-player-card {
-    max-height: 460px;
+    height: 410px;
   }
 }
 @media (max-width: 1250px) {
   .profile-shell.profile-landing {
     --profile-gutter: 22px;
-  }
-  .profile-landing .profile-sidebar {
-    width: 208px;
-  }
-  .profile-landing .profile-main {
-    margin-left: 208px;
   }
   .profile-landing .profile-grid {
     gap: 14px;
@@ -1056,7 +1017,7 @@
   }
   .profile-player-initial {
     top: 55px;
-    font-size: 185px;
+    font-size: 160px;
   }
   .profile-player-brand {
     font-size: 21px;
@@ -1087,11 +1048,11 @@
     font-size: 25px;
   }
   .profile-landing .profile-metric small {
-    font-size: 10px;
+    font-size: 12px;
   }
   .profile-landing .profile-metric-hint {
     white-space: normal;
-    font-size: 9px;
+    font-size: 11px;
   }
   .profile-record {
     grid-template-columns: 42px 90px minmax(0, 1fr) auto 12px;
@@ -1106,9 +1067,6 @@
   .profile-record-arrow {
     grid-column: auto;
     grid-row: auto;
-  }
-  .profile-theme-preview {
-    aspect-ratio: 2.3;
   }
 }
 @media (max-width: 800px) {
@@ -1165,7 +1123,7 @@
   .profile-landing .profile-edit-trigger {
     grid-column: 2;
     justify-self: start;
-    font-size: 11px;
+    font-size: 13px;
     margin: 0;
   }
   .profile-landing .profile-metrics {
@@ -1213,7 +1171,7 @@
   }
   .profile-text-link {
     gap: 5px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .profile-record {
     grid-template-columns: 30px 65px minmax(0, 1fr) 10px;
@@ -1225,30 +1183,30 @@
     text-align: left;
     max-width: none;
     margin-top: -8px;
-    font-size: 9px;
+    font-size: 11px;
   }
   .profile-record-arrow {
     grid-column: 4;
     grid-row: 1;
   }
   .profile-record-copy strong {
-    font-size: 11px;
+    font-size: 13px;
   }
   .profile-record-copy small {
-    font-size: 9px;
+    font-size: 12px;
   }
   .profile-team-logo {
     width: 24px;
     height: 24px;
   }
   .profile-game-badge {
-    font-size: 9px;
+    font-size: 11px;
   }
   .profile-theme-options {
     gap: 8px;
   }
   .profile-theme-preview {
-    aspect-ratio: 1.45;
+    height: 72px;
   }
   .preview-side {
     padding: 7px 3px;
@@ -1279,10 +1237,10 @@
     min-height: 360px;
   }
   .profile-player-initial {
-    font-size: 220px;
+    font-size: 170px;
   }
   .profile-player-bottom {
-    padding-top: 155px;
+    padding-top: 100px;
   }
   .profile-studio-dialog {
     padding: 24px;
