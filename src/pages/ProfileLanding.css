@@ -1,62 +1,109 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+/* Self-hosted variable fonts: Ukrainian and Latin render consistently offline. */
+@font-face {
+  font-family: "MatchIQ Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "MatchIQ Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "MatchIQ Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-cyrillic-ext.woff2") format("woff2");
+  unicode-range:
+    U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
 
 /* Profile-only design tokens. Other workspace routes keep their existing skin. */
 .profile-shell.profile-landing,
 .profile-studio-dialog {
-  --profile-bg: #f4f4f3;
+  --profile-bg: #f5f5f5;
   --profile-panel: #fff;
-  --profile-text: #191c1b;
-  --profile-muted: #646b66;
-  --profile-border: #e8eae7;
+  --profile-text: #141519;
+  --profile-muted: #747780;
+  --profile-border: #e9eaee;
   --profile-accent: #fc5a2b;
-  --profile-gutter: clamp(24px, 2.4vw, 40px);
+  --profile-gutter: 30px;
+  --profile-font: "MatchIQ Inter", Arial, sans-serif;
 }
 /* Scope the profile skin to the content area only — the sidebar/navbar keeps
    the same font as every other screen so it doesn't jump when switching routes. */
 .profile-landing .profile-main,
 .profile-studio-dialog {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--profile-font);
   -webkit-font-smoothing: antialiased;
+}
+.profile-shell.profile-landing {
+  width: 100%;
+  min-width: 0;
+}
+.profile-landing .profile-main {
+  max-width: none;
+  min-width: 0;
+}
+.profile-landing .profile-content {
+  min-width: 0;
+}
+.profile-masthead {
+  background: #222325 url("/assets/profile/contours.svg") right center / auto
+    100% no-repeat;
+  color: #fafafa;
+  min-width: 0;
 }
 .profile-landing .profile-page {
   max-width: none;
+  width: 100%;
+  min-width: 0;
   padding: 0 0 32px;
 }
 .profile-landing .profile-heading {
-  padding: 23px var(--profile-gutter) 10px;
-  background: #1d201f;
+  padding: 22px calc(var(--profile-gutter) + 12px) 8px;
+  background: transparent;
   color: #f8f9f7;
 }
 .profile-landing .profile-heading h1 {
-  font:
-    700 15px/1.5 "Manrope",
-    sans-serif;
+  font: 600 16px/1.5 var(--profile-font);
   margin: 0;
   letter-spacing: -0.2px;
 }
 .profile-landing .profile-tabs {
   position: relative;
   gap: 26px;
-  padding: 0 var(--profile-gutter);
+  padding: 0 calc(var(--profile-gutter) + 12px);
   margin: 0;
   border: 0;
-  background: #1d201f;
+  background: transparent;
 }
 .profile-landing .profile-tabs::after {
   content: "";
   position: absolute;
   bottom: 0;
-  left: var(--profile-gutter);
-  right: var(--profile-gutter);
+  left: calc(var(--profile-gutter) + 12px);
+  right: calc(var(--profile-gutter) + 6px);
   height: 1px;
-  background: #ffffff29;
+  background: #ffffff70;
 }
 .profile-landing .profile-tabs button {
   position: relative;
   padding: 0 0 12px;
   border: 0;
   color: #b4b9b5;
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 20px;
   z-index: 1;
 }
 .profile-landing .profile-tabs button::after {
@@ -88,14 +135,14 @@
 .profile-landing .profile-identity {
   position: relative;
   isolation: isolate;
-  padding: 24px var(--profile-gutter) 22px;
-  background: #1d201f;
+  padding: 22px calc(var(--profile-gutter) + 18px) 16px;
+  background: transparent;
   color: #f8f9f7;
-  gap: 26px;
+  gap: 34px;
   min-height: 136px;
 }
 .profile-landing .profile-identity::before {
-  content: "";
+  content: none;
   position: absolute;
   inset: 0 0 0 28%;
   z-index: -1;
@@ -104,8 +151,8 @@
   opacity: 0.45;
 }
 .profile-landing .profile-avatar {
-  width: 88px;
-  height: 88px;
+  width: 96px;
+  height: 96px;
   background: #f5f5f2;
   color: #1a1d1b;
 }
@@ -117,10 +164,10 @@
   display: none;
 }
 .profile-landing .profile-identity-copy h2 {
-  font-size: clamp(26px, 2.7vw, 38px);
+  font-size: 42px;
   letter-spacing: -1.2px;
   line-height: 1.25;
-  font-weight: 800;
+  font-weight: 700;
 }
 .profile-landing .profile-identity-copy p {
   color: #b9bebb;
@@ -134,13 +181,13 @@
   flex-wrap: wrap;
   gap: 8px;
   color: #c4c9c6;
-  font-size: 13px;
+  font-size: 16px;
   margin-top: 8px;
 }
 .profile-online i,
 .profile-player-status i {
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   display: inline-block;
   border-radius: 50%;
   background: #35d67d;
@@ -150,7 +197,8 @@
   background: #ffffff03;
   color: #fff;
   border-color: #ffffff38;
-  font-size: 13px;
+  font-size: 14px;
+  min-height: 46px;
 }
 .profile-landing .profile-edit-trigger:hover {
   background: #ffffff0a;
@@ -159,20 +207,20 @@
 .profile-landing .profile-metrics {
   position: relative;
   padding: 0 var(--profile-gutter);
-  gap: 12px;
-  background: linear-gradient(#1d201f 34px, transparent 34px);
+  gap: 14px;
+  background: linear-gradient(#222325 34px, transparent 34px);
 }
 .profile-landing .profile-metric {
   position: relative;
   min-height: 110px;
   align-items: flex-start;
-  gap: 14px;
-  padding: 19px 16px 16px;
-  border: 1px solid var(--profile-border);
+  gap: 16px;
+  padding: 16px 18px 12px;
+  border: 1px solid #eeeff1;
   background: var(--profile-panel);
   color: var(--profile-text);
   border-radius: 10px;
-  box-shadow: 0 4px 14px #161d1705;
+  box-shadow: 0 5px 14px #171b1c06;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -187,27 +235,26 @@
 .profile-landing .profile-metric svg {
   color: var(--profile-text);
   margin-top: 2px;
+  flex-shrink: 0;
 }
 .profile-metric-copy {
   min-width: 0;
-  padding-right: 5px;
+  padding-right: 0;
 }
 .profile-landing .profile-metric strong {
   color: var(--profile-text);
-  font:
-    800 30px/1.05 "Manrope",
-    sans-serif;
+  font: 750 36px/1.05 var(--profile-font);
   letter-spacing: -1px;
 }
 .profile-landing .profile-metric small {
-  margin-top: 9px;
-  font-size: 13px;
+  margin-top: 7px;
+  font-size: 14px;
   line-height: 1.35;
 }
 .profile-landing .profile-metric .profile-metric-arrow {
   position: absolute;
   top: 23px;
-  right: 10px;
+  right: 15px;
   color: var(--profile-muted);
   width: 14px;
 }
@@ -215,9 +262,10 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
-  margin-top: 4px;
-  white-space: nowrap;
+  font-size: 13px;
+  line-height: 16px;
+  margin-top: 0;
+  white-space: normal;
 }
 .profile-landing .profile-metric-hint svg {
   margin: 0;
@@ -225,7 +273,7 @@
 .profile-landing .profile-grid {
   padding: 22px var(--profile-gutter) 0;
   gap: 18px;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.34fr) minmax(0, 1fr);
   align-items: start;
 }
 .profile-landing .profile-left,
@@ -236,27 +284,28 @@
   align-content: start;
 }
 .profile-landing .profile-grid .profile-panel {
-  border: 1px solid var(--profile-border);
+  border: 1px solid #f0f1f3;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px #18251b02;
+  box-shadow: none;
 }
 .profile-landing .profile-grid h2 {
-  font:
-    800 21px/1.35 "Manrope",
-    sans-serif;
+  font: 700 26px/1.25 var(--profile-font);
   letter-spacing: -0.65px;
 }
 .profile-landing .profile-section-title {
   margin-bottom: 0;
-  padding-bottom: 13px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--profile-border);
+}
+.profile-landing .profile-settings .profile-section-title {
+  padding-bottom: 0;
 }
 .profile-text-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   color: var(--profile-muted);
   transition: color 160ms;
@@ -265,7 +314,9 @@
   color: var(--profile-text);
 }
 .profile-landing .profile-activity {
-  min-height: 294px;
+  min-height: 330px;
+  container-type: inline-size;
+  container-name: profile-activity;
 }
 .profile-records {
   list-style: none;
@@ -277,12 +328,12 @@
 }
 .profile-record {
   display: grid;
-  grid-template-columns: 44px 90px minmax(0, 1fr) 82px 12px;
+  grid-template-columns: 58px 142px minmax(0, 1fr) 104px 16px;
   width: 100%;
-  gap: 12px;
+  gap: 15px;
   align-items: center;
   text-align: left;
-  padding: 19px 0;
+  padding: 16px 0;
   border-radius: 4px;
   transition: background 160ms;
 }
@@ -292,8 +343,8 @@
 .profile-game-badge {
   background: var(--profile-bg);
   border-radius: 6px;
-  padding: 6px 4px;
-  font-size: 12px;
+  padding: 9px 4px;
+  font-size: 14px;
   text-align: center;
   color: var(--profile-muted);
   white-space: nowrap;
@@ -302,26 +353,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 13px;
 }
 .profile-team-logo {
   display: block;
-  width: 31px;
-  height: 31px;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
   object-fit: contain;
 }
 .profile-team-fallback {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
   background: var(--profile-bg);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 .profile-versus {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--profile-muted);
 }
 .profile-record-copy {
@@ -329,9 +382,9 @@
 }
 .profile-record-copy strong {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
-  font-weight: 650;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -340,15 +393,16 @@
   display: block;
   margin-top: 3px;
   color: var(--profile-muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .profile-record time {
-  max-width: 75px;
-  font-size: 11px;
+  max-width: none;
+  white-space: nowrap;
+  font-size: 14px;
   color: var(--profile-muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -381,20 +435,20 @@
 }
 .profile-landing .profile-public .profile-section-title {
   border: 0;
-  padding-bottom: 14px;
+  padding-bottom: 10px;
 }
 .profile-player-card {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   width: 100%;
-  height: clamp(340px, 27vw, 410px);
-  min-height: 340px;
+  min-height: 390px;
+  aspect-ratio: 1.26;
   border-radius: 9px;
   background: #101312;
   color: #fff;
   border-left: 7px solid #fc5a2b;
-  padding: 20px;
+  padding: 18px 22px 14px;
   display: flex;
   flex-direction: column;
 }
@@ -402,7 +456,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url("/assets/profile/player-cover.png") center 40% / cover
+  background: url("/assets/profile/player-cover.png") center center / cover
     no-repeat;
   transition: transform 450ms cubic-bezier(0.2, 0.65, 0.3, 1);
 }
@@ -422,7 +476,7 @@
   z-index: 1;
 }
 .profile-player-brand {
-  font-size: 23px;
+  font-size: 25px;
   font-weight: 800;
   letter-spacing: -1px;
 }
@@ -433,35 +487,33 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .profile-player-initial {
   position: absolute;
-  top: 45px;
-  left: 9px;
-  font:
-    800 clamp(150px, calc(27vw - 180px), 210px)/1 "Manrope",
-    sans-serif;
+  top: 10px;
+  left: 0;
+  font: 850 250px/1 var(--profile-font);
   letter-spacing: -10px;
-  color: #fa5b2b;
+  color: #ff5927;
   opacity: 0.96;
   pointer-events: none;
 }
 .profile-player-bottom {
   margin-top: auto;
   z-index: 1;
-  padding-top: 100px;
+  padding-top: 160px;
 }
 .profile-player-bottom > strong {
   display: block;
-  font-size: 27px;
+  font-size: 30px;
   line-height: 1.3;
   letter-spacing: -0.6px;
   overflow-wrap: anywhere;
 }
 .profile-player-bottom > p {
   color: #bfc3bf;
-  font-size: 14px;
+  font-size: 18px;
   margin: 2px 0 10px;
 }
 .profile-player-actions {
@@ -472,14 +524,15 @@
   padding-top: 12px;
 }
 .profile-player-actions > a {
-  flex: 1;
-  max-width: 240px;
+  max-width: none;
+  flex: 0 1 250px;
 }
 .profile-player-copy {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 42px;
+  width: 56px;
+  height: 46px;
+  flex-shrink: 0;
   border: 1px solid #ffffff64;
   border-radius: 7px;
   transition:
@@ -508,12 +561,13 @@
 .profile-theme-picker {
   padding: 0;
   border: 0;
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   min-width: 0;
 }
 .profile-theme-picker legend {
-  font-size: 14px;
-  margin-bottom: 9px;
+  font-size: 16px;
+  line-height: 20px;
+  margin-bottom: 6px;
 }
 .profile-theme-options {
   display: grid;
@@ -579,9 +633,10 @@
 }
 .profile-theme-label {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   text-align: center;
-  margin-top: 6px;
+  margin-top: 4px;
+  line-height: 20px;
   color: var(--profile-muted);
 }
 .profile-theme-option input:checked ~ .profile-theme-label {
@@ -603,7 +658,7 @@
   position: relative;
   display: block;
   width: 100%;
-  height: 90px;
+  height: 72px;
   overflow: hidden;
   border-radius: 4px;
 }
@@ -715,8 +770,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 20px;
-  margin-top: 15px;
-  padding-top: 14px;
+  margin-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid var(--profile-border);
 }
 .profile-landing .profile-setting {
@@ -731,18 +786,19 @@
 }
 .profile-landing .profile-setting > label {
   display: block;
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 20px;
+  margin-bottom: 6px;
 }
 .profile-landing .profile-setting :is(input, select) {
   height: 42px;
-  font-size: 14px;
+  font-size: 15px;
   padding: 8px 10px;
   border-radius: 6px;
 }
 .profile-landing .profile-setting small {
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 18px;
 }
 .profile-landing .profile-icon-button {
   color: var(--profile-text);
@@ -754,12 +810,12 @@
 }
 .profile-landing .profile-backup-card p {
   color: var(--profile-muted);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.65;
   margin: 8px 0 0;
 }
 .profile-landing .profile-backup-card .profile-backup-date {
-  font-size: 13px;
+  font-size: 15px;
 }
 .profile-backup-reminder {
   display: block;
@@ -774,8 +830,8 @@
 .profile-landing .profile-button,
 .profile-studio-dialog .profile-button {
   border-radius: 7px;
-  font-size: 13px;
-  min-height: 42px;
+  font-size: 15px;
+  min-height: 46px;
   transition:
     background 160ms,
     border-color 160ms,
@@ -788,8 +844,8 @@
 }
 .profile-landing .profile-primary,
 .profile-studio-dialog .profile-primary {
-  background: #d6441c;
-  border-color: #d6441c;
+  background: #ff5a28;
+  border-color: #ff5a28;
   color: #fff;
   font-weight: 700;
 }
@@ -844,9 +900,7 @@
   gap: 14px;
 }
 .profile-studio-dialog > h2 {
-  font:
-    800 22px/1.4 "Manrope",
-    sans-serif;
+  font: 700 24px/1.4 var(--profile-font);
   padding-right: 22px;
   letter-spacing: -0.6px;
 }
@@ -942,131 +996,109 @@
     transition: none !important;
   }
 }
-@media (min-width: 1700px) {
-  .profile-landing .profile-grid {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  }
-  .profile-landing .profile-main {
-    max-width: 1676px;
-  }
+/* Respond to the actual activity panel width, not only the window width. */
+@container profile-activity (max-width: 620px) {
   .profile-record {
-    grid-template-columns: 48px 100px minmax(0, 1fr) auto 12px;
-    padding-block: 22px;
+    grid-template-columns: 46px 116px minmax(0, 1fr) 16px;
+    gap: 10px;
   }
-  .profile-record-copy strong {
-    font-size: 14px;
-  }
-  .profile-record-copy small {
-    font-size: 12px;
-  }
-  .profile-player-card {
-    height: 410px;
-  }
-}
-@media (max-width: 1250px) {
-  .profile-shell.profile-landing {
-    --profile-gutter: 22px;
-  }
-  .profile-landing .profile-grid {
-    gap: 14px;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  }
-  .profile-landing .profile-grid .profile-panel {
-    padding: 16px;
-  }
-  .profile-landing .profile-grid h2 {
-    font-size: 18px;
-  }
-  .profile-landing .profile-metric {
-    padding: 16px 12px;
-    gap: 9px;
-  }
-  .profile-landing .profile-metric > svg:first-child {
-    width: 21px;
-  }
-  .profile-landing .profile-metric strong {
-    font-size: 26px;
-  }
-  .profile-landing .profile-metric .profile-metric-arrow {
-    display: none;
-  }
-  .profile-record {
-    grid-template-columns: 35px 68px minmax(0, 1fr) 10px;
+  .profile-team-pair {
     gap: 8px;
   }
   .profile-record time {
     grid-column: 3;
+    grid-row: 2;
     text-align: left;
-    max-width: none;
-    margin-top: -10px;
+    margin-top: -6px;
+    font-size: 13px;
   }
   .profile-record-arrow {
     grid-column: 4;
     grid-row: 1;
   }
-  .profile-team-logo {
-    width: 25px;
-    height: 25px;
+}
+@container profile-activity (max-width: 430px) {
+  .profile-record {
+    grid-template-columns: 46px minmax(0, 1fr) 16px;
+    gap: 8px 12px;
+    padding-block: 18px;
   }
   .profile-team-pair {
-    gap: 4px;
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-start;
   }
-  .profile-player-card {
-    min-height: 335px;
-    padding: 16px;
+  .profile-record-copy {
+    grid-column: 1 / 3;
+    grid-row: 2;
   }
-  .profile-player-initial {
-    top: 55px;
-    font-size: 160px;
+  .profile-record-copy strong,
+  .profile-record-copy small {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
-  .profile-player-brand {
-    font-size: 21px;
+  .profile-record time {
+    grid-column: 1 / 3;
+    grid-row: 3;
+    margin: 0;
   }
-  .profile-settings-fields {
-    gap: 12px;
-  }
-  .profile-landing .profile-setting + .profile-setting {
-    padding-left: 12px;
+  .profile-record-arrow {
+    grid-column: 3;
+    grid-row: 2;
   }
 }
-@media (max-width: 1050px) {
+@media (max-width: 1450px) {
+  .profile-landing .profile-metric {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+  .profile-landing .profile-metric small {
+    font-size: 14px;
+  }
+  .profile-landing .profile-metric .profile-metric-arrow {
+    right: 10px;
+  }
+  .profile-landing .profile-grid h2 {
+    font-size: 24px;
+  }
+}
+@media (max-width: 1200px) {
+  .profile-shell.profile-landing {
+    --profile-gutter: 24px;
+  }
   .profile-landing .profile-grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .profile-landing .profile-rail {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .profile-landing .profile-metrics {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
-  }
   .profile-landing .profile-metric {
     flex-direction: column;
     gap: 8px;
   }
-  .profile-landing .profile-metric strong {
-    font-size: 25px;
+  .profile-landing .profile-metric > svg:first-child {
+    width: 28px;
+    height: 28px;
   }
-  .profile-landing .profile-metric small {
-    font-size: 12px;
+  .profile-landing .profile-metric-copy {
+    padding-right: 0;
   }
   .profile-landing .profile-metric-hint {
-    white-space: normal;
-    font-size: 11px;
+    font-size: 13px;
   }
-  .profile-record {
-    grid-template-columns: 42px 90px minmax(0, 1fr) auto 12px;
-    padding-block: 20px;
+  .profile-player-card {
+    aspect-ratio: auto;
+    min-height: 390px;
+    padding-inline: 18px;
   }
-  .profile-record time {
-    grid-column: auto;
-    margin: 0;
-    text-align: right;
-    max-width: 80px;
+  .profile-player-initial {
+    font-size: 250px;
   }
-  .profile-record-arrow {
-    grid-column: auto;
-    grid-row: auto;
+  .profile-settings-fields {
+    gap: 16px;
+  }
+  .profile-landing .profile-setting + .profile-setting {
+    padding-left: 16px;
   }
 }
 @media (max-width: 800px) {
@@ -1074,178 +1106,205 @@
     margin-left: 0;
   }
   .profile-landing .profile-heading {
-    padding-top: 14px;
+    padding: 16px var(--profile-gutter) 10px;
+  }
+  .profile-landing .profile-tabs {
+    padding-inline: var(--profile-gutter);
+  }
+  .profile-landing .profile-tabs::after {
+    left: var(--profile-gutter);
+    right: var(--profile-gutter);
   }
   .profile-landing .profile-identity {
-    gap: 18px;
+    gap: 22px;
+    padding-inline: var(--profile-gutter);
+  }
+  .profile-landing .profile-identity-copy h2 {
+    font-size: 36px;
+  }
+  .profile-landing .profile-avatar {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-landing .profile-metric strong {
+    font-size: 32px;
+  }
+  .profile-landing .profile-mobile-header {
+    border-bottom: 1px solid #ffffff12;
+  }
+  .profile-landing .profile-mobile-header button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+@media (max-width: 640px) {
+  .profile-shell.profile-landing {
+    --profile-gutter: 16px;
+  }
+  .profile-landing .profile-identity {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 16px;
+    padding-block: 22px;
   }
   .profile-landing .profile-avatar {
     width: 72px;
     height: 72px;
   }
-  .profile-landing .profile-identity-copy h2 {
-    font-size: 28px;
-  }
-  .profile-landing .profile-metric {
-    flex-direction: row;
-  }
-  .profile-landing .profile-metric > svg:first-child {
-    display: none;
-  }
-  .profile-landing .profile-mobile-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid #ffffff0d;
-  }
-  .profile-landing .profile-mobile-header button {
-    min-width: 40px;
-    min-height: 40px;
-  }
-}
-@media (max-width: 560px) {
-  .profile-shell.profile-landing {
-    --profile-gutter: 16px;
-  }
-  .profile-landing .profile-identity {
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 14px;
-    padding-block: 22px;
-  }
-  .profile-landing .profile-avatar {
-    width: 64px;
-    height: 64px;
-  }
   .profile-landing .profile-avatar-letter {
-    font-size: 31px;
+    font-size: 36px;
   }
   .profile-landing .profile-identity-copy h2 {
-    font-size: 27px;
+    font-size: 32px;
+  }
+  .profile-landing .profile-online {
+    font-size: 14px;
   }
   .profile-landing .profile-edit-trigger {
     grid-column: 2;
     justify-self: start;
-    font-size: 13px;
     margin: 0;
+    font-size: 14px;
+    white-space: normal;
   }
   .profile-landing .profile-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
+    gap: 10px;
   }
   .profile-landing .profile-metric {
-    min-height: 89px;
-    padding: 14px;
+    min-height: 124px;
+    flex-direction: row;
+    padding: 18px 12px;
+    gap: 12px;
   }
   .profile-landing .profile-metric > svg:first-child {
-    display: block;
+    width: 26px;
+    height: 26px;
+  }
+  .profile-landing .profile-metric strong {
+    font-size: 30px;
+  }
+  .profile-landing .profile-metric small {
+    font-size: 14px;
+  }
+  .profile-landing .profile-metric .profile-metric-arrow {
+    display: none;
   }
   .profile-landing .profile-metric:last-child {
     grid-column: 1 / -1;
+    min-height: 72px;
     align-items: center;
-    min-height: 68px;
   }
   .profile-landing .profile-metric:last-child .profile-metric-copy {
     display: flex;
-    gap: 12px;
     align-items: center;
+    gap: 16px;
   }
   .profile-landing .profile-metric:last-child small {
     margin: 0;
   }
-  .profile-landing .profile-metric .profile-metric-arrow {
-    display: block;
-  }
   .profile-landing .profile-grid {
-    padding-top: 16px;
-    gap: 14px;
+    padding-top: 18px;
+    gap: 16px;
   }
+  .profile-landing .profile-left,
   .profile-landing .profile-rail {
+    gap: 16px;
     grid-template-columns: minmax(0, 1fr);
   }
-  .profile-landing .profile-left {
-    gap: 14px;
+  .profile-landing .profile-grid .profile-panel {
+    padding: 18px;
   }
   .profile-landing .profile-grid h2 {
-    font-size: 19px;
+    font-size: 22px;
   }
   .profile-landing .profile-activity {
     min-height: 0;
   }
-  .profile-text-link {
-    gap: 5px;
-    font-size: 12px;
-  }
-  .profile-record {
-    grid-template-columns: 30px 65px minmax(0, 1fr) 10px;
-    column-gap: 7px;
-    padding-block: 16px;
-  }
-  .profile-record time {
-    grid-column: 3;
-    text-align: left;
-    max-width: none;
-    margin-top: -8px;
-    font-size: 11px;
-  }
-  .profile-record-arrow {
-    grid-column: 4;
-    grid-row: 1;
-  }
-  .profile-record-copy strong {
-    font-size: 13px;
-  }
-  .profile-record-copy small {
-    font-size: 12px;
-  }
-  .profile-team-logo {
-    width: 24px;
-    height: 24px;
-  }
-  .profile-game-badge {
-    font-size: 11px;
+  .profile-landing .profile-section-title {
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .profile-theme-options {
     gap: 8px;
   }
+  .profile-theme-frame {
+    padding: 4px;
+  }
   .profile-theme-preview {
-    height: 72px;
+    height: 78px;
+  }
+  .preview-workspace {
+    padding: 6px 3px;
+    gap: 4px;
   }
   .preview-side {
     padding: 7px 3px;
     gap: 6px;
   }
-  .preview-workspace {
-    padding: 7px 4px;
-    gap: 4px;
+  .profile-theme-label {
+    font-size: 13px;
   }
   .profile-settings-fields {
     grid-template-columns: minmax(0, 1fr);
-    gap: 15px;
+    gap: 18px;
+    margin-top: 20px;
   }
   .profile-landing .profile-setting + .profile-setting {
-    border: 0;
     padding-left: 0;
+    border: 0;
   }
   .profile-landing .profile-setting :is(input, select),
   .profile-edit-dialog :is(input, textarea) {
     font-size: 16px;
-    min-height: 44px;
-  }
-  .profile-landing .profile-icon-button {
-    min-height: 44px;
-    width: 44px;
+    min-height: 46px;
   }
   .profile-player-card {
-    min-height: 360px;
+    min-height: 400px;
   }
   .profile-player-initial {
-    font-size: 170px;
+    font-size: 260px;
+    top: 10px;
   }
-  .profile-player-bottom {
-    padding-top: 100px;
+  .profile-player-bottom > strong {
+    font-size: 28px;
+  }
+  .profile-player-bottom > p {
+    font-size: 16px;
+  }
+  .profile-player-brand {
+    font-size: 23px;
+  }
+  .profile-player-status {
+    font-size: 13px;
+  }
+  .profile-player-copy {
+    width: 46px;
+  }
+  .profile-player-actions > a {
+    min-width: 0;
+    padding-inline: 12px;
   }
   .profile-studio-dialog {
     padding: 24px;
   }
-  .profile-record-detail-grid {
+}
+@media (max-width: 360px) {
+  .profile-landing .profile-metric {
     gap: 8px;
+    padding-inline: 10px;
+  }
+  .profile-landing .profile-metric > svg:first-child {
+    width: 22px;
+    height: 22px;
+  }
+  .profile-player-card {
+    padding-inline: 14px;
+  }
+  .profile-player-top {
+    gap: 6px;
+  }
+  .profile-player-status {
+    gap: 5px;
   }
 }

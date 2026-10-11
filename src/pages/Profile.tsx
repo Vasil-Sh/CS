@@ -455,8 +455,8 @@ export default function Profile() {
     reader.readAsText(file);
   };
 
-  return (
-    <div className={`profile-page profile-view-${activeTab}`}>
+  const profileHeader = (
+    <>
       <header className="profile-heading">
         <h1>Особистий простір</h1>
       </header>
@@ -476,9 +476,18 @@ export default function Profile() {
           Бекап
         </button>
       </nav>
+    </>
+  );
+
+  return (
+    <div className={`profile-page profile-view-${activeTab}`}>
+      {activeTab === "backup" && (
+        <div className="profile-masthead">{profileHeader}</div>
+      )}
       <div className="profile-content" key={activeTab}>
         {activeTab === "interface" && (
           <ProfileOverview
+            header={profileHeader}
             username={username}
             telegram={user?.telegram || ""}
             stats={stats}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText,
@@ -11,30 +11,14 @@ import {
   ChevronRight,
   Check,
   RefreshCw,
-  FolderOpen,
   MessageCircle,
-  Pencil,
   Layers,
-  X,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { UserDataService } from "@/lib/userDataService";
 import { useData } from "@/contexts/DataContext";
 import { proxyLogoUrl } from "@/lib/logoProxy";
-import {
-  journalKey,
-  journalMoney,
-  journalAmount,
-  journalStatus,
-} from "@/components/mybets/journalModel";
+import { journalKey } from "@/components/mybets/journalModel";
 import type { ThemePreference } from "@/hooks/useTheme";
-import type { Bet } from "@/types/betting";
 import type { Lang } from "@/lib/i18n";
 import { toast } from "sonner";
 import {
@@ -45,6 +29,7 @@ import {
 } from "./profileModel";
 
 interface Props {
+  header?: ReactNode;
   username: string;
   telegram?: string;
   stats: {
@@ -165,16 +150,11 @@ export default function ProfileOverview(p: Props) {
       ),
     ),
   );
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(identity);
-  const [saving, setSaving] = useState(false);
   const identityRevision = useRef(0);
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [rate, setRate] = useState(String(p.exchangeRate));
   const [rateError, setRateError] = useState("");
-  const [selected, setSelected] = useState<Bet | null>(null);
-  const activityTrigger = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setRate(String(p.exchangeRate));
@@ -246,30 +226,6 @@ export default function ProfileOverview(p: Props) {
     },
   ];
 
-  async function saveIdentity(event: FormEvent) {
-    event.preventDefault();
-    if (saving) return;
-    setSaving(true);
-    identityRevision.current += 1;
-    const next = {
-      displayName: draft.displayName.trim(),
-      bio: draft.bio.trim(),
-    };
-    try {
-      await UserDataService.saveUserPrefs({
-        preferences: { profileIdentity: next },
-      });
-      setIdentity(next);
-      UserDataService.setUserDataSync(p.username, "profile_identity", next);
-      setEditing(false);
-      toast.success("Профіль збережено");
-    } catch {
-      toast.error("Не вдалося зберегти профіль. Спробуйте ще раз.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   function commitRate() {
     const value = Number(rate.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0) {
@@ -282,129 +238,47 @@ export default function ProfileOverview(p: Props) {
 
   return (
     <>
-      <section className="profile-identity" aria-label="Ваш профіль">
-        <div className="profile-avatar">
-          <span className="profile-avatar-letter" aria-hidden="true">
-            {initial}
-          </span>
-          {tgValid && (
-            <img
-              key={tgAvatarName}
-              src={`https://t.me/i/userpic/320/${tgAvatarName}.jpg`}
-              alt=""
-              className="profile-avatar-img"
-              onError={(e) => {
-                e.currentTarget.hidden = true;
-              }}
-              onLoad={(e) => {
-                if (e.currentTarget.naturalWidth <= 1)
+      <div className="profile-masthead">
+        {p.header}
+        <section className="profile-identity" aria-label="Ваш профіль">
+          <div className="profile-avatar">
+            <span className="profile-avatar-letter" aria-hidden="true">
+              {initial}
+            </span>
+            {tgValid && (
+              <img
+                key={tgAvatarName}
+                src={`https://t.me/i/userpic/320/${tgAvatarName}.jpg`}
+                alt=""
+                className="profile-avatar-img"
+                onError={(e) => {
                   e.currentTarget.hidden = true;
-              }}
-            />
-          )}
-        </div>
-        <div className="profile-identity-copy">
-          <h2>{identity.displayName || `@${p.username}`}</h2>
-          <span className="profile-online">
-            <i aria-hidden="true" />
-            Активний{identity.displayName && <span> · @{p.username}</span>}
-          </span>
-          {identity.bio && <p>{identity.bio}</p>}
-        </div>
-        <Dialog
-          open={editing}
-          onOpenChange={(open) => {
-            if (saving) return;
-            if (open) {
-              identityRevision.current += 1;
-              setDraft(identity);
-            }
-            setEditing(open);
-          }}
-        >
-          <DialogTrigger asChild>
-            <button
-              className="profile-button profile-edit-trigger"
-              type="button"
-            >
-              <Pencil size={16} />
-              Редагувати профіль
-            </button>
-          </DialogTrigger>
-          <DialogContent
-            className="profile-edit-dialog profile-studio-dialog"
-            hideCloseButton
-          >
-            <DialogTitle>Редагувати профіль</DialogTitle>
-            <DialogDescription>
-              Ім’я та опис у вашому особистому просторі. Логін і публічне
-              посилання не змінюються.
-            </DialogDescription>
-            <button
-              className="profile-dialog-close"
-              type="button"
-              aria-label="Закрити"
-              disabled={saving}
-              onClick={() => setEditing(false)}
-            >
-              <X size={20} />
-            </button>
-            <form onSubmit={saveIdentity}>
-              <label htmlFor="profile-display-name">Ім’я</label>
-              <input
-                id="profile-display-name"
-                value={draft.displayName}
-                maxLength={40}
-                placeholder={`@${p.username}`}
-                disabled={saving}
-                onChange={(e) =>
-                  setDraft({ ...draft, displayName: e.target.value })
-                }
+                }}
+                onLoad={(e) => {
+                  if (e.currentTarget.naturalWidth <= 1)
+                    e.currentTarget.hidden = true;
+                }}
               />
-              <label htmlFor="profile-bio">Коротко про себе</label>
-              <textarea
-                id="profile-bio"
-                rows={3}
-                value={draft.bio}
-                maxLength={140}
-                disabled={saving}
-                onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
-              />
-              <small>{draft.bio.length}/140</small>
-              <footer>
-                <button
-                  className="profile-button"
-                  type="button"
-                  disabled={saving}
-                  onClick={() => setEditing(false)}
-                >
-                  Скасувати
-                </button>
-                <button
-                  className="profile-button profile-primary"
-                  type="submit"
-                  disabled={saving}
-                >
-                  {saving ? "Зберігаємо…" : "Зберегти"}
-                </button>
-              </footer>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </section>
+            )}
+          </div>
+          <div className="profile-identity-copy">
+            <h2>{identity.displayName || `@${p.username}`}</h2>
+            <span className="profile-online">
+              <i aria-hidden="true" />
+              Активний{identity.displayName && <span> · @{p.username}</span>}
+            </span>
+            {identity.bio && <p>{identity.bio}</p>}
+          </div>
+        </section>
+      </div>
 
       <nav className="profile-metrics" aria-label="Огляд вашого журналу">
         {metrics.map(({ label, value, Icon, href }) => (
           <Link className="profile-metric" to={href} key={href}>
-            <Icon size={25} strokeWidth={1.7} aria-hidden="true" />
+            <Icon size={30} strokeWidth={1.8} aria-hidden="true" />
             <span className="profile-metric-copy">
               <strong>{value.toLocaleString("uk-UA")}</strong>{" "}
               <small>{label}</small>
-              {href === "/app/strategy" && value === 0 && (
-                <span className="profile-metric-hint">
-                  Створити першу <ArrowUpRight size={13} />
-                </span>
-              )}
             </span>
             <ChevronRight
               className="profile-metric-arrow"
@@ -444,13 +318,9 @@ export default function ProfileOverview(p: Props) {
                   const date = recordDate(bet);
                   return (
                     <li key={journalKey(bet)}>
-                      <button
+                      <Link
                         className="profile-record"
-                        type="button"
-                        onClick={(e) => {
-                          activityTrigger.current = e.currentTarget;
-                          setSelected(bet);
-                        }}
+                        to="/app/my-bets"
                         aria-label={`Деталі: ${summary.title}`}
                       >
                         <span className="profile-game-badge">
@@ -458,7 +328,7 @@ export default function ProfileOverview(p: Props) {
                         </span>
                         <span className="profile-team-pair" aria-hidden="true">
                           {summary.express ? (
-                            <Layers size={30} />
+                            <Layers size={42} />
                           ) : (
                             <>
                               <TeamMark
@@ -491,7 +361,7 @@ export default function ProfileOverview(p: Props) {
                           className="profile-record-arrow"
                           aria-hidden="true"
                         />
-                      </button>
+                      </Link>
                     </li>
                   );
                 })}
@@ -695,73 +565,15 @@ export default function ProfileOverview(p: Props) {
               </small>
             )}
             <button
-              className="profile-button"
+              className="profile-button profile-primary"
               type="button"
               onClick={p.onOpenBackup}
             >
-              <FolderOpen size={18} />
               Відкрити бекап <ArrowRight size={16} />
             </button>
           </section>
         </aside>
       </div>
-
-      <Dialog
-        open={!!selected}
-        onOpenChange={(open) => {
-          if (!open) setSelected(null);
-        }}
-      >
-        <DialogContent
-          className="profile-studio-dialog profile-record-dialog"
-          hideCloseButton
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            activityTrigger.current?.focus();
-          }}
-        >
-          <DialogTitle>
-            {selected ? recordSummary(selected).title : "Деталі запису"}
-          </DialogTitle>
-          <DialogDescription>
-            {selected ? recordSummary(selected).description : ""}
-          </DialogDescription>
-          <button
-            className="profile-dialog-close"
-            type="button"
-            aria-label="Закрити деталі"
-            onClick={() => setSelected(null)}
-          >
-            <X size={20} />
-          </button>
-          {selected && (
-            <>
-              <dl className="profile-record-detail-grid">
-                <div>
-                  <dt>Сума</dt>
-                  <dd>
-                    {journalMoney(journalAmount(selected), selected.currency)}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Коефіцієнт</dt>
-                  <dd>{selected.odds.toLocaleString("uk-UA")}</dd>
-                </div>
-                <div>
-                  <dt>Статус</dt>
-                  <dd>{journalStatus(selected)}</dd>
-                </div>
-              </dl>
-              {selected.notes && (
-                <p className="profile-record-notes">{selected.notes}</p>
-              )}
-              <Link className="profile-button" to="/app/my-bets">
-                Відкрити журнал <ArrowRight size={16} />
-              </Link>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

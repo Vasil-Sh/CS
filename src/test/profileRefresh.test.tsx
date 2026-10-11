@@ -4,7 +4,6 @@ import {
   render,
   renderHook,
   screen,
-  waitFor,
   act,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -96,9 +95,10 @@ describe("profile overview", () => {
       "href",
       "/app/goals",
     );
-    expect(
-      screen.getByRole("link", { name: /Створити першу/ }),
-    ).toHaveAttribute("href", "/app/strategy");
+    expect(screen.getByRole("link", { name: "0 Стратегії" })).toHaveAttribute(
+      "href",
+      "/app/strategy",
+    );
     expect(
       screen.getByRole("heading", { name: "Публічний профіль" }),
     ).toBeInTheDocument();
@@ -130,65 +130,14 @@ describe("profile overview", () => {
     show();
     expect(screen.getByText("Ваш журнал починається тут")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Деталі:/ }),
+      screen.queryByRole("link", { name: /Деталі:/ }),
     ).not.toBeInTheDocument();
   });
-  it("opens a read-only record dialog and closes it", async () => {
+  it("links each activity record to the journal", () => {
     show();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Деталі: Falcons vs TYLOO" }),
-    );
-    expect(screen.getByRole("dialog")).toHaveTextContent("Виграш");
-    expect(screen.getByRole("dialog")).toHaveTextContent("200 ₴");
-    fireEvent.click(screen.getByRole("button", { name: "Закрити деталі" }));
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
-    );
-  });
-  it("does not persist an edited name when cancelled", () => {
-    show();
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати профіль" }));
-    fireEvent.change(screen.getByLabelText("Ім’я"), {
-      target: { value: "Player" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
-    expect(UserDataService.saveUserPrefs).not.toHaveBeenCalled();
-  });
-  it("persists a display name and bio through the existing preferences API", async () => {
-    show();
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати профіль" }));
-    fireEvent.change(screen.getByLabelText("Ім’я"), {
-      target: { value: " Player " },
-    });
-    fireEvent.change(screen.getByLabelText("Коротко про себе"), {
-      target: { value: "My journal" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Player" }),
-      ).toBeInTheDocument(),
-    );
-    expect(UserDataService.saveUserPrefs).toHaveBeenCalledWith({
-      preferences: {
-        profileIdentity: { displayName: "Player", bio: "My journal" },
-      },
-    });
-  });
-  it("retains the edit dialog and draft on an API failure", async () => {
-    vi.mocked(UserDataService.saveUserPrefs).mockRejectedValueOnce(
-      new Error("offline"),
-    );
-    show();
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати профіль" }));
-    fireEvent.change(screen.getByLabelText("Ім’я"), {
-      target: { value: "Retry me" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Зберегти" })).toBeEnabled(),
-    );
-    expect(screen.getByLabelText("Ім’я")).toHaveValue("Retry me");
+    expect(
+      screen.getByRole("link", { name: "Деталі: Falcons vs TYLOO" }),
+    ).toHaveAttribute("href", "/app/my-bets");
   });
   it("offers a selectable link if clipboard permission is denied", async () => {
     Object.defineProperty(navigator, "clipboard", {
