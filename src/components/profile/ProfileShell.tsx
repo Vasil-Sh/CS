@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { t } from "@/lib/i18n";
+import { useTheme } from "@/hooks/useTheme";
 import "@/pages/Profile.css";
 import "@/pages/ProfileLanding.css";
 import "@/pages/PlanningNavigation.css";
@@ -60,6 +61,7 @@ export default function ProfileShell({
   onLogout: () => void;
   children: ReactNode;
 }) {
+  useTheme();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const inPlanning = pathname === "/app/strategy" || pathname === "/app/goals";
@@ -99,10 +101,12 @@ export default function ProfileShell({
               </button>
               {planningOpen && (
                 <div className="planning-nav-children">
-                  {[
-                    ["/app/strategy", "Стратегії", FileText],
-                    ["/app/goals", "Цілі", Target],
-                  ].map(([url, title, ChildIcon]) => (
+                  {(
+                    [
+                      ["/app/strategy", "Стратегії", FileText],
+                      ["/app/goals", "Цілі", Target],
+                    ] as const
+                  ).map(([url, title, ChildIcon]) => (
                     <Link
                       key={url}
                       to={url}

@@ -1,44 +1,71 @@
-import { useState, useEffect, useCallback } from 'react';
-import { UserDataService } from '@/lib/userDataService';
+import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { UserDataService } from "@/lib/userDataService";
 
-type Theme = 'light' | 'dark';
+export type ThemePreference = "light" | "dark" | "system";
+type Theme = "light" | "dark";
+const THEME_KEY = "matchiq_theme";
+const THEME_EVENT = "matchiq:theme-change";
+let memoryPreference: ThemePreference = "light";
 
-const THEME_KEY = 'matchiq_theme';
-
-function getStoredTheme(): Theme {
+function getPreference(): ThemePreference {
   try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
-  } catch { /* ignore */ }
-  return 'light';
-}
-
-function applyTheme(theme: Theme) {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
+    const value = localStorage.getItem(THEME_KEY);
+    return value === "dark" || value === "system" ? value : "light";
+  } catch {
+    return memoryPreference;
   }
 }
 
+function systemTheme(): Theme {
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function snapshot() {
+  const preference = getPreference();
+  return `${preference}:${preference === "system" ? systemTheme() : preference}`;
+}
+
+function subscribe(update: () => void) {
+  const media = window.matchMedia?.("(prefers-color-scheme: dark)");
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === THEME_KEY || event.key === null) update();
+  };
+  window.addEventListener(THEME_EVENT, update);
+  window.addEventListener("storage", onStorage);
+  media?.addEventListener("change", update);
+  return () => {
+    window.removeEventListener(THEME_EVENT, update);
+    window.removeEventListener("storage", onStorage);
+    media?.removeEventListener("change", update);
+  };
+}
+
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
+  const state = useSyncExternalStore(subscribe, snapshot, () => "light:light");
+  const [preference, theme] = state.split(":") as [ThemePreference, Theme];
 
-  // Apply on mount
   useEffect(() => {
-    applyTheme(theme);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const next: Theme = prev === 'light' ? 'dark' : 'light';
+  const setTheme = useCallback((next: ThemePreference) => {
+    memoryPreference = next;
+    try {
       localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
-      // Sync to API
-      UserDataService.saveUserPrefs({ preferences: { theme: next } }).catch(() => {});
-      return next;
-    });
+    } catch {
+      /* Session fallback. */
+    }
+    window.dispatchEvent(new Event(THEME_EVENT));
+    UserDataService.saveUserPrefs({ preferences: { theme: next } }).catch(
+      () => {},
+    );
   }, []);
 
-  return { theme, toggleTheme };
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "light" ? "dark" : "light");
+  }, [theme, setTheme]);
+
+  return { theme, preference, setTheme, toggleTheme };
 }

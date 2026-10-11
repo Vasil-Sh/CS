@@ -14,7 +14,7 @@ import { api } from "@/lib/apiClient";
 import ProfileOverview from "@/components/profile/ProfileOverview";
 import ProfileBackup from "@/components/profile/ProfileBackup";
 import "./Profile.css";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme, type ThemePreference } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { setLang, getLang, type Lang } from "@/lib/i18n";
 import { logRender } from "@/lib/devLogger";
@@ -23,7 +23,7 @@ export default function Profile() {
   logRender("Profile");
   const { user } = useAuth();
   const username = user?.username || "User";
-  const { theme, toggleTheme } = useTheme();
+  const { preference, setTheme } = useTheme();
   const isAdmin = user?.role === "admin";
   const [language, setLanguage] = useState<Lang>(getLang);
   const [isExporting, setIsExporting] = useState(false);
@@ -128,12 +128,14 @@ export default function Profile() {
     }
   };
 
-  const handleThemeChange = (newTheme: "light" | "dark") => {
-    if (newTheme !== theme) {
-      toggleTheme();
-    }
+  const handleThemeChange = (newTheme: ThemePreference) => {
+    setTheme(newTheme);
     toast.success(
-      newTheme === "dark" ? "Темна тема активована" : "Світла тема активована",
+      newTheme === "system"
+        ? "Тема відповідає налаштуванням пристрою"
+        : newTheme === "dark"
+          ? "Темна тема активована"
+          : "Світла тема активована",
     );
   };
 
@@ -454,9 +456,9 @@ export default function Profile() {
   };
 
   return (
-    <div className="profile-page">
+    <div className={`profile-page profile-view-${activeTab}`}>
       <header className="profile-heading">
-        <h1>{activeTab === "backup" ? "Бекап даних" : "Профіль"}</h1>
+        <h1>Особистий простір</h1>
       </header>
       <nav className="profile-tabs" aria-label="Розділи профілю">
         <button
@@ -474,13 +476,13 @@ export default function Profile() {
           Бекап
         </button>
       </nav>
-      <div className="profile-content">
+      <div className="profile-content" key={activeTab}>
         {activeTab === "interface" && (
           <ProfileOverview
             username={username}
             telegram={user?.telegram || ""}
             stats={stats}
-            theme={theme}
+            theme={preference}
             language={language}
             onThemeChange={handleThemeChange}
             onLanguageChange={handleLanguageChange}
