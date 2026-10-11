@@ -137,7 +137,7 @@ describe("profile overview", () => {
     show();
     expect(
       screen.getByRole("link", { name: "Деталі: Falcons vs TYLOO" }),
-    ).toHaveAttribute("href", "/app/my-bets");
+    ).toHaveAttribute("href", "/app/my-bets?tab=records");
   });
   it("offers a selectable link if clipboard permission is denied", async () => {
     Object.defineProperty(navigator, "clipboard", {

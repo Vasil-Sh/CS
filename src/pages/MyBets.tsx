@@ -49,6 +49,7 @@ export default function MyBets() {
   const [searchParams, setSearchParams] = useSearchParams();
   const goalId = searchParams.get("goalId");
   const strategyFilter = searchParams.get("strategy");
+  const tabParam = searchParams.get("tab");
   const bumpBankroll = useAppStore((s) => s.bumpBankroll);
   const bumpBets = useAppStore((s) => s.bumpBets);
   const bankrollVersion = useAppStore((s) => s.bankrollVersion);
@@ -79,7 +80,11 @@ export default function MyBets() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [activeTab, setActiveTab] = useState(
-    goalId || strategyFilter ? "records" : "add",
+    goalId || strategyFilter
+      ? "records"
+      : tabParam === "records"
+        ? "records"
+        : "add",
   );
   const [bankrollRefreshKey, setBankrollRefreshKey] = useState(0);
   const [prefillData, setPrefillData] = useState<MatchPrefillData | null>(null);
@@ -119,9 +124,11 @@ export default function MyBets() {
   );
 
   useEffect(() => {
-    if (goalId || strategyFilter) setActiveTab("records");
+    if (goalId || strategyFilter || tabParam === "records") {
+      setActiveTab("records");
+    }
     setCurrentPage(1);
-  }, [goalId, strategyFilter]);
+  }, [goalId, strategyFilter, tabParam]);
 
   useEffect(() => {
     const handler = (e: StorageEvent) => {

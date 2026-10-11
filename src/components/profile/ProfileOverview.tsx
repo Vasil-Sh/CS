@@ -297,7 +297,7 @@ export default function ProfileOverview(p: Props) {
           >
             <div className="profile-section-title">
               <h2 id="profile-activity-title">Остання активність</h2>
-              <Link to="/app/my-bets" className="profile-text-link">
+              <Link to="/app/my-bets?tab=records" className="profile-text-link">
                 Усі записи <ArrowRight size={16} />
               </Link>
             </div>
@@ -320,7 +320,7 @@ export default function ProfileOverview(p: Props) {
                     <li key={journalKey(bet)}>
                       <Link
                         className="profile-record"
-                        to="/app/my-bets"
+                        to="/app/my-bets?tab=records"
                         aria-label={`Деталі: ${summary.title}`}
                       >
                         <span className="profile-game-badge">
@@ -370,7 +370,10 @@ export default function ProfileOverview(p: Props) {
               <div className="profile-activity-empty">
                 <strong>Ваш журнал починається тут</strong>
                 <p>Нові записи з’являться в цьому блоці.</p>
-                <Link className="profile-text-link" to="/app/my-bets">
+                <Link
+                  className="profile-text-link"
+                  to="/app/my-bets?tab=records"
+                >
                   Перейти до журналу <ArrowRight size={16} />
                 </Link>
               </div>
