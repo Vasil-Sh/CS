@@ -71,7 +71,7 @@
   border-bottom: 1px solid #ffffff14;
 }
 .public-nav {
-  height: 68px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -153,6 +153,9 @@
 .public-cover.is-active {
   opacity: 1;
 }
+.public-cover[src$="cover-all.webp"] {
+  object-position: 85% 34%;
+}
 .public-player-card::after {
   content: "";
   position: absolute;
@@ -176,13 +179,13 @@
   padding: 23px 22px;
 }
 .public-player-top .public-logo {
-  font-size: 25px;
+  font-size: 26px;
 }
 .public-card-game {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -298,15 +301,10 @@
   padding-top: 8px;
 }
 .public-title-row {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .public-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 650;
-  color: var(--public-muted);
-  margin-bottom: 8px !important;
+  display: none;
 }
 .public-profile h1 {
   font-size: clamp(26px, 2.65vw, 40px);
@@ -329,7 +327,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 14px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 .public-game-filter {
   display: flex;
@@ -422,7 +420,7 @@
     color 160ms;
 }
 .public-currency button[aria-pressed="true"] {
-  background: #20252a;
+  background: #ce3d12;
   color: white;
 }
 .public-currency button:hover:not([aria-pressed="true"]) {
@@ -443,12 +441,25 @@
   min-height: 170px;
 }
 .public-main-profit > span {
-  font-size: 15px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 21px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.65px;
+}
+.public-main-profit > span::before {
+  content: "";
+  flex-shrink: 0;
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--public-orange);
 }
 .public-main-profit > strong {
   display: block;
-  font-size: clamp(32px, 3.1vw, 50px);
+  font-size: clamp(36px, 3.65vw, 58px);
   line-height: 1.15;
   letter-spacing: -2px;
   font-weight: 750;
@@ -486,7 +497,7 @@
   min-height: 38px;
 }
 .public-kpis dd {
-  font-size: clamp(29px, 2.4vw, 38px);
+  font-size: clamp(30px, 2.9vw, 44px);
   letter-spacing: -1px;
   line-height: 1.2;
   font-weight: 750;
@@ -538,13 +549,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .public-section-heading h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 21px;
   line-height: 1.3;
   font-weight: 700;
   letter-spacing: -0.65px;
+}
+.public-section-heading h2::before {
+  content: "";
+  flex-shrink: 0;
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--public-orange);
 }
 .public-section-heading > span {
   font-size: 12px;
@@ -554,7 +576,7 @@
 .public-chart-panel {
   display: flex;
   flex-direction: column;
-  min-height: 260px;
+  min-height: 240px;
 }
 .public-chart-scroll {
   overflow: auto;
@@ -656,6 +678,7 @@
 }
 .public-summary dd {
   font-size: 25px;
+  line-height: 1.1;
   font-weight: 650;
   letter-spacing: -0.7px;
   font-variant-numeric: tabular-nums;
@@ -687,7 +710,7 @@
 }
 .public-profile th,
 .public-profile td {
-  padding: 15px 10px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--public-line);
   vertical-align: middle;
 }
@@ -947,7 +970,8 @@
   .public-kpis {
     min-height: 184px;
   }
-  .public-section-heading h2 {
+  .public-section-heading h2,
+  .public-main-profit > span {
     font-size: 24px;
   }
 }
@@ -1109,7 +1133,8 @@
     margin-left: 66px;
     margin-right: 108px;
   }
-  .public-section-heading h2 {
+  .public-section-heading h2,
+  .public-main-profit > span {
     font-size: 19px;
   }
   .public-panel {
@@ -1286,7 +1311,8 @@
   .public-chart-month {
     font-size: 11px;
   }
-  .public-section-heading h2 {
+  .public-section-heading h2,
+  .public-main-profit > span {
     font-size: 20px;
   }
   .public-recent {
@@ -1338,7 +1364,8 @@
   .public-kpis dd {
     font-size: 24px;
   }
-  .public-section-heading h2 {
+  .public-section-heading h2,
+  .public-main-profit > span {
     font-size: 18px;
   }
   .public-player-card {

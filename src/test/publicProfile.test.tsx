@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -111,7 +112,7 @@ describe("Public profile screen", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Falcons")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Статистика профілю @admin" }),
+      screen.getByRole("heading", { name: "Статистика профілю" }),
     ).toBeInTheDocument();
   });
   it("uses a single global filter and fetches aggregates, not just recent-row filtering", async () => {
@@ -245,6 +246,63 @@ describe("Public profile screen", () => {
     expect(document.querySelector(".public-chart-bar")).toHaveClass(
       "is-negative",
     );
+  });
+  it("preserves all filter choices when controls are changed in one render cycle", async () => {
+    mount();
+    await screen.findByText("100%");
+    act(() => {
+      screen.getByRole("button", { name: "CS2" }).click();
+      fireEvent.change(screen.getByLabelText("Період статистики"), {
+        target: { value: "90d" },
+      });
+      screen.getByRole("button", { name: "USD" }).click();
+    });
+    await waitFor(() =>
+      expect(vi.mocked(fetch).mock.calls.at(-1)?.[0]).toContain(
+        "game=cs2&period=90d",
+      ),
+    );
+    expect(screen.getByRole("button", { name: "USD" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "CS2" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+  it("keeps newer filter data when an older request resolves late", async () => {
+    let resolveFirst!: (response: unknown) => void;
+    const first = new Promise((resolve) => {
+      resolveFirst = resolve;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockReturnValueOnce(first)
+        .mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            ...fixture,
+            filters: { game: "cs2", period: "all" },
+          }),
+        }),
+    );
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "CS2" }));
+    await screen.findByText("100%");
+    await act(async () => {
+      resolveFirst({
+        ok: true,
+        json: async () => ({
+          ...fixture,
+          stats: { ...fixture.stats, winRate: 12 },
+        }),
+      });
+    });
+    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.queryByText("12%")).not.toBeInTheDocument();
   });
 });
 describe("Public formatting", () => {

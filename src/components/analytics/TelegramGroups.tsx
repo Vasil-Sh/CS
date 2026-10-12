@@ -679,11 +679,12 @@ export default function TelegramGroups() {
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
         <DialogContent className="tg-group-dialog">
           <DialogHeader className="tg-group-header">
+            <p className="tg-dialog-eyebrow">Telegram група</p>
             <DialogTitle>
               {editingGroup ? "Редагувати групу" : "Додати групу"}
             </DialogTitle>
             <DialogDescription>
-              Додайте групу з якої будете аналізувати ставки
+              Підключіть канал, щоб відстежувати прогнози та результати.
             </DialogDescription>
           </DialogHeader>
           <div className="tg-group-body">
@@ -729,7 +730,10 @@ export default function TelegramGroups() {
                   setGroupForm((p) => ({ ...p, hasChannel: e.target.checked }))
                 }
               />
-              <span>Є приватний канал</span>
+              <span>
+                <strong>Це приватний канал</strong>
+                <small>Доступ буде можливий лише за запрошенням.</small>
+              </span>
             </label>
           </div>
           <DialogFooter className="tg-group-footer">
@@ -737,7 +741,7 @@ export default function TelegramGroups() {
               Скасувати
             </Button>
             <Button onClick={handleSaveGroup} className="tg-group-submit">
-              {editingGroup ? "Зберегти" : "Додати"}
+              {editingGroup ? "Зберегти зміни" : "Додати групу"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -815,16 +819,29 @@ export default function TelegramGroups() {
         }}
       >
         <DialogContent className="tg-group-dialog tg-detail-dialog">
-          <DialogHeader className="tg-group-header">
-            <DialogTitle>Статистика групи</DialogTitle>
-            <DialogDescription>
-              {(() => {
-                const g = detailGroupId
-                  ? groups.find((x) => x.id === detailGroupId)
-                  : null;
-                return g?.name || "";
-              })()}
-            </DialogDescription>
+          <DialogHeader className="tg-detail-header">
+            {(() => {
+              const group = detailGroupId
+                ? groups.find((x) => x.id === detailGroupId)
+                : null;
+              return (
+                <>
+                  <GroupAvatar
+                    link={group?.link || ""}
+                    name={group?.name || ""}
+                  />
+                  <div className="tg-detail-header-copy">
+                    <p className="tg-dialog-eyebrow">Статистика групи</p>
+                    <DialogTitle>
+                      {group?.name || "Статистика групи"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {group?.link ? tgHandle(group.link) : "Дані каналу"}
+                    </DialogDescription>
+                  </div>
+                </>
+              );
+            })()}
           </DialogHeader>
           {(() => {
             const g = detailGroupId
@@ -909,7 +926,10 @@ export default function TelegramGroups() {
                   {stats.monthlyProfit.length ? (
                     <MonthlyProfitBars data={stats.monthlyProfit} />
                   ) : (
-                    <p className="text-xs text-slate-400">Немає даних</p>
+                    <div className="tg-detail-empty-chart">
+                      <strong>Немає даних</strong>
+                      <p>Поки що немає інформації про прибуток за місяцями.</p>
+                    </div>
                   )}
                 </div>
               </div>

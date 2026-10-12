@@ -659,6 +659,287 @@
 .tg-group-footer .tg-delete-submit:hover {
   background: #b91c1c;
 }
+
+/* ── Telegram group dialogs ────────────────────────────────────────────────
+   The group form and statistics are one dialog family: a restrained graphite
+   identity strip, a readable form/metric surface and a single coral action. */
+.tg-group-dialog {
+  width: min(560px, calc(100vw - 32px)) !important;
+  max-width: 560px !important;
+  border-color: #343936;
+  border-radius: 14px;
+  box-shadow: 0 28px 84px rgb(7 10 8 / 38%);
+}
+
+.tg-detail-dialog {
+  width: min(680px, calc(100vw - 32px)) !important;
+  max-width: 680px !important;
+}
+
+.tg-group-dialog > button {
+  top: 21px;
+  right: 21px;
+  z-index: 2;
+  border-radius: 7px;
+  color: rgb(255 255 255 / 78%);
+}
+
+.tg-group-dialog > button:hover {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+.tg-group-header {
+  padding: 27px 58px 26px 28px;
+  background: #171a1b;
+}
+
+.tg-dialog-eyebrow {
+  margin: 0 0 7px;
+  color: var(--tg-orange);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.tg-group-header h2 {
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(26px, 4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  text-transform: none;
+}
+
+.tg-group-header p:last-child {
+  margin: 8px 0 0;
+  color: #c5c9c6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tg-group-body {
+  display: grid;
+  gap: 19px;
+  padding: 27px 28px 31px;
+}
+
+.tg-group-body > * + * {
+  margin-top: 0;
+}
+
+.tg-group-body label:not(.tg-group-channel-toggle) {
+  margin-bottom: 8px;
+  color: #202421;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.tg-group-body input,
+.tg-group-body textarea {
+  border-color: #d4d7d3;
+  border-radius: 9px;
+  background: #fff;
+  color: #171a18;
+}
+
+.tg-group-body input {
+  height: 48px;
+  padding-inline: 14px;
+}
+
+.tg-group-body textarea {
+  min-height: 98px;
+  padding: 13px 14px;
+  resize: vertical;
+}
+
+.tg-group-body input::placeholder,
+.tg-group-body textarea::placeholder {
+  color: #9a9f9a;
+}
+
+.tg-group-body input:focus-visible,
+.tg-group-body textarea:focus-visible {
+  border-color: var(--tg-orange);
+  outline: 3px solid rgb(255 105 59 / 13%);
+  outline-offset: 0;
+}
+
+.tg-group-body label.tg-group-channel-toggle {
+  align-items: flex-start;
+  gap: 13px;
+  margin: 1px 0 0;
+  padding: 15px 16px;
+  border-color: #e1e4df;
+  border-radius: 10px;
+  background: #fafbf9;
+  font-weight: 400;
+}
+
+.tg-group-body label.tg-group-channel-toggle input {
+  width: 19px;
+  height: 19px;
+  margin-top: 1px;
+  border-radius: 5px;
+}
+
+.tg-group-body label.tg-group-channel-toggle span {
+  display: grid;
+  gap: 3px;
+}
+
+.tg-group-body label.tg-group-channel-toggle strong {
+  color: #202421;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.tg-group-body label.tg-group-channel-toggle small {
+  color: #7d837d;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tg-group-footer {
+  justify-content: flex-end;
+  padding: 18px 28px;
+  border-color: #e1e3df;
+  background: #fbfcfa;
+}
+
+.tg-group-footer button {
+  height: 46px;
+  min-width: 124px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.tg-group-footer .tg-group-submit {
+  min-width: 148px;
+  background: var(--tg-orange);
+  color: #fff;
+}
+
+.tg-group-footer .tg-group-submit:hover {
+  background: #ec5830;
+}
+
+.tg-detail-header {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 16px;
+  padding: 25px 58px 24px 28px;
+  background: #171a1b;
+  color: #fff;
+  text-align: left;
+}
+
+.tg-detail-header > div:first-child {
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgb(255 255 255 / 12%);
+}
+
+.tg-detail-header-copy {
+  min-width: 0;
+}
+
+.tg-detail-header h2 {
+  overflow: hidden;
+  margin: 0;
+  color: #fff;
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(21px, 3vw, 27px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-detail-header p:last-child {
+  margin: 5px 0 0;
+  color: #c5c9c6;
+  font-size: 13px;
+}
+
+.tg-detail-body {
+  padding: 27px 28px 29px;
+  background: #fff;
+}
+
+.tg-detail-head {
+  display: none;
+}
+
+.tg-detail-stats {
+  gap: 12px;
+  margin: 0;
+}
+
+.tg-detail-stats > div {
+  min-height: 105px;
+  padding: 17px 10px 14px;
+  border-color: #e5e8e4;
+  border-radius: 11px;
+  background: #f8f9f7;
+}
+
+.tg-detail-stats span {
+  color: #7d837d;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.tg-detail-stats strong {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  margin-top: 5px;
+  color: #161a17;
+  font-size: 22px;
+  line-height: 1.14;
+}
+
+.tg-detail-chart-section {
+  margin-top: 25px;
+}
+
+.tg-detail-chart-section h3 {
+  margin: 0 0 12px;
+  color: #202421;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.tg-detail-empty-chart {
+  display: grid;
+  min-height: 140px;
+  place-content: center;
+  gap: 4px;
+  padding: 20px;
+  border: 1px solid #edf0eb;
+  border-radius: 11px;
+  background: #fafbf9;
+  color: #727971;
+  text-align: center;
+}
+
+.tg-detail-empty-chart strong {
+  color: #4f564f;
+  font-size: 14px;
+}
+
+.tg-detail-empty-chart p {
+  max-width: 310px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .tg-empty {
   display: flex;
   min-height: 310px;
@@ -763,6 +1044,63 @@
   .telegram-guide ol {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .tg-group-dialog,
+  .tg-detail-dialog {
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .tg-group-header,
+  .tg-detail-header {
+    padding: 22px 50px 21px 20px;
+  }
+
+  .tg-group-header h2 {
+    font-size: 27px;
+  }
+
+  .tg-detail-header {
+    gap: 12px;
+  }
+
+  .tg-detail-header > div:first-child {
+    width: 46px;
+    height: 46px;
+  }
+
+  .tg-detail-header h2 {
+    font-size: 20px;
+  }
+
+  .tg-group-body,
+  .tg-detail-body {
+    padding: 21px 20px 23px;
+  }
+
+  .tg-detail-stats {
+    gap: 8px;
+  }
+
+  .tg-detail-stats > div {
+    min-height: 88px;
+    padding: 12px 5px 10px;
+  }
+
+  .tg-detail-stats strong {
+    min-height: 35px;
+    font-size: 18px;
+  }
+
+  .tg-group-footer {
+    padding: 14px 20px;
+  }
+
+  .tg-group-footer button,
+  .tg-group-footer .tg-group-submit {
+    min-width: 0;
+    flex: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

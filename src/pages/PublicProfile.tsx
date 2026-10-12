@@ -190,9 +190,7 @@ export default function PublicProfile() {
           <div className="public-title-row">
             <div>
               <p className="public-eyebrow">Публічний журнал</p>
-              <h1>
-                Статистика профілю <span>@{name}</span>
-              </h1>
+              <h1>Статистика профілю</h1>
             </div>
           </div>
           <div className="public-toolbar">

@@ -39,6 +39,7 @@ function TeamLogo({
 }
 function BetTeams({ bet }: { bet: PublicBet }) {
   const express = /експрес|express|parlay/i.test(`${bet.betType} ${bet.match}`);
+  const eventCount = express ? bet.match.match(/(\d+)\s*[xх×]/i)?.[1] : null;
   const split = bet.match.split(/\s+(?:vs\.?|v\.?|проти)\s+/i);
   const team1 = bet.team1 || split[0],
     team2 = bet.team2 || split[1];
@@ -48,7 +49,13 @@ function BetTeams({ bet }: { bet: PublicBet }) {
         <Layers size={34} aria-hidden="true" />
         <span>
           {bet.match.split("|")[0]}
-          <small>{express ? "Експрес" : bet.game}</small>
+          <small>
+            {express
+              ? eventCount
+                ? `${eventCount} подій`
+                : "Експрес"
+              : bet.game}
+          </small>
         </span>
       </span>
     );
