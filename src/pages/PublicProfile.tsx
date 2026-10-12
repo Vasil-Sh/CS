@@ -1,268 +1,133 @@
-/* Scrollable chart/table regions must be keyboard focusable. */
-/* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["region"] }] */
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowUpRight, Loader2 } from "lucide-react";
-import { proxyLogoUrl } from "@/lib/logoProxy";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { ArrowUpRight, Check, ChevronDown, Info, Loader2 } from "lucide-react";
+import { PlayerCard } from "@/components/public-profile/PlayerCard";
+import { GameMark } from "@/components/public-profile/GameMark";
+import { ProfitChart } from "@/components/public-profile/ProfitChart";
+import { RecentBets } from "@/components/public-profile/RecentBets";
+import {
+  displayValue,
+  formatNumber,
+  gameOptions,
+  periodOptions,
+  readProfileFilters,
+  signedNumber,
+  type PublicProfileData,
+} from "@/components/public-profile/publicProfileModel";
 import "./PublicProfile.css";
 
-interface PublicStats {
-  username: string;
-  telegram?: string;
-  stats: {
-    totalBets: number;
-    wins: number;
-    losses: number;
-    winRate: number;
-    totalProfit: number;
-    profitUAH: number;
-    profitUSD: number;
-    totalStaked: number;
-    roi: number;
-    avgOdds: number;
-    currentBank: number;
-    activeGoals: number;
-  };
-  recentBets: {
-    match: string;
-    team1?: string;
-    team2?: string;
-    logoTeam1?: string | null;
-    logoTeam2?: string | null;
-    betType?: string;
-    result: string;
-    profit: number;
-    currency?: string;
-    odds: number;
-    date: string;
-    game: string;
-  }[];
-  monthlyProfit: { month: string; profit: number }[];
-}
-const number = (value: number, decimals = 0) =>
-  Number(value || 0).toLocaleString("uk-UA", {
-    maximumFractionDigits: decimals,
-  });
-const signed = (value: number) => `${value > 0 ? "+" : ""}${number(value, 2)}`;
-const months = [
-  "Січ",
-  "Лют",
-  "Бер",
-  "Кві",
-  "Тра",
-  "Чер",
-  "Лип",
-  "Сер",
-  "Вер",
-  "Жов",
-  "Лис",
-  "Гру",
-];
-const monthLabel = (value: string) => {
-  const [year, month] = value.split("-");
-  return `${months[Number(month) - 1] || month} ’${year.slice(-2)}`;
-};
-type PublicBet = PublicStats["recentBets"][number];
-function PublicBetTeams({ bet }: { bet: PublicBet }) {
-  const isExpress = (bet.betType || "").toLowerCase().startsWith("експрес");
-  const team1 = isExpress ? "" : bet.team1 || "";
-  const team2 = isExpress ? "" : bet.team2 || "";
-  const logo1 = proxyLogoUrl(bet.logoTeam1 || null, bet.game);
-  const logo2 = proxyLogoUrl(bet.logoTeam2 || null, bet.game);
-  if (!team1 && !team2) return <span>{bet.match}</span>;
-  return (
-    <span className="public-match-teams">
-      {team1 && (
-        <span className="public-match-team">
-          {logo1 && (
-            <img
-              src={logo1}
-              alt=""
-              className="public-match-logo"
-              loading="lazy"
-            />
-          )}
-          <span>{team1}</span>
-        </span>
-      )}
-      {team1 && team2 && <span className="public-match-vs">vs</span>}
-      {team2 && (
-        <span className="public-match-team">
-          {logo2 && (
-            <img
-              src={logo2}
-              alt=""
-              className="public-match-logo"
-              loading="lazy"
-            />
-          )}
-          <span>{team2}</span>
-        </span>
-      )}
-    </span>
-  );
-}
-const gameLabel = (value: string) =>
-  value.toLowerCase().replace(/[^a-z0-9]/g, "");
-const resultLabel = (result: string) =>
-  ({
-    Win: "Виграш",
-    Loss: "Програш",
-    Pending: "Очікується",
-    Refund: "Повернення",
-    Void: "Скасовано",
-    Push: "Повернення",
-  })[result] ||
-  result ||
-  "Очікується";
-
-function ProfitChart({ data }: { data: PublicStats["monthlyProfit"] }) {
-  if (!data.length)
-    return (
-      <div className="public-empty">
-        <strong>Ще немає результатів</strong>
-        <p>Графік з’явиться після розрахованих ставок.</p>
-      </div>
-    );
-  const sorted = [...data].sort((a, b) => a.month.localeCompare(b.month));
-  const high = Math.max(0, ...sorted.map((item) => item.profit));
-  const low = Math.min(0, ...sorted.map((item) => item.profit));
-  const span = high - low || 1;
-  const y = (value: number) => 36 + ((high - value) / span) * 180;
-  const zero = y(0);
-  const width = Math.max(620, sorted.length * 96 + 80);
-  const slot = (width - 88) / sorted.length;
-  return (
-    <div
-      className="public-chart-scroll"
-      tabIndex={0}
-      role="region"
-      aria-label="Графік прибутку за місяцями, можна прокручувати"
-    >
-      <svg
-        className="public-chart"
-        viewBox={`0 0 ${width} 270`}
-        style={{ minWidth: width }}
-        role="img"
-        aria-labelledby="public-chart-title public-chart-description"
-      >
-        <title id="public-chart-title">Прибуток за місяцями, гривні</title>
-        <desc id="public-chart-description">
-          {sorted
-            .map(
-              (item) =>
-                `${monthLabel(item.month)}: ${signed(item.profit)} гривень`,
-            )
-            .join("; ")}
-        </desc>
-        {[high, ...(high > 0 && low < 0 ? [0] : []), low]
-          .filter((value, index, list) => list.indexOf(value) === index)
-          .map((tick) => (
-            <g key={tick}>
-              <line
-                x1="72"
-                x2={width - 12}
-                y1={y(tick)}
-                y2={y(tick)}
-                className={tick === 0 ? "public-baseline" : "public-gridline"}
-              />
-              <text
-                x="60"
-                y={y(tick) + 4}
-                textAnchor="end"
-                className="public-axis"
-              >
-                {number(tick)}
-              </text>
-            </g>
-          ))}
-        {sorted.map((item, index) => {
-          const center = 80 + slot * (index + 0.5);
-          const top = Math.min(y(item.profit), zero);
-          return (
-            <g key={item.month}>
-              <rect
-                x={center - Math.min(slot * 0.3, 35)}
-                y={top}
-                width={Math.min(slot * 0.6, 70)}
-                height={Math.max(Math.abs(y(item.profit) - zero), 1)}
-                className={`public-bar${item.profit < 0 ? " is-negative" : ""}`}
-              >
-                <title>
-                  {monthLabel(item.month)}: {signed(item.profit)} ₴
-                </title>
-              </rect>
-              <text
-                x={center}
-                y={item.profit >= 0 ? top - 10 : y(item.profit) + 17}
-                textAnchor="middle"
-                className={`public-bar-value${item.profit < 0 ? " is-negative" : ""}`}
-              >
-                {signed(item.profit)}
-              </text>
-              <text
-                x={center}
-                y="258"
-                textAnchor="middle"
-                className="public-axis"
-              >
-                {monthLabel(item.month)}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
-}
-
 export default function PublicProfile() {
-  const { username } = useParams<{ username: string }>();
-  const [data, setData] = useState<PublicStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all");
+  const { username = "" } = useParams<{ username: string }>();
+  const [params, setParams] = useSearchParams();
+  const filterParams = useRef(params);
+  filterParams.current = params;
+  const { game, period, currency } = readProfileFilters(params);
+  const [response, setResponse] = useState<{
+    key: string;
+    data: PublicProfileData;
+  } | null>(null);
+  const [error, setError] = useState<{
+    key: string;
+    message: string;
+    missing?: boolean;
+  } | null>(null);
   const [retry, setRetry] = useState(0);
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [shareError, setShareError] = useState(false);
+  const requestKey = `${username}:${game}:${period}:${retry}`;
+  const data = response?.key === requestKey ? response.data : null;
+  const currentError = error?.key === requestKey ? error : null;
+  const loading = !data && !currentError;
+
+  function updateFilter(key: string, value: string) {
+    const next = new URLSearchParams(filterParams.current);
+    if (value === "all" || (key === "currency" && value === "UAH"))
+      next.delete(key);
+    else next.set(key, value);
+    filterParams.current = next;
+    setParams(next, { replace: true });
+    setCopied(false);
+  }
+  function resetFilters() {
+    const next = new URLSearchParams(filterParams.current);
+    next.delete("game");
+    next.delete("period");
+    filterParams.current = next;
+    setParams(next, { replace: true });
+  }
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
-    setError("");
-    setData(null);
-    setFilter("all");
-    const base = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    const base = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
     fetch(
-      `${base.replace(/\/$/, "")}/public-profile/${encodeURIComponent(username || "")}`,
+      `${base}/public-profile/${encodeURIComponent(username)}?game=${game}&period=${period}`,
       { signal: controller.signal },
     )
-      .then((res) => {
+      .then(async (res) => {
         if (!res.ok)
           throw new Error(
             res.status === 404
-              ? "Користувача не знайдено"
-              : "Не вдалося завантажити статистику",
+              ? "not-found"
+              : "Не вдалося завантажити статистику. Спробуйте ще раз.",
           );
-        return res.json();
-      })
-      .then((result) => {
-        if (!controller.signal.aborted) setData(result);
-      })
-      .catch((err) => {
+        const result: PublicProfileData = await res.json();
+        if (
+          result.schemaVersion !== 2 ||
+          result.filters?.game !== game ||
+          result.filters?.period !== period
+        ) {
+          throw new Error(
+            "Для нового екрана потрібно перезапустити сервер API з оновленим кодом.",
+          );
+        }
         if (!controller.signal.aborted)
-          setError(err instanceof Error ? err.message : "Помилка завантаження");
+          setResponse({ key: requestKey, data: result });
       })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+      .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
+        const message =
+          reason instanceof Error
+            ? reason.message
+            : "Не вдалося завантажити статистику.";
+        setError({
+          key: requestKey,
+          message,
+          missing: message === "not-found",
+        });
       });
     return () => controller.abort();
-  }, [username, retry]);
-  const bets =
-    data?.recentBets.filter(
-      (bet) => filter === "all" || gameLabel(bet.game) === filter,
-    ) || [];
+  }, [username, game, period, requestKey]);
+  useEffect(() => {
+    const previous = document.title;
+    document.title = `@${username} — публічна статистика | MatchIQ`;
+    return () => {
+      document.title = previous;
+    };
+  }, [username]);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2500);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+  async function share() {
+    setShareError(false);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      setShareError(true);
+    }
+  }
+
+  const unit = currency === "USD" ? "$" : "₴";
+  const profit = data
+    ? displayValue(data.stats.displayProfit, currency, data.exchangeRate)
+    : null;
+  const activeGame = gameOptions.find((item) => item.value === game)!;
+  const activePeriod = periodOptions.find((item) => item.value === period)!;
+  const name = data?.username || username;
   return (
     <div className="public-profile">
-      <a className="public-skip" href="#public-main">
+      <a className="public-skip" href="#public-statistics">
         Перейти до статистики
       </a>
       <header className="public-header">
@@ -280,268 +145,290 @@ export default function PublicProfile() {
           </Link>
         </nav>
       </header>
-      <main id="public-main">
-        {loading ? (
-          <div className="public-state" role="status">
-            <Loader2 className="public-spinner" size={28} />
-            <h1>Завантажуємо профіль</h1>
-            <p>Отримуємо актуальну статистику…</p>
+      <main className="public-wrap public-layout">
+        <aside className="public-identity-column">
+          <PlayerCard
+            username={name}
+            game={game}
+            copied={copied}
+            onShare={share}
+          />
+          <div className="public-disclosure">
+            <Info size={19} aria-hidden="true" />
+            <p>
+              Дані з журналу користувача.
+              {data &&
+              data.stats.completedBets > 0 &&
+              data.stats.completedBets < 30 ? (
+                <span>
+                  Завершених ставок: {data.stats.completedBets}. Мала вибірка —
+                  недостатня для надійних висновків.
+                </span>
+              ) : (
+                <span>
+                  Результати не є незалежно підтвердженою статистикою.
+                </span>
+              )}
+            </p>
           </div>
-        ) : error || !data ? (
-          <div className="public-state" role="alert">
-            <span className="public-eyebrow">MatchIQ</span>
-            <h1>
-              {error === "Користувача не знайдено"
-                ? "Профіль не знайдено"
-                : "Статистика недоступна"}
-            </h1>
-            <p>{error || "Не вдалося отримати дані профілю"}</p>
-            <div className="public-state-actions">
-              <button
-                className="public-button"
-                onClick={() => setRetry((value) => value + 1)}
-              >
-                Спробувати ще раз
-              </button>
-              <Link to="/">На головну ↗</Link>
+          <div className="public-sr-only" role="status">
+            {copied ? "Посилання на профіль скопійовано" : ""}
+          </div>
+          {shareError && (
+            <div className="public-share-fallback" role="alert">
+              <p>Скопіюйте посилання вручну:</p>
+              <input
+                aria-label="Посилання на профіль"
+                readOnly
+                value={window.location.href}
+                onFocus={(event) => event.currentTarget.select()}
+              />
+            </div>
+          )}
+        </aside>
+        <div className="public-content" id="public-statistics">
+          <div className="public-title-row">
+            <div>
+              <p className="public-eyebrow">Публічний журнал</p>
+              <h1>
+                Статистика профілю <span>@{name}</span>
+              </h1>
             </div>
           </div>
-        ) : (
-          <>
-            <section className="public-hero" aria-labelledby="public-name">
-              <div className="public-wrap public-identity">
-                <div className="public-avatar" aria-hidden="true">
-                  {data.telegram &&
-                  /^[a-zA-Z0-9_]{5,32}$/.test(
-                    data.telegram.replace(/^@/, ""),
-                  ) ? (
-                    <img
-                      src={`https://t.me/i/userpic/320/${data.telegram.replace(/^@/, "")}.jpg`}
-                      alt=""
-                      className="public-avatar-img"
-                      loading="lazy"
-                      ref={(node) => {
-                        if (node && node.complete && node.naturalWidth > 1) {
-                          setAvatarLoaded(true);
-                        }
-                      }}
-                      onError={() => setAvatarLoaded(false)}
-                      onLoad={(e) => {
-                        setAvatarLoaded(e.currentTarget.naturalWidth > 1);
-                      }}
-                    />
-                  ) : null}
-                  {!avatarLoaded && (
-                    <span className="public-avatar-letter">
-                      {data.username.slice(0, 1).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div className="public-identity-copy">
-                  <p className="public-eyebrow">Статистика гравця</p>
-                  <h1 id="public-name">@{data.username}</h1>
-                  <p className="public-subtitle">Публічний журнал ставок</p>
-                </div>
-              </div>
-              <div className="public-kpi-border">
-                <dl className="public-wrap public-kpis">
-                  <div className="public-bets-count">
-                    <dt>Ставок</dt>
-                    <dd>{number(data.stats.totalBets)}</dd>
-                  </div>
-                  <div className={data.stats.winRate >= 50 ? "public-positive" : "public-negative"}>
-                    <dt>Вінрейт</dt>
-                    <dd>
-                      {number(data.stats.winRate, 1)}
-                      <small>%</small>
-                    </dd>
-                  </div>
-                  <div className="public-roi">
-                    <dt>ROI</dt>
-                    <dd>
-                      {signed(data.stats.roi)}
-                      <small>%</small>
-                    </dd>
-                  </div>
-                  <div className={data.stats.profitUAH >= 0 ? "public-positive" : "public-negative"}>
-                    <dt>Прибуток ₴</dt>
-                    <dd>
-                      {signed(data.stats.profitUAH)} <small>₴</small>
-                    </dd>
-                  </div>
-                  <div className={data.stats.profitUSD >= 0 ? "public-positive" : "public-negative"}>
-                    <dt>Прибуток $</dt>
-                    <dd>
-                      {signed(data.stats.profitUSD)} <small>$</small>
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </section>
-            <div className="public-wrap public-body">
-              <section
-                aria-labelledby="public-results-title"
-                className="public-results"
-              >
-                <div className="public-section-heading">
-                  <h2 id="public-results-title">Результати за місяцями</h2>
-                  <span>
-                    {data.monthlyProfit.length
-                      ? `${monthLabel([...data.monthlyProfit].sort((a, b) => a.month.localeCompare(b.month))[0].month)} — ${monthLabel([...data.monthlyProfit].sort((a, b) => a.month.localeCompare(b.month)).at(-1)!.month)}`
-                      : "Поки немає даних"}
+          <div className="public-toolbar">
+            <div
+              className="public-game-filter"
+              role="group"
+              aria-label="Гра для всієї статистики"
+            >
+              {gameOptions.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  aria-pressed={game === item.value}
+                  onClick={() => updateFilter("game", item.value)}
+                >
+                  <GameMark game={item.value} />
+                  {item.label}
+                  <span className="public-filter-check">
+                    {game === item.value && <Check size={12} />}
                   </span>
-                </div>
-                <div className="public-results-grid">
-                  <div className="public-chart-card">
-                    <ProfitChart data={data.monthlyProfit} />
-                  </div>
-                  <aside className="public-numbers">
-                    <h3>
-                      У цифрах <span>За весь час</span>
-                    </h3>
-                    <dl>
-                      <div>
-                        <dt>Виграші</dt>
-                        <dd className="public-numbers-green">{number(data.stats.wins)}</dd>
-                      </div>
-                      <div>
-                        <dt>Програші</dt>
-                        <dd className="public-numbers-red">{number(data.stats.losses)}</dd>
-                      </div>
-                      <div>
-                        <dt>Середній коефіцієнт</dt>
-                        <dd>{number(data.stats.avgOdds, 2)}</dd>
-                      </div>
-                    </dl>
-                  </aside>
-                </div>
+                </button>
+              ))}
+            </div>
+            <div className="public-toolbar-options">
+              <label className="public-period">
+                <span className="public-sr-only">Період статистики</span>
+                <select
+                  value={period}
+                  onChange={(event) =>
+                    updateFilter("period", event.target.value)
+                  }
+                >
+                  {periodOptions.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={16} aria-hidden="true" />
+              </label>
+              <div
+                className="public-currency"
+                role="group"
+                aria-label="Валюта статистики"
+              >
+                {(["UAH", "USD"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={currency === value}
+                    onClick={() => updateFilter("currency", value)}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="public-data-region" aria-busy={loading}>
+            {loading ? (
+              <div className="public-loading" role="status">
+                <Loader2 className="public-spinner" size={25} />
+                <span>Завантажуємо статистику…</span>
+                <div className="public-skeleton" />
+                <div className="public-skeleton" />
+              </div>
+            ) : currentError ? (
+              <section className="public-panel public-state" role="alert">
+                <h2>
+                  {currentError.missing
+                    ? "Профіль не знайдено"
+                    : "Статистика недоступна"}
+                </h2>
+                <p>
+                  {currentError.missing
+                    ? "Перевірте ім’я користувача в посиланні."
+                    : currentError.message}
+                </p>
+                <button
+                  type="button"
+                  className="public-button"
+                  onClick={() => setRetry((value) => value + 1)}
+                >
+                  Спробувати ще раз
+                </button>
               </section>
-              <section
-                className="public-recent"
-                aria-labelledby="public-recent-title"
-              >
-                <div className="public-section-heading public-table-heading">
-                  <h2 id="public-recent-title">Останні ставки</h2>
-                  <div
-                    className="public-filters"
-                    role="group"
-                    aria-label="Фільтр останніх ставок за грою"
+            ) : (
+              data && (
+                <div key={`${game}-${period}`} className="public-data-enter">
+                  <section
+                    className="public-panel public-kpis"
+                    aria-label="Ключові показники"
                   >
-                    {[
-                      { value: "all", label: "Усі" },
-                      { value: "cs2", label: "CS2" },
-                      { value: "dota2", label: "Dota 2" },
-                    ].map((item) => (
-                      <button
-                        type="button"
-                        key={item.value}
-                        aria-pressed={filter === item.value}
-                        onClick={() => setFilter(item.value)}
+                    <div className="public-main-profit">
+                      <span>Загальний прибуток</span>
+                      <strong
+                        className={
+                          profit !== null && profit > 0
+                            ? "public-positive"
+                            : profit !== null && profit < 0
+                              ? "public-negative"
+                              : ""
+                        }
                       >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="public-count" aria-live="polite">
-                    {bets.length} з {data.recentBets.length}
-                  </span>
-                </div>
-                {bets.length ? (
-                  <div
-                    className="public-table-scroll"
-                    tabIndex={0}
-                    role="region"
-                    aria-label="Останні ставки, таблицю можна прокручувати"
-                  >
-                    <table className="public-bets-table">
-                      <caption className="public-sr-only">
-                        Останні доступні ставки користувача {data.username}
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">Дата</th>
-                          <th scope="col">Матч</th>
-                          <th scope="col" className="public-col-center">Коеф.</th>
-                          <th scope="col" className="public-col-center">Результат</th>
-                          <th scope="col" className="public-col-center">Прибуток</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {bets.map((bet, index) => (
-                          <tr key={`${bet.date}-${bet.match}-${index}`}>
-                            <td className="public-date">{bet.date || "—"}</td>
-                            <td className="public-match">
-                              <PublicBetTeams bet={bet} />
-                            </td>
-                            <td className="public-col-center">{number(bet.odds, 2)}</td>
-                            <td className="public-col-center">
-                              <span
-                                className={`public-result ${bet.result === "Win" ? "is-win" : bet.result === "Loss" ? "is-loss" : "is-pending"}`}
-                              >
-                                <i />
-                                {resultLabel(bet.result)}
-                              </span>
-                            </td>
-                            <td className="public-col-center">
-                              {[
-                                "Win",
-                                "Loss",
-                                "Refund",
-                                "Void",
-                                "Push",
-                              ].includes(bet.result)
-                                ? (
-                                  <span className={bet.profit >= 0 ? "public-profit-pos" : "public-profit-neg"}>
-                                    {signed(bet.profit)} {bet.currency === "USD" ? "$" : "₴"}
-                                  </span>
-                                )
-                                : "—"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="public-bets-card">
-                    <div className="public-empty public-bets-empty">
-                      <strong>
-                        {filter === "all"
-                          ? "Ставок ще немає"
-                          : "У цьому списку немає ставок з цієї гри"}
+                        {signedNumber(profit)}
+                        {profit !== null && <small> {unit}</small>}
                       </strong>
                       <p>
-                        {filter === "all"
-                          ? "Тут з’являться останні записи публічного журналу."
-                          : "Оберіть іншу гру або поверніться до всіх ставок."}
+                        {signedNumber(data.stats.profitUAH)} ₴ <span> / </span>{" "}
+                        {signedNumber(data.stats.profitUSD)} $
                       </p>
-                      {filter !== "all" && (
-                        <button
-                          className="public-button"
-                          onClick={() => setFilter("all")}
-                        >
-                          Показати всі
-                        </button>
-                      )}
                     </div>
+                    <dl>
+                      <div>
+                        <dt>ROI</dt>
+                        <dd
+                          title={
+                            data.stats.roi === null
+                              ? undefined
+                              : `${signedNumber(data.stats.roi)}%`
+                          }
+                        >
+                          {signedNumber(
+                            data.stats.roi === null
+                              ? null
+                              : Math.round(data.stats.roi),
+                          )}
+                          {data.stats.roi !== null && "%"}
+                        </dd>
+                        <span>Прибуток / сума ставок</span>
+                      </div>
+                      <div>
+                        <dt>Виграшів</dt>
+                        <dd>
+                          {formatNumber(data.stats.winRate, 0)}
+                          {data.stats.winRate !== null && "%"}
+                        </dd>
+                        <span>
+                          {data.stats.wins} із{" "}
+                          {data.stats.wins + data.stats.losses}
+                        </span>
+                      </div>
+                      <div>
+                        <dt>Завершені ставки</dt>
+                        <dd>{formatNumber(data.stats.completedBets)}</dd>
+                        <span>
+                          {data.stats.pendingBets
+                            ? `${data.stats.pendingBets} очікують результату`
+                            : activePeriod.label}
+                        </span>
+                      </div>
+                    </dl>
+                  </section>
+                  <div className="public-scope-note">
+                    <span>
+                      {activeGame.cardLabel} · {activePeriod.label}
+                    </span>
+                    <span>
+                      {data.exchangeRate
+                        ? `Курс ${formatNumber(data.exchangeRate, 2)} ₴/$ · ${data.exchangeRateSource === "profile" ? "із налаштувань профілю" : "з останньої ставки"}`
+                        : "Курс для конвертації не задано"}
+                    </span>
                   </div>
-                )}
-                <p className="public-table-note">
-                  Показано останні доступні записи, а не всю історію ставок.
-                </p>
-              </section>
-            </div>
-          </>
-        )}
-      </main>
-      <footer className="public-footer">
-        <div className="public-wrap">
-          <Link to="/" className="public-logo">
-            Match<span>IQ</span>
-          </Link>
-          <p>Статистика журналу · Не гарантує майбутніх результатів</p>
-          <span>Ваші дані. Зрозумілі рішення.</span>
+                  {(!data.stats.conversionComplete ||
+                    (currency === "USD" && !data.exchangeRate)) && (
+                    <p className="public-conversion-warning" role="status">
+                      Загальний прибуток не показано: бракує даних для
+                      конвертації. Суми в рядках журналу залишаються в
+                      оригінальних валютах.
+                    </p>
+                  )}
+                  <div className="public-results-grid">
+                    <section
+                      className="public-panel public-chart-panel"
+                      aria-labelledby="public-chart-title"
+                    >
+                      <div className="public-section-heading">
+                        <h2 id="public-chart-title">Результати за місяцями</h2>
+                        <span>{unit}</span>
+                      </div>
+                      <ProfitChart
+                        data={data.monthlyProfit}
+                        currency={currency}
+                        rate={data.exchangeRate}
+                      />
+                    </section>
+                    <section
+                      className="public-panel public-summary"
+                      aria-labelledby="public-summary-title"
+                    >
+                      <div className="public-section-heading">
+                        <h2 id="public-summary-title">Підсумки</h2>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>Виграші</dt>
+                          <dd>{data.stats.wins}</dd>
+                        </div>
+                        <div>
+                          <dt>Програші</dt>
+                          <dd>{data.stats.losses}</dd>
+                        </div>
+                        <div>
+                          <dt>Середній коефіцієнт</dt>
+                          <dd>{formatNumber(data.stats.avgOdds, 2)}</dd>
+                        </div>
+                        {data.stats.refunds > 0 && (
+                          <div>
+                            <dt>Повернення / скасування</dt>
+                            <dd>{data.stats.refunds}</dd>
+                          </div>
+                        )}
+                      </dl>
+                      <p>Відсоток виграшів — без повернень.</p>
+                    </section>
+                  </div>
+                  <RecentBets
+                    bets={data.recentBets}
+                    total={data.stats.totalBets}
+                    filtered={game !== "all" || period !== "all"}
+                    onReset={resetFilters}
+                  />
+                </div>
+              )
+            )}
+          </div>
         </div>
+      </main>
+      <footer className="public-wrap public-footer">
+        <Link to="/" className="public-logo">
+          Match<span>IQ</span>
+        </Link>
+        <p>
+          Дані з журналу користувача. Минулі результати не гарантують майбутніх.
+        </p>
+        <span>Публічний журнал</span>
       </footer>
     </div>
   );
