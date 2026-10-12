@@ -34,7 +34,6 @@ import {
   XCircle,
   Clock,
   Pencil,
-  Save,
   X,
   AlertTriangle,
   RefreshCw,
@@ -79,6 +78,84 @@ function GroupAvatar({ link, name }: { link: string; name: string }) {
       ) : (
         <Users size={20} strokeWidth={1.75} />
       )}
+    </div>
+  );
+}
+
+/** Inline mini sparkline of monthly profit for a table row. */
+function ProfitSparkline({
+  data,
+}: {
+  data: { month: string; profit: number }[];
+}) {
+  const values = data.map((d) => d.profit);
+  const width = 76;
+  const height = 22;
+  const min = Math.min(0, ...values);
+  const max = Math.max(0, ...values);
+  const range = max - min || 1;
+  const points = values
+    .map((v, i) => {
+      const x =
+        values.length === 1 ? width / 2 : (i / (values.length - 1)) * width;
+      const y = height - 2 - ((v - min) / range) * (height - 4);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const color = values[values.length - 1] >= values[0] ? "#10b981" : "#ef4444";
+  const baselineY = height - 2 - ((0 - min) / range) * (height - 4);
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      className="mx-auto block"
+      aria-hidden="true"
+    >
+      <line
+        x1="0"
+        y1={baselineY}
+        x2={width}
+        y2={baselineY}
+        stroke="#e2e8f0"
+        strokeWidth="1"
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Monthly profit bars for the group details dialog. */
+function MonthlyProfitBars({
+  data,
+}: {
+  data: { month: string; profit: number }[];
+}) {
+  const maxAbs = Math.max(1, ...data.map((d) => Math.abs(d.profit)));
+  return (
+    <div className="tg-detail-chart">
+      {data.map((d, i) => {
+        const h = Math.max(5, (Math.abs(d.profit) / maxAbs) * 100);
+        return (
+          <div className="tg-detail-bar" key={`${d.month}-${i}`}>
+            <div className="tg-detail-bar-track">
+              <div
+                className={`tg-detail-bar-fill ${d.profit >= 0 ? "is-win" : "is-loss"}`}
+                style={{ height: `${h}%` }}
+                title={`${d.month}: ${d.profit >= 0 ? "+" : ""}${d.profit.toFixed(0)} ₴`}
+              />
+            </div>
+            <span className="tg-detail-bar-label">{d.month}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -237,8 +314,19 @@ export default function TelegramGroups() {
   const [resultFilter, setResultFilter] = useState<string>("all");
   const [groupSearch, setGroupSearch] = useState("");
   const [groupListFilter, setGroupListFilter] = useState<
-    "all" | "profitable" | "losing" | "stable" | "unstable"
+    | "all"
+    | "profitable"
+    | "losing"
+    | "stable"
+    | "unstable"
+    | "hasChannel"
+    | "noChannel"
   >("all");
+  const [groupSortKey, setGroupSortKey] = useState<
+    "rank" | "bets" | "winRate" | "profit"
+  >("rank");
+  const [groupSortDir, setGroupSortDir] = useState<"asc" | "desc">("desc");
+  const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
   const [sortBy] = useState<"date" | "odds" | "profit">("date");
   const [sortOrder] = useState<"asc" | "desc">("desc");
 
@@ -479,29 +567,61 @@ export default function TelegramGroups() {
     };
   }, [bets]);
 
-  const visibleGroups = useMemo(
-    () =>
-      rankedGroups.filter((group) => {
-        const source = groups.find((item) => item.id === group.groupId);
-        const query = groupSearch.trim().toLowerCase();
-        const matchesSearch =
-          !query ||
-          group.groupName.toLowerCase().includes(query) ||
-          tgHandle(source?.link || "")
-            .toLowerCase()
-            .includes(query);
-        const matchesFilter =
-          groupListFilter === "all" ||
-          (groupListFilter === "profitable" && group.totalProfit > 0) ||
-          (groupListFilter === "losing" && group.totalProfit < 0) ||
-          (groupListFilter === "stable" &&
-            group.stabilityLabel === "Стабільна") ||
-          (groupListFilter === "unstable" &&
-            group.stabilityLabel === "Нестабільна");
-        return matchesSearch && matchesFilter;
-      }),
-    [rankedGroups, groups, groupSearch, groupListFilter],
-  );
+  const visibleGroups = useMemo(() => {
+    const filtered = rankedGroups.filter((group) => {
+      const source = groups.find((item) => item.id === group.groupId);
+      const query = groupSearch.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        group.groupName.toLowerCase().includes(query) ||
+        tgHandle(source?.link || "")
+          .toLowerCase()
+          .includes(query);
+      const matchesFilter =
+        groupListFilter === "all" ||
+        (groupListFilter === "profitable" && group.totalProfit > 0) ||
+        (groupListFilter === "losing" && group.totalProfit < 0) ||
+        (groupListFilter === "stable" &&
+          group.stabilityLabel === "Стабільна") ||
+        (groupListFilter === "unstable" &&
+          group.stabilityLabel === "Нестабільна") ||
+        (groupListFilter === "hasChannel" && !!source?.hasChannel) ||
+        (groupListFilter === "noChannel" && !source?.hasChannel);
+      return matchesSearch && matchesFilter;
+    });
+    return filtered.sort((a, b) => {
+      if (groupSortKey === "rank") return a.rank - b.rank;
+      const valueOf = (g: typeof a): number =>
+        groupSortKey === "bets"
+          ? g.totalBets
+          : groupSortKey === "winRate"
+            ? g.winRate
+            : g.totalProfit;
+      const cmp = valueOf(a) - valueOf(b);
+      return groupSortDir === "asc" ? cmp : -cmp;
+    });
+  }, [
+    rankedGroups,
+    groups,
+    groupSearch,
+    groupListFilter,
+    groupSortKey,
+    groupSortDir,
+  ]);
+
+  const handleGroupSort = (key: "bets" | "winRate" | "profit") => {
+    if (groupSortKey === key) {
+      setGroupSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setGroupSortKey(key);
+      setGroupSortDir("desc");
+    }
+  };
+
+  const groupSortIcon = (key: "bets" | "winRate" | "profit") => {
+    if (groupSortKey !== key) return "";
+    return groupSortDir === "asc" ? " ↑" : " ↓";
+  };
 
   // ── Filtered bets ──
 
@@ -686,6 +806,122 @@ export default function TelegramGroups() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ===== Group Details ===== */}
+      <Dialog
+        open={!!detailGroupId}
+        onOpenChange={(open) => {
+          if (!open) setDetailGroupId(null);
+        }}
+      >
+        <DialogContent className="tg-group-dialog tg-detail-dialog">
+          <DialogHeader className="tg-group-header">
+            <DialogTitle>Статистика групи</DialogTitle>
+            <DialogDescription>
+              {(() => {
+                const g = detailGroupId
+                  ? groups.find((x) => x.id === detailGroupId)
+                  : null;
+                return g?.name || "";
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const g = detailGroupId
+              ? groups.find((x) => x.id === detailGroupId)
+              : null;
+            const stats = detailGroupId
+              ? groupStats.find((x) => x.groupId === detailGroupId)
+              : null;
+            if (!g || !stats) return null;
+            const streakLabel =
+              stats.streak === 0
+                ? "—"
+                : stats.streak > 0
+                  ? `${stats.streak}W`
+                  : `${Math.abs(stats.streak)}L`;
+            return (
+              <div className="tg-detail-body">
+                <div className="tg-detail-head">
+                  <GroupAvatar link={g.link} name={g.name} />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <strong className="truncate text-slate-800">
+                        {g.name}
+                      </strong>
+                      {g.hasChannel && (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                          <Megaphone className="h-3 w-3" strokeWidth={2} />Є
+                          приватний канал
+                        </span>
+                      )}
+                    </div>
+                    <p className="truncate text-xs text-slate-400">
+                      {tgHandle(g.link) || "Без посилання"}
+                    </p>
+                    {g.comment && (
+                      <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-slate-500">
+                        {g.comment}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="tg-detail-stats">
+                  <div>
+                    <span>Ставок</span>
+                    <strong>{stats.totalBets}</strong>
+                  </div>
+                  <div>
+                    <span>Виграші</span>
+                    <strong>{stats.wins}</strong>
+                  </div>
+                  <div>
+                    <span>Програші</span>
+                    <strong>{stats.losses}</strong>
+                  </div>
+                  <div>
+                    <span>Очікує</span>
+                    <strong>{stats.pending}</strong>
+                  </div>
+                  <div>
+                    <span>Win Rate</span>
+                    <strong>
+                      {stats.totalBets ? `${stats.winRate.toFixed(0)}%` : "—"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>ROI</span>
+                    <strong>{stats.roi.toFixed(0)}%</strong>
+                  </div>
+                  <div>
+                    <span>Стабільність</span>
+                    <strong>{stats.stabilityLabel}</strong>
+                  </div>
+                  <div>
+                    <span>Серія</span>
+                    <strong>{streakLabel}</strong>
+                  </div>
+                </div>
+
+                <div className="tg-detail-chart-section">
+                  <h3>Прибуток по місяцях</h3>
+                  {stats.monthlyProfit.length ? (
+                    <MonthlyProfitBars data={stats.monthlyProfit} />
+                  ) : (
+                    <p className="text-xs text-slate-400">Немає даних</p>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter className="tg-group-footer">
+            <Button variant="outline" onClick={() => setDetailGroupId(null)}>
+              Закрити
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
@@ -821,20 +1057,26 @@ export default function TelegramGroups() {
                     </div>
                     <Select
                       value={groupListFilter}
-                      onValueChange={(
-                        value:
-                          | "all"
-                          | "profitable"
-                          | "losing"
-                          | "stable"
-                          | "unstable",
-                      ) => setGroupListFilter(value)}
+                      onValueChange={(value) =>
+                        setGroupListFilter(
+                          value as
+                            | "all"
+                            | "profitable"
+                            | "losing"
+                            | "stable"
+                            | "unstable"
+                            | "hasChannel"
+                            | "noChannel",
+                        )
+                      }
                     >
                       <SelectTrigger className="h-11 rounded-xl border-[#dfe3ea] bg-white text-slate-700">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Усі групи</SelectItem>
+                        <SelectItem value="hasChannel">З каналом</SelectItem>
+                        <SelectItem value="noChannel">Без каналу</SelectItem>
                         <SelectItem value="profitable">Прибуткові</SelectItem>
                         <SelectItem value="losing">Збиткові</SelectItem>
                         <SelectItem value="stable">Стабільні</SelectItem>
@@ -854,10 +1096,32 @@ export default function TelegramGroups() {
                           <tr>
                             <th className="px-4 py-3 text-left">Група</th>
                             <th className="px-3 py-3">Активність</th>
-                            <th className="px-3 py-3">Ставок</th>
-                            <th className="px-3 py-3">Win Rate</th>
+                            <th className="px-3 py-3">
+                              <button
+                                type="button"
+                                onClick={() => handleGroupSort("bets")}
+                                className="inline-flex items-center gap-1 hover:text-slate-600"
+                              >
+                                Ставок{groupSortIcon("bets")}
+                              </button>
+                            </th>
+                            <th className="px-3 py-3">
+                              <button
+                                type="button"
+                                onClick={() => handleGroupSort("winRate")}
+                                className="inline-flex items-center gap-1 hover:text-slate-600"
+                              >
+                                Win Rate{groupSortIcon("winRate")}
+                              </button>
+                            </th>
                             <th className="px-3 py-3" title="Прибуток / Збиток">
-                              Прибуток/Збиток
+                              <button
+                                type="button"
+                                onClick={() => handleGroupSort("profit")}
+                                className="inline-flex items-center gap-1 hover:text-slate-600"
+                              >
+                                Прибуток/Збиток{groupSortIcon("profit")}
+                              </button>
                             </th>
                             <th className="px-3 py-3">Статус</th>
                             <th className="px-4 py-3">Дії</th>
@@ -878,7 +1142,8 @@ export default function TelegramGroups() {
                             return (
                               <tr
                                 key={gs.groupId}
-                                className="border-b border-[#edf0f3] last:border-0 transition-colors hover:bg-slate-50/70"
+                                className="cursor-pointer border-b border-[#edf0f3] last:border-0 transition-colors hover:bg-slate-50/70"
+                                onClick={() => setDetailGroupId(gs.groupId)}
                               >
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-3">
@@ -930,12 +1195,38 @@ export default function TelegramGroups() {
                                   </div>
                                 </td>
                                 <td className="px-3 py-3 text-center text-xs text-slate-500">
-                                  {lastBet
-                                    ? new Date(lastBet.date).toLocaleDateString(
-                                        "uk-UA",
-                                        { day: "2-digit", month: "short" },
-                                      )
-                                    : "Ще немає"}
+                                  {lastBet ? (
+                                    <div className="flex flex-col items-center gap-0.5">
+                                      <span className="inline-flex items-center gap-1">
+                                        {new Date(
+                                          lastBet.date,
+                                        ).toLocaleDateString("uk-UA", {
+                                          day: "2-digit",
+                                          month: "short",
+                                        })}
+                                        {lastBet.result === "Win" && (
+                                          <CheckCircle2
+                                            className="h-3.5 w-3.5 text-emerald-500"
+                                            strokeWidth={2}
+                                          />
+                                        )}
+                                        {lastBet.result === "Loss" && (
+                                          <XCircle
+                                            className="h-3.5 w-3.5 text-red-500"
+                                            strokeWidth={2}
+                                          />
+                                        )}
+                                        {lastBet.result === "Pending" && (
+                                          <Clock
+                                            className="h-3.5 w-3.5 text-amber-500"
+                                            strokeWidth={2}
+                                          />
+                                        )}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    "Ще немає"
+                                  )}
                                 </td>
                                 <td className="px-3 py-3 text-center font-medium text-slate-700">
                                   {gs.totalBets}
@@ -947,11 +1238,16 @@ export default function TelegramGroups() {
                                     ? `${gs.winRate.toFixed(0)}%`
                                     : "—"}
                                 </td>
-                                <td
-                                  className={`px-3 py-3 text-center font-semibold ${gs.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
-                                >
-                                  {gs.totalProfit >= 0 ? "+" : ""}
-                                  {gs.totalProfit.toFixed(0)} ₴
+                                <td className="px-3 py-3 text-center">
+                                  <div
+                                    className={`font-semibold ${gs.totalProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}
+                                  >
+                                    {gs.totalProfit >= 0 ? "+" : ""}
+                                    {gs.totalProfit.toFixed(0)} ₴
+                                  </div>
+                                  {gs.monthlyProfit.length >= 2 && (
+                                    <ProfitSparkline data={gs.monthlyProfit} />
+                                  )}
                                 </td>
                                 <td className="px-3 py-3 text-center">
                                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-600">
@@ -962,7 +1258,8 @@ export default function TelegramGroups() {
                                 <td className="px-4 py-3">
                                   <div className="flex items-center justify-center gap-2">
                                     <button
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         setEditingGroup(group || null);
                                         setGroupForm({
                                           name: group?.name || "",
@@ -980,9 +1277,10 @@ export default function TelegramGroups() {
                                       <Pencil className="h-4 w-4" />
                                     </button>
                                     <button
-                                      onClick={() =>
-                                        setDeleteGroupConfirm(gs.groupId)
-                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDeleteGroupConfirm(gs.groupId);
+                                      }}
                                       className="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-500"
                                       title="Видалити групу"
                                       aria-label="Видалити групу"
