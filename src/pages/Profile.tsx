@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { UserDataService } from "@/lib/userDataService";
 import { api } from "@/lib/apiClient";
@@ -73,7 +72,9 @@ export default function Profile() {
 
   // ── Backup last date ──
   const BACKUP_REMINDER_DAYS = 7;
-  const lastBackup = localStorage.getItem("matchiq_last_backup_date");
+  const [lastBackup, setLastBackup] = useState(() =>
+    localStorage.getItem("matchiq_last_backup_date"),
+  );
   const lastBackupDate = lastBackup ? new Date(lastBackup) : null;
   const daysSinceBackup = lastBackupDate
     ? Math.floor(
@@ -338,10 +339,9 @@ export default function Profile() {
       URL.revokeObjectURL(url);
 
       // Save backup date
-      localStorage.setItem(
-        "matchiq_last_backup_date",
-        new Date().toISOString(),
-      );
+      const exportedAt = new Date().toISOString();
+      localStorage.setItem("matchiq_last_backup_date", exportedAt);
+      setLastBackup(exportedAt);
 
       toast.success("Повний бекап створено!", {
         description: `Файл: matchiq-backup-${new Date().toISOString().slice(0, 10)}.json`,
@@ -481,9 +481,6 @@ export default function Profile() {
 
   return (
     <div className={`profile-page profile-view-${activeTab}`}>
-      {activeTab === "backup" && (
-        <div className="profile-masthead">{profileHeader}</div>
-      )}
       <div className="profile-content" key={activeTab}>
         {activeTab === "interface" && (
           <ProfileOverview
@@ -512,6 +509,7 @@ export default function Profile() {
         )}
         {activeTab === "backup" && (
           <ProfileBackup
+            header={profileHeader}
             storageSize={storageSize}
             lastBackupDate={lastBackupDate}
             isExporting={isExporting}
@@ -525,45 +523,32 @@ export default function Profile() {
 
         {/* ===== Clear data confirmation dialog ===== */}
         <Dialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
-          <DialogContent className="sm:max-w-[440px] rounded-3xl border border-gray-100 bg-white p-0 gap-0">
-            <DialogHeader className="px-6 pt-6 pb-0">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-50">
-                  <AlertTriangle
-                    className="h-5 w-5 text-red-600"
-                    strokeWidth={2}
-                  />
-                </div>
-                <div>
-                  <DialogTitle className="text-lg font-bold text-gray-900">
-                    Очистити всі дані
-                  </DialogTitle>
-                  <DialogDescription className="text-sm text-gray-500 mt-0.5">
-                    Цю дію неможливо скасувати
-                  </DialogDescription>
-                </div>
-              </div>
+          <DialogContent className="profile-studio-dialog backup-confirm-dialog">
+            <DialogHeader>
+              <DialogTitle>Очистити всі дані?</DialogTitle>
+              <DialogDescription>
+                Цю дію неможливо скасувати. Обліковий запис, тема та мова
+                залишаться.
+              </DialogDescription>
             </DialogHeader>
-            <div className="px-6 py-5">
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-                <p className="text-sm text-amber-800 leading-relaxed">
-                  Усі ваші дані будуть видалені назавжди: ставки, стратегії,
-                  цілі, ризиковані команди та Telegram-групи.
-                </p>
-              </div>
-            </div>
-            <DialogFooter className="flex items-center gap-3 px-6 pb-6">
+            <p className="backup-confirm-warning">
+              Будуть видалені ваші ставки, стратегії, цілі, ризикові команди,
+              Telegram-групи та банкрол на сервері, а також локальні записи
+              цього браузера. Локальний JSON-бекап не відновлює серверні дані.
+            </p>
+            <DialogFooter>
               <button
                 type="button"
                 onClick={() => setClearConfirmOpen(false)}
-                className="flex-1 h-11 rounded-2xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                className="profile-button"
               >
                 Скасувати
               </button>
               <button
                 type="button"
                 onClick={clearAllData}
-                className="flex-1 h-11 rounded-2xl bg-red-600 text-sm font-semibold text-white hover:bg-[#B91C1C] transition-all duration-200"
+                disabled={isClearing}
+                className="profile-button backup-confirm-delete"
               >
                 Видалити
               </button>

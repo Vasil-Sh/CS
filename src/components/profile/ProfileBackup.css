@@ -1,0 +1,466 @@
+/* Backup shares the profile's type, surfaces and masthead, without reskinning other routes. */
+.backup-masthead {
+  background-image:
+    linear-gradient(#22232540, #22232540),
+    url("/assets/profile/contours-backup.svg");
+  background-position:
+    center,
+    left center;
+  background-size:
+    auto,
+    auto 100%;
+  background-repeat: no-repeat;
+}
+.backup-hero {
+  padding: 18px calc(var(--profile-gutter) + 12px) 17px;
+}
+.backup-hero h2 {
+  margin: 0;
+  color: #fafafa;
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -1.3px;
+}
+.backup-hero p {
+  margin: 2px 0 0;
+  color: #d7d8d9;
+  font-size: 20px;
+  line-height: 1.5;
+}
+.profile-landing .backup-page.backup-studio {
+  padding: 0 var(--profile-gutter);
+  gap: 18px;
+  min-width: 0;
+  background: linear-gradient(#222325 30px, transparent 30px);
+  animation: none;
+}
+.backup-data-overview {
+  min-width: 0;
+}
+.backup-data-summary {
+  display: grid;
+  grid-template-columns: 1fr 1.14fr 1fr;
+  align-items: center;
+  padding: 22px 28px;
+  margin: 0;
+  min-height: 108px;
+  background: var(--profile-panel);
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px #11121405;
+}
+.backup-data-summary > div {
+  min-width: 0;
+  padding-inline: 46px;
+}
+.backup-data-summary > div:first-child {
+  padding-left: 0;
+}
+.backup-data-summary > div:last-child {
+  padding-right: 0;
+}
+.backup-data-summary > div + div {
+  border-left: 1px solid var(--profile-border);
+}
+.backup-data-summary dt {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--profile-text);
+  opacity: 0.8;
+}
+.backup-data-summary dd {
+  margin: 2px 0 0;
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 650;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.backup-data-summary .backup-no-export {
+  font-size: 24px;
+}
+.backup-studio .backup-scope-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+.backup-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.backup-studio .profile-panel {
+  padding: 18px 22px;
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  min-width: 0;
+}
+.backup-studio h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: -0.75px;
+  color: var(--profile-text);
+}
+.backup-studio p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--profile-muted);
+}
+.backup-studio .backup-helper {
+  font-size: 14px;
+  line-height: 20px;
+  margin-top: 10px;
+}
+.backup-studio .backup-export {
+  min-height: 222px;
+}
+.backup-studio .profile-button,
+.backup-confirm-dialog .profile-button {
+  min-height: 44px;
+  font-size: 15px;
+  line-height: 22px;
+  white-space: normal;
+}
+.backup-studio .profile-button svg {
+  flex: 0 0 auto;
+}
+.backup-studio .backup-download {
+  margin-top: 16px;
+  padding: 12px 24px;
+  min-height: 52px;
+  font-size: 18px;
+  font-weight: 600;
+  gap: 14px;
+  max-width: 100%;
+  border-radius: 7px;
+}
+.backup-studio .backup-contents {
+  display: flex;
+  flex-direction: column;
+}
+.backup-studio .backup-contents ul {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  column-gap: 30px;
+  row-gap: 6px;
+  margin: 8px 0 18px;
+  padding: 0 0 0 20px;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--profile-muted);
+}
+.backup-studio .backup-contents li {
+  padding-left: 4px;
+  overflow-wrap: anywhere;
+}
+.backup-studio .backup-contents li::marker {
+  color: #9c9fa4;
+}
+.backup-studio .backup-contents .backup-helper {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--profile-border);
+}
+.backup-studio .backup-warning {
+  margin: 10px 0 12px;
+  padding: 10px 16px;
+  border-radius: 7px;
+  border-color: #ffdab0;
+  background: #fff8ec;
+  color: #914806;
+  font-size: 14px;
+  line-height: 22px;
+  gap: 12px;
+}
+.backup-studio .backup-dropzone {
+  padding: 18px 24px;
+  min-height: 90px;
+  border-radius: 8px;
+  border-color: #bfc1c6;
+  background: var(--profile-bg);
+  gap: 24px;
+}
+.profile-landing .backup-studio .backup-dropzone.is-dragging {
+  border-color: var(--profile-accent);
+  background: #fc5a2b0a;
+  box-shadow: inset 0 0 0 1px var(--profile-accent);
+}
+.backup-studio .backup-dropzone:focus-within {
+  border-color: var(--profile-accent);
+}
+.backup-studio .backup-file-copy strong {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+.backup-studio .backup-file-copy span {
+  font-size: 14px;
+  line-height: 20px;
+  margin-top: 2px;
+}
+.backup-file-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.backup-file-actions .profile-button {
+  padding-inline: 16px;
+}
+.backup-file-actions .backup-remove-file {
+  width: 44px;
+  padding: 0;
+}
+.backup-studio .backup-restore-footer {
+  margin-top: 12px;
+}
+.backup-studio .backup-restore > .backup-helper {
+  margin-top: 8px;
+}
+.backup-studio .backup-restore {
+  padding-bottom: 12px;
+}
+.profile-landing .backup-studio .backup-danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-color: var(--profile-border);
+}
+.backup-danger-actions {
+  display: grid;
+  justify-items: stretch;
+  flex-shrink: 0;
+  gap: 6px;
+}
+.backup-danger-actions > span {
+  text-align: center;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--profile-muted);
+}
+.profile-landing .backup-studio .backup-danger-button {
+  color: #d52c25;
+  border-color: #ef5852;
+  background: transparent;
+  padding: 10px 24px;
+  min-width: 230px;
+  gap: 14px;
+}
+.profile-landing .backup-studio .backup-danger-button:hover {
+  background: #fff4f3;
+  border-color: #d52c25;
+}
+.backup-confirm-dialog h2 {
+  font: 700 24px/1.3 var(--profile-font);
+  letter-spacing: -0.6px;
+  padding-right: 20px;
+}
+.backup-confirm-dialog p {
+  font: 400 15px/1.65 var(--profile-font);
+  color: var(--profile-muted);
+  overflow-wrap: anywhere;
+}
+.backup-confirm-dialog .backup-confirm-warning {
+  padding: 14px 16px;
+  border: 1px solid #efccc9;
+  border-radius: 8px;
+  background: #fff6f5;
+  color: #a3322c;
+}
+.backup-confirm-dialog .backup-confirm-delete {
+  background: #c52c24;
+  border-color: #c52c24;
+  color: white;
+}
+.backup-confirm-dialog .backup-confirm-delete:hover {
+  background: #a9241e;
+}
+.backup-confirm-dialog .profile-button {
+  white-space: normal;
+}
+.backup-confirm-dialog :is(button):focus-visible {
+  outline: 3px solid #f97850;
+  outline-offset: 3px;
+}
+.dark .backup-studio .backup-warning {
+  background: #362b1d;
+  border-color: #70502d;
+  color: #f0cd96;
+}
+.dark .backup-studio .backup-dropzone {
+  border-color: #626861;
+}
+.dark .profile-landing .backup-studio .backup-danger-button {
+  color: #ffa39d;
+  border-color: #a65d56;
+}
+.dark .profile-landing .backup-studio .backup-danger-button:hover {
+  background: #432724;
+}
+.dark .backup-confirm-dialog .backup-confirm-warning {
+  background: #362320;
+  border-color: #754640;
+  color: #ffa39d;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .backup-studio > * {
+    animation: profile-enter 240ms ease-out backwards;
+  }
+  .backup-studio > :nth-child(2) {
+    animation-delay: 35ms;
+  }
+  .backup-studio > :nth-child(3) {
+    animation-delay: 70ms;
+  }
+  .backup-studio > :nth-child(4) {
+    animation-delay: 105ms;
+  }
+  .backup-spinner {
+    animation: backup-spin 800ms linear infinite;
+  }
+  @keyframes backup-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+@media (max-width: 1350px) {
+  .backup-data-summary > div {
+    padding-inline: 24px;
+  }
+  .backup-data-summary dd {
+    font-size: 26px;
+    line-height: 34px;
+  }
+  .backup-data-summary .backup-no-export {
+    font-size: 22px;
+  }
+  .backup-studio .backup-download {
+    font-size: 16px;
+    padding-inline: 18px;
+  }
+}
+@media (max-width: 1100px) {
+  .backup-top-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .backup-studio .backup-export {
+    min-height: 0;
+  }
+  .profile-landing .backup-studio .backup-danger {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .backup-data-summary {
+    padding-inline: 22px;
+    grid-template-columns: 0.8fr 1.4fr 0.65fr;
+  }
+  .backup-data-summary > div {
+    padding-inline: 20px;
+  }
+  .backup-data-summary dt {
+    font-size: 14px;
+  }
+  .backup-data-summary dd {
+    font-size: 24px;
+  }
+}
+@media (max-width: 800px) {
+  .backup-hero {
+    padding-inline: var(--profile-gutter);
+  }
+}
+@media (max-width: 640px) {
+  .backup-hero {
+    padding-top: 22px;
+    padding-bottom: 26px;
+  }
+  .backup-hero h2 {
+    font-size: 34px;
+    letter-spacing: -0.9px;
+  }
+  .backup-hero p {
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 8px;
+  }
+  .backup-data-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 18px;
+  }
+  .backup-data-summary > div {
+    padding: 0;
+  }
+  .backup-data-summary > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--profile-border);
+    padding-top: 12px;
+  }
+  .backup-data-summary dt {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .backup-data-summary dd {
+    font-size: 26px;
+    line-height: 34px;
+  }
+  .backup-data-summary .backup-no-export {
+    font-size: 22px;
+  }
+  .backup-studio .profile-panel {
+    padding: 18px;
+  }
+  .backup-studio h2 {
+    font-size: 22px;
+    line-height: 28px;
+  }
+  .backup-studio .backup-download {
+    width: 100%;
+    padding-inline: 14px;
+    font-size: 16px;
+    gap: 10px;
+  }
+  .backup-studio .backup-contents ul {
+    column-gap: 18px;
+  }
+  .backup-studio .backup-dropzone {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    padding: 16px;
+    gap: 14px;
+  }
+  .backup-studio .backup-dropzone > svg {
+    width: 26px;
+  }
+  .backup-file-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .backup-file-actions > button:last-child {
+    flex: 1;
+  }
+  .backup-studio .backup-warning {
+    padding: 12px;
+    gap: 10px;
+  }
+  .backup-danger-actions {
+    width: 100%;
+  }
+  .profile-landing .backup-studio .backup-danger-button {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 12px;
+  }
+  .backup-confirm-dialog .profile-button {
+    width: 100%;
+  }
+}
