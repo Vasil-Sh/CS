@@ -393,7 +393,9 @@
   text-align: left;
 }
 .tg-group-header h2 {
-  font: 600 32px/1.2 "Oswald", sans-serif;
+  font:
+    600 32px/1.2 "Oswald",
+    sans-serif;
   color: #f8f8f5;
   text-transform: uppercase;
   padding-right: 24px;
@@ -427,11 +429,48 @@
   font-size: 14px;
   box-shadow: none;
 }
-.tg-group-body input:focus-visible {
+.tg-group-body textarea {
+  min-height: 64px;
+  padding: 9px 12px;
+  border: 1px solid #cfd1ce;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  box-shadow: none;
+}
+.tg-group-body input:focus-visible,
+.tg-group-body textarea:focus-visible {
   outline: 2px solid #ff693b;
   outline-offset: 2px;
   --tw-ring-color: transparent;
   border-color: #cfd1ce;
+}
+.tg-group-body label.tg-group-channel-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e7e9e5;
+  border-radius: 8px;
+  background: #fafbfa;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #171916;
+}
+.tg-group-body label.tg-group-channel-toggle input {
+  flex-shrink: 0;
+  height: 18px;
+  width: 18px;
+  margin: 0;
+  accent-color: #ff693b;
+  cursor: pointer;
+}
+.tg-group-body label.tg-group-channel-toggle span {
+  user-select: none;
 }
 .tg-group-footer {
   flex-shrink: 0;
@@ -466,7 +505,9 @@
   text-align: left;
 }
 .tg-delete-header h2 {
-  font: 600 32px/1.2 "Oswald", sans-serif;
+  font:
+    600 32px/1.2 "Oswald",
+    sans-serif;
   color: #f8f8f5;
   text-transform: uppercase;
   padding-right: 24px;

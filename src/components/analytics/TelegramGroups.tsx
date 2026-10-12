@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/apiClient";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ import {
   RefreshCw,
   Search,
   CircleHelp,
+  Megaphone,
 } from "lucide-react";
 import { CHART_CARD_SHADOW } from "@/lib/cardStyles";
 
@@ -87,6 +89,8 @@ interface TelegramGroup {
   id: string;
   name: string;
   link: string;
+  hasChannel: boolean;
+  comment: string;
   createdAt: string;
   _backendId?: string;
 }
@@ -128,6 +132,8 @@ interface GroupStats {
 const EMPTY_GROUP: Omit<TelegramGroup, "id" | "createdAt"> = {
   name: "",
   link: "",
+  hasChannel: false,
+  comment: "",
 };
 
 // ── Component ──
@@ -163,7 +169,12 @@ export default function TelegramGroups() {
             try {
               const backend = await api.post<{ id: string }>(
                 "/telegram-groups",
-                { name: g.name, link: g.link || "" },
+                {
+                  name: g.name,
+                  link: g.link || "",
+                  hasChannel: g.hasChannel,
+                  comment: g.comment || "",
+                },
               );
               updated.push({ ...g, _backendId: backend.id });
             } catch {
@@ -244,7 +255,13 @@ export default function TelegramGroups() {
     if (editingGroup) {
       newGroups = groupsRef.current.map((g) =>
         g.id === editingGroup.id
-          ? { ...g, name: groupForm.name.trim(), link: groupForm.link.trim() }
+          ? {
+              ...g,
+              name: groupForm.name.trim(),
+              link: groupForm.link.trim(),
+              hasChannel: groupForm.hasChannel,
+              comment: groupForm.comment.trim(),
+            }
           : g,
       );
       toast.success("Групу оновлено");
@@ -253,6 +270,8 @@ export default function TelegramGroups() {
         id: crypto.randomUUID(),
         name: groupForm.name.trim(),
         link: groupForm.link.trim(),
+        hasChannel: groupForm.hasChannel,
+        comment: groupForm.comment.trim(),
         createdAt: new Date().toISOString(),
       };
       freshGroupId = newGroup.id;
@@ -268,6 +287,8 @@ export default function TelegramGroups() {
         .post<{ id?: string }>("/telegram-groups", {
           name: groupForm.name.trim(),
           link: groupForm.link.trim(),
+          hasChannel: groupForm.hasChannel,
+          comment: groupForm.comment.trim(),
         })
         .then((backend) => {
           if (backend?.id) {
@@ -473,8 +494,10 @@ export default function TelegramGroups() {
           groupListFilter === "all" ||
           (groupListFilter === "profitable" && group.totalProfit > 0) ||
           (groupListFilter === "losing" && group.totalProfit < 0) ||
-          (groupListFilter === "stable" && group.stabilityLabel === "Стабільна") ||
-          (groupListFilter === "unstable" && group.stabilityLabel === "Нестабільна");
+          (groupListFilter === "stable" &&
+            group.stabilityLabel === "Стабільна") ||
+          (groupListFilter === "unstable" &&
+            group.stabilityLabel === "Нестабільна");
         return matchesSearch && matchesFilter;
       }),
     [rankedGroups, groups, groupSearch, groupListFilter],
@@ -566,12 +589,31 @@ export default function TelegramGroups() {
                 placeholder="https://t.me/groupname"
               />
             </div>
+            <div>
+              <Label htmlFor="tg-group-comment">Коментар</Label>
+              <Textarea
+                id="tg-group-comment"
+                rows={2}
+                value={groupForm.comment}
+                onChange={(e) =>
+                  setGroupForm((p) => ({ ...p, comment: e.target.value }))
+                }
+                placeholder="Наприклад: платна група, тільки CS2"
+              />
+            </div>
+            <label className="tg-group-channel-toggle">
+              <input
+                type="checkbox"
+                checked={groupForm.hasChannel}
+                onChange={(e) =>
+                  setGroupForm((p) => ({ ...p, hasChannel: e.target.checked }))
+                }
+              />
+              <span>Є приватний канал</span>
+            </label>
           </div>
           <DialogFooter className="tg-group-footer">
-            <Button
-              variant="outline"
-              onClick={() => setGroupDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setGroupDialogOpen(false)}>
               Скасувати
             </Button>
             <Button onClick={handleSaveGroup} className="tg-group-submit">
@@ -752,7 +794,9 @@ export default function TelegramGroups() {
             {groups.length === 0 ? (
               <div className="tg-empty">
                 <strong>Немає доданих Telegram-груп</strong>
-                <p>Додайте Telegram-групи зі ставками для аналізу їх результатів</p>
+                <p>
+                  Додайте Telegram-групи зі ставками для аналізу їх результатів
+                </p>
                 <button
                   type="button"
                   className="tg-empty-button"
@@ -777,9 +821,14 @@ export default function TelegramGroups() {
                     </div>
                     <Select
                       value={groupListFilter}
-                      onValueChange={(value: "all" | "profitable" | "losing" | "stable" | "unstable") =>
-                        setGroupListFilter(value)
-                      }
+                      onValueChange={(
+                        value:
+                          | "all"
+                          | "profitable"
+                          | "losing"
+                          | "stable"
+                          | "unstable",
+                      ) => setGroupListFilter(value)}
                     >
                       <SelectTrigger className="h-11 rounded-xl border-[#dfe3ea] bg-white text-slate-700">
                         <SelectValue />
@@ -838,13 +887,32 @@ export default function TelegramGroups() {
                                       name={gs.groupName}
                                     />
                                     <div className="min-w-0">
-                                      <p className="truncate font-semibold text-slate-800">
-                                        {gs.groupName}
-                                      </p>
+                                      <div className="flex items-center gap-1.5">
+                                        <p className="truncate font-semibold text-slate-800">
+                                          {gs.groupName}
+                                        </p>
+                                        {group?.hasChannel && (
+                                          <span
+                                            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700"
+                                            title="Ця група має окремий приватний Telegram-канал"
+                                          >
+                                            <Megaphone
+                                              className="h-3 w-3"
+                                              strokeWidth={2}
+                                            />
+                                            Є приватний канал
+                                          </span>
+                                        )}
+                                      </div>
                                       <p className="truncate text-xs text-slate-400">
                                         {tgHandle(group?.link || "") ||
                                           "Без посилання"}
                                       </p>
+                                      {group?.comment && (
+                                        <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-slate-500">
+                                          {group.comment}
+                                        </p>
+                                      )}
                                     </div>
                                     {group?.link && (
                                       <a
@@ -899,6 +967,9 @@ export default function TelegramGroups() {
                                         setGroupForm({
                                           name: group?.name || "",
                                           link: group?.link || "",
+                                          hasChannel:
+                                            group?.hasChannel ?? false,
+                                          comment: group?.comment || "",
                                         });
                                         setGroupDialogOpen(true);
                                       }}
@@ -1145,7 +1216,14 @@ function Metric({
   tone?: "orange" | "green";
 }) {
   return (
-    <div className={[accent ? "is-accent" : undefined, tone ? `is-${tone}` : undefined].filter(Boolean).join(" ")}>
+    <div
+      className={[
+        accent ? "is-accent" : undefined,
+        tone ? `is-${tone}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <p>{value}</p>
       <p>{label}</p>
     </div>
