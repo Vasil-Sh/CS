@@ -24,12 +24,20 @@ afterEach(() => localStorage.clear());
 
 describe("Layout", () => {
   it("renders without crashing", () => {
-    const { container } = render(<TestWrapper><Layout /></TestWrapper>);
+    const { container } = render(
+      <TestWrapper>
+        <Layout />
+      </TestWrapper>,
+    );
     expect(container).toBeTruthy();
   });
 
   it("renders navigation with links", () => {
-    render(<TestWrapper><Layout /></TestWrapper>);
+    render(
+      <TestWrapper>
+        <Layout />
+      </TestWrapper>,
+    );
     expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
   });
 });
@@ -37,14 +45,20 @@ describe("Layout", () => {
 describe("OnboardingTour", () => {
   it("does not render when already completed", () => {
     localStorage.setItem("matchiq_onboarding_completed", "true");
-    render(<TestWrapper><OnboardingTour isOpen={false} onClose={() => {}} /></TestWrapper>);
+    render(
+      <TestWrapper>
+        <OnboardingTour isOpen={false} onClose={() => {}} />
+      </TestWrapper>,
+    );
     expect(screen.queryByText(/команди/)).toBeNull();
   });
 });
 
 describe("BankSparkline", () => {
   it("renders SVG", () => {
-    const { container } = render(<BankSparkline data={[{balance:10000},{balance:10500}]} />);
+    const { container } = render(
+      <BankSparkline data={[{ balance: 10000 }, { balance: 10500 }]} />,
+    );
     expect(container.querySelector("svg")).toBeTruthy();
   });
 
@@ -54,8 +68,12 @@ describe("BankSparkline", () => {
   });
 
   it("upward trend = blue", () => {
-    const { container } = render(<BankSparkline data={[{balance:10000},{balance:12000}]} />);
-    expect(container.querySelector("path[fill]")?.getAttribute("fill") || "").toContain("252");
+    const { container } = render(
+      <BankSparkline data={[{ balance: 10000 }, { balance: 12000 }]} />,
+    );
+    expect(
+      container.querySelector("path[fill]")?.getAttribute("fill") || "",
+    ).toContain("252");
   });
 });
 
@@ -69,18 +87,25 @@ describe("ProfitSparkline", () => {
 
   it("green for today-positive", () => {
     const today = new Date().toISOString().split("T")[0];
-    const { container } = render(<ProfitSparkline bets={[{date:today,profit:500}]} />);
-    expect(container.querySelector("path[fill]")?.getAttribute("fill") || "").toContain("197,94");
+    const { container } = render(
+      <ProfitSparkline bets={[{ date: today, profit: 500 }]} />,
+    );
+    expect(
+      container.querySelector("path[fill]")?.getAttribute("fill") || "",
+    ).toContain("197,94");
   });
 
   it("red for 7 days negative", () => {
     const bets = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
+      const d = new Date();
+      d.setDate(d.getDate() - i);
       bets.push({ date: d.toISOString().split("T")[0], profit: -100 });
     }
     const { container } = render(<ProfitSparkline bets={bets} />);
-    expect(container.querySelector("path[fill]")?.getAttribute("fill") || "").toContain("239,68,68");
+    expect(
+      container.querySelector("path[fill]")?.getAttribute("fill") || "",
+    ).toContain("239,68,68");
   });
 });
 
@@ -88,13 +113,23 @@ import Telegram from "@/pages/Telegram";
 
 describe("Telegram", () => {
   it("renders without crashing", () => {
-    const { container } = render(<TestWrapper><Telegram /></TestWrapper>);
+    const { container } = render(
+      <TestWrapper>
+        <Telegram />
+      </TestWrapper>,
+    );
     expect(container).toBeTruthy();
   });
 
   it("renders page header", () => {
-    render(<TestWrapper><Telegram /></TestWrapper>);
-    expect(screen.getByText("Telegram")).toBeTruthy();
+    render(
+      <TestWrapper>
+        <Telegram />
+      </TestWrapper>,
+    );
+    expect(
+      screen.getByRole("heading", { name: /Всі ваші джерела/ }),
+    ).toBeTruthy();
   });
 });
 
@@ -102,7 +137,11 @@ import PublicProfile from "@/pages/PublicProfile";
 
 describe("PublicProfile", () => {
   it("renders without crashing", () => {
-    const { container } = render(<MemoryRouter><PublicProfile /></MemoryRouter>);
+    const { container } = render(
+      <MemoryRouter>
+        <PublicProfile />
+      </MemoryRouter>,
+    );
     expect(container).toBeTruthy();
   });
 });
