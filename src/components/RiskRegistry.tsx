@@ -11,6 +11,14 @@ import {
   RefreshCw,
   Trash2,
   AlertTriangle,
+  Users,
+  Ban,
+  Activity,
+  Eye,
+  ShieldCheck,
+  CircleCheck,
+  File,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,6 +32,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ALL_STATUSES, useRiskyTeams } from "@/hooks/useRiskyTeams";
 import "./RiskRegistry.css";
+import "./RiskModals.css";
+import "./RiskScreen.css";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { proxyLogoUrl } from "@/lib/logoProxy";
 
 type Game = "all" | "CS" | "Дота";
@@ -66,7 +82,7 @@ export default function RiskRegistry() {
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("risk");
   const [filtersOpen, setFiltersOpen] = useState(true);
-  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const counts = useMemo(() => {
     const output: Record<string, number> = { all: h.riskyTeams.length };
@@ -127,11 +143,14 @@ export default function RiskRegistry() {
   ];
 
   return (
-    <div className="risk-registry">
+    <div className="risk-registry risk-screen-v2">
       <section className="risk-hero" aria-labelledby="risk-title">
         <div className="risk-hero-top">
           <div>
-            <h1 id="risk-title">Ризиковані команди</h1>
+            <p className="risk-eyebrow">RISK REGISTRY</p>
+            <h1 id="risk-title">
+              Ризиковані <span>команди</span>
+            </h1>
             <p>Правила, які допомагають не пропустити ризик перед ставкою.</p>
           </div>
           <div className="risk-actions">
@@ -149,26 +168,61 @@ export default function RiskRegistry() {
             </button>
           </div>
         </div>
-        <dl className="risk-metrics">
-          <div className="is-total">
-            <dt>Усі команди</dt>
-            <dd>{h.teamStats.total}</dd>
-          </div>
-          <div className="is-ban">
-            <dt>БАН</dt>
-            <dd>{h.teamStats.banCount}</dd>
-          </div>
-          <div className="is-warning">
-            <dt>Ризиковані</dt>
-            <dd>{h.teamStats.unstableCount}</dd>
-          </div>
-          <div>
-            <dt>Неоцінені</dt>
-            <dd>{h.teamStats.noStatusCount}</dd>
-          </div>
-        </dl>
       </section>
       <div className="risk-workspace">
+        <dl className="risk-summary-cards">
+          {[
+            {
+              name: "Усі команди",
+              value: h.teamStats.total,
+              Icon: Users,
+              tone: "total",
+            },
+            { name: "БАН", value: counts.БАН, Icon: Ban, tone: "ban" },
+            {
+              name: "Ризиковані",
+              value: counts.Ризиковані,
+              Icon: AlertTriangle,
+              tone: "warning",
+            },
+            {
+              name: "Нестабільні",
+              value: counts.Нестабільні,
+              Icon: Activity,
+              tone: "unstable",
+            },
+            {
+              name: "Обережно",
+              value: counts.Обережно,
+              Icon: Eye,
+              tone: "caution",
+            },
+            {
+              name: "Стабільні",
+              value: counts.Стабільні,
+              Icon: ShieldCheck,
+              tone: "safe",
+            },
+            {
+              name: "Надійна",
+              value: counts.Надійна,
+              Icon: CircleCheck,
+              tone: "reliable",
+            },
+            {
+              name: "Неоцінені",
+              value: h.teamStats.noStatusCount,
+              Icon: File,
+              tone: "neutral",
+            },
+          ].map(({ name, value, Icon, tone: color }) => (
+            <div key={name} className={color}>
+              <Icon aria-hidden="true" />
+              <dt>{name}</dt>
+              <dd>{value ?? 0}</dd>
+            </div>
+          ))}
+        </dl>
         <div className="risk-toolbar">
           <label className="risk-search">
             <Search size={18} />
@@ -203,14 +257,8 @@ export default function RiskRegistry() {
             onClick={() => setFiltersOpen((value) => !value)}
           >
             <SlidersHorizontal size={17} /> Фільтри{" "}
-            {status !== "all" && (
-              <span className="risk-filter-count">1</span>
-            )}
-            {filtersOpen ? (
-              <ChevronDown size={16} />
-            ) : (
-              <ChevronUp size={16} />
-            )}
+            {status !== "all" && <span className="risk-filter-count">1</span>}
+            {filtersOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
         </div>
         {filtersOpen && (
@@ -224,7 +272,7 @@ export default function RiskRegistry() {
               aria-pressed={status === "all"}
               onClick={() => setStatus("all")}
             >
-              Усі
+              Усі <span>{counts.all}</span>
             </button>
             {chips.map((item) => (
               <button
@@ -279,6 +327,7 @@ export default function RiskRegistry() {
                       <th>Команда</th>
                       <th>Гра</th>
                       <th>Статус</th>
+                      <th>Впевненість</th>
                       <th>Коментар</th>
                       <th>Дії</th>
                     </tr>
@@ -314,7 +363,11 @@ export default function RiskRegistry() {
                               <strong>{team.name}</strong>
                             </div>
                           </td>
-                          <td>{team.game === "Дота" ? "Dota 2" : "CS"}</td>
+                          <td>
+                            <span className="risk-game-badge">
+                              {team.game === "Дота" ? "Dota 2" : "CS"}
+                            </span>
+                          </td>
                           <td>
                             <span
                               className={`risk-status ${tone(team.status)}`}
@@ -322,29 +375,40 @@ export default function RiskRegistry() {
                               {team.status || "Неоцінена"}
                             </span>
                           </td>
+                          <td>
+                            <span
+                              className="risk-confidence"
+                              title="Оцінку впевненості ще не задано"
+                            >
+                              —
+                            </span>
+                          </td>
                           <td className="risk-rule">
                             <span>{team.notes || "Нотатку ще не додано"}</span>
                           </td>
                           <td>
-                            <div className="risk-row-actions">
-                              <button
-                                type="button"
-                                aria-label={`Редагувати ${team.name}`}
-                                title="Редагувати"
-                                onClick={() => h.startEditing(index, team)}
-                              >
-                                <Pencil size={17} />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={`Видалити ${team.name}`}
-                                title="Видалити команду"
-                                className="risk-remove"
-                                onClick={() => setDeleteTarget(index)}
-                              >
-                                <Trash2 size={17} />
-                              </button>
-                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className="risk-more"
+                                  aria-label={`Дії команди ${team.name}`}
+                                >
+                                  <MoreHorizontal size={22} />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onSelect={() => h.startEditing(index, team)}
+                                >
+                                  <Pencil size={16} /> Редагувати
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => setDeleteTarget(index)}
+                                >
+                                  <Trash2 size={16} /> Видалити
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </td>
                         </tr>
                       );
@@ -392,41 +456,41 @@ export default function RiskRegistry() {
               </li>
               {guideOpen && (
                 <>
-              <li>
-                <span>4</span>
-                <div>
-                  <strong>Обережно</strong>
-                  <p>Зверніть увагу на форму команди.</p>
-                </div>
-              </li>
-              <li>
-                <span>5</span>
-                <div>
-                  <strong>Під питанням</strong>
-                  <p>Перевірити актуальну форму.</p>
-                </div>
-              </li>
-              <li>
-                <span>6</span>
-                <div>
-                  <strong>Стабільні</strong>
-                  <p>Передбачуваний результат.</p>
-                </div>
-              </li>
-              <li>
-                <span>7</span>
-                <div>
-                  <strong>Надійна</strong>
-                  <p>Доведена позитивна динаміка.</p>
-                </div>
-              </li>
-              <li>
-                <span>8</span>
-                <div>
-                  <strong>Неоцінена</strong>
-                  <p>Недостатньо даних для оцінки.</p>
-                </div>
-              </li>
+                  <li>
+                    <span>4</span>
+                    <div>
+                      <strong>Обережно</strong>
+                      <p>Зверніть увагу на форму команди.</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span>5</span>
+                    <div>
+                      <strong>Під питанням</strong>
+                      <p>Перевірити актуальну форму.</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span>6</span>
+                    <div>
+                      <strong>Стабільні</strong>
+                      <p>Передбачуваний результат.</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span>7</span>
+                    <div>
+                      <strong>Надійна</strong>
+                      <p>Доведена позитивна динаміка.</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span>8</span>
+                    <div>
+                      <strong>Неоцінена</strong>
+                      <p>Недостатньо даних для оцінки.</p>
+                    </div>
+                  </li>
                 </>
               )}
             </ol>
@@ -443,36 +507,50 @@ export default function RiskRegistry() {
         </div>
       </div>
       <Dialog open={h.isAddTeamOpen} onOpenChange={h.setIsAddTeamOpen}>
-        <DialogContent className="risk-dialog">
+        <DialogContent className="risk-dialog risk-modal-v2">
           <DialogHeader className="risk-dialog-header">
+            <span className="risk-modal-eyebrow">РЕЄСТР КОМАНД</span>
             <DialogTitle>Додати команду</DialogTitle>
             <DialogDescription>
               Додайте команду, яку треба відстежувати перед ставкою.
             </DialogDescription>
           </DialogHeader>
           <div className="risk-dialog-fields">
+            <label htmlFor="risk-new-name">
+              Назва команди <span>*</span>
+            </label>
             <Input
+              id="risk-new-name"
+              required
               placeholder="Назва команди"
               value={h.newTeam.name}
               onChange={(event) =>
                 h.setNewTeam({ ...h.newTeam, name: event.target.value })
               }
             />
+            <label htmlFor="risk-new-game">
+              Гра <span>*</span>
+            </label>
             <select
+              id="risk-new-game"
               value={h.newTeam.game}
               onChange={(event) =>
                 h.setNewTeam({ ...h.newTeam, game: event.target.value })
               }
             >
-              <option value="CS">CS</option>
+              <option value="CS">CS2</option>
               <option value="Дота">Dota 2</option>
             </select>
+            <label htmlFor="risk-new-status">
+              Статус <span>*</span>
+            </label>
             <div className="risk-status-field">
               <span
                 className={`risk-status-dot ${tone(h.newTeam.status)}`}
                 aria-hidden="true"
               />
               <select
+                id="risk-new-status"
                 value={h.newTeam.status}
                 onChange={(event) =>
                   h.setNewTeam({ ...h.newTeam, status: event.target.value })
@@ -485,7 +563,11 @@ export default function RiskRegistry() {
                 ))}
               </select>
             </div>
+            <label htmlFor="risk-new-notes">
+              Коментар <small>необов’язково</small>
+            </label>
             <Textarea
+              id="risk-new-notes"
               placeholder="Коментар або коротка нотатка"
               value={h.newTeam.notes}
               onChange={(event) =>
@@ -509,7 +591,7 @@ export default function RiskRegistry() {
                 h.setIsAddTeamOpen(false);
               }}
             >
-              Додати
+              <Plus size={17} /> Додати команду
             </button>
           </DialogFooter>
         </DialogContent>
@@ -533,7 +615,9 @@ export default function RiskRegistry() {
             </div>
             <div className="risk-dialog-warning">
               <AlertTriangle size={18} className="shrink-0 text-red-600" />
-              <p>Команду буде видалено з реєстру. Цю дію неможливо скасувати.</p>
+              <p>
+                Команду буде видалено з реєстру. Цю дію неможливо скасувати.
+              </p>
             </div>
           </div>
           <DialogFooter className="risk-dialog-footer">
@@ -622,8 +706,9 @@ export default function RiskRegistry() {
         </DialogContent>
       </Dialog>
       <Dialog open={h.isSheetsGuideOpen} onOpenChange={h.setIsSheetsGuideOpen}>
-        <DialogContent className="risk-dialog risk-sheets-dialog">
+        <DialogContent className="risk-dialog risk-sheets-dialog risk-modal-v2">
           <DialogHeader className="risk-dialog-header">
+            <span className="risk-modal-eyebrow">РЕЄСТР КОМАНД</span>
             <DialogTitle>Імпорт із Google Sheets</DialogTitle>
             <DialogDescription>
               Як оформити документ, щоб дані правильно підтягнулись.
@@ -636,8 +721,8 @@ export default function RiskRegistry() {
               <div>
                 <h4>Створіть Google Sheets документ</h4>
                 <p>
-                  Відкрийте новий документ на{" "}
-                  <strong>Google Sheets</strong> і дайте йому будь-яку назву.
+                  Відкрийте новий документ на <strong>Google Sheets</strong> і
+                  дайте йому будь-яку назву.
                 </p>
               </div>
             </div>
@@ -685,7 +770,9 @@ export default function RiskRegistry() {
                 <h4>Відкрийте доступ до документу</h4>
                 <p>
                   Натисніть{" "}
-                  <strong>«Поділитися» → «Усі, хто має посилання» → «Читач»</strong>
+                  <strong>
+                    «Поділитися» → «Усі, хто має посилання» → «Читач»
+                  </strong>
                   , щоб документ був доступний для читання.
                 </p>
               </div>
@@ -695,8 +782,13 @@ export default function RiskRegistry() {
             <div className="risk-sheet-step">
               <span className="risk-sheet-step-num">4</span>
               <div>
-                <h4>Вставте посилання на ваш документ</h4>
+                <h4>
+                  <label htmlFor="risk-sheet-url">
+                    Вставте посилання на ваш документ
+                  </label>
+                </h4>
                 <Input
+                  id="risk-sheet-url"
                   value={h.customSheetUrl}
                   onChange={(event) => h.setCustomSheetUrl(event.target.value)}
                   placeholder="https://docs.google.com/spreadsheets/d/ВАШ_ID/edit"
@@ -704,8 +796,8 @@ export default function RiskRegistry() {
                 {h.customSheetUrl.trim() &&
                   !h.customSheetUrl.trim().includes("spreadsheets/d/") && (
                     <p className="risk-sheet-error">
-                      ❌ Неправильний формат посилання. Перевірте, чи скопійовано
-                      повне посилання з Google Sheets.
+                      ❌ Неправильний формат посилання. Перевірте, чи
+                      скопійовано повне посилання з Google Sheets.
                     </p>
                   )}
                 {h.customSheetUrl.trim() &&
