@@ -64,7 +64,6 @@
   background: #0d1011;
   color: #fafafa;
   min-width: 0;
-  border-radius: 12px 12px 0 0;
 }
 .profile-masthead::before,
 .profile-masthead::after {
@@ -72,33 +71,25 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  border-radius: inherit;
 }
 .profile-masthead::before {
-  inset: 0 0 0 42%;
+  inset: 0;
   background:
-    linear-gradient(90deg, #0d1011 0%, #0d101180 32%, #0d101155 100%),
-    url("/assets/landing-arena.png") right 65% / auto 150% no-repeat;
-  opacity: 0.72;
+    linear-gradient(90deg, #0d1011 0%, #0d101170 40%, transparent 70%),
+    url("/assets/profile/profile-c4-graphite.png") center / cover no-repeat;
 }
 .profile-masthead::after {
-  inset: 0;
-  background: url("/assets/risk-header-contours.svg") left center / 72% 100%
-    no-repeat;
+  content: none;
 }
 .profile-landing .profile-masthead .profile-tabs::after {
   background: #ffffff26;
 }
 .profile-landing .profile-masthead .profile-heading h1 {
-  color: #ff794b;
+  color: #f8f9f7;
 }
 @media (max-width: 640px) {
   .profile-masthead::before {
-    inset-inline-start: 20%;
-    opacity: 0.35;
-  }
-  .profile-masthead::after {
-    background-size: auto 100%;
+    opacity: 0.4;
   }
 }
 .profile-landing .profile-page {

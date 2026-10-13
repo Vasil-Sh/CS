@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" fill="none">
+ <defs>
+  <linearGradient id="stroke" x1="250" y1="150" x2="1000" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#f97945" stop-opacity="0"/><stop offset=".7" stop-color="#f97945" stop-opacity=".3"/><stop offset="1" stop-color="#fbb194" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="panel"><stop stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".035"/></linearGradient>
+ </defs>
+ <path d="M530 0H750L540 300H320Z" fill="url(#panel)"/>
+ <path d="M820 0H1000L790 300H610Z" fill="url(#panel)"/>
+ <g stroke="url(#stroke)" stroke-width="1" transform="rotate(-24 760 150)">
+  <ellipse cx="760" cy="150" rx="130" ry="70"/>
+  <ellipse cx="760" cy="150" rx="175" ry="95"/>
+  <ellipse cx="760" cy="150" rx="220" ry="120"/>
+  <ellipse cx="760" cy="150" rx="265" ry="145"/>
+  <ellipse cx="760" cy="150" rx="310" ry="170"/>
+  <ellipse cx="760" cy="150" rx="355" ry="195"/>
+  <ellipse cx="760" cy="150" rx="400" ry="220"/>
+ </g>
+ <g fill="#ff8855" opacity=".55"><circle cx="720" cy="77" r="2.5"/><circle cx="887" cy="217" r="2"/><circle cx="572" cy="206" r="2"/></g>
+</svg>

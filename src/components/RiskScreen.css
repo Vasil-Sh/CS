@@ -20,14 +20,13 @@
   content: "";
   position: absolute;
   z-index: -2;
-  inset: 0 0 0 48%;
+  inset: 0;
   background:
-    linear-gradient(90deg, #0d1011 0%, #0d101177 24%, #0d10113b 100%),
-    url("/assets/landing-arena.png") right 65% / auto 150% no-repeat;
-  opacity: 0.8;
+    linear-gradient(90deg, #11161955 0%, transparent 65%),
+    url("/assets/risk-attacker-hero.png") right center / cover no-repeat;
 }
 .risk-screen-v2 .risk-hero::after {
-  content: "";
+  content: none;
   position: absolute;
   z-index: -1;
   inset: 0;
